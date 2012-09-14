@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.SpaceExceededException;
@@ -66,8 +65,8 @@ public class CrawlProfileEditor_p {
     private static final List <eentry> labels = new ArrayList<eentry>();
     static {
         labels.add(new eentry(CrawlProfile.NAME,                "Name",                  true,  eentry.STRING));
-        labels.add(new eentry(CrawlProfile.FILTER_URL_MUSTMATCH,    "Must-Match Filter",     false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.FILTER_URL_MUSTNOTMATCH, "Must-Not-Match Filter", false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.CRAWLER_URL_MUSTMATCH,    "Must-Match Filter",     false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.CRAWLER_URL_MUSTNOTMATCH, "Must-Not-Match Filter", false, eentry.STRING));
         labels.add(new eentry(CrawlProfile.DEPTH,               "Crawl Depth",           false, eentry.INTEGER));
         labels.add(new eentry(CrawlProfile.RECRAWL_IF_OLDER,    "Recrawl If Older",      false, eentry.INTEGER));
         labels.add(new eentry(CrawlProfile.DOM_MAX_PAGES,       "Domain Max. Pages",     false, eentry.INTEGER));
@@ -139,8 +138,6 @@ public class CrawlProfileEditor_p {
         if ((post != null) && (selentry != null)) {
             if (post.containsKey("submit")) {
                 try {
-                	Pattern.compile(post.get(CrawlProfile.FILTER_URL_MUSTMATCH, CrawlProfile.MATCH_ALL_STRING));
-                	Pattern.compile(post.get(CrawlProfile.FILTER_URL_MUSTNOTMATCH, CrawlProfile.MATCH_NEVER_STRING));
                     final Iterator<eentry> lit = labels.iterator();
                     eentry tee;
                     while (lit.hasNext()) {

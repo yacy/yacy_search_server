@@ -43,7 +43,6 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
-import net.yacy.repository.RegexHelper;
 
 public final class CrawlSwitchboard
 {
@@ -108,30 +107,6 @@ public final class CrawlSwitchboard
             if ( p == null ) {
                 continue;
             }
-            if ( !RegexHelper.isValidRegex(p.get(CrawlProfile.FILTER_URL_MUSTMATCH)) ) {
-                removeActive(handle);
-                Log.logWarning("CrawlProfiles", "removed Profile "
-                    + p.handle()
-                    + ": "
-                    + p.name()
-                    + " from active crawls since "
-                    + CrawlProfile.FILTER_URL_MUSTMATCH
-                    + " is no valid regular expression: "
-                    + p.get(CrawlProfile.FILTER_URL_MUSTMATCH));
-            } else if ( !RegexHelper.isValidRegex(p.get(CrawlProfile.FILTER_URL_MUSTNOTMATCH)) ) {
-                removeActive(handle);
-                Log.logWarning("CrawlProfiles", "removed Profile "
-                    + p.handle()
-                    + ": "
-                    + p.name()
-                    + " from active crawls since "
-                    + CrawlProfile.FILTER_URL_MUSTNOTMATCH
-                    + " is no valid regular expression: "
-                    + p.get(CrawlProfile.FILTER_URL_MUSTNOTMATCH));
-            } else {
-                Log.logInfo("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.name());
-            }
-
         }
         initActiveCrawlProfiles();
         log.logInfo("Loaded active crawl profiles from file "
@@ -296,6 +271,9 @@ public final class CrawlSwitchboard
                     CrawlProfile.MATCH_NEVER_STRING,
                     CrawlProfile.MATCH_ALL_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,
+                    CrawlProfile.MATCH_NEVER_STRING,
+                    CrawlProfile.MATCH_ALL_STRING,
+                    CrawlProfile.MATCH_NEVER_STRING,
                     "",
                     0 /*Integer.parseInt(getConfig(PROXY_PREFETCH_DEPTH, "0"))*/,
                     true,
@@ -321,6 +299,9 @@ public final class CrawlSwitchboard
                 new CrawlProfile(
                     CRAWL_PROFILE_REMOTE,
                     CrawlProfile.MATCH_ALL_STRING,
+                    CrawlProfile.MATCH_ALL_STRING,
+                    CrawlProfile.MATCH_NEVER_STRING,
+                    CrawlProfile.MATCH_NEVER_STRING,
                     CrawlProfile.MATCH_ALL_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,
                     "",
@@ -352,6 +333,9 @@ public final class CrawlSwitchboard
                     CrawlProfile.MATCH_NEVER_STRING,
                     CrawlProfile.MATCH_ALL_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,
+                    CrawlProfile.MATCH_NEVER_STRING,
+                    CrawlProfile.MATCH_ALL_STRING,
+                    CrawlProfile.MATCH_NEVER_STRING,
                     "",
                     0,
                     false,
@@ -377,6 +361,9 @@ public final class CrawlSwitchboard
                 new CrawlProfile(
                     CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT,
                     CrawlProfile.MATCH_ALL_STRING,
+                    CrawlProfile.MATCH_NEVER_STRING,
+                    CrawlProfile.MATCH_ALL_STRING,
+                    CrawlProfile.MATCH_NEVER_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,
                     CrawlProfile.MATCH_ALL_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,
@@ -409,6 +396,9 @@ public final class CrawlSwitchboard
                     CrawlProfile.MATCH_NEVER_STRING,
                     CrawlProfile.MATCH_ALL_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,
+                    CrawlProfile.MATCH_NEVER_STRING,
+                    CrawlProfile.MATCH_ALL_STRING,
+                    CrawlProfile.MATCH_NEVER_STRING,
                     "",
                     0,
                     false,
@@ -437,6 +427,9 @@ public final class CrawlSwitchboard
                     CrawlProfile.MATCH_NEVER_STRING,
                     CrawlProfile.MATCH_ALL_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,
+                    CrawlProfile.MATCH_NEVER_STRING,
+                    CrawlProfile.MATCH_ALL_STRING,
+                    CrawlProfile.MATCH_NEVER_STRING,
                     "",
                     0,
                     false,
@@ -462,6 +455,9 @@ public final class CrawlSwitchboard
                 new CrawlProfile(
                     CRAWL_PROFILE_SURROGATE,
                     CrawlProfile.MATCH_ALL_STRING,
+                    CrawlProfile.MATCH_NEVER_STRING,
+                    CrawlProfile.MATCH_ALL_STRING,
+                    CrawlProfile.MATCH_NEVER_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,
                     CrawlProfile.MATCH_ALL_STRING,
                     CrawlProfile.MATCH_NEVER_STRING,

@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
@@ -67,14 +68,20 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String XDSTOPW          = "xdstopw";
     public static final String XPSTOPW          = "xpstopw";
     public static final String CACHE_STRAGEGY   = "cacheStrategy";
-    public static final String FILTER_URL_MUSTMATCH     = "generalFilter"; // for URLs
-    public static final String FILTER_URL_MUSTNOTMATCH  = "nevermatch";    // for URLs
-    public static final String FILTER_IP_MUSTMATCH      = "crawlingIPMustMatch";
-    public static final String FILTER_IP_MUSTNOTMATCH   = "crawlingIPMustNotMatch";
-    public static final String FILTER_COUNTRY_MUSTMATCH = "crawlingCountryMustMatch";
+    public static final String CRAWLER_URL_MUSTMATCH         = "crawlerURLMustMatch";
+    public static final String CRAWLER_URL_MUSTNOTMATCH      = "crawlerURLMustNotMatch";
+    public static final String CRAWLER_IP_MUSTMATCH          = "crawlerIPMustMatch";
+    public static final String CRAWLER_IP_MUSTNOTMATCH       = "crawlerIPMustNotMatch";
+    public static final String CRAWLER_COUNTRY_MUSTMATCH     = "crawlerCountryMustMatch";
+    public static final String CRAWLER_URL_NODEPTHLIMITMATCH = "crawlerNoLimitURLMustMatch";
+    public static final String INDEXING_URL_MUSTMATCH        = "indexURLMustMatch";
+    public static final String INDEXING_URL_MUSTNOTMATCH     = "indexURLMustNotMatch";
     public static final String COLLECTIONS = "collections";
 
-    private Pattern urlmustmatch = null, urlmustnotmatch = null, ipmustmatch = null, ipmustnotmatch = null;
+    private Pattern crawlerurlmustmatch = null, crawlerurlmustnotmatch = null;
+    private Pattern crawleripmustmatch = null, crawleripmustnotmatch = null;
+    private Pattern crawlernodepthlimitmatch = null;
+    private Pattern indexurlmustmatch = null, indexurlmustnotmatch = null;
 
     public final static class DomProfile {
 
@@ -99,11 +106,14 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * Constructor which creates CrawlPofile from parameters.
      * @param name name of the crawl profile
      * @param startURL root URL of the crawl
-     * @param urlMustMatch URLs which do not match this regex will be ignored
-     * @param urlMustNotMatch URLs which match this regex will be ignored
-     * @param ipMustMatch IPs from URLs which do not match this regex will be ignored
-     * @param ipMustNotMatch IPs from URLs which match this regex will be ignored
-     * @param countryMustMatch URLs from a specific country must match
+     * @param crawlerUrlMustMatch URLs which do not match this regex will be ignored in the crawler
+     * @param crawlerUrlMustNotMatch URLs which match this regex will be ignored in the crawler
+     * @param crawlerIpMustMatch IPs from URLs which do not match this regex will be ignored in the crawler
+     * @param crawlerIpMustNotMatch IPs from URLs which match this regex will be ignored in the crawler
+     * @param crawlerCountryMustMatch URLs from a specific country must match
+     * @param crawlerNoDepthLimitMatch if matches, no depth limit is applied to the crawler
+     * @param indexUrlMustMatch URLs which do not match this regex will be ignored for indexing
+     * @param indexUrlMustNotMatch URLs which match this regex will be ignored for indexing
      * @param depth height of the tree which will be created by the crawler
      * @param directDocByURL if true, then linked documents that cannot be parsed are indexed as document
      * @param recrawlIfOlder documents which have been indexed in the past will
@@ -122,11 +132,10 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      */
     public CrawlProfile(
                  String name,
-                 final String urlMustMatch,
-                 final String urlMustNotMatch,
-                 final String ipMustMatch,
-                 final String ipMustNotMatch,
-                 final String countryMustMatch,
+                 final String crawlerUrlMustMatch, final String crawlerUrlMustNotMatch,
+                 final String crawlerIpMustMatch, final String crawlerIpMustNotMatch,
+                 final String crawlerCountryMustMatch, final String crawlerNoDepthLimitMatch,
+                 final String indexUrlMustMatch, final String indexUrlMustNotMatch,
                  final int depth,
                  final boolean directDocByURL,
                  final long recrawlIfOlder /*date*/,
@@ -150,11 +159,14 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         final String handle = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(name)).substring(0, Word.commonHashLength);
         put(HANDLE,           handle);
         put(NAME,             name);
-        put(FILTER_URL_MUSTMATCH,     (urlMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : urlMustMatch);
-        put(FILTER_URL_MUSTNOTMATCH,  (urlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : urlMustNotMatch);
-        put(FILTER_IP_MUSTMATCH,      (ipMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : ipMustMatch);
-        put(FILTER_IP_MUSTNOTMATCH,   (ipMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : ipMustNotMatch);
-        put(FILTER_COUNTRY_MUSTMATCH, (countryMustMatch == null) ? "" : countryMustMatch);
+        put(CRAWLER_URL_MUSTMATCH,     (crawlerUrlMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerUrlMustMatch);
+        put(CRAWLER_URL_MUSTNOTMATCH,  (crawlerUrlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerUrlMustNotMatch);
+        put(CRAWLER_IP_MUSTMATCH,      (crawlerIpMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerIpMustMatch);
+        put(CRAWLER_IP_MUSTNOTMATCH,   (crawlerIpMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerIpMustNotMatch);
+        put(CRAWLER_COUNTRY_MUSTMATCH, (crawlerCountryMustMatch == null) ? "" : crawlerCountryMustMatch);
+        put(CRAWLER_URL_NODEPTHLIMITMATCH, (crawlerNoDepthLimitMatch == null) ? "" : crawlerNoDepthLimitMatch);
+        put(INDEXING_URL_MUSTMATCH, (indexUrlMustMatch == null) ? "" : indexUrlMustMatch);
+        put(INDEXING_URL_MUSTNOTMATCH, (indexUrlMustNotMatch == null) ? "" : indexUrlMustNotMatch);
         put(DEPTH,            depth);
         put(DIRECT_DOC_BY_URL, directDocByURL);
         put(RECRAWL_IF_OLDER, recrawlIfOlder);
@@ -281,15 +293,13 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * @return regex which must be matched
      */
     public Pattern urlMustMatchPattern() {
-        if (this.urlmustmatch == null) {
-            final String r = get(FILTER_URL_MUSTMATCH);
-            if (r == null || r.equals(CrawlProfile.MATCH_ALL_STRING)) {
-                this.urlmustmatch = CrawlProfile.MATCH_ALL_PATTERN;
-            } else {
-                this.urlmustmatch = Pattern.compile(r);
-            }
+        if (this.crawlerurlmustmatch == null) {
+            final String r = get(CRAWLER_URL_MUSTMATCH);
+            try {
+                this.crawlerurlmustmatch = (r == null || r.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN : Pattern.compile(r);
+            } catch (PatternSyntaxException e) { this.crawlerurlmustmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
-        return this.urlmustmatch;
+        return this.crawlerurlmustmatch;
     }
 
     /**
@@ -297,15 +307,13 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * @return regex which must not be matched
      */
     public Pattern urlMustNotMatchPattern() {
-        if (this.urlmustnotmatch == null) {
-            final String r = get(FILTER_URL_MUSTNOTMATCH);
-            if (r == null || r.equals(CrawlProfile.MATCH_NEVER_STRING)) {
-                this.urlmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN;
-            } else {
-                this.urlmustnotmatch = Pattern.compile(r);
-            }
+        if (this.crawlerurlmustnotmatch == null) {
+            final String r = get(CRAWLER_URL_MUSTNOTMATCH);
+            try {
+                this.crawlerurlmustnotmatch = (r == null || r.equals(CrawlProfile.MATCH_NEVER_STRING)) ? CrawlProfile.MATCH_NEVER_PATTERN : Pattern.compile(r);
+            } catch (PatternSyntaxException e) { this.crawlerurlmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
-        return this.urlmustnotmatch;
+        return this.crawlerurlmustnotmatch;
     }
 
     /**
@@ -313,15 +321,13 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * @return regex which must be matched
      */
     public Pattern ipMustMatchPattern() {
-        if (this.ipmustmatch == null) {
-            final String r = get(FILTER_IP_MUSTMATCH);
-            if (r == null || r.equals(CrawlProfile.MATCH_ALL_STRING)) {
-                this.ipmustmatch = CrawlProfile.MATCH_ALL_PATTERN;
-            } else {
-                this.ipmustmatch = Pattern.compile(r);
-            }
+        if (this.crawleripmustmatch == null) {
+            final String r = get(CRAWLER_IP_MUSTMATCH);
+            try {
+                this.crawleripmustmatch = (r == null || r.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN : Pattern.compile(r);
+            } catch (PatternSyntaxException e) { this.crawleripmustmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
-        return this.ipmustmatch;
+        return this.crawleripmustmatch;
     }
 
     /**
@@ -329,15 +335,13 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * @return regex which must not be matched
      */
     public Pattern ipMustNotMatchPattern() {
-        if (this.ipmustnotmatch == null) {
-            final String r = get(FILTER_IP_MUSTNOTMATCH);
-            if (r == null || r.equals(CrawlProfile.MATCH_NEVER_STRING)) {
-                this.ipmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN;
-            } else {
-                this.ipmustnotmatch = Pattern.compile(r);
-            }
+        if (this.crawleripmustnotmatch == null) {
+            final String r = get(CRAWLER_IP_MUSTNOTMATCH);
+            try {
+                this.crawleripmustnotmatch = (r == null || r.equals(CrawlProfile.MATCH_NEVER_STRING)) ? CrawlProfile.MATCH_NEVER_PATTERN : Pattern.compile(r);
+            } catch (PatternSyntaxException e) { this.crawleripmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
-        return this.ipmustnotmatch;
+        return this.crawleripmustnotmatch;
     }
 
     /**
@@ -345,14 +349,56 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * @return a list of country codes
      */
     public String[] countryMustMatchList() {
-        String countryMustMatch = get(FILTER_COUNTRY_MUSTMATCH);
+        String countryMustMatch = get(CRAWLER_COUNTRY_MUSTMATCH);
         if (countryMustMatch == null) countryMustMatch = "";
         if (countryMustMatch.isEmpty()) return new String[0];
         String[] list = countryMustMatch.split(",");
         if (list.length == 1 && list.length == 0) list = new String[0];
         return list;
     }
+    
+    /**
+     * If the regex matches with the url, then there is no depth limit on the crawl (it overrides depth == 0)
+     * @return regex which must be matched
+     */
+    public Pattern crawlerNoDepthLimitMatchPattern() {
+        if (this.crawlernodepthlimitmatch == null) {
+            final String r = get(CRAWLER_URL_NODEPTHLIMITMATCH);
+            try {
+                this.crawlernodepthlimitmatch = (r == null || r.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN : Pattern.compile(r);
+            } catch (PatternSyntaxException e) { this.crawlernodepthlimitmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
+        }
+        return this.crawlernodepthlimitmatch;
+    }
 
+    /**
+     * Gets the regex which must be matched by URLs in order to be indexed.
+     * @return regex which must be matched
+     */
+    public Pattern indexUrlMustMatchPattern() {
+        if (this.indexurlmustmatch == null) {
+            final String r = get(INDEXING_URL_MUSTMATCH);
+            try {
+                this.indexurlmustmatch = (r == null || r.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN : Pattern.compile(r);
+            } catch (PatternSyntaxException e) { this.indexurlmustmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
+        }
+        return this.indexurlmustmatch;
+    }
+
+    /**
+     * Gets the regex which must not be matched by URLs in order to be indexed.
+     * @return regex which must not be matched
+     */
+    public Pattern indexUrlMustNotMatchPattern() {
+        if (this.indexurlmustnotmatch == null) {
+            final String r = get(INDEXING_URL_MUSTNOTMATCH);
+            try {
+                this.indexurlmustnotmatch = (r == null || r.equals(CrawlProfile.MATCH_NEVER_STRING)) ? CrawlProfile.MATCH_NEVER_PATTERN : Pattern.compile(r);
+            } catch (PatternSyntaxException e) { this.indexurlmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
+        }
+        return this.indexurlmustnotmatch;
+    }
+    
     /**
      * Gets depth of crawl job (or height of the tree which will be
      * created by the crawler).

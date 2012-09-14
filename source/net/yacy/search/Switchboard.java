@@ -1946,45 +1946,35 @@ public final class Switchboard extends serverSwitch
                     }
                     boolean insert = false;
                     if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY) ) {
-                        selentry.put(CrawlProfile.RECRAWL_IF_OLDER, Long.toString(CrawlProfile
-                            .getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE)));
+                        selentry.put(CrawlProfile.RECRAWL_IF_OLDER, Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE)));
                         insert = true;
                     }
                     if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT) ) {
-                        selentry
-                            .put(
+                        selentry.put(
                                 CrawlProfile.RECRAWL_IF_OLDER,
-                                Long.toString(CrawlProfile
-                                    .getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE)));
+                                Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE)));
                         insert = true;
                     }
                     if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT) ) {
-                        selentry
-                            .put(
+                        selentry.put(
                                 CrawlProfile.RECRAWL_IF_OLDER,
-                                Long.toString(CrawlProfile
-                                    .getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE)));
+                                Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE)));
                         insert = true;
                     }
                     if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ) {
-                        selentry
-                            .put(
+                        selentry.put(
                                 CrawlProfile.RECRAWL_IF_OLDER,
-                                Long.toString(CrawlProfile
-                                    .getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE)));
+                                Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE)));
                         insert = true;
                     }
                     if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA) ) {
-                        selentry
-                            .put(
+                        selentry.put(
                                 CrawlProfile.RECRAWL_IF_OLDER,
-                                Long.toString(CrawlProfile
-                                    .getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE)));
+                                Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE)));
                         insert = true;
                     }
                     if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE) ) {
-                        selentry.put(CrawlProfile.RECRAWL_IF_OLDER, Long.toString(CrawlProfile
-                            .getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE)));
+                        selentry.put(CrawlProfile.RECRAWL_IF_OLDER, Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE)));
                         insert = true;
                     }
                     if ( insert ) {
