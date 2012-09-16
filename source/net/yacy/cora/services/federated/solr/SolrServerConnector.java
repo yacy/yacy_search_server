@@ -92,7 +92,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public long getSize() {
         try {
-            final QueryResponse rsp = query(AbstractSolrConnector.catchallQuery);
+            final QueryResponse rsp = query(AbstractSolrConnector.catchSuccessQuery);
             if (rsp == null) return 0;
             final SolrDocumentList docs = rsp.getResults();
             if (docs == null) return 0;
