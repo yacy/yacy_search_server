@@ -92,7 +92,8 @@
           <td>Crawling Depth:</td>
           <td>
             <input name="crawlingDepth" id="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#" />&nbsp;&nbsp;&nbsp;
-            <input type="checkbox" name="directDocByURL" id="directDocByURL" #(directDocByURLChecked)#::checked="checked"#(/directDocByURLChecked)# />also all linked non-parsable documents
+            <input type="checkbox" name="directDocByURL" id="directDocByURL" #(directDocByURLChecked)#::checked="checked"#(/directDocByURLChecked)# />also all linked non-parsable documents<br/>
+            Unlimited crawl depth for URLs matching with: <input name="crawlingDepthExtension" id="crawlingDepthExtension" type="text" size="30" maxlength="100" value="#[crawlingDepthExtension]#" />
           </td>
           <td>
             This defines how often the Crawler will follow links (of links..) embedded in websites.
@@ -150,7 +151,7 @@
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">
-          <td><label for="mustmatch">Must-Match Filter for URLs</label>:</td>
+          <td><label for="mustmatch">Must-Match Filter for URLs for crawling</label>:</td>
           <td>
 			<input type="radio" name="range" id="rangeWide" value="wide" checked="checked" />Use filter&nbsp;&nbsp;
 			<input name="mustmatch" id="mustmatch" type="text" size="60" maxlength="100" value="#[mustmatch]#" /><br />
@@ -165,7 +166,7 @@
           </td>
         </tr>
         <tr valign="top" class="TableCellDark">
-          <td><label for="mustnotmatch">Must-Not-Match Filter for URLs</label>:</td>
+          <td><label for="mustnotmatch">Must-Not-Match Filter for URLs for crawling</label>:</td>
           <td>
 			<input name="mustnotmatch" id="mustnotmatch" type="text" size="60" maxlength="100" value="#[mustnotmatch]#" />
 		  </td>
@@ -174,6 +175,26 @@
             that <b>must not match</b> to allow that the page is accepted for crawling.
             The empty string is a never-match filter which should do well for most cases.
             If you don't know what this means, please leave this field empty.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td><label for="indexmustmatch">Must-Match Filter for URLs for indexing</label>:</td>
+          <td>
+			<input name="indexmustmatch" id="indexmustmatch" type="text" size="60" maxlength="100" value="#[indexmustmatch]#" /><br />
+		  </td>
+          <td>
+            The filter is a <b><a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html">regular expression</a></b>
+            that <b>must match</b> with the URLs to allow that the content of the url is indexed.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellDark">
+          <td><label for="indexmustnotmatch">Must-Not-Match Filter for URLs for indexing</label>:</td>
+          <td>
+			<input name="indexmustnotmatch" id="indexmustnotmatch" type="text" size="60" maxlength="100" value="#[indexmustnotmatch]#" />
+		  </td>
+          <td>
+            The filter is a <b><a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html">regular expression</a></b>
+            that <b>must not match</b> with the URLs to allow that the content of the url is indexed.
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">

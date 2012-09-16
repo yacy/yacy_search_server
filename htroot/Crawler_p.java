@@ -204,9 +204,15 @@ public class Crawler_p {
                 sb.setConfig("crawlingIPMustNotMatch", ipMustNotMatch);
                 if (countryMustMatch.length() > 0) sb.setConfig("crawlingCountryMustMatch", countryMustMatch);
 
+                String crawlerNoDepthLimitMatch = post.get("crawlingDepthExtension", CrawlProfile.MATCH_NEVER_STRING);
+                final String indexUrlMustMatch = post.get("indexmustmatch", CrawlProfile.MATCH_ALL_STRING);
+                final String indexUrlMustNotMatch = post.get("indexmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
+
                 final boolean crawlOrder = post.get("crawlOrder", "off").equals("on");
                 env.setConfig("crawlOrder", crawlOrder);
 
+                if (crawlOrder) crawlerNoDepthLimitMatch = CrawlProfile.MATCH_NEVER_STRING; // without limitation the crawl order does not work
+                
                 int newcrawlingdepth = post.getInt("crawlingDepth", 8);
                 env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                 if ((crawlOrder) && (newcrawlingdepth > 8)) newcrawlingdepth = 8;
@@ -347,9 +353,9 @@ public class Crawler_p {
                         ipMustMatch,
                         ipMustNotMatch,
                         countryMustMatch,
-                        CrawlProfile.MATCH_NEVER_STRING,
-                        CrawlProfile.MATCH_ALL_STRING,
-                        CrawlProfile.MATCH_NEVER_STRING,
+                        crawlerNoDepthLimitMatch,
+                        indexUrlMustMatch,
+                        indexUrlMustNotMatch,
                         newcrawlingdepth,
                         directDocByURL,
                         crawlingIfOlder,

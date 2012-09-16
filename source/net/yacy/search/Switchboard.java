@@ -2284,28 +2284,14 @@ public final class Switchboard extends serverSwitch
         final EventOrigin processCase = response.processCase(this.peers.mySeed().hash);
 
         if ( this.log.isFine() ) {
-            this.log.logFine("processResourceStack processCase="
-                + processCase
-                + ", depth="
-                + response.depth()
-                + ", maxDepth="
-                + ((response.profile() == null) ? "null" : Integer.toString(response.profile().depth()))
-                + ", must-match="
-                + ((response.profile() == null) ? "null" : response
-                    .profile()
-                    .urlMustMatchPattern()
-                    .toString())
-                + ", must-not-match="
-                + ((response.profile() == null) ? "null" : response
-                    .profile()
-                    .urlMustNotMatchPattern()
-                    .toString())
-                + ", initiatorHash="
-                + ((response.initiator() == null) ? "null" : ASCII.String(response.initiator()))
-                +
-                //", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
-                ", url="
-                + response.url()); // DEBUG
+            this.log.logFine(
+                "processResourceStack processCase=" + processCase
+                + ", depth=" + response.depth()
+                + ", maxDepth=" + ((response.profile() == null) ? "null" : Integer.toString(response.profile().depth()))
+                + ", must-match=" + ((response.profile() == null) ? "null" : response.profile().urlMustMatchPattern().toString())
+                + ", must-not-match=" + ((response.profile() == null) ? "null" : response.profile().urlMustNotMatchPattern().toString())
+                + ", initiatorHash=" + ((response.initiator() == null) ? "null" : ASCII.String(response.initiator()))
+                + ", url=" + response.url()); // DEBUG
         }
 
         // PARSE CONTENT
@@ -2353,8 +2339,13 @@ public final class Switchboard extends serverSwitch
 
         // put anchors on crawl stack
         final long stackStartTime = System.currentTimeMillis();
-        if ( ((processCase == EventOrigin.PROXY_LOAD) || (processCase == EventOrigin.LOCAL_CRAWLING))
-            && ((response.profile() == null) || (response.depth() < response.profile().depth())) ) {
+        if ((processCase == EventOrigin.PROXY_LOAD || processCase == EventOrigin.LOCAL_CRAWLING) &&
+            (
+                response.profile() == null ||
+                response.depth() < response.profile().depth() ||
+                response.profile().crawlerNoDepthLimitMatchPattern().matcher(response.url().toNormalform(false, false)).matches()
+            )
+           ) {
             // get the hyperlinks
             final Map<MultiProtocolURI, String> hl = Document.getHyperlinks(documents);
 
@@ -2415,24 +2406,25 @@ public final class Switchboard extends serverSwitch
 
     public IndexingQueueEntry condenseDocument(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_CONDENSING);
-        if ( !in.queueEntry.profile().indexText() && !in.queueEntry.profile().indexMedia() ) {
-            if ( this.log.isInfo() ) {
-                this.log.logInfo("Not Condensed Resource '"
-                    + in.queueEntry.url().toNormalform(false, true)
-                    + "': indexing not wanted by crawl profile");
-            }
+        CrawlProfile profile = in.queueEntry.profile();
+        String urls = in.queueEntry.url().toNormalform(false, true);
+        
+        // check profile attributes which prevent indexing (while crawling is allowed)
+        if (!profile.indexText() && !profile.indexMedia()) {
+            if (this.log.isInfo()) this.log.logInfo("Not Condensed Resource '" + urls + "': indexing of this media type not wanted by crawl profile");
             return new IndexingQueueEntry(in.queueEntry, in.documents, null);
         }
-
+        if (!profile.indexUrlMustMatchPattern().matcher(urls).matches() ||
+             profile.indexUrlMustNotMatchPattern().matcher(urls).matches() ) {
+            if (this.log.isInfo()) this.log.logInfo("Not Condensed Resource '" + urls + "': indexing prevented by regular expression on url");
+            return new IndexingQueueEntry(in.queueEntry, in.documents, null);
+        }
+        
         // check which files may take part in the indexing process
         final List<Document> doclist = new ArrayList<Document>();
         for ( final Document document : in.documents ) {
             if ( document.indexingDenied() ) {
-                if ( this.log.isInfo() ) {
-                    this.log.logInfo("Not Condensed Resource '"
-                        + in.queueEntry.url().toNormalform(false, true)
-                        + "': denied by document-attached noindexing rule");
-                }
+                if ( this.log.isInfo() ) this.log.logInfo("Not Condensed Resource '" + urls + "': denied by document-attached noindexing rule");
                 addURLtoErrorDB(
                     in.queueEntry.url(),
                     in.queueEntry.referrerHash(),
@@ -2459,7 +2451,6 @@ public final class Switchboard extends serverSwitch
             // update image result list statistics
             // its good to do this concurrently here, because it needs a DNS lookup
             // to compute a URL hash which is necessary for a double-check
-            final CrawlProfile profile = in.queueEntry.profile();
             ResultImages.registerImages(in.queueEntry.url(), in.documents[i], (profile == null)
                 ? true
                 : !profile.remoteIndexing());
