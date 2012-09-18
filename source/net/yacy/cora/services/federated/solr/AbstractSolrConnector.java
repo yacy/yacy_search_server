@@ -48,10 +48,10 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     }
     public final static SolrQuery catchSuccessQuery = new SolrQuery();
     static {
-        catchallQuery.setQuery("-" + YaCySchema.failreason_t.name() + ":[* TO *]");
-        catchallQuery.setFields(YaCySchema.id.name());
-        catchallQuery.setRows(1);
-        catchallQuery.setStart(0);
+        catchSuccessQuery.setQuery("-" + YaCySchema.failreason_t.name() + ":[* TO *]");
+        catchSuccessQuery.setFields(YaCySchema.id.name());
+        catchSuccessQuery.setRows(1);
+        catchSuccessQuery.setStart(0);
     }
     private final static int pagesize = 10;
     
