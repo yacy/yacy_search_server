@@ -53,7 +53,7 @@ if [ ! -e $CONFIGFILE ]; then
     echo "network.unit.definition=defaults/yacy.network.freeworld.unit" >> $CONFIGFILE
     echo "adminAccountForLocalhost=false" >> $CONFIGFILE
     echo "javastart_Xmx=Xmx600m" >> $CONFIGFILE
-    echo "javastart_Xms=Xmx180m" >> $CONFIGFILE
+    echo "javastart_Xms=Xmx600m" >> $CONFIGFILE
 fi
 
 # Substitute in the values from the debconf db.

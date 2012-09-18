@@ -76,7 +76,7 @@ public class PerformanceQueues_p {
             if (post.containsKey("Xmx")) {
                 int xmx = post.getInt("Xmx", 600); // default maximum heap size
                 if (OS.isWin32) xmx = Math.min(2000, xmx);
-                int xms = Math.min(xmx, Math.max(90, xmx / 10));
+                int xms = xmx; //Math.min(xmx, Math.max(90, xmx / 10));
 	            sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
 	            sb.setConfig("javastart_Xms", "Xms" + xms + "m");
 	            prop.put("setStartupCommit", "1");
@@ -333,7 +333,7 @@ public class PerformanceQueues_p {
         // parse initialization memory settings
         final String Xmx = sb.getConfig("javastart_Xmx", "Xmx600m").substring(3);
         prop.put("Xmx", Xmx.substring(0, Xmx.length() - 1));
-        final String Xms = sb.getConfig("javastart_Xms", "Xms90m").substring(3);
+        final String Xms = sb.getConfig("javastart_Xms", "Xms600m").substring(3);
         prop.put("Xms", Xms.substring(0, Xms.length() - 1));
 
         final long diskFree = sb.getConfigLong(SwitchboardConstants.DISK_FREE, 3000L);
