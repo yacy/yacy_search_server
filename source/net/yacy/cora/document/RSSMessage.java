@@ -57,11 +57,11 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         guid(new String[]{"guid"}),
         ttl(new String[]{"ttl"}),
         docs(new String[]{"docs"}),
-        size(new String[]{"size","length"}),
+        size(new String[]{"size","length","yacy:size"}),
         lon(new String[]{"geo:lon",Geo.Long.getURIref()}),
         lat(new String[]{Geo.Lat.getURIref()});
         //point("gml:pos,georss:point,coordinates");
-
+        
         private Set<String> keys;
 
         private Token(final String[] keylist) {

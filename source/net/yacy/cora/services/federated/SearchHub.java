@@ -102,13 +102,13 @@ public class SearchHub {
      * Every time this method is called the list is re-computed to reflect the latest results
      * @return a score map of urls
      */
-    public ScoreMap<String> getResults() {
-        final ScoreMap<String> scores = new ConcurrentScoreMap<String>();
+    public ScoreMap<RSSMessage> getResults() {
+        final ScoreMap<RSSMessage> scores = new ConcurrentScoreMap<RSSMessage>();
         final int m = this.threads.size();
         for (final Map.Entry<RSSMessage, List<Integer>> entry: this.result.entrySet()) {
             int a = 0;
             for (final Integer i : entry.getValue()) a += i.intValue();
-            scores.inc(entry.getKey().getLink(), a * m / entry.getValue().size());
+            scores.inc(entry.getKey(), a * m / entry.getValue().size());
         }
         return scores;
     }
@@ -166,9 +166,9 @@ public class SearchHub {
         addSRURSSServices(search, SRURSSServicesList, 100, CacheStrategy.CACHEONLY, false, "searchhub");
         try {Thread.sleep(100);} catch (final InterruptedException e1) {}
         search.waitTermination();
-        final ScoreMap<String> result = search.getResults();
-        final Iterator<String> i = result.keys(true);
-        String u;
+        final ScoreMap<RSSMessage> result = search.getResults();
+        final Iterator<RSSMessage> i = result.keys(true);
+        RSSMessage u;
         while (i.hasNext()) {
             u = i.next();
             System.out.println("[" + result.get(u) + "] " + u);
