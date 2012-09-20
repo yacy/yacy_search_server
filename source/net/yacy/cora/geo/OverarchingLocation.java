@@ -20,7 +20,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.document.geolocation;
+package net.yacy.cora.geo;
 
 import java.util.HashMap;
 import java.util.HashSet;

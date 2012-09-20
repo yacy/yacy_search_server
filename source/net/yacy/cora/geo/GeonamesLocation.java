@@ -20,7 +20,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.document.geolocation;
+package net.yacy.cora.geo;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,9 +39,10 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import net.yacy.document.StringBuilderComparator;
-import net.yacy.document.WordCache;
-import net.yacy.kelondro.logging.Log;
+import org.apache.log4j.Logger;
+
+import net.yacy.cora.document.WordCache;
+import net.yacy.cora.util.StringBuilderComparator;
 
 public class GeonamesLocation implements Locations {
 
@@ -68,7 +69,8 @@ public class GeonamesLocation implements Locations {
         timezone          : the timezone id (see file timeZone.txt)
         modification date : date of last modification in yyyy-MM-dd format
      */
-
+    private final static Logger log = Logger.getLogger(GeonamesLocation.class);
+    
     private final Map<Integer, GeoLocation> id2loc;
     private final TreeMap<StringBuilder, List<Integer>> name2ids;
     private final File file;
@@ -92,7 +94,7 @@ public class GeonamesLocation implements Locations {
             final InputStream is = zf.getInputStream(ze);
             reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
         } catch ( final IOException e ) {
-            Log.logException(e);
+            log.warn(e);
             return;
         }
 
@@ -153,7 +155,7 @@ public class GeonamesLocation implements Locations {
                 }
             }
         } catch ( final IOException e ) {
-            Log.logException(e);
+            log.warn(e);
         }
     }
 

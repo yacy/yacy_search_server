@@ -36,7 +36,7 @@ import java.util.LinkedList;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
-import net.yacy.document.WordCache;
+import net.yacy.cora.document.WordCache;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 

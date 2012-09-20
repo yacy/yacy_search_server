@@ -21,11 +21,11 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import net.yacy.cora.geo.GeonamesLocation;
+import net.yacy.cora.geo.OpenGeoDBLocation;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.LibraryProvider;
-import net.yacy.document.geolocation.GeonamesLocation;
-import net.yacy.document.geolocation.OpenGeoDBLocation;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;

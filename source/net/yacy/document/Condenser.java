@@ -35,6 +35,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.WordCache;
 import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.lod.vocabulary.Tagging;

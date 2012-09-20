@@ -24,12 +24,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
 import net.yacy.document.LibraryProvider;
-import net.yacy.document.geolocation.GeoLocation;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import de.anomic.server.serverCore;

@@ -84,6 +84,7 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.WordCache;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
@@ -1914,6 +1915,12 @@ public final class Switchboard extends serverSwitch
     }
 
     public boolean cleanupJob() {
+        
+        if (MemoryControl.shortStatus()) {
+            WordCache.clear();
+            Domains.clear();
+        }
+        
         try {
         	// flush the document compressor cache
         	Cache.commit();
@@ -2556,7 +2563,7 @@ public final class Switchboard extends serverSwitch
                         ASCII.getBytes(this.peers.mySeed().hash))
                         ? EventChannel.LOCALINDEXING
                         : EventChannel.REMOTEINDEXING);
-            feed.addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url()));
+            feed.addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url(), ASCII.String(queueEntry.url().hash())));
         } catch ( final IOException e ) {
             //if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
             addURLtoErrorDB(

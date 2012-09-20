@@ -75,6 +75,11 @@ public class KeyList implements Iterable<String> {
         this.raf = new RandomAccessFile(file, "rw");
 
     }
+    
+    public void clear() throws IOException {
+        this.raf.setLength(0);
+        this.keys.clear();
+    }
 
     public int size() {
         return this.keys.size();

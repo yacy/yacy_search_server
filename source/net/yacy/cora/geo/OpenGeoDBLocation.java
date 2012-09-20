@@ -20,7 +20,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.document.geolocation;
+package net.yacy.cora.geo;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,8 +39,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
-import net.yacy.document.StringBuilderComparator;
-import net.yacy.document.WordCache;
+import net.yacy.cora.document.WordCache;
+import net.yacy.cora.util.StringBuilderComparator;
 import net.yacy.kelondro.logging.Log;
 
 /**

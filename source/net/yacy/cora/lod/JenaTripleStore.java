@@ -20,8 +20,10 @@ import net.yacy.cora.lod.vocabulary.Geo;
 import net.yacy.cora.lod.vocabulary.HttpHeader;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
+
+import org.apache.log4j.Logger;
+import org.mortbay.log.Log;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -37,7 +39,8 @@ import com.hp.hpl.jena.util.FileManager;
 
 public class JenaTripleStore {
 
-    public static Log log = new Log("TRIPLESTORE");
+    private final static Logger log = Logger.getLogger(JenaTripleStore.class);
+    
 	public static Model model = ModelFactory.createDefaultModel();
 	static {
 	    init(model);
@@ -67,12 +70,12 @@ public class JenaTripleStore {
 
 	public static void loadRDF(String fileNameOrUri) throws IOException {
 		Model tmp  = ModelFactory.createDefaultModel();
-		log.logInfo("Loading from " + fileNameOrUri);
+		log.info("Loading from " + fileNameOrUri);
         InputStream is = FileManager.get().open(fileNameOrUri);
 	    if (is != null) {
 	    	// read the RDF/XML file
 	    	tmp.read(is, null);
-			log.logInfo("loaded " + tmp.size() + " triples from " + fileNameOrUri);
+			log.info("loaded " + tmp.size() + " triples from " + fileNameOrUri);
 	    	model = model.union(tmp);
 	    } else {
 	        throw new IOException("cannot read " + fileNameOrUri);
@@ -80,7 +83,7 @@ public class JenaTripleStore {
 	}
 
 	public static void LoadNTriples(String fileNameOrUri) throws IOException {
-	    log.logInfo("Loading N-Triples from " + fileNameOrUri);
+	    log.info("Loading N-Triples from " + fileNameOrUri);
 	    InputStream is = FileManager.get().open(fileNameOrUri);
 	    LoadNTriples(is);
 	}
@@ -89,7 +92,7 @@ public class JenaTripleStore {
 	    Model tmp = ModelFactory.createDefaultModel();
 	    if (is != null) {
 	    	tmp.read(is, null, "N-TRIPLE");
-			log.logInfo("loaded " + tmp.size() + " triples");
+			log.info("loaded " + tmp.size() + " triples");
         	model = model.union(tmp);
 	        //model.write(System.out, "TURTLE");
 	    } else {
@@ -118,10 +121,10 @@ public class JenaTripleStore {
         File ftmp = new File(filename + "." + System.currentTimeMillis());
 	    if (model.isEmpty() && !f.exists()) {
 	        // we don't store zero-size models if they did not exist before
-	        log.logInfo("NOT saving triplestore with " + model.size() + " triples to " + filename);
+	        log.info("NOT saving triplestore with " + model.size() + " triples to " + filename);
 	        return;
 	    }
-		log.logInfo("Saving triplestore with " + model.size() + " triples to " + filename);
+		log.info("Saving triplestore with " + model.size() + " triples to " + filename);
     	OutputStream fout;
 		try {
 			fout = new BufferedOutputStream(new FileOutputStream(ftmp));
@@ -133,9 +136,9 @@ public class JenaTripleStore {
 			if (!f.exists()) {
 			    ftmp.renameTo(f);
 			}
-			log.logInfo("Saved triplestore with " + model.size() + " triples to " + filename);
+			log.info("Saved triplestore with " + model.size() + " triples to " + filename);
 		} catch (Exception e) {
-			log.logWarning("Saving to " + filename+" failed");
+			log.warn("Saving to " + filename+" failed");
 		}
 	}
 
@@ -176,14 +179,14 @@ public class JenaTripleStore {
         Resource r = model.getResource(subject);
         Property pr = model.getProperty(predicate);
         r.addProperty(pr, object);
-        log.logInfo("ADD " + subject + " - " + predicate + " - " + object);
+        log.info("ADD " + subject + " - " + predicate + " - " + object);
     }
 
     public static String getObject(final String subject, final String predicate) {
     	Iterator<RDFNode> ni = JenaTripleStore.getObjects(subject, predicate);
     	String object = "";
         if (ni.hasNext()) object = ni.next().toString();
-        log.logInfo("GET " + subject + " - " + predicate + " - " + object);
+        log.info("GET " + subject + " - " + predicate + " - " + object);
         return object;
     }
 
@@ -196,7 +199,7 @@ public class JenaTripleStore {
     	Iterator<RDFNode> ni = JenaTripleStore.getPrivateObjects(subject, predicate, username);
         String object = "";
         if (ni.hasNext()) object = ni.next().toString();
-        log.logInfo("GET (" + username + ") " + subject + " - " + predicate + " - " + object);
+        log.info("GET (" + username + ") " + subject + " - " + predicate + " - " + object);
         return object;
     }
 
@@ -271,7 +274,7 @@ public class JenaTripleStore {
 
 	public static void initPrivateStores() {
 		Switchboard switchboard = Switchboard.getSwitchboard();
-		log.logInfo("Init private stores");
+		log.info("Init private stores");
 		if (privatestorage == null) privatestorage = new ConcurrentHashMap<String, Model>();
 		if (privatestorage != null) privatestorage.clear();
 
@@ -282,17 +285,17 @@ public class JenaTripleStore {
 				String username = e.getUserName();
 				File triplestore = new File(switchboard.getConfig("triplestore", new File(switchboard.getDataPath(), "DATA/TRIPLESTORE").getAbsolutePath()));
                 File currentuserfile = new File(triplestore, "private_store_"+username+".rdf");
-                log.logInfo("Init " + username + " from "+currentuserfile.getAbsolutePath());
+                log.info("Init " + username + " from "+currentuserfile.getAbsolutePath());
                 Model tmp  = ModelFactory.createDefaultModel();
                 init (tmp);
 
                 if (currentuserfile.exists()) {
-            		log.logInfo("Loading from " + currentuserfile.getAbsolutePath());
+            		log.info("Loading from " + currentuserfile.getAbsolutePath());
                     InputStream is = FileManager.get().open(currentuserfile.getAbsolutePath());
             	    if (is != null) {
             	    	// read the RDF/XML file
             	    	tmp.read(is, null);
-            			log.logInfo("loaded " + tmp.size() + " triples from " + currentuserfile.getAbsolutePath());
+            			log.info("loaded " + tmp.size() + " triples from " + currentuserfile.getAbsolutePath());
             	    } else {
             	        throw new IOException("cannot read " + currentuserfile.getAbsolutePath());
             	    }
@@ -303,13 +306,13 @@ public class JenaTripleStore {
                 }
 			}
 		} catch (Exception anyex) {
-			Log.logException(anyex);
+			Log.warn(anyex);
 		}
 	}
 
 	public static void savePrivateStores() {
         Switchboard switchboard = Switchboard.getSwitchboard();
-		log.logInfo("Saving user triplestores");
+		log.info("Saving user triplestores");
 		if (privatestorage == null) return;
 		for (Entry<String, Model> s : privatestorage.entrySet()) {
 			File triplestore = new File(switchboard.getConfig("triplestore", new File(switchboard.getDataPath(), "DATA/TRIPLESTORE").getAbsolutePath()));

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import net.yacy.cora.document.WordCache;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.order.Base64Order;
 

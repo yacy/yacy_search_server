@@ -43,13 +43,14 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.WordCache;
+import net.yacy.cora.geo.GeonamesLocation;
+import net.yacy.cora.geo.OpenGeoDBLocation;
+import net.yacy.cora.geo.OverarchingLocation;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
 import net.yacy.cora.storage.Files;
-import net.yacy.document.geolocation.GeonamesLocation;
-import net.yacy.document.geolocation.OpenGeoDBLocation;
-import net.yacy.document.geolocation.OverarchingLocation;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 

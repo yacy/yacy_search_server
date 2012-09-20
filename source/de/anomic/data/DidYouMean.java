@@ -10,8 +10,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.cora.util.StringBuilderComparator;
 import net.yacy.document.LibraryProvider;
-import net.yacy.document.StringBuilderComparator;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.index.Segment;
 

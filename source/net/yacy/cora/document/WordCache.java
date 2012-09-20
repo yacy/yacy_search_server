@@ -18,7 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.document;
+package net.yacy.cora.document;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,9 +37,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.log4j.Logger;
+
 import net.yacy.cora.sorting.OrderedScoreMap;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.cora.util.StringBuilderComparator;
 
 /**
  * provide a completion library for the did-you-mean class
@@ -47,13 +48,12 @@ import net.yacy.kelondro.util.MemoryControl;
  */
 public class WordCache {
 
+    private final static Logger log = Logger.getLogger(WordCache.class);
+    
     // common word cache
-    private static final int commonWordsMaxSize = (int) (MemoryControl.available() / 30000); // maximum size of common word cache
+    private static final int commonWordsMaxSize = 20000;  // maximum size of common word cache
     private static final int commonWordsMinLength = 5;    // words must have that length at minimum
     private static OrderedScoreMap<StringBuilder> commonWords = new OrderedScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
-    static {
-    	Log.logConfig("WordCache", "commonWordsMaxSize = " + commonWordsMaxSize);
-    }
 
     // dictionaries
     private final File dictionaryPath;
@@ -213,9 +213,6 @@ public class WordCache {
         if (word.length() < commonWordsMinLength) {
             return;
         }
-        if (MemoryControl.shortStatus()) {
-            commonWords.clear();
-        }
         commonWords.inc(word);
         if (!(commonWords.sizeSmaller(commonWordsMaxSize))) {
             commonWords.shrinkToMaxSize(commonWordsMaxSize / 2);
@@ -242,7 +239,7 @@ public class WordCache {
                     Dictionary dict = new Dictionary(new File(this.dictionaryPath, f));
                     this.dictionaries.put(f.substring(0, f.length() - 6), dict);
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    log.warn(e);
                 }
             }
         }
@@ -322,6 +319,10 @@ public class WordCache {
             size += dict.size();
         }
         return size;
+    }
+    
+    public static void clear() {
+        commonWords.clear();
     }
 
     /**

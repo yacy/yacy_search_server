@@ -38,7 +38,6 @@ import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.cora.lod.vocabulary.Geo;
 import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMessage> {
 
@@ -110,13 +109,13 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         this.map.put("guid", artificialGuidPrefix + Integer.toHexString((title + description + link).hashCode()));
     }
 
-    public RSSMessage(final String title, final String description, final DigestURI link) {
+    public RSSMessage(final String title, final String description, final MultiProtocolURI link, final String guid) {
         this.map = new HashMap<String, String>();
         this.map.put("title", title);
         this.map.put("description", description);
         this.map.put("link", link.toNormalform(true, false));
         this.map.put("pubDate", ISO8601Formatter.FORMATTER.format());
-        this.map.put("guid", ASCII.String(link.hash()));
+        this.map.put("guid", guid);
     }
 
     public RSSMessage() {

@@ -50,19 +50,21 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.apache.log4j.Logger;
+
 import net.yacy.cora.plugin.ClassProvider;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.KeyList;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.MemoryControl;
 
 import com.google.common.net.InetAddresses;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.google.common.util.concurrent.TimeLimiter;
 
 public class Domains {
-
+    
+    private final static Logger log = Logger.getLogger(Domains.class);
+    
     public  static final String LOCALHOST = "127.0.0.1"; // replace with IPv6 0:0:0:0:0:0:0:1 ?
     private static       String LOCALHOST_NAME = LOCALHOST; // this will be replaced with the actual name of the local host
 
@@ -602,7 +604,7 @@ public class Domains {
             globalHosts = null;
         } else try {
             globalHosts = new KeyList(globalHostsnameCache);
-            Log.logInfo("Domains", "loaded globalHosts cache of hostnames, size = " + globalHosts.size());
+            log.info("loaded globalHosts cache of hostnames, size = " + globalHosts.size());
         } catch (final IOException e) {
             globalHosts = null;
         }
@@ -621,7 +623,7 @@ public class Domains {
     }
 
     public static synchronized void close() {
-        if (globalHosts != null) try {globalHosts.close();} catch (final IOException e) {Log.logException(e);}
+        if (globalHosts != null) try {globalHosts.close();} catch (final IOException e) {log.warn(e);}
     }
 
     /**
@@ -769,7 +771,7 @@ public class Domains {
                 if (InetAddresses.isInetAddress(host)) {
                     try {
                         ip = InetAddresses.forString(host);
-                        Log.logInfo("Domains", "using guava for host resolution:"  + host);
+                        log.info("using guava for host resolution:"  + host);
                     } catch (IllegalArgumentException e) {
                         ip = null;
                     }
@@ -811,12 +813,7 @@ public class Domains {
                     localHostNames.add(host);
                 } else {
                     if (globalHosts != null) try {
-                        if (MemoryControl.shortStatus()) {
-                            globalHosts.close();
-                            globalHosts = null;
-                        } else {
-                            globalHosts.add(host);
-                        }
+                        globalHosts.add(host);
                     } catch (final IOException e) {}
                 }
             }
@@ -825,6 +822,10 @@ public class Domains {
         }
     }
 
+    public static void clear() {
+        try {globalHosts.clear();} catch (IOException e) {}
+    }
+    
     private final static Pattern dotPattern = Pattern.compile("\\.");
 
     public static final InetAddress parseInetAddress(String ip) {

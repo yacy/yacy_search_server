@@ -34,10 +34,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.WordCache.Dictionary;
+import net.yacy.cora.geo.GeoLocation;
+import net.yacy.cora.geo.Locations;
 import net.yacy.cora.storage.Files;
-import net.yacy.document.WordCache.Dictionary;
-import net.yacy.document.geolocation.GeoLocation;
-import net.yacy.document.geolocation.Locations;
 
 public class Tagging {
 

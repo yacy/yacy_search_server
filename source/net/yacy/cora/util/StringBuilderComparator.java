@@ -1,5 +1,5 @@
 /**
- *  CaseInsensitiveStringBuilderComparator.java
+ *  StringBuilderComparator.java
  *  Copyright 2011 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 09.11.2011 at http://yacy.net
  *
@@ -18,7 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.document;
+package net.yacy.cora.util;
 
 import java.util.ArrayList;
 import java.util.Comparator;

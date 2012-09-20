@@ -38,7 +38,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import net.yacy.document.StringBuilderComparator;
+import net.yacy.cora.util.StringBuilderComparator;
 
 public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<E> {
 

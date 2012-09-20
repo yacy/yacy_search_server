@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.geo.Locations;
 import net.yacy.cora.lod.vocabulary.Tagging;
-import net.yacy.document.geolocation.Locations;
 import net.yacy.kelondro.logging.Log;
 
 /**
