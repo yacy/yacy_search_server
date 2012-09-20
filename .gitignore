@@ -8,3 +8,5 @@ DATA/
 classes/
 RELEASE/
 /yacy.pid
+.DS_Store
+lib/yacy-cora.jar
