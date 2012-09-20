@@ -186,7 +186,7 @@ public class ContentControlImportThread {
 
 											+ wikiurlify ("/?Url/?Filter/?Article has average rating/?Category")
 											+ "/mainlabel%3D"
-											+ "/format%3Dsupercount");
+											+ "/format%3Dystat");
 
 							String reply = UTF8.String(new HTTPClient()
 									.GETbytes(bmks_count.toString()));
