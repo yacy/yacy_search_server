@@ -2006,6 +2006,9 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         } catch (final MalformedURLException e) {
             throw new IOException("SMB.getName MalformedURLException (" + e.getMessage() + ") for " + toString() );
         }
+        if (isFTP()) {
+            return this.getFileName();
+        }
         return null;
     }
 
