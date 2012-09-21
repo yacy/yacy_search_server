@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional because target is being used in a links -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': URL References Administration</title>
+    #%env/templates/metas.template%#
+  <script type="text/javascript">
+//<![CDATA[
+function xmlhttpPost() {
+    var searchform = document.getElementById('searchform');
+    search(searchform.urlstring.value);
+}
+
+function search(query) {
+    var xmlHttpReq = false;
+    var self = this;
+    if (window.XMLHttpRequest) { // Mozilla/Safari
+        self.xmlHttpReq = new XMLHttpRequest(); 
+    }
+    else if (window.ActiveXObject) { // IE
+        self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    self.xmlHttpReq.open('GET', "/solr/select?q=sku:\"" + query + "\" OR host_s:\"" + query + "\" OR host_dnc_s:\"" + query + "\" OR host_organization_s:\"" + query + "\" OR host_organizationdnc_s:\"" + query + "\" OR host_subdomain_s:\"" + query + "\"&start=0&rows=100&wt=json", true);
+    self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    self.xmlHttpReq.onreadystatechange = function() {
+        if (self.xmlHttpReq.readyState == 4) {
+            updatepage(self.xmlHttpReq.responseText);
+        }
+    }
+    self.xmlHttpReq.send(null);
+}
+
+function updatepage(str) {
+  var raw = document.getElementById("raw");
+  if (raw != null) raw.innerHTML = str;
+  var rsp = eval("("+str+")");
+  var firstChannel = rsp.channels[0];
+  var totalResults = firstChannel.totalResults.replace(/[,.]/,"");
+  var startIndex = firstChannel.startIndex;
+  var itemsPerPage = firstChannel.itemsPerPage;
+  var navigation = firstChannel.navigation;
+  
+  var html = "";
+  
+  if (totalResults > 0 && firstChannel.items.length > 0) {
+    var item;
+    html += "<table class=\"networkTable\" border=\"0\" cellpadding=\"2\" cellspacing=\"1\" width=\"99%\">";
+    html += "<tr class=\"TableHeader\" valign=\"bottom\">";
+    html += "<td>URL from index (total results = " + totalResults + ")<\/td>";
+    for (var i = 0; i < firstChannel.items.length; i++) {
+        item = firstChannel.items[i];
+        html += "<tr class=\"TableCellLight\"><td align=\"left\"><a href=\"HostBrowser.html?urlstringsearch=&amp;urlstring=" + item.link + "\">" + item.link + "<\/a><\/td>";
+    }
+    html += "<\/table>";
+  }
+  document.getElementById("searchresults").innerHTML = html;
+}
+//]]>
+</script>
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexControl.template%#
+    <h2>URL References Administration</h2>
+    <p>The local index currently contains #[ucount]# URL references</p>
+    <form action="HostBrowser.html" id="searchform" method="post" enctype="multipart/form-data" accept-charset="UTF-8" onkeyup="xmlhttpPost(); return false;">
+    <fieldset><legend>URL Retrieval</legend>
+      <dl>
+        
+        <dt class="TableCellDark">Retrieve by URL:</dt>
+        <dd><input type="text" name="urlstring" value="#[urlstring]#" size="40" maxlength="250" />
+            <input type="submit" name="urlstringsearch" value="Show Details for URL" class="submitready" style="width:240px;"/><br />
+            <div id="searchresults"></div>
+        </dd>
+        
+      </dl>
+    </fieldset>
+    </form>
+    
+    <div id="raw"></div>
+    
+    #(statisticslines)#::
+    <p><em>Statistics about the top-#[domains]# domains in the database:</em></p>
+    <table cellpadding="2" cellspacing="1" >
+      <tr class="TableHeader">
+        <td><strong>Domain</strong></td>
+        <td><strong>URLs</strong></td>
+      </tr>
+      #{domains}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td><a href="http://#[domain]#/" target="_blank">#[domain]#</a></td>
+        <td>#[count]#</td>
+      </tr>
+      #{/domains}#
+    </table>
+    #(/statisticslines)#
+    
+    
+    #(genUrlProfile)#
+    ::No entry found for URL-hash #[urlhash]#
+    ::<iframe src="/api/yacydoc.html?urlhash=#[urlhash]#" width="100%" height="420" frameborder="0" scrolling="no"></iframe><br />
+    <div id="api">
+    <a href="/api/yacydoc.html?urlhash=#[urlhash]#">
+    <img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
+    <span>These document details can be retrieved as <a href="http://www.w3.org/TR/xhtml-rdfa-primer/">XHTML+RDFa</a>
+    document containg <a href="http://www.w3.org/RDF/">RDF</a> annotations in <a href="http://dublincore.org/">Dublin Core</a> vocabulary.
+    The XHTML+RDFa data format is both a XML content format and a HTML display format and is considered as an important <a href="http://www.w3.org/2001/sw/">Semantic Web</a> content format.
+    The same content can also be retrieved as pure <a href="/api/yacydoc.xml?urlhash=#[urlhash]#">XML metadata</a> with DC tag name vocabulary.
+    Click the API icon to see an example call to the search rss API.
+    To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
+    </div>
+    #(/genUrlProfile)#
+    
+    #[result]#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>
