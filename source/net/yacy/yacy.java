@@ -46,6 +46,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.sorting.Array;
+import net.yacy.data.Translator;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
 import net.yacy.kelondro.logging.Log;
@@ -58,12 +59,11 @@ import net.yacy.peers.operation.yacyRelease;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.server.serverCore;
+import net.yacy.server.http.HTTPDemon;
 
 import com.google.common.io.Files;
 
-import de.anomic.data.Translator;
-import de.anomic.http.server.HTTPDemon;
-import de.anomic.server.serverCore;
 
 /**
 * This is the main class of YaCy. Several threads are started from here:

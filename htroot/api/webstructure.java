@@ -33,6 +33,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -41,9 +42,8 @@ import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.CrawlQueues;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class webstructure {
 

@@ -47,6 +47,8 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.services.federated.yacy.ConfigurationSet;
 import net.yacy.cora.services.federated.yacy.YaCySchema;
+import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ContentScraper;
@@ -62,8 +64,6 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.retrieval.Response;
 
 public class SolrConfiguration extends ConfigurationSet implements Serializable {
 

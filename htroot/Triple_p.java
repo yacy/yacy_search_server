@@ -26,6 +26,9 @@ import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.http.HTTPDemon;
 
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -34,9 +37,6 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 
-import de.anomic.http.server.HTTPDemon;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class Triple_p {
 

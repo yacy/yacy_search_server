@@ -43,6 +43,8 @@ import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.data.ZURL.FailCategory;
+import net.yacy.crawler.retrieval.Request;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.WordTokenizer;
@@ -54,8 +56,6 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.ZURL.FailCategory;
-import de.anomic.crawler.retrieval.Request;
 
 
 public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaSnippet> {

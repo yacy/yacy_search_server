@@ -31,8 +31,8 @@ import net.yacy.document.content.dao.ImportDump;
 import net.yacy.document.content.dao.PhpBB3Dao;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class ContentIntegrationPHPBB3_p {
 

@@ -43,6 +43,9 @@ import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.crawler.data.Cache;
+import net.yacy.crawler.data.CrawlQueues;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
@@ -55,14 +58,11 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 import com.hp.hpl.jena.rdf.model.Model;
 
-import de.anomic.crawler.Cache;
-import de.anomic.crawler.CrawlQueues;
-import de.anomic.crawler.retrieval.Response;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class ViewFile {
 

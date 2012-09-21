@@ -41,8 +41,8 @@ import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class PerformanceMemory_p {
 

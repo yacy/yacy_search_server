@@ -31,6 +31,9 @@ import java.io.IOException;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.crawler.data.ResultURLs;
+import net.yacy.crawler.data.ResultURLs.EventOrigin;
+import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
@@ -38,12 +41,9 @@ import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.ResultURLs;
-import de.anomic.crawler.ResultURLs.EventOrigin;
-import de.anomic.crawler.ZURL.FailCategory;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.tools.crypt;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.utils.crypt;
 
 public final class crawlReceipt {
 

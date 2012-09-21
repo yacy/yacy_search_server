@@ -14,30 +14,30 @@ import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.BookmarksDB;
+import net.yacy.data.UserDB;
+import net.yacy.data.WorkTables;
+import net.yacy.data.ymark.MonitoredReader;
+import net.yacy.data.ymark.YMarkAutoTagger;
+import net.yacy.data.ymark.YMarkCrawlStart;
+import net.yacy.data.ymark.YMarkDMOZImporter;
+import net.yacy.data.ymark.YMarkEntry;
+import net.yacy.data.ymark.YMarkHTMLImporter;
+import net.yacy.data.ymark.YMarkJSONImporter;
+import net.yacy.data.ymark.YMarkTables;
+import net.yacy.data.ymark.YMarkUtil;
+import net.yacy.data.ymark.YMarkXBELImporter;
 import net.yacy.document.Parser.Failure;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 import org.xml.sax.SAXException;
 
-import de.anomic.data.BookmarksDB;
-import de.anomic.data.UserDB;
-import de.anomic.data.WorkTables;
-import de.anomic.data.ymark.MonitoredReader;
-import de.anomic.data.ymark.YMarkAutoTagger;
-import de.anomic.data.ymark.YMarkCrawlStart;
-import de.anomic.data.ymark.YMarkDMOZImporter;
-import de.anomic.data.ymark.YMarkEntry;
-import de.anomic.data.ymark.YMarkHTMLImporter;
-import de.anomic.data.ymark.YMarkJSONImporter;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.data.ymark.YMarkXBELImporter;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 
 public class import_ymark {

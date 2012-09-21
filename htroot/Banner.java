@@ -36,9 +36,9 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.graphics.BannerData;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 import net.yacy.visualization.RasterPlotter;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 /** Draw a banner with information about the peer. */
 public class Banner {

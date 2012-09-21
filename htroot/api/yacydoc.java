@@ -41,12 +41,12 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class yacydoc {
 

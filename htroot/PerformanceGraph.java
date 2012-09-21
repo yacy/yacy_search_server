@@ -27,9 +27,9 @@
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 import net.yacy.visualization.RasterPlotter;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class PerformanceGraph {
 

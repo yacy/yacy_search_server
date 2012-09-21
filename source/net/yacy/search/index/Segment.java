@@ -46,6 +46,9 @@ import net.yacy.cora.services.federated.yacy.YaCySchema;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.data.CrawlQueues;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -69,9 +72,6 @@ import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.RWIProcess;
 import net.yacy.search.query.SearchEvent;
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.CrawlQueues;
-import de.anomic.crawler.retrieval.Response;
 
 public class Segment {
 

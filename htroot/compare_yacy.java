@@ -29,9 +29,9 @@ import java.util.Map;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.server.servletProperties;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.servletProperties;
 
 public class compare_yacy {
 

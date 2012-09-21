@@ -21,10 +21,10 @@
 
 package net.yacy.search;
 
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.kelondro.workflow.WorkflowJob;
-import de.anomic.crawler.retrieval.Response;
 
 public class IndexingQueueEntry extends WorkflowJob {
 

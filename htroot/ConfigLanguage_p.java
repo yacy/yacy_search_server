@@ -41,13 +41,13 @@ import java.util.Map;
 
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.Translator;
+import net.yacy.data.WorkTables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
-import de.anomic.data.Translator;
-import de.anomic.data.WorkTables;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 
 public class ConfigLanguage_p {

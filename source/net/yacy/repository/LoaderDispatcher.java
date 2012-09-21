@@ -46,6 +46,15 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.crawler.data.Cache;
+import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.data.ZURL.FailCategory;
+import net.yacy.crawler.retrieval.FTPLoader;
+import net.yacy.crawler.retrieval.FileLoader;
+import net.yacy.crawler.retrieval.HTTPLoader;
+import net.yacy.crawler.retrieval.Request;
+import net.yacy.crawler.retrieval.Response;
+import net.yacy.crawler.retrieval.SMBLoader;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
@@ -54,15 +63,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.Cache;
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.ZURL.FailCategory;
-import de.anomic.crawler.retrieval.FTPLoader;
-import de.anomic.crawler.retrieval.FileLoader;
-import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.crawler.retrieval.Request;
-import de.anomic.crawler.retrieval.Response;
-import de.anomic.crawler.retrieval.SMBLoader;
 
 public final class LoaderDispatcher {
 

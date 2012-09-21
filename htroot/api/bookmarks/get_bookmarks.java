@@ -6,13 +6,13 @@ import java.util.Iterator;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.BookmarkHelper;
+import net.yacy.data.BookmarksDB;
+import net.yacy.data.UserDB;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.search.Switchboard;
-import de.anomic.data.BookmarkHelper;
-import de.anomic.data.BookmarksDB;
-import de.anomic.data.UserDB;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class get_bookmarks {
 

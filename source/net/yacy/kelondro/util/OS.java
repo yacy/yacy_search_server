@@ -36,7 +36,7 @@ import java.util.Vector;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.logging.Log;
-import de.anomic.server.serverCore;
+import net.yacy.server.serverCore;
 
 
 public final class OS {

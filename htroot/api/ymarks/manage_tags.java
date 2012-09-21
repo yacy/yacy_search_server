@@ -3,15 +3,15 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.UserDB;
+import net.yacy.data.ymark.YMarkTables;
+import net.yacy.data.ymark.YMarkUtil;
+import net.yacy.data.ymark.YMarkTables.TABLES;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.data.ymark.YMarkTables.TABLES;
-import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 
 public class manage_tags {

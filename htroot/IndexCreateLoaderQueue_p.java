@@ -29,11 +29,11 @@
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.crawler.retrieval.Request;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.retrieval.Request;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class IndexCreateLoaderQueue_p {
 

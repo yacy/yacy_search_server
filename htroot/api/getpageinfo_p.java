@@ -35,20 +35,20 @@ import javax.xml.parsers.ParserConfigurationException;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.crawler.data.CrawlQueues;
+import net.yacy.crawler.robots.RobotsTxtEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.anomic.crawler.CrawlQueues;
-import de.anomic.crawler.RobotsTxtEntry;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class getpageinfo_p {
 

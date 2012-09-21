@@ -39,19 +39,19 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.BlogBoard;
+import net.yacy.data.BlogBoardComments;
+import net.yacy.data.MessageBoard;
+import net.yacy.data.UserDB;
+import net.yacy.data.BlogBoard.BlogEntry;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 import com.google.common.io.Files;
 
-import de.anomic.data.BlogBoard;
-import de.anomic.data.BlogBoard.BlogEntry;
-import de.anomic.data.BlogBoardComments;
-import de.anomic.data.MessageBoard;
-import de.anomic.data.UserDB;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class BlogComments {
 

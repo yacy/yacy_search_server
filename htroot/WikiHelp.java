@@ -28,8 +28,8 @@
 // if the shell's current path is HTROOT
 
 import net.yacy.cora.protocol.RequestHeader;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class WikiHelp {
 

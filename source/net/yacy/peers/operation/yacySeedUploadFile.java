@@ -27,9 +27,10 @@ package net.yacy.peers.operation;
 
 import java.io.File;
 
+import net.yacy.server.serverSwitch;
+
 import com.google.common.io.Files;
 
-import de.anomic.server.serverSwitch;
 
 public class yacySeedUploadFile implements yacySeedUploader {
 

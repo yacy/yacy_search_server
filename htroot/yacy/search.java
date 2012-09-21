@@ -73,10 +73,10 @@ import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.snippet.ResultEntry;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.tools.crypt;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.utils.crypt;
 
 public final class search {
 

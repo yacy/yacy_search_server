@@ -15,10 +15,10 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
+import net.yacy.server.http.ServerSideIncludes;
 
 import org.jsoup.Jsoup;
 
-import de.anomic.http.server.ServerSideIncludes;
 
 
 public class AugmentHtmlStream {

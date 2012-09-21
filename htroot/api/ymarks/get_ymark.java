@@ -5,19 +5,19 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.UserDB;
+import net.yacy.data.ymark.YMarkCrawlStart;
+import net.yacy.data.ymark.YMarkDate;
+import net.yacy.data.ymark.YMarkEntry;
+import net.yacy.data.ymark.YMarkTables;
+import net.yacy.data.ymark.YMarkUtil;
+import net.yacy.data.ymark.YMarkTables.TABLES;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
-import de.anomic.data.ymark.YMarkCrawlStart;
-import de.anomic.data.ymark.YMarkDate;
-import de.anomic.data.ymark.YMarkEntry;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.data.ymark.YMarkTables.TABLES;
-import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 
 public class get_ymark {

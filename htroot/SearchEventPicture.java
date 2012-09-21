@@ -28,9 +28,9 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.graphics.NetworkGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 import net.yacy.visualization.RasterPlotter;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 // draw a picture of the yacy network
 

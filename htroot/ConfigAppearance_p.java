@@ -44,11 +44,11 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 import com.google.common.io.Files;
 
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class ConfigAppearance_p {
 

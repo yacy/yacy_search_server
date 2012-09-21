@@ -39,11 +39,11 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 import net.yacy.visualization.GraphPlotter;
 import net.yacy.visualization.PrintTool;
 import net.yacy.visualization.RasterPlotter;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class WebStructurePicture_p {
 

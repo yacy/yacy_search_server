@@ -42,6 +42,8 @@ import net.yacy.cora.sorting.WeakPriorityBlockingQueue.Element;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.data.Cache;
+import net.yacy.data.WorkTables;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -62,8 +64,6 @@ import net.yacy.search.snippet.TextSnippet;
 
 import org.apache.solr.common.SolrDocument;
 
-import de.anomic.crawler.Cache;
-import de.anomic.data.WorkTables;
 
 public class SnippetProcess {
 

@@ -37,6 +37,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
@@ -51,8 +52,7 @@ import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.kelondro.util.kelondroException;
 import net.yacy.search.query.QueryParams;
-import de.anomic.crawler.retrieval.Request;
-import de.anomic.tools.crypt;
+import net.yacy.utils.crypt;
 
 public class URIMetadataRow implements URIMetadata {
 

@@ -4,11 +4,11 @@ import java.util.Iterator;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.BookmarksDB;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.search.Switchboard;
-import de.anomic.data.BookmarksDB;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class all {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {

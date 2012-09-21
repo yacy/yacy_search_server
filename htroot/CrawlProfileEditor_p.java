@@ -32,12 +32,12 @@ import java.util.TreeMap;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.server.servletProperties;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.servletProperties;
 
 public class CrawlProfileEditor_p {
 

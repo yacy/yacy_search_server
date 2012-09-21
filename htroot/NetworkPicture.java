@@ -32,8 +32,8 @@ import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.peers.graphics.NetworkGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 /** draw a picture of the yacy network */
 public class NetworkPicture

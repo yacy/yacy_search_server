@@ -1,6 +1,6 @@
 import net.yacy.cora.protocol.RequestHeader;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public final class DemoServletInteraction {
 

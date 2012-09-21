@@ -26,12 +26,12 @@ import java.io.File;
 import java.io.IOException;
 
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.snippet.TextSnippet;
-import de.anomic.crawler.retrieval.Response;
 
 
 // get one server with

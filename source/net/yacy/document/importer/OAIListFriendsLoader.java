@@ -41,6 +41,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
@@ -51,7 +52,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import de.anomic.crawler.retrieval.Response;
 
 public class OAIListFriendsLoader implements Serializable {
 

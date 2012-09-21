@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.http.server.RobotsTxtConfig;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.server.servletProperties;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.servletProperties;
+import net.yacy.server.http.RobotsTxtConfig;
 
 public class robots {
 

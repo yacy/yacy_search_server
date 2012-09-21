@@ -36,17 +36,17 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.YaCySchema;
+import net.yacy.crawler.data.ResultURLs;
+import net.yacy.crawler.data.ResultURLs.EventOrigin;
+import net.yacy.crawler.data.ResultURLs.InitExecEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.ResultURLs;
-import de.anomic.crawler.ResultURLs.EventOrigin;
-import de.anomic.crawler.ResultURLs.InitExecEntry;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.tools.nxTools;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.utils.nxTools;
 
 public class CrawlResults {
 

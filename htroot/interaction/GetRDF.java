@@ -36,11 +36,11 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.interaction.Interaction;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 import com.hp.hpl.jena.rdf.model.Model;
 
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class GetRDF {
 

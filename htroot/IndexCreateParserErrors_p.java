@@ -27,13 +27,13 @@ import java.util.ArrayList;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.crawler.CrawlStacker;
+import net.yacy.crawler.data.ZURL;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.CrawlStacker;
-import de.anomic.crawler.ZURL;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class IndexCreateParserErrors_p {
 

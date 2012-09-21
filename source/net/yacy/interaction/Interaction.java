@@ -13,6 +13,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.data.UserDB;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -21,7 +22,6 @@ import net.yacy.search.Switchboard;
 
 import org.apache.http.entity.mime.content.ContentBody;
 
-import de.anomic.data.UserDB;
 
 
 public class Interaction {

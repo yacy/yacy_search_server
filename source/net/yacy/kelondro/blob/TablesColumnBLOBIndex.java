@@ -32,9 +32,9 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
-import de.anomic.data.ymark.YMarkUtil;
 
 public class TablesColumnBLOBIndex extends TablesColumnIndex{
 

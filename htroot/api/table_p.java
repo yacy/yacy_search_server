@@ -30,8 +30,8 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class table_p {
 

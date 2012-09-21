@@ -37,8 +37,8 @@ import net.yacy.kelondro.logging.ThreadDump;
 import net.yacy.kelondro.util.OS;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class Threaddump_p {
 

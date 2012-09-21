@@ -13,9 +13,9 @@ import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Fulltext.HostStat;
 import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.BlockRank;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.server.servletProperties;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.servletProperties;
 
 public class YBRFetch_p
 {

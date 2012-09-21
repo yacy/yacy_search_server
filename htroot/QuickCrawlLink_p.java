@@ -38,13 +38,13 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.util.NumberTools;
+import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.retrieval.Request;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class QuickCrawlLink_p {
 

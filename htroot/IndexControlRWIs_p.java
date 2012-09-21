@@ -42,6 +42,10 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.data.Cache;
+import net.yacy.crawler.data.ResultURLs;
+import net.yacy.data.ListManager;
+import net.yacy.data.WorkTables;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
@@ -70,12 +74,8 @@ import net.yacy.search.query.RWIProcess;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.BlockRank;
 import net.yacy.search.ranking.ReferenceOrder;
-import de.anomic.crawler.Cache;
-import de.anomic.crawler.ResultURLs;
-import de.anomic.data.ListManager;
-import de.anomic.data.WorkTables;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class IndexControlRWIs_p {
 

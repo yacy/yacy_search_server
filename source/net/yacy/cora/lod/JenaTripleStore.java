@@ -278,9 +278,9 @@ public class JenaTripleStore {
 		if (privatestorage != null) privatestorage.clear();
 
 		try {
-			Iterator<de.anomic.data.UserDB.Entry> it = switchboard.userDB.iterator(true);
+			Iterator<net.yacy.data.UserDB.Entry> it = switchboard.userDB.iterator(true);
 			while (it.hasNext()) {
-				de.anomic.data.UserDB.Entry e = it.next();
+				net.yacy.data.UserDB.Entry e = it.next();
 				String username = e.getUserName();
 				File triplestore = new File(switchboard.getConfig("triplestore", new File(switchboard.getDataPath(), "DATA/TRIPLESTORE").getAbsolutePath()));
                 File currentuserfile = new File(triplestore, "private_store_"+username+".rdf");

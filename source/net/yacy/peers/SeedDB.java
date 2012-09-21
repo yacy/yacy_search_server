@@ -59,10 +59,10 @@ import net.yacy.peers.dht.PartitionScheme;
 import net.yacy.peers.dht.VerticalWordPartitionScheme;
 import net.yacy.peers.operation.yacySeedUploader;
 import net.yacy.search.Switchboard;
-import de.anomic.http.server.AlternativeDomainNames;
-import de.anomic.http.server.HTTPDemon;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.http.AlternativeDomainNames;
+import net.yacy.server.http.HTTPDemon;
 
 public final class SeedDB implements AlternativeDomainNames {
 

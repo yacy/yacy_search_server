@@ -43,6 +43,9 @@ import java.util.Set;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.ListManager;
+import net.yacy.data.list.ListAccumulator;
+import net.yacy.data.list.XMLBlacklistImporter;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
@@ -50,14 +53,11 @@ import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 import org.xml.sax.SAXException;
 
-import de.anomic.data.ListManager;
-import de.anomic.data.list.ListAccumulator;
-import de.anomic.data.list.XMLBlacklistImporter;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class sharedBlacklist_p {
 

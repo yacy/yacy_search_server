@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -13,7 +14,6 @@ import net.yacy.document.parser.rdfa.impl.RDFaParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.data.ymark.YMarkUtil;
 
 
 public class AugmentParser extends AbstractParser implements Parser {

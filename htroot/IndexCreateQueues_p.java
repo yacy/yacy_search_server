@@ -11,15 +11,15 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.crawler.CrawlSwitchboard;
+import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.data.NoticedURL.StackType;
+import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.CrawlSwitchboard;
-import de.anomic.crawler.NoticedURL.StackType;
-import de.anomic.crawler.retrieval.Request;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class IndexCreateQueues_p {
 

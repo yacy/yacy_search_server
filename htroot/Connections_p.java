@@ -42,10 +42,10 @@ import net.yacy.kelondro.workflow.WorkflowThread;
 import net.yacy.peers.PeerActions;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverCore.Session;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.serverCore.Session;
 
 public final class Connections_p {
 

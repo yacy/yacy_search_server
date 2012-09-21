@@ -36,17 +36,17 @@ import java.util.regex.Pattern;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.Translator;
+import net.yacy.data.WorkTables;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.data.Translator;
-import de.anomic.data.WorkTables;
-import de.anomic.http.server.HTTPDFileHandler;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.tools.UPnP;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.http.HTTPDFileHandler;
+import net.yacy.utils.UPnP;
 
 public class ConfigBasic {
 

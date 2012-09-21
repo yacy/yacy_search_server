@@ -25,15 +25,15 @@ import net.yacy.cora.geo.GeonamesLocation;
 import net.yacy.cora.geo.OpenGeoDBLocation;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.crawler.data.CrawlQueues;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.CrawlQueues;
-import de.anomic.crawler.retrieval.Response;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class DictionaryLoader_p {
 

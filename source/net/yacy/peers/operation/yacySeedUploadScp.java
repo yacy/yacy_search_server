@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.server.serverSwitch;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
@@ -41,7 +42,6 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
-import de.anomic.server.serverSwitch;
 
 public class yacySeedUploadScp implements yacySeedUploader {
 

@@ -33,6 +33,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.services.federated.solr.OpensearchResponseWriter.ResHead;
 import net.yacy.cora.services.federated.yacy.YaCySchema;
+import net.yacy.server.serverObjects;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Fieldable;
@@ -45,7 +46,6 @@ import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocSlice;
 import org.apache.solr.search.SolrIndexSearcher;
 
-import de.anomic.server.serverObjects;
 
 /**
  * write the opensearch result in YaCys special way to include as much as in opensearch is included.

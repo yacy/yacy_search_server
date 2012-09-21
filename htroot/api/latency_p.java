@@ -27,11 +27,11 @@ import java.util.Map;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
-import de.anomic.crawler.Latency;
-import de.anomic.crawler.Latency.Host;
-import de.anomic.crawler.NoticedURL;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.crawler.data.Latency;
+import net.yacy.crawler.data.NoticedURL;
+import net.yacy.crawler.data.Latency.Host;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class latency_p {
 

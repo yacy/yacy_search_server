@@ -31,11 +31,11 @@ package interaction;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.UserDB;
 import net.yacy.interaction.Interaction;
 import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class Table {
 

@@ -31,14 +31,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.WorkTables;
 import net.yacy.peers.PeerActions;
 import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.data.WorkTables;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class RemoteCrawl_p {
 

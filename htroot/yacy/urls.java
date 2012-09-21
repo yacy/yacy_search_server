@@ -30,15 +30,15 @@ import java.util.Date;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.crawler.data.NoticedURL;
+import net.yacy.crawler.data.ZURL.FailCategory;
+import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.peers.Protocol;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.NoticedURL;
-import de.anomic.crawler.ZURL.FailCategory;
-import de.anomic.crawler.retrieval.Request;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class urls {
 

@@ -26,11 +26,11 @@
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.YaCySchema;
+import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class CrawlStartExpert_p {
 

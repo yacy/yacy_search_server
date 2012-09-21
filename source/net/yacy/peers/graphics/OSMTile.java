@@ -35,13 +35,13 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.crawler.data.Cache;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.visualization.RasterPlotter;
-import de.anomic.crawler.Cache;
-import de.anomic.crawler.retrieval.Response;
 
 public class OSMTile {
 

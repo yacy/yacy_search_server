@@ -43,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.data.WorkTables;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
@@ -61,7 +62,6 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.query.SnippetProcess.Worker;
 import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.snippet.ResultEntry;
-import de.anomic.data.WorkTables;
 
 public final class SearchEvent {
 

@@ -26,8 +26,8 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.YaCySchema;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.SolrConfiguration;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class schema_p {
 

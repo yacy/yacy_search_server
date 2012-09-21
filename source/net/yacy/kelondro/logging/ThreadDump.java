@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
-import de.anomic.tools.nxTools;
+import net.yacy.utils.nxTools;
 
 public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> implements Map<ThreadDump.StackTrace, List<String>> {
 

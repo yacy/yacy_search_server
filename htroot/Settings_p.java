@@ -31,9 +31,9 @@ import net.yacy.peers.Network;
 import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacySeedUploader;
 import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public final class Settings_p {
     

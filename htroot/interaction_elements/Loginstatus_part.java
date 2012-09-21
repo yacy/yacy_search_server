@@ -31,11 +31,11 @@ package interaction_elements;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.server.servletProperties;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.servletProperties;
 
 public class Loginstatus_part {
 

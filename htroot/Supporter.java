@@ -45,10 +45,10 @@ import net.yacy.peers.NewsPool;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.tools.crypt;
-import de.anomic.tools.nxTools;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.utils.crypt;
+import net.yacy.utils.nxTools;
 
 public class Supporter {
 

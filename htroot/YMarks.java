@@ -5,16 +5,16 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.data.UserDB;
+import net.yacy.data.ymark.YMarkEntry;
+import net.yacy.data.ymark.YMarkRDF;
+import net.yacy.data.ymark.YMarkTables;
+import net.yacy.data.ymark.YMarkTables.TABLES;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
-import de.anomic.data.ymark.YMarkEntry;
-import de.anomic.data.ymark.YMarkRDF;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.data.ymark.YMarkTables.TABLES;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class YMarks {
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {

@@ -36,6 +36,8 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.SnippetProcess;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
@@ -44,8 +46,6 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.DocSlice;
 
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 // try
 // http://localhost:8090/gsa/searchresult?q=chicken+teriyaki&output=xml&client=test&site=test&sort=date:D:S:d1

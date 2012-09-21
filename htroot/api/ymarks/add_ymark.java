@@ -1,16 +1,16 @@
 import java.io.IOException;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.UserDB;
+import net.yacy.data.ymark.YMarkEntry;
+import net.yacy.data.ymark.YMarkTables;
+import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
-import de.anomic.data.ymark.YMarkEntry;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 
 public class add_ymark {

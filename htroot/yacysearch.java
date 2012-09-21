@@ -52,6 +52,9 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.data.DidYouMean;
+import net.yacy.data.UserDB;
+import net.yacy.data.ymark.YMarkTables;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
@@ -80,13 +83,10 @@ import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.query.SnippetProcess;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.snippet.TextSnippet;
-import de.anomic.data.DidYouMean;
-import de.anomic.data.UserDB;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.server.servletProperties;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.servletProperties;
 
 public class yacysearch {
 

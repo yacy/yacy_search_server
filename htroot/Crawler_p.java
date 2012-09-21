@@ -44,6 +44,16 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.data.CrawlQueues;
+import net.yacy.crawler.data.ZURL.FailCategory;
+import net.yacy.crawler.retrieval.Request;
+import net.yacy.crawler.retrieval.SitemapImporter;
+import net.yacy.data.BookmarkHelper;
+import net.yacy.data.BookmarksDB;
+import net.yacy.data.ListManager;
+import net.yacy.data.WorkTables;
+import net.yacy.data.ymark.YMarkTables;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.document.parser.html.ContentScraper;
@@ -55,18 +65,8 @@ import net.yacy.peers.NewsPool;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.CrawlQueues;
-import de.anomic.crawler.SitemapImporter;
-import de.anomic.crawler.ZURL.FailCategory;
-import de.anomic.crawler.retrieval.Request;
-import de.anomic.data.BookmarkHelper;
-import de.anomic.data.BookmarksDB;
-import de.anomic.data.ListManager;
-import de.anomic.data.WorkTables;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class Crawler_p {
 

@@ -27,7 +27,7 @@
 package net.yacy.search;
 
 import net.yacy.kelondro.util.MapTools;
-import de.anomic.http.server.RobotsTxtConfig;
+import net.yacy.server.http.RobotsTxtConfig;
 
 /**
  * @author danielr

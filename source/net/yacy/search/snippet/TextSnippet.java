@@ -39,6 +39,8 @@ import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.crawler.retrieval.Request;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.SentenceReader;
@@ -55,8 +57,6 @@ import net.yacy.peers.RemoteSearch;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.retrieval.Request;
-import de.anomic.crawler.retrieval.Response;
 
 public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnippet> {
 
@@ -196,7 +196,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                     while (sr.hasNext()) {
                         sentences.add(sr.next());
                     }
-                } else if (de.anomic.crawler.Cache.has(url.hash())) {
+                } else if (net.yacy.crawler.data.Cache.has(url.hash())) {
                     // get the sentences from the cache
                     final Request request = loader == null ? null : loader.request(url, true, reindexing);
                     Response response;

@@ -36,9 +36,9 @@ import net.yacy.document.ImageParser;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class cytag {
     

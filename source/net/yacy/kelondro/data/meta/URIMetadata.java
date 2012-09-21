@@ -25,9 +25,9 @@ package net.yacy.kelondro.data.meta;
 import java.util.Date;
 import java.util.regex.Pattern;
 
+import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.order.Bitfield;
-import de.anomic.crawler.retrieval.Request;
 
 
 public interface URIMetadata {

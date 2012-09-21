@@ -74,8 +74,8 @@ import net.yacy.kelondro.util.OS;
 import net.yacy.peers.dht.FlatWordPartitionScheme;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
-import de.anomic.tools.bitfield;
-import de.anomic.tools.crypt;
+import net.yacy.utils.bitfield;
+import net.yacy.utils.crypt;
 
 public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 {

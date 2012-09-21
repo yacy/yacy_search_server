@@ -36,8 +36,8 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Network;
 import net.yacy.peers.Protocol;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public final class query {
 

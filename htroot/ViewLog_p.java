@@ -40,8 +40,8 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.GuiHandler;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.logging.LogalizerHandler;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class ViewLog_p {
 

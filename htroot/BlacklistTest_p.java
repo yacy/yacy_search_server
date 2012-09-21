@@ -33,13 +33,13 @@ import java.io.File;
 import java.net.MalformedURLException;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.ListManager;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-import de.anomic.data.ListManager;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class BlacklistTest_p {
 

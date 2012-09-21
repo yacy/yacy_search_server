@@ -9,8 +9,8 @@ import java.util.Scanner;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class ynetSearch {
 

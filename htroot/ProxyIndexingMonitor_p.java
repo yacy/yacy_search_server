@@ -30,12 +30,12 @@
 import java.io.File;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.crawler.data.Cache;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.crawler.Cache;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class ProxyIndexingMonitor_p {
 

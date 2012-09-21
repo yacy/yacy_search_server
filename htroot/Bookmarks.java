@@ -43,6 +43,12 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.data.BookmarkHelper;
+import net.yacy.data.BookmarksDB;
+import net.yacy.data.ListManager;
+import net.yacy.data.UserDB;
+import net.yacy.data.BookmarksDB.Bookmark;
+import net.yacy.data.BookmarksDB.Tag;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -51,14 +57,8 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
 import net.yacy.search.snippet.TextSnippet;
-import de.anomic.data.BookmarkHelper;
-import de.anomic.data.BookmarksDB;
-import de.anomic.data.BookmarksDB.Bookmark;
-import de.anomic.data.BookmarksDB.Tag;
-import de.anomic.data.ListManager;
-import de.anomic.data.UserDB;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 
 public class Bookmarks {

@@ -4,20 +4,20 @@ import java.util.EnumMap;
 import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.UserDB;
+import net.yacy.data.ymark.YMarkAutoTagger;
+import net.yacy.data.ymark.YMarkCrawlStart;
+import net.yacy.data.ymark.YMarkEntry;
+import net.yacy.data.ymark.YMarkMetadata;
+import net.yacy.data.ymark.YMarkTables;
+import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
-import de.anomic.data.ymark.YMarkAutoTagger;
-import de.anomic.data.ymark.YMarkCrawlStart;
-import de.anomic.data.ymark.YMarkEntry;
-import de.anomic.data.ymark.YMarkMetadata;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class get_metadata {
 

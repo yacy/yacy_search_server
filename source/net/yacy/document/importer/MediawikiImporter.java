@@ -52,6 +52,8 @@ import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.util.NumberTools;
+import net.yacy.data.wiki.WikiCode;
+import net.yacy.data.wiki.WikiParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
@@ -62,8 +64,6 @@ import net.yacy.kelondro.util.ByteBuffer;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
-import de.anomic.data.wiki.WikiCode;
-import de.anomic.data.wiki.WikiParser;
 
 /*
  * this class provides data structures to read a mediawiki dump file in xml format

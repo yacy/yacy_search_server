@@ -62,7 +62,7 @@ import net.yacy.peers.operation.yacySeedUploadScp;
 import net.yacy.peers.operation.yacySeedUploader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.server.serverCore;
+import net.yacy.server.serverCore;
 
 public class Network
 {
@@ -444,7 +444,7 @@ public class Network
                 if ( record == null ) {
                     this.sb.peers.mySeed().put("news", "");
                 } else {
-                    this.sb.peers.mySeed().put("news", de.anomic.tools.crypt.simpleEncode(record.toString()));
+                    this.sb.peers.mySeed().put("news", net.yacy.utils.crypt.simpleEncode(record.toString()));
                 }
             } catch ( final Exception e ) {
                 log.logSevere("publishMySeed: problem with news encoding", e);

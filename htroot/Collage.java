@@ -27,10 +27,10 @@ import java.util.Random;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.crawler.data.ResultImages;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.ResultImages;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class Collage {
     private static           int fifoMax  = 20;

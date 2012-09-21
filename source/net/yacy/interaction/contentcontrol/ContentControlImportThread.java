@@ -7,10 +7,10 @@ import java.net.URL;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.data.ymark.YMarkEntry;
+import net.yacy.data.ymark.YMarkSMWJSONImporter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.data.ymark.YMarkEntry;
-import de.anomic.data.ymark.YMarkSMWJSONImporter;
 
 public class ContentControlImportThread {
 

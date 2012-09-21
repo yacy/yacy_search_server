@@ -3,10 +3,10 @@ import java.io.File;
 import java.util.List;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.ListManager;
 import net.yacy.kelondro.util.FileUtils;
-import de.anomic.data.ListManager;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class blacklists {
 

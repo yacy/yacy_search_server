@@ -78,6 +78,8 @@ import net.yacy.cora.services.federated.solr.SolrConnector;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.data.ResultURLs;
+import net.yacy.crawler.data.ResultURLs.EventOrigin;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -105,6 +107,10 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.snippet.TextSnippet;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.utils.crypt;
 
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -112,12 +118,6 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 
-import de.anomic.crawler.ResultURLs;
-import de.anomic.crawler.ResultURLs.EventOrigin;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.tools.crypt;
 
 public final class Protocol
 {

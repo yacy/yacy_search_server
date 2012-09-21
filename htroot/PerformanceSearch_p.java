@@ -30,8 +30,8 @@ import java.util.Iterator;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.EventTracker;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class PerformanceSearch_p {
 
