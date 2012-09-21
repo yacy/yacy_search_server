@@ -32,7 +32,7 @@ import java.util.Map;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.services.federated.solr.OpensearchResponseWriter.ResHead;
-import net.yacy.search.index.YaCySchema;
+import net.yacy.cora.services.federated.yacy.YaCySchema;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Fieldable;

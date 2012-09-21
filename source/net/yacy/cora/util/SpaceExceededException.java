@@ -22,8 +22,6 @@ package net.yacy.cora.util;
 
 import java.util.Date;
 
-import net.yacy.kelondro.util.MemoryControl;
-
 public class SpaceExceededException extends Exception {
 
     private static final long serialVersionUID = 9059516027929222151L;
@@ -32,17 +30,17 @@ public class SpaceExceededException extends Exception {
     private final long neededRAM, availableRAM, time;
 
     public SpaceExceededException(final long neededRAM, final String forUsage) {
-        super(Long.toString(neededRAM) + " bytes needed for " + forUsage + ": " + MemoryControl.available() + " free at " + (new Date()).toString());
+        super(Long.toString(neededRAM) + " bytes needed for " + forUsage + ": " + Memory.available() + " free at " + (new Date()).toString());
         this.time = System.currentTimeMillis();
-        this.availableRAM = MemoryControl.available();
+        this.availableRAM = Memory.available();
         this.neededRAM = neededRAM;
         this.forUsage = forUsage;
     }
 
     public SpaceExceededException(final long neededRAM, final String forUsage, final Throwable t) {
-        super(Long.toString(neededRAM) + " bytes needed for " + forUsage + ": " + MemoryControl.available() + " free at " + (new Date()).toString(), t);
+        super(Long.toString(neededRAM) + " bytes needed for " + forUsage + ": " + Memory.available() + " free at " + (new Date()).toString(), t);
         this.time = System.currentTimeMillis();
-        this.availableRAM = MemoryControl.available();
+        this.availableRAM = Memory.available();
         this.neededRAM = neededRAM;
         this.forUsage = forUsage;
     }

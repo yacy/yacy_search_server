@@ -26,10 +26,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.LookAheadIterator;
-import net.yacy.search.index.YaCySchema;
+import net.yacy.cora.services.federated.yacy.YaCySchema;
+import net.yacy.cora.util.LookAheadIterator;
 
+import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -37,6 +37,8 @@ import org.apache.solr.common.SolrException;
 
 public abstract class AbstractSolrConnector implements SolrConnector {
 
+    private final static Logger log = Logger.getLogger(AbstractSolrConnector.class);
+    
     public final SolrDocument POISON_DOCUMENT = new SolrDocument();
     public final static String POISON_ID = "POISON_ID";
     public final static SolrQuery catchallQuery = new SolrQuery();
@@ -61,7 +63,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             final SolrDocument doc = get(id);
             return doc != null;
         } catch (final Throwable e) {
-            Log.logException(e);
+            log.warn(e);
             return false;
         }
     }

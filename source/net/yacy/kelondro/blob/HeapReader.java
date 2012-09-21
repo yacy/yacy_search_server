@@ -41,6 +41,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.HandleMap;
+import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.io.CachedFileWriter;
@@ -50,7 +51,6 @@ import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.order.RotateIterator;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.LookAheadIterator;
 import net.yacy.kelondro.util.MemoryControl;
 
 

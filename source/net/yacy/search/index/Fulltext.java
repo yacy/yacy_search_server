@@ -39,6 +39,7 @@ import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.services.federated.solr.EmbeddedSolrConnector;
 import net.yacy.cora.services.federated.solr.MirrorSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
+import net.yacy.cora.services.federated.yacy.YaCySchema;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.storage.HandleSet;

@@ -34,12 +34,12 @@ import net.yacy.cora.services.federated.solr.ShardSelection;
 import net.yacy.cora.services.federated.solr.ShardSolrConnector;
 import net.yacy.cora.services.federated.solr.RemoteSolrConnector;
 import net.yacy.cora.services.federated.solr.SolrConnector;
-import net.yacy.cora.storage.ConfigurationSet;
+import net.yacy.cora.services.federated.yacy.ConfigurationSet;
+import net.yacy.cora.services.federated.yacy.YaCySchema;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.OS;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.index.YaCySchema;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

@@ -32,7 +32,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.atomic.AtomicLong;
 
-import net.yacy.search.index.YaCySchema;
+import net.yacy.cora.services.federated.yacy.YaCySchema;
 
 import org.apache.solr.common.SolrInputDocument;
 

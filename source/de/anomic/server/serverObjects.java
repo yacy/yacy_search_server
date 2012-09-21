@@ -59,10 +59,10 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
+import net.yacy.cora.services.federated.yacy.YaCySchema;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.YaCySchema;
 
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MultiMapSolrParams;

@@ -54,6 +54,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.MergeIterator;
@@ -63,7 +64,6 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.rwi.ReferenceIterator;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.LookAheadIterator;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
 

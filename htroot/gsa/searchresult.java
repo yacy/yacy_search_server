@@ -31,9 +31,9 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.solr.EmbeddedSolrConnector;
 import net.yacy.cora.services.federated.solr.GSAResponseWriter;
+import net.yacy.cora.services.federated.yacy.YaCySchema;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.YaCySchema;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.SnippetProcess;
 

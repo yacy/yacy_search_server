@@ -22,7 +22,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.storage;
+package net.yacy.cora.services.federated.yacy;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -34,12 +34,12 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import net.yacy.cora.storage.ConfigurationSet.Entry;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.search.index.YaCySchema;
+import org.apache.log4j.Logger;
+
+import net.yacy.cora.services.federated.yacy.ConfigurationSet.Entry;
+import net.yacy.cora.storage.Files;
+
 /**
  * this class reads configuration attributes as a list of keywords from a list
  * the list may contain lines with one keyword, comment lines, empty lines and out-commented keyword lines
@@ -55,8 +55,9 @@ import net.yacy.search.index.YaCySchema;
  */
 public class ConfigurationSet extends TreeMap<String,Entry> implements Serializable {
 
-    private static final long serialVersionUID=-5961730809008841258L;
-
+    private final static long serialVersionUID=-5961730809008841258L;
+    private final static Logger log = Logger.getLogger(ConfigurationSet.class);
+   
     private final File file;
 
     public ConfigurationSet() {
@@ -114,7 +115,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
                 }
             }
         } catch (final IOException e) {
-            Log.logException(e);
+            log.warn(e);
         } finally {
             if (br != null) try {br.close();} catch (IOException e) {}
         }
@@ -190,7 +191,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
             try {
                 commit();
             } catch (IOException ex) {
-                Logger.getLogger(ConfigurationSet.class.getName()).log(Level.SEVERE, null, ex);
+                log.warn(ex);
             }
         }
     }

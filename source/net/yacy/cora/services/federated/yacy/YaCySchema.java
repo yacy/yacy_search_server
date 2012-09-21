@@ -3,10 +3,6 @@
  *  Copyright 2011 by Michael Peter Christen
  *  First released 14.04.2011 at http://yacy.net
  *
- *  $LastChangedDate: 2011-04-14 22:05:04 +0200 (Do, 14 Apr 2011) $
- *  $LastChangedRevision: 7654 $
- *  $LastChangedBy: orbiter $
- *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -22,7 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.search.index;
+package net.yacy.cora.services.federated.yacy;
 
 import java.util.Date;
 import java.util.List;

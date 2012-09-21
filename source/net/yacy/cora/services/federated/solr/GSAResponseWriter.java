@@ -32,9 +32,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.services.federated.yacy.YaCySchema;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.YaCySchema;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Fieldable;

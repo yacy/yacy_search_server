@@ -25,10 +25,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import net.yacy.cora.services.federated.yacy.YaCySchema;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.search.index.YaCySchema;
 
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;

@@ -47,6 +47,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -61,7 +62,6 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.LookAheadIterator;
 import net.yacy.search.Switchboard;
 
 public class WebStructureGraph

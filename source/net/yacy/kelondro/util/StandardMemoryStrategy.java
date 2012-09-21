@@ -25,13 +25,13 @@
 
 package net.yacy.kelondro.util;
 
+import net.yacy.cora.util.Memory;
+
 /**
  * Standard implementation to get information about memory usage or try to free some memory
  */
 public class StandardMemoryStrategy extends MemoryStrategy {
 
-
-    private final Runtime runtime = Runtime.getRuntime();
     private final long[] gcs = new long[5];
     private int gcs_pos = 0;
     private long properMbyte = 0L;
@@ -94,7 +94,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
      */
     @Override
     protected final long free() {
-        return this.runtime.freeMemory();
+        return Memory.free();
     }
 
     /**
@@ -103,7 +103,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
      */
     @Override
     protected final long available() {
-        return maxMemory() - total() + free();
+        return Memory.available();
     }
 
     /**
@@ -113,7 +113,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
     @Override
     protected final long maxMemory()
     {
-    	return this.runtime.maxMemory();
+    	return Memory.maxMemory();
     }
 
 	/**
@@ -123,7 +123,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
     @Override
     protected final long total()
 	{
-		return this.runtime.totalMemory();
+		return Memory.total();
 	}
 
 	/**
@@ -187,7 +187,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
      */
     @Override
     protected final long used() {
-        return total() - free();
+        return Memory.used();
     }
 
     @Override

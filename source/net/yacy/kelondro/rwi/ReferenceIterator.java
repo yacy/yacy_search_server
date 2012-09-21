@@ -32,11 +32,11 @@ import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.HeapReader;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.LookAheadIterator;
 
 /**
  * iterator of BLOBHeap files: is used to import heap dumps into a write-enabled index heap

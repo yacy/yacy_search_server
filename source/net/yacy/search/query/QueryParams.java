@@ -46,6 +46,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.services.federated.yacy.YaCySchema;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
@@ -61,7 +62,6 @@ import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.Seed;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.YaCySchema;
 import net.yacy.search.ranking.RankingProfile;
 
 public final class QueryParams {

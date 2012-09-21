@@ -23,7 +23,6 @@ import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.search.Switchboard;
 
 import org.apache.log4j.Logger;
-import org.mortbay.log.Log;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -306,7 +305,7 @@ public class JenaTripleStore {
                 }
 			}
 		} catch (Exception anyex) {
-			Log.warn(anyex);
+			log.warn(anyex);
 		}
 	}
 

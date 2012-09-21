@@ -33,7 +33,7 @@ import java.util.Set;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.search.index.YaCySchema;
+import net.yacy.cora.services.federated.yacy.YaCySchema;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Fieldable;
