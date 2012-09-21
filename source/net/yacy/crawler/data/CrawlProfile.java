@@ -366,7 +366,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (this.crawlernodepthlimitmatch == null) {
             final String r = get(CRAWLER_URL_NODEPTHLIMITMATCH);
             try {
-                this.crawlernodepthlimitmatch = (r == null || r.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN : Pattern.compile(r);
+                this.crawlernodepthlimitmatch = (r == null || r.equals(CrawlProfile.MATCH_NEVER_STRING)) ? CrawlProfile.MATCH_NEVER_PATTERN : Pattern.compile(r);
             } catch (PatternSyntaxException e) { this.crawlernodepthlimitmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
         return this.crawlernodepthlimitmatch;
