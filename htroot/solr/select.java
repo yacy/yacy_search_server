@@ -78,7 +78,7 @@ public class select {
         RESPONSE_WRITER.put("xslt", xsltWriter); // try i.e. http://localhost:8090/solr/select?q=*:*&start=0&rows=10&wt=xslt&tr=json.xsl
         RESPONSE_WRITER.put("exml", new EnhancedXMLResponseWriter());
         RESPONSE_WRITER.put("rss", new OpensearchResponseWriter()); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
-        RESPONSE_WRITER.put("json", new JsonResponseWriter()); //try http://localhost:8090/solr/select?wt=json&q=olympia&hl=true&hl.fl=text_t,h1,h2
+        RESPONSE_WRITER.put("yjson", new JsonResponseWriter()); //try http://localhost:8090/solr/select?wt=json&q=olympia&hl=true&hl.fl=text_t,h1,h2
     }
 
     /**
@@ -96,7 +96,9 @@ public class select {
             if (tr.indexOf("json") >= 0) return "application/json";
         }
         if ("rss".equals(wt)) return "application/rss+xml";
+        if ("exml".equals(wt)) return "application/rss+xml";
         if ("json".equals(wt)) return "application/json";
+        if ("yjson".equals(wt)) return "application/json";
         if ("python".equals(wt)) return "text/html";
         if ("php".equals(wt) || "phps".equals(wt)) return "application/x-httpd-php";
         if ("ruby".equals(wt)) return "text/html";
