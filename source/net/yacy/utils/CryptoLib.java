@@ -46,8 +46,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+import net.yacy.cora.order.Base64Order;
 import net.yacy.kelondro.io.CharBuffer;
-import net.yacy.kelondro.order.Base64Order;
 
 
 /**

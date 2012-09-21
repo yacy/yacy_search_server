@@ -22,7 +22,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package net.yacy.peers.dht;
+package net.yacy.peers;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,6 +32,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadata;
@@ -42,13 +43,9 @@ import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.workflow.WorkflowJob;
-import net.yacy.peers.Protocol;
-import net.yacy.peers.Seed;
-import net.yacy.peers.SeedDB;
 import net.yacy.search.index.Segment;
 
 public class Transmission {

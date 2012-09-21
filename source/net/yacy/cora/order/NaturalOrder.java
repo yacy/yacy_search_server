@@ -1,40 +1,28 @@
-// NaturalOrder.java
-// -----------------------
-// part of The Kelondro Database
-// (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2005
-// created 29.12.2005
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  NaturalOrder
+ *  (C) 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+ *  first published 29.12.2005 on http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-package net.yacy.kelondro.order;
+package net.yacy.cora.order;
 
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Iterator;
-
-import net.yacy.cora.order.AbstractOrder;
-import net.yacy.cora.order.ByteOrder;
-import net.yacy.cora.order.Order;
-import net.yacy.cora.storage.HandleSet;
-import net.yacy.kelondro.index.RowHandleSet;
 
 public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable, Serializable {
 
@@ -44,10 +32,6 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
     public NaturalOrder(final boolean ascending) {
         this.asc = ascending;
         this.zero = null;
-    }
-
-    public HandleSet getHandleSet(final int keylength, final int space) {
-        return new RowHandleSet(keylength, this, space);
     }
 
     @Override

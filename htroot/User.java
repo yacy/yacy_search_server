@@ -27,13 +27,13 @@
 //javac -classpath .:../Classes Message.java
 //if the shell's current path is HTROOT
 
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.data.UserDB;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;

@@ -1,39 +1,33 @@
-// VerticalWordPartitionScheme.java 
-// --------------------------------
-// part of YaCy
-// (C) 2009 by Michael Peter Christen; mc@yacy.net
-// first published on http://yacy.net
-// Frankfurt, Germany, 28.01.2009
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  VerticalPartition
+ *  Copyright 2009 by Michael Peter Christen
+ *  First released 28.01.2009 at http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-package net.yacy.peers.dht;
+package net.yacy.cora.services.federated.yacy.dht;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.peers.Seed;
 
-public class VerticalWordPartitionScheme implements PartitionScheme {
+public class VerticalPartition implements Partition {
     
     int partitionExponent;
     
-    public VerticalWordPartitionScheme(int partitionExponent) {
+    public VerticalPartition(int partitionExponent) {
         this.partitionExponent = partitionExponent;
     }
 
@@ -60,7 +54,7 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
         // this creates 1^^e different positions for the same word hash (according to url hash)
         assert wordHash != null;
         assert urlHash != null;
-        if (urlHash == null || partitionExponent < 1) return FlatWordPartitionScheme.std.dhtPosition(wordHash, null);
+        if (urlHash == null || partitionExponent < 1) return HorizontalPartition.std.dhtPosition(wordHash, null);
         // the partition size is (Long.MAX + 1) / 2 ** e == 2 ** (63 - e)
         assert partitionExponent > 0;
         long partitionMask = (1L << (Long.SIZE - 1 - partitionExponent)) - 1L;
@@ -70,23 +64,23 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
         // in case that the partitionExpoent is 1, only one bit is taken from the urlHash,
         // which means that the partition is in two parts.
         // With partitionExponent = 2 it is divided in four parts and so on.
-        return (FlatWordPartitionScheme.std.dhtPosition(wordHash, null) & partitionMask) | (FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(urlHash), null) & ~partitionMask);
+        return (HorizontalPartition.std.dhtPosition(wordHash, null) & partitionMask) | (HorizontalPartition.std.dhtPosition(ASCII.getBytes(urlHash), null) & ~partitionMask);
     }
     
     public final long dhtPosition(final byte[] wordHash, final int verticalPosition) {
         assert wordHash != null;
         assert wordHash[2] != '@';
-        if (partitionExponent == 0) return FlatWordPartitionScheme.std.dhtPosition(wordHash, null);
+        if (partitionExponent == 0) return HorizontalPartition.std.dhtPosition(wordHash, null);
         long partitionMask = (1L << (Long.SIZE - 1 - partitionExponent)) - 1L;
         long verticalMask = ((long) verticalPosition) << (Long.SIZE - 1 - partitionExponent); // don't remove the cast! it will become an integer result which is wrong.
-        return (FlatWordPartitionScheme.std.dhtPosition(wordHash, null) & partitionMask) | verticalMask;
+        return (HorizontalPartition.std.dhtPosition(wordHash, null) & partitionMask) | verticalMask;
     }
     
     public final int verticalPosition(final byte[] urlHash) {
         assert urlHash != null;
         if (urlHash == null || partitionExponent < 1) return 0;
         assert partitionExponent > 0;
-        return (int) (FlatWordPartitionScheme.std.dhtPosition(urlHash, null) >> (Long.SIZE - 1 - partitionExponent)); // take only the top-<partitionExponent> bits
+        return (int) (HorizontalPartition.std.dhtPosition(urlHash, null) >> (Long.SIZE - 1 - partitionExponent)); // take only the top-<partitionExponent> bits
     }
     
     /**
@@ -101,25 +95,11 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
         int partitions = 1 << partitionExponent;
         long[] l = new long[partitions];
         long partitionSize = 1L << (Long.SIZE - 1 - partitionExponent);
-        l[0] = FlatWordPartitionScheme.std.dhtPosition(wordHash, null) & (partitionSize - 1L); // this is the lowest possible position
+        l[0] = HorizontalPartition.std.dhtPosition(wordHash, null) & (partitionSize - 1L); // this is the lowest possible position
         for (int i = 1; i < partitions; i++) {
             l[i] = l[i - 1] + partitionSize; // no overflow, because we started with the lowest
         }
         return l;
-    }
- 
-    public final long dhtDistance(final byte[] word, final String urlHash, final Seed peer) {
-        return dhtDistance(word, urlHash, ASCII.getBytes(peer.hash));
-    }
-    
-    private long dhtDistance(final byte[] from, final String urlHash, final byte[] to) {
-        // the dht distance is a positive value between 0 and 1
-        // if the distance is small, the word more probably belongs to the peer
-        assert to != null;
-        assert from != null;
-        final long toPos = FlatWordPartitionScheme.std.dhtPosition(to, null);
-        final long fromPos = dhtPosition(from, urlHash);
-        return FlatWordPartitionScheme.dhtDistance(fromPos, toPos);
     }
 
     public static void main(String[] args) {
@@ -130,7 +110,7 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
         //double dhtd;
         long   dhtl;
         int partitionExponent = 0;
-        VerticalWordPartitionScheme partition = new VerticalWordPartitionScheme(0);
+        VerticalPartition partition = new VerticalPartition(0);
         if (args.length == 3) {
             // the horizontal and vertical position calculation
             String urlHash = args[1];
@@ -138,14 +118,14 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
             dhtl = partition.dhtPosition(UTF8.getBytes(wordHash), urlHash);
         } else {
             // only a horizontal position calculation
-            dhtl = FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(wordHash), null);
+            dhtl = HorizontalPartition.std.dhtPosition(UTF8.getBytes(wordHash), null);
         }
         //System.out.println("DHT Double              = " + dhtd);
         System.out.println("DHT Long                = " + dhtl);
         System.out.println("DHT as Double from Long = " + ((double) dhtl) / ((double) Long.MAX_VALUE));
         //System.out.println("DHT as Long from Double = " + (long) (Long.MAX_VALUE * dhtd));
         //System.out.println("DHT as b64 from Double  = " + positionToHash(dhtd));
-        System.out.println("DHT as b64 from Long    = " + FlatWordPartitionScheme.positionToHash(dhtl));
+        System.out.println("DHT as b64 from Long    = " + HorizontalPartition.positionToHash(dhtl));
         
         System.out.print("all " + (1 << partitionExponent) + " DHT positions from doubles: ");
         /*
@@ -161,7 +141,7 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
         long[] l = partition.dhtPositions(UTF8.getBytes(wordHash));
         for (int i = 0; i < l.length; i++) {
             if (i > 0) System.out.print(", ");
-            System.out.print(FlatWordPartitionScheme.positionToHash(l[i]));
+            System.out.print(HorizontalPartition.positionToHash(l[i]));
         }
         System.out.println();
     }

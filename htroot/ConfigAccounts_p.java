@@ -34,13 +34,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.UserDB;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;

@@ -55,7 +55,6 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.peers.dht.PeerSelection;
 import net.yacy.peers.operation.yacySeedUploadFile;
 import net.yacy.peers.operation.yacySeedUploadFtp;
 import net.yacy.peers.operation.yacySeedUploadScp;
@@ -391,7 +390,7 @@ public class Network
                     attempts = PING_INITIAL;
                 }
                 final Map<byte[], String> ch = Switchboard.getSwitchboard().clusterhashes;
-                seeds = PeerSelection.seedsByAge(this.sb.peers, true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
+                seeds = DHTSelection.seedsByAge(this.sb.peers, true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
                 // add also all peers from cluster if this is a public robinson cluster
                 if ( ch != null ) {
                     final Iterator<Map.Entry<byte[], String>> i = ch.entrySet().iterator();
@@ -424,7 +423,7 @@ public class Network
                         attempts = PING_MAX_RUNNING;
                     }
                 }
-                seeds = PeerSelection.seedsByAge(this.sb.peers, false, attempts); // best for seed list maintenance/cleaning
+                seeds = DHTSelection.seedsByAge(this.sb.peers, false, attempts); // best for seed list maintenance/cleaning
             }
 
             if ( seeds == null || seeds.isEmpty() ) {

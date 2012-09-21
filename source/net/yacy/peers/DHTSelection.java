@@ -22,7 +22,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package net.yacy.peers.dht;
+package net.yacy.peers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,17 +35,15 @@ import java.util.Set;
 import java.util.SortedMap;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
+import net.yacy.cora.services.federated.yacy.dht.HorizontalPartition;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.kelondroException;
-import net.yacy.peers.Network;
-import net.yacy.peers.Seed;
-import net.yacy.peers.SeedDB;
 import net.yacy.peers.operation.yacyVersion;
 
 
@@ -55,7 +53,7 @@ import net.yacy.peers.operation.yacyVersion;
  * part of yacyPeerActions, yacyDHTActions and yacySeedDB
  */
 
-public class PeerSelection {
+public class DHTSelection {
 
     public static Seed[] selectClusterPeers(final SeedDB seedDB, final SortedMap<byte[], String> peerhashes) {
         final Iterator<Map.Entry<byte[], String>> i = peerhashes.entrySet().iterator();
@@ -202,7 +200,7 @@ public class PeerSelection {
         final long[] dhtVerticalTargets = seedDB.scheme.dhtPositions(wordhash);
         Seed seed;
         for (long  dhtVerticalTarget : dhtVerticalTargets) {
-            wordhash = FlatWordPartitionScheme.positionToHash(dhtVerticalTarget);
+            wordhash = HorizontalPartition.positionToHash(dhtVerticalTarget);
             Iterator<Seed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, wordhash, redundancy, false);
             int c = Math.min(seedDB.sizeConnected(), redundancy);
             int cc = 2; // select a maximum of 3, this is enough redundancy
@@ -227,7 +225,7 @@ public class PeerSelection {
         return null;
     }
 
-    protected static List<Seed> getAcceptRemoteIndexSeedsList(
+    public static List<Seed> getAcceptRemoteIndexSeedsList(
             SeedDB seedDB,
             final byte[] starthash,
             int max,

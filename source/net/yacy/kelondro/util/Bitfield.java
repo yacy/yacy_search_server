@@ -22,9 +22,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package net.yacy.kelondro.order;
+package net.yacy.kelondro.util;
 
 import java.io.Serializable;
+
+import net.yacy.cora.order.Base64Order;
 
 
 public class Bitfield implements Cloneable, Serializable {

@@ -86,6 +86,9 @@ import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.WordCache;
 import net.yacy.cora.lod.JenaTripleStore;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
+import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
@@ -143,9 +146,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
-import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -155,14 +155,14 @@ import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.kelondro.workflow.WorkflowThread;
+import net.yacy.peers.Dispatcher;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.Network;
 import net.yacy.peers.NewsPool;
+import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
-import net.yacy.peers.dht.Dispatcher;
-import net.yacy.peers.dht.PeerSelection;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.peers.operation.yacyRelease;
@@ -1918,6 +1918,7 @@ public final class Switchboard extends serverSwitch
         if (MemoryControl.shortStatus()) {
             WordCache.clear();
             Domains.clear();
+            Digest.cleanup();
         }
         
         try {
@@ -3013,9 +3014,9 @@ public final class Switchboard extends serverSwitch
             byte[] startHash = null, limitHash = null;
             int tries = 10;
             while ( tries-- > 0 ) {
-                startHash = PeerSelection.selectTransferStart();
+                startHash = DHTSelection.selectTransferStart();
                 assert startHash != null;
-                limitHash = PeerSelection.limitOver(this.peers, startHash);
+                limitHash = DHTSelection.limitOver(this.peers, startHash);
                 if ( limitHash != null ) {
                     break;
                 }

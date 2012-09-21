@@ -12,14 +12,14 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.table.SQLTable;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.table.Table;

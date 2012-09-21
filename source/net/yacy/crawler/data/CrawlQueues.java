@@ -39,6 +39,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Hit;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.crawler.data.NoticedURL.StackType;
@@ -48,12 +49,11 @@ import net.yacy.crawler.retrieval.Response;
 import net.yacy.crawler.robots.RobotsTxtEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.WorkflowJob;
+import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
-import net.yacy.peers.dht.PeerSelection;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.IndexingQueueEntry;
 import net.yacy.search.Switchboard;
@@ -452,7 +452,7 @@ public class CrawlQueues {
         Seed seed;
         if (this.remoteCrawlProviderHashes.isEmpty()) {
             if (this.sb.peers != null && this.sb.peers.sizeConnected() > 0) {
-                final Iterator<Seed> e = PeerSelection.getProvidesRemoteCrawlURLs(this.sb.peers);
+                final Iterator<Seed> e = DHTSelection.getProvidesRemoteCrawlURLs(this.sb.peers);
                 while (e.hasNext()) {
                     seed = e.next();
                     if (seed != null) {

@@ -44,7 +44,7 @@ import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.SetTools;
 
 

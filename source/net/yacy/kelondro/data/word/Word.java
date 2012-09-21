@@ -32,6 +32,8 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.HandleSet;
@@ -39,9 +41,7 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Bitfield;
-import net.yacy.kelondro.order.Digest;
+import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.MemoryControl;
 
 

@@ -31,8 +31,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.WordCache;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.order.Base64Order;
 
 
 public class WordTokenizer implements Enumeration<StringBuilder> {

@@ -34,14 +34,14 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 

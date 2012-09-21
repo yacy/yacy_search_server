@@ -23,7 +23,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package net.yacy.peers.dht;
+package net.yacy.peers;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.services.federated.yacy.dht.HorizontalPartition;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -40,12 +42,9 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
-import net.yacy.peers.Seed;
-import net.yacy.peers.SeedDB;
 import net.yacy.search.index.Segment;
 
 public class Dispatcher {
@@ -282,13 +281,13 @@ public class Dispatcher {
         for (int vertical = 0; vertical < containers.length; vertical++) {
             // the 'new' primary target is the word hash of the last container in the array
             lastContainer = containers[vertical].get(containers[vertical].size() - 1);
-            primaryTarget = FlatWordPartitionScheme.positionToHash(this.seeds.scheme.dhtPosition(lastContainer.getTermHash(), vertical));
+            primaryTarget = HorizontalPartition.positionToHash(this.seeds.scheme.dhtPosition(lastContainer.getTermHash(), vertical));
             assert primaryTarget[2] != '@';
             pTArray = new ByteArray(primaryTarget);
 
             // get or make a entry object
             entry = this.transmissionCloud.get(pTArray); // if this is not null, the entry is extended here
-            final List<Seed> targets = PeerSelection.getAcceptRemoteIndexSeedsList(
+            final List<Seed> targets = DHTSelection.getAcceptRemoteIndexSeedsList(
                     this.seeds,
                     primaryTarget,
                     this.seeds.redundancy() * 3,

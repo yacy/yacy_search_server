@@ -3,9 +3,9 @@ import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.BookmarksDB;
-import net.yacy.kelondro.order.Digest;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;

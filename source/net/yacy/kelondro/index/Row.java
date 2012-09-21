@@ -40,13 +40,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.AbstractOrder;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.order.Order;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Bitfield;
-import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.kelondroException;
 

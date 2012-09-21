@@ -49,13 +49,13 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.wiki.WikiBoard;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.kelondroException;
 
 import org.w3c.dom.Document;

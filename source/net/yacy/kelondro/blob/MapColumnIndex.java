@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.cora.order.NaturalOrder;
 
 /**
  * a mapping from a column name to maps with the value of the columns to the primary keys where the entry exist in the table

@@ -42,8 +42,8 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.MergeIterator;
 import net.yacy.search.EventTracker;
 
 

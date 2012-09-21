@@ -34,9 +34,9 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
-import net.yacy.peers.dht.PeerSelection;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -110,7 +110,7 @@ public class rct_p {
         Seed seed;
         int hc = 0;
         if (sb.peers != null && sb.peers.sizeConnected() > 0) {
-            final Iterator<Seed> e = PeerSelection.getProvidesRemoteCrawlURLs(sb.peers);
+            final Iterator<Seed> e = DHTSelection.getProvidesRemoteCrawlURLs(sb.peers);
             while (e.hasNext()) {
                 seed = e.next();
                 if (seed != null) {

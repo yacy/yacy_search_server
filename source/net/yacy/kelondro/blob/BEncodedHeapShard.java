@@ -33,15 +33,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.AbstractMapStore;
 import net.yacy.cora.storage.MapStore;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MergeIterator;
 
 public class BEncodedHeapShard extends AbstractMapStore implements MapStore {
 

@@ -32,12 +32,12 @@ import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Order;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 
 public abstract class AbstractIndex <ReferenceType extends Reference> implements Index<ReferenceType> {
 

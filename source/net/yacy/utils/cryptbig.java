@@ -56,9 +56,9 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
 
 
 public class cryptbig {

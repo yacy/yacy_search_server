@@ -32,14 +32,14 @@ import java.util.Iterator;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.RotateIterator;
+import net.yacy.kelondro.util.RotateIterator;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;

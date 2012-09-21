@@ -39,11 +39,11 @@ import java.util.Map;
 
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.NaturalOrder;
 
 public class BookmarkDate {
 

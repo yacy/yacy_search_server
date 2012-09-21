@@ -33,13 +33,13 @@ import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
 import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.BinSearch;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.rwi.ReferenceIterator;

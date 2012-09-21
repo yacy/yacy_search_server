@@ -63,7 +63,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;

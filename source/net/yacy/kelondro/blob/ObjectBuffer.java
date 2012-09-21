@@ -57,7 +57,7 @@
 package net.yacy.kelondro.blob;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.cora.order.NaturalOrder;
 
 public class ObjectBuffer {
 

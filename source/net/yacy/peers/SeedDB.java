@@ -42,21 +42,21 @@ import java.util.concurrent.ConcurrentMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.services.federated.yacy.dht.Partition;
+import net.yacy.cora.services.federated.yacy.dht.VerticalPartition;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
-import net.yacy.peers.dht.PartitionScheme;
-import net.yacy.peers.dht.VerticalWordPartitionScheme;
 import net.yacy.peers.operation.yacySeedUploader;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverCore;
@@ -93,7 +93,7 @@ public final class SeedDB implements AlternativeDomainNames {
     public  NewsPool newsPool;
 
     private int netRedundancy;
-    public  PartitionScheme scheme;
+    public  Partition scheme;
 
     private Seed mySeed; // my own seed
     private final Set<String> myBotIDs; // list of id's that this bot accepts as robots.txt identification
@@ -118,7 +118,7 @@ public final class SeedDB implements AlternativeDomainNames {
         this.myBotIDs.add("yacybot");
         this.myBotIDs.add("yacyproxy");
         this.netRedundancy = redundancy;
-        this.scheme = new VerticalWordPartitionScheme(partitionExponent);
+        this.scheme = new VerticalPartition(partitionExponent);
 
         // set up seed database
         this.seedActiveDB = openSeedTable(this.seedActiveDBFile);
@@ -166,7 +166,7 @@ public final class SeedDB implements AlternativeDomainNames {
         this.myOwnSeedFile = new File(newNetworkRoot, SeedDB.DBFILE_OWN_SEED);
 
         this.netRedundancy = redundancy;
-        this.scheme = new VerticalWordPartitionScheme(partitionExponent);
+        this.scheme = new VerticalPartition(partitionExponent);
 
         // set up seed database
         this.seedActiveDB = openSeedTable(this.seedActiveDBFile);

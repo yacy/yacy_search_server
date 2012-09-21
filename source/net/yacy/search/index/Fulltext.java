@@ -54,9 +54,9 @@ import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.MergeIterator;
 import net.yacy.search.Switchboard;
 
 import org.apache.lucene.util.Version;

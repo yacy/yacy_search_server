@@ -40,9 +40,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.peers.Network;
 import net.yacy.peers.NewsDB;
 import net.yacy.peers.NewsPool;

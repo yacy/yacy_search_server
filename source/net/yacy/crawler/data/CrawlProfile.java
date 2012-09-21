@@ -35,12 +35,12 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
 import net.yacy.server.serverObjects;
 
 public class CrawlProfile extends ConcurrentHashMap<String, String> implements Map<String, String> {

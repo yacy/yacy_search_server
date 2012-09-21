@@ -62,16 +62,16 @@ import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.services.federated.yacy.dht.HorizontalPartition;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.kelondro.util.OS;
-import net.yacy.peers.dht.FlatWordPartitionScheme;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 import net.yacy.utils.bitfield;
@@ -860,13 +860,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
         // find dht position and size of gap
         final long left =
-            FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(interval.substring(0, 12)), null);
+            HorizontalPartition.std.dhtPosition(ASCII.getBytes(interval.substring(0, 12)), null);
         final long right =
-            FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(interval.substring(12)), null);
-        final long gap8 = FlatWordPartitionScheme.dhtDistance(left, right) >> 3; //  1/8 of a gap
+            HorizontalPartition.std.dhtPosition(ASCII.getBytes(interval.substring(12)), null);
+        final long gap8 = HorizontalPartition.dhtDistance(left, right) >> 3; //  1/8 of a gap
         final long gapx = gap8 + (Math.abs(random.nextLong()) % (6 * gap8));
         final long gappos = (Long.MAX_VALUE - left >= gapx) ? left + gapx : (left - Long.MAX_VALUE) + gapx;
-        final byte[] computedHash = FlatWordPartitionScheme.positionToHash(gappos);
+        final byte[] computedHash = HorizontalPartition.positionToHash(gappos);
         // the computed hash is the perfect position (modulo gap4 population and gap alternatives)
         // this is too tight. The hash must be more randomized. We take only (!) the first two bytes
         // of the computed hash and add random bytes at the remaining positions. The first two bytes
@@ -905,18 +905,18 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
                 continue;
             }
             l =
-                FlatWordPartitionScheme.dhtDistance(
-                    FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(s0.hash), null),
-                    FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(s1.hash), null));
+                HorizontalPartition.dhtDistance(
+                    HorizontalPartition.std.dhtPosition(ASCII.getBytes(s0.hash), null),
+                    HorizontalPartition.std.dhtPosition(ASCII.getBytes(s1.hash), null));
             gaps.put(l, s0.hash + s1.hash);
             s0 = s1;
         }
         // compute also the last gap
         if ( (first != null) && (s0 != null) ) {
             l =
-                FlatWordPartitionScheme.dhtDistance(
-                    FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(s0.hash), null),
-                    FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(first.hash), null));
+                HorizontalPartition.dhtDistance(
+                    HorizontalPartition.std.dhtPosition(ASCII.getBytes(s0.hash), null),
+                    HorizontalPartition.std.dhtPosition(ASCII.getBytes(first.hash), null));
             gaps.put(l, s0.hash + first.hash);
         }
         return gaps;

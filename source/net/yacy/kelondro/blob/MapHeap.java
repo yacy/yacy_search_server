@@ -47,15 +47,15 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.NaturalOrder;
-import net.yacy.kelondro.order.RotateIterator;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.RotateIterator;
 
 public class MapHeap implements Map<byte[], Map<String, String>> {
 

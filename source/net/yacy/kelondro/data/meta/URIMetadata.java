@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.word.WordReference;
-import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.util.Bitfield;
 
 
 public interface URIMetadata {

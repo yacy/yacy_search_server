@@ -30,12 +30,12 @@ import java.io.IOException;
 import java.util.Date;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.NaturalOrder;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Bitfield;
-import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.workflow.WorkflowJob;
 
 public class Request extends WorkflowJob

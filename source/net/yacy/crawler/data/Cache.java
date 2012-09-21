@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
@@ -52,7 +53,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 
 
 public final class Cache {

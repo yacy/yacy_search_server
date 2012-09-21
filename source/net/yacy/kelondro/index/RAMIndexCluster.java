@@ -37,8 +37,8 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.MergeIterator;
-import net.yacy.kelondro.order.StackIterator;
+import net.yacy.kelondro.util.MergeIterator;
+import net.yacy.kelondro.util.StackIterator;
 
 
 public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Cloneable {

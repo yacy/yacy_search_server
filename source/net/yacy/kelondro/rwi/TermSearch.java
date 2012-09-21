@@ -29,9 +29,9 @@ package net.yacy.kelondro.rwi;
 
 import java.util.TreeMap;
 
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.order.Base64Order;
 
 
 public class TermSearch <ReferenceType extends Reference> {

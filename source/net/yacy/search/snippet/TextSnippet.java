@@ -35,6 +35,7 @@ import java.util.SortedMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
@@ -50,7 +51,6 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.peers.RemoteSearch;

@@ -52,9 +52,9 @@ import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.index.RowCollection;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.MergeIterator;
-import net.yacy.kelondro.order.StackIterator;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MergeIterator;
+import net.yacy.kelondro.util.StackIterator;
 
 
 public class SplitTable implements Index, Iterable<Row.Entry> {

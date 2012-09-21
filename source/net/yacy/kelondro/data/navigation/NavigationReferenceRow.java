@@ -29,11 +29,11 @@ package net.yacy.kelondro.data.navigation;
 import java.util.Collection;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.AbstractReference;
 import net.yacy.kelondro.rwi.Reference;
 

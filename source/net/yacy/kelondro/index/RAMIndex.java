@@ -36,8 +36,8 @@ import java.util.TreeMap;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Row.Entry;
-import net.yacy.kelondro.order.MergeIterator;
-import net.yacy.kelondro.order.StackIterator;
+import net.yacy.kelondro.util.MergeIterator;
+import net.yacy.kelondro.util.StackIterator;
 
 
 public final class RAMIndex implements Index, Iterable<Row.Entry> {

@@ -30,7 +30,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.cora.order.NaturalOrder;
 
 public class TablesColumnRAMIndex extends TablesColumnIndex{
 

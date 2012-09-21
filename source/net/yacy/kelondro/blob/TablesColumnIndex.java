@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.cora.order.NaturalOrder;
 
 
 /**

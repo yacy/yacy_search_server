@@ -40,7 +40,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ReverseMapIterator;
 
 public final class ResultURLs {

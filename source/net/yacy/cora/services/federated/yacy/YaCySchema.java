@@ -1,5 +1,5 @@
 /**
- *  SolrField
+ *  YaCySchema
  *  Copyright 2011 by Michael Peter Christen
  *  First released 14.04.2011 at http://yacy.net
  *

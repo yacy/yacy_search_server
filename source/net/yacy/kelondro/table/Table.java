@@ -40,6 +40,7 @@ import java.util.TreeSet;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.storage.HandleMap;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Column;
@@ -52,7 +53,6 @@ import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.io.BufferedRecords;
 import net.yacy.kelondro.io.Records;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.kelondroException;

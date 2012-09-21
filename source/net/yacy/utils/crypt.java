@@ -26,8 +26,8 @@ package net.yacy.utils;
 
 import java.util.Random;
 
+import net.yacy.cora.order.Base64Order;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 
 
 public class crypt {

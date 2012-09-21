@@ -26,8 +26,8 @@
 
 package net.yacy.kelondro.data.word;
 
-import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.Reference;
+import net.yacy.kelondro.util.Bitfield;
 
 public interface WordReference extends Reference {
 

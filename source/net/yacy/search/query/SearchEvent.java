@@ -42,19 +42,19 @@ import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.services.federated.yacy.dht.HorizontalPartition;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.data.WorkTables;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.RemoteSearch;
 import net.yacy.peers.SeedDB;
-import net.yacy.peers.dht.FlatWordPartitionScheme;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.EventTracker;
@@ -232,7 +232,7 @@ public final class SearchEvent {
                         this.IAmaxcounthash = wordhash;
                         maxcount = container.size();
                     }
-                    l = FlatWordPartitionScheme.std.dhtDistance(wordhash, null, peers.mySeed());
+                    l = HorizontalPartition.std.dhtDistance(wordhash, null, ASCII.getBytes(peers.mySeed().hash));
                     if ( l < mindhtdistance ) {
                         // calculate the word hash that is closest to our dht position
                         mindhtdistance = l;

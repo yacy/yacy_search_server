@@ -39,11 +39,11 @@ import java.util.Properties;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.order.Base64Order;
 
 /**
  * Vcard specification: http://www.imc.org/pdi/vcard-21.txt

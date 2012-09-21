@@ -33,10 +33,10 @@ import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;

@@ -32,7 +32,6 @@ import java.util.SortedMap;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.peers.dht.PeerSelection;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
@@ -155,19 +154,19 @@ public class RemoteSearch extends Thread {
         // prepare seed targets and threads
         final Seed[] targetPeers =
             (clusterselection == null) ?
-                    PeerSelection.selectSearchTargets(
+                    DHTSelection.selectSearchTargets(
                             event.peers,
                             event.getQuery().query_include_hashes,
                             event.peers.redundancy(),
                             burstRobinsonPercent,
                             burstMultiwordPercent)
-                  : PeerSelection.selectClusterPeers(event.peers, clusterselection);
+                  : DHTSelection.selectClusterPeers(event.peers, clusterselection);
         if (targetPeers == null) return;
 
         // start solr searches
         Set<Seed> omit = new HashSet<Seed>();
         for (Seed s: targetPeers) omit.add(s);
-        Seed[] nodes = PeerSelection.selectNodeSearchTargets(event.peers, 20, omit);
+        Seed[] nodes = DHTSelection.selectNodeSearchTargets(event.peers, 20, omit);
         for (Seed s: nodes) {
             solrRemoteSearch(event, count, time, s, blacklist);
         }

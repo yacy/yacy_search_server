@@ -28,9 +28,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.NaturalOrder;
 
 
 public class Stack {

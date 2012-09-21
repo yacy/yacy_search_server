@@ -1,30 +1,25 @@
-// Digest.java
-// -----------------------
-// (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 28.12.2008 on http://yacy.net
-// this uses methods that had been implemented in serverCodings
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
-// LICENSE
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  Digest
+ *  (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+ *  first published 28.12.2008 on http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-package net.yacy.kelondro.order;
+
+package net.yacy.cora.order;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -44,23 +39,24 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.log4j.Logger;
+
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.MemoryControl;
-
+import net.yacy.cora.util.Memory;
 
 
 public class Digest {
 
+    private final static Logger log = Logger.getLogger(Digest.class);
 	public static BlockingQueue<MessageDigest> digestPool = new LinkedBlockingDeque<MessageDigest>();
 
-    private static final int md5CacheSize = Math.max(1000, Math.min(1000000, (int) (MemoryControl.available() / 50000L)));
+    private static final int md5CacheSize = Math.max(1000, Math.min(1000000, (int) (Memory.available() / 50000L)));
     private static ARC<String, byte[]> md5Cache = null;
     static {
         try {
-            Log.logInfo("Digest", "creating hash cache of size " + md5CacheSize);
+            log.info("creating hash cache of size " + md5CacheSize);
             md5Cache = new ConcurrentARC<String, byte[]>(md5CacheSize, Math.max(8, 2 * Runtime.getRuntime().availableProcessors()));
         } catch (final OutOfMemoryError e) {
             md5Cache = new ConcurrentARC<String, byte[]>(1000, Math.max(2, Runtime.getRuntime().availableProcessors()));
@@ -152,11 +148,7 @@ public class Digest {
         }
 
         // update the cache
-        if (MemoryControl.shortStatus()) {
-            md5Cache.clear();
-        } else {
-            md5Cache.insertIfAbsent(key, result); // prevent expensive MD5 computation and encoding
-        }
+        md5Cache.insertIfAbsent(key, result); // prevent expensive MD5 computation and encoding
         return result;
     }
 
@@ -166,7 +158,7 @@ public class Digest {
             in = new FileInputStream(file);
         } catch (final java.io.FileNotFoundException e) {
             System.out.println("file not found:" + file.toString());
-            Log.logException(e);
+            log.warn(e);
             return null;
         }
 
@@ -187,7 +179,7 @@ public class Digest {
                 md5consumer.consume(c);
             }
         } catch (final IOException e) {
-            Log.logSevere("Digest", "file error with " + file.toString() + ": " + e.getMessage());
+            log.fatal("file error with " + file.toString() + ": " + e.getMessage(), e);
             md5consumer.consume(md5FilechunkConsumer.poison);
             throw e;
         } finally {
@@ -200,10 +192,10 @@ public class Digest {
         try {
             return md5result.get().digest();
         } catch (final InterruptedException e) {
-            Log.logException(e);
+            log.warn(e);
             throw new IOException(e);
         } catch (final ExecutionException e) {
-            Log.logException(e);
+            log.warn(e);
             throw new IOException(e);
         }
     }
@@ -242,7 +234,7 @@ public class Digest {
             try {
                 this.filed.put(c);
             } catch (final InterruptedException e) {
-                Log.logException(e);
+                log.warn(e);
             }
         }
 
@@ -250,7 +242,7 @@ public class Digest {
             try {
                 return this.empty.take();
             } catch (final InterruptedException e) {
-                Log.logException(e);
+                log.warn(e);
                 throw new IOException(e);
             }
         }
@@ -266,7 +258,7 @@ public class Digest {
                     this.empty.put(c);
                 }
             } catch (final InterruptedException e) {
-                Log.logException(e);
+                log.warn(e);
             }
             return this.digest;
         }
@@ -289,7 +281,7 @@ public class Digest {
             assert b.length != 0 : "file = " + file.toString();
             return Base64Order.enhancedCoder.encode(b);
         } catch (final IOException e) {
-            Log.logException(e);
+            log.warn(e);
             return null;
         }
     }
@@ -319,7 +311,7 @@ public class Digest {
         try {
             digest = MessageDigest.getInstance("MD5");
         } catch (final NoSuchAlgorithmException e) {
-            Log.logException(e);
+            log.warn(e);
             return null;
         }
         final RandomAccessFile raf = new RandomAccessFile(file, "r");
@@ -402,7 +394,5 @@ public class Digest {
 
         System.out.println("time: " + (System.currentTimeMillis() - start) + " ms");
 
-        // without this this method would never end
-        Log.shutdown();
     }
 }

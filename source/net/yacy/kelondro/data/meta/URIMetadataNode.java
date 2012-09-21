@@ -31,6 +31,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.services.federated.solr.SolrType;
 import net.yacy.cora.services.federated.yacy.YaCySchema;
 import net.yacy.crawler.retrieval.Request;
@@ -38,8 +39,7 @@ import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.util.Bitfield;
 import net.yacy.utils.crypt;
 
 import org.apache.solr.common.SolrDocument;

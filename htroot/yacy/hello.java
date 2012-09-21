@@ -38,9 +38,9 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Network;
+import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
-import net.yacy.peers.dht.PeerSelection;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.EventTracker;
@@ -216,7 +216,7 @@ public final class hello {
             if (count > 100) { count = 100; }
 
             // latest seeds
-            final Map<String, Seed> ySeeds = PeerSelection.seedsByAge(sb.peers, true, count); // peerhash/yacySeed relation
+            final Map<String, Seed> ySeeds = DHTSelection.seedsByAge(sb.peers, true, count); // peerhash/yacySeed relation
 
             // attach also my own seed
             seeds.append("seed0=").append(sb.peers.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
