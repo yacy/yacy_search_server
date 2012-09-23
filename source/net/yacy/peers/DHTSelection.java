@@ -37,7 +37,7 @@ import java.util.SortedMap;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
-import net.yacy.cora.services.federated.yacy.dht.HorizontalPartition;
+import net.yacy.cora.services.federated.yacy.Distribution;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.Word;
@@ -197,10 +197,10 @@ public class DHTSelection {
             int redundancy,
             Map<String, Seed> regularSeeds) {
         // this method is called from the search target computation
-        final long[] dhtVerticalTargets = seedDB.scheme.dhtPositions(wordhash);
+        final long[] dhtVerticalTargets = seedDB.scheme.verticalDHTPositions(wordhash);
         Seed seed;
         for (long  dhtVerticalTarget : dhtVerticalTargets) {
-            wordhash = HorizontalPartition.positionToHash(dhtVerticalTarget);
+            wordhash = Distribution.positionToHash(dhtVerticalTarget);
             Iterator<Seed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, wordhash, redundancy, false);
             int c = Math.min(seedDB.sizeConnected(), redundancy);
             int cc = 2; // select a maximum of 3, this is enough redundancy

@@ -65,7 +65,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.services.federated.yacy.dht.HorizontalPartition;
+import net.yacy.cora.services.federated.yacy.Distribution;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.storage.HandleSet;
@@ -859,14 +859,12 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         }
 
         // find dht position and size of gap
-        final long left =
-            HorizontalPartition.std.dhtPosition(ASCII.getBytes(interval.substring(0, 12)), null);
-        final long right =
-            HorizontalPartition.std.dhtPosition(ASCII.getBytes(interval.substring(12)), null);
-        final long gap8 = HorizontalPartition.dhtDistance(left, right) >> 3; //  1/8 of a gap
+        final long left = Distribution.horizontalDHTPosition(ASCII.getBytes(interval.substring(0, 12)));
+        final long right = Distribution.horizontalDHTPosition(ASCII.getBytes(interval.substring(12)));
+        final long gap8 = Distribution.horizontalDHTDistance(left, right) >> 3; //  1/8 of a gap
         final long gapx = gap8 + (Math.abs(random.nextLong()) % (6 * gap8));
         final long gappos = (Long.MAX_VALUE - left >= gapx) ? left + gapx : (left - Long.MAX_VALUE) + gapx;
-        final byte[] computedHash = HorizontalPartition.positionToHash(gappos);
+        final byte[] computedHash = Distribution.positionToHash(gappos);
         // the computed hash is the perfect position (modulo gap4 population and gap alternatives)
         // this is too tight. The hash must be more randomized. We take only (!) the first two bytes
         // of the computed hash and add random bytes at the remaining positions. The first two bytes
@@ -904,19 +902,17 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
                 first = s0;
                 continue;
             }
-            l =
-                HorizontalPartition.dhtDistance(
-                    HorizontalPartition.std.dhtPosition(ASCII.getBytes(s0.hash), null),
-                    HorizontalPartition.std.dhtPosition(ASCII.getBytes(s1.hash), null));
+            l = Distribution.horizontalDHTDistance(
+                            Distribution.horizontalDHTPosition(ASCII.getBytes(s0.hash)),
+                            Distribution.horizontalDHTPosition(ASCII.getBytes(s1.hash)));
             gaps.put(l, s0.hash + s1.hash);
             s0 = s1;
         }
         // compute also the last gap
         if ( (first != null) && (s0 != null) ) {
-            l =
-                HorizontalPartition.dhtDistance(
-                    HorizontalPartition.std.dhtPosition(ASCII.getBytes(s0.hash), null),
-                    HorizontalPartition.std.dhtPosition(ASCII.getBytes(first.hash), null));
+            l = Distribution.horizontalDHTDistance(
+                            Distribution.horizontalDHTPosition(ASCII.getBytes(s0.hash)),
+                            Distribution.horizontalDHTPosition(ASCII.getBytes(first.hash)));
             gaps.put(l, s0.hash + first.hash);
         }
         return gaps;

@@ -37,7 +37,7 @@ import java.util.List;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Hit;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.services.federated.yacy.dht.HorizontalPartition;
+import net.yacy.cora.services.federated.yacy.Distribution;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.RemoteSearch;
@@ -139,7 +139,7 @@ public class NetworkGraph {
         for (final RemoteSearch primarySearche : primarySearches) {
             if (primarySearche == null) continue;
             eventPicture.setColor((primarySearche.isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
-            angle = cyc + (360.0d * ((HorizontalPartition.std.dhtPosition(UTF8.getBytes(primarySearche.target().hash), null)) / DOUBLE_LONG_MAX_VALUE));
+            angle = cyc + (360.0d * ((Distribution.horizontalDHTPosition(UTF8.getBytes(primarySearche.target().hash))) / DOUBLE_LONG_MAX_VALUE));
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle, true, null, null, -1, -1, -1, false);
         }
 
@@ -161,7 +161,7 @@ public class NetworkGraph {
         final Iterator<byte[]> i = query.query_include_hashes.iterator();
         eventPicture.setColor(RasterPlotter.GREY);
         while (i.hasNext()) {
-            final long[] positions = seedDB.scheme.dhtPositions(i.next());
+            final long[] positions = seedDB.scheme.verticalDHTPositions(i.next());
             for (final long position : positions) {
                 angle = cyc + (360.0d * ((position) / DOUBLE_LONG_MAX_VALUE));
                 eventPicture.arcLine(cx, cy, cr - 20, cr, angle, true, null, null, -1, -1, -1, false);
@@ -313,8 +313,8 @@ public class NetworkGraph {
     }
 
     private static void drawNetworkPictureDHT(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final Seed mySeed, final Seed otherSeed, final String colorLine, final int coronaangle, final boolean out, final int cyc) {
-        final int angleMy = cyc + (int) (360.0d * HorizontalPartition.std.dhtPosition(ASCII.getBytes(mySeed.hash), null) / DOUBLE_LONG_MAX_VALUE);
-        final int angleOther = cyc + (int) (360.0d * HorizontalPartition.std.dhtPosition(ASCII.getBytes(otherSeed.hash), null) / DOUBLE_LONG_MAX_VALUE);
+        final int angleMy = cyc + (int) (360.0d * Distribution.horizontalDHTPosition(ASCII.getBytes(mySeed.hash)) / DOUBLE_LONG_MAX_VALUE);
+        final int angleOther = cyc + (int) (360.0d * Distribution.horizontalDHTPosition(ASCII.getBytes(otherSeed.hash)) / DOUBLE_LONG_MAX_VALUE);
         // draw line
         img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleMy, !out,
                 colorLine, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
@@ -355,7 +355,7 @@ public class NetworkGraph {
             final String name = this.seed.getName().toUpperCase() /*+ ":" + seed.hash + ":" + (((double) ((int) (100 * (((double) yacySeed.dhtPosition(seed.hash)) / ((double) yacySeed.maxDHTDistance))))) / 100.0)*/;
             if (name.length() < shortestName) shortestName = name.length();
             if (name.length() > longestName) longestName = name.length();
-            final double angle = this.cyc + (360.0d * HorizontalPartition.std.dhtPosition(ASCII.getBytes(this.seed.hash), null) / DOUBLE_LONG_MAX_VALUE);
+            final double angle = this.cyc + (360.0d * Distribution.horizontalDHTPosition(ASCII.getBytes(this.seed.hash)) / DOUBLE_LONG_MAX_VALUE);
             //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
             int linelength = 20 + this.outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + Math.abs(this.seed.hash.hashCode() % 20)) / 80;
             if (linelength > this.outerradius) linelength = this.outerradius;

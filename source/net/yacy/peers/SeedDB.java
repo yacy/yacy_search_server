@@ -48,8 +48,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.cora.services.federated.yacy.dht.Partition;
-import net.yacy.cora.services.federated.yacy.dht.VerticalPartition;
+import net.yacy.cora.services.federated.yacy.Distribution;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -93,7 +92,7 @@ public final class SeedDB implements AlternativeDomainNames {
     public  NewsPool newsPool;
 
     private int netRedundancy;
-    public  Partition scheme;
+    public  Distribution scheme;
 
     private Seed mySeed; // my own seed
     private final Set<String> myBotIDs; // list of id's that this bot accepts as robots.txt identification
@@ -118,7 +117,7 @@ public final class SeedDB implements AlternativeDomainNames {
         this.myBotIDs.add("yacybot");
         this.myBotIDs.add("yacyproxy");
         this.netRedundancy = redundancy;
-        this.scheme = new VerticalPartition(partitionExponent);
+        this.scheme = new Distribution(partitionExponent);
 
         // set up seed database
         this.seedActiveDB = openSeedTable(this.seedActiveDBFile);
@@ -166,7 +165,7 @@ public final class SeedDB implements AlternativeDomainNames {
         this.myOwnSeedFile = new File(newNetworkRoot, SeedDB.DBFILE_OWN_SEED);
 
         this.netRedundancy = redundancy;
-        this.scheme = new VerticalPartition(partitionExponent);
+        this.scheme = new Distribution(partitionExponent);
 
         // set up seed database
         this.seedActiveDB = openSeedTable(this.seedActiveDBFile);

@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
-import net.yacy.cora.services.federated.yacy.dht.HorizontalPartition;
+import net.yacy.cora.services.federated.yacy.Distribution;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.data.WorkTables;
 import net.yacy.document.LargeNumberCache;
@@ -232,7 +232,7 @@ public final class SearchEvent {
                         this.IAmaxcounthash = wordhash;
                         maxcount = container.size();
                     }
-                    l = HorizontalPartition.std.dhtDistance(wordhash, null, ASCII.getBytes(peers.mySeed().hash));
+                    l = Distribution.horizontalDHTDistance(wordhash, ASCII.getBytes(peers.mySeed().hash));
                     if ( l < mindhtdistance ) {
                         // calculate the word hash that is closest to our dht position
                         mindhtdistance = l;

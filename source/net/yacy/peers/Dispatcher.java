@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.order.Base64Order;
-import net.yacy.cora.services.federated.yacy.dht.HorizontalPartition;
+import net.yacy.cora.services.federated.yacy.Distribution;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -251,7 +251,7 @@ public class Dispatcher {
             while (i.hasNext()) {
                 re = i.next();
                 if (re == null) continue;
-                partitionBuffer[this.seeds.scheme.verticalPosition(re.urlhash())].add(re);
+                partitionBuffer[this.seeds.scheme.verticalDHTPosition(re.urlhash())].add(re);
             }
 
             // add the containers to the result vector
@@ -281,7 +281,7 @@ public class Dispatcher {
         for (int vertical = 0; vertical < containers.length; vertical++) {
             // the 'new' primary target is the word hash of the last container in the array
             lastContainer = containers[vertical].get(containers[vertical].size() - 1);
-            primaryTarget = HorizontalPartition.positionToHash(this.seeds.scheme.dhtPosition(lastContainer.getTermHash(), vertical));
+            primaryTarget = Distribution.positionToHash(this.seeds.scheme.verticalDHTPosition(lastContainer.getTermHash(), vertical));
             assert primaryTarget[2] != '@';
             pTArray = new ByteArray(primaryTarget);
 

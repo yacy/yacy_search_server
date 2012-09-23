@@ -35,7 +35,7 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.yacy.dht.HorizontalPartition;
+import net.yacy.cora.services.federated.yacy.Distribution;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -228,7 +228,7 @@ public final class transferRWI {
             } else {
                 final String firstHash = wordhashes.get(0);
                 final String lastHash = wordhashes.get(wordhashes.size() - 1);
-                final long avdist = (HorizontalPartition.std.dhtDistance(firstHash.getBytes(), null, ASCII.getBytes(sb.peers.mySeed().hash)) + HorizontalPartition.std.dhtDistance(lastHash.getBytes(), null, ASCII.getBytes(sb.peers.mySeed().hash))) / 2;
+                final long avdist = (Distribution.horizontalDHTDistance(firstHash.getBytes(), ASCII.getBytes(sb.peers.mySeed().hash)) + Distribution.horizontalDHTDistance(lastHash.getBytes(), ASCII.getBytes(sb.peers.mySeed().hash))) / 2;
                 sb.getLog().logInfo("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName);
                 EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName, "", otherPeer.hash));
             }
