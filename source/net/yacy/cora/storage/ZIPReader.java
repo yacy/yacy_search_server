@@ -1,7 +1,30 @@
+/**
+ *  ZIPReader
+ *  Copyright 2012 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
+ *  First released 24.09.2012 at http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package net.yacy.cora.storage;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.AbstractMap;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -88,4 +111,32 @@ public class ZIPReader extends AbstractMap<String, ZipEntry> implements Map<Stri
         this.zipFile.close();
     }
 
+    /**
+     * decompress a zip file and reconstruct full directory structure
+     * @param zipIn
+     * @param outDir
+     * @throws IOException
+     */
+    public static void unzip(File zipIn, File outDir) throws IOException {
+        ZipFile zfile = new ZipFile(zipIn);
+        Enumeration<? extends ZipEntry> entries = zfile.entries();
+        byte[] buffer = new byte[1024];
+        int readCount;
+        while (entries.hasMoreElements()) {
+            ZipEntry entry = entries.nextElement();
+            File file = new File(outDir, entry.getName());
+            if (entry.isDirectory()) {
+                file.mkdirs();
+            } else {
+                file.getParentFile().mkdirs();
+                InputStream in = zfile.getInputStream(entry);
+                try {
+                    OutputStream out = new FileOutputStream(file);
+                    try { while ((readCount = in.read(buffer)) > 0) out.write(buffer, 0, readCount); } finally { out.close(); }
+                } finally {
+                    in.close();
+                }
+            }
+        }
+    }
 }
