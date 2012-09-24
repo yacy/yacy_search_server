@@ -147,14 +147,14 @@ public final class TemplateEngine {
 
     private final static byte[] ul = "_".getBytes();
 
-    private final static byte[] alternative_which = ASCII.getBytes(" type=\"alternative\" which=\"");
-    private final static byte[] multi_num = ASCII.getBytes(" type=\"multi\" num=\"");
-    private final static byte[] open_endtag = ASCII.getBytes("</");
-    private final static byte[] close_quotetagn = ASCII.getBytes("\">\n");
-    private final static byte[] close_tagn = ASCII.getBytes(">\n");
-    private final static byte[] PP = ASCII.getBytes("%%");
-    private final static byte[] hash_brackopen_slash = ASCII.getBytes("#(/");
-    private final static byte[] brackclose_hash = ASCII.getBytes(")#");
+    private final static byte[] alternative_which = " type=\"alternative\" which=\"".getBytes();
+    private final static byte[] multi_num = " type=\"multi\" num=\"".getBytes();
+    private final static byte[] open_endtag = "</".getBytes();
+    private final static byte[] close_quotetagn = "\">\n".getBytes();
+    private final static byte[] close_tagn = ">\n".getBytes();
+    private final static byte[] PP = "%%".getBytes();
+    private final static byte[] hash_brackopen_slash = "#(/".getBytes();
+    private final static byte[] brackclose_hash = ")#".getBytes();
 
 
     /**

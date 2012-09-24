@@ -161,9 +161,10 @@ public class NetworkGraph {
         final Iterator<byte[]> i = query.query_include_hashes.iterator();
         eventPicture.setColor(RasterPlotter.GREY);
         while (i.hasNext()) {
-            final long[] positions = seedDB.scheme.verticalDHTPositions(i.next());
-            for (final long position : positions) {
-                angle = cyc + (360.0d * ((position) / DOUBLE_LONG_MAX_VALUE));
+            byte[] wordHash = i.next();
+            for (int verticalPosition = 0; verticalPosition < seedDB.scheme.verticalPartitions(); verticalPosition++) {
+                long position = seedDB.scheme.verticalDHTPosition(wordHash, verticalPosition);
+                angle = cyc + (360.0d * (position / DOUBLE_LONG_MAX_VALUE));
                 eventPicture.arcLine(cx, cy, cr - 20, cr, angle, true, null, null, -1, -1, -1, false);
             }
         }

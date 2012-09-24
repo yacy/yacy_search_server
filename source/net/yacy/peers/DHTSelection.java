@@ -197,9 +197,9 @@ public class DHTSelection {
             int redundancy,
             Map<String, Seed> regularSeeds) {
         // this method is called from the search target computation
-        final long[] dhtVerticalTargets = seedDB.scheme.verticalDHTPositions(wordhash);
         Seed seed;
-        for (long  dhtVerticalTarget : dhtVerticalTargets) {
+        for (int verticalPosition = 0; verticalPosition < seedDB.scheme.verticalPartitions(); verticalPosition++) {
+            long dhtVerticalTarget = seedDB.scheme.verticalDHTPosition(wordhash, verticalPosition);
             wordhash = Distribution.positionToHash(dhtVerticalTarget);
             Iterator<Seed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, wordhash, redundancy, false);
             int c = Math.min(seedDB.sizeConnected(), redundancy);

@@ -273,6 +273,7 @@ public class Dispatcher {
      * then no additional IO is necessary.
      */
     private void enqueueContainersToCloud(final List<ReferenceContainer<WordReference>>[] containers) {
+        assert (containers.length == this.seeds.scheme.verticalPartitions());
         if (this.transmissionCloud == null) return;
         ReferenceContainer<WordReference> lastContainer;
         byte[] primaryTarget;
