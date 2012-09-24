@@ -403,7 +403,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     HTTPDFileHandler.doGet(prop, header, session.out);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
-                    session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted, 1)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this server, because you are using a non-granted IP (" + session.userAddress.getHostAddress() + "). allowed are only connections that match with the following filter: " + switchboard.getConfig("serverClient", "*") + serverCore.CRLF_STRING));
+                    session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted, 1)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this server, because you are using a non-granted IP (" + session.userAddress.getHostAddress() + "). allowed are only connections that match with the following filter (1): " + switchboard.getConfig("serverClient", "*") + serverCore.CRLF_STRING));
                     return serverCore.TERMINATE_CONNECTION;
                 }
             } else {
@@ -413,7 +413,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     HTTPDProxyHandler.doGet(prop, header, session.out);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
-                    session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted, 2)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using a non-granted IP (" + session.userAddress.getHostAddress() + "). allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING));
+                    session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted, 2)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using a non-granted IP (" + session.userAddress.getHostAddress() + "). allowed are only connections that match with the following filter (2): " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING));
                     return serverCore.TERMINATE_CONNECTION;
                 }
             }
@@ -537,7 +537,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     HTTPDFileHandler.doPost(prop, header, session.out, sessionIn);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
-                    session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this server, because you are using the non-granted IP " + session.userAddress.getHostAddress() + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("serverClient", "*") + serverCore.CRLF_STRING));
+                    session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this server, because you are using the non-granted IP " + session.userAddress.getHostAddress() + ". allowed are only connections that match with the following filter (3): " + switchboard.getConfig("serverClient", "*") + serverCore.CRLF_STRING));
                     return serverCore.TERMINATE_CONNECTION;
                 }
             } else {
@@ -547,7 +547,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     HTTPDProxyHandler.doPost(prop, header, session.out, sessionIn);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
-                    session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + session.userAddress.getHostAddress() + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING));
+                    session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + session.userAddress.getHostAddress() + ". allowed are only connections that match with the following filter (4): " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING));
                     return serverCore.TERMINATE_CONNECTION;
                 }
             }
@@ -618,7 +618,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
 
         if (!(allowProxy(session))) {
             // not authorized through firewall blocking (ip does not match filter)
-            session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + session.userAddress.getHostAddress() + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING));
+            session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + session.userAddress.getHostAddress() + ". allowed are only connections that match with the following filter (5): " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING));
             return serverCore.TERMINATE_CONNECTION;
         }
 
@@ -636,7 +636,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             HTTPDProxyHandler.doConnect(prop, header, session.in, session.out);
         } else {
             // not authorized through firewall blocking (ip does not match filter)
-            session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + session.userAddress.getHostAddress() + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING));
+            session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + session.userAddress.getHostAddress() + ". allowed are only connections that match with the following filter (6): " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING));
         }
 
         return serverCore.TERMINATE_CONNECTION;
