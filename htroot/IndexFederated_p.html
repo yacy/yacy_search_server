@@ -23,7 +23,7 @@
       <legend>
         Local Search Index
       </legend>
-      This is an experimental switchboard to test an index migration from embedded metadata to embedded solr. The 'classic' configuration is rwi + metadata switched on. The future configuration is rwi + solr switched on.
+      This is a switchboard for the usage of embedded metadata to embedded solr.
       The rwi index is necessary for index transmission and shall be switched off in future portalmode configurations.
       <dl>
       <dt><input type="checkbox" name="core.service.fulltext" id="core.service.fulltext" #(core.service.fulltext.checked)#:: checked="checked"#(/core.service.fulltext.checked)# /></dt><dd>url metadata and embedded solr fulltext search index, interface at: <a href="/solr/select?q=*:*&start=0&rows=10" target="_blank">/solr/select?q=*:*&amp;start=0&amp;rows=10</a></dd>

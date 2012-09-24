@@ -125,6 +125,26 @@ function updatepage(str) {
     </table>
     #(/statisticslines)#
     
+    #(dumprestore)#::
+    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset><legend>Dump and Restore of Solr Index</legend>
+      <dl>
+        <dt class="TableCellLight">&nbsp;</dt>
+        <dd><input type="submit" name="indexdump" value="Create Dump" class="submitready" style="width:240px;"/>
+        </dd>
+      </dl>
+      <dl>
+        <dt class="TableCellDark">Dump File</dt>
+        <dd><input type="text" name="dumpfile" value="#[dumpfile]#" size="80" maxlength="250" />
+        </dd>
+        <dt class="TableCellLight">&nbsp;</dt>
+        <dd><input type="submit" name="indexrestore" value="Restore Dump" class="submitready" style="width:240px;"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>::
+    #(/dumprestore)#
+    
     #(lurlexport)#::
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Loaded URL Export</legend>
@@ -161,6 +181,10 @@ function updatepage(str) {
     #(lurlexporterror)#::
     <div class="error">Export to file #[exportfile]# failed: #[exportfailmsg]#</div>::
     #(/lurlexporterror)#
+    
+    #(indexdump)#::
+    <div class="commit">Stored a solr dump to file #[dumpfile]#</div>::
+    #(/indexdump)#
     
     #(urlhashsimilar)#::<p>Sequential List of URL-Hashes:<br />
     #{rows}# 

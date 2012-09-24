@@ -60,10 +60,12 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     private final SolrCore defaultCore;
     protected SolrRequestParsers adminRequestParser;
     private final SearchHandler requestHandler;
+    private final File storagePath;
 
     public EmbeddedSolrConnector(File storagePath, File solr_config) throws IOException {
         super();
         // copy the solrconfig.xml to the storage path
+        this.storagePath = storagePath;
         File conf = new File(storagePath, "conf");
         conf.mkdirs();
         File source, target;
@@ -106,6 +108,10 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         super.init(new EmbeddedSolrServer(this.cores, this.defaultCoreName));
     }
 
+    public File getStoragePath() {
+        return this.storagePath;
+    }
+    
     public SolrCore getCore() {
         return this.defaultCore;
     }

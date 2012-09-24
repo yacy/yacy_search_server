@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Iterator;
+import java.util.List;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
@@ -67,6 +68,12 @@ public class IndexControlURLs_p {
         prop.put("statistics_lines", 100);
         prop.put("statisticslines", 0);
         prop.put("reload", 0);
+        prop.put("indexdump", 0);
+        prop.put("lurlexport", 0);
+        prop.put("reload", 0);
+        prop.put("dumprestore", 1);
+        List<File> dumpFiles =  segment.fulltext().dumpFiles();
+        prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
 
         // show export messages
         final Fulltext.Export export = segment.fulltext().export();
@@ -127,8 +134,6 @@ public class IndexControlURLs_p {
         if (post.containsKey("urlhashdeleteall")) {
             int i = segment.removeAllUrlReferences(urlhash.getBytes(), sb.loader, CacheStrategy.IFEXIST);
             prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
-            prop.put("lurlexport", 0);
-            prop.put("reload", 0);
         }
 
         if (post.containsKey("urlhashdelete")) {
@@ -141,8 +146,6 @@ public class IndexControlURLs_p {
                 sb.urlRemove(segment, urlhash.getBytes());
                 prop.putHTML("result", "Removed URL " + urlstring);
             }
-            prop.put("lurlexport", 0);
-            prop.put("reload", 0);
         }
 
         if (post.containsKey("urldelete")) {
@@ -157,8 +160,6 @@ public class IndexControlURLs_p {
                 sb.urlRemove(segment, urlhash.getBytes());
                 prop.putHTML("result", "Removed URL " + urlstring);
             }
-            prop.put("lurlexport", 0);
-            prop.put("reload", 0);
         }
 
         if (post.containsKey("urlstringsearch")) {
@@ -179,8 +180,6 @@ public class IndexControlURLs_p {
                 prop.putHTML("result", "bad url: " + urlstring);
                 prop.put("urlhash", "");
             }
-            prop.put("lurlexport", 0);
-            prop.put("reload", 0);
         }
 
         if (post.containsKey("urlhashsearch")) {
@@ -192,8 +191,6 @@ public class IndexControlURLs_p {
                 prop.putAll(genUrlProfile(segment, entry, urlhash));
                 prop.put("statistics", 0);
             }
-            prop.put("lurlexport", 0);
-            prop.put("reload", 0);
         }
 
         // generate list
@@ -218,8 +215,6 @@ public class IndexControlURLs_p {
 			prop.put("statistics", 0);
 			prop.put("urlhashsimilar_rows", rows);
 			prop.put("result", result.toString());
-            prop.put("lurlexport", 0);
-            prop.put("reload", 0);
         }
 
         if (post.containsKey("lurlexport")) {
@@ -232,23 +227,34 @@ public class IndexControlURLs_p {
             if (fname.endsWith("rss")) format = 2;
 
             // extend export file name
-			String s = post.get("exportfile", "");
-			if (s.indexOf('.',0) < 0) {
-				if (format == 0) s = s + ".txt";
-				if (format == 1) s = s + ".html";
-				if (format == 2) s = s + ".xml";
-			}
-        	final File f = new File(s);
-			f.getParentFile().mkdirs();
-			final String filter = post.get("exportfilter", ".*");
-			final Fulltext.Export running = segment.fulltext().export(f, filter, null, format, dom);
+            String s = post.get("exportfile", "");
+            if (s.indexOf('.',0) < 0) {
+                if (format == 0) s = s + ".txt";
+                if (format == 1) s = s + ".html";
+                if (format == 2) s = s + ".xml";
+            }
+            final File f = new File(s);
+            f.getParentFile().mkdirs();
+            final String filter = post.get("exportfilter", ".*");
+            final Fulltext.Export running = segment.fulltext().export(f, filter, null, format, dom);
 
-			prop.put("lurlexport_exportfile", s);
-			prop.put("lurlexport_urlcount", running.count());
-			if ((running != null) && (running.failed() == null)) {
-				prop.put("lurlexport", 2);
-			}
-			prop.put("reload", 1);
+            prop.put("lurlexport_exportfile", s);
+            prop.put("lurlexport_urlcount", running.count());
+            if ((running != null) && (running.failed() == null)) {
+                prop.put("lurlexport", 2);
+            }
+            prop.put("reload", 1);
+        }
+
+        if (post.containsKey("indexdump")) {
+            final File dump = segment.fulltext().dumpSolr();
+            prop.put("indexdump", 1);
+            prop.put("indexdump_dumpfile", dump.getAbsolutePath());
+        }
+
+        if (post.containsKey("indexrestore")) {
+            final File dump = new File(post.get("dumpfile", ""));
+            segment.fulltext().restoreSolr(dump);
         }
 
         if (post.containsKey("deletedomain")) {
@@ -261,7 +267,6 @@ public class IndexControlURLs_p {
             }
             // trigger the loading of the table
             post.put("statistics", "");
-            prop.put("reload", 0);
         }
 
         if (post.containsKey("statistics")) {
@@ -289,8 +294,6 @@ public class IndexControlURLs_p {
             }
             prop.put("statisticslines_domains", cnt);
             prop.put("statisticslines", 1);
-            prop.put("lurlexport", 0);
-            prop.put("reload", 0);
         }
 
         // insert constants

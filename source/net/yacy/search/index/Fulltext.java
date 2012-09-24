@@ -30,9 +30,11 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.order.CloneableIterator;
@@ -43,6 +45,8 @@ import net.yacy.cora.services.federated.yacy.YaCySchema;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.storage.ZIPReader;
+import net.yacy.cora.storage.ZIPWriter;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -447,7 +451,63 @@ public final class Fulltext implements Iterable<byte[]> {
             }
         };
     }
-
+    
+    public List<File> dumpFiles() {
+        EmbeddedSolrConnector esc = (EmbeddedSolrConnector) this.solr.getSolr0();
+        File storagePath = esc.getStoragePath().getParentFile();
+        ArrayList<File> zips = new ArrayList<File>();
+        for (String p: storagePath.list()) {
+            if (p.endsWith("zip")) zips.add(new File(storagePath, p));
+        }
+        return zips;
+    }
+    
+    /**
+     * create a dump file from the current solr directory
+     * @return
+     */
+    public File dumpSolr() {
+        EmbeddedSolrConnector esc = (EmbeddedSolrConnector) this.solr.getSolr0();
+        int commitWithin = esc.getCommitWithinMs();
+        File storagePath = esc.getStoragePath();
+        this.disconnectLocalSolr();
+        File zipOut = new File(storagePath.toString() + "_" + GenericFormatter.SHORT_DAY_FORMATTER.format() + ".zip");
+        try {
+            ZIPWriter.zip(storagePath, zipOut);
+        } catch (IOException e) {
+            Log.logException(e);
+        } finally {
+            try {
+                this.connectLocalSolr(commitWithin);
+            } catch (IOException e) {
+                Log.logException(e);
+            }
+        }
+        return zipOut;
+    }
+    
+    /**
+     * restore a solr dump to the current solr directory
+     * @param solrDumpZipFile
+     */
+    public void restoreSolr(File solrDumpZipFile) {
+        EmbeddedSolrConnector esc = (EmbeddedSolrConnector) this.solr.getSolr0();
+        int commitWithin = esc.getCommitWithinMs();
+        File storagePath = esc.getStoragePath();
+        this.disconnectLocalSolr();
+        try {
+            ZIPReader.unzip(solrDumpZipFile, storagePath);
+        } catch (IOException e) {
+            Log.logException(e);
+        } finally {
+            try {
+                this.connectLocalSolr(commitWithin);
+            } catch (IOException e) {
+                Log.logException(e);
+            }
+        }
+    }
+    
     // export methods
     public Export export(final File f, final String filter, final HandleSet set, final int format, final boolean dom) {
         if ((this.exportthread != null) && (this.exportthread.isAlive())) {
