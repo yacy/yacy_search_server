@@ -293,10 +293,12 @@ public final class Fulltext implements Iterable<byte[]> {
         if (this.connectedSolr()) {
 	        try {
 	        	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-	            SolrDocument sd = this.solr.get(id);
-	            if (sd == null || this.solrScheme.getDate(sd, YaCySchema.last_modified).before(this.solrScheme.getDate(doc, YaCySchema.last_modified))) {
-		            this.solr.add(doc);
-	            }
+	        	synchronized (this.solr) {
+	        	    SolrDocument sd = this.solr.get(id);
+	        	    if (sd == null || this.solrScheme.getDate(sd, YaCySchema.last_modified).before(this.solrScheme.getDate(doc, YaCySchema.last_modified))) {
+	        	        this.solr.add(doc);
+	        	    }
+	        	}
 	        } catch (SolrException e) {
 	            throw new IOException(e.getMessage(), e);
 	        }
@@ -334,10 +336,12 @@ public final class Fulltext implements Iterable<byte[]> {
         if (this.connectedSolr()) {
 	        try {
 	        	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-	            SolrDocument sd = this.solr.get(id);
-	            if (sd == null || (new URIMetadataNode(sd)).isOlder(row)) {
-	            	this.solr.add(getSolrScheme().metadata2solr(row));
-	            }
+                synchronized (this.solr) {
+                    SolrDocument sd = this.solr.get(id);
+                    if (sd == null || (new URIMetadataNode(sd)).isOlder(row)) {
+                        this.solr.add(getSolrScheme().metadata2solr(row));
+                    }
+                }
 	        } catch (SolrException e) {
 	            throw new IOException(e.getMessage(), e);
 	        }
@@ -365,7 +369,9 @@ public final class Fulltext implements Iterable<byte[]> {
     public boolean remove(final byte[] urlHash) {
         if (urlHash == null) return false;
         try {
-            this.solr.delete(ASCII.String(urlHash));
+            synchronized (this.solr) {
+                this.solr.delete(ASCII.String(urlHash));
+            }
         } catch (final Throwable e) {
             Log.logException(e);
         }
@@ -470,17 +476,19 @@ public final class Fulltext implements Iterable<byte[]> {
         EmbeddedSolrConnector esc = (EmbeddedSolrConnector) this.solr.getSolr0();
         int commitWithin = esc.getCommitWithinMs();
         File storagePath = esc.getStoragePath();
-        this.disconnectLocalSolr();
         File zipOut = new File(storagePath.toString() + "_" + GenericFormatter.SHORT_DAY_FORMATTER.format() + ".zip");
-        try {
-            ZIPWriter.zip(storagePath, zipOut);
-        } catch (IOException e) {
-            Log.logException(e);
-        } finally {
+        synchronized (this.solr) {
+            this.disconnectLocalSolr();
             try {
-                this.connectLocalSolr(commitWithin);
+                ZIPWriter.zip(storagePath, zipOut);
             } catch (IOException e) {
                 Log.logException(e);
+            } finally {
+                try {
+                    this.connectLocalSolr(commitWithin);
+                } catch (IOException e) {
+                    Log.logException(e);
+                }
             }
         }
         return zipOut;
@@ -494,16 +502,18 @@ public final class Fulltext implements Iterable<byte[]> {
         EmbeddedSolrConnector esc = (EmbeddedSolrConnector) this.solr.getSolr0();
         int commitWithin = esc.getCommitWithinMs();
         File storagePath = esc.getStoragePath();
-        this.disconnectLocalSolr();
-        try {
-            ZIPReader.unzip(solrDumpZipFile, storagePath);
-        } catch (IOException e) {
-            Log.logException(e);
-        } finally {
+        synchronized (this.solr) {
+            this.disconnectLocalSolr();
             try {
-                this.connectLocalSolr(commitWithin);
+                ZIPReader.unzip(solrDumpZipFile, storagePath);
             } catch (IOException e) {
                 Log.logException(e);
+            } finally {
+                try {
+                    this.connectLocalSolr(commitWithin);
+                } catch (IOException e) {
+                    Log.logException(e);
+                }
             }
         }
     }
@@ -783,7 +793,9 @@ public final class Fulltext implements Iterable<byte[]> {
         // first collect all url hashes that belong to the domain
         assert hosthash.length() == 6;
         // delete in solr
-        this.solr.deleteByQuery(YaCySchema.host_id_s.name() + ":\"" + hosthash + "\"");
+        synchronized (this.solr) {
+            this.solr.deleteByQuery(YaCySchema.host_id_s.name() + ":\"" + hosthash + "\"");
+        }
 
         // delete in old metadata structure
         final ArrayList<String> l = new ArrayList<String>();
