@@ -18,7 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.services.federated.solr;
+package net.yacy.cora.services.federated.solr.responsewriter;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.cora.services.federated.yacy.YaCySchema;
+import net.yacy.cora.services.federated.solr.YaCySchema;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 

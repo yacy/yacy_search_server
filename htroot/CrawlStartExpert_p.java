@@ -25,7 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.yacy.YaCySchema;
+import net.yacy.cora.services.federated.solr.YaCySchema;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;

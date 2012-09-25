@@ -37,6 +37,7 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
+import net.yacy.cora.services.federated.solr.YaCySchema;
 import net.yacy.cora.services.federated.yacy.ConfigurationSet.Entry;
 import net.yacy.cora.storage.Files;
 

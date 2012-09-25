@@ -18,14 +18,14 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.services.federated.solr;
+package net.yacy.cora.services.federated.solr.connector;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import net.yacy.cora.services.federated.yacy.YaCySchema;
+import net.yacy.cora.services.federated.solr.YaCySchema;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.util.MemoryControl;

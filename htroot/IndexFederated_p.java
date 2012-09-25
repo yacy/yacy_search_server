@@ -30,12 +30,12 @@ import java.util.Iterator;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.solr.ShardSelection;
-import net.yacy.cora.services.federated.solr.ShardSolrConnector;
-import net.yacy.cora.services.federated.solr.RemoteSolrConnector;
-import net.yacy.cora.services.federated.solr.SolrConnector;
+import net.yacy.cora.services.federated.solr.YaCySchema;
+import net.yacy.cora.services.federated.solr.connector.RemoteSolrConnector;
+import net.yacy.cora.services.federated.solr.connector.ShardSelection;
+import net.yacy.cora.services.federated.solr.connector.ShardSolrConnector;
+import net.yacy.cora.services.federated.solr.connector.SolrConnector;
 import net.yacy.cora.services.federated.yacy.ConfigurationSet;
-import net.yacy.cora.services.federated.yacy.YaCySchema;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.OS;
 import net.yacy.search.Switchboard;

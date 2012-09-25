@@ -33,7 +33,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.services.federated.solr.SolrType;
-import net.yacy.cora.services.federated.yacy.YaCySchema;
+import net.yacy.cora.services.federated.solr.YaCySchema;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;

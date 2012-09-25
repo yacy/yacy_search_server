@@ -19,12 +19,14 @@
  */
 
 
-package net.yacy.cora.services.federated.solr;
+package net.yacy.cora.services.federated.solr.connector;
 
 import java.io.File;
 import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
+
+import net.yacy.cora.services.federated.solr.SolrServlet;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;

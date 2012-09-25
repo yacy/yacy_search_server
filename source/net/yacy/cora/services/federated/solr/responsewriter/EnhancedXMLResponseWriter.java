@@ -18,13 +18,15 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.services.federated.solr;
+package net.yacy.cora.services.federated.solr.responsewriter;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
+import net.yacy.cora.services.federated.solr.SolrType;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Fieldable;

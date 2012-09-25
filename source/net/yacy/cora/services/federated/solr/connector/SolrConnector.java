@@ -22,7 +22,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.services.federated.solr;
+package net.yacy.cora.services.federated.solr.connector;
 
 import java.io.IOException;
 import java.util.Collection;

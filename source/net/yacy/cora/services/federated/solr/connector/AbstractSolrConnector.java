@@ -18,7 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.services.federated.solr;
+package net.yacy.cora.services.federated.solr.connector;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -26,7 +26,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import net.yacy.cora.services.federated.yacy.YaCySchema;
+import net.yacy.cora.services.federated.solr.YaCySchema;
 import net.yacy.cora.util.LookAheadIterator;
 
 import org.apache.log4j.Logger;

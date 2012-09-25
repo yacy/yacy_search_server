@@ -18,7 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.services.federated.solr;
+package net.yacy.cora.services.federated.solr.responsewriter;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -31,8 +31,8 @@ import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.cora.services.federated.solr.OpensearchResponseWriter.ResHead;
-import net.yacy.cora.services.federated.yacy.YaCySchema;
+import net.yacy.cora.services.federated.solr.YaCySchema;
+import net.yacy.cora.services.federated.solr.responsewriter.OpensearchResponseWriter.ResHead;
 import net.yacy.server.serverObjects;
 
 import org.apache.lucene.document.Document;

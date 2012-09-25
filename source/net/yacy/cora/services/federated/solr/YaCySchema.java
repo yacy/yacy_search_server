@@ -18,13 +18,11 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.services.federated.yacy;
+package net.yacy.cora.services.federated.solr;
 
 import java.util.Date;
 import java.util.List;
 
-import net.yacy.cora.services.federated.solr.Schema;
-import net.yacy.cora.services.federated.solr.SolrType;
 
 import org.apache.solr.common.SolrInputDocument;
 
