@@ -142,7 +142,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
     }
 
     public void terminate() {
-        this.client.getConnectionManager().shutdown();
+        if (this.client != null) this.client.getConnectionManager().shutdown();
     }
 
     @Override

@@ -122,7 +122,8 @@ public class IndexFederated_p {
                 sb.index.fulltext().disconnectRemoteSolr();
             }
 
-            if (!solrRemoteWasOn && solrRemoteIsOnAfterwards) {
+            if (solrRemoteIsOnAfterwards) {
+                if (solrRemoteWasOn) sb.index.fulltext().disconnectRemoteSolr();
                 // switch on
                 final boolean usesolr = sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;
                 try {

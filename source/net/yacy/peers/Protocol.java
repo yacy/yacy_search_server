@@ -1032,18 +1032,17 @@ public final class Protocol
         }
         event.rankingProcess.addExpectedRemoteReferences(count);
         SolrDocumentList docList = null;
-        final String solrQuerystring = event.getQuery().solrQueryString(false);
-        Log.logInfo("Protocol", "SOLR QUERY: " + solrQuerystring);
+        final String solrQuerystring = event.getQuery().solrQueryString();
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
         if (localsearch) {
             // search the local index
             try {
                 docList = event.rankingProcess.getQuery().getSegment().fulltext().getSolr().query(solrQuerystring, offset, count);
             } catch (SolrException e) {
-                Network.log.logInfo("SEARCH failed (solr), localpeer (" + e.getMessage() + ")");
+                Network.log.logInfo("SEARCH failed (solr, 1), localpeer (" + e.getMessage() + ")", e);
                 return -1;
             } catch (IOException e) {
-                Network.log.logInfo("SEARCH failed (solr), localpeer (" + e.getMessage() + ")");
+                Network.log.logInfo("SEARCH failed (solr, 2), localpeer (" + e.getMessage() + ")", e);
                 return -1;
             }
         } else {
@@ -1053,13 +1052,14 @@ public final class Protocol
                 docList = solrConnector.query(solrQuerystring, offset, count);
                 // no need to close this here because that sends a commit to remote solr which is not wanted here
             } catch (IOException e) {
-                Network.log.logInfo("SEARCH failed (solr), Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
+                Network.log.logInfo("SEARCH failed (solr), Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")", e);
                 return -1;
             }
         }
 
         // evaluate result
 		if (docList.size() > 0) {// create containers
+            Network.log.logInfo("SEARCH (solr), returned " + docList.size() + " documents from peer " + target.hash + ":" + target.getName());
             final List<ReferenceContainer<WordReference>> container = new ArrayList<ReferenceContainer<WordReference>>(wordhashes.size());
             for (byte[] hash: wordhashes) {
                 try {
