@@ -34,9 +34,9 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.kelondro.blob.MapHeap;

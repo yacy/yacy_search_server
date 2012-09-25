@@ -42,8 +42,8 @@ import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.order.Base64Order;
-import net.yacy.cora.services.federated.yacy.Distribution;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.data.WorkTables;
 import net.yacy.document.LargeNumberCache;

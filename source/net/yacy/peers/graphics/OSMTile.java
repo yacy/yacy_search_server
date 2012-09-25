@@ -34,7 +34,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.kelondro.data.meta.DigestURI;

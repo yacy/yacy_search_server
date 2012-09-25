@@ -33,7 +33,7 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Request;

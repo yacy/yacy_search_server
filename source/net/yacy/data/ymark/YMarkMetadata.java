@@ -32,7 +32,7 @@ import java.util.EnumMap;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;

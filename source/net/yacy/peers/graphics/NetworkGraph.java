@@ -37,7 +37,7 @@ import java.util.List;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Hit;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.services.federated.yacy.Distribution;
+import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.RemoteSearch;

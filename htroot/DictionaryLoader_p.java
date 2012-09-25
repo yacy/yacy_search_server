@@ -21,10 +21,10 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeonamesLocation;
 import net.yacy.cora.geo.OpenGeoDBLocation;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.LibraryProvider;

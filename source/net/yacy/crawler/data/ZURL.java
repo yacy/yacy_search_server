@@ -38,9 +38,9 @@ import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.solr.connector.ShardSolrConnector;
+import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.order.Base64Order;
-import net.yacy.cora.services.federated.solr.connector.ShardSolrConnector;
-import net.yacy.cora.services.federated.solr.connector.SolrConnector;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;

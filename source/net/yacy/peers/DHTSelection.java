@@ -35,9 +35,9 @@ import java.util.Set;
 import java.util.SortedMap;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
-import net.yacy.cora.services.federated.yacy.Distribution;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.Word;

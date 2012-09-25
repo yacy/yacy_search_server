@@ -27,11 +27,11 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.solr.YaCySchema;
+import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
+import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.solr.YaCySchema;
-import net.yacy.cora.services.federated.solr.connector.EmbeddedSolrConnector;
-import net.yacy.cora.services.federated.solr.responsewriter.GSAResponseWriter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;

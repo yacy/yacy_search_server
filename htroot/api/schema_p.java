@@ -22,8 +22,8 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.solr.YaCySchema;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.SolrConfiguration;
 import net.yacy.server.serverObjects;

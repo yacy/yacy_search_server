@@ -32,10 +32,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Map;
 
+import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.document.ImageParser;
