@@ -132,7 +132,6 @@ public final class QueryParams {
     public final String sitehash; // this is a domain hash, 6 bytes long or null
     public final Set<String> siteexcludes; // set of domain hashes that are excluded if not included by sitehash
     public final String authorhash;
-    public final String tenant;
     public final Modifier modifier;
     public Seed remotepeer;
     public final long starttime, maxtime, timeout; // the time when the query started, how long it should take and the time when the timeout is reached (milliseconds)
@@ -178,7 +177,6 @@ public final class QueryParams {
     		this.query_all_hashes = Word.words2hashesHandles(cq[2]);
     	}
     	this.ranking = ranking;
-    	this.tenant = null;
     	this.modifier = new Modifier("");
         this.maxDistance = Integer.MAX_VALUE;
         this.urlMask = catchall_pattern;
@@ -223,7 +221,6 @@ public final class QueryParams {
         final HandleSet queryHashes,
         final HandleSet excludeHashes,
         final HandleSet fullqueryHashes,
-        final String tenant,
         final String modifier,
         final int maxDistance, final String prefer, final ContentDomain contentdom,
         final String language,
@@ -252,7 +249,6 @@ public final class QueryParams {
         this.query_include_hashes = queryHashes;
         this.query_exclude_hashes = excludeHashes;
         this.query_all_hashes = fullqueryHashes;
-        this.tenant = (tenant != null && tenant.isEmpty()) ? null : tenant;
         this.modifier = new Modifier(modifier == null ? "" : modifier);
         this.ranking = ranking;
         this.maxDistance = maxDistance;

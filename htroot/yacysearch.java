@@ -499,21 +499,6 @@ public class yacysearch {
                 }
             }
 
-            String tenant = null;
-            if ( post.containsKey("tenant") ) {
-                tenant = post.get("tenant");
-                if ( tenant != null && tenant.isEmpty() ) {
-                    tenant = null;
-                }
-                if ( tenant != null ) {
-                    if ( urlmask == null ) {
-                        urlmask = ".*" + tenant + ".*";
-                    } else {
-                        urlmask = ".*" + tenant + urlmask;
-                    }
-                }
-            }
-
             final int site = querystring.indexOf("site:", 0);
             String sitehash = null;
             String sitehost = null;
@@ -746,7 +731,6 @@ public class yacysearch {
                     Word.words2hashesHandles(query[0]),
                     Word.words2hashesHandles(query[1]),
                     Word.words2hashesHandles(query[2]),
-                    tenant,
                     modifier.toString().trim(),
                     maxDistance,
                     prefermask,

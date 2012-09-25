@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.services.federated.solr.connector.ShardSelection.Method;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
