@@ -486,6 +486,7 @@
     <delete file="${build}/net/yacy/peers/operation/yacyBuildProperties.java" failonerror="false"/>
     <delete file="${build}/log4j.properties" failonerror="false"/>
     <delete file="${lib}/yacycore.jar" failonerror="false"/>
+    <delete file="${lib}/yacy-cora.jar" failonerror="false"/>
     <delete file="${lib}/svnRevNr.jar" failonerror="false"/>
     <delete file="${libbuild}/svnRevNr.jar" failonerror="false"/>
     <delete file="${libbuild}/GitRevTask.jar" failonerror="false"/>
