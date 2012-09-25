@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -143,6 +144,7 @@ public final class QueryParams {
     public final String userAgent;
     public boolean filterfailurls;
     public double lat, lon, radius;
+    public String solrQueryString = null;
 
     public QueryParams(
             final String queryString,
@@ -463,14 +465,25 @@ public final class QueryParams {
         return ret;
     }
 
-    final static String[] fields = new String[]{
-        YaCySchema.sku.name(),YaCySchema.title.name(),
-        YaCySchema.h1_txt.name(),YaCySchema.h2_txt.name(),
-        YaCySchema.author.name(),YaCySchema.description.name(),
-        YaCySchema.keywords.name(),YaCySchema.text_t.name()
+    final static YaCySchema[] fields = new YaCySchema[]{
+        YaCySchema.sku,YaCySchema.title,YaCySchema.h1_txt,YaCySchema.h2_txt,
+        YaCySchema.author,YaCySchema.description,YaCySchema.keywords,YaCySchema.text_t
     };
+    
+    final static Map<YaCySchema,Float> boosts = new LinkedHashMap<YaCySchema,Float>();
+    static {
+        boosts.put(YaCySchema.sku, 20.0f);
+        boosts.put(YaCySchema.title, 15.0f);
+        boosts.put(YaCySchema.h1_txt, 11.0f);
+        boosts.put(YaCySchema.h2_txt, 10.0f);
+        boosts.put(YaCySchema.author, 8.0f);
+        boosts.put(YaCySchema.description, 5.0f);
+        boosts.put(YaCySchema.keywords, 2.0f);
+        boosts.put(YaCySchema.text_t, 1.0f);
+    }
 
-    public String solrQueryString(boolean urlencoded) {
+    public String solrQueryString() {
+        if (this.solrQueryString != null) return this.solrQueryString;
         if (this.query_include_words == null || this.query_include_words.size() == 0) return null;
         final StringBuilder q = new StringBuilder(80);
 
@@ -478,44 +491,44 @@ public final class QueryParams {
         int wc = 0;
         StringBuilder w = new StringBuilder(80);
         for (String s: this.query_include_words) {
-            if (wc > 0) w.append(urlencoded ? "+AND+" : " AND ");
+            if (wc > 0) w.append(" AND ");
             w.append(s);
             wc++;
         }
         for (String s: this.query_exclude_words){
-            if (wc > 0) w.append(urlencoded ? "+AND+-" : " AND -");
+            if (wc > 0) w.append(" AND -");
             w.append(s);
             wc++;
         }
         
         // combine these queries for all relevant fields
         wc = 0;
-        for (String a: fields) {
-            if (wc > 0) q.append(urlencoded ? "+OR+" : " OR ");
-            q.append('(').append(a).append(':').append(w).append(')');
+        for (YaCySchema field: fields) {
+            if (wc > 0) q.append(" OR ");
+            q.append('(').append(field.name()).append(':').append(w).append(')');
             wc++;
         }
         q.insert(0, '(');
         q.append(')');
 
         // add filter to prevent that results come from failed urls
-        q.append(urlencoded ? "+AND+-failreason_t:[*+TO+*]" : " AND -failreason_t:[* TO *]");
+        q.append(" AND -").append(YaCySchema.failreason_t.name()).append(":[* TO *]");
 
         // add constraints
         if ( this.sitehash == null ) {
             if (this.siteexcludes != null) {
                 for (String ex: this.siteexcludes) {
-                    q.append(urlencoded ? "+-host_id_s:" : " -host_id_s:").append(ex);
+                    q.append(" -").append(YaCySchema.host_id_s.name()).append(':').append(ex);
                 }
             }
         } else {
-            q.append(urlencoded ? "+host_id_s:" : " host_id_s:").append(this.sitehash);
+            q.append(' ').append(YaCySchema.host_id_s.name()).append(':').append(this.sitehash);
         }
         String urlMaskPattern = this.urlMask.pattern();
         int extm = urlMaskPattern.indexOf(".*\\.");
         if (extm >= 0) {
             String ext = urlMaskPattern.substring(extm + 4);
-            q.append(urlencoded ? "+AND+url_file_ext_s:" : " AND url_file_ext_s:").append(ext);
+            q.append(" AND ").append(YaCySchema.url_file_ext_s.name()).append(':').append(ext);
         }
 
         if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {
@@ -524,11 +537,18 @@ public final class QueryParams {
             q.append(Double.toString(this.lat)).append(',').append(Double.toString(this.lon)).append("&d=").append(GeoLocation.degreeToKm(this.radius));
         } else {
             // boost fields
-            q.append("&defType=edismax&qf=sku^20.0,title^15.0,h1_txt^11.0,h2_txt^10.0,author^8.0,description^5.0,keywords^2.0,text_t^1.0");
+            q.append("&defType=edismax&qf=");
+            int c = 0;
+            for (Map.Entry<YaCySchema, Float> boost: boosts.entrySet()) {
+                if (c++ > 0) q.append(',');
+                q.append(boost.getKey().name()).append('^').append(boost.getValue().toString());
+            }
         }
 
         // prepare result
-        return (urlencoded) ? CharacterCoding.unicode2html(q.toString(), true) : q.toString();
+        this.solrQueryString = q.toString();
+        Log.logInfo("Protocol", "SOLR QUERY: " + this.solrQueryString);
+        return this.solrQueryString;
     }
 
     public String queryStringForUrl() {
