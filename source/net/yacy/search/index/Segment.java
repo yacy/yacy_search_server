@@ -193,15 +193,14 @@ public class Segment {
         return this.termIndex.getBufferSize();
     }
 
-    public int getQueryCount(String word) {
-        int count = this.termIndex == null ? 0 : this.termIndex.count(Word.word2hash(word));
-        try {count += this.fulltext.getSolr().getQueryCount(YaCySchema.text_t.name() + ':' + word);} catch (IOException e) {}
-        return count;
+    public int getQueryCount(StringBuilder wordsb) {
+        return getQueryCount(wordsb.toString());
     }
 
-    public int getQueryCount(StringBuilder word) {
+    public int getQueryCount(String word) {
+        if (word == null || word.indexOf(':') >= 0 || word.indexOf(' ') >= 0) return 0;
         int count = this.termIndex == null ? 0 : this.termIndex.count(Word.word2hash(word));
-        try {count += this.fulltext.getSolr().getQueryCount(YaCySchema.text_t.name() + ':' + word.toString());} catch (IOException e) {}
+        try {count += this.fulltext.getSolr().getQueryCount(YaCySchema.text_t.name() + ':' + word);} catch (IOException e) {}
         return count;
     }
 

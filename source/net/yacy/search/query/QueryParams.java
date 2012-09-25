@@ -467,7 +467,12 @@ public final class QueryParams {
         return ret;
     }
 
-    final static String[] fields = new String[]{"sku","title","h1_txt","h2_txt","author","description","keywords","text_t"};
+    final static String[] fields = new String[]{
+        YaCySchema.sku.name(),YaCySchema.title.name(),
+        YaCySchema.h1_txt.name(),YaCySchema.h2_txt.name(),
+        YaCySchema.author.name(),YaCySchema.description.name(),
+        YaCySchema.keywords.name(),YaCySchema.text_t.name()
+    };
 
     public String solrQueryString(boolean urlencoded) {
         if (this.query_include_words == null || this.query_include_words.size() == 0) return null;
@@ -486,15 +491,19 @@ public final class QueryParams {
             w.append(s);
             wc++;
         }
+        
+        // combine these queries for all relevant fields
         wc = 0;
         for (String a: fields) {
             if (wc > 0) q.append(urlencoded ? "+OR+" : " OR ");
             q.append('(').append(a).append(':').append(w).append(')');
             wc++;
         }
+        q.insert(0, '(');
+        q.append(')');
 
         // add filter to prevent that results come from failed urls
-        q.append(urlencoded ? "+-failreason_t:[*+TO+*]" : " -failreason_t:[* TO *]");
+        q.append(urlencoded ? "+AND+-failreason_t:[*+TO+*]" : " AND -failreason_t:[* TO *]");
 
         // add constraints
         if ( this.sitehash == null ) {
@@ -505,6 +514,12 @@ public final class QueryParams {
             }
         } else {
             q.append(urlencoded ? "+host_id_s:" : " host_id_s:").append(this.sitehash);
+        }
+        String urlMaskPattern = this.urlMask.pattern();
+        int extm = urlMaskPattern.indexOf(".*\\.");
+        if (extm >= 0) {
+            String ext = urlMaskPattern.substring(extm + 4);
+            q.append(urlencoded ? "+AND+url_file_ext_s:" : " AND url_file_ext_s:").append(ext);
         }
 
         if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {
