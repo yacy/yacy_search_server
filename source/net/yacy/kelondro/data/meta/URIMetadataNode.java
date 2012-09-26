@@ -129,7 +129,8 @@ public class URIMetadataNode implements URIMetadata {
         assert field.getType() == SolrType.date;
         Date x = (Date) this.doc.getFieldValue(field.name());
         if (x == null) return new Date(0);
-        return x;
+        Date now = new Date();
+        return (x.after(now)) ? now : x;
     }
 
     private String getString(YaCySchema field) {

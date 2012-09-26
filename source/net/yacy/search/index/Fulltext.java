@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -279,7 +280,12 @@ public final class Fulltext implements Iterable<byte[]> {
         try {
         	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
         	SolrDocument sd = this.solr.get(id);
-        	if (sd == null || this.solrScheme.getDate(sd, YaCySchema.last_modified).before(this.solrScheme.getDate(doc, YaCySchema.last_modified))) {
+        	Date now = new Date();
+        	Date sdDate = this.solrScheme.getDate(sd, YaCySchema.last_modified);
+        	if (sdDate.after(now)) sdDate = now;
+        	Date docDate = this.solrScheme.getDate(doc, YaCySchema.last_modified);
+        	if (docDate.after(now)) docDate = now;
+        	if (sd == null || sdDate.before(docDate)) {
                 if (this.solrScheme.contains(YaCySchema.ip_s)) {
                     // ip_s needs a dns lookup which causes blockings during search here
                     this.solr.add(doc);

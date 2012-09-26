@@ -174,7 +174,9 @@ public class URIMetadataRow implements URIMetadata {
     private void encodeDate(final int col, final Date d) {
         // calculates the number of days since 1.1.1970 and returns this as 4-byte array
         // 86400000 is the number of milliseconds in one day
-        this.entry.setCol(col, NaturalOrder.encodeLong(d.getTime() / 86400000L, 4));
+        long time = d.getTime();
+        long now = System.currentTimeMillis();
+        this.entry.setCol(col, NaturalOrder.encodeLong((time > now ? now : time) / 86400000L, 4));
     }
 
     private Date decodeDate(final int col) {

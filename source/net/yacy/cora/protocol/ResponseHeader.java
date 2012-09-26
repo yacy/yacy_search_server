@@ -73,7 +73,8 @@ public class ResponseHeader extends HeaderFramework {
 
     public Date date() {
         final Date d = headerDate(HeaderFramework.DATE);
-        return (d == null) ? new Date() : d;
+        final Date now = new Date();
+        return (d == null) ? now : d.after(now) ? now : d;
     }
 
     public Date expires() {
@@ -82,7 +83,8 @@ public class ResponseHeader extends HeaderFramework {
 
     public Date lastModified() {
         final Date d = headerDate(LAST_MODIFIED);
-        return (d == null) ? date() : d;
+        final Date now = new Date();
+        return (d == null) ? date() : d.after(now) ? now : d;
     }
 
     public long age() {

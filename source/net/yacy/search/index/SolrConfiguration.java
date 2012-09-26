@@ -835,7 +835,9 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     }
 
     public Date solrGetDate(final SolrDocument solr) {
-        return (Date) solr.getFieldValue(YaCySchema.last_modified.getSolrFieldName());
+        Date date = (Date) solr.getFieldValue(YaCySchema.last_modified.getSolrFieldName());
+        Date now = new Date();
+        return date.after(now) ? now : date;
     }
 
     public Collection<String> solrGetKeywords(final SolrDocument solr) {

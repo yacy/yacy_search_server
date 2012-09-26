@@ -198,7 +198,7 @@ public class Segment {
     }
 
     public int getQueryCount(String word) {
-        if (word == null || word.indexOf(':') >= 0 || word.indexOf(' ') >= 0) return 0;
+        if (word == null || word.indexOf(':') >= 0 || word.indexOf(' ') >= 0 || word.indexOf('/') >= 0) return 0;
         int count = this.termIndex == null ? 0 : this.termIndex.count(Word.word2hash(word));
         try {count += this.fulltext.getSolr().getQueryCount(YaCySchema.text_t.name() + ':' + word);} catch (IOException e) {}
         return count;

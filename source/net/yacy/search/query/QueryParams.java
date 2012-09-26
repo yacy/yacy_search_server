@@ -39,6 +39,8 @@ import java.util.SortedSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.apache.solr.common.params.CommonParams;
+
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.Classification.ContentDomain;
@@ -481,6 +483,18 @@ public final class QueryParams {
         boosts.put(YaCySchema.keywords, 2.0f);
         boosts.put(YaCySchema.text_t, 1.0f);
     }
+    
+    /*
+  public static final String QT ="qt";
+  public static final String WT ="wt";
+  public static final String Q ="q";
+  public static final String START ="start";
+  public static final String ROWS ="rows";
+  public static final String XSL ="xsl";
+  public static final String VERSION ="version";
+  public static final String FL = "fl";
+  public static final String DF = "df";
+     */
 
     public String solrQueryString() {
         if (this.solrQueryString != null) return this.solrQueryString;
@@ -533,18 +547,24 @@ public final class QueryParams {
 
         if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {
             // localtion search, no special ranking
-            q.append("&fq={!bbox sfield=").append(YaCySchema.coordinate_p.name()).append("}&pt=");
+            q.append('&').append(CommonParams.FQ).append("={!bbox sfield=").append(YaCySchema.coordinate_p.name()).append("}&pt=");
             q.append(Double.toString(this.lat)).append(',').append(Double.toString(this.lon)).append("&d=").append(GeoLocation.degreeToKm(this.radius));
         } else {
-            // boost fields
-            q.append("&defType=edismax&qf=");
-            int c = 0;
-            for (Map.Entry<YaCySchema, Float> boost: boosts.entrySet()) {
-                if (c++ > 0) q.append(',');
-                q.append(boost.getKey().name()).append('^').append(boost.getValue().toString());
+            // set ranking
+            if (this.ranking.coeff_date == RankingProfile.COEFF_MAX) {
+                // set a most-recent ordering
+                q.append('&').append(CommonParams.SORT).append('=').append(YaCySchema.last_modified.name()).append(" desc");
+            } else {
+                // boost fields
+                q.append("&defType=edismax&qf=");
+                int c = 0;
+                for (Map.Entry<YaCySchema, Float> boost: boosts.entrySet()) {
+                    if (c++ > 0) q.append(',');
+                    q.append(boost.getKey().name()).append('^').append(boost.getValue().toString());
+                }
             }
         }
-
+        
         // prepare result
         this.solrQueryString = q.toString();
         Log.logInfo("Protocol", "SOLR QUERY: " + this.solrQueryString);
