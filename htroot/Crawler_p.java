@@ -190,6 +190,8 @@ public class Crawler_p {
                     } catch (MalformedURLException e) {
                         Log.logException(e);
                     }
+                } else {
+                	crawlName = crawlingFile.getName();
                 }
                 if (crawlName.length() > 80) crawlName = crawlName.substring(0, 80);
                 if (crawlName.endsWith("_")) crawlName = crawlName.substring(0, crawlName.length() - 1);
