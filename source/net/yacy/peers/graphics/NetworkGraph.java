@@ -373,13 +373,13 @@ public class NetworkGraph {
             PrintTool.arcPrint(this.img, this.centerX, this.centerY, this.innerradius + linelength, angle, name);
 
             // draw corona around dot for crawling activity
-            final int ppmx = this.seed.getPPM() / 40;
+            final int ppmx = Math.min(this.seed.getPPM() / 10, 20);
             if (this.coronaangle >= 0 && ppmx > 0) {
                 drawCorona(this.img, this.centerX, this.centerY, this.innerradius, angle, dotsize, ppmx, this.coronaangle, true, false, 2, 2, 2); // color = 0..63
             }
 
             // draw corona around dot for query activity
-            final int qphx = ((int) (this.seed.getQPM() * 4.0));
+            int qphx = Math.min((int) (this.seed.getQPM() * 2.0f), 8);
             if (this.coronaangle >= 0 && qphx > 0) {
                 drawCorona(this.img, this.centerX, this.centerY, this.innerradius, angle, dotsize, qphx, this.coronaangle, false, true, 10, 40, 10); // color = 0..63
             }
@@ -388,7 +388,7 @@ public class NetworkGraph {
 
     private static void drawCorona(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final double angle, final int dotsize, int strength, final int coronaangle, final boolean inside, final boolean split, final int r, final int g, final int b) {
         final double ca = Math.PI * 2.0d * coronaangle / 360.0d;
-        if (strength > 4) strength = 4;
+        if (strength > 20) strength = 20;
         // draw a wave around crawling peers
         double wave;
         final int waveradius = innerradius / 2;
