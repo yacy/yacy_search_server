@@ -96,7 +96,7 @@ public class Tables implements Iterable<String> {
         this.cidx = new ConcurrentHashMap<String, TablesColumnIndex>();
     }
 
-    public TablesColumnIndex getIndex(final String tableName, TablesColumnIndex.INDEXTYPE indexType) throws Exception {
+    public TablesColumnIndex getIndex(final String tableName, TablesColumnIndex.INDEXTYPE indexType) throws TableColumnIndexException, IOException {
     	final TablesColumnIndex index;
     	switch(indexType) {
 	    	case RAM:
@@ -109,12 +109,12 @@ public class Tables implements Iterable<String> {
 	   			index =  new TablesColumnBLOBIndex(bheap);
 	   			break;
 	   		default:
-	   			throw new Exception("Unsupported TableColumnIndex: "+indexType.name());
+	   			throw new TableColumnIndexException("Unsupported TableColumnIndex: "+indexType.name());
     	}
     	return index;
     }
 
-    public TablesColumnIndex getIndex(final String tableName) throws Exception {
+    public TablesColumnIndex getIndex(final String tableName) throws TableColumnIndexException {
     	// return an existing index
     	if(this.cidx.containsKey(tableName)) {
     		return this.cidx.get(tableName);
@@ -131,7 +131,7 @@ public class Tables implements Iterable<String> {
     	final TablesColumnIndex index;
 
     	if(size < NOINDEX) {
-    		throw new RuntimeException("TableColumnIndex not available for tables with less than "+NOINDEX+" rows: "+tableName);
+    		throw new TableColumnIndexException("TableColumnIndex not available for tables with less than "+NOINDEX+" rows: "+tableName);
     	}
     	if(size < RAMINDEX) {
     		index = new TablesColumnRAMIndex();
