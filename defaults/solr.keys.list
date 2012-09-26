@@ -77,11 +77,11 @@ applinkscount_i
 
 ### optional but highly recommended values, not part of the index distribution process
 
+## tags that are attached to crawls/index generation to separate the search result into user-defined subsets
+collection_sxt
+
 ## point in degrees of latitude,longitude as declared in WSG84, location
 coordinate_p
-
-## ip of host of url (after DNS lookup), string
-ip_s
 
 ## content of author-tag, texgen
 author
@@ -140,8 +140,8 @@ h6_txt
 
 ### optional values, not part of standard YaCy handling (but useful for external applications)
 
-## tags that are attached to crawls/index generation to separate the search result into user-defined subsets
-#collection_sxt
+## ip of host of url (after DNS lookup), string
+#ip_s
 
 ## tags of css entries, normalized with absolute URL
 #css_tag_txt

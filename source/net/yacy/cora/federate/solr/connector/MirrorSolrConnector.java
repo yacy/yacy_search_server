@@ -205,18 +205,13 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         	return false;
         }
         cacheMiss_Miss++;
-        if (this.solr0 != null) {
-            if (this.solr0.exists(id)) {
-                this.hitCache.put(id, EXIST);
-                cacheHit_Insert++;
-                return true;
-            }
-        }
-        if (this.solr1 != null) {
-            if (this.solr1.exists(id)) {
-                this.hitCache.put(id, EXIST);
-                cacheHit_Insert++;
-                return true;
+        for (SolrConnector solr: new SolrConnector[]{this.solr0, this.solr1}) {
+            if (solr != null) {
+                if (solr.exists(id)) {
+                    this.hitCache.put(id, EXIST);
+                    cacheHit_Insert++;
+                    return true;
+                }
             }
         }
         this.missCache.put(id, EXIST);
@@ -237,24 +232,17 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         	return null;
         }
         cacheMiss_Miss++;
-        if (this.solr0 != null) {
-            doc = this.solr0.get(id);
-            if (doc != null) {
-                this.hitCache.put(id, EXIST);
-                cacheHit_Insert++;
-                this.documentCache.put(id, doc);
-                cacheDocument_Insert++;
-                return doc;
-            }
-        }
-        if (this.solr1 != null) {
-            doc = this.solr1.get(id);
-            if (doc != null) {
-                this.hitCache.put(id, EXIST);
-                cacheHit_Insert++;
-                this.documentCache.put(id, doc);
-                cacheDocument_Insert++;
-                return doc;
+        
+        for (SolrConnector solr: new SolrConnector[]{this.solr0, this.solr1}) {
+            if (solr != null) {
+                doc = solr.get(id);
+                if (doc != null) {
+                    this.hitCache.put(id, EXIST);
+                    cacheHit_Insert++;
+                    this.documentCache.put(id, doc);
+                    cacheDocument_Insert++;
+                    return doc;
+                }
             }
         }
         this.missCache.put(id, EXIST);

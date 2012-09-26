@@ -119,7 +119,11 @@ public class IndexFederated_p {
 
             if (solrRemoteWasOn && !solrRemoteIsOnAfterwards) {
                 // switch off
-                sb.index.fulltext().disconnectRemoteSolr();
+                try {
+                    sb.index.fulltext().disconnectRemoteSolr();
+                } catch (Throwable e) {
+                    Log.logException(e);
+                }
             }
 
             if (solrRemoteIsOnAfterwards) {
@@ -134,9 +138,13 @@ public class IndexFederated_p {
                     } else {
                         sb.index.fulltext().disconnectRemoteSolr();
                     }
-                } catch (final IOException e) {
+                } catch (final Throwable e) {
                     Log.logException(e);
-                    sb.index.fulltext().disconnectRemoteSolr();
+                    try {
+                        sb.index.fulltext().disconnectRemoteSolr();
+                    } catch (Throwable ee) {
+                        Log.logException(ee);
+                    }
                 }
             }
 

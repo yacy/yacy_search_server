@@ -227,7 +227,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         // construct query
         final SolrQuery params = new SolrQuery();
         params.setQuery(querystring);
-        params.setRows(1);
+        params.setRows(0);
         params.setStart(0);
 
         // query the server

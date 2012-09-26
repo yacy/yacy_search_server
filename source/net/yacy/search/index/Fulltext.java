@@ -293,11 +293,14 @@ public final class Fulltext implements Iterable<byte[]> {
         if (this.connectedSolr()) {
 	        try {
 	        	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-	        	synchronized (this.solr) {
-	        	    SolrDocument sd = this.solr.get(id);
-	        	    if (sd == null || this.solrScheme.getDate(sd, YaCySchema.last_modified).before(this.solrScheme.getDate(doc, YaCySchema.last_modified))) {
-	        	        this.solr.add(doc);
-	        	    }
+	        	SolrDocument sd = this.solr.get(id);
+	        	if (sd == null || this.solrScheme.getDate(sd, YaCySchema.last_modified).before(this.solrScheme.getDate(doc, YaCySchema.last_modified))) {
+	                if (this.solrScheme.contains(YaCySchema.ip_s)) {
+	                    // ip_s needs a dns lookup which causes blockings during search here
+	                    this.solr.add(doc);
+	                } else synchronized (this.solr) {
+	                    this.solr.add(doc);
+	                }
 	        	}
 	        } catch (SolrException e) {
 	            throw new IOException(e.getMessage(), e);
@@ -336,9 +339,12 @@ public final class Fulltext implements Iterable<byte[]> {
         if (this.connectedSolr()) {
 	        try {
 	        	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-                synchronized (this.solr) {
-                    SolrDocument sd = this.solr.get(id);
-                    if (sd == null || (new URIMetadataNode(sd)).isOlder(row)) {
+                SolrDocument sd = this.solr.get(id);
+                if (sd == null || (new URIMetadataNode(sd)).isOlder(row)) {
+                    if (this.solrScheme.contains(YaCySchema.ip_s)) {
+                        // ip_s needs a dns lookup which causes blockings during search here
+                        this.solr.add(getSolrScheme().metadata2solr(row));
+                    }  else synchronized (this.solr) {
                         this.solr.add(getSolrScheme().metadata2solr(row));
                     }
                 }

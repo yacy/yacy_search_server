@@ -166,6 +166,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
 
     @Override
     public QueryResponse query(SolrParams params) throws IOException {
+        if (this.server == null) throw new IOException("server disconnected");
         try {
             return this.server.query(params);
         } catch (SolrServerException e) {

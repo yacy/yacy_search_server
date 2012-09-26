@@ -170,7 +170,7 @@ public class RemoteSearch extends Thread {
         for (Seed s: nodes) {
             solrRemoteSearch(event, count, time, s, blacklist);
         }
-
+        
         // start search to YaCy peers
         final int targets = targetPeers.length;
         if (targets == 0) return;

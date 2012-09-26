@@ -1059,7 +1059,7 @@ public final class Protocol
 
         // evaluate result
 		if (docList.size() > 0) {// create containers
-            Network.log.logInfo("SEARCH (solr), returned " + docList.size() + " documents from peer " + target.hash + ":" + target.getName());
+            Network.log.logInfo("SEARCH (solr), returned " + docList.size() + " documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName()))) ;
             final List<ReferenceContainer<WordReference>> container = new ArrayList<ReferenceContainer<WordReference>>(wordhashes.size());
             for (byte[] hash: wordhashes) {
                 try {
@@ -1087,7 +1087,7 @@ public final class Protocol
                         if (localsearch) {
                             Network.log.logInfo("local search (solr): filtered blacklisted url " + urlEntry.url());
                         } else {
-                            Network.log.logInfo("remote search (solr): filtered blacklisted url " + urlEntry.url() + " from peer " + target.getName());
+                            Network.log.logInfo("remote search (solr): filtered blacklisted url " + urlEntry.url() + " from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
                         }
                     }
                     continue; // block with backlist
