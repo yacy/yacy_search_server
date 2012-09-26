@@ -85,10 +85,12 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.WordCache;
+import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.ShardSelection;
 import net.yacy.cora.federate.solr.connector.ShardSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.federate.yacy.ConfigurationSet;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
@@ -390,7 +392,12 @@ public final class Switchboard extends serverSwitch
         // update the working scheme with the backup scheme. This is necessary to include new features.
         // new features are always activated by default (if activated in input-backupScheme)
         solrScheme.fill(backupScheme, true);
-
+        // switch on some fields which are necessary for ranking and faceting
+        for (YaCySchema field: new YaCySchema[]{YaCySchema.url_file_ext_s, YaCySchema.last_modified}) {
+            ConfigurationSet.Entry entry = solrScheme.get(field.name()); entry.setEnable(true); solrScheme.put(field.name(), entry);
+        }
+        solrScheme.commit();
+        
         // initialize index
         ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
         final File segmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
