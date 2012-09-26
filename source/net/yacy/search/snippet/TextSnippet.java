@@ -31,7 +31,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
@@ -180,11 +179,11 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             Collection<StringBuilder> sentences = null;
 
             // try to get the snippet from metadata
+            removeMatchingHashes(row.url().toTokens(), remainingHashes);
             removeMatchingHashes(row.dc_title(), remainingHashes);
             removeMatchingHashes(row.dc_creator(), remainingHashes);
             removeMatchingHashes(row.dc_subject(), remainingHashes);
-            removeMatchingHashes(row.url().toNormalform(true, true).replace('-', ' '), remainingHashes);
-
+            
             if (!remainingHashes.isEmpty()) {
                 // we did not find everything in the metadata, look further into the document itself.
 
@@ -226,7 +225,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                         textline = tsr.getSnippet();
                         remainingHashes = tsr.getRemainingWords();
                     } catch (final UnsupportedOperationException e) {
-                        init(url.hash(), null, ResultClass.ERROR_NO_MATCH, "no matching snippet found");
+                        init(url.hash(), null, ResultClass.ERROR_NO_MATCH, "snippet extractor failed:" + e.getMessage());
                         return;
                     }
                 }
@@ -305,7 +304,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 textline = tsr.getSnippet();
                 remainingHashes =  tsr.getRemainingWords();
             } catch (final UnsupportedOperationException e) {
-                init(url.hash(), null, ResultClass.ERROR_NO_MATCH, "no matching snippet found");
+                init(url.hash(), null, ResultClass.ERROR_NO_MATCH, "snippet extractor failed:" + e.getMessage());
                 return;
             }
         } //encapsulate potential expensive sentences END
@@ -514,16 +513,15 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     }
 
     private static void removeMatchingHashes(final String sentence, final HandleSet queryhashes) {
-        final SortedMap<byte[], Integer> m = WordTokenizer.hashSentence(sentence, null, 100);
+        if (queryhashes.size() == 0) return;
+        final Set<byte[]> m = WordTokenizer.hashSentence(sentence, null, 100).keySet();
+        //for (byte[] b: m) System.out.println("sentence hash: " + ASCII.String(b));
+        //for (byte[] b: queryhashes) System.out.println("queryhash: " + ASCII.String(b));
         ArrayList<byte[]> o = new ArrayList<byte[]>(queryhashes.size());
         for (final byte[] b : queryhashes) {
-            if (m.containsKey(b)) {
-                o.add(b);
-            }
+            if (m.contains(b)) o.add(b);
         }
-        for (final byte[] b : o) {
-            queryhashes.remove(b);
-        }
+        for (final byte[] b : o) queryhashes.remove(b);
     }
 
 }
