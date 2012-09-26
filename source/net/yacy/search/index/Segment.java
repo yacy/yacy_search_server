@@ -352,7 +352,7 @@ public class Segment {
             final Condenser condenser,
             final SearchEvent searchEvent,
             final String sourceName
-            ) throws IOException {
+            ) {
         final long startTime = System.currentTimeMillis();
 
         // CREATE INDEX
@@ -394,16 +394,12 @@ public class Segment {
         );
 
         // STORE TO SOLR
-        // we do not store the data in metadatadb any more if a solr is connected
-        if (this.fulltext.connectedSolr()) {
-            try {
-                this.fulltext.putDocument(this.fulltext.getSolrScheme().yacy2solr(id, profile, responseHeader, document, metadata));
-            } catch ( final IOException e ) {
-                Log.logWarning("SOLR", "failed to send " + urlNormalform + " to solr: " + e.getMessage());
-            }
-        } else {
-        	this.fulltext.putMetadata(metadata);
+        try {
+            this.fulltext.putDocument(this.fulltext.getSolrScheme().yacy2solr(id, profile, responseHeader, document, metadata));
+        } catch ( final IOException e ) {
+            Log.logWarning("SOLR", "failed to send " + urlNormalform + " to solr: " + e.getMessage());
         }
+
         final long storageEndTime = System.currentTimeMillis();
 
         // STORE PAGE INDEX INTO WORD INDEX DB

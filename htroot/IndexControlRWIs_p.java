@@ -159,7 +159,7 @@ public class IndexControlRWIs_p {
                 if ( post.get("deleteIndex", "").equals("on") ) {
                     segment.clear();
                 }
-                if ( post.get("deleteRemoteSolr", "").equals("on") && sb.index.fulltext().connectedSolr()) {
+                if ( post.get("deleteRemoteSolr", "").equals("on")) {
                     try {
                         sb.index.fulltext().getSolr().clear();
                     } catch ( final Exception e ) {

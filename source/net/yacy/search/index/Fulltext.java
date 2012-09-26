@@ -47,7 +47,6 @@ import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.storage.ZIPReader;
 import net.yacy.cora.storage.ZIPWriter;
-import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
@@ -108,10 +107,6 @@ public final class Fulltext implements Iterable<byte[]> {
 
     public SolrConfiguration getSolrScheme() {
         return this.solrScheme;
-    }
-
-    public boolean connectedSolr() {
-        return this.solr.isConnected0() || this.solr.isConnected1();
     }
 
     public boolean connectedLocalSolr() {
@@ -227,16 +222,12 @@ public final class Fulltext implements Iterable<byte[]> {
 
         // get the metadata from the old metadata index
         if (this.urlIndexFile != null) try {
-        	if (this.connectedSolr()) {
-        		// slow migration to solr
-        		final Row.Entry entry = this.urlIndexFile.remove(urlHash);
-                if (entry == null) return null;
-    			URIMetadataRow row = new URIMetadataRow(entry, wre, weight);
-    			this.putDocument(this.solrScheme.metadata2solr(row));
-    			return row;
-        	}
-    		final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
-    		if (entry != null) return new URIMetadataRow(entry, wre, weight);
+    		// slow migration to solr
+    		final Row.Entry entry = this.urlIndexFile.remove(urlHash);
+            if (entry == null) return null;
+			URIMetadataRow row = new URIMetadataRow(entry, wre, weight);
+			this.putDocument(this.solrScheme.metadata2solr(row));
+			return row;
         } catch (final IOException e) {
             Log.logException(e);
         }
@@ -269,17 +260,12 @@ public final class Fulltext implements Iterable<byte[]> {
 
         // get the document from the old metadata index
         if (this.urlIndexFile != null) try {
-        	if (this.connectedSolr()) {
-        		// slow migration to solr
-        		final Row.Entry entry = this.urlIndexFile.remove(urlHash);
-                if (entry == null) return null;
-        		URIMetadataRow row = new URIMetadataRow(entry, wre, weight);
-        		this.putDocument(this.solrScheme.metadata2solr(row));
-        		return ClientUtils.toSolrDocument(getSolrScheme().metadata2solr(row));
-        	}
-        	final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
+    		// slow migration to solr
+    		final Row.Entry entry = this.urlIndexFile.remove(urlHash);
             if (entry == null) return null;
-            return ClientUtils.toSolrDocument(getSolrScheme().metadata2solr(new URIMetadataRow(entry, wre, weight)));
+    		URIMetadataRow row = new URIMetadataRow(entry, wre, weight);
+    		this.putDocument(this.solrScheme.metadata2solr(row));
+    		return ClientUtils.toSolrDocument(getSolrScheme().metadata2solr(row));
         } catch (final IOException e) {
             Log.logException(e);
         }
@@ -290,38 +276,19 @@ public final class Fulltext implements Iterable<byte[]> {
     public void putDocument(final SolrInputDocument doc) throws IOException {
         String id = (String) doc.getFieldValue(YaCySchema.id.name());
         byte[] idb = ASCII.getBytes(id);
-        if (this.connectedSolr()) {
-	        try {
-	        	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-	        	SolrDocument sd = this.solr.get(id);
-	        	if (sd == null || this.solrScheme.getDate(sd, YaCySchema.last_modified).before(this.solrScheme.getDate(doc, YaCySchema.last_modified))) {
-	                if (this.solrScheme.contains(YaCySchema.ip_s)) {
-	                    // ip_s needs a dns lookup which causes blockings during search here
-	                    this.solr.add(doc);
-	                } else synchronized (this.solr) {
-	                    this.solr.add(doc);
-	                }
-	        	}
-	        } catch (SolrException e) {
-	            throw new IOException(e.getMessage(), e);
-	        }
-        } else if (this.urlIndexFile != null) {
-            URIMetadata oldEntry = null;
-	        try {
-	            final Row.Entry oe = this.urlIndexFile.get(idb, false);
-	            oldEntry = (oe == null) ? null : new URIMetadataRow(oe, null, 0);
-	        } catch (final Throwable e) {
-	            Log.logException(e);
-	            oldEntry = null;
-	        }
-	        URIMetadataNode entry = new URIMetadataNode(ClientUtils.toSolrDocument(doc));
-	        if (oldEntry == null || oldEntry.isOlder(entry)) {
-		        try {
-		        	this.urlIndexFile.put(entry.toRow().toRowEntry());
-		        } catch (final SpaceExceededException e) {
-		            throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
-		        }
+        try {
+        	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
+        	SolrDocument sd = this.solr.get(id);
+        	if (sd == null || this.solrScheme.getDate(sd, YaCySchema.last_modified).before(this.solrScheme.getDate(doc, YaCySchema.last_modified))) {
+                if (this.solrScheme.contains(YaCySchema.ip_s)) {
+                    // ip_s needs a dns lookup which causes blockings during search here
+                    this.solr.add(doc);
+                } else synchronized (this.solr) {
+                    this.solr.add(doc);
+                }
         	}
+        } catch (SolrException e) {
+            throw new IOException(e.getMessage(), e);
         }
         this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCache();
@@ -336,37 +303,19 @@ public final class Fulltext implements Iterable<byte[]> {
 
         byte[] idb = row.hash();
         String id = ASCII.String(idb);
-        if (this.connectedSolr()) {
-	        try {
-	        	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-                SolrDocument sd = this.solr.get(id);
-                if (sd == null || (new URIMetadataNode(sd)).isOlder(row)) {
-                    if (this.solrScheme.contains(YaCySchema.ip_s)) {
-                        // ip_s needs a dns lookup which causes blockings during search here
-                        this.solr.add(getSolrScheme().metadata2solr(row));
-                    }  else synchronized (this.solr) {
-                        this.solr.add(getSolrScheme().metadata2solr(row));
-                    }
+        try {
+        	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
+            SolrDocument sd = this.solr.get(id);
+            if (sd == null || (new URIMetadataNode(sd)).isOlder(row)) {
+                if (this.solrScheme.contains(YaCySchema.ip_s)) {
+                    // ip_s needs a dns lookup which causes blockings during search here
+                    this.solr.add(getSolrScheme().metadata2solr(row));
+                }  else synchronized (this.solr) {
+                    this.solr.add(getSolrScheme().metadata2solr(row));
                 }
-	        } catch (SolrException e) {
-	            throw new IOException(e.getMessage(), e);
-	        }
-        } else if (this.urlIndexFile != null) {
-            URIMetadata oldEntry = null;
-	        try {
-	            final Row.Entry oe = this.urlIndexFile.get(idb, false);
-	            oldEntry = (oe == null) ? null : new URIMetadataRow(oe, null, 0);
-	        } catch (final Throwable e) {
-	            Log.logException(e);
-	            oldEntry = null;
-	        }
-	        if (oldEntry == null || oldEntry.isOlder(row)) {
-		        try {
-		        	this.urlIndexFile.put(row.toRowEntry());
-		        } catch (final SpaceExceededException e) {
-		            throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
-		        }
-        	}
+            }
+        } catch (SolrException e) {
+            throw new IOException(e.getMessage(), e);
         }
         this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCache();

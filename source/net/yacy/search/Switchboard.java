@@ -2541,45 +2541,28 @@ public final class Switchboard extends serverSwitch
 
         // STORE WORD INDEX
         URIMetadata newEntry = null;
-        try {
-            newEntry =
-                this.index.storeDocument(
-                    url,
-                    referrerURL,
-                    queueEntry.lastModified(),
-                    new Date(),
-                    queueEntry.size(),
-                    queueEntry.profile(),
-                    queueEntry.getResponseHeader(),
-                    document,
-                    condenser,
-                    searchEvent,
-                    sourceName);
-            final RSSFeed feed =
-                EventChannel.channels(queueEntry.initiator() == null
-                    ? EventChannel.PROXY
-                    : Base64Order.enhancedCoder.equal(
-                        queueEntry.initiator(),
-                        ASCII.getBytes(this.peers.mySeed().hash))
-                        ? EventChannel.LOCALINDEXING
-                        : EventChannel.REMOTEINDEXING);
-            feed.addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url(), ASCII.String(queueEntry.url().hash())));
-        } catch ( final IOException e ) {
-            //if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
-            addURLtoErrorDB(
+        newEntry =
+            this.index.storeDocument(
                 url,
-                (referrerURL == null) ? null : referrerURL.hash(),
-                queueEntry.initiator(),
-                dc_title,
-                FailCategory.FINAL_LOAD_CONTEXT,
-                "error storing url: "
-                    + url.toNormalform(false, true)
-                    + "': process case="
-                    + processCase
-                    + ", error = "
-                    + e.getMessage());
-            return;
-        }
+                referrerURL,
+                queueEntry.lastModified(),
+                new Date(),
+                queueEntry.size(),
+                queueEntry.profile(),
+                queueEntry.getResponseHeader(),
+                document,
+                condenser,
+                searchEvent,
+                sourceName);
+        final RSSFeed feed =
+            EventChannel.channels(queueEntry.initiator() == null
+                ? EventChannel.PROXY
+                : Base64Order.enhancedCoder.equal(
+                    queueEntry.initiator(),
+                    ASCII.getBytes(this.peers.mySeed().hash))
+                    ? EventChannel.LOCALINDEXING
+                    : EventChannel.REMOTEINDEXING);
+        feed.addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url(), ASCII.String(queueEntry.url().hash())));
 
         // store rss feeds in document into rss table
         for ( final Map.Entry<MultiProtocolURI, String> rssEntry : document.getRSS().entrySet() ) {
