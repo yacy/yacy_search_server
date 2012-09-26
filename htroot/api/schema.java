@@ -23,17 +23,20 @@
  */
 
 import net.yacy.cora.federate.solr.YaCySchema;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.SolrConfiguration;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
+import net.yacy.server.servletProperties;
 
-public class schema_p {
+public class schema {
 
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        final serverObjects prop = new serverObjects();
+        final servletProperties prop = new servletProperties();
         final Switchboard sb = (Switchboard) env;
 
         // write scheme
@@ -72,6 +75,13 @@ public class schema_p {
 
         prop.put("solruniquekey",YaCySchema.id.getSolrFieldName());
         prop.put("solrdefaultsearchfield",YaCySchema.text_t.getSolrFieldName());
+        
+
+        // add CORS Access header
+        final ResponseHeader outgoingHeader = new ResponseHeader(200);
+        outgoingHeader.put(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
+        prop.setOutgoingHeader(outgoingHeader);   
+        
         // return rewrite properties
         return prop;
     }
