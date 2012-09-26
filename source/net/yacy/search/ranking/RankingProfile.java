@@ -195,6 +195,46 @@ public class RankingProfile {
         return (coeff.get(attr)).intValue();
     }
 
+    /**
+     * set all ranking attributes to zero
+     * This is usually used when a specific value is set to maximum
+     */
+    public void allZero() {
+        this.coeff_domlength          = 0;
+        this.coeff_ybr                = 0;
+        this.coeff_date               = 0;
+        this.coeff_wordsintitle       = 0;
+        this.coeff_wordsintext        = 0;
+        this.coeff_phrasesintext      = 0;
+        this.coeff_llocal             = 0;
+        this.coeff_lother             = 0;
+        this.coeff_urllength          = 0;
+        this.coeff_urlcomps           = 0;
+        this.coeff_hitcount           = 0;
+        this.coeff_posintext          = 0;
+        this.coeff_posofphrase        = 0;
+        this.coeff_posinphrase        = 0;
+        this.coeff_authority          = 0;
+        this.coeff_worddistance       = 0;
+        this.coeff_appurl             = 0;
+        this.coeff_app_dc_title       = 0;
+        this.coeff_app_dc_creator     = 0;
+        this.coeff_app_dc_subject     = 0;
+        this.coeff_app_dc_description = 0;
+        this.coeff_appemph            = 0;
+        this.coeff_catindexof         = 0;
+        this.coeff_cathasimage        = 0;
+        this.coeff_cathasaudio        = 0;
+        this.coeff_cathasvideo        = 0;
+        this.coeff_cathasapp          = 0;
+        this.coeff_termfrequency      = 0;
+        this.coeff_urlcompintoplist   = 0;
+        this.coeff_descrcompintoplist = 0;
+        this.coeff_prefer             = 0;
+        this.coeff_language           = 0;
+        this.coeff_citation           = 0;
+    }
+    
     private String externalStringCache = null;
     public String toExternalString() {
         if (this.externalStringCache != null) return this.externalStringCache;

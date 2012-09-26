@@ -175,12 +175,14 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
     public Date getDate(SolrInputDocument doc, final YaCySchema key) {
         Date x = (Date) doc.getFieldValue(key.name());
-        return (x == null) ? new Date(0) : x;
+        Date now = new Date();
+        return (x == null) ? new Date(0) : x.after(now) ? now : x;
     }
 
     public Date getDate(SolrDocument doc, final YaCySchema key) {
-        Date x = (Date) doc.getFieldValue(key.name());
-        return (x == null) ? new Date(0) : x;
+        Date x = doc == null ? null : (Date) doc.getFieldValue(key.name());
+        Date now = new Date();
+        return (x == null) ? new Date(0) : x.after(now) ? now : x;
     }
 
     /**

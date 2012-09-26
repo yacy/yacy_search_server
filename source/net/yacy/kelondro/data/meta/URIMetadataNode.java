@@ -130,7 +130,7 @@ public class URIMetadataNode implements URIMetadata {
         Date x = (Date) this.doc.getFieldValue(field.name());
         if (x == null) return new Date(0);
         Date now = new Date();
-        return (x.after(now)) ? now : x;
+        return x.after(now) ? now : x;
     }
 
     private String getString(YaCySchema field) {

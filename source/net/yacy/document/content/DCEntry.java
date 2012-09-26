@@ -102,7 +102,9 @@ public class DCEntry extends TreeMap<String, String> {
         if (d == null) return null;
         if (d.isEmpty()) return null;
         try {
-            return ISO8601Formatter.FORMATTER.parse(d);
+            Date x = ISO8601Formatter.FORMATTER.parse(d);
+            Date now = new Date();
+            return x.after(now) ? now : x;
         } catch (ParseException e) {
             Log.logException(e);
             return new Date();

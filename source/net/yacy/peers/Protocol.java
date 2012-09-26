@@ -1063,12 +1063,8 @@ public final class Protocol
             final List<ReferenceContainer<WordReference>> container = new ArrayList<ReferenceContainer<WordReference>>(wordhashes.size());
             for (byte[] hash: wordhashes) {
                 try {
-                    container.add(ReferenceContainer.emptyContainer(
-                                Segment.wordReferenceFactory,
-                                hash,
-                                count));
-                } catch (SpaceExceededException e) {
-                } // throws SpaceExceededException
+                    container.add(ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, hash, count));
+                } catch (SpaceExceededException e) {} // throws SpaceExceededException
             }
 
         	int term = count;
@@ -1090,11 +1086,10 @@ public final class Protocol
                             Network.log.logInfo("remote search (solr): filtered blacklisted url " + urlEntry.url() + " from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
                         }
                     }
-                    continue; // block with backlist
+                    continue; // block with blacklist
                 }
 
-                final String urlRejectReason =
-                    Switchboard.getSwitchboard().crawlStacker.urlInAcceptedDomain(urlEntry.url());
+                final String urlRejectReason = Switchboard.getSwitchboard().crawlStacker.urlInAcceptedDomain(urlEntry.url());
                 if ( urlRejectReason != null ) {
                     if ( Network.log.isInfo() ) {
                         if (localsearch) {

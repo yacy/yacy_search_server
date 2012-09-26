@@ -364,11 +364,13 @@ public class yacysearch {
 
             if ( querystring.indexOf("/near", 0) >= 0 ) {
                 querystring = querystring.replace("/near", "");
+                ranking.allZero(); // switch off all attributes
                 ranking.coeff_worddistance = RankingProfile.COEFF_MAX;
                 modifier.append("/near ");
             }
             if ( querystring.indexOf("/date", 0) >= 0 ) {
                 querystring = querystring.replace("/date", "");
+                ranking.allZero(); // switch off all attributes
                 ranking.coeff_date = RankingProfile.COEFF_MAX;
                 modifier.append("/date ");
             }
