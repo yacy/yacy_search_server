@@ -47,6 +47,7 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.WorkTables;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
+import net.yacy.kelondro.blob.TableColumnIndexException;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.blob.TablesColumnIndex;
@@ -149,8 +150,8 @@ public class YMarkTables {
 					}
     			} catch (IOException e) {
 					Log.logException(e);
-				} catch (Exception e) {
-					Log.logException(e);
+				} catch (TableColumnIndexException e) {
+					// currently nothing to do...
 				}
     		}
     	}
@@ -164,10 +165,10 @@ public class YMarkTables {
     		this.worktables.delete(bmk_table,urlHash);
         }
     	if(this.worktables.hasIndex(bmk_table, YMarkEntry.BOOKMARK.FOLDERS.key())) {
-    		try {
+			try {
 				this.worktables.getIndex(bmk_table).delete(urlHash);
-			} catch (Exception e) {
-				// nothing to do
+			} catch (TableColumnIndexException e) {
+				// currently nothing to do...
 			}
     	}
     }

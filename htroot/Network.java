@@ -42,6 +42,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.peers.NewsDB;
 import net.yacy.peers.NewsPool;
@@ -53,6 +54,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
+import net.yacy.server.servletProperties;
 
 public class Network {
 
@@ -62,7 +64,9 @@ public class Network {
         final Switchboard sb = (Switchboard) switchboard;
         final long start = System.currentTimeMillis();
 
-        final serverObjects prop = new serverObjects();
+        // final serverObjects prop = new serverObjects();
+        final servletProperties prop = new servletProperties();
+        
         prop.put("menu", post == null ? 2 : (post.get("menu", "").equals("embed")) ? 0 : (post.get("menu","").equals("simple")) ? 1 : 2);
         if (sb.peers.mySeed() != null) prop.put("menu_newpeer_peerhash", sb.peers.mySeed().hash);
 
@@ -86,7 +90,7 @@ public class Network {
             final int disconCount = sb.peers.sizeDisconnected();
             int potCount = sb.peers.sizePotential();
 
-//          final boolean complete = ((post == null) ? false : post.get("links", "false").equals("true"));
+            // final boolean complete = ((post == null) ? false : post.get("links", "false").equals("true"));
             final long otherppm = sb.peers.countActivePPM();
             final double otherqpm = sb.peers.countActiveQPM();
             long myppm = 0;
@@ -477,6 +481,14 @@ public class Network {
 
         prop.putNum("table_rt", System.currentTimeMillis() - start);
 
+        // Adding CORS Access header for Network.xml
+        final String path = requestHeader.get(HeaderFramework.CONNECTION_PROP_PATH);
+        if(path != null && path.endsWith(".xml")) {
+            final ResponseHeader outgoingHeader = new ResponseHeader(200);
+    		outgoingHeader.put(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
+    		prop.setOutgoingHeader(outgoingHeader);        	
+        }
+        
         // return rewrite properties
         return prop;
     }
