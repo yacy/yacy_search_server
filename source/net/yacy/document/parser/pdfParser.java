@@ -71,7 +71,7 @@ public class pdfParser extends AbstractParser implements Parser {
     public Document[] parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
 
         // check memory for parser
-        if (!MemoryControl.request(200 * 1024 * 1024, true))
+        if (!MemoryControl.request(200 * 1024 * 1024, false))
             throw new Parser.Failure("Not enough Memory available for pdf parser: " + MemoryControl.available(), location);
 
         // create a pdf parser
