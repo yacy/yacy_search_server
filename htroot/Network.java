@@ -64,7 +64,6 @@ public class Network {
         final Switchboard sb = (Switchboard) switchboard;
         final long start = System.currentTimeMillis();
 
-        // final serverObjects prop = new serverObjects();
         final servletProperties prop = new servletProperties();
         
         prop.put("menu", post == null ? 2 : (post.get("menu", "").equals("embed")) ? 0 : (post.get("menu","").equals("simple")) ? 1 : 2);

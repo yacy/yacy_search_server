@@ -884,6 +884,7 @@ public final class HTTPDFileHandler {
                 // prepare response header
                 ResponseHeader header = new ResponseHeader(200);
                 header.put(HeaderFramework.CONTENT_TYPE, getMimeFromServlet(targetClass, requestHeader, args, "text/xml"));
+                header.put(HeaderFramework.CORS_ALLOW_ORIGIN, "*"); // allow Cross-Origin Resource Sharing for all stream servlets
                 conProp.remove(HeaderFramework.CONNECTION_PROP_PERSISTENT);
                 final boolean zipContent = requestHeader.acceptGzip();
                 if (zipContent) header.put(HeaderFramework.CONTENT_ENCODING, "gzip");
