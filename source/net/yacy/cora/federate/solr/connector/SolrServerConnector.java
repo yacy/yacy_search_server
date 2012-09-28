@@ -274,8 +274,9 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         // query the server
         QueryResponse rsp = query(params);
         FacetField facet = rsp.getFacetField(field);
-        List<Count> values = facet.getValues();
         ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+        List<Count> values = facet.getValues();
+        if (values == null) return result;
         for (Count ff: values) result.set(ff.getName(), (int) ff.getCount());
         return result;
     }

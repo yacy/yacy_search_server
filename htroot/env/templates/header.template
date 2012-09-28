@@ -9,6 +9,7 @@
     <ul class="menu">
       <li><a href="/index.html" accesskey="s" class="MenuItemLink">Web Search</a></li>
       <li><a href="/yacyinteractive.html" class="MenuItemLink">File Search</a></li>
+      <li><a href="/HostBrowser.html" class="MenuItemLink">Host Browser</a></li>
       <li><a href="/yacysearch_location.html" class="MenuItemLink">Location Search</a></li>
       <li><a href="/solr/select?q=*:*&start=0&rows=3" class="MenuItemLink">Embedded Solr API</a></li>
       <!--<li><a href="/yacy/ui/" accesskey="s" class="MenuItemLink">Rich Client Search</a></li>-->

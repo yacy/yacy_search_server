@@ -394,8 +394,11 @@ public final class Switchboard extends serverSwitch
         solrScheme.fill(backupScheme, true);
         // switch on some fields which are necessary for ranking and faceting
         for (YaCySchema field: new YaCySchema[]{
-                YaCySchema.url_file_ext_s, YaCySchema.last_modified,
-                YaCySchema.url_paths_sxt, YaCySchema.host_organization_s
+                YaCySchema.host_s,
+                YaCySchema.url_file_ext_s, YaCySchema.last_modified,                        // needed for media search and /date operator
+                YaCySchema.url_paths_sxt, YaCySchema.host_organization_s,                   // needed to search in the url
+                YaCySchema.inboundlinks_protocol_sxt, YaCySchema.inboundlinks_urlstub_txt,  // needed for HostBrowser
+                YaCySchema.outboundlinks_protocol_sxt, YaCySchema.outboundlinks_urlstub_txt // needed to enhance the crawler
             }) {
             ConfigurationSet.Entry entry = solrScheme.get(field.name()); entry.setEnable(true); solrScheme.put(field.name(), entry);
         }

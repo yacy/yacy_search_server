@@ -881,14 +881,14 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return CharType.high;
     }
 
-    public String toNormalform(final boolean excludeReference, final boolean stripAmp) {
-        return toNormalform(excludeReference, stripAmp, false);
+    public String toNormalform(final boolean excludeAnchor, final boolean stripAmp) {
+        return toNormalform(excludeAnchor, stripAmp, false);
     }
 
-    private static final Pattern ampPattern = Pattern.compile("&amp;");
+    private static final Pattern ampPattern = Pattern.compile(Pattern.quote("&amp;"));
 
-    public String toNormalform(final boolean excludeReference, final boolean stripAmp, final boolean removeSessionID) {
-        String result = toNormalform0(excludeReference, removeSessionID);
+    public String toNormalform(final boolean excludeAnchor, final boolean stripAmp, final boolean removeSessionID) {
+        String result = toNormalform0(excludeAnchor, removeSessionID);
         if (stripAmp) {
             Matcher matcher = ampPattern.matcher(result);
             while (matcher.find()) {
@@ -899,7 +899,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return result;
     }
 
-    private String toNormalform0(final boolean excludeReference, final boolean removeSessionID) {
+    private String toNormalform0(final boolean excludeAnchor, final boolean removeSessionID) {
         // generates a normal form of the URL
         boolean defaultPort = false;
         if (this.protocol.equals("mailto")) {
@@ -915,17 +915,17 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         } else if (isFile()) {
             defaultPort = true;
         }
-        final String urlPath = this.getFile(excludeReference, removeSessionID);
-        final StringBuilder u = new StringBuilder(80);
+        final String urlPath = this.getFile(excludeAnchor, removeSessionID);
+        String h = getHost();
+        final StringBuilder u = new StringBuilder(20 + urlPath.length() + ((h == null) ? 0 : h.length()));
         u.append(this.protocol);
         u.append("://");
-        if (getHost() != null) {
+        if (h != null) {
             if (this.userInfo != null) {
                 u.append(this.userInfo);
                 u.append("@");
             }
-            final String hl = getHost().toLowerCase();
-            u.append(hl);
+            u.append(h.toLowerCase());
         }
         if (!defaultPort) {
             u.append(":");
@@ -961,7 +961,13 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     @Override
     public int compareTo(final MultiProtocolURI h) {
-        return toString().compareTo(h.toString());
+        int c;
+        if (this.protocol != null && h.protocol != null && (c = this.protocol.compareTo(h.protocol)) != 0) return c;
+        if (this.host != null && h.host != null && (c = this.host.compareTo(h.host)) != 0) return c;
+        if (this.userInfo != null && h.userInfo != null && (c = this.userInfo.compareTo(h.userInfo)) != 0) return c;
+        if (this.path != null && h.path != null && (c = this.path.compareTo(h.path)) != 0) return c;
+        if (this.searchpart != null && h.searchpart != null && (c = this.searchpart.compareTo(h.searchpart)) != 0) return c;
+        return toNormalform(true, true).compareTo(h.toNormalform(true, true));
     }
 
     public boolean isPOST() {

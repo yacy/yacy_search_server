@@ -178,10 +178,10 @@ h6_txt
 #inboundlinks_tag_txt
 
 ## internal links, only the protocol
-#inboundlinks_protocol_sxt
+inboundlinks_protocol_sxt
 
 ## internal links, the url only without the protocol
-#inboundlinks_urlstub_txt
+inboundlinks_urlstub_txt
 
 ## internal links, the name property of the a-tag
 #inboundlinks_name_txt
@@ -208,10 +208,10 @@ h6_txt
 #outboundlinks_tag_txt
 
 ## external links, only the protocol
-#outboundlinks_protocol_sxt
+outboundlinks_protocol_sxt
 
 ## external links, the url only without the protocol
-#outboundlinks_urlstub_txt
+outboundlinks_urlstub_txt
 
 ## external links, the name property of the a-tag
 #outboundlinks_name_txt
@@ -325,7 +325,7 @@ host_s
 #host_dnc_s
     
 ## either the second level domain or, if a ccSLD is used, the third level domain
-#host_organization_s
+host_organization_s
     
 ## the organization and dnc concatenated with '.'
 #host_organizationdnc_s

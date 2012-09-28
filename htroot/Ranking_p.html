@@ -7,7 +7,7 @@
 	$(function() {
 		$("select").each(function(){
 			var name = $(this).attr("name");
-			$("<div name='"+name+"' id='slider_"+name+"'></div>").insertAfter($(this)).slider({
+			$("<div style='width:360px; float:left; display: inline;' name='"+name+"' id='slider_"+name+"'></div>").insertAfter($(this)).slider({
 				min: 0,
 				max: 15,
 				range: "min",
@@ -38,8 +38,8 @@
         <legend>Pre-Ranking</legend>
         <dl>#{attrPre}# 
           <dt style="width:260px"><label for="#[nameorg]#">#[name]#</label>&nbsp;<span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span>#[info]#</span></span></dt>
-          <dd style="width:360px" id="#[nameorg]#">
-            <select name="#[nameorg]#">#{select}# 
+          <dd style="width:360px; float:left; display:inline;" id="#[nameorg]#">
+            <select style="float:left; display:inline;" name="#[nameorg]#">#{select}# 
 				<option value="#[value]#" #(checked)#:: selected="selected"#(/checked)#>#[value]#</option>#{/select}#
 			</select>
           </dd>#{/attrPre}# 
