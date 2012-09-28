@@ -27,6 +27,7 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.federate.solr.SolrServlet;
+import net.yacy.cora.federate.solr.YaCySchema;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
@@ -182,16 +183,26 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         storage.mkdirs();
         try {
             EmbeddedSolrConnector solr = new EmbeddedSolrConnector(storage, solr_config);
+            solr.setCommitWithinMs(100);
             SolrInputDocument doc = new SolrInputDocument();
-            doc.addField("id", "ABCD0000abcd");
-            doc.addField("title", "Lorem ipsum");
-            doc.addField("text_t", "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+            doc.addField(YaCySchema.id.name(), "ABCD0000abcd");
+            doc.addField(YaCySchema.title.name(), "Lorem ipsum");
+            doc.addField(YaCySchema.host_s.name(), "yacy.net");
+            doc.addField(YaCySchema.text_t.name(), "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
             solr.add(doc);
-            SolrServlet.startServer("/solr", 8091, solr);
-            SolrDocumentList searchresult = solr.query("text_t:tempor", 0, 10);
-            for (SolrDocument d : searchresult) {
-                System.out.println(d.toString());
-            }
+            
+            // start a server
+            SolrServlet.startServer("/solr", 8091, solr); // try http://localhost:8091/solr/select?q=*:*
+
+            // do a normal query
+            SolrDocumentList select = solr.query(YaCySchema.text_t.name() + ":tempor", 0, 10);
+            for (SolrDocument d : select) System.out.println("***TEST SELECT*** " + d.toString());
+
+            // do a facet query
+            select = solr.query(YaCySchema.text_t.name() + ":tempor", 0, 10);
+            for (SolrDocument d : select) System.out.println("***TEST SELECT*** " + d.toString());
+            
+            
             // try http://127.0.0.1:8091/solr/select?q=ping
             try {Thread.sleep(1000 * 1000);} catch (InterruptedException e) {}
             solr.close();

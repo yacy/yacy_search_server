@@ -27,6 +27,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import net.yacy.cora.document.UTF8;
+import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.protocol.Domains;
 
 import org.apache.solr.common.SolrDocument;
@@ -206,6 +209,22 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
         return count.get();
     }
 
+    /**
+     * get a facet of the index: a list of values that are most common in a specific field
+     * @param field the field which is selected for the facet
+     * @param maxresults the maximum size of the resulting map
+     * @return an ordered map of fields
+     * @throws IOException
+     */
+    public ReversibleScoreMap<String> getFacet(final String field, final int maxresults) throws IOException {
+        ReversibleScoreMap<String> acc = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+        for (final SolrConnector connector: this.connectors) {
+            ReversibleScoreMap<String> peer = connector.getFacet(field, maxresults);
+            for (String key: peer) acc.inc(key, peer.get(key));
+        }
+        return acc;
+    }
+    
     public long[] getSizeList() {
         final long[] size = new long[this.connectors.size()];
         int i = 0;

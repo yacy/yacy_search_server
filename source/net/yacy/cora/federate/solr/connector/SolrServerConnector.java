@@ -26,21 +26,29 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.document.UTF8;
+import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.sorting.ReversibleScoreMap;
 
+import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
+import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.SolrParams;
 
 public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
+    private final static Logger log = Logger.getLogger(SolrServerConnector.class);
+    
     protected SolrServer server;
     protected int commitWithinMs; // max time (in ms) before a commit will happen
 
@@ -81,9 +89,9 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             if (this.server != null) synchronized (this.server) {this.server.commit();}
             this.server = null;
         } catch (SolrServerException e) {
-            Log.logException(e);
+            log.warn(e);
         } catch (IOException e) {
-            Log.logException(e);
+            log.warn(e);
         }
     }
 
@@ -96,7 +104,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             if (docs == null) return 0;
             return docs.getNumFound();
         } catch (final Throwable e) {
-            Log.logException(e);
+            log.warn(e);
             return 0;
         }
     }
@@ -181,7 +189,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 //this.server.commit();
             }
         } catch (SolrServerException e) {
-            Log.logWarning("SolrConnector", e.getMessage() + " DOC=" + solrdoc.toString());
+            log.warn(e.getMessage() + " DOC=" + solrdoc.toString());
             throw new IOException(e);
         }
     }
@@ -196,7 +204,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 //this.server.commit();
             }
         } catch (SolrServerException e) {
-            Log.logWarning("SolrConnector", e.getMessage() + " DOC=" + solrdocs.toString());
+            log.warn(e.getMessage() + " DOC=" + solrdocs.toString());
             throw new IOException(e);
         }
     }
@@ -214,6 +222,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         params.setQuery(querystring);
         params.setRows(count);
         params.setStart(offset);
+        params.setFacet(false);
         //params.addSortField( "price", SolrQuery.ORDER.asc );
 
         // query the server
@@ -222,6 +231,12 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         return docs;
     }
 
+    /**
+     * get the number of results when this query is done.
+     * This should only be called if the actual result is never used, and only the count is interesting
+     * @param querystring
+     * @return the number of results for this query
+     */
     @Override
     public long getQueryCount(String querystring) throws IOException {
         // construct query
@@ -229,11 +244,40 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         params.setQuery(querystring);
         params.setRows(0);
         params.setStart(0);
+        params.setFacet(false);
 
         // query the server
         QueryResponse rsp = query(params);
         final SolrDocumentList docs = rsp.getResults();
         return docs.getNumFound();
+    }
+    
+    /**
+     * get a facet of the index: a list of values that are most common in a specific field
+     * @param field the field which is selected for the facet
+     * @param maxresults the maximum size of the resulting map
+     * @return an ordered map of fields
+     * @throws IOException
+     */
+    @Override
+    public ReversibleScoreMap<String> getFacet(String field, int maxresults) throws IOException {
+        // construct query
+        final SolrQuery params = new SolrQuery();
+        params.setQuery("*:*");
+        params.setRows(0);
+        params.setStart(0);
+        params.setFacet(true);
+        params.setFacetLimit(maxresults);
+        params.setFacetSort(FacetParams.FACET_SORT_COUNT);
+        params.addFacetField(field);
+        
+        // query the server
+        QueryResponse rsp = query(params);
+        FacetField facet = rsp.getFacetField(field);
+        List<Count> values = facet.getValues();
+        ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+        for (Count ff: values) result.set(ff.getName(), (int) ff.getCount());
+        return result;
     }
 
     abstract public QueryResponse query(SolrParams params) throws IOException;

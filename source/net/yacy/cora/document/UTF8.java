@@ -26,6 +26,7 @@ package net.yacy.cora.document;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.Comparator;
 
 import org.apache.http.entity.mime.content.StringBody;
 
@@ -38,13 +39,65 @@ import org.apache.http.entity.mime.content.StringBody;
  * @author admin
  *
  */
-public class UTF8 {
+public class UTF8 implements Comparator<String> {
 
     public final static Charset charset;
     static {
         charset = Charset.forName("UTF-8");
     }
 
+    public static final UTF8 insensitiveUTF8Comparator = new UTF8(true);
+    public static final UTF8 identityUTF8Comparator = new UTF8(false);
+
+    public boolean insensitive;
+
+    public UTF8(boolean insensitive) {
+        this.insensitive = insensitive;
+    }
+
+    @Override
+    public int compare(String o0, String o1) {
+        final int l0 = o0.length();
+        final int l1 = o1.length();
+        final int ml = Math.min(l0, l1);
+        char c0, c1;
+        for (int i = 0; i < ml; i++) {
+            if (this.insensitive) {
+                c0 = Character.toLowerCase(o0.charAt(i));
+                c1 = Character.toLowerCase(o1.charAt(i));
+            } else {
+                c0 = o0.charAt(i);
+                c1 = o1.charAt(i);
+            }
+            if (c0 == c1) continue;
+            return c0 - c1;
+        }
+        return l0 - l1;
+    }
+
+    public boolean equals(final String o0, final String o1) {
+        final int l0 = o0.length();
+        final int l1 = o1.length();
+        if (l0 != l1) return false;
+        return equals(o0, o1, l1);
+    }
+
+    private boolean equals(final String o0, final String o1, final int l) {
+        char c0, c1;
+        for (int i = 0; i < l; i++) {
+            if (this.insensitive) {
+                c0 = Character.toLowerCase(o0.charAt(i));
+                c1 = Character.toLowerCase(o1.charAt(i));
+            } else {
+                c0 = o0.charAt(i);
+                c1 = o1.charAt(i);
+            }
+            if (c0 == c1) continue;
+            return false;
+        }
+        return true;
+    }
+    
     public final static StringBody StringBody(final byte[] b) {
         return StringBody(UTF8.String(b));
     }

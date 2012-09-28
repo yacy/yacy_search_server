@@ -25,6 +25,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import net.yacy.cora.sorting.ReversibleScoreMap;
+
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
@@ -163,10 +165,14 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
         return this.solr.query(querystring, offset, count);
     }
 
-
     @Override
     public long getQueryCount(final String querystring) throws IOException {
         return this.solr.getQueryCount(querystring);
+    }
+
+    @Override
+    public ReversibleScoreMap<String> getFacet(final String field, final int maxresults) throws IOException {
+        return this.solr.getFacet(field, maxresults);
     }
 
     @Override

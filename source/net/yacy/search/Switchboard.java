@@ -393,7 +393,10 @@ public final class Switchboard extends serverSwitch
         // new features are always activated by default (if activated in input-backupScheme)
         solrScheme.fill(backupScheme, true);
         // switch on some fields which are necessary for ranking and faceting
-        for (YaCySchema field: new YaCySchema[]{YaCySchema.url_file_ext_s, YaCySchema.last_modified}) {
+        for (YaCySchema field: new YaCySchema[]{
+                YaCySchema.url_file_ext_s, YaCySchema.last_modified,
+                YaCySchema.url_paths_sxt, YaCySchema.host_organization_s
+            }) {
             ConfigurationSet.Entry entry = solrScheme.get(field.name()); entry.setEnable(true); solrScheme.put(field.name(), entry);
         }
         solrScheme.commit();

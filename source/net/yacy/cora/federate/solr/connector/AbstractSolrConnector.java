@@ -39,7 +39,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
 
     private final static Logger log = Logger.getLogger(AbstractSolrConnector.class);
     
-    public final SolrDocument POISON_DOCUMENT = new SolrDocument();
+    public final static SolrDocument POISON_DOCUMENT = new SolrDocument();
     public final static String POISON_ID = "POISON_ID";
     public final static SolrQuery catchallQuery = new SolrQuery();
     static {
@@ -90,7 +90,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                         break;
                     }
                 }
-                try {queue.put(AbstractSolrConnector.this.POISON_DOCUMENT);} catch (InterruptedException e1) {}
+                try {queue.put(AbstractSolrConnector.POISON_DOCUMENT);} catch (InterruptedException e1) {}
             }
         };
         t.start();

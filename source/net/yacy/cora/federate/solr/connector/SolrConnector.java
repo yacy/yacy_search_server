@@ -25,6 +25,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
+import net.yacy.cora.sorting.ReversibleScoreMap;
+
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
@@ -118,8 +120,17 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public long getQueryCount(final String querystring) throws IOException;
 
     /**
+     * get a facet of the index: a list of values that are most common in a specific field
+     * @param field the field which is selected for the facet
+     * @param maxresults the maximum size of the resulting map
+     * @return an ordered map of fields
+     * @throws IOException
+     */
+    public ReversibleScoreMap<String> getFacet(String field, int maxresults) throws IOException;
+    
+    /**
      * Get a query result from solr as a stream of documents.
-     * The result queue is considered as terminated if AbstractSolrConnectro.POISON_DOCUMENT is returned.
+     * The result queue is considered as terminated if AbstractSolrConnector.POISON_DOCUMENT is returned.
      * The method returns immediately and feeds the search results into the queue
      * @param querystring
      * @param offset

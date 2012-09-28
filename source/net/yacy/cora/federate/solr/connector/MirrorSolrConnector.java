@@ -25,7 +25,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.YaCySchema;
+import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.util.MemoryControl;
@@ -358,6 +361,27 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         return count.get();
     }
 
+    /**
+     * get a facet of the index: a list of values that are most common in a specific field
+     * @param field the field which is selected for the facet
+     * @param maxresults the maximum size of the resulting map
+     * @return an ordered map of fields
+     * @throws IOException
+     */
+    public ReversibleScoreMap<String> getFacet(String field, int maxresults) throws IOException {
+        if (this.solr0 == null && this.solr1 == null) return new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+        if (this.solr0 != null && this.solr1 == null) {
+            return this.solr0.getFacet(field, maxresults);
+        }
+        if (this.solr1 != null && this.solr0 == null) {
+            return this.solr1.getFacet(field, maxresults);
+        }
+        ReversibleScoreMap<String> facet0 = this.solr0.getFacet(field, maxresults);
+        ReversibleScoreMap<String> facet1 = this.solr1.getFacet(field, maxresults);
+        for (String key: facet1) facet0.inc(key, facet1.get(key));
+        return facet0;
+    }
+    
     private void addToCache(SolrDocumentList list) {
         if (MemoryControl.shortStatus()) clearCache();
         for (final SolrDocument solrdoc: list) {
