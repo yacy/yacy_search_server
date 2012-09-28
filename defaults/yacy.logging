@@ -58,10 +58,10 @@ net.yacy.kelondro.logging.ConsoleOutErrHandler.formatter=net.yacy.kelondro.loggi
 #net.yacy.kelondro.logging.ConsoleOutErrHandler.ignoreCtrlChr=true
 
 # Properties for the proxy access logger
-de.anomic.http.server.HTTPDProxyHandler.logging.enabled = TRUE
-de.anomic.http.server.HTTPDProxyHandler.logging.FileHandler.limit = 1048576
-de.anomic.http.server.HTTPDProxyHandler.logging.FileHandler.count = 20
-de.anomic.http.server.HTTPDProxyHandler.logging.FileHandler.pattern = DATA/LOG/proxyAccess%u%g.log
+net.yacy.server.http.HTTPDProxyHandler.logging.enabled = TRUE
+net.yacy.server.http.HTTPDProxyHandler.logging.FileHandler.limit = 1048576
+net.yacy.server.http.HTTPDProxyHandler.logging.FileHandler.count = 20
+net.yacy.server.http.HTTPDProxyHandler.logging.FileHandler.pattern = DATA/LOG/proxyAccess%u%g.log
 
 # Properties for the LogalizerHandler
 net.yacy.kelondro.logging.LogalizerHandler.enabled = false

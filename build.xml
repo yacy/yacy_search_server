@@ -775,7 +775,7 @@
             <not><available file="${stdReleaseFile}" filepath="${release}" type="file" /></not>
         </condition>
     </fail>
-    <java classname="de.anomic.tools.CryptoLib" failonerror="true">
+    <java classname="net.yacy.utils.CryptoLib" failonerror="true">
       <classpath>
         <pathelement location="${build}"/>
       </classpath>
@@ -789,7 +789,7 @@
 	<available file="${privateKeyFile}" type="file" />
       </condition>
     </fail>
-    <java classname="de.anomic.tools.CryptoLib" failonerror="true">
+    <java classname="net.yacy.utils.CryptoLib" failonerror="true">
       <classpath>
         <pathelement location="${build}"/>
       </classpath>

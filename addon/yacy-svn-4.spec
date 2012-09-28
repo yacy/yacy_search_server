@@ -297,31 +297,6 @@ rm -rf $RPM_BUILD_ROOT
 /usr/lib/yacy/classes/*
 %doc /usr/share/doc/yacy/*
 
-%files libx
-#%dir /usr/lib/yacy/libx
-/usr/lib/yacy/libx/*
-#/usr/lib/yacy/classes/de/anomic/plasma/parser/bzip/bzipParser.class
-#/usr/lib/yacy/classes/de/anomic/plasma/parser/doc/docParser.class
-#/usr/lib/yacy/classes/de/anomic/plasma/parser/gzip/gzipParser.class
-#/usr/lib/yacy/classes/de/anomic/plasma/parser/mimeType/mimeTypeParser.class
-#/usr/lib/yacy/classes/de/anomic/plasma/parser/mimeType/odtDetector.class
-#/usr/lib/yacy/classes/de/anomic/plasma/parser/mimeType/rssDetector.class
-#/usr/lib/yacy/classes/de/anomic/plasma/parser/odt/odtParser.class
-#/usr/lib/yacy/classes/de/anomic/plasma/parser/pdf/pdfParser.class
-#/usr/lib/yacy/classes/de/anomic/plasma/parser/ppt/pptParser.class
-#/usr/lib/yacy/classes/de/anomic/plasma/parser/rpm/rpmParser.class
-#/usr/lib/yacy/classes/de/anomic/plasma/parser/rss/rssParser.class
-#/usr/lib/yacy/classes/de/anomic/plasma/parser/rtf/rtfParser.class
-#/usr/lib/yacy/classes/de/anomic/plasma/parser/tar/tarParser.class
-#/usr/lib/yacy/classes/de/anomic/plasma/parser/vcf/vcfParser.class
-#/usr/lib/yacy/classes/de/anomic/plasma/parser/zip/zipParser.class
-#/usr/lib/yacy/classes/de/anomic/server/portForwarding/sch/*
-#/usr/lib/yacy/classes/de/anomic/server/portForwarding/serverPortForwarding.class
-#/usr/lib/yacy/classes/de/anomic/server/portForwarding/upnp/*
-#/usr/lib/yacy/classes/de/anomic/soap/*
-#/usr/lib/yacy/classes/de/anomic/soap/services/*
-#/usr/lib/yacy/classes/de/anomic/yacy/seedUpload/*
-
 %changelog
 * Fri Oct 20 2006 Franz Brauße <mike-nought@gmx.de>
 - added Packager-Tag
