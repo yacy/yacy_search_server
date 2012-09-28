@@ -200,6 +200,7 @@
     	<pathelement location="${lib}/lucene-phonetic-3.6.1.jar" />
     	<pathelement location="${lib}/lucene-spatial-3.6.1.jar" />
     	<pathelement location="${lib}/lucene-spellchecker-3.6.1.jar" />
+    	<pathelement location="${lib}/lucene-memory-3.6.1.jar" />
     	<pathelement location="${lib}/metadata-extractor-2.4.0-beta-1.jar" />
     	<pathelement location="${lib}/mysql-connector-java-5.1.12-bin.jar" />
         <pathelement location="${lib}/pdfbox-1.7.0.jar" />
