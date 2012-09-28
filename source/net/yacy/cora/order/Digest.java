@@ -18,7 +18,6 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package net.yacy.cora.order;
 
 import java.io.ByteArrayInputStream;
@@ -39,24 +38,22 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.log4j.Logger;
-
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.util.Memory;
 
+// ATTENTION! THIS CLASS SHALL NOT IMPORT FROM OTHER PACKAGES THAN CORA AND JRE
+// BECAUSE OTHERWISE THE DEBIAN INSTALLER FAILS!
 
 public class Digest {
 
-    private final static Logger log = Logger.getLogger(Digest.class);
 	public static BlockingQueue<MessageDigest> digestPool = new LinkedBlockingDeque<MessageDigest>();
 
     private static final int md5CacheSize = Math.max(1000, Math.min(1000000, (int) (Memory.available() / 50000L)));
     private static ARC<String, byte[]> md5Cache = null;
     static {
         try {
-            log.info("creating hash cache of size " + md5CacheSize);
             md5Cache = new ConcurrentARC<String, byte[]>(md5CacheSize, Math.max(8, 2 * Runtime.getRuntime().availableProcessors()));
         } catch (final OutOfMemoryError e) {
             md5Cache = new ConcurrentARC<String, byte[]>(1000, Math.max(2, Runtime.getRuntime().availableProcessors()));
@@ -158,7 +155,7 @@ public class Digest {
             in = new FileInputStream(file);
         } catch (final java.io.FileNotFoundException e) {
             System.out.println("file not found:" + file.toString());
-            log.warn(e);
+            e.printStackTrace();
             return null;
         }
 
@@ -179,7 +176,8 @@ public class Digest {
                 md5consumer.consume(c);
             }
         } catch (final IOException e) {
-            log.fatal("file error with " + file.toString() + ": " + e.getMessage(), e);
+            System.out.println("file error with " + file.toString() + ": " + e.getMessage());
+            e.printStackTrace();
             md5consumer.consume(md5FilechunkConsumer.poison);
             throw e;
         } finally {
@@ -192,10 +190,10 @@ public class Digest {
         try {
             return md5result.get().digest();
         } catch (final InterruptedException e) {
-            log.warn(e);
+            e.printStackTrace();
             throw new IOException(e);
         } catch (final ExecutionException e) {
-            log.warn(e);
+            e.printStackTrace();
             throw new IOException(e);
         }
     }
@@ -234,7 +232,7 @@ public class Digest {
             try {
                 this.filed.put(c);
             } catch (final InterruptedException e) {
-                log.warn(e);
+                e.printStackTrace();
             }
         }
 
@@ -242,7 +240,7 @@ public class Digest {
             try {
                 return this.empty.take();
             } catch (final InterruptedException e) {
-                log.warn(e);
+                e.printStackTrace();
                 throw new IOException(e);
             }
         }
@@ -258,7 +256,7 @@ public class Digest {
                     this.empty.put(c);
                 }
             } catch (final InterruptedException e) {
-                log.warn(e);
+                e.printStackTrace();
             }
             return this.digest;
         }
@@ -281,7 +279,7 @@ public class Digest {
             assert b.length != 0 : "file = " + file.toString();
             return Base64Order.enhancedCoder.encode(b);
         } catch (final IOException e) {
-            log.warn(e);
+            e.printStackTrace();
             return null;
         }
     }
@@ -311,7 +309,7 @@ public class Digest {
         try {
             digest = MessageDigest.getInstance("MD5");
         } catch (final NoSuchAlgorithmException e) {
-            log.warn(e);
+            e.printStackTrace();
             return null;
         }
         final RandomAccessFile raf = new RandomAccessFile(file, "r");

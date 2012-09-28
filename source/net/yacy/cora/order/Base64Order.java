@@ -25,6 +25,9 @@ import java.util.Comparator;
 
 import net.yacy.cora.document.UTF8;
 
+//ATTENTION! THIS CLASS SHALL NOT IMPORT FROM OTHER PACKAGES THAN CORA AND JRE
+//BECAUSE OTHERWISE THE DEBIAN INSTALLER FAILS!
+
 public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable, Serializable {
 
     private static final long serialVersionUID=980647587445343851L;
