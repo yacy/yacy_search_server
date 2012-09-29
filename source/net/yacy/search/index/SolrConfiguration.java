@@ -775,6 +775,15 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         return doc;
     }
 
+    /**
+     * this method compresses a list of protocol names to an indexed list.
+     * To do this, all 'http' entries are removed and considered as default.
+     * The remaining entries are indexed as follows: a list of <i>-<p> entries is produced, where
+     * <i> is an index pointing to the original index of the protocol entry and <p> is the protocol entry itself.
+     * The <i> entry is formatted as a 3-digit decimal number with leading zero digits.
+     * @param protocol
+     * @return a list of indexed protocol entries
+     */
     private static List<String> protocolList2indexedList(List<String> protocol) {
         List<String> a = new ArrayList<String>();
         String p;
@@ -788,7 +797,15 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         }
         return a;
     }
-
+    
+    public static List<String> indexedList2protocolList(Collection<Object> iplist, int dimension) {
+        List<String> a = new ArrayList<String>(dimension);
+        for (int i = 0; i < dimension; i++) a.add("http");
+        if (iplist == null) return a;
+        for (Object ip: iplist) a.set(Integer.parseInt(((String) ip).substring(0, 3)), ((String) ip).substring(4));
+        return a;
+    }
+    
     /**
      * encode a string containing attributes from anchor rel properties binary:
      * bit 0: "me" contained in rel

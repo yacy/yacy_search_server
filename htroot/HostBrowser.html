@@ -85,18 +85,18 @@ function updatepage(str) {
     #(/hosts)#
     
     #(files)#::
-     <fieldset><legend>Files in #[path]#</legend>
-     <p>Documents in domain: #[hostsize]#; Documents in subpath: #[subpathsize]#</p>
+     <fieldset><legend>Browser for #[path]#</legend>
+     <p>Documents on host: #[hostsize]#; Documents in subpath: #[subpathsize]#</p>
       <table border="0" cellpadding="2" cellspacing="2" style="float:left">
       <tr>
         <th align="center" width="32"></th>
-        <th align="left" width="600">Path</th>
-        <th align="right" width="80" >Documents</th>
+        <th align="left" width="600" class="listing">Path</th>
+        <th align="right" width="80" class="listing">Documents</th>
       </tr>
       #(root)#
       <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
         <td align="center"></td>
-        <td align="left" nowrap ><a href="/HostBrowser.html?path=#[path]#">..</a></td>
+        <td align="left" nowrap ><a href="/HostBrowser.html?path=#[path]#" class="listing">..</a></td>
         <td align="right" nowrap></td>
       </tr>::
       #(/root)#
@@ -104,11 +104,11 @@ function updatepage(str) {
         #(type)#
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
           <td align="center"><a href="/ViewFile.html?url=#[file]#"><img src="/env/grafics/doc.gif"/></a></td>
-          <td align="left" nowrap #(stored)#class="error"::#(/stored)# colspan="2">#[file]#&nbsp;<a href="#[file]#"><img src="/env/grafics/link.gif"/></a></td>
+          <td align="left" nowrap class=#(stored)#"listingem"::"listing"#(/stored)# colspan="2">#[file]#&nbsp;<a href="#[file]#"><img src="/env/grafics/link.gif"/></a></td>
         </tr>::
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
           <td align="center"><img src="/env/grafics/dir.gif"/></td>
-          <td align="left" nowrap ><a href="/HostBrowser.html?path=#[file]#">#[file]#</a></td>
+          <td align="left" nowrap class="listing"><a href="/HostBrowser.html?path=#[file]#" class="listing">#[file]#</a></td>
           <td align="right" nowrap>#[count]#</td>
         </tr>
         #(/type)#

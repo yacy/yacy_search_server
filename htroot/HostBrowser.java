@@ -39,6 +39,7 @@ import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
+import net.yacy.search.index.SolrConfiguration;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -124,8 +125,8 @@ public class HostBrowser {
                     String u = (String) doc.getFieldValue(YaCySchema.sku.name());
                     hostsize++;
                     if (u.startsWith(path)) storedDocs.add(u);
-                    Collection<Object> urlprot = doc.getFieldValues(YaCySchema.inboundlinks_protocol_sxt.name());
                     Collection<Object> urlstub = doc.getFieldValues(YaCySchema.inboundlinks_urlstub_txt.name());
+                    Collection<String> urlprot = urlstub == null ? null : SolrConfiguration.indexedList2protocolList(doc.getFieldValues(YaCySchema.inboundlinks_protocol_sxt.name()), urlstub.size());
                     if (urlprot != null && urlstub != null) {
                         assert urlprot.size() == urlstub.size();
                         Object[] urlprota = urlprot.toArray();

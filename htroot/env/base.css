@@ -150,6 +150,16 @@ tt, *.tt {
   display:hidden;
 }
 
+.listing {
+  font-family:Courier,Terminal,sans-serif;
+  color:black;
+}
+
+.listingem {
+  font-family:Courier,Terminal,sans-serif;
+  color:DimGray;
+}
+
 /* .snippetLoaded {
   font-style:italic;
   color: #666;
