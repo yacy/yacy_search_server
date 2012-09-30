@@ -19,7 +19,9 @@
  */
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,11 +33,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.solr.common.SolrDocument;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.crawler.retrieval.Request;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
@@ -49,7 +52,9 @@ public class HostBrowser {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         Fulltext fulltext = sb.index.fulltext();
-        final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header);
+        final boolean admin = sb.verifyAuthentication(header);
+        final boolean loadRight = admin; // add config later
+        final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || admin;
 
         final serverObjects prop = new serverObjects();
         
@@ -59,6 +64,7 @@ public class HostBrowser {
         prop.putNum("ucount", fulltext.size());
         prop.put("hosts", 0);
         prop.put("files", 0);
+        prop.put("admin", 0);
 
         if (!searchAllowed) {
             prop.put("result", "You are not allowed to use this page. Please ask an administrator for permission.");
@@ -80,6 +86,25 @@ public class HostBrowser {
             !path.startsWith("file://"))) { path = "http://" + path; }
         prop.putHTML("path", path);
 
+        String load = post.get("load", "");
+        //if (path.length() != 0 && load.length() == 0 && loadRight && !sb.index.exists(urlhash))
+        if (load.length() > 0 && loadRight) {
+            // stack URL
+            DigestURI url;
+            try {
+                url = new DigestURI(load);
+                String reasonString = sb.crawlStacker.stackCrawl(new Request(
+                        sb.peers.mySeed().hash.getBytes(),
+                        url, null, load, new Date(),
+                        sb.crawler.defaultRemoteProfile.handle(),
+                        0, 0, 0, 0
+                    ));
+                prop.put("result", reasonString == null ? ("added url to indexer: " + load) : ("not indexed url '" + load + "': " + reasonString));
+            } catch (MalformedURLException e) {
+                prop.put("result", "bad url '" + load + "'");
+            }
+        }
+        
         if (post.containsKey("hosts")) {
             // generate host list
             try {
@@ -112,7 +137,7 @@ public class HostBrowser {
             }
             try {
                 // generate file list from path
-                MultiProtocolURI uri = new MultiProtocolURI(path);
+                DigestURI uri = new DigestURI(path);
                 String host = uri.getHost();
                 
                 // get all files for a specific host from the index
@@ -169,7 +194,16 @@ public class HostBrowser {
                         // this is a file
                         prop.put("files_list_" + c + "_type", 0);
                         prop.put("files_list_" + c + "_type_file", entry.getKey());
-                        prop.put("files_list_" + c + "_type_stored", ((Boolean) entry.getValue()).booleanValue() ? 1 : 0);
+                        boolean stored = ((Boolean) entry.getValue()).booleanValue();
+                        try {uri = new DigestURI(entry.getKey());} catch (MalformedURLException e) {uri = null;}
+                        boolean loading = load.equals(entry.getKey()) ||
+                                (uri != null && sb.crawlQueues.urlExists(uri.hash()) != null);
+                        prop.put("files_list_" + c + "_type_stored", stored ? 1 : loading ? 2 : 0);
+                        prop.put("files_list_" + c + "_type_stored_load", loadRight ? 1 : 0);
+                        if (loadRight) {
+                            prop.put("files_list_" + c + "_type_stored_load_file", entry.getKey());
+                            prop.put("files_list_" + c + "_type_stored_load_path", path);
+                        }
                     } else {
                         // this is a folder
                         prop.put("files_list_" + c + "_type", 1);

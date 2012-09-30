@@ -160,6 +160,16 @@ tt, *.tt {
   color:DimGray;
 }
 
+.listingok {
+  font-family:Courier,Terminal,sans-serif;
+  color:green;
+}
+
+.listingnok {
+  font-family:Courier,Terminal,sans-serif;
+  color:red;
+}
+
 /* .snippetLoaded {
   font-style:italic;
   color: #666;

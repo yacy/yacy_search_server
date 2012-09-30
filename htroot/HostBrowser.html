@@ -91,7 +91,7 @@ function updatepage(str) {
       <tr>
         <th align="center" width="32"></th>
         <th align="left" width="600" class="listing">Path</th>
-        <th align="right" width="80" class="listing">Documents</th>
+        <th align="right" width="80" class="listing"></th>
       </tr>
       #(root)#
       <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
@@ -104,18 +104,31 @@ function updatepage(str) {
         #(type)#
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
           <td align="center"><a href="/ViewFile.html?url=#[file]#"><img src="/env/grafics/doc.gif"/></a></td>
-          <td align="left" nowrap class=#(stored)#"listingem"::"listing"#(/stored)# colspan="2">#[file]#&nbsp;<a href="#[file]#"><img src="/env/grafics/link.gif"/></a></td>
+          <td align="left" nowrap class=#(stored)#"listingem"::"listing"#(/stored)#>#[file]#&nbsp;<a href="#[file]#"><img src="/env/grafics/link.gif"/></a></td>
+          #(stored)#
+          #(load)#::<td align="right" nowrap class="listingnok"><a href="/HostBrowser.html?load=#[file]#&path=#[path]#">load &amp; index</a>#(/load)#</td>::
+          <td align="right" nowrap class="listingok">indexed</td>::
+ 		  <td align="right" nowrap class="listingnok">loading</td>
+          #(/stored)#
         </tr>::
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
           <td align="center"><img src="/env/grafics/dir.gif"/></td>
           <td align="left" nowrap class="listing"><a href="/HostBrowser.html?path=#[file]#" class="listing">#[file]#</a></td>
-          <td align="right" nowrap>#[count]#</td>
+          <td align="right" nowrap class="listing">#[count]# files</td>
         </tr>
         #(/type)#
       #{/list}#
       </table>
     </fieldset>
     #(/files)#
+
+    #(admin)#::
+     <form action="HostBrowser.html" method="get">
+     <fieldset><legend>Administration Options</legend>
+
+     </fieldset>
+     </form>
+    #(/admin)#
     
     #%env/templates/footer.template%#
   </body>
