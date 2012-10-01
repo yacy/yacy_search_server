@@ -127,6 +127,8 @@ public enum YaCySchema implements Schema {
     boldcount_i(SolrType.integer, true, true, false, "total number of occurrences of <b> or <strong>"),
     italic_txt(SolrType.text_general, true, true, true, "all texts inside of <i> tags. no doubles. listed in the order of number of occurrences in decreasing order"),
     italiccount_i(SolrType.integer, true, true, false, "total number of occurrences of <i>"),
+    underline_txt(SolrType.text_general, true, true, true, "all texts inside of <u> tags. no doubles. listed in the order of number of occurrences in decreasing order"),
+    underlinecount_i(SolrType.integer, true, true, false, "total number of occurrences of <u>"),
     flash_b(SolrType.bool, true, true, false, "flag that shows if a swf file is linked"),
     frames_txt(SolrType.text_general, true, true, true, "list of all links to frames"),
     framesscount_i(SolrType.integer, true, true, false, "number of frames_txt"),
@@ -165,6 +167,7 @@ public enum YaCySchema implements Schema {
     // special values; can only be used if '_val' type is defined in schema file; this is not standard
     bold_val(SolrType.integer, true, true, true, "number of occurrences of texts in bold_txt"),
     italic_val(SolrType.integer, true, true, true, "number of occurrences of texts in italic_txt"),
+    underline_val(SolrType.integer, true, true, true, "number of occurrences of texts in underline_txt"),
     ext_cms_txt(SolrType.text_general, true, true, true, "names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias"),
     ext_cms_val(SolrType.integer, true, true, true, "number of attributes that count for a specific cms in ext_cms_txt"),
     ext_ads_txt(SolrType.text_general, true, true, true, "names of ad-servers/ad-services"),

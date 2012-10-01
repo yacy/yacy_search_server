@@ -282,6 +282,15 @@ italic_txt
 ## total number of occurrences of <i>, int
 #italiccount_i
 
+## all texts inside of <u> tags. no doubles. listed in the order of number of occurrences in decreasing order
+underline_txt
+
+## number of occurrences of texts in underline_txt
+#underline_val
+
+## total number of occurrences of <u>, int
+#underlinecount_i
+
 ## flag that shows if a swf file is linked, boolean
 #flash_b
 

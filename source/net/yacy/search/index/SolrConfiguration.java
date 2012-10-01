@@ -506,6 +506,14 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                     add(doc, YaCySchema.italic_val, html.getItalicCount(italic));
                 }
             }
+            final String[] underline = html.getUnderline();
+            add(doc, YaCySchema.underlinecount_i, underline.length);
+            if (underline.length > 0) {
+                add(doc, YaCySchema.underline_txt, underline);
+                if (allAttr || contains(YaCySchema.underline_val)) {
+                    add(doc, YaCySchema.underline_val, html.getUnderlineCount(underline));
+                }
+            }
             final String[] li = html.getLi();
             add(doc, YaCySchema.licount_i, li.length);
             if (li.length > 0) add(doc, YaCySchema.li_txt, li);
