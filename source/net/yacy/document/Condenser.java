@@ -38,6 +38,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.WordCache;
 import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.language.synonyms.SynonymLibrary;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.document.language.Identificator;
 import net.yacy.document.parser.html.ImageEntry;
@@ -66,7 +67,8 @@ public final class Condenser {
     //private Properties analysis;
     private final Map<String, Word> words; // a string (the words) to (indexWord) - relation
     private final Map<String, Set<Tagging.Metatag>> tags = new HashMap<String, Set<Tagging.Metatag>>(); // a set of tags, discovered from Autotagging
-
+    private final Set<String> synonyms; // a set of synonyms to the words
+    
     public int RESULT_NUMB_WORDS = -1;
     public int RESULT_DIFF_WORDS = -1;
     public int RESULT_NUMB_SENTENCES = -1;
@@ -79,12 +81,14 @@ public final class Condenser {
             final boolean indexText,
             final boolean indexMedia,
             final WordCache meaningLib,
+            final SynonymLibrary stemming,
             final boolean doAutotagging
             ) {
         Thread.currentThread().setName("condenser-" + document.dc_identifier()); // for debugging
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
         this.words = new HashMap<String, Word>();
+        this.synonyms = new HashSet<String>();
         this.RESULT_FLAGS = new Bitfield(4);
 
         // construct flag set for document
@@ -202,6 +206,14 @@ public final class Condenser {
         if (!this.tags.isEmpty()) {
             document.addMetatags(this.tags);
         }
+        
+        // create the synonyms set
+        if (stemming != null) {
+            for (String word: this.words.keySet()) {
+                Set<String> syms = stemming.getSynonyms(word);
+                if (syms != null) this.synonyms.addAll(syms);
+            }
+        }
     }
 
     private void insertTextToWords(
@@ -239,6 +251,7 @@ public final class Condenser {
         this.languageIdentificator = null; // we don't need that here
         // analysis = new Properties();
         this.words = new TreeMap<String, Word>();
+        this.synonyms = new HashSet<String>();
         createCondensement(text, meaningLib, doAutotagging);
     }
 
@@ -253,6 +266,10 @@ public final class Condenser {
     public Map<String, Word> words() {
         // returns the words as word/indexWord relation map
         return this.words;
+    }
+    
+    public Set<String> synonyms() {
+        return this.synonyms;
     }
 
     public String language() {

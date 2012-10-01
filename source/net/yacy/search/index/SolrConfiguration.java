@@ -338,7 +338,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
 
-    public SolrInputDocument yacy2solr(final String id, final CrawlProfile profile, final ResponseHeader header, final Document yacydoc, final URIMetadata metadata) {
+    public SolrInputDocument yacy2solr(final String id, final CrawlProfile profile, final ResponseHeader header, final Document yacydoc, Condenser condenser, final URIMetadata metadata) {
         // we use the SolrCell design as index scheme
         final SolrInputDocument doc = new SolrInputDocument();
         final DigestURI digestURI = new DigestURI(yacydoc.dc_source());
@@ -415,6 +415,13 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.wordcount_i)) {
             final int contentwc = content.split(" ").length;
             add(doc, YaCySchema.wordcount_i, contentwc);
+        }
+        if (allAttr || contains(YaCySchema.synonyms_t)) {
+            Set<String> synonyms = condenser.synonyms();
+            StringBuilder s = new StringBuilder(synonyms.size() * 8);
+            for (String o: synonyms) s.append(o).append(' ');
+            if (s.length() > 0) s.setLength(s.length() - 1);
+            add(doc, YaCySchema.synonyms_t, s.toString());
         }
 
         // path elements of link
