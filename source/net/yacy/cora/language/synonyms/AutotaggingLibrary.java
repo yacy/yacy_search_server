@@ -18,7 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.document;
+package net.yacy.cora.language.synonyms;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,17 +27,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.log4j.Logger;
+
 import net.yacy.cora.geo.Locations;
 import net.yacy.cora.lod.vocabulary.Tagging;
-import net.yacy.kelondro.logging.Log;
 
 /**
  * Autotagging provides a set of tag/print-name properties which can be used to
  * - create tags from texts automatically
  * - create navigation entries for given tags
  */
-public class Autotagging {
+public class AutotaggingLibrary {
 
+    private final static Logger log = Logger.getLogger(AutotaggingLibrary.class);
     private final static Object PRESENT = new Object();
 
     private final File autotaggingPath;
@@ -53,7 +55,7 @@ public class Autotagging {
      * properties without values are allowed (the value is then set to the key)
      * also the value can be used as a tag
      */
-    public Autotagging(final File autotaggingPath) {
+    public AutotaggingLibrary(final File autotaggingPath) {
         this.vocabularies = new ConcurrentHashMap<String, Tagging>();
         this.autotaggingPath = autotaggingPath;
         this.allTags = new ConcurrentHashMap<String, Object>();
@@ -73,7 +75,7 @@ public class Autotagging {
                         this.allTags.put(t, PRESENT);
                     }
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    log.warn(e.getMessage(), e);
                 }
             }
         }

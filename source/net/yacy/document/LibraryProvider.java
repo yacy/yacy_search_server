@@ -47,6 +47,7 @@ import net.yacy.cora.document.WordCache;
 import net.yacy.cora.geo.GeonamesLocation;
 import net.yacy.cora.geo.OpenGeoDBLocation;
 import net.yacy.cora.geo.OverarchingLocation;
+import net.yacy.cora.language.synonyms.AutotaggingLibrary;
 import net.yacy.cora.language.synonyms.SynonymLibrary;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.Tagging;
@@ -67,7 +68,7 @@ public class LibraryProvider {
     public static final String disabledExtension = ".disabled";
 
     public static WordCache dymLib = new WordCache(null);
-    public static Autotagging autotagging = null;
+    public static AutotaggingLibrary autotagging = null;
     public static SynonymLibrary synonyms = null;
     public static OverarchingLocation geoLoc = new OverarchingLocation();
     private static File dictSource = null;
@@ -185,7 +186,7 @@ public class LibraryProvider {
         if ( !autotaggingPath.exists() ) {
             autotaggingPath.mkdirs();
         }
-        autotagging = new Autotagging(autotaggingPath);
+        autotagging = new AutotaggingLibrary(autotaggingPath);
     }
     public static void initSynonyms() {
         final File synonymPath = new File(dictRoot, path_to_synonym_dictionaries);
