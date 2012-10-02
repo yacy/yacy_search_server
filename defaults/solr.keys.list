@@ -119,8 +119,8 @@ responsetime_i
 ## all visible text, text
 text_t
 
-## additional synonyms to the words in the text, text
-synonyms_t
+## additional synonyms to the words in the text
+synonyms_sxt
 
 ## h1 header
 h1_txt

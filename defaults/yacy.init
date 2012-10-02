@@ -1113,3 +1113,7 @@ interaction.dontimportbookmarks =
 interaction.autocrawler.enabled = false
 interaction.autocrawler.domainfilter = .*
 interaction.autocrawler.categoryfilter = .*
+
+# host browser settings
+browser.autoload = true
+browser.load4everyone = false

@@ -357,6 +357,14 @@ public final class Fulltext implements Iterable<byte[]> {
         return false;
     }
 
+    public String failReason(final String urlHash) throws IOException {
+        if (urlHash == null) return null;
+        SolrDocument doc = this.solr.get(urlHash);
+        if (doc == null) return null;
+        String reason = (String) doc.getFieldValue(YaCySchema.failreason_t.name());
+        return reason == null ? null : reason.length() == 0 ? null : reason;
+    }
+
     @Override
     public Iterator<byte[]> iterator() {
     	CloneableIterator<byte[]> a = null;

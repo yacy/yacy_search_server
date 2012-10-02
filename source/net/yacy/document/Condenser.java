@@ -24,9 +24,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -81,14 +84,14 @@ public final class Condenser {
             final boolean indexText,
             final boolean indexMedia,
             final WordCache meaningLib,
-            final SynonymLibrary stemming,
+            final SynonymLibrary synonyms,
             final boolean doAutotagging
             ) {
         Thread.currentThread().setName("condenser-" + document.dc_identifier()); // for debugging
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
         this.words = new HashMap<String, Word>();
-        this.synonyms = new HashSet<String>();
+        this.synonyms = new LinkedHashSet<String>();
         this.RESULT_FLAGS = new Bitfield(4);
 
         // construct flag set for document
@@ -208,9 +211,9 @@ public final class Condenser {
         }
         
         // create the synonyms set
-        if (stemming != null) {
+        if (synonyms != null) {
             for (String word: this.words.keySet()) {
-                Set<String> syms = stemming.getSynonyms(word);
+                Set<String> syms = synonyms.getSynonyms(word);
                 if (syms != null) this.synonyms.addAll(syms);
             }
         }
@@ -268,8 +271,10 @@ public final class Condenser {
         return this.words;
     }
     
-    public Set<String> synonyms() {
-        return this.synonyms;
+    public List<String> synonyms() {
+        ArrayList<String> l = new ArrayList<String>(this.synonyms.size());
+        for (String s: this.synonyms) l.add(s);
+        return l;
     }
 
     public String language() {

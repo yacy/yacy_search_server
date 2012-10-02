@@ -416,12 +416,9 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             final int contentwc = content.split(" ").length;
             add(doc, YaCySchema.wordcount_i, contentwc);
         }
-        if (allAttr || contains(YaCySchema.synonyms_t)) {
-            Set<String> synonyms = condenser.synonyms();
-            StringBuilder s = new StringBuilder(synonyms.size() * 8);
-            for (String o: synonyms) s.append(o).append(' ');
-            if (s.length() > 0) s.setLength(s.length() - 1);
-            add(doc, YaCySchema.synonyms_t, s.toString());
+        if (allAttr || contains(YaCySchema.synonyms_sxt)) {
+            List<String> synonyms = condenser.synonyms();
+            add(doc, YaCySchema.synonyms_sxt, synonyms);
         }
 
         // path elements of link

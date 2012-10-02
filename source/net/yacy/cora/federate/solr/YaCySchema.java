@@ -67,7 +67,7 @@ public enum YaCySchema implements Schema {
     imagescount_i(SolrType.integer, true, true, false, "number of images"),
     responsetime_i(SolrType.integer, true, true, false, "response time of target server in milliseconds"),
     text_t(SolrType.text_general, true, true, false, "all visible text"),
-    synonyms_t(SolrType.text_general, true, true, false, "additional synonyms to the words in the text"),
+    synonyms_sxt(SolrType.string, true, true, true, "additional synonyms to the words in the text"),
     h1_txt(SolrType.text_general, true, true, true, "h1 header"),
     h2_txt(SolrType.text_general, true, true, true, "h2 header"),
     h3_txt(SolrType.text_general, true, true, true, "h3 header"),
