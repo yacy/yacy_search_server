@@ -879,7 +879,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         }
         return a;
     }
-
+    
     /**
      * register an entry as error document
      * @param digestURI

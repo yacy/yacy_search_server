@@ -161,7 +161,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
 
         // write header
         writer.write(XML_START);
-        String query = request.getParams().get("q");
+        String query = request.getParams().get("originalQuery");
         String site  = (String) context.get("site");
         OpensearchResponseWriter.solitaireTag(writer, "TM", Long.toString(System.currentTimeMillis() - start));
         OpensearchResponseWriter.solitaireTag(writer, "Q", query);
@@ -170,7 +170,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
         paramTag(writer, "ie", "UTF-8");
         paramTag(writer, "oe", "UTF-8");
         paramTag(writer, "client", (String) context.get("client"));
-        paramTag(writer, "q", request.getParams().get("q"));
+        paramTag(writer, "q", query);
         paramTag(writer, "site", site);
         paramTag(writer, "start", Integer.toString(resHead.offset));
         paramTag(writer, "num", Integer.toString(resHead.rows));

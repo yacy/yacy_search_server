@@ -472,7 +472,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
 
     public SolrParams toSolrParams(YaCySchema[] facets) {
         // check if all required post fields are there
-        if (!this.containsKey(CommonParams.DF)) this.put(CommonParams.DF, YaCySchema.text_t.name()); // set default field to all fields
+        if (!this.containsKey(CommonParams.DF)) this.put(CommonParams.DF, YaCySchema.text_t.name()); // set default field to the text field
         if (!this.containsKey(CommonParams.START)) this.put(CommonParams.START, "0"); // set default start item
         if (!this.containsKey(CommonParams.ROWS)) this.put(CommonParams.ROWS, "10"); // set default number of search results
 
