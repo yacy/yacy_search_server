@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.solr.common.SolrDocument;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
@@ -53,7 +54,9 @@ public class HostBrowser {
         final Switchboard sb = (Switchboard) env;
         Fulltext fulltext = sb.index.fulltext();
         final boolean admin = sb.verifyAuthentication(header);
-        final boolean loadRight = admin; // add config later
+        final boolean autoload = sb.getConfigBool("browser.autoload", true);
+        final boolean load4everyone = sb.getConfigBool("browser.load4everyone", false);
+        final boolean loadRight = admin || load4everyone; // add config later
         final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || admin;
 
         final serverObjects prop = new serverObjects();
@@ -85,21 +88,33 @@ public class HostBrowser {
             !path.startsWith("smb://") &&
             !path.startsWith("file://"))) { path = "http://" + path; }
         prop.putHTML("path", path);
+        DigestURI pathURI = null;
+        try {pathURI = new DigestURI(path);} catch (MalformedURLException e) {}
 
         String load = post.get("load", "");
-        //if (path.length() != 0 && load.length() == 0 && loadRight && !sb.index.exists(urlhash))
+        boolean wait = false;
+        if (loadRight && autoload && path.length() != 0 && pathURI != null && load.length() == 0 && !sb.index.exists(pathURI.hash())) {
+            // in case that the url does not exist and loading is wanted turn this request into a loading request
+            load = path;
+            wait = true;
+        }
         if (load.length() > 0 && loadRight) {
             // stack URL
             DigestURI url;
+            if (sb.crawlStacker.size() > 2) wait = false;
             try {
                 url = new DigestURI(load);
                 String reasonString = sb.crawlStacker.stackCrawl(new Request(
                         sb.peers.mySeed().hash.getBytes(),
                         url, null, load, new Date(),
-                        sb.crawler.defaultRemoteProfile.handle(),
+                        sb.crawler.defaultProxyProfile.handle(),
                         0, 0, 0, 0
                     ));
                 prop.put("result", reasonString == null ? ("added url to indexer: " + load) : ("not indexed url '" + load + "': " + reasonString));
+                if (wait) for (int i = 0; i < 10; i++) {
+                    if (sb.index.exists(url.hash())) break;
+                    try {Thread.sleep(1000);} catch (InterruptedException e) {}
+                }
             } catch (MalformedURLException e) {
                 prop.put("result", "bad url '" + load + "'");
             }
@@ -194,11 +209,12 @@ public class HostBrowser {
                         // this is a file
                         prop.put("files_list_" + c + "_type", 0);
                         prop.put("files_list_" + c + "_type_file", entry.getKey());
-                        boolean stored = ((Boolean) entry.getValue()).booleanValue();
+                        boolean indexed = ((Boolean) entry.getValue()).booleanValue();
                         try {uri = new DigestURI(entry.getKey());} catch (MalformedURLException e) {uri = null;}
                         boolean loading = load.equals(entry.getKey()) ||
                                 (uri != null && sb.crawlQueues.urlExists(uri.hash()) != null);
-                        prop.put("files_list_" + c + "_type_stored", stored ? 1 : loading ? 2 : 0);
+                        //String failr = fulltext.failReason(ASCII.String(uri.hash()));
+                        prop.put("files_list_" + c + "_type_stored", indexed ? 1 : loading ? 2 : 0);
                         prop.put("files_list_" + c + "_type_stored_load", loadRight ? 1 : 0);
                         if (loadRight) {
                             prop.put("files_list_" + c + "_type_stored_load_file", entry.getKey());
