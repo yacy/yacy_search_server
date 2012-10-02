@@ -2464,9 +2464,10 @@ public final class Switchboard extends serverSwitch
         final Condenser[] condenser = new Condenser[in.documents.length];
         for ( int i = 0; i < in.documents.length; i++ ) {
             condenser[i] =
-                new Condenser(in.documents[i], in.queueEntry.profile().indexText(), in.queueEntry
-                    .profile()
-                    .indexMedia(), LibraryProvider.dymLib, true);
+                new Condenser(
+                        in.documents[i], in.queueEntry.profile().indexText(),
+                        in.queueEntry.profile().indexMedia(),
+                        LibraryProvider.dymLib, LibraryProvider.synonyms, true);
 
             // update image result list statistics
             // its good to do this concurrently here, because it needs a DNS lookup
@@ -2714,7 +2715,7 @@ public final class Switchboard extends serverSwitch
                             if ( document.indexingDenied() ) {
                                 throw new Parser.Failure("indexing is denied", url);
                             }
-                            final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib, true);
+                            final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib, LibraryProvider.synonyms, true);
                             ResultImages.registerImages(url, document, true);
                             Switchboard.this.webStructure.generateCitationReference(url, document);
                             storeDocumentIndex(

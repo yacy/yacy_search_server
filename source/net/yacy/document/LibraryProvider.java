@@ -47,6 +47,7 @@ import net.yacy.cora.document.WordCache;
 import net.yacy.cora.geo.GeonamesLocation;
 import net.yacy.cora.geo.OpenGeoDBLocation;
 import net.yacy.cora.geo.OverarchingLocation;
+import net.yacy.cora.language.synonyms.SynonymLibrary;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
@@ -61,19 +62,19 @@ public class LibraryProvider {
     public static final String path_to_source_dictionaries = "source";
     public static final String path_to_did_you_mean_dictionaries = "didyoumean";
     public static final String path_to_autotagging_dictionaries = "autotagging";
+    public static final String path_to_synonym_dictionaries = "synonyms";
 
     public static final String disabledExtension = ".disabled";
 
     public static WordCache dymLib = new WordCache(null);
     public static Autotagging autotagging = null;
+    public static SynonymLibrary synonyms = null;
     public static OverarchingLocation geoLoc = new OverarchingLocation();
     private static File dictSource = null;
     private static File dictRoot = null;
 
     public static enum Dictionary {
-        GEODB0(
-            "geo0",
-            "http://downloads.sourceforge.net/project/opengeodb/Data/0.2.5a/opengeodb-0.2.5a-UTF8-sql.gz" ),
+        GEODB0( "geo0", "http://downloads.sourceforge.net/project/opengeodb/Data/0.2.5a/opengeodb-0.2.5a-UTF8-sql.gz" ),
         GEODB1( "geo1", "http://fa-technik.adfc.de/code/opengeodb/dump/opengeodb-02624_2011-10-17.sql.gz" ),
         GEON0( "geon0", "http://download.geonames.org/export/dump/cities1000.zip" ),
         GEON1( "geon1", "http://download.geonames.org/export/dump/cities5000.zip" ),
@@ -121,6 +122,7 @@ public class LibraryProvider {
         initAutotagging();
         activateDeReWo();
         initDidYouMean();
+        initSynonyms();
         integrateOpenGeoDB();
         integrateGeonames0(-1);
         integrateGeonames1(-1);
@@ -169,8 +171,7 @@ public class LibraryProvider {
             geoLoc.activateLocation(Dictionary.GEON2.nickname, new GeonamesLocation(geon, dymLib, minPopulation));
             return;
         }
-    }
-
+    }    
     public static void initDidYouMean() {
         final File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
         if ( !dymDict.exists() ) {
@@ -186,7 +187,13 @@ public class LibraryProvider {
         }
         autotagging = new Autotagging(autotaggingPath);
     }
-
+    public static void initSynonyms() {
+        final File synonymPath = new File(dictRoot, path_to_synonym_dictionaries);
+        if ( !synonymPath.exists() ) {
+            synonymPath.mkdirs();
+        }
+        synonyms = new SynonymLibrary(synonymPath);
+    }
     public static void activateDeReWo() {
         // translate input files (once..)
         final File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
