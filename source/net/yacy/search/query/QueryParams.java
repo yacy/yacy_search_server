@@ -523,7 +523,7 @@ public final class QueryParams {
         if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {
             // localtion search, no special ranking
             // try http://localhost:8090/solr/select?q=*:*&fq={!bbox}&sfield=coordinate_p&pt=50.17,8.65&d=1
-            q.append('&').append(CommonParams.FQ).append("={!bbox}&sfield=").append(YaCySchema.coordinate_p.name()).append("&pt=");
+            q.append('&').append(CommonParams.FQ).append("=!bbox&sfield=").append(YaCySchema.coordinate_p.name()).append("&pt=");
             q.append(Double.toString(this.lat)).append(',').append(Double.toString(this.lon)).append("&d=").append(GeoLocation.degreeToKm(this.radius));
         } else {
             // set ranking
