@@ -450,9 +450,15 @@ The search result was discovered by a heuristic, not previously known by YaCy==D
 When a search is made using a \'site\'-operator \(like: \'download site:yacy.net\'\) then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==Wenn eine Suche mit dem 'site'-Operator gestartet wird (z.B.: 'download site:yacy.net') dann wird der Host des 'site'-Operator sofort gecrawlt mit einer auf den Host beschränkten Suchtiefe von 1.
 That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Das bedeutet: Gleich nach der Suchanfrage wird die Portalseite des Hosts geladen und jede verlinkte Seite die auf eine Seite auf demselben Host verweist.
 Because this \'instant crawl\' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search \(after a small pause of some seconds\).==Weil dieser 'Sofort Crawl' auch die robots.txt und eine minimale Zugriffszeit für folgende Seiten berücksichtigen muss, ist diese Heuristik sehr langsam - aber kann alle gewünschten Suchergebniss finden indem eine zweite Suche (nach einigen Sekunden Pause) gestartet wird. 
-scroogle: load external search result list==scroogle: externe Suchergebnis Listen laden
-When using this heuristic, then every search request line is used for a call to scroogle.==Diese Heuristik verwendet jede Zeile der Suchanfrage für einen Aufruf von Scroogle.
-20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==20 Ergebnisse werden von Scroogle geholt und simultan geladen, geparst und sofort indexiert.	  
+search-result: shallow crawl on all displayed search results==Suchergebnis: crawl Links aller angezeigten Suchergebnisse
+When a search is made then all displayed result links are crawled with a depth-1 crawl.==Nach einer Suche werden alle angezeigten Ergebnislinks der Crawler Liste (mit einer Suchtiefe von 1) hinzugefügt.
+This means: right after the search request every page is loaded and every page that is linked on this page.==Das bedeutet: direkt nach der Suche wird jeder Link auf den Ergebnisseiten der Suche indexiert.
+If you check \'add as global crawl job\' the pages to be crawled are added to the global crawl queue \(remote peers can pickup pages to be crawled\).==Wenn 'als globaler Crawl hinzufügen' gewählt ist werden die zu indexierenden Seiten dem globalen Crawler hinzugefügt (entfernte Peers können beim Crawlen unterstützen).
+Default is to add the links to the local crawl queue \(your peer crawls the linked pages\).==Vorgabe ist die Links der lokalen Crawl Queue hinzuzufügen.
+add as global crawl job==als globaler Crawl hinzufügen
+blekko: load external search result list from==blekko: lade externe Suchergebnisse von
+When using this heuristic, then every search request line is used for a call to blekko.==Wenn diese Heuristik aktiv ist werden alle lokalen Suchanfragen an blekko weitergeleitet.
+20 results are taken from blekko and loaded simultanously, parsed and indexed immediately.==Die ersten 20 Ergebnisse von blekko werden geladen und sofort indexiert.
 #-----------------------------
 
 #File: ConfigHTCache_p.html
