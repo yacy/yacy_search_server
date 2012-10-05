@@ -58,7 +58,7 @@
 			<string>$JAVAROOT/lib/guava-r05.jar</string>
 			<string>$JAVAROOT/lib/htmllexer.jar</string>
 			<string>$JAVAROOT/lib/httpclient-4.2.1.jar</string>
-			<string>$JAVAROOT/lib/httpcore-4.2.1.jar</string>
+			<string>$JAVAROOT/lib/httpcore-4.2.2.jar</string>
 			<string>$JAVAROOT/lib/httpmime-4.2.1.jar</string>
 			<string>$JAVAROOT/lib/icu4j-core.jar</string>
 			<string>$JAVAROOT/lib/iri-0.8.jar</string>

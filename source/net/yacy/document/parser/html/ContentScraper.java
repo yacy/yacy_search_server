@@ -100,6 +100,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         title(TagType.pair),
         b(TagType.pair),
         strong(TagType.pair),
+        u(TagType.pair),
         i(TagType.pair),
         li(TagType.pair),
         script(TagType.pair),
@@ -130,7 +131,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private Collection<String> titles;
     //private String headline;
     private List<String>[] headlines;
-    private final ClusteredScoreMap<String> bold, italic;
+    private final ClusteredScoreMap<String> bold, italic, underline;
     private final List<String> li;
     private final CharBuffer content;
     private final EventListenerList htmlFilterEventListeners;
@@ -177,6 +178,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         for (int i = 0; i < this.headlines.length; i++) this.headlines[i] = new ArrayList<String>();
         this.bold = new ClusteredScoreMap<String>();
         this.italic = new ClusteredScoreMap<String>();
+        this.underline = new ClusteredScoreMap<String>();
         this.li = new ArrayList<String>();
         this.content = new CharBuffer(MAX_DOCSIZE, 1024);
         this.htmlFilterEventListeners = new EventListenerList();
@@ -494,6 +496,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         } else if ((tagname.equalsIgnoreCase("i")) && (text.length < 1024)) {
             h = recursiveParse(text);
             if (h.length() > 0) this.italic.inc(h);
+        } else if ((tagname.equalsIgnoreCase("u")) && (text.length < 1024)) {
+            h = recursiveParse(text);
+            if (h.length() > 0) this.underline.inc(h);
         } else if ((tagname.equalsIgnoreCase("li")) && (text.length < 1024)) {
             h = recursiveParse(text);
             if (h.length() > 0) this.li.add(h);
@@ -606,6 +611,19 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     public String[] getItalicCount(final String[] a) {
         final String[] counter = new String[a.length];
         for (int i = 0; i < a.length; i++) counter[i] = Integer.toString(this.italic.get(a[i]));
+        return counter;
+    }
+
+    public String[] getUnderline() {
+        final List<String> a = new ArrayList<String>();
+        final Iterator<String> i = this.underline.keys(false);
+        while (i.hasNext()) a.add(i.next());
+        return a.toArray(new String[a.size()]);
+    }
+
+    public String[] getUnderlineCount(final String[] a) {
+        final String[] counter = new String[a.length];
+        for (int i = 0; i < a.length; i++) counter[i] = Integer.toString(this.underline.get(a[i]));
         return counter;
     }
 

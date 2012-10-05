@@ -338,7 +338,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
 
-    public SolrInputDocument yacy2solr(final String id, final CrawlProfile profile, final ResponseHeader header, final Document yacydoc, final URIMetadata metadata) {
+    public SolrInputDocument yacy2solr(final String id, final CrawlProfile profile, final ResponseHeader header, final Document yacydoc, Condenser condenser, final URIMetadata metadata) {
         // we use the SolrCell design as index scheme
         final SolrInputDocument doc = new SolrInputDocument();
         final DigestURI digestURI = new DigestURI(yacydoc.dc_source());
@@ -415,6 +415,10 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.wordcount_i)) {
             final int contentwc = content.split(" ").length;
             add(doc, YaCySchema.wordcount_i, contentwc);
+        }
+        if (allAttr || contains(YaCySchema.synonyms_sxt)) {
+            List<String> synonyms = condenser.synonyms();
+            add(doc, YaCySchema.synonyms_sxt, synonyms);
         }
 
         // path elements of link
@@ -504,6 +508,14 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 add(doc, YaCySchema.italic_txt, italic);
                 if (allAttr || contains(YaCySchema.italic_val)) {
                     add(doc, YaCySchema.italic_val, html.getItalicCount(italic));
+                }
+            }
+            final String[] underline = html.getUnderline();
+            add(doc, YaCySchema.underlinecount_i, underline.length);
+            if (underline.length > 0) {
+                add(doc, YaCySchema.underline_txt, underline);
+                if (allAttr || contains(YaCySchema.underline_val)) {
+                    add(doc, YaCySchema.underline_val, html.getUnderlineCount(underline));
                 }
             }
             final String[] li = html.getLi();
@@ -867,7 +879,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         }
         return a;
     }
-
+    
     /**
      * register an entry as error document
      * @param digestURI

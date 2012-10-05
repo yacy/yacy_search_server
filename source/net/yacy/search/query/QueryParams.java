@@ -65,6 +65,7 @@ import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.Seed;
 import net.yacy.search.index.Segment;
+import net.yacy.search.index.SolrConfiguration;
 import net.yacy.search.ranking.RankingProfile;
 
 public final class QueryParams {
@@ -469,7 +470,7 @@ public final class QueryParams {
 
     final static YaCySchema[] fields = new YaCySchema[]{
         YaCySchema.sku,YaCySchema.title,YaCySchema.h1_txt,YaCySchema.h2_txt,
-        YaCySchema.author,YaCySchema.description,YaCySchema.keywords,YaCySchema.text_t
+        YaCySchema.author,YaCySchema.description,YaCySchema.keywords,YaCySchema.text_t,YaCySchema.synonyms_sxt
     };
     
     final static Map<YaCySchema,Float> boosts = new LinkedHashMap<YaCySchema,Float>();
@@ -499,34 +500,8 @@ public final class QueryParams {
     public String solrQueryString() {
         if (this.solrQueryString != null) return this.solrQueryString;
         if (this.query_include_words == null || this.query_include_words.size() == 0) return null;
-        final StringBuilder q = new StringBuilder(80);
-
-        // add text query
-        int wc = 0;
-        StringBuilder w = new StringBuilder(80);
-        for (String s: this.query_include_words) {
-            if (wc > 0) w.append(" AND ");
-            w.append(s);
-            wc++;
-        }
-        for (String s: this.query_exclude_words){
-            if (wc > 0) w.append(" AND -");
-            w.append(s);
-            wc++;
-        }
-        
-        // combine these queries for all relevant fields
-        wc = 0;
-        for (YaCySchema field: fields) {
-            if (wc > 0) q.append(" OR ");
-            q.append('(').append(field.name()).append(':').append(w).append(')');
-            wc++;
-        }
-        q.insert(0, '(');
-        q.append(')');
-
-        // add filter to prevent that results come from failed urls
-        q.append(" AND -").append(YaCySchema.failreason_t.name()).append(":[* TO *]");
+        // get text query
+        final StringBuilder q = solrQueryString(this.query_include_words, this.query_exclude_words, this.indexSegment.fulltext().getSolrScheme());
 
         // add constraints
         if ( this.sitehash == null ) {
@@ -547,7 +522,8 @@ public final class QueryParams {
 
         if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {
             // localtion search, no special ranking
-            q.append('&').append(CommonParams.FQ).append("={!bbox sfield=").append(YaCySchema.coordinate_p.name()).append("}&pt=");
+            // try http://localhost:8090/solr/select?q=*:*&fq={!bbox}&sfield=coordinate_p&pt=50.17,8.65&d=1
+            q.append('&').append(CommonParams.FQ).append("=!bbox&sfield=").append(YaCySchema.coordinate_p.name()).append("&pt=");
             q.append(Double.toString(this.lat)).append(',').append(Double.toString(this.lon)).append("&d=").append(GeoLocation.degreeToKm(this.radius));
         } else {
             // set ranking
@@ -569,6 +545,40 @@ public final class QueryParams {
         this.solrQueryString = q.toString();
         Log.logInfo("Protocol", "SOLR QUERY: " + this.solrQueryString);
         return this.solrQueryString;
+    }
+
+    public static StringBuilder solrQueryString(Collection<String> include, Collection<String> exclude, SolrConfiguration configuration) {
+        final StringBuilder q = new StringBuilder(80);
+
+        // add text query
+        int wc = 0;
+        StringBuilder w = new StringBuilder(80);
+        for (String s: include) {
+            if (wc > 0) w.append(" AND ");
+            w.append(s);
+            wc++;
+        }
+        for (String s: exclude){
+            if (wc > 0) w.append(" AND -");
+            w.append(s);
+            wc++;
+        }
+        
+        // combine these queries for all relevant fields
+        wc = 0;
+        for (YaCySchema field: fields) {
+            if (configuration != null && !configuration.contains(field.name())) continue;
+            if (wc > 0) q.append(" OR ");
+            q.append('(').append(field.name()).append(':').append(w).append(')');
+            wc++;
+        }
+        q.insert(0, '(');
+        q.append(')');
+
+        // add filter to prevent that results come from failed urls
+        q.append(" AND -").append(YaCySchema.failreason_t.name()).append(":[* TO *]");
+
+        return q;
     }
 
     public String queryStringForUrl() {
