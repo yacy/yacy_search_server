@@ -214,6 +214,7 @@
     	<pathelement location="${lib}/wstx-asl-3.2.7.jar" />
     	<pathelement location="${lib}/xercesImpl.jar" />
     	<pathelement location="${lib}/xml-apis.jar" />
+    	<pathelement location="${lib}/jaudiotagger-2.0.4-20111207.115108-15.jar" />
     </path>
 
   <target name="compile-core" depends="init" description="compile YaCy core">

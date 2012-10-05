@@ -64,6 +64,7 @@
 	<classpathentry kind="lib" path="lib/lucene-spatial-3.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-spellchecker-3.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-memory-3.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/jaudiotagger-2.0.4-20111207.115108-15.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>

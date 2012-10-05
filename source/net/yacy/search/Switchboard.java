@@ -139,6 +139,7 @@ import net.yacy.document.TextParser;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
+import net.yacy.document.parser.audioTagParser;
 import net.yacy.document.parser.html.Evaluation;
 import net.yacy.gui.Tray;
 import net.yacy.interaction.contentcontrol.ContentControlFilterUpdateThread;
@@ -685,7 +686,31 @@ public final class Switchboard extends serverSwitch
 
         // define a realtime parsable mimetype list
         this.log.logConfig("Parser: Initializing Mime Type deny list");
-        TextParser.setDenyMime(getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
+        
+    	final boolean enableAudioTags = getConfigBool("parser.enableAudioTags", false);
+        log.logConfig("Parser: parser.enableAudioTags= "+enableAudioTags);
+    	final StringBuilder denyExt = new StringBuilder(256);
+    	final StringBuilder denyMime = new StringBuilder(256);
+    	denyExt.append(getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
+    	denyMime.append(getConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, ""));
+    	
+    	if (!enableAudioTags) {
+    		if(denyExt.length()>0) {
+    			denyExt.append(audioTagParser.SEPERATOR);
+    		}
+    		denyExt.append(audioTagParser.EXTENSIONS);
+    		
+    		if(denyMime.length()>0) {
+    			denyMime.append(audioTagParser.SEPERATOR);
+    		}
+    		denyMime.append(audioTagParser.MIME_TYPES);
+        	
+        	setConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, denyExt.toString());
+        	setConfig(SwitchboardConstants.PARSER_MIME_DENY, denyMime.toString());
+        	setConfig("parser.enableAudioTags", true);
+        }
+                
+    	TextParser.setDenyMime(getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
         TextParser.setDenyExtension(getConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, ""));
 
         // start a loader
