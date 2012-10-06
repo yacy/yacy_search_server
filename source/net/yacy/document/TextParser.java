@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.document.parser.audioTagParser;
 import net.yacy.document.parser.bzipParser;
 import net.yacy.document.parser.csvParser;
 import net.yacy.document.parser.docParser;
@@ -103,7 +104,8 @@ public final class TextParser {
         initParser(new zipParser());
         initParser(new RDFaParser());
         initParser(new rdfParser());
-
+        initParser(new audioTagParser());
+        
         if (Switchboard.getSwitchboard().getConfigBool("parserAugmentation.RDFa", true)) initParser(new RDFaParser());
         if (Switchboard.getSwitchboard().getConfigBool("parserAugmentation", true)) initParser(new AugmentParser());
     }
@@ -471,7 +473,7 @@ public final class TextParser {
     public static String getDenyExtension() {
         String s = "";
         for (final String d: denyExtensionx.keySet()) s += d + ",";
-        s = s.substring(0, s.length() - 1);
+        if (!s.isEmpty()) s = s.substring(0, s.length() - 1);
         return s;
     }
 

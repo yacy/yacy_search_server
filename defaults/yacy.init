@@ -274,6 +274,7 @@ minimumGlobalDelta = 500
 # parser.mime.deny: specifies mime-types that shall not be indexed
 parser.mime.deny=
 parser.extensions.deny=
+parser.enableAudioTags=false
 
 # Promotion Strings
 # These strings appear in the Web Mask of the YACY search client
