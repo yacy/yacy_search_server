@@ -42,9 +42,9 @@ import net.yacy.kelondro.logging.Log;
  * iterator of BLOBHeap files: is used to import heap dumps into a write-enabled index heap
  */
 public class ReferenceIterator <ReferenceType extends Reference> extends LookAheadIterator<ReferenceContainer<ReferenceType>> implements CloneableIterator<ReferenceContainer<ReferenceType>>, Iterable<ReferenceContainer<ReferenceType>> {
-    HeapReader.entries blobs;
-    File blobFile;
-    ReferenceFactory<ReferenceType> factory;
+    private HeapReader.entries blobs;
+    private File blobFile;
+    private ReferenceFactory<ReferenceType> factory;
 
     public ReferenceIterator(final File blobFile, final ReferenceFactory<ReferenceType> factory) throws IOException {
         this.blobs = new HeapReader.entries(blobFile, factory.getRow().primaryKeyLength);

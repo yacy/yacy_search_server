@@ -54,9 +54,9 @@ public final class OS {
 	public static final String blankTypeString = "____";
 
 	// system-identification statics
-	public static final System  systemOS;
+	private static final System  systemOS;
 	public static final boolean isMacArchitecture;
-	public static final boolean isUnixFS;
+	private static final boolean isUnixFS;
 	public static final boolean canExecUnix;
 	public static final boolean isWindows;
 	public static final boolean isWin32;
@@ -95,7 +95,7 @@ public final class OS {
 	 * @return heap in -Xmx<i>[heap]</i>m
 	 * @author [DW], 07.02.2009
 	 */
-	public static int getWin32MaxHeap() {
+	private static int getWin32MaxHeap() {
 		int maxmem = 1000;
 		while(checkWin32Heap(maxmem)) maxmem += 100;
 		while(!checkWin32Heap(maxmem)) maxmem -= 10;
@@ -108,7 +108,7 @@ public final class OS {
 	 * @return true if possible
 	 * @author [DW], 07.02.2009
 	 */
-	public static boolean checkWin32Heap(final int mem){
+	private static boolean checkWin32Heap(final int mem){
 		String line = "";
         final List<String> processArgs = new ArrayList<String>();
         processArgs.add("java");

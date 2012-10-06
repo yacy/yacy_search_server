@@ -40,17 +40,13 @@ import net.yacy.kelondro.logging.Log;
 public abstract class AbstractThread extends Thread implements WorkflowThread {
 
     private static Log log = new Log("WorkflowThread");
-    protected boolean running = true, announcedShutdown = false;
+    protected boolean running = true;
+    private boolean announcedShutdown = false;
     protected long busytime = 0, memuse = 0;
     private   long blockPause = 0;
     private   String shortDescr = "", longDescr = "";
     private   String monitorURL = null;
     private   long threadBlockTimestamp = System.currentTimeMillis();
-
-
-    protected final boolean announceShutdown() {
-        return this.announcedShutdown;
-    }
 
     protected final void announceThreadBlockApply() {
         // shall only be used, if a thread blocks for an important reason
@@ -66,10 +62,6 @@ public abstract class AbstractThread extends Thread implements WorkflowThread {
         final long thisBlockTime = (System.currentTimeMillis() - this.threadBlockTimestamp);
         this.blockPause += thisBlockTime;
         this.busytime -= thisBlockTime;
-    }
-
-    protected final void announceMoreExecTime(final long millis) {
-        this.busytime += millis;
     }
 
     @Override

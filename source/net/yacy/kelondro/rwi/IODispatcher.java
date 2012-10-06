@@ -48,7 +48,7 @@ import net.yacy.kelondro.util.MemoryControl;
  */
 public class IODispatcher extends Thread {
 
-    public static final Log log = new Log("IODispatcher");
+    private static final Log log = new Log("IODispatcher");
 
     private   Semaphore                    controlQueue;
     private   final Semaphore              termination;

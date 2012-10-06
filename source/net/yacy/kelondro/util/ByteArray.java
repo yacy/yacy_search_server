@@ -27,7 +27,6 @@ package net.yacy.kelondro.util;
 import java.util.HashMap;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.order.ByteOrder;
 
 
 /**
@@ -50,16 +49,8 @@ public class ByteArray {
         this.buffer = bb;
     }
 
-    public int length() {
-        return this.buffer.length;
-    }
-
     public byte[] asBytes() {
         return this.buffer;
-    }
-
-    public byte readByte(final int pos) {
-        return this.buffer[pos];
     }
 
     public static boolean startsWith(final byte[] buffer, final byte[] pattern) {
@@ -69,16 +60,6 @@ public class ByteArray {
         if (buffer.length < pattern.length) return false;
         for (int i = 0; i < pattern.length; i++) if (buffer[i] != pattern[i]) return false;
         return true;
-    }
-
-    public int compareTo(final ByteArray b, final ByteOrder order) {
-        assert this.buffer.length == b.buffer.length;
-        return order.compare(this.buffer, b.buffer);
-    }
-
-    public int compareTo(final int aoffset, final int alength, final ByteArray b, final int boffset, final int blength, final ByteOrder order) {
-        assert alength == blength;
-        return order.compare(this.buffer, aoffset, b.buffer, boffset, blength);
     }
 
     private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful

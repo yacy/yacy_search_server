@@ -41,11 +41,11 @@ import net.yacy.cora.document.UTF8;
 
 public class BDecoder {
 
-    final static byte[] _e = "e".getBytes();
-    final static byte[] _i = "i".getBytes();
-    final static byte[] _d = "d".getBytes();
-    final static byte[] _l = "l".getBytes();
-    final static byte[] _p = ":".getBytes();
+    private final static byte[] _e = "e".getBytes();
+    private final static byte[] _i = "i".getBytes();
+    private final static byte[] _d = "d".getBytes();
+    private final static byte[] _l = "l".getBytes();
+    private final static byte[] _p = ":".getBytes();
     
     private final byte[] b;
     private int pos;
@@ -70,7 +70,7 @@ public class BDecoder {
         public void toStream(OutputStream os) throws IOException;
     }
     
-    public static abstract class BDfltObject implements BObject {
+    private static abstract class BDfltObject implements BObject {
 
         public long getInteger() {
             throw new UnsupportedOperationException();
@@ -121,12 +121,12 @@ public class BDecoder {
             os.write(_p);
             os.write(this.b);
         }
-        public static void toStream(OutputStream os, byte[] b) throws IOException {
+        private static void toStream(OutputStream os, byte[] b) throws IOException {
             os.write(ASCII.getBytes(Integer.toString(b.length)));
             os.write(_p);
             os.write(b);
         }
-        public static void toStream(OutputStream os, String s) throws IOException {
+        private static void toStream(OutputStream os, String s) throws IOException {
             final byte[] b = UTF8.getBytes(s);
             os.write(ASCII.getBytes(Integer.toString(b.length)));
             os.write(_p);
@@ -203,7 +203,7 @@ public class BDecoder {
     
     public static class BIntegerObject extends BDfltObject implements BObject {
         private long i;
-        public BIntegerObject(long i) {
+        private BIntegerObject(long i) {
             this.i = i;
         }
         @Override
@@ -285,7 +285,7 @@ public class BDecoder {
         }
     }
     
-    public static void print(BObject bo, int t) {
+    private static void print(BObject bo, int t) {
         for (int i = 0; i < t; i++) System.out.print(" ");
         if (bo.getType() == BType.integer) System.out.println(bo.getInteger());
         if (bo.getType() == BType.string) System.out.println(bo.getString());

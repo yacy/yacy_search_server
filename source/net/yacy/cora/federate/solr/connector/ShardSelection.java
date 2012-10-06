@@ -28,16 +28,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.atomic.AtomicLong;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.federate.solr.YaCySchema;
 
 import org.apache.solr.common.SolrInputDocument;
 
 public class ShardSelection {
-
-    public final static Charset charsetUTF8;
-    static {
-        charsetUTF8 = Charset.forName("UTF-8");
-    }
 
     private final Method method; // the sharding method
     private final AtomicLong chardID;  // the next id that shall be given away
@@ -74,7 +70,7 @@ public class ShardSelection {
                 if (host == null) throw new IOException("sharding - bad url, host empty: " + sku);
                 try {
                     final MessageDigest digest = MessageDigest.getInstance("MD5");
-                    digest.update(host.getBytes(charsetUTF8));
+                    digest.update(ASCII.getBytes(host));
                     final byte[] md5 = digest.digest();
                     return (0xff & md5[0]) % this.dimension;
                 } catch (final NoSuchAlgorithmException e) {

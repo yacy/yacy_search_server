@@ -39,8 +39,8 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
     private final Object environment;
     private final Long   handle;
     private static int handleCounter = 0;
-    public static int instantThreadCounter = 0;
-    public static final ConcurrentMap<Long, String> jobs = new ConcurrentHashMap<Long, String>();
+    private static int instantThreadCounter = 0;
+    private static final ConcurrentMap<Long, String> jobs = new ConcurrentHashMap<Long, String>();
 
     public InstantBlockingThread(final Object env, final String jobExec, final WorkflowProcessor<J> manager) {
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
@@ -53,20 +53,6 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
         this.jobExecMethod = execMethod(env, jobExec);
         this.environment = (env instanceof Class<?>) ? null : env;
         setName(this.jobExecMethod.getClass().getName() + "." + this.jobExecMethod.getName() + "." + handleCounter++);
-        this.handle = Long.valueOf(System.currentTimeMillis() + getName().hashCode());
-    }
-
-    public InstantBlockingThread(final Object env, final Method jobExecMethod, final WorkflowProcessor<J> manager) {
-        // jobExec is the name of a method of the object 'env' that executes the one-step-run
-        // jobCount is the name of a method that returns the size of the job
-
-        // set the manager of blocking queues for input and output
-        setManager(manager);
-
-        // define execution class
-        this.jobExecMethod = jobExecMethod;
-        this.environment = (env instanceof Class<?>) ? null : env;
-        setName(jobExecMethod.getClass().getName() + "." + jobExecMethod.getName() + "." + handleCounter++);
         this.handle = Long.valueOf(System.currentTimeMillis() + getName().hashCode());
     }
 

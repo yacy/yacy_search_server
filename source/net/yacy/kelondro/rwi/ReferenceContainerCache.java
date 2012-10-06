@@ -59,7 +59,7 @@ import net.yacy.kelondro.util.FileUtils;
  */
 public final class ReferenceContainerCache<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType>, IndexReader<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
 
-    public static final Log log = new Log("ReferenceContainerCache");
+    private static final Log log = new Log("ReferenceContainerCache");
 
     private final int termSize;
     private final ByteOrder termOrder;
@@ -176,7 +176,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * create a clone of the cache content that is sorted using the this.containerOrder
      * @return the sorted ReferenceContainer[]
      */
-    protected List<ReferenceContainer<ReferenceType>> sortedClone() {
+    private List<ReferenceContainer<ReferenceType>> sortedClone() {
         final List<ReferenceContainer<ReferenceType>> cachecopy = new ArrayList<ReferenceContainer<ReferenceType>>(this.cache.size());
         synchronized (this.cache) {
             for (final Map.Entry<ByteArray, ReferenceContainer<ReferenceType>> entry: this.cache.entrySet()) {
@@ -187,7 +187,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return cachecopy;
     }
 
-    protected List<Rating<ByteArray>> ratingList() {
+    private List<Rating<ByteArray>> ratingList() {
         final List<Rating<ByteArray>> list = new ArrayList<Rating<ByteArray>>(this.cache.size());
         synchronized (this.cache) {
             for (final Map.Entry<ByteArray, ReferenceContainer<ReferenceType>> entry: this.cache.entrySet()) {
@@ -508,11 +508,6 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
 	        }
         }
         return false;
-    }
-
-    @Override
-    public void removeDelayed(final byte[] termHash, final HandleSet urlHashes) {
-        remove(termHash, urlHashes);
     }
 
     @Override

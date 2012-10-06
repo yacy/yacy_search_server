@@ -340,37 +340,6 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
         return null;
     }
 
-    public int columns() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public ByteOrder order() {
-        return order;
-    }
-
-    public int primarykey() {
-        return 0;
-    }
-
-    public final int cacheObjectChunkSize() {
-        // dummy method
-        return -1;
-    }
-
-    public long[] cacheObjectStatus() {
-        // dummy method
-        return null;
-    }
-
-    public final int cacheNodeChunkSize() {
-        return -1;
-    }
-
-    public final int[] cacheNodeStatus() {
-        return new int[]{0,0,0,0,0,0,0,0,0,0};
-    }
-
     @Override
     public void clear() {
         // do nothing

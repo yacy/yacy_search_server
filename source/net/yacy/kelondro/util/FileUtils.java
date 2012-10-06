@@ -24,8 +24,6 @@
 
 package net.yacy.kelondro.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -41,36 +39,26 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.Files;
-import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.logging.Log;
 
-public final class FileUtils
-{
+public final class FileUtils {
 
     private static final int DEFAULT_BUFFER_SIZE = 1024; // this is also the maximum chunk size
 
@@ -117,22 +105,6 @@ public final class FileUtils
         dest.flush();
 
         return total;
-    }
-
-    public static int copy(final File source, final Charset inputCharset, final Writer dest)
-        throws IOException {
-        InputStream fis = null;
-        try {
-            fis = new FileInputStream(source);
-            return copy(fis, dest, inputCharset);
-        } finally {
-            if ( fis != null ) {
-                try {
-                    fis.close();
-                } catch (Exception e ) {
-                }
-            }
-        }
     }
 
     public static int copy(final InputStream source, final Writer dest) throws IOException {
@@ -333,62 +305,6 @@ public final class FileUtils
         return buffer;
     }
 
-    public static byte[] readAndZip(final File source) throws IOException {
-        ByteArrayOutputStream byteOut = null;
-        GZIPOutputStream zipOut = null;
-        try {
-            byteOut = new ByteArrayOutputStream((int) (source.length() / 2));
-            zipOut = new GZIPOutputStream(byteOut);
-            copy(source, zipOut);
-            zipOut.close();
-            return byteOut.toByteArray();
-        } finally {
-            if ( zipOut != null ) {
-                try {
-                    zipOut.close();
-                } catch ( final Exception e ) {
-                }
-            }
-            if ( byteOut != null ) {
-                try {
-                    byteOut.close();
-                } catch ( final Exception e ) {
-                }
-            }
-        }
-    }
-
-    public static void writeAndGZip(final byte[] source, final File dest) throws IOException {
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(dest);
-            writeAndGZip(source, fos);
-        } finally {
-            if ( fos != null ) {
-                try {
-                    fos.close();
-                } catch ( final Exception e ) {
-                }
-            }
-        }
-    }
-
-    public static void writeAndGZip(final byte[] source, final OutputStream dest) throws IOException {
-        GZIPOutputStream zipOut = null;
-        try {
-            zipOut = new GZIPOutputStream(dest);
-            copy(source, zipOut);
-            zipOut.close();
-        } finally {
-            if ( zipOut != null ) {
-                try {
-                    zipOut.close();
-                } catch ( final Exception e ) {
-                }
-            }
-        }
-    }
-
     /**
      * This function determines if a byte array is gzip compressed and uncompress it
      *
@@ -524,102 +440,6 @@ public final class FileUtils
         saveMap(file, m, comment);
     }
 
-    public static Set<String> loadSet(final File file, final int chunksize, final boolean tree)
-        throws IOException {
-        final Set<String> set =
-            (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
-        final byte[] b = read(file);
-        for ( int i = 0; (i + chunksize) <= b.length; i++ ) {
-            set.add(UTF8.String(b, i, chunksize));
-        }
-        return set;
-    }
-
-    public static Set<String> loadSet(final File file, final String sep, final boolean tree)
-        throws IOException {
-        final Set<String> set =
-            (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
-        final byte[] b = read(file);
-        final StringTokenizer st = new StringTokenizer(UTF8.String(b), sep);
-        while ( st.hasMoreTokens() ) {
-            set.add(st.nextToken());
-        }
-        return set;
-    }
-
-    public static void saveSet(final File file, final String format, final Set<byte[]> set, final String sep) throws IOException {
-        final File tf = new File(file.toString() + ".prt" + (System.currentTimeMillis() % 1000));
-        OutputStream os = null;
-        if ( (format == null) || (format.equals("plain")) ) {
-            os = new BufferedOutputStream(new FileOutputStream(tf));
-        } else if ( format.equals("gzip") ) {
-            os = new GZIPOutputStream(new FileOutputStream(tf));
-        } else if ( format.equals("zip") ) {
-            @SuppressWarnings("resource")
-            final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file));
-            String name = file.getName();
-            if ( name.endsWith(".zip") ) {
-                name = name.substring(0, name.length() - 4);
-            }
-            zos.putNextEntry(new ZipEntry(name + ".txt"));
-            os = zos;
-        }
-        IOException ex = null;
-        if ( os != null ) try {
-            for ( final byte[] b : set ) {
-                os.write(b);
-                if ( sep != null ) {
-                    os.write(UTF8.getBytes(sep));
-                }
-            }
-            os.close();
-        } catch (IOException e) {
-            ex = e;
-        } finally {
-            os.close();
-        }
-        if (ex != null) throw ex;
-        forceMove(tf, file);
-    }
-
-    public static void saveSet(final File file, final String format, final RowSet set, final String sep) throws IOException {
-        final File tf = new File(file.toString() + ".prt" + (System.currentTimeMillis() % 1000));
-        OutputStream os = null;
-        if ( (format == null) || (format.equals("plain")) ) {
-            os = new BufferedOutputStream(new FileOutputStream(tf));
-        } else if ( format.equals("gzip") ) {
-            os = new GZIPOutputStream(new FileOutputStream(tf));
-        } else if ( format.equals("zip") ) {
-            @SuppressWarnings("resource")
-            final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file));
-            String name = file.getName();
-            if ( name.endsWith(".zip") ) {
-                name = name.substring(0, name.length() - 4);
-            }
-            zos.putNextEntry(new ZipEntry(name + ".txt"));
-            os = zos;
-        }
-        IOException ex = null;
-        if ( os != null ) try {
-            final Iterator<Row.Entry> i = set.iterator();
-            if ( i.hasNext() ) {
-                os.write(i.next().getPrimaryKeyBytes());
-            }
-            while ( i.hasNext() ) {
-                if ( sep != null ) {
-                    os.write(UTF8.getBytes(sep));
-                }
-                os.write(i.next().getPrimaryKeyBytes());
-            }
-        } catch (IOException e) {
-            ex = e;
-        } finally {
-            os.close();
-        }
-        if (ex != null) throw ex;
-        forceMove(tf, file);
-    }
-
     public static ConcurrentHashMap<String, String> table(final Reader r) {
         final BufferedReader br = new BufferedReader(r);
         return table(new StringsIterator(br));
@@ -711,7 +531,7 @@ public final class FileUtils
      * @param out the String to write
      * @return returns <code>true</code> if successful, <code>false</code> otherwise
      */
-    public static boolean writeList(final File listFile, final String out) {
+    private static boolean writeList(final File listFile, final String out) {
         BufferedWriter bw = null;
         try {
             bw = new BufferedWriter(new PrintWriter(new FileWriter(listFile)));
@@ -730,8 +550,8 @@ public final class FileUtils
         }
     }
 
-    public static final char LF = (char) 10;
-    public static final char CR = (char) 13;
+    private static final char LF = (char) 10;
+    private static final char CR = (char) 13;
 
     /**
      * Read lines of a text file into a String, optionally ignoring comments.
@@ -839,7 +659,7 @@ public final class FileUtils
     /**
      * Returns a List of all dirs and subdirs as File Objects Warning: untested
      */
-    public static ArrayList<File> getDirsRecursive(
+    private static ArrayList<File> getDirsRecursive(
         final File dir,
         final String notdir,
         final boolean excludeDotfiles) {
@@ -877,12 +697,11 @@ public final class FileUtils
         return FileUtils.writeList(listFile, new String(out)); //(File, String)
     }
 
-    public static class StringsIterator implements Iterator<String>
-    {
+    private static class StringsIterator implements Iterator<String> {
         private BufferedReader reader;
         private String nextLine;
 
-        public StringsIterator(final BufferedReader reader) {
+        private StringsIterator(final BufferedReader reader) {
             this.reader = reader;
             this.nextLine = null;
             next();
@@ -939,52 +758,6 @@ public final class FileUtils
         }
     }
 
-    /**
-     * Moves all files from a directory to another.
-     *
-     * @param from_dir Directory which contents will be moved.
-     * @param to_dir Directory to move into. It must exist already.
-     */
-    public static void moveAll(final File from_dir, final File to_dir) {
-        if ( !(from_dir.isDirectory()) ) {
-            return;
-        }
-        if ( !(to_dir.isDirectory()) ) {
-            return;
-        }
-        final String[] list = from_dir.list();
-        for ( int i = 0; i < list.length; i++ ) {
-            if ( !new File(from_dir, list[i]).renameTo(new File(to_dir, list[i])) ) {
-                Log.logWarning("serverFileUtils", "moveAll(): could not move from "
-                    + from_dir
-                    + list[i]
-                    + " to "
-                    + to_dir
-                    + list[i]);
-            }
-        }
-    }
-
-    public static class dirlistComparator implements Comparator<File>, Serializable
-    {
-
-        /**
-         * generated serial
-         */
-        private static final long serialVersionUID = -5196490300039230135L;
-
-        @Override
-        public int compare(final File file1, final File file2) {
-            if ( file1.isDirectory() && !file2.isDirectory() ) {
-                return -1;
-            } else if ( !file1.isDirectory() && file2.isDirectory() ) {
-                return 1;
-            } else {
-                return file1.getName().compareToIgnoreCase(file2.getName());
-            }
-        }
-    }
-
     public static final File createTempFile(final Class<?> classObj, final String name) throws IOException {
         String parserClassName = classObj.getName();
         int idx = parserClassName.lastIndexOf('.');
@@ -1006,107 +779,7 @@ public final class FileUtils
                 (!fileExt.isEmpty()) ? "." + fileExt : fileExt);
         return tempFile;
     }
-
-    /**
-     * copies the input stream to one output stream (byte per byte)
-     *
-     * @param in
-     * @param out
-     * @return number of copies bytes
-     * @throws IOException
-     */
-    public static int copyToStream(final BufferedInputStream in, final BufferedOutputStream out)
-        throws IOException {
-        int count = 0;
-        // copy bytes
-        int b;
-        while ( (b = in.read()) != -1 ) {
-            count++;
-            out.write(b);
-        }
-        out.flush();
-        return count;
-    }
-
-    /**
-     * copies the input stream to both output streams (byte per byte)
-     *
-     * @param in
-     * @param out0
-     * @param out1
-     * @return number of copies bytes
-     * @throws IOException
-     */
-    public static int copyToStreams(
-        final BufferedInputStream in,
-        final BufferedOutputStream out0,
-        final BufferedOutputStream out1) throws IOException {
-        assert out0 != null;
-        assert out1 != null;
-
-        int count = 0;
-        // copy bytes
-        int b;
-        while ( (b = in.read()) != -1 ) {
-            count++;
-            out0.write(b);
-            out1.write(b);
-        }
-        out0.flush();
-        out1.flush();
-        return count;
-    }
-
-    /**
-     * copies the input stream to all writers (byte per byte)
-     *
-     * @param data
-     * @param writer
-     * @param charSet
-     * @return
-     * @throws IOException
-     */
-    public static int copyToWriter(
-        final BufferedInputStream data,
-        final BufferedWriter writer,
-        final Charset charSet) throws IOException {
-        // the docs say: "For top efficiency, consider wrapping an InputStreamReader within a BufferedReader."
-        final Reader sourceReader = new InputStreamReader(data, charSet);
-
-        int count = 0;
-        // copy bytes
-        int b;
-        while ( (b = sourceReader.read()) != -1 ) {
-            count++;
-            writer.write(b);
-        }
-        writer.flush();
-        return count;
-    }
-
-    public static int copyToWriters(
-        final BufferedInputStream data,
-        final BufferedWriter writer0,
-        final BufferedWriter writer1,
-        final Charset charSet) throws IOException {
-        // the docs say: "For top efficiency, consider wrapping an InputStreamReader within a BufferedReader."
-        assert writer0 != null;
-        assert writer1 != null;
-        final Reader sourceReader = new InputStreamReader(data, charSet);
-
-        int count = 0;
-        // copy bytes
-        int b;
-        while ( (b = sourceReader.read()) != -1 ) {
-            count++;
-            writer0.write(b);
-            writer1.write(b);
-        }
-        writer0.flush();
-        writer1.flush();
-        return count;
-    }
-
+    
     /**
      * delete files and directories if a directory is not empty, delete also everything inside because
      * deletion sometimes fails on windows, there is also a windows exec included
@@ -1171,14 +844,6 @@ public final class FileUtils
             if ( path.exists() ) {
                 Log.logSevere("FileUtils", "cannot delete file " + p);
             }
-        }
-    }
-
-    public static void main(final String[] args) {
-        try {
-            writeAndGZip("ein zwei drei, Zauberei".getBytes(), new File("zauberei.txt.gz"));
-        } catch ( final IOException e ) {
-            Log.logException(e);
         }
     }
 

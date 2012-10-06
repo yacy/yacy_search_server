@@ -125,7 +125,7 @@ public class WorkflowProcessor<J extends WorkflowJob> {
         }
     }
 
-    public synchronized void relaxCapacity() {
+    private synchronized void relaxCapacity() {
         if (this.input.isEmpty()) {
             return;
         }

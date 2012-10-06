@@ -174,7 +174,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     }
 
-    public boolean shrink(final long targetFileSize, final long maxFileSize) {
+    private boolean shrink(final long targetFileSize, final long maxFileSize) {
         if (this.array.entries() < 2) return false;
         boolean donesomething = false;
 
@@ -392,26 +392,6 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     }
 
     @Override
-    public void removeDelayed(final byte[] termHash, final HandleSet urlHashes) {
-        HandleSet r;
-        synchronized (this.removeDelayedURLs) {
-            r = this.removeDelayedURLs.get(termHash);
-        }
-        if (r == null) {
-            r = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
-        }
-        try {
-            r.putAll(urlHashes);
-        } catch (final SpaceExceededException e) {
-            try {remove(termHash, urlHashes);} catch (final IOException e1) {}
-            return;
-        }
-        synchronized (this.removeDelayedURLs) {
-            this.removeDelayedURLs.put(termHash, r);
-        }
-    }
-
-    @Override
     public void removeDelayed(final byte[] termHash, final byte[] urlHashBytes) {
         HandleSet r;
         synchronized (this.removeDelayedURLs) {
@@ -582,7 +562,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         throw new UnsupportedOperationException("an accumulated size of index entries would not reflect the real number of words, which cannot be computed easily");
     }
 
-    public int[] sizes() {
+    private int[] sizes() {
         final int[] as = this.array.sizes();
         final int[] asr = new int[as.length + 1];
         System.arraycopy(as, 0, asr, 0, as.length);
@@ -606,16 +586,6 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     @Override
     public ByteOrder termKeyOrdering() {
         return this.array.ordering();
-    }
-
-    public File newContainerBLOBFile() {
-        // for migration of cache files
-        return this.array.newContainerBLOBFile();
-    }
-
-    public void mountBLOBFile(final File blobFile) throws IOException {
-        // for migration of cache files
-        this.array.mountBLOBFile(blobFile);
     }
 
     @Override

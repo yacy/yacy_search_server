@@ -138,9 +138,7 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
      * @throws IOException
      */
     public int remove(final byte[] termHash, HandleSet referenceHashes) throws IOException;
-    public void removeDelayed(final byte[] termHash, HandleSet referenceHashes) throws IOException;
     public int remove(final HandleSet termHashes, final byte[] urlHashBytes) throws IOException;
-    public void removeDelayed(final HandleSet termHashes, final byte[] urlHashBytes) throws IOException;
 
     public void removeDelayed() throws IOException;
 
@@ -170,14 +168,6 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
                             byte[] startHash,
                             boolean rot,
                             boolean excludePrivate
-                            ) throws IOException;
-
-
-    public TreeSet<ReferenceContainer<ReferenceType>> referenceContainer(
-                            byte[] startHash,
-                            boolean rot,
-                            boolean excludePrivate,
-                            int count
                             ) throws IOException;
 
     /**

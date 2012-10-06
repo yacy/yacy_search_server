@@ -31,9 +31,9 @@ import net.yacy.cora.order.CloneableIterator;
 
 public class RotateIterator<E> implements CloneableIterator<E> {
 
-    CloneableIterator<E> a, clone;
+    private CloneableIterator<E> a, clone;
     Object modifier;
-    boolean nempty;
+    private boolean nempty;
     int terminationCount;
 
     public RotateIterator(final CloneableIterator<E> a, final Object modifier, final int terminationCount) {

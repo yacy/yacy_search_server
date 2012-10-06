@@ -99,5 +99,4 @@ public interface BusyThread extends WorkflowThread {
      */
     public void freemem();
 
-    public void notifyThread();
 }

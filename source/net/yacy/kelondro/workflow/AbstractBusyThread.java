@@ -53,10 +53,6 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
         this.minBusySleep = minBusySleep;
         this.maxBusySleep = maxBusySleep;
     }
-    
-    protected final void announceMoreSleepTime(final long millis) {
-        this.idletime += millis;
-    }
 
     public final void setStartupSleep(final long milliseconds) {
         // sets a sleep time before execution of the job-loop

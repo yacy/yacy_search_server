@@ -37,8 +37,8 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
     private final Object environment;
     private final Long   handle;
 
-    public static int instantThreadCounter = 0;
-    public static final TreeMap<Long, String> jobs = new TreeMap<Long, String>();
+    private static int instantThreadCounter = 0;
+    private static final TreeMap<Long, String> jobs = new TreeMap<Long, String>();
 
     public InstantBusyThread(
               final Object env,
@@ -175,12 +175,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
     public static WorkflowThread oneTimeJob(final Runnable thread, final long startupDelay) {
         return oneTimeJob(thread, "run", startupDelay);
     }
-
-    public static WorkflowThread oneTimeJob(final Runnable thread, final long startupDelay, final int maxJobs) {
-        while (instantThreadCounter >= maxJobs) try {Thread.sleep(100);} catch (final InterruptedException e) {break;}
-        return oneTimeJob( thread, startupDelay);
-    }
-
+    
     @Override
     public void open() {
         // Not implemented in this thread

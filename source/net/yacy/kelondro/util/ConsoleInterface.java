@@ -42,7 +42,7 @@ public class ConsoleInterface extends Thread {
     private final Log log;
     
 
-    public ConsoleInterface(final InputStream stream, final Log log) {
+    private ConsoleInterface(final InputStream stream, final Log log) {
         this.log = log;
         this.stream = stream;
         // block reading {@see getOutput()}
@@ -106,7 +106,7 @@ public class ConsoleInterface extends Thread {
      * @return console output
      * @throws IOException
      */
-	public static List<String> getConsoleOutput(final List<String> processArgs, Log log) throws IOException {
+	private static List<String> getConsoleOutput(final List<String> processArgs, Log log) throws IOException {
 	    final ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
 	    Process process = null;
 	    ConsoleInterface inputStream = null;

@@ -37,7 +37,7 @@ import net.yacy.cora.util.SpaceExceededException;
 public class TermSearch <ReferenceType extends Reference> {
 
     private final ReferenceContainer<ReferenceType> joinResult;
-    TreeMap<byte[], ReferenceContainer<ReferenceType>> inclusionContainers;
+    private TreeMap<byte[], ReferenceContainer<ReferenceType>> inclusionContainers;
 
     public TermSearch(
             Index<ReferenceType> base,

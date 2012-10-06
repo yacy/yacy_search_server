@@ -127,42 +127,6 @@ public class Bitfield implements Cloneable, Serializable {
         return this.toString().hashCode();
     }
 
-    public void and(final Bitfield x) {
-        final int c = Math.min(x.length(), this.length());
-        for (int i = 0; i < c; i++) set(i, this.get(i) && x.get(i));
-    }
-
-    public void or(final Bitfield x) {
-        final int c = Math.min(x.length(), this.length());
-        for (int i = 0; i < c; i++) set(i, this.get(i) || x.get(i));
-        if (x.length() > c) {
-            for (int i = c; i < x.length(); i++) set(i, x.get(i));
-        }
-    }
-
-    public void xor(final Bitfield x) {
-        final int c = Math.min(x.length(), this.length());
-        for (int i = 0; i < c; i++) set(i, this.get(i) != x.get(i));
-        if (x.length() > c) {
-            for (int i = c; i < x.length(); i++) set(i, x.get(i));
-        }
-    }
-
-    public boolean anyOf(final Bitfield x) {
-        final int c = Math.min(x.length(), this.length());
-        for (int i = 0; i < c; i++) if ((x.get(i)) && (this.get(i))) return true;
-        return false;
-    }
-
-    public boolean allOf(final Bitfield x) {
-        final int c = Math.min(x.length(), this.length());
-        for (int i = 0; i < c; i++) if ((x.get(i)) && (!(this.get(i)))) return false;
-        if (x.length() > c) {
-            for (int i = c; i < x.length(); i++) if (x.get(i)) return false;
-        }
-        return true;
-    }
-
     public static void main(final String[] args) {
         Bitfield test = new Bitfield(4);
         final int l = test.length();

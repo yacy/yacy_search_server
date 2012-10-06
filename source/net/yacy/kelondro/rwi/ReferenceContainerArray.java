@@ -32,24 +32,21 @@ import java.util.Iterator;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.sorting.Rating;
-import net.yacy.cora.storage.HandleMap;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.blob.BLOB;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.search.index.Segment;
 
 
 public final class ReferenceContainerArray<ReferenceType extends Reference> {
 
     private final static long METHOD_MAXRUNTIME = 5000L;
 
-    protected final ReferenceFactory<ReferenceType> factory;
-    protected final ArrayStack array;
+    private final ReferenceFactory<ReferenceType> factory;
+    private final ArrayStack array;
 
     /**
      * open a index container array based on BLOB dumps. The content of the BLOBs will not be read
@@ -83,10 +80,6 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
 
     public void clear() throws IOException {
     	this.array.clear();
-    }
-
-    public long mem() {
-        return this.array.mem();
     }
 
     public int[] sizes() {
@@ -356,18 +349,6 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     }
 
     /**
-     * calculate an upper limit for a ranking number of the container size
-     * the returned number is not a counter. It can only be used to compare the
-     * ReferenceContainer, that may be produced as a result of get()
-     * @param termHash
-     * @return a ranking number
-     * @throws IOException
-     */
-    public long lenghtRankingUpperLimit(final byte[] termHash) throws IOException {
-        return this.array.lengthAdd(termHash);
-    }
-
-    /**
      * delete a indexContainer from the heap cache. This can only be used for write-enabled heaps
      * @param wordHash
      * @return the indexContainer if the cache contained the container, null otherwise
@@ -444,52 +425,4 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         merger.merge(ff, null, this.factory, this.array, newContainerBLOBFile());
         return true;
     }
-
-    public static <ReferenceType extends Reference> HandleMap referenceHashes(
-                            final File heapLocation,
-                            final ReferenceFactory<ReferenceType> factory,
-                            final ByteOrder termOrder,
-                            final Row payloadrow) throws IOException, SpaceExceededException {
-
-        System.out.println("CELL REFERENCE COLLECTION startup");
-        final HandleMap references = new RowHandleMap(payloadrow.primaryKeyLength, termOrder, 4, 1000000, heapLocation.getAbsolutePath());
-        final String[] files = heapLocation.list();
-        for (final String f: files) {
-            if (f.length() < 22 || !f.startsWith(Segment.termIndexName) || !f.endsWith(".blob")) continue;
-            final File fl = new File(heapLocation, f);
-            System.out.println("CELL REFERENCE COLLECTION opening blob " + fl);
-            final CloneableIterator<ReferenceContainer<ReferenceType>> ei = new ReferenceIterator<ReferenceType>(fl, factory);
-
-            ReferenceContainer<ReferenceType> container;
-            final long start = System.currentTimeMillis();
-            long lastlog = start - 27000;
-            int count = 0;
-            ReferenceType reference;
-            byte[] mh;
-            while (ei.hasNext()) {
-                container = ei.next();
-                if (container == null) continue;
-                final Iterator<ReferenceType> refi = container.entries();
-                while (refi.hasNext()) {
-                	reference = refi.next();
-                	if (reference == null) continue;
-                	mh = reference.urlhash();
-                	if (mh == null) continue;
-                    references.inc(mh);
-                }
-                count++;
-                // write a log
-                if (System.currentTimeMillis() - lastlog > 30000) {
-                    System.out.println("CELL REFERENCE COLLECTION scanned " + count + " RWI index entries. ");
-                    lastlog = System.currentTimeMillis();
-                }
-            }
-            ei.close();
-        }
-        references.trim();
-        System.out.println("CELL REFERENCE COLLECTION finished");
-        return references;
-    }
-
-
 }
