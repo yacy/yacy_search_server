@@ -225,6 +225,8 @@ public class DCEntry extends TreeMap<String, String> {
     public String getDescription() {
         String t = this.get("body");
         if (t == null) t = this.get("dc:description");
+        if (t == null) t = this.get("dc:subject");
+        if (t == null) t = this.get("categories");
         t = stripCDATA(t);
         if (t == null) return "";
         return t;

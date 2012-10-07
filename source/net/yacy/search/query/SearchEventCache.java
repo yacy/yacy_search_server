@@ -113,16 +113,6 @@ public class SearchEventCache {
         return alive;
     }
 
-/*
-    private volatile static SearchEvent dummyEvent = null;
-    private static SearchEvent getDummyEvent(final WorkTables workTables, final LoaderDispatcher loader, final Segment indexSegment) {
-        Log.logWarning("SearchEventCache", "returning dummy event");
-        if (dummyEvent != null) return dummyEvent;
-        final QueryParams query = new QueryParams("", 0, null, indexSegment, new RankingProfile(Classification.ContentDomain.TEXT), "");
-        dummyEvent = new SearchEvent(query, null, workTables, null, false, loader, 0, 0, 0, 0, false);
-        return dummyEvent;
-    }
-*/
     public static SearchEvent getEvent(
             final QueryParams query,
             final SeedDB peers,
@@ -153,37 +143,6 @@ public class SearchEventCache {
             }
         }
         if (event == null) {
-
-            // throttling in case of too many search requests
-
-            int waitcount = 0;
-            /*
-            throttling : while (true) {
-                final int allowedThreads = (int) Math.max(10, MemoryControl.available() / (query.snippetCacheStrategy == null ? 3 : 30) / 1024 / 1024);
-                // make room if there are too many search events (they need a lot of RAM)
-                if (lastEvents.size() >= allowedThreads) {
-                    Log.logWarning("SearchEventCache", "throttling phase 1: " + lastEvents.size() + " in cache; " + countAliveThreads() + " alive; " + allowedThreads + " allowed");
-                    cleanupEvents(false);
-                } else break throttling;
-                // if there are still some then delete just all
-                if (lastEvents.size() >= allowedThreads) {
-                    Log.logWarning("SearchEventCache", "throttling phase 2: " + lastEvents.size() + " in cache; " + countAliveThreads() + " alive; " + allowedThreads + " allowed");
-                    cleanupEvents(true);
-                } else break throttling;
-                // now there might be still events left that are alive
-                if (countAliveThreads() < allowedThreads) break throttling;
-                // finally we just wait some time until we get access
-                Log.logWarning("SearchEventCache", "throttling phase 3: " + lastEvents.size() + " in cache; " + countAliveThreads() + " alive; " + allowedThreads + " allowed");
-                try { Thread.sleep(200); } catch (final InterruptedException e) { }
-                waitcount++;
-                if (waitcount >= 100) return getDummyEvent(workTables, loader, query.getSegment());
-            }
-             */
-
-            if (waitcount > 0) {
-                // do not fetch snippets because that is most time-expensive
-                query.snippetCacheStrategy = null;
-            }
 
             // check if there are too many other searches alive now
             Log.logInfo("SearchEventCache", "getEvent: " + lastEvents.size() + " in cache; " + countAliveThreads() + " alive");

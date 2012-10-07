@@ -27,10 +27,12 @@ import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.sorting.ReversibleScoreMap;
 
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.ModifiableSolrParams;
 
 public interface SolrConnector extends Iterable<String> /* Iterable of document IDs */ {
 
@@ -102,6 +104,13 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @throws IOException
      */
     public SolrDocument get(final String id) throws IOException;
+
+    /**
+     * get a query result from solr
+     * @param query
+     * @throws IOException
+     */
+    public QueryResponse query(final ModifiableSolrParams query) throws IOException, SolrException;
 
     /**
      * get a query result from solr

@@ -32,10 +32,12 @@ import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.protocol.Domains;
 
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.ModifiableSolrParams;
 
 
 public class ShardSolrConnector extends AbstractSolrConnector implements SolrConnector {
@@ -187,6 +189,15 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
         return list;
     }
 
+    @Override
+    public QueryResponse query(final ModifiableSolrParams query) throws IOException, SolrException {
+        for (final SolrConnector connector: this.connectors) {
+            QueryResponse rsp = connector.query(query);
+            if (rsp != null && rsp.getResults().size() > 0) return rsp;
+        }
+        return new QueryResponse();
+    }
+    
     @Override
     public long getQueryCount(final String querystring) throws IOException {
         final AtomicLong count = new AtomicLong(0);

@@ -196,35 +196,6 @@ public final class RWIProcess extends Thread
     @Override
     public void run() {
 
-        /*
-        // start a concurrent solr search
-        if (this.query.query_include_words != null) {
-            Thread solrSearch = new Thread() {
-                @Override
-                public void run() {
-                    Thread.currentThread().setName("SearchEvent.solrSearch");
-                    String solrQuery = RWIProcess.this.query.solrQuery();
-                    try {
-                        ReferenceContainer<WordReference> wr = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, null);
-                        SolrDocumentList sdl = RWIProcess.this.query.getSegment().fulltext().getSolr().query(solrQuery, 0, 20);
-                        for (SolrDocument d : sdl) {
-                            try {
-                                URIMetadataNode md = new URIMetadataNode(d);
-                                WordReferenceVars v = new WordReferenceVars(md);
-                                wr.add(v);
-                            } catch (SpaceExceededException e) {}
-                        }
-                        Log.logInfo("SearchEvent", "added " + wr.size() + " hits from solr to ranking process");
-                        RWIProcess.this.add(wr, true, "embedded solr", sdl.size(), 60000);
-                    } catch (SolrException e) {
-                    } catch (IOException e) {
-                    }
-                }
-            };
-            solrSearch.start();
-        }
-        */
-
         // do a search
         oneFeederStarted();
 

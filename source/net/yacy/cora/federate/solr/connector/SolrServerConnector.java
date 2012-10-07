@@ -43,7 +43,7 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.FacetParams;
-import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.params.ModifiableSolrParams;
 
 public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
@@ -281,7 +281,8 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         return result;
     }
 
-    abstract public QueryResponse query(SolrParams params) throws IOException;
+    @Override
+    abstract public QueryResponse query(ModifiableSolrParams params) throws IOException;
 
     private final char[] queryIDTemplate = "id:\"            \"".toCharArray();
 

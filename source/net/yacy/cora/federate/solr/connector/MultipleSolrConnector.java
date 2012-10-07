@@ -27,10 +27,12 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import net.yacy.cora.sorting.ReversibleScoreMap;
 
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.ModifiableSolrParams;
 
 public class MultipleSolrConnector extends AbstractSolrConnector implements SolrConnector {
 
@@ -163,6 +165,11 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
     @Override
     public SolrDocumentList query(String querystring, int offset, int count) throws IOException {
         return this.solr.query(querystring, offset, count);
+    }
+
+    @Override
+    public QueryResponse query(ModifiableSolrParams query) throws IOException, SolrException {
+        return this.solr.query(query);
     }
 
     @Override

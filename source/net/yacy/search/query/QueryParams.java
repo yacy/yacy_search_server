@@ -39,7 +39,8 @@ import java.util.SortedSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
@@ -497,8 +498,8 @@ public final class QueryParams {
   public static final String DF = "df";
      */
 
-    public String solrQueryString() {
-        if (this.solrQueryString != null) return this.solrQueryString;
+
+    public SolrQuery solrQuery() {
         if (this.query_include_words == null || this.query_include_words.size() == 0) return null;
         // get text query
         final StringBuilder q = solrQueryString(this.query_include_words, this.query_exclude_words, this.indexSegment.fulltext().getSolrScheme());
@@ -520,33 +521,36 @@ public final class QueryParams {
             q.append(" AND ").append(YaCySchema.url_file_ext_s.name()).append(':').append(ext);
         }
 
+        // construct query
+        final SolrQuery params = new SolrQuery();
+        params.setQuery(q.toString());
+        params.setStart(this.offset);
+        params.setRows(this.resultcount);
+        params.setFacet(false);
+        
         if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {
             // localtion search, no special ranking
-            // try http://localhost:8090/solr/select?q=*:*&fq={!bbox}&sfield=coordinate_p&pt=50.17,8.65&d=1
-            q.append('&').append(CommonParams.FQ).append("=!bbox&sfield=").append(YaCySchema.coordinate_p.name()).append("&pt=");
-            q.append(Double.toString(this.lat)).append(',').append(Double.toString(this.lon)).append("&d=").append(GeoLocation.degreeToKm(this.radius));
+            // try http://localhost:8090/solr/select?q=*:*&fq={!bbox sfield=coordinate_p pt=50.17,8.65 d=1}
+
+            //params.setQuery("!bbox " + q.toString());
+            //params.set("sfield", YaCySchema.coordinate_p.name());
+            //params.set("pt", Double.toString(this.lat) + "," + Double.toString(this.lon));
+            //params.set("d", GeoLocation.degreeToKm(this.radius));
+            params.setFilterQueries("{!bbox sfield=" + YaCySchema.coordinate_p.name() + " pt=" + Double.toString(this.lat) + "," + Double.toString(this.lon) + " d=" + GeoLocation.degreeToKm(this.radius) + "}");
+            //params.setRows(Integer.MAX_VALUE);
         } else {
             // set ranking
             if (this.ranking.coeff_date == RankingProfile.COEFF_MAX) {
                 // set a most-recent ordering
-                q.append('&').append(CommonParams.SORT).append('=').append(YaCySchema.last_modified.name()).append(" desc");
-            } else {
-                // boost fields
-                q.append("&defType=edismax&qf=");
-                int c = 0;
-                for (Map.Entry<YaCySchema, Float> boost: boosts.entrySet()) {
-                    if (c++ > 0) q.append(',');
-                    q.append(boost.getKey().name()).append('^').append(boost.getValue().toString());
-                }
+                params.setSortField(YaCySchema.last_modified.name(), ORDER.desc);
             }
         }
         
         // prepare result
-        this.solrQueryString = q.toString();
-        Log.logInfo("Protocol", "SOLR QUERY: " + this.solrQueryString);
-        return this.solrQueryString;
+        Log.logInfo("Protocol", "SOLR QUERY: " + params.toString());
+        return params;
     }
-
+    
     public static StringBuilder solrQueryString(Collection<String> include, Collection<String> exclude, SolrConfiguration configuration) {
         final StringBuilder q = new StringBuilder(80);
 
@@ -566,10 +570,15 @@ public final class QueryParams {
         
         // combine these queries for all relevant fields
         wc = 0;
+        Float boost;
         for (YaCySchema field: fields) {
             if (configuration != null && !configuration.contains(field.name())) continue;
             if (wc > 0) q.append(" OR ");
-            q.append('(').append(field.name()).append(':').append(w).append(')');
+            q.append('(');
+            q.append(field.name()).append(':').append(w);
+            boost = boosts.get(field);
+            if (boost != null) q.append('^').append(boost.toString());
+            q.append(')');
             wc++;
         }
         q.insert(0, '(');

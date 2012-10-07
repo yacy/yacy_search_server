@@ -36,6 +36,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
@@ -166,7 +167,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
 
     @Override
-    public QueryResponse query(SolrParams params) throws IOException {
+    public QueryResponse query(ModifiableSolrParams params) throws IOException {
         if (this.server == null) throw new IOException("server disconnected");
         try {
             return this.server.query(params);

@@ -224,7 +224,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         entry.setCol(exp_chunkcount, this.chunkcount);
         entry.setCol(exp_last_read, daysSince2000(System.currentTimeMillis()));
         entry.setCol(exp_last_wrote, daysSince2000(this.lastTimeWrote));
-        entry.setCol(exp_order_type, (this.rowdef.objectOrder == null) ? ASCII.getBytes("__") : UTF8.getBytes(this.rowdef.objectOrder.signature()));
+        entry.setCol(exp_order_type, (this.rowdef.objectOrder == null) ? ASCII.getBytes("__") : ASCII.getBytes(this.rowdef.objectOrder.signature()));
         entry.setCol(exp_order_bound, this.sortBound);
         entry.setCol(exp_collection, this.chunkcache);
         return entry.bytes();

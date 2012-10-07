@@ -28,10 +28,12 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.ModifiableSolrParams;
 
 public class RetrySolrConnector extends AbstractSolrConnector implements SolrConnector {
 
@@ -187,6 +189,21 @@ public class RetrySolrConnector extends AbstractSolrConnector implements SolrCon
         return null;
     }
 
+    @Override
+    public QueryResponse query(ModifiableSolrParams query) throws IOException, SolrException {
+        final long t = System.currentTimeMillis() + this.retryMaxTime;
+        Throwable ee = null;
+        while (System.currentTimeMillis() < t) try {
+            return this.solrConnector.query(query);
+        } catch (final Throwable e) {
+            ee = e;
+            try {Thread.sleep(10);} catch (final InterruptedException e1) {}
+            continue;
+        }
+        if (ee != null) throw (ee instanceof IOException) ? (IOException) ee : new IOException(ee.getMessage());
+        return null;
+    }
+    
     @Override
     public long getQueryCount(final String querystring) throws IOException {
         final long t = System.currentTimeMillis() + this.retryMaxTime;

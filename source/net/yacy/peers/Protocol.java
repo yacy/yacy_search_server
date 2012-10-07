@@ -113,6 +113,8 @@ import net.yacy.server.serverSwitch;
 import net.yacy.utils.crypt;
 
 import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -1032,12 +1034,15 @@ public final class Protocol
         }
         event.rankingProcess.addExpectedRemoteReferences(count);
         SolrDocumentList docList = null;
-        final String solrQuerystring = event.getQuery().solrQueryString();
+        final SolrQuery solrQuery = event.getQuery().solrQuery();
+        solrQuery.setStart(offset);
+        solrQuery.setRows(count);
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
         if (localsearch) {
             // search the local index
             try {
-                docList = event.rankingProcess.getQuery().getSegment().fulltext().getSolr().query(solrQuerystring, offset, count);
+                QueryResponse rsp = event.rankingProcess.getQuery().getSegment().fulltext().getSolr().query(solrQuery);
+                docList = rsp.getResults();
             } catch (SolrException e) {
                 Network.log.logInfo("SEARCH failed (solr, 1), localpeer (" + e.getMessage() + ")", e);
                 return -1;
@@ -1049,7 +1054,8 @@ public final class Protocol
             final String solrURL = "http://" + target.getPublicAddress() + "/solr";
             try {
                 SolrConnector solrConnector = new RemoteSolrConnector(solrURL);
-                docList = solrConnector.query(solrQuerystring, offset, count);
+                QueryResponse rsp = solrConnector.query(solrQuery);
+                docList = rsp.getResults();
                 // no need to close this here because that sends a commit to remote solr which is not wanted here
             } catch (IOException e) {
                 Network.log.logInfo("SEARCH failed (solr), Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")", e);

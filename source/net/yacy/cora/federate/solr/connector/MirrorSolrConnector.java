@@ -33,11 +33,14 @@ import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.util.MemoryControl;
 
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.ModifiableSolrParams;
 
 /**
  * Implementation of a mirrored solr connector.
@@ -328,6 +331,50 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         return list;
     }
 
+    @Override
+    public QueryResponse query(ModifiableSolrParams query) throws IOException, SolrException {
+        Integer count0 = query.getInt(CommonParams.ROWS);
+        int count = count0 == null ? 10 : count0.intValue();
+        Integer start0 = query.getInt(CommonParams.START);
+        int start = start0 == null ? 0 : start0.intValue();
+        if (this.solr0 == null && this.solr1 == null) return new QueryResponse();
+
+        if (this.solr0 != null && this.solr1 == null) {
+            QueryResponse list = this.solr0.query(query);
+            return list;
+        }
+        if (this.solr1 != null && this.solr0 == null) {
+            QueryResponse list = this.solr1.query(query);
+            return list;
+        }
+
+        // combine both lists
+        QueryResponse rsp = this.solr0.query(query);
+        final SolrDocumentList l = rsp.getResults();
+        if (l.size() >= count) return rsp;
+
+        // at this point we need to know how many results are in solr0
+        // compute this with a very bad hack; replace with better method later
+        int size0 = 0;
+        { //bad hack - TODO: replace
+            query.set(CommonParams.START, 0);
+            query.set(CommonParams.ROWS, Integer.MAX_VALUE);
+            QueryResponse lHack = this.solr0.query(query);
+            query.set(CommonParams.START, start);
+            query.set(CommonParams.ROWS, count);
+            size0 = lHack.getResults().size();
+        }
+
+        // now use the size of the first query to do a second query
+        query.set(CommonParams.START, start + l.size() - size0);
+        query.set(CommonParams.ROWS, count - l.size());
+        QueryResponse rsp1 = this.solr1.query(query);
+        query.set(CommonParams.START, start);
+        query.set(CommonParams.ROWS, count);
+        // TODO: combine both
+        return rsp1;
+    }
+    
     @Override
     public long getQueryCount(final String querystring) throws IOException {
         if (this.solr0 == null && this.solr1 == null) return 0;
