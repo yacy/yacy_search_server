@@ -381,9 +381,9 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
 
     public class KeyIterator implements CloneableIterator<byte[]>, Iterator<byte[]> {
 
-        final boolean up, rotating;
-        final byte[] firstKey, secondKey;
-        Iterator<byte[]> iterator;
+        private final boolean up, rotating;
+        private final byte[] firstKey, secondKey;
+        private Iterator<byte[]> iterator;
         final private CloneableIterator<byte[]> blobkeys;
 
         public KeyIterator(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {

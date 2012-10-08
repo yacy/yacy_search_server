@@ -188,7 +188,7 @@ public class URIMetadataRow implements URIMetadata {
         */
     }
 
-    public static byte[] encodeComp(
+    private static byte[] encodeComp(
             final DigestURI url,
             final String dc_title,
             final String dc_creator,
@@ -220,7 +220,7 @@ public class URIMetadataRow implements URIMetadata {
         this.collections = new String[0];
     }
 
-    public URIMetadataRow(final Properties prop) throws kelondroException {
+    private URIMetadataRow(final Properties prop) throws kelondroException {
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());

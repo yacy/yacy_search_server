@@ -80,7 +80,7 @@ public class Word {
     public  int      posInText;   // unique handle, is initialized with word position (excluding double occurring words)
     public  int      posInPhrase; // position of word in phrase
     public  int      numOfPhrase; // number of phrase. 'normal' phrases begin with number 100
-    Set<Integer> phrases;         // a set of handles to all phrases where this word appears
+    private Set<Integer> phrases;         // a set of handles to all phrases where this word appears
     public  Bitfield flags;       // the flag bits for each word
 
     public Word(final int handle, final int pip, final int nop) {
@@ -98,15 +98,6 @@ public class Word {
 
     public int occurrences() {
         return this.count;
-    }
-
-    public void check(final int i) {
-        this.phrases.add(LargeNumberCache.valueOf(i));
-    }
-
-    public Iterator<Integer> phrases() {
-        // returns an iterator to handles of all phrases where the word appears
-        return this.phrases.iterator();
     }
 
     @Override

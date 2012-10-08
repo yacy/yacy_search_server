@@ -79,7 +79,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
 	 * object for termination of concurrent blocking queue processing
 	 */
     public static final Row.Entry poisonRowEntry = urlEntryRow.newEntry();
-	public static final WordReferenceRow poison = new WordReferenceRow(poisonRowEntry);
+	private static final WordReferenceRow poison = new WordReferenceRow(poisonRowEntry);
 
     // static properties
     private static final int col_urlhash       =  0; // h 12 the url hash b64-encoded
@@ -209,7 +209,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         private static final String PIN = "_";
         private final BlockingQueue<String> in;
         private final BlockingQueue<WordReferenceRow> out;
-        Thread[] worker;
+        private Thread[] worker;
         public ExternalParser(final int concurrency) {
             this.in = new LinkedBlockingQueue<String>();
             this.out = new LinkedBlockingQueue<WordReferenceRow>();

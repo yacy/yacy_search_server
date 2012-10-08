@@ -41,7 +41,7 @@ import net.yacy.kelondro.util.FileUtils;
 
 public final class HeapWriter {
 
-    public final static Log log = new Log("HeapWriter");
+    private final static Log log = new Log("HeapWriter");
     public final static byte[] ZERO = new byte[]{0};
 
     private final int          keylength;     // the length of the primary key

@@ -57,12 +57,12 @@ import net.yacy.kelondro.util.FileUtils;
 
 public class Tables implements Iterable<String> {
 
-    public final static String p1 = "(?:^|.*,)";
-    public final static String p2 = "((?:";
-    public final static String p3 = ")(?:,.*|$)){";
-    public final static String CIDX = "_cidx";
-    public final static int NOINDEX = 50000;
-    public final static int RAMINDEX = 100000;
+    private final static String p1 = "(?:^|.*,)";
+    private final static String p2 = "((?:";
+    private final static String p3 = ")(?:,.*|$)){";
+    private final static String CIDX = "_cidx";
+    private final static int NOINDEX = 50000;
+    private final static int RAMINDEX = 100000;
 
 	private static final String suffix = ".bheap";
     private static final String system_table_pkcounter = "pkcounter";
@@ -71,7 +71,7 @@ public class Tables implements Iterable<String> {
     private final File location;
     private final ConcurrentHashMap<String, BEncodedHeap> tables;
     private final ConcurrentHashMap<String, TablesColumnIndex> cidx;
-    int keymaxlen;
+    private int keymaxlen;
 
     // use our own formatter to prevent concurrency locks with other processes
     private final static GenericFormatter my_SHORT_MILSEC_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_MILSEC, 1);

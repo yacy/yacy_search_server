@@ -72,21 +72,12 @@ public abstract class TablesColumnIndex {
      * @param separator - a string value used to split column values into an array
      * @param table - an iterator over table rows which should be added to the index
      */    
-    public synchronized void buildIndex(final String columnName, final String separator, final Iterator<Tables.Row> table) {
+    private synchronized void buildIndex(final String columnName, final String separator, final Iterator<Tables.Row> table) {
     	this.deleteIndex(columnName);
     	// loop through all rows of the table      
     	while (table.hasNext()) {
     		this.add(columnName, separator, table.next());
         }    	
-    }
-    
-    /**
-     * create an index for a given table and column
-     * @param columnName - name of the column you want to build an index for
-     * @param table - an iterator over table rows which should be added to the index
-     */  
-    public synchronized void buildIndex(final String columnName, final Iterator<Tables.Row> table) {
-    	this.buildIndex(columnName, "", table);
     }
     
     /**
@@ -111,10 +102,6 @@ public abstract class TablesColumnIndex {
 	
 	public void delete(final byte[] pk) {
 		this.removePK(pk);
-	}
-	
-	public void delete(final Tables.Row row) {
-		this.removePK(row.getPK());
 	}
 	
 	public void update(final String columnName, final String separator, final Tables.Row row) {

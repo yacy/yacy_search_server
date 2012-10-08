@@ -67,21 +67,8 @@ public class CitationReference implements Reference, Serializable {
         this.entry.setCol(col_reserve, 0);
     }
 
-    public CitationReference(final String urlHash, final String code) {
-        // the code is the external form of the row minus the leading urlHash entry
-        this.entry = citationRow.newEntry(UTF8.getBytes((urlHash + code)));
-    }
-
-    public CitationReference(final String external) {
-        this.entry = citationRow.newEntry(external, true);
-    }
-
-    public CitationReference(final byte[] row) {
+    private CitationReference(final byte[] row) {
         this.entry = citationRow.newEntry(row);
-    }
-
-    public CitationReference(final byte[] row, final int offset, final boolean clone) {
-        this.entry = citationRow.newEntry(row, offset, clone);
     }
 
     public CitationReference(final Row.Entry rentry) {
@@ -169,10 +156,6 @@ public class CitationReference implements Reference, Serializable {
 
     @Override
     public int minposition() {
-        throw new UnsupportedOperationException();
-    }
-
-    public int position(@SuppressWarnings("unused") int p) {
         throw new UnsupportedOperationException();
     }
 

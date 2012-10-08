@@ -48,8 +48,8 @@ import net.yacy.kelondro.util.MemoryControl;
 
 public class Compressor implements BLOB, Iterable<byte[]> {
 
-    static byte[] gzipMagic  = {(byte) 'z', (byte) '|'}; // magic for gzip-encoded content
-    static byte[] plainMagic = {(byte) 'p', (byte) '|'}; // magic for plain content (no encoding)
+    private static byte[] gzipMagic  = {(byte) 'z', (byte) '|'}; // magic for gzip-encoded content
+    private static byte[] plainMagic = {(byte) 'p', (byte) '|'}; // magic for plain content (no encoding)
 
     private final BLOB backend;
     private TreeMap<byte[], byte[]> buffer; // entries which are not yet compressed, format is RAW (without magic)

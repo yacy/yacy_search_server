@@ -55,7 +55,7 @@ public class URIMetadataNode implements URIMetadata {
     private final byte[] hash;
     private final String urlRaw, keywords;
     private DigestURI url;
-    Bitfield flags;
+    private Bitfield flags;
     private final int imagec, audioc, videoc, appc;
     private double lat, lon;
     private long ranking; // during generation of a search result this value is set

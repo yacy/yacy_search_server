@@ -33,37 +33,7 @@ import net.yacy.visualization.RasterPlotter;
 public class imagetest {
 
     public static RasterPlotter respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
-        /*
-        BufferedImage bi = new BufferedImage(640, 400, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g = bi.createGraphics();
-        g.setBackground(Color.white);
-        g.clearRect(0, 0, 640, 400);
 
-        g.setColor(new Color(200, 200, 0));
-        g.drawRect(100, 50, 40, 30);
-
-        g.setColor(new Color(0, 0, 200));
-        try {
-            Class[] pType    = {Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE};
-            Object[] pParam = new Integer[]{new Integer(66), new Integer(55), new Integer(80), new Integer(80)};
-
-            String com = "drawRect";
-            Method m = g.getClass().getMethod(com, pType);
-            Object result = m.invoke(g, pParam);
-        } catch (NoSuchMethodException e) {
-            Log.logException(e);
-        } catch (IllegalAccessException e) {
-            Log.logException(e);
-        } catch (InvocationTargetException e) {
-            Log.logException(e);
-        }
-
-        WritableRaster r = bi.getRaster();
-        for (int i = 20; i < 100; i++) r.setPixel(i, 30, new int[]{255, 0, 0});
-        for (int i = 20; i < 100; i++) r.setPixel(i, 32, new int[]{0, 255, 0});
-        for (int i = 20; i < 100; i++) r.setPixel(i, 34, new int[]{0, 0, 255});
-        return bi;
-        */
         final RasterPlotter img = new RasterPlotter(800, 600, RasterPlotter.DrawMode.MODE_SUB, "FFFFFF");
         img.setColor(RasterPlotter.GREY);
         for (int y = 0; y < 600; y = y + 50) PrintTool.print(img, 0, 6 + y, 0, Integer.toString(y), -1);

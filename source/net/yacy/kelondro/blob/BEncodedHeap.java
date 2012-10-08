@@ -160,12 +160,12 @@ public class BEncodedHeap implements MapStore {
 
     }
 
-    public static class b2mEntry implements Map.Entry<byte[], Map<String, byte[]>>
+    private static class b2mEntry implements Map.Entry<byte[], Map<String, byte[]>>
     {
         private final byte[] s;
         private Map<String, byte[]> b;
 
-        public b2mEntry(final byte[] s, final Map<String, byte[]> b) {
+        private b2mEntry(final byte[] s, final Map<String, byte[]> b) {
             this.s = s;
             this.b = b;
         }
@@ -242,7 +242,7 @@ public class BEncodedHeap implements MapStore {
      * @param name
      * @return true if the row exists
      */
-    public boolean containsKey(final byte[] pk) {
+    private boolean containsKey(final byte[] pk) {
         return this.table.containsKey(pk);
     }
 

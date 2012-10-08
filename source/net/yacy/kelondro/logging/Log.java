@@ -288,11 +288,11 @@ public final class Log {
     }
 
     protected final static class logEntry {
-        public final Level level;
-        public final String message;
-        public Logger logger;
-        public String loggername;
-        public Throwable thrown;
+        private final Level level;
+        private final String message;
+        private Logger logger;
+        private String loggername;
+        private Throwable thrown;
         private logEntry(final Level level, final String message) {
             this.level = level;
             this.message = message == null || message.length() <= 512 ? message : message.substring(0, 512);
@@ -330,8 +330,8 @@ public final class Log {
         }
     }
 
-    protected final static logEntry poison = new logEntry();
-    protected final static BlockingQueue<logEntry> logQueue = new ArrayBlockingQueue<logEntry>(300);
+    private final static logEntry poison = new logEntry();
+    private final static BlockingQueue<logEntry> logQueue = new ArrayBlockingQueue<logEntry>(300);
     private   final static logRunner logRunnerThread = new logRunner();
 
     static {

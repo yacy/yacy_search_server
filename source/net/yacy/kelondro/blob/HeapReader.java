@@ -729,7 +729,7 @@ public class HeapReader {
         Iterator<Map.Entry<byte[], byte[]>>,
         Iterable<Map.Entry<byte[], byte[]>> {
 
-        DataInputStream is;
+        private DataInputStream is;
         int keylen;
         private final File blobFile;
 

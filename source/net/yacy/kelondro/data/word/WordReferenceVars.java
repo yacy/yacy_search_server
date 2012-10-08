@@ -57,19 +57,19 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 	private static int cores = Runtime.getRuntime().availableProcessors();
 	public static final byte[] default_language = UTF8.getBytes("uk");
 
-    public final Bitfield flags;
-    public long lastModified;
-    public final byte[] language;
+    private final Bitfield flags;
+    private long lastModified;
+    private final byte[] language;
     public final byte[] urlHash;
     private String hostHash = null;
-    public final char type;
-    public int hitcount, llocal, lother, phrasesintext,
+    private final char type;
+    private int hitcount, llocal, lother, phrasesintext,
                posinphrase, posofphrase,
                urlcomps, urllength,
                wordsintext, wordsintitle;
     private int virtualAge;
     private final Queue<Integer> positions;
-    public double termFrequency;
+    private double termFrequency;
 
     public WordReferenceVars(final URIMetadata md) {
         this.language = md.language();
@@ -472,9 +472,9 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 
     public static class TransformDistributor extends Thread {
 
-    	ReferenceContainer<WordReference> container;
-    	BlockingQueue<WordReferenceVars> out;
-    	long maxtime;
+    	private ReferenceContainer<WordReference> container;
+    	private BlockingQueue<WordReferenceVars> out;
+    	private long maxtime;
 
     	public TransformDistributor(final ReferenceContainer<WordReference> container, final BlockingQueue<WordReferenceVars> out, final long maxtime) {
     		this.container = container;
@@ -523,9 +523,9 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 
     public static class TransformWorker extends Thread {
 
-    	BlockingQueue<Row.Entry> in;
-    	BlockingQueue<WordReferenceVars> out;
-    	long maxtime;
+    	private BlockingQueue<Row.Entry> in;
+    	private BlockingQueue<WordReferenceVars> out;
+    	private long maxtime;
 
     	public TransformWorker(final BlockingQueue<WordReferenceVars> out, final long maxtime) {
     		this.in = new LinkedBlockingQueue<Row.Entry>();

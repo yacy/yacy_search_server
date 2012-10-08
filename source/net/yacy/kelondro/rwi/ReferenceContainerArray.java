@@ -213,7 +213,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     public class ReferenceCountIterator implements CloneableIterator<Rating<byte[]>>, Iterable<Rating<byte[]>> {
 
         private final boolean rot, excludePrivate;
-        protected CloneableIterator<byte[]> iterator;
+        private CloneableIterator<byte[]> iterator;
 
         public ReferenceCountIterator(final byte[] startWordHash, final boolean rot, final boolean excludePrivate) throws IOException {
             this.rot = rot;

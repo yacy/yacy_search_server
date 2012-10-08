@@ -38,109 +38,109 @@ import java.util.regex.Pattern;
 public final class LogParser {
 
     /** the version of the LogParser - <strong>Double</strong>*/
-    public static final String PARSER_VERSION           = "version";
+    private static final String PARSER_VERSION           = "version";
 
     /** the amount of URLs received during DHT - <strong>Integer</strong> */
-    public static final String URLS_RECEIVED            = "urlSum";
+    private static final String URLS_RECEIVED            = "urlSum";
 
     /** the amount of URLs requested during DHT - <strong>Integer</strong> */
-    public static final String URLS_REQUESTED           = "urlReqSum";
+    private static final String URLS_REQUESTED           = "urlReqSum";
 
     /** the amount of URLs blocked during DHT because they match the peer's blacklist - <strong>Integer</strong> */
-    public static final String URLS_BLOCKED             = "blockedURLSum";
+    private static final String URLS_BLOCKED             = "blockedURLSum";
 
     /** the amount of words received during DHT - <strong>Integer</strong> */
-    public static final String WORDS_RECEIVED           = "wordsSum";
+    private static final String WORDS_RECEIVED           = "wordsSum";
 
     /** the amount of RWIs received during DHT - <strong>Integer</strong> */
-    public static final String RWIS_RECEIVED            = "rwiSum";
+    private static final String RWIS_RECEIVED            = "rwiSum";
 
     /** the amount of RWIs blocked during DHT because their entries match the peer's blacklist - <strong>Integer</strong> */
-    public static final String RWIS_BLOCKED             = "blockedRWISum";
+    private static final String RWIS_BLOCKED             = "blockedRWISum";
 
     /** total time receiving RWIs during DHT in milli seconds - <strong>Long</strong> */
-    public static final String RWIS_RECEIVED_TIME       = "rwiTimeSum";
+    private static final String RWIS_RECEIVED_TIME       = "rwiTimeSum";
 
     /** total time receiving URLs during DHT in milli seconds - <strong>Long</strong> */
-    public static final String URLS_RECEIVED_TIME       = "urlTimeSum";
+    private static final String URLS_RECEIVED_TIME       = "urlTimeSum";
 
     /** the traffic sent during DHT in bytes - <strong>Long</strong> */
-    public static final String DHT_TRAFFIC_SENT         = "DHTSendTraffic";
+    private static final String DHT_TRAFFIC_SENT         = "DHTSendTraffic";
 
     /** the amount of URLs requested by other peers and sent by this one - <strong>Integer</strong> */
-    public static final String DHT_URLS_SENT            = "DHTSendURLs";
+    private static final String DHT_URLS_SENT            = "DHTSendURLs";
 
     /** the amount of rejected DHT transfers from other peers (i.e. because this peer was busy) - <strong>Integer</strong> */
-    public static final String DHT_REJECTED             = "RWIRejectCount";
+    private static final String DHT_REJECTED             = "RWIRejectCount";
 
     /** the peer-names from whose DHT transfers were rejected - <strong>HasSet</strong> */
-    public static final String DHT_REJECTED_PEERS_NAME  = "DHTRejectPeerNames";
+    private static final String DHT_REJECTED_PEERS_NAME  = "DHTRejectPeerNames";
 
     /** the peer-hashes from whose DHT transfers were rejected - <strong>HasSet</strong> */
-    public static final String DHT_REJECTED_PEERS_HASH  = "DHTRejectPeerHashs";
+    private static final String DHT_REJECTED_PEERS_HASH  = "DHTRejectPeerHashs";
 
     /** the peer-names this peer sent DHT chunks to - <strong>HasSet</strong> */
-    public static final String DHT_SENT_PEERS_NAME      = "DHTPeerNames";
+    private static final String DHT_SENT_PEERS_NAME      = "DHTPeerNames";
 
     /** the peer-hashes this peer sent DHT chunks to - <strong>HasSet</strong> */
-    public static final String DHT_SENT_PEERS_HASH      = "DHTPeerHashs";
+    private static final String DHT_SENT_PEERS_HASH      = "DHTPeerHashs";
 
     /** total amount of selected peers for index distribution - <strong>Integer</strong> */
-    public static final String DHT_SELECTED             = "DHTSelectionTargetCount";
+    private static final String DHT_SELECTED             = "DHTSelectionTargetCount";
 
     /** total amount of words selected for index distribution - <strong>Integer</strong> */
-    public static final String DHT_WORDS_SELECTED       = "DHTSelectionWordsCount";
+    private static final String DHT_WORDS_SELECTED       = "DHTSelectionWordsCount";
 
     /** total time selecting words for index distribution - <strong>Integer</strong> */
-    public static final String DHT_WORDS_SELECTED_TIME  = "DHTSelectionWordsTimeCount";
+    private static final String DHT_WORDS_SELECTED_TIME  = "DHTSelectionWordsTimeCount";
 
     /** the minimal DHT distance during peer-selection for index distribution - <strong>Long</strong> */
-    public static final String DHT_DISTANCE_MIN         = "minDHTDist";
+    private static final String DHT_DISTANCE_MIN         = "minDHTDist";
 
     /** the maximal DHT distance during peer-selection for index distribution - <strong>Long</strong> */
-    public static final String DHT_DISTANCE_MAX         = "maxDHTDist";
+    private static final String DHT_DISTANCE_MAX         = "maxDHTDist";
 
     /** the average DHT distance during peer-selection for index distribution - <strong>Long</strong> */
-    public static final String DHT_DISTANCE_AVERAGE     = "avgDHTDist";
+    private static final String DHT_DISTANCE_AVERAGE     = "avgDHTDist";
 
     /** how many times remote peers were too busy to accept the index transfer - <strong>Integer</strong> */
-    public static final String PEERS_BUSY               = "busyPeerCount";
+    private static final String PEERS_BUSY               = "busyPeerCount";
 
     /** how many times not enough peers for index distribution were found - <strong>Integer</strong> */
-    public static final String PEERS_TOO_LESS           = "notEnoughDHTPeers";
+    private static final String PEERS_TOO_LESS           = "notEnoughDHTPeers";
 
     /** how many times the index distribution failed (i.e. due to time-out or other reasons) - <strong>Integer</strong> */
-    public static final String DHT_SENT_FAILED          = "failedIndexDistributionCount";
+    private static final String DHT_SENT_FAILED          = "failedIndexDistributionCount";
 
     /** how many times the error "<code>tried to create left child-node twice</code>" occured - <strong>Integer</strong> */
-    public static final String ERROR_CHILD_TWICE_LEFT   = "leftChildTwiceCount";
+    private static final String ERROR_CHILD_TWICE_LEFT   = "leftChildTwiceCount";
 
     /** how many times the error "<code>tried to create right child-node twice</code>" occured - <strong>Integer</strong> */
-    public static final String ERROR_CHILD_TWICE_RIGHT  = "rightChildTwiceCount";
+    private static final String ERROR_CHILD_TWICE_RIGHT  = "rightChildTwiceCount";
 
     /** how many ranking distributions were executed successfully - <strong>Integer</strong> */
-    public static final String RANKING_DIST             = "rankingDistributionCount";
+    private static final String RANKING_DIST             = "rankingDistributionCount";
 
     /** total time the ranking distributions took - <strong>Integer</strong> */
-    public static final String RANKING_DIST_TIME        = "rankingDistributionTime";
+    private static final String RANKING_DIST_TIME        = "rankingDistributionTime";
 
     /** how many ranking distributions failed - <strong>Integer</strong> */
-    public static final String RANKING_DIST_FAILED      = "rankingDistributionFailCount";
+    private static final String RANKING_DIST_FAILED      = "rankingDistributionFailCount";
 
     /** how many times the error "<code>Malformed URL</code>" occured - <strong>Integer</strong> */
-    public static final String ERROR_MALFORMED_URL      = "malformedURLCount";
+    private static final String ERROR_MALFORMED_URL      = "malformedURLCount";
 
     /** the amount of indexed sites - <strong>Integer</strong> */
-    public static final String INDEXED_SITES            = "indexedSites";
+    private static final String INDEXED_SITES            = "indexedSites";
 
     /** total amount of indexed words - <strong>Integer</strong> */
-    public static final String INDEXED_WORDS            = "indexedWords";
+    private static final String INDEXED_WORDS            = "indexedWords";
 
     /** total size of all indexed sites - <strong>Integer</strong> */
-    public static final String INDEXED_SITES_SIZE       = "indexedSiteSizeSum";
+    private static final String INDEXED_SITES_SIZE       = "indexedSiteSizeSum";
 
     /** total amount of indexed anchors - <strong>Integer</strong> */
-    public static final String INDEXED_ANCHORS          = "indexedAnchors";
+    private static final String INDEXED_ANCHORS          = "indexedAnchors";
 
 //    /** total time needed for stacking the site of an indexing - <strong>Integer</strong> */
 //    public static final String INDEXED_STACK_TIME       = "indexedStackingTime";
@@ -155,16 +155,16 @@ public final class LogParser {
 //    public static final String INDEXED_STORE_TIME       = "indexedStorageTime";
 
     /** total time needed for storing the results of a link indexing - <strong>Integer</strong> */
-    public static final String INDEXED_LINKSTORE_TIME       = "indexedLinkStorageTime";
+    private static final String INDEXED_LINKSTORE_TIME       = "indexedLinkStorageTime";
 
     /** total time needed for storing the results of a word indexing - <strong>Integer</strong> */
-    public static final String INDEXED_INDEXSTORE_TIME       = "indexedIndexStorageTime";
+    private static final String INDEXED_INDEXSTORE_TIME       = "indexedIndexStorageTime";
 
     /** accumulated time needed to parse the log entries up to now (in ms)*/
-    public static final String TOTAL_PARSER_TIME        = "totalParserTime";
+    private static final String TOTAL_PARSER_TIME        = "totalParserTime";
 
     /** times the parser was called, respectively amount of independent log-lines */
-    public static final String TOTAL_PARSER_RUNS        = "totalParserRuns";
+    private static final String TOTAL_PARSER_RUNS        = "totalParserRuns";
 
 
     private static final float parserVersion = 0.1f;

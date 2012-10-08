@@ -207,7 +207,7 @@ public class Stack {
 
     public class Entry {
 
-        long h;
+        private long h;
         byte[] b;
 
         /**

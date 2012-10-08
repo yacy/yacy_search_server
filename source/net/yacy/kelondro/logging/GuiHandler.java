@@ -43,7 +43,7 @@ public class GuiHandler extends Handler {
     private final static int DEFAULT_SIZE = 400;
     private int size = DEFAULT_SIZE;
     private LogRecord buffer[];
-    int start, count;
+    private int start, count;
 
 
     public GuiHandler() {

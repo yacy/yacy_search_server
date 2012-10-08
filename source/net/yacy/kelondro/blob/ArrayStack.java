@@ -83,17 +83,17 @@ public class ArrayStack implements BLOB {
      * time-out. Deletions are not made automatically, they must be triggered using this method.
      */
 
-    public static final long maxFileSize = Integer.MAX_VALUE;
-    public static final long oneMonth    = 1000L * 60L * 60L * 24L * 365L / 12L;
+    private static final long maxFileSize = Integer.MAX_VALUE;
+    public  static final long oneMonth    = 1000L * 60L * 60L * 24L * 365L / 12L;
 
-    protected     int            keylength;
-    protected     ByteOrder      ordering;
+    private       int            keylength;
+    private       ByteOrder      ordering;
     private final File           heapLocation;
     private       long           fileAgeLimit;
     private       long           fileSizeLimit;
     private       long           repositoryAgeMax;
     private       long           repositorySizeMax;
-    protected     List<blobItem> blobs;
+    private       List<blobItem> blobs;
     private final String         prefix;
     private final int            buffersize;
     private final boolean        trimall;
@@ -256,7 +256,7 @@ public class ArrayStack implements BLOB {
         this.blobs.add(new blobItem(d, location, oneBlob));
     }
 
-    public synchronized void unmountBLOB(final File location, final boolean writeIDX) {
+    private synchronized void unmountBLOB(final File location, final boolean writeIDX) {
         blobItem b;
         for (int i = 0; i < this.blobs.size(); i++) {
             b = this.blobs.get(i);
@@ -334,11 +334,7 @@ public class ArrayStack implements BLOB {
         return new File[]{f0, f1};
     }
 
-    public synchronized File unmountSmallestBLOB(final long maxResultSize) {
-        return smallestBLOB(null, maxResultSize);
-    }
-
-    public synchronized File smallestBLOB(final File excluding, final long maxsize) {
+    private synchronized File smallestBLOB(final File excluding, final long maxsize) {
         if (this.blobs.isEmpty()) return null;
         File bestFile = null;
         long smallest = Long.MAX_VALUE;
@@ -675,7 +671,7 @@ public class ArrayStack implements BLOB {
         return new BlobValues(key);
     }
 
-    public class BlobValues extends LookAheadIterator<byte[]> {
+    private class BlobValues extends LookAheadIterator<byte[]> {
 
         private final Iterator<blobItem> bii;
         private final byte[] key;
@@ -732,7 +728,7 @@ public class ArrayStack implements BLOB {
         return new BlobLengths(key);
     }
 
-    public class BlobLengths extends LookAheadIterator<Long> {
+    private class BlobLengths extends LookAheadIterator<Long> {
 
         private final Iterator<blobItem> bii;
         private final byte[] key;

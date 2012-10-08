@@ -35,8 +35,8 @@ import java.util.logging.LogRecord;
 
 public final class LogalizerHandler extends Handler {
 
-    public static boolean enabled;
-    public static boolean debug;
+    private static boolean enabled;
+    private static boolean debug;
 
     public LogalizerHandler() {
         super();

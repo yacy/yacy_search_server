@@ -51,8 +51,8 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
     private static final Pattern multiDumpFilterPattern = Pattern.compile(multiDumpFilter);
 
     public static class StackTrace {
-        public String text;
-        public Thread.State state;
+        private String text;
+        private Thread.State state;
         public StackTrace(final String text, final Thread.State state) {
             this.state = state;
             this.text = text;
@@ -75,7 +75,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
     }
 
     public static class Lock {
-        public String id;
+        private String id;
         public Lock(final String name) {
             this.id = name;
         }

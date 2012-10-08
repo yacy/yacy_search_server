@@ -282,11 +282,6 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     private static final char rootURLFlag0 = subdomPortPath("", 80, "");
     private static final char rootURLFlag1 = subdomPortPath("www", 80, "");
 
-    public static final boolean probablyRootURL(final String urlHash) {
-    	final char c = urlHash.charAt(5);
-        return c == rootURLFlag0 || c == rootURLFlag1;
-    }
-
     public static final boolean probablyRootURL(final byte[] urlHash) {
     	final char c = (char) urlHash[5];
         return c == rootURLFlag0 || c == rootURLFlag1;
@@ -308,7 +303,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
      * @param port
      * @return 6 bytes base64 encoded String representing the domain of the url
      */
-    public static final String hosthash6(final String protocol, final String host, final int port) {
+    private static final String hosthash6(final String protocol, final String host, final int port) {
         final StringBuilder hash = new StringBuilder(12);
         final int id = Domains.getDomainID(host, null); // id=7: tld is local
         int p = host.lastIndexOf('.');
@@ -355,16 +350,11 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         return domLengthEstimation(urlHashBytes) << 8 / 20;
     }
 
-    public static final int domDomain(final byte[] urlHash) {
+    private static final int domDomain(final byte[] urlHash) {
         // returns the ID of the domain of the domain
         assert (urlHash != null);
         assert (urlHash.length == 12 || urlHash.length == 6) : "urlhash = " + ASCII.String(urlHash);
         return (Base64Order.enhancedCoder.decodeByte(urlHash[(urlHash.length == 12) ? 11 : 5]) & 28) >> 2;
-    }
-
-
-    public static boolean isDomDomain(final byte[] urlHash, final int id) {
-        return domDomain(urlHash) == id;
     }
 
     /**

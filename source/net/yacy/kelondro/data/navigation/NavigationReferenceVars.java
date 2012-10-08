@@ -38,11 +38,11 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
 
     private static final long serialVersionUID=2873544331190937594L;
 
-    public byte[] termhash, refhash;
-    public int hitcount, position;
-    byte flags;
+    private byte[] termhash, refhash;
+    private int hitcount, position;
+    private byte flags;
 
-    public NavigationReferenceVars(
+    private NavigationReferenceVars(
             final byte[]   termhash,
             final byte[]   refhash,
             final int      count,
@@ -76,7 +76,7 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
         return c;
     }
 
-    public NavigationReferenceRow toRowEntry() {
+    private NavigationReferenceRow toRowEntry() {
         return new NavigationReferenceRow(
                 this.termhash,
                 this.refhash,

@@ -200,7 +200,7 @@ public final class transferRWI {
                 serverCore.checkInterruption();
 
                 // check if we need to ask for the corresponding URL
-                if (!(knownURL.has(urlHash) || unknownURL.has(urlHash)))  try {
+                if (!knownURL.has(urlHash) && !unknownURL.has(urlHash))  try {
                     if (sb.index.fulltext().exists(urlHash)) {
                         knownURL.put(urlHash);
                     } else {
@@ -208,9 +208,7 @@ public final class transferRWI {
                     }
                     receivedURL++;
                 } catch (final Exception ex) {
-                    sb.getLog().logWarning(
-                                "transferRWI: DB-Error while trying to determine if URL with hash '" +
-                                ASCII.String(urlHash) + "' is known.", ex);
+                    sb.getLog().logWarning("transferRWI: DB-Error while trying to determine if URL with hash '" + ASCII.String(urlHash) + "' is known.", ex);
                 }
                 received++;
             }
