@@ -2461,7 +2461,7 @@ public final class Switchboard extends serverSwitch
         }
         if (!profile.indexUrlMustMatchPattern().matcher(urls).matches() ||
              profile.indexUrlMustNotMatchPattern().matcher(urls).matches() ) {
-            if (this.log.isInfo()) this.log.logInfo("Not Condensed Resource '" + urls + "': indexing prevented by regular expression on url");
+            if (this.log.isInfo()) this.log.logInfo("Not Condensed Resource '" + urls + "': indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + profile.indexUrlMustMatchPattern().pattern() + ", indexUrlMustNotMatchPattern = " + profile.indexUrlMustNotMatchPattern().pattern());
             return new IndexingQueueEntry(in.queueEntry, in.documents, null);
         }
         

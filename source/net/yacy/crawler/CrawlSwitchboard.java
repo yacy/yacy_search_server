@@ -217,270 +217,210 @@ public final class CrawlSwitchboard
     }
 
     private void initActiveCrawlProfiles() {
-        this.defaultProxyProfile = null;
-        this.defaultRemoteProfile = null;
-        this.defaultTextSnippetLocalProfile = null;
-        this.defaultTextSnippetGlobalProfile = null;
-        this.defaultMediaSnippetLocalProfile = null;
-        this.defaultMediaSnippetGlobalProfile = null;
-        this.defaultSurrogateProfile = null;
-        CrawlProfile profile;
-        String name;
-        try {
-            for ( final byte[] handle : this.profilesActiveCrawls.keySet() ) {
-                profile = new CrawlProfile(this.profilesActiveCrawls.get(handle));
-                name = profile.name();
-                if ( name.equals(CRAWL_PROFILE_PROXY) ) {
-                    this.defaultProxyProfile = profile;
-                }
-                if ( name.equals(CRAWL_PROFILE_REMOTE) ) {
-                    this.defaultRemoteProfile = profile;
-                }
-                if ( name.equals(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT) ) {
-                    this.defaultTextSnippetLocalProfile = profile;
-                }
-                if ( name.equals(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT) ) {
-                    this.defaultTextSnippetGlobalProfile = profile;
-                }
-                if ( name.equals(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ) {
-                    this.defaultMediaSnippetLocalProfile = profile;
-                }
-                if ( name.equals(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA) ) {
-                    this.defaultMediaSnippetGlobalProfile = profile;
-                }
-                if ( name.equals(CRAWL_PROFILE_SURROGATE) ) {
-                    this.defaultSurrogateProfile = profile;
-                }
-            }
-        } catch ( final Exception e ) {
-            this.profilesActiveCrawls.clear();
-            this.defaultProxyProfile = null;
-            this.defaultRemoteProfile = null;
-            this.defaultTextSnippetLocalProfile = null;
-            this.defaultTextSnippetGlobalProfile = null;
-            this.defaultMediaSnippetLocalProfile = null;
-            this.defaultMediaSnippetGlobalProfile = null;
-            this.defaultSurrogateProfile = null;
-        }
-
-        if ( this.defaultProxyProfile == null ) {
-            // generate new default entry for proxy crawling
-            this.defaultProxyProfile =
-                new CrawlProfile(
-                    CRAWL_PROFILE_PROXY,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    "",
-                    0 /*Integer.parseInt(getConfig(PROXY_PREFETCH_DEPTH, "0"))*/,
-                    true,
-                    CrawlProfile.getRecrawlDate(CRAWL_PROFILE_PROXY_RECRAWL_CYCLE),
-                    -1,
-                    false,
-                    true /*getConfigBool(PROXY_INDEXING_LOCAL_TEXT, true)*/,
-                    true /*getConfigBool(PROXY_INDEXING_LOCAL_MEDIA, true)*/,
-                    true,
-                    false /*getConfigBool(PROXY_INDEXING_REMOTE, false)*/,
-                    true,
-                    true,
-                    true,
-                    CacheStrategy.IFFRESH,
-                    "robot_" + CRAWL_PROFILE_PROXY);
-            this.profilesActiveCrawls.put(
-                UTF8.getBytes(this.defaultProxyProfile.handle()),
-                this.defaultProxyProfile);
-        }
-        if ( this.defaultRemoteProfile == null ) {
-            // generate new default entry for remote crawling
-            this.defaultRemoteProfile =
-                new CrawlProfile(
-                    CRAWL_PROFILE_REMOTE,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    "",
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    0,
-                    false,
-                    -1,
-                    -1,
-                    true,
-                    true,
-                    true,
-                    false,
-                    false,
-                    true,
-                    true,
-                    false,
-                    CacheStrategy.IFFRESH,
-                    "robot_" + CRAWL_PROFILE_REMOTE);
-            this.profilesActiveCrawls.put(
-                UTF8.getBytes(this.defaultRemoteProfile.handle()),
-                this.defaultRemoteProfile);
-        }
-        if ( this.defaultTextSnippetLocalProfile == null ) {
-            // generate new default entry for snippet fetch and optional crawling
-            this.defaultTextSnippetLocalProfile =
-                new CrawlProfile(
-                    CRAWL_PROFILE_SNIPPET_LOCAL_TEXT,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    "",
-                    0,
-                    false,
-                    CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE),
-                    -1,
-                    true,
-                    false,
-                    false,
-                    true,
-                    false,
-                    true,
-                    true,
-                    false,
-                    CacheStrategy.IFEXIST,
-                    "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_TEXT);
-            this.profilesActiveCrawls.put(
-                UTF8.getBytes(this.defaultTextSnippetLocalProfile.handle()),
-                this.defaultTextSnippetLocalProfile);
-        }
-        if ( this.defaultTextSnippetGlobalProfile == null ) {
-            // generate new default entry for snippet fetch and optional crawling
-            this.defaultTextSnippetGlobalProfile =
-                new CrawlProfile(
-                    CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    "",
-                    0,
-                    false,
-                    CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE),
-                    -1,
-                    true,
-                    true,
-                    true,
-                    true,
-                    false,
-                    true,
-                    true,
-                    false,
-                    CacheStrategy.IFEXIST,
-                    "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT);
-            this.profilesActiveCrawls.put(
-                UTF8.getBytes(this.defaultTextSnippetGlobalProfile.handle()),
-                this.defaultTextSnippetGlobalProfile);
-        }
+        // generate new default entry for proxy crawling
+        this.defaultProxyProfile =
+            new CrawlProfile(
+                CRAWL_PROFILE_PROXY,
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerUrlMustNotMatch
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
+                "",                              //crawlerCountryMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
+                CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
+                0 /*Integer.parseInt(getConfig(PROXY_PREFETCH_DEPTH, "0"))*/,
+                true,
+                CrawlProfile.getRecrawlDate(CRAWL_PROFILE_PROXY_RECRAWL_CYCLE),
+                -1,
+                false,
+                true /*getConfigBool(PROXY_INDEXING_LOCAL_TEXT, true)*/,
+                true /*getConfigBool(PROXY_INDEXING_LOCAL_MEDIA, true)*/,
+                true,
+                false /*getConfigBool(PROXY_INDEXING_REMOTE, false)*/,
+                true,
+                true,
+                true,
+                CacheStrategy.IFFRESH,
+                "robot_" + CRAWL_PROFILE_PROXY);
+        this.profilesActiveCrawls.put(
+            UTF8.getBytes(this.defaultProxyProfile.handle()),
+            this.defaultProxyProfile);
+        // generate new default entry for remote crawling
+        this.defaultRemoteProfile =
+            new CrawlProfile(
+                CRAWL_PROFILE_REMOTE,
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerUrlMustNotMatch
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
+                "",                              //crawlerCountryMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
+                CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
+                0,
+                false,
+                -1,
+                -1,
+                true,
+                true,
+                true,
+                false,
+                false,
+                true,
+                true,
+                false,
+                CacheStrategy.IFFRESH,
+                "robot_" + CRAWL_PROFILE_REMOTE);
+        this.profilesActiveCrawls.put(
+            UTF8.getBytes(this.defaultRemoteProfile.handle()),
+            this.defaultRemoteProfile);
+        // generate new default entry for snippet fetch and optional crawling
+        this.defaultTextSnippetLocalProfile =
+            new CrawlProfile(
+                CRAWL_PROFILE_SNIPPET_LOCAL_TEXT,
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerUrlMustNotMatch
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
+                "",                              //crawlerCountryMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
+                CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
+                0,
+                false,
+                CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE),
+                -1,
+                true,
+                false,
+                false,
+                true,
+                false,
+                true,
+                true,
+                false,
+                CacheStrategy.IFEXIST,
+                "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_TEXT);
+        this.profilesActiveCrawls.put(
+            UTF8.getBytes(this.defaultTextSnippetLocalProfile.handle()),
+            this.defaultTextSnippetLocalProfile);
+        // generate new default entry for snippet fetch and optional crawling
+        this.defaultTextSnippetGlobalProfile =
+            new CrawlProfile(
+                CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT,
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerUrlMustNotMatch
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
+                "",                              //crawlerCountryMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
+                CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
+                0,
+                false,
+                CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE),
+                -1,
+                true,
+                true,
+                true,
+                true,
+                false,
+                true,
+                true,
+                false,
+                CacheStrategy.IFEXIST,
+                "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT);
+        this.profilesActiveCrawls.put(
+            UTF8.getBytes(this.defaultTextSnippetGlobalProfile.handle()),
+            this.defaultTextSnippetGlobalProfile);
         this.defaultTextSnippetGlobalProfile.setCacheStrategy(CacheStrategy.IFEXIST);
-        if ( this.defaultMediaSnippetLocalProfile == null ) {
-            // generate new default entry for snippet fetch and optional crawling
-            this.defaultMediaSnippetLocalProfile =
-                new CrawlProfile(
-                    CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    "",
-                    0,
-                    false,
-                    CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE),
-                    -1,
-                    true,
-                    false,
-                    false,
-                    true,
-                    false,
-                    true,
-                    true,
-                    false,
-                    CacheStrategy.IFEXIST,
-                    "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA);
-            this.profilesActiveCrawls.put(
-                UTF8.getBytes(this.defaultMediaSnippetLocalProfile.handle()),
-                this.defaultMediaSnippetLocalProfile);
-        }
-        if ( this.defaultMediaSnippetGlobalProfile == null ) {
-            // generate new default entry for snippet fetch and optional crawling
-            this.defaultMediaSnippetGlobalProfile =
-                new CrawlProfile(
-                    CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    "",
-                    0,
-                    false,
-                    CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE),
-                    -1,
-                    true,
-                    false,
-                    true,
-                    true,
-                    false,
-                    true,
-                    true,
-                    false,
-                    CacheStrategy.IFEXIST,
-                    "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA);
-            this.profilesActiveCrawls.put(
-                UTF8.getBytes(this.defaultMediaSnippetGlobalProfile.handle()),
-                this.defaultMediaSnippetGlobalProfile);
-        }
-        if ( this.defaultSurrogateProfile == null ) {
-            // generate new default entry for surrogate parsing
-            this.defaultSurrogateProfile =
-                new CrawlProfile(
-                    CRAWL_PROFILE_SURROGATE,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    CrawlProfile.MATCH_ALL_STRING,
-                    CrawlProfile.MATCH_NEVER_STRING,
-                    "",
-                    0,
-                    false,
-                    CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE),
-                    -1,
-                    true,
-                    true,
-                    false,
-                    false,
-                    false,
-                    true,
-                    true,
-                    false,
-                    CacheStrategy.NOCACHE,
-                    "robot_" + CRAWL_PROFILE_SURROGATE);
-            this.profilesActiveCrawls.put(
-                UTF8.getBytes(this.defaultSurrogateProfile.handle()),
-                this.defaultSurrogateProfile);
-        }
+        // generate new default entry for snippet fetch and optional crawling
+        this.defaultMediaSnippetLocalProfile =
+            new CrawlProfile(
+                CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA,
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerUrlMustNotMatch
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
+                "",                              //crawlerCountryMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
+                CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
+                0,
+                false,
+                CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE),
+                -1,
+                true,
+                false,
+                false,
+                true,
+                false,
+                true,
+                true,
+                false,
+                CacheStrategy.IFEXIST,
+                "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA);
+        this.profilesActiveCrawls.put(
+            UTF8.getBytes(this.defaultMediaSnippetLocalProfile.handle()),
+            this.defaultMediaSnippetLocalProfile);
+        // generate new default entry for snippet fetch and optional crawling
+        this.defaultMediaSnippetGlobalProfile =
+            new CrawlProfile(
+                CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA,
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerUrlMustNotMatch
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
+                "",                              //crawlerCountryMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
+                CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
+                0,
+                false,
+                CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE),
+                -1,
+                true,
+                false,
+                true,
+                true,
+                false,
+                true,
+                true,
+                false,
+                CacheStrategy.IFEXIST,
+                "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA);
+        this.profilesActiveCrawls.put(
+            UTF8.getBytes(this.defaultMediaSnippetGlobalProfile.handle()),
+            this.defaultMediaSnippetGlobalProfile);
+        // generate new default entry for surrogate parsing
+        this.defaultSurrogateProfile =
+            new CrawlProfile(
+                CRAWL_PROFILE_SURROGATE,
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerUrlMustNotMatch
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
+                "",                              //crawlerCountryMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
+                CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
+                0,
+                false,
+                CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE),
+                -1,
+                true,
+                true,
+                false,
+                false,
+                false,
+                true,
+                true,
+                false,
+                CacheStrategy.NOCACHE,
+                "robot_" + CRAWL_PROFILE_SURROGATE);
+        this.profilesActiveCrawls.put(
+            UTF8.getBytes(this.defaultSurrogateProfile.handle()),
+            this.defaultSurrogateProfile);
     }
 
     private void resetProfiles() {

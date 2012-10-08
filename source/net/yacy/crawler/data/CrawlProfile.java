@@ -164,10 +164,10 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(CRAWLER_URL_MUSTNOTMATCH,  (crawlerUrlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerUrlMustNotMatch);
         put(CRAWLER_IP_MUSTMATCH,      (crawlerIpMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerIpMustMatch);
         put(CRAWLER_IP_MUSTNOTMATCH,   (crawlerIpMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerIpMustNotMatch);
-        put(CRAWLER_COUNTRY_MUSTMATCH, (crawlerCountryMustMatch == null) ? "" : crawlerCountryMustMatch);
-        put(CRAWLER_URL_NODEPTHLIMITMATCH, (crawlerNoDepthLimitMatch == null) ? "" : crawlerNoDepthLimitMatch);
-        put(INDEXING_URL_MUSTMATCH, (indexUrlMustMatch == null) ? "" : indexUrlMustMatch);
-        put(INDEXING_URL_MUSTNOTMATCH, (indexUrlMustNotMatch == null) ? "" : indexUrlMustNotMatch);
+        put(CRAWLER_COUNTRY_MUSTMATCH, (crawlerCountryMustMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerCountryMustMatch);
+        put(CRAWLER_URL_NODEPTHLIMITMATCH, (crawlerNoDepthLimitMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerNoDepthLimitMatch);
+        put(INDEXING_URL_MUSTMATCH, (indexUrlMustMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : indexUrlMustMatch);
+        put(INDEXING_URL_MUSTNOTMATCH, (indexUrlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : indexUrlMustNotMatch);
         put(DEPTH,            depth);
         put(DIRECT_DOC_BY_URL, directDocByURL);
         put(RECRAWL_IF_OLDER, recrawlIfOlder);
@@ -351,7 +351,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      */
     public String[] countryMustMatchList() {
         String countryMustMatch = get(CRAWLER_COUNTRY_MUSTMATCH);
-        if (countryMustMatch == null) countryMustMatch = "";
+        if (countryMustMatch == null) countryMustMatch = CrawlProfile.MATCH_NEVER_STRING;
         if (countryMustMatch.isEmpty()) return new String[0];
         String[] list = countryMustMatch.split(",");
         if (list.length == 1 && list.length == 0) list = new String[0];

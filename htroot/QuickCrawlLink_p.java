@@ -134,14 +134,14 @@ public class QuickCrawlLink_p {
             try {
                 pe = new CrawlProfile(
                         crawlingStartURL.toNormalform(true, false),
-                        crawlingMustMatch,
-                        CrawlProfile.MATCH_ALL_STRING,
-                        CrawlProfile.MATCH_NEVER_STRING,
-                        CrawlProfile.MATCH_NEVER_STRING,
-                        CrawlProfile.MATCH_ALL_STRING,
-                        CrawlProfile.MATCH_NEVER_STRING,
-                        "",
-                        crawlingMustNotMatch,
+                        crawlingMustMatch,               //crawlerUrlMustMatch
+                        crawlingMustNotMatch,            //crawlerUrlMustNotMatch
+                        CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
+                        CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
+                        "",                              //crawlerCountryMustMatch
+                        CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
+                        CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
+                        CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
                         CrawlingDepth,
                         true,
                         60 * 24 * 30, // recrawlIfOlder (minutes); here: one month
