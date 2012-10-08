@@ -44,9 +44,7 @@ public class Distribution {
      * 
      * @param verticalPartitionExponent, the number of partitions should be computed with partitions = 2**n, n = scaling factor
      */
-    public Distribution(int verticalPartitionExponent) {
-        assert verticalPartitionExponent > 0;
-        
+    public Distribution(int verticalPartitionExponent) {        
         // the partition exponent is the number of bits that we use for the partition
         this.verticalPartitionExponent = verticalPartitionExponent;
         
