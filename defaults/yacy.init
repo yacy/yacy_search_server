@@ -1116,5 +1116,5 @@ interaction.autocrawler.domainfilter = .*
 interaction.autocrawler.categoryfilter = .*
 
 # host browser settings
-browser.autoload = true
+browser.autoload = false
 browser.load4everyone = false

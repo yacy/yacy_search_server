@@ -29,11 +29,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.solr.common.SolrDocument;
 
-import net.yacy.cora.document.ASCII;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
@@ -54,9 +52,9 @@ public class HostBrowser {
         final Switchboard sb = (Switchboard) env;
         Fulltext fulltext = sb.index.fulltext();
         final boolean admin = sb.verifyAuthentication(header);
-        final boolean autoload = sb.getConfigBool("browser.autoload", true);
+        final boolean autoload = admin && sb.getConfigBool("browser.autoload", true);
         final boolean load4everyone = sb.getConfigBool("browser.load4everyone", false);
-        final boolean loadRight = admin || load4everyone; // add config later
+        final boolean loadRight = autoload || load4everyone; // add config later
         final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || admin;
 
         final serverObjects prop = new serverObjects();
@@ -111,9 +109,9 @@ public class HostBrowser {
                         0, 0, 0, 0
                     ));
                 prop.put("result", reasonString == null ? ("added url to indexer: " + load) : ("not indexed url '" + load + "': " + reasonString));
-                if (wait) for (int i = 0; i < 10; i++) {
+                if (wait) for (int i = 0; i < 30; i++) {
                     if (sb.index.exists(url.hash())) break;
-                    try {Thread.sleep(1000);} catch (InterruptedException e) {}
+                    try {Thread.sleep(100);} catch (InterruptedException e) {}
                 }
             } catch (MalformedURLException e) {
                 prop.put("result", "bad url '" + load + "'");
@@ -173,6 +171,8 @@ public class HostBrowser {
                         Object[] urlstuba = urlstub.toArray();
                         for (int i = 0; i < urlprota.length; i++) {
                             u = ((String) urlprota[i]) + "://" + ((String) urlstuba[i]);
+                            int hp = u.indexOf('#');
+                            if (hp > 0) u = u.substring(0, hp);
                             if (u.startsWith(path) && !storedDocs.contains(u)) linkedDocs.add(u);
                         }
                     }
@@ -184,20 +184,22 @@ public class HostBrowser {
                 
                 // distinguish files and folders
                 Map<String, Object> list = new TreeMap<String, Object>();
-                for (String url: files.keySet()) {
-                    String file = url.substring(path.length());
+                for (Map.Entry<String, Boolean> entry: files.entrySet()) {
+                    String file = entry.getKey().substring(path.length());
                     p = file.indexOf('/');
                     if (p < 0) {
                         // this is a file in the root path
-                        list.put(url, files.get(url)); // Boolean value: this is a file
+                        list.put(entry.getKey(), entry.getValue()); // Boolean value: this is a file
                     } else {
                         // this is a directory path
                         String dir = path + file.substring(0, p + 1);
                         Object c = list.get(dir);
                         if (c == null) {
-                            list.put(dir, new AtomicInteger(1));
-                        } else if (c instanceof AtomicInteger) {
-                            ((AtomicInteger) c).incrementAndGet();
+                            int[] linkedStored = new int[]{0,0};
+                            linkedStored[entry.getValue().booleanValue() ? 1 : 0]++;
+                            list.put(dir, linkedStored);
+                        } else if (c instanceof int[]) {
+                            ((int[]) c)[entry.getValue().booleanValue() ? 1 : 0]++;
                         }
                     }
                 }
@@ -224,7 +226,7 @@ public class HostBrowser {
                         // this is a folder
                         prop.put("files_list_" + c + "_type", 1);
                         prop.put("files_list_" + c + "_type_file", entry.getKey());
-                        prop.put("files_list_" + c + "_type_count", ((AtomicInteger) entry.getValue()).intValue());
+                        prop.put("files_list_" + c + "_type_count", ((int[]) entry.getValue())[1] + " stored / " + ((int[]) entry.getValue())[0] + " linked");
                     }
                     if (++c >= maxcount) break;
                 }
