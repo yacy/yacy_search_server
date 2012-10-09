@@ -53,6 +53,7 @@ import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
 import net.yacy.cora.storage.Files;
+import net.yacy.crawler.retrieval.URLRewriterLibrary;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -64,12 +65,14 @@ public class LibraryProvider {
     public static final String path_to_did_you_mean_dictionaries = "didyoumean";
     public static final String path_to_autotagging_dictionaries = "autotagging";
     public static final String path_to_synonym_dictionaries = "synonyms";
+    public static final String path_to_rewriter_dictionaries = "rewriter";
 
     public static final String disabledExtension = ".disabled";
 
     public static WordCache dymLib = new WordCache(null);
     public static AutotaggingLibrary autotagging = null;
     public static SynonymLibrary synonyms = null;
+    public static URLRewriterLibrary urlRewriter = null;
     public static OverarchingLocation geoLoc = new OverarchingLocation();
     private static File dictSource = null;
     private static File dictRoot = null;
@@ -124,6 +127,7 @@ public class LibraryProvider {
         activateDeReWo();
         initDidYouMean();
         initSynonyms();
+        initRewriter();
         integrateOpenGeoDB();
         integrateGeonames0(-1);
         integrateGeonames1(-1);
@@ -194,6 +198,13 @@ public class LibraryProvider {
             synonymPath.mkdirs();
         }
         synonyms = new SynonymLibrary(synonymPath);
+    }
+    public static void initRewriter() {
+        final File rewriterPath = new File(dictRoot, path_to_rewriter_dictionaries);
+        if ( !rewriterPath.exists() ) {
+            rewriterPath.mkdirs();
+        }
+        urlRewriter = new URLRewriterLibrary(rewriterPath);
     }
     public static void activateDeReWo() {
         // translate input files (once..)

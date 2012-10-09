@@ -2410,13 +2410,21 @@ public final class Switchboard extends serverSwitch
 
                 // process the next hyperlink
                 nextUrl = nextEntry.getKey();
-                final String u = nextUrl.toNormalform(true, true, true);
+                String u = nextUrl.toNormalform(true, true, true);
                 if ( !(u.startsWith("http://")
                     || u.startsWith("https://")
                     || u.startsWith("ftp://")
                     || u.startsWith("smb://") || u.startsWith("file://")) ) {
                     continue;
                 }
+                
+                // rewrite the url
+                String u0 = LibraryProvider.urlRewriter.apply(u);
+                if (!u.equals(u0)) {
+                    log.logInfo("REWRITE of url = \"" + u + "\" to \"" + u0 + "\"");
+                    u = u0;
+                }
+                
                 // enqueue the hyperlink into the pre-notice-url db
                 try {
                     this.crawlStacker.enqueueEntry(new Request(
