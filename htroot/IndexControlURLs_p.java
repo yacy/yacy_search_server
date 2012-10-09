@@ -34,8 +34,12 @@ import java.util.List;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.crawler.data.Cache;
+import net.yacy.crawler.data.ResultURLs;
+import net.yacy.data.WorkTables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.word.Word;
@@ -74,6 +78,8 @@ public class IndexControlURLs_p {
         prop.put("dumprestore", 1);
         List<File> dumpFiles =  segment.fulltext().dumpFiles();
         prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
+        prop.put("cleanup", post == null ? 1 : 0);
+        prop.put("cleanup_solr", sb.index.fulltext().connectedRemoteSolr() ? 1 : 0);
 
         // show export messages
         final Fulltext.Export export = segment.fulltext().export();
@@ -130,6 +136,38 @@ public class IndexControlURLs_p {
         prop.putHTML("urlstring", urlstring);
         prop.putHTML("urlhash", urlhash);
         prop.put("result", " ");
+
+        // delete everything
+        if ( post.containsKey("deletecomplete") ) {
+            if ( post.get("deleteIndex", "").equals("on") ) {
+                segment.clear();
+            }
+            if ( post.get("deleteRemoteSolr", "").equals("on")) {
+                try {
+                    sb.index.fulltext().getSolr().clear();
+                } catch ( final Exception e ) {
+                    Log.logException(e);
+                }
+            }
+            if ( post.get("deleteCrawlQueues", "").equals("on") ) {
+                sb.crawlQueues.clear();
+                sb.crawlStacker.clear();
+                ResultURLs.clearStacks();
+            }
+            if ( post.get("deleteTriplestore", "").equals("on") ) {
+                JenaTripleStore.clear();
+            }
+            if ( post.get("deleteCache", "").equals("on") ) {
+                Cache.clear();
+            }
+            if ( post.get("deleteRobots", "").equals("on") ) {
+                try {sb.robots.clear();} catch (IOException e) {}
+            }
+            if ( post.get("deleteSearchFl", "").equals("on") ) {
+                sb.tables.clear(WorkTables.TABLE_SEARCH_FAILURE_NAME);
+            }
+            post.remove("deletecomplete");
+        }
 
         if (post.containsKey("urlhashdeleteall")) {
             int i = segment.removeAllUrlReferences(urlhash.getBytes(), sb.loader, CacheStrategy.IFEXIST);

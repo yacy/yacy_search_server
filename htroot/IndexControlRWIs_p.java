@@ -38,15 +38,11 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
-import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.crawler.data.Cache;
-import net.yacy.crawler.data.ResultURLs;
 import net.yacy.data.ListManager;
-import net.yacy.data.WorkTables;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
@@ -81,10 +77,7 @@ public class IndexControlRWIs_p {
 
     private final static String errmsg = "not possible to compute word from hash";
 
-    public static serverObjects respond(
-        @SuppressWarnings("unused") final RequestHeader header,
-        final serverObjects post,
-        final serverSwitch env) throws IOException {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -93,8 +86,7 @@ public class IndexControlRWIs_p {
         prop.putHTML("keystring", "");
         prop.put("keyhash", "");
         prop.put("result", "");
-        prop.put("cleanup", post == null || post.containsKey("maxReferencesLimit") ? 1 : 0);
-        prop.put("cleanup_solr", sb.index.fulltext().connectedRemoteSolr() ? 1 : 0);
+        prop.put("limitations", post == null || post.containsKey("maxReferencesLimit") ? 1 : 0);
 
         // switch off all optional forms/lists
         prop.put("searchresult", 0);
@@ -152,38 +144,6 @@ public class IndexControlRWIs_p {
                     prop.put("searchresult", 2);
                     prop.putHTML("searchresult_wordhash", ASCII.String(keyhash));
                 }
-            }
-
-            // delete everything
-            if ( post.containsKey("deletecomplete") ) {
-                if ( post.get("deleteIndex", "").equals("on") ) {
-                    segment.clear();
-                }
-                if ( post.get("deleteRemoteSolr", "").equals("on")) {
-                    try {
-                        sb.index.fulltext().getSolr().clear();
-                    } catch ( final Exception e ) {
-                        Log.logException(e);
-                    }
-                }
-                if ( post.get("deleteCrawlQueues", "").equals("on") ) {
-                    sb.crawlQueues.clear();
-                    sb.crawlStacker.clear();
-                    ResultURLs.clearStacks();
-                }
-                if ( post.get("deleteTriplestore", "").equals("on") ) {
-                    JenaTripleStore.clear();
-                }
-                if ( post.get("deleteCache", "").equals("on") ) {
-                    Cache.clear();
-                }
-                if ( post.get("deleteRobots", "").equals("on") ) {
-                    sb.robots.clear();
-                }
-                if ( post.get("deleteSearchFl", "").equals("on") ) {
-                    sb.tables.clear(WorkTables.TABLE_SEARCH_FAILURE_NAME);
-                }
-                post.remove("deletecomplete");
             }
 
             // set reference limitation
@@ -490,10 +450,8 @@ public class IndexControlRWIs_p {
 
         // insert constants
         prop.putNum("wcount", segment.RWICount());
-        prop.put("cleanup_maxReferencesRadioChecked", ReferenceContainer.maxReferences > 0 ? 1 : 0);
-        prop.put("cleanup_maxReferences", ReferenceContainer.maxReferences > 0
-            ? ReferenceContainer.maxReferences
-            : 100000);
+        prop.put("limitations_maxReferencesRadioChecked", ReferenceContainer.maxReferences > 0 ? 1 : 0);
+        prop.put("limitations_maxReferences", ReferenceContainer.maxReferences > 0 ? ReferenceContainer.maxReferences : 100000);
 
         // return rewrite properties
         return prop;
