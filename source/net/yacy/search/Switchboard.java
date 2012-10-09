@@ -1177,7 +1177,7 @@ public final class Switchboard extends serverSwitch
             ClientIdentification.generateYaCyBot(getConfig(SwitchboardConstants.NETWORK_NAME, "")
                 + (isRobinsonMode() ? "-" : "/")
                 + getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global"));
-        if ( !getConfigBool("network.unit.dht", false)
+        if ( !getConfigBool(SwitchboardConstants.DHT_ENABLED, false)
             && getConfig("network.unit.tenant.agent", "").length() > 0 ) {
             newagent = getConfig("network.unit.tenant.agent", "").trim();
             this.log.logInfo("new user agent: '" + newagent + "'");
@@ -2600,7 +2600,8 @@ public final class Switchboard extends serverSwitch
                 document,
                 condenser,
                 searchEvent,
-                sourceName);
+                sourceName,
+                getConfigBool(SwitchboardConstants.DHT_ENABLED, false));
         final RSSFeed feed =
             EventChannel.channels(queueEntry.initiator() == null
                 ? EventChannel.PROXY
@@ -2980,7 +2981,7 @@ public final class Switchboard extends serverSwitch
         if ( this.peers.noDHTActivity() ) {
             return "no DHT distribution: network too small";
         }
-        if ( !getConfigBool("network.unit.dht", true) ) {
+        if ( !getConfigBool(SwitchboardConstants.DHT_ENABLED, true) ) {
             return "no DHT distribution: disabled by network.unit.dht";
         }
         if ( getConfig(SwitchboardConstants.INDEX_DIST_ALLOW, "false").equalsIgnoreCase("false") ) {

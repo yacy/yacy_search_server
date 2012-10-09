@@ -282,6 +282,8 @@ public final class SwitchboardConstants {
     public static final String CLUSTER_MODE_PRIVATE_PEER        = "privatepeer";
     public static final String CLUSTER_PEERS_IPPORT             = "cluster.peers.ipport";
 
+    
+    public static final String DHT_ENABLED                      = "network.unit.dht";
     public static final String DHT_BURST_ROBINSON               = "network.unit.dht.burst.robinson";
     public static final String DHT_BURST_MULTIWORD              = "network.unit.dht.burst.multiword";
 

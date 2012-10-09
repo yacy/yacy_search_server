@@ -351,7 +351,8 @@ public class Segment {
             final Document document,
             final Condenser condenser,
             final SearchEvent searchEvent,
-            final String sourceName
+            final String sourceName,
+            final boolean storeToRWI
             ) {
         final long startTime = System.currentTimeMillis();
 
@@ -411,59 +412,61 @@ public class Segment {
         final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
 
         // create a word prototype which is re-used for all entries
-        final int len = (document == null) ? urlLength : document.dc_title().length();
-        final WordReferenceRow ientry = new WordReferenceRow(
-                        url.hash(),
-                        urlLength, urlComps, len,
-                        condenser.RESULT_NUMB_WORDS,
-                        condenser.RESULT_NUMB_SENTENCES,
-                        modDate.getTime(),
-                        System.currentTimeMillis(),
-                        UTF8.getBytes(language),
-                        docType,
-                        outlinksSame, outlinksOther);
-
-        // iterate over all words of content text
-        Word wprop = null;
-        byte[] wordhash;
-        String word;
-        for (Map.Entry<String, Word> wentry: condenser.words().entrySet()) {
-            word = wentry.getKey();
-            wprop = wentry.getValue();
-            assert (wprop.flags != null);
-            ientry.setWord(wprop);
-            wordhash = Word.word2hash(word);
+        if ((this.termIndex != null && storeToRWI) || searchEvent != null) {
+            final int len = (document == null) ? urlLength : document.dc_title().length();
+            final WordReferenceRow ientry = new WordReferenceRow(
+                            url.hash(),
+                            urlLength, urlComps, len,
+                            condenser.RESULT_NUMB_WORDS,
+                            condenser.RESULT_NUMB_SENTENCES,
+                            modDate.getTime(),
+                            System.currentTimeMillis(),
+                            UTF8.getBytes(language),
+                            docType,
+                            outlinksSame, outlinksOther);
+    
+            // iterate over all words of content text
+            Word wprop = null;
+            byte[] wordhash;
+            String word;
+            for (Map.Entry<String, Word> wentry: condenser.words().entrySet()) {
+                word = wentry.getKey();
+                wprop = wentry.getValue();
+                assert (wprop.flags != null);
+                ientry.setWord(wprop);
+                wordhash = Word.word2hash(word);
+                if (this.termIndex != null && storeToRWI) try {
+                    this.termIndex.add(wordhash, ientry);
+                } catch (final Exception e) {
+                    Log.logException(e);
+                }
+                wordCount++;
+    
+                // during a search event it is possible that a heuristic is used which aquires index
+                // data during search-time. To transfer indexed data directly to the search process
+                // the following lines push the index data additionally to the search process
+                // this is done only for searched words
+                if (searchEvent != null && !searchEvent.getQuery().query_exclude_hashes.has(wordhash) && searchEvent.getQuery().query_include_hashes.has(wordhash)) {
+                    // if the page was added in the context of a heuristic this shall ensure that findings will fire directly into the search result
+                    ReferenceContainer<WordReference> container;
+                    try {
+                        container = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhash, 1);
+                        container.add(ientry);
+                        rankingProcess.add(container, true, sourceName, -1, 5000);
+                    } catch (final SpaceExceededException e) {
+                        continue;
+                    }
+                }
+            }
+            if (rankingProcess != null) rankingProcess.addFinalize();
+    
+            // assign the catchall word
+            ientry.setWord(wprop == null ? catchallWord : wprop); // we use one of the word properties as template to get the document characteristics
             if (this.termIndex != null) try {
-                this.termIndex.add(wordhash, ientry);
+                this.termIndex.add(catchallHash, ientry);
             } catch (final Exception e) {
                 Log.logException(e);
             }
-            wordCount++;
-
-            // during a search event it is possible that a heuristic is used which aquires index
-            // data during search-time. To transfer indexed data directly to the search process
-            // the following lines push the index data additionally to the search process
-            // this is done only for searched words
-            if (searchEvent != null && !searchEvent.getQuery().query_exclude_hashes.has(wordhash) && searchEvent.getQuery().query_include_hashes.has(wordhash)) {
-                // if the page was added in the context of a heuristic this shall ensure that findings will fire directly into the search result
-                ReferenceContainer<WordReference> container;
-                try {
-                    container = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhash, 1);
-                    container.add(ientry);
-                    rankingProcess.add(container, true, sourceName, -1, 5000);
-                } catch (final SpaceExceededException e) {
-                    continue;
-                }
-            }
-        }
-        if (rankingProcess != null) rankingProcess.addFinalize();
-
-        // assign the catchall word
-        ientry.setWord(wprop == null ? catchallWord : wprop); // we use one of the word properties as template to get the document characteristics
-        if (this.termIndex != null) try {
-            this.termIndex.add(catchallHash, ientry);
-        } catch (final Exception e) {
-            Log.logException(e);
         }
 
         // STORE PAGE REFERENCES INTO CITATION INDEX

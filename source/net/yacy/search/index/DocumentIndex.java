@@ -177,7 +177,8 @@ public class DocumentIndex extends Segment {
                     document,
                     condenser,
                     null,
-                    DocumentIndex.class.getName() + ".add");
+                    DocumentIndex.class.getName() + ".add",
+                    false);
         }
         return rows;
     }

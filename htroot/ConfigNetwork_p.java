@@ -235,7 +235,7 @@ public class ConfigNetwork_p
         prop.putHTML("network.unit.name", sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""));
         prop.putHTML("network.unit.description", sb.getConfig("network.unit.description", ""));
         prop.putHTML("network.unit.domain", sb.getConfig(SwitchboardConstants.NETWORK_DOMAIN, ""));
-        prop.putHTML("network.unit.dht", sb.getConfig("network.unit.dht", ""));
+        prop.putHTML("network.unit.dht", sb.getConfig(SwitchboardConstants.DHT_ENABLED, ""));
         networkBootstrapLocations.remove(sb.getConfig("network.unit.definition", ""));
         int c = 0;
         for ( final String s : networkBootstrapLocations ) {
