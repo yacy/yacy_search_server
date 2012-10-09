@@ -115,25 +115,21 @@ public class ViewFile {
         // get the url hash from which the content should be loaded
         String urlHash = post.get("urlHash", post.get("urlhash", ""));
 
-        if (urlHash.length() == 0) {
-            // alternatively, get the url simply from a url String
-            // this can be used as a simple tool to test the text parser
-            final String urlString = post.get("url", "");
-            if (urlString.length() > 0) try {
-                // this call forces the peer to download  web pages
-                // it is therefore protected by the admin password
+        final String urlString = post.get("url", "");
+        if (urlString.length() > 0) try {
+            // this call forces the peer to download  web pages
+            // it is therefore protected by the admin password
 
-                if (!sb.verifyAuthentication(header)) {
-                    prop.authenticationRequired();
-                    return prop;
-                }
+            if (!sb.verifyAuthentication(header)) {
+                prop.authenticationRequired();
+                return prop;
+            }
 
-                // define an url by post parameter
-                url = new DigestURI(MultiProtocolURI.unescape(urlString));
-                urlHash = ASCII.String(url.hash());
-                pre = post.getBoolean("pre");
-            } catch (final MalformedURLException e) {}
-        }
+            // define an url by post parameter
+            url = new DigestURI(MultiProtocolURI.unescape(urlString));
+            urlHash = ASCII.String(url.hash());
+            pre = post.getBoolean("pre");
+        } catch (final MalformedURLException e) {}
 
         URIMetadata urlEntry = null;
         // get the urlEntry that belongs to the url hash
