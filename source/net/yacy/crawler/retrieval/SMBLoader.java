@@ -38,8 +38,10 @@ import java.util.List;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -80,14 +82,6 @@ public class SMBLoader {
         String[] l = null;
         try {l = url.list();} catch (IOException e) {}
         if (l != null) {
-            /*
-            if (l == null) {
-                // this can only happen if there is no connection or the directory does not exist
-                //log.logInfo("directory listing not available. URL = " + request.url().toString());
-                sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, "directory listing not available. URL = " + request.url().toString());
-                throw new IOException("directory listing not available. URL = " + request.url().toString());
-            }
-            */
             String u = url.toNormalform(true, true);
             List<String> list = new ArrayList<String>();
             for (String s: l) {
@@ -106,14 +100,14 @@ public class SMBLoader {
             ResponseHeader responseHeader = new ResponseHeader(200);
             responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
-            final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
+            final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
             Response response = new Response(
                     request,
                     requestHeader,
                     responseHeader,
                     profile,
                     false,
-                    content.toString().getBytes());
+                    UTF8.getBytes(content.toString()));
 
             return response;
         }

@@ -173,7 +173,7 @@ public class Response {
         if (!request.isEmpty()) this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(request.size()));
         this.profile = profile;
         this.status = QUEUE_STATE_FRESH;
-        this.content = request.name().length() > 0 ? request.name().getBytes() : request.url().toTokens().getBytes();
+        this.content = request.name().length() > 0 ? UTF8.getBytes(request.name()) : UTF8.getBytes(request.url().toTokens());
         this.fromCache = true;
     }
 

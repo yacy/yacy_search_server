@@ -29,6 +29,7 @@ package net.yacy.crawler.retrieval;
 import java.io.IOException;
 import java.util.Date;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
@@ -212,11 +213,11 @@ public class Request extends WorkflowJob
             new byte[][] {
                 this.url.hash(),
                 this.initiator,
-                this.url.toString().getBytes(),
+                UTF8.getBytes(this.url.toString()),
                 this.refhash,
                 namebytes,
                 appdatestr,
-                (this.profileHandle == null) ? null : this.profileHandle.getBytes(),
+                (this.profileHandle == null) ? null : ASCII.getBytes(this.profileHandle),
                 NaturalOrder.encodeLong(this.depth, rowdef.width(7)),
                 NaturalOrder.encodeLong(this.anchors, rowdef.width(8)),
                 NaturalOrder.encodeLong(this.forkfactor, rowdef.width(9)),

@@ -27,6 +27,7 @@ package net.yacy.crawler.retrieval;
 import java.io.IOException;
 import java.util.Date;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -78,7 +79,7 @@ public final class HTTPLoader {
 
     private Response load(final Request request, final int retryCount, final int maxFileSize, final BlacklistType blacklistType) throws IOException {
 
-        byte[] myHash = this.sb.peers.mySeed().hash.getBytes();
+        byte[] myHash = ASCII.getBytes(this.sb.peers.mySeed().hash);
 
         if (retryCount < 0) {
             this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "retry counter exceeded", -1);
@@ -198,7 +199,7 @@ public final class HTTPLoader {
             }
 
             // create a new cache entry
-            final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
+            final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
             response = new Response(
                     request,
                     requestHeader,

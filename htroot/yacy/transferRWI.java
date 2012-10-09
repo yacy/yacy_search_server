@@ -193,7 +193,7 @@ public final class transferRWI {
 
                 // learn entry
                 try {
-                    sb.index.storeRWI(wordHash.getBytes(), iEntry);
+                    sb.index.storeRWI(ASCII.getBytes(wordHash), iEntry);
                 } catch (final Exception e) {
                     Log.logException(e);
                 }

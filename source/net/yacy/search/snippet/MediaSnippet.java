@@ -259,7 +259,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
 
         // check if url is in blacklist
         if (Switchboard.urlBlacklist.isListed(blacklistType, url.getHost().toLowerCase(), url.getFile())) {
-            Switchboard.getSwitchboard().crawlQueues.errorURL.push(new Request(url, null), Switchboard.getSwitchboard().peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
+            Switchboard.getSwitchboard().crawlQueues.errorURL.push(new Request(url, null), ASCII.getBytes(Switchboard.getSwitchboard().peers.mySeed().hash), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             Log.logFine("snippet fetch", "MEDIA-SNIPPET Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
             isBlacklisted = true;
         }

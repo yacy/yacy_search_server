@@ -32,7 +32,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -126,14 +128,14 @@ public class FTPLoader {
                     final ResponseHeader responseHeader = new ResponseHeader(200);
                     responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
                     responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
-                    final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
+                    final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
                     response = new Response(
                             request,
                             requestHeader,
                             responseHeader,
                             profile,
                             false,
-                            dirList.toString().getBytes());
+                            UTF8.getBytes(dirList.toString()));
                 }
             } else {
                 // file -> download
@@ -152,7 +154,7 @@ public class FTPLoader {
         if (berr.size() > 0 || response == null) {
             // some error logging
             final String detail = (berr.size() > 0) ? "Errorlog: " + berr.toString() : "";
-            this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, " ftp server download, " + detail, -1);
+            this.sb.crawlQueues.errorURL.push(request, ASCII.getBytes(this.sb.peers.mySeed().hash), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, " ftp server download, " + detail, -1);
             throw new IOException("FTPLoader: Unable to download URL '" + request.url().toString() + "': " + detail);
         }
 
@@ -245,7 +247,7 @@ public class FTPLoader {
 
             // create response with metadata only
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/plain");
-            final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
+            final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
             final Response response = new Response(
                     request,
                     requestHeader,
@@ -260,7 +262,7 @@ public class FTPLoader {
         final byte[] b = ftpClient.get(path);
 
         // create a response
-        final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
+        final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
         final Response response = new Response(
                 request,
                 requestHeader,

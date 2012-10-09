@@ -35,10 +35,6 @@ import net.yacy.cora.document.UTF8;
 
 public final class ByteBuffer extends OutputStream {
 
-    private static final byte singlequote = (byte) 39;
-    private static final byte doublequote = (byte) 34;
-    private static final byte equal       = (byte) '=';
-
     private byte[] buffer;
     private int offset;
     private int length;
