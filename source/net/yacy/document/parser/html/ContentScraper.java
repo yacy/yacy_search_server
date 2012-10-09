@@ -445,6 +445,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             mergeAnchors(src, tagopts /* with property "name" */);
             this.iframes.add(src);
             this.evaluationScores.match(Element.iframepath, src.toNormalform(true, false));
+        } else if (tagname.equalsIgnoreCase("html")) {
+            final String lang = tagopts.getProperty("lang", EMPTY_STRING);
+            if (!lang.isEmpty()) // fake a language meta to preserv detection from <html lang="xx" />
+                this.metas.put("dc.language",lang.substring(0,2)); // fix found entries like "hu-hu"
         }
 
         // fire event
