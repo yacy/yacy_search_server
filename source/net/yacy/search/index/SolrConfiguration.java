@@ -447,8 +447,9 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             hs = html.getHeadlines(4); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h4_txt, hs); add(doc, YaCySchema.h4_i, hs.length);
             hs = html.getHeadlines(5); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h5_txt, hs); add(doc, YaCySchema.h5_i, hs.length);
             hs = html.getHeadlines(6); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h6_txt, hs); add(doc, YaCySchema.h6_i, hs.length);
-
+       
             add(doc, YaCySchema.htags_i, h);
+            add(doc, YaCySchema.schema_org_breadcrumb_i, html.breadcrumbCount());
 
             // noindex and nofollow attributes
             // from HTML (meta-tag in HTML header: robots)

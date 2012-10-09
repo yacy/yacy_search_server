@@ -371,6 +371,9 @@ host_organization_s
 #h5_i
 #h6_i
 
+## breadcrumbs, see http://schema.org/WebPage; this is a counter how many itemprop="breadcrumb" properties in div tags appears within a page
+#schema_org_breadcrumb_i
+
 ## names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias
 #ext_cms_txt
 

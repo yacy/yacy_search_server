@@ -164,7 +164,9 @@ public enum YaCySchema implements Schema {
     h4_i(SolrType.integer, true, true, false, "number of h4 header lines"),
     h5_i(SolrType.integer, true, true, false, "number of h5 header lines"),
     h6_i(SolrType.integer, true, true, false, "number of h6 header lines"),
-
+    
+    schema_org_breadcrumb_i(SolrType.integer, true, true, false, "number of itemprop=\"breadcrumb\" appearances in div tags"),    
+    
     // special values; can only be used if '_val' type is defined in schema file; this is not standard
     bold_val(SolrType.integer, true, true, true, "number of occurrences of texts in bold_txt"),
     italic_val(SolrType.integer, true, true, true, "number of occurrences of texts in italic_txt"),

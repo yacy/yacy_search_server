@@ -138,6 +138,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private double lon, lat;
     private MultiProtocolURI canonical;
     private final int maxLinks;
+    private int breadcrumbs;
 
 
     /**
@@ -186,6 +187,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.lat = 0.0d;
         this.evaluationScores.match(Element.url, root.toNormalform(false, false));
         this.canonical = null;
+        this.breadcrumbs = 0;
     }
 
     @Override
@@ -356,6 +358,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         } else if (tagname.equalsIgnoreCase("div")) {
             final String id = tagopts.getProperty("id", EMPTY_STRING);
             this.evaluationScores.match(Element.divid, id);
+            final String itemtype = tagopts.getProperty("itemtype", EMPTY_STRING);
+            if (itemtype.equals("http://data-vocabulary.org/Breadcrumb")) {
+                breadcrumbs++;
+            }
         } else if (tagname.equalsIgnoreCase("meta")) {
             String name = tagopts.getProperty("name", EMPTY_STRING);
             final String content = tagopts.getProperty("content", EMPTY_STRING);
@@ -652,6 +658,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return false;
     }
 
+    public int breadcrumbCount() {
+        return this.breadcrumbs;
+    }
+    
     public String getText() {
         try {
             return this.content.toString();
