@@ -363,18 +363,21 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 breadcrumbs++;
             }
         } else if (tagname.equalsIgnoreCase("meta")) {
-            String name = tagopts.getProperty("name", EMPTY_STRING);
             final String content = tagopts.getProperty("content", EMPTY_STRING);
+            String name = tagopts.getProperty("name", EMPTY_STRING);
             if (name.length() > 0) {
                 this.metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
                 if (name.toLowerCase().equals("generator")) {
                     this.evaluationScores.match(Element.metagenerator, content);
                 }
-            } else {
-                name = tagopts.getProperty("http-equiv", EMPTY_STRING);
-                if (name.length() > 0) {
-                    this.metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
-                }
+            }
+            name = tagopts.getProperty("http-equiv", EMPTY_STRING);
+            if (name.length() > 0) {
+                this.metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
+            }
+            name = tagopts.getProperty("property", EMPTY_STRING);
+            if (name.length() > 0) {
+                this.metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
             }
         } else if (tagname.equalsIgnoreCase("area")) {
             final String areatitle = cleanLine(tagopts.getProperty("title", EMPTY_STRING));

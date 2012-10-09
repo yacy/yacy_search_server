@@ -451,6 +451,13 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             add(doc, YaCySchema.htags_i, h);
             add(doc, YaCySchema.schema_org_breadcrumb_i, html.breadcrumbCount());
 
+            // meta tags: Open Graph properties
+            String og;
+            og = html.getMetas().get("og:title"); if (og != null) add(doc, YaCySchema.opengraph_title_t, og);
+            og = html.getMetas().get("og:type"); if (og != null) add(doc, YaCySchema.opengraph_type_s, og);
+            og = html.getMetas().get("og:url"); if (og != null) add(doc, YaCySchema.opengraph_url_s, og);
+            og = html.getMetas().get("og:image"); if (og != null) add(doc, YaCySchema.opengraph_image_s, og);
+
             // noindex and nofollow attributes
             // from HTML (meta-tag in HTML header: robots)
             // and HTTP header (x-robots property)

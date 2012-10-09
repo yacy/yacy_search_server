@@ -164,8 +164,12 @@ public enum YaCySchema implements Schema {
     h4_i(SolrType.integer, true, true, false, "number of h4 header lines"),
     h5_i(SolrType.integer, true, true, false, "number of h5 header lines"),
     h6_i(SolrType.integer, true, true, false, "number of h6 header lines"),
-    
-    schema_org_breadcrumb_i(SolrType.integer, true, true, false, "number of itemprop=\"breadcrumb\" appearances in div tags"),    
+
+    schema_org_breadcrumb_i(SolrType.integer, true, true, false, "number of itemprop=\"breadcrumb\" appearances in div tags"),
+    opengraph_title_t(SolrType.text_general, true, true, false, "Open Graph Metadata from og:title metadata field, see http://ogp.me/ns#"),
+    opengraph_type_s(SolrType.text_general, true, true, false, "Open Graph Metadata from og:type metadata field, see http://ogp.me/ns#"),
+    opengraph_url_s(SolrType.text_general, true, true, false, "Open Graph Metadata from og:url metadata field, see http://ogp.me/ns#"),
+    opengraph_image_s(SolrType.text_general, true, true, false, "Open Graph Metadata from og:image metadata field, see http://ogp.me/ns#"),
     
     // special values; can only be used if '_val' type is defined in schema file; this is not standard
     bold_val(SolrType.integer, true, true, true, "number of occurrences of texts in bold_txt"),

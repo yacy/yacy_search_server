@@ -374,6 +374,12 @@ host_organization_s
 ## breadcrumbs, see http://schema.org/WebPage; this is a counter how many itemprop="breadcrumb" properties in div tags appears within a page
 #schema_org_breadcrumb_i
 
+## Open Graph Metadata field, see http://ogp.me/ns#
+#opengraph_title_t
+#opengraph_type_s
+#opengraph_url_s
+#opengraph_image_s
+
 ## names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias
 #ext_cms_txt
 
