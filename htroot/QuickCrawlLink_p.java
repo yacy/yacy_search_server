@@ -98,8 +98,8 @@ public class QuickCrawlLink_p {
         final String crawlingMustNotMatch  = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
         final int CrawlingDepth      = post.getInt("crawlingDepth", 0);
         final boolean crawlDynamic   = post.get("crawlingQ", "").equals("on");
-        final boolean indexText      = post.get("indexText", "on").equals("on");
-        final boolean indexMedia     = post.get("indexMedia", "on").equals("on");
+        final boolean indexText      = post.get("indexText", "off").equals("on");
+        final boolean indexMedia     = post.get("indexMedia", "off").equals("on");
         final boolean storeHTCache   = post.get("storeHTCache", "").equals("on");
         final boolean remoteIndexing = post.get("crawlOrder", "").equals("on");
         final boolean xsstopw        = post.get("xsstopw", "").equals("on");

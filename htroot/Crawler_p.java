@@ -155,7 +155,7 @@ public class Crawler_p {
                 }
                 
                 // prepare some filter that are adjusted in case that this is wanted
-                boolean storeHTCache = "on".equals(post.get("storeHTCache", "on"));
+                boolean storeHTCache = "on".equals(post.get("storeHTCache", "off"));
                 String newcrawlingMustMatch = post.get("mustmatch", CrawlProfile.MATCH_ALL_STRING);
                 String newcrawlingMustNotMatch = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
                 if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = CrawlProfile.MATCH_ALL_STRING; // avoid that all urls are filtered out if bad value was submitted
@@ -219,7 +219,7 @@ public class Crawler_p {
                 env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                 if ((crawlOrder) && (newcrawlingdepth > 8)) newcrawlingdepth = 8;
 
-                boolean directDocByURL = "on".equals(post.get("directDocByURL", "on")); // catch also all linked media documents without loading them
+                boolean directDocByURL = "on".equals(post.get("directDocByURL", "off")); // catch also all linked media documents without loading them
                 env.setConfig("crawlingDirectDocByURL", directDocByURL);
 
                 final String collection = post.get("collection", sb.getConfig("collection", "user"));
@@ -264,10 +264,10 @@ public class Crawler_p {
                 boolean crawlingQ = "on".equals(post.get("crawlingQ", "off"));
                 env.setConfig("crawlingQ", crawlingQ);
 
-                final boolean indexText = "on".equals(post.get("indexText", "on"));
+                final boolean indexText = "on".equals(post.get("indexText", "off"));
                 env.setConfig("indexText", indexText);
 
-                final boolean indexMedia = "on".equals(post.get("indexMedia", "on"));
+                final boolean indexMedia = "on".equals(post.get("indexMedia", "off"));
                 env.setConfig("indexMedia", indexMedia);
 
                 env.setConfig("storeHTCache", storeHTCache);
