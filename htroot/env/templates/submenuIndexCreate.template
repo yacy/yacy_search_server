@@ -36,4 +36,12 @@
       <li><a href="/IndexImportMediawiki_p.html" class="MenuItemLink lock">Dump Reader for <br/>MediaWiki dumps</a></li>
     </ul>
   </div>
+  
+  <div class="SubMenugroup">
+    <h3>Target Analysis</h3>
+    <ul class="SubMenu">
+      <li><a href="/CrawlCheck_p.html" class="MenuItemLink lock">Mass Crawl<br/>Check</a></li>
+      <li><a href="/RegexTest.html" class="MenuItemLink">Regex<br/>Test</a></li>
+    </ul>
+  </div>
 </div>
