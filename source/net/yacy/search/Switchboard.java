@@ -2388,7 +2388,7 @@ public final class Switchboard extends serverSwitch
             (
                 response.profile() == null ||
                 response.depth() < response.profile().depth() ||
-                response.profile().crawlerNoDepthLimitMatchPattern().matcher(response.url().toNormalform(false, false)).matches()
+                response.profile().crawlerNoDepthLimitMatchPattern().matcher(response.url().toNormalform(true)).matches()
             )
            ) {
             // get the hyperlinks
@@ -2410,7 +2410,7 @@ public final class Switchboard extends serverSwitch
 
                 // process the next hyperlink
                 nextUrl = nextEntry.getKey();
-                String u = nextUrl.toNormalform(true, true, true);
+                String u = nextUrl.toNormalform(true, true);
                 if ( !(u.startsWith("http://")
                     || u.startsWith("https://")
                     || u.startsWith("ftp://")
@@ -2447,7 +2447,7 @@ public final class Switchboard extends serverSwitch
                 this.log.logInfo("CRAWL: ADDED "
                     + hl.size()
                     + " LINKS FROM "
-                    + response.url().toNormalform(false, true)
+                    + response.url().toNormalform(true)
                     + ", STACKING TIME = "
                     + (stackEndTime - stackStartTime)
                     + ", PARSING TIME = "
@@ -2460,7 +2460,7 @@ public final class Switchboard extends serverSwitch
     public IndexingQueueEntry condenseDocument(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_CONDENSING);
         CrawlProfile profile = in.queueEntry.profile();
-        String urls = in.queueEntry.url().toNormalform(false, true);
+        String urls = in.queueEntry.url().toNormalform(true);
         
         // check profile attributes which prevent indexing (while crawling is allowed)
         if (!profile.indexText() && !profile.indexMedia()) {
@@ -2616,7 +2616,7 @@ public final class Switchboard extends serverSwitch
         for ( final Map.Entry<MultiProtocolURI, String> rssEntry : document.getRSS().entrySet() ) {
             final Tables.Data rssRow = new Tables.Data();
             rssRow.put("referrer", url.hash());
-            rssRow.put("url", UTF8.getBytes(rssEntry.getKey().toNormalform(true, false)));
+            rssRow.put("url", UTF8.getBytes(rssEntry.getKey().toNormalform(true)));
             rssRow.put("title", UTF8.getBytes(rssEntry.getValue()));
             rssRow.put("recording_date", new Date());
             try {
@@ -2643,7 +2643,7 @@ public final class Switchboard extends serverSwitch
             EventTracker.update(EventTracker.EClass.PPM, Long.valueOf(currentPPM()), true);
             lastPPMUpdate = System.currentTimeMillis();
         }
-        EventTracker.update(EventTracker.EClass.INDEX, url.toNormalform(true, false), false);
+        EventTracker.update(EventTracker.EClass.INDEX, url.toNormalform(true), false);
 
         // if this was performed for a remote crawl request, notify requester
         if ( (processCase == EventOrigin.GLOBAL_CRAWLING) && (queueEntry.initiator() != null) ) {
@@ -2719,7 +2719,7 @@ public final class Switchboard extends serverSwitch
         final Request request = this.loader.request(url, true, true);
         final CrawlProfile profile = sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
         final String acceptedError = this.crawlStacker.checkAcceptance(url, profile, 0);
-        final String urls = url.toNormalform(false, false);
+        final String urls = url.toNormalform(true);
         if ( acceptedError != null ) {
             this.log.logWarning("addToIndex: cannot load "
                 + urls
@@ -2759,18 +2759,18 @@ public final class Switchboard extends serverSwitch
                                 searchEvent,
                                 "heuristic:" + heuristicName);
                             Switchboard.this.log.logInfo("addToIndex fill of url "
-                                + url.toNormalform(true, true)
+                                + url.toNormalform(true)
                                 + " finished");
                         }
                     }
                 } catch ( final IOException e ) {
                     Switchboard.this.log.logWarning("addToIndex: failed loading "
-                        + url.toNormalform(false, false)
+                        + url.toNormalform(true)
                         + ": "
                         + e.getMessage());
                 } catch ( final Parser.Failure e ) {
                     Switchboard.this.log.logWarning("addToIndex: failed parsing "
-                        + url.toNormalform(false, false)
+                        + url.toNormalform(true)
                         + ": "
                         + e.getMessage());
                 }
@@ -2796,7 +2796,7 @@ public final class Switchboard extends serverSwitch
         final String acceptedError = this.crawlStacker.checkAcceptance(url, profile, 0);
         if (acceptedError != null) {
             this.log.logInfo("addToCrawler: cannot load "
-                    + url.toNormalform(false, false)
+                    + url.toNormalform(true)
                     + ": "
                     + acceptedError);
             return;
@@ -2810,7 +2810,7 @@ public final class Switchboard extends serverSwitch
 
         if (s != null) {
             Switchboard.this.log.logInfo("addToCrawler: failed to add "
-                    + url.toNormalform(false, false)
+                    + url.toNormalform(true)
                     + ": "
                     + s);
         }
@@ -2840,7 +2840,7 @@ public final class Switchboard extends serverSwitch
                     "");
             if ( response == null ) {
                 Switchboard.this.log.logInfo("Sending crawl receipt for '"
-                    + this.reference.url().toNormalform(false, true)
+                    + this.reference.url().toNormalform(true)
                     + "' to "
                     + this.initiatorPeer.getName()
                     + " FAILED, send time = "
@@ -2849,7 +2849,7 @@ public final class Switchboard extends serverSwitch
             }
             final String delay = response.get("delay");
             Switchboard.this.log.logInfo("Sending crawl receipt for '"
-                + this.reference.url().toNormalform(false, true)
+                + this.reference.url().toNormalform(true)
                 + "' to "
                 + this.initiatorPeer.getName()
                 + " success, delay = "

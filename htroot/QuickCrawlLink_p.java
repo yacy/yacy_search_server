@@ -112,7 +112,7 @@ public class QuickCrawlLink_p {
 
         if (crawlingStart != null) {
             crawlingStart = crawlingStart.trim();
-            try {crawlingStart = new DigestURI(crawlingStart).toNormalform(true, true);} catch (final MalformedURLException e1) {}
+            try {crawlingStart = new DigestURI(crawlingStart).toNormalform(true);} catch (final MalformedURLException e1) {}
 
             // check if url is proper
             DigestURI crawlingStartURL = null;
@@ -133,7 +133,7 @@ public class QuickCrawlLink_p {
             CrawlProfile pe = null;
             try {
                 pe = new CrawlProfile(
-                        crawlingStartURL.toNormalform(true, false),
+                        crawlingStartURL.toNormalform(true),
                         crawlingMustMatch,               //crawlerUrlMustMatch
                         crawlingMustNotMatch,            //crawlerUrlMustNotMatch
                         CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch

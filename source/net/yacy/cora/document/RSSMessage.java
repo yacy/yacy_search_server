@@ -113,7 +113,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         this.map = new HashMap<String, String>();
         this.map.put("title", title);
         this.map.put("description", description);
-        this.map.put("link", link.toNormalform(true, false));
+        this.map.put("link", link.toNormalform(true));
         this.map.put("pubDate", ISO8601Formatter.FORMATTER.format());
         this.map.put("guid", guid);
     }

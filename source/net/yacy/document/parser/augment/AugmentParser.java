@@ -86,7 +86,7 @@ public class AugmentParser extends AbstractParser implements Parser {
 			it = Switchboard.getSwitchboard().tables.orderBy(it, -1, "timestamp_creation").iterator();
 			while (it.hasNext()) {
 				net.yacy.kelondro.blob.Tables.Row r = it.next();
-				if (r.get("url", "").equals (url.toNormalform(false, false))) {
+				if (r.get("url", "").equals (url.toNormalform(false))) {
 					Set<String> tags = new HashSet<String>();
 					for (String s : YMarkUtil.keysStringToSet(r.get("scitag", ""))) {
 						tags.add(s);

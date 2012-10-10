@@ -218,7 +218,7 @@ public class Segment {
         String hh = DigestURI.hosthash(host);
         final BlockingQueue<String> hostQueue = this.fulltext.getSolr().concurrentIDs(YaCySchema.host_id_s + ":" + hh, 0, Integer.MAX_VALUE, 10000);
 
-        final String urlstub = stub.toNormalform(false, false);
+        final String urlstub = stub.toNormalform(true);
 
         // now filter the stub from the iterated urls
         return new LookAheadIterator<DigestURI>() {
@@ -234,7 +234,7 @@ public class Segment {
                     }
                     if (id == null || id == AbstractSolrConnector.POISON_ID) return null;
                     DigestURI u = Segment.this.fulltext.getMetadata(ASCII.getBytes(id)).url();
-                    if (u.toNormalform(true, false).startsWith(urlstub)) return u;
+                    if (u.toNormalform(true).startsWith(urlstub)) return u;
                 }
             }
         };
@@ -361,7 +361,7 @@ public class Segment {
         // load some document metadata
         final String id = ASCII.String(url.hash());
         final String dc_title = document.dc_title();
-        final String urlNormalform = url.toNormalform(true, false);
+        final String urlNormalform = url.toNormalform(true);
         final String language = votedLanguage(url, urlNormalform, document, condenser); // identification of the language
 
         // STORE URL TO LOADED-URL-DB

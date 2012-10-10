@@ -91,8 +91,8 @@ public class urls {
 
                 // create RSS entry
                 prop.put("item_" + c + "_title", "");
-                prop.putXML("item_" + c + "_link", entry.url().toNormalform(true, false));
-                prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
+                prop.putXML("item_" + c + "_link", entry.url().toNormalform(true));
+                prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true));
                 prop.putXML("item_" + c + "_description", entry.name());
                 prop.put("item_" + c + "_author", "");
                 prop.put("item_" + c + "_pubDate", GenericFormatter.SHORT_SECOND_FORMATTER.format(entry.appdate()));
@@ -119,8 +119,8 @@ public class urls {
                 referrer = sb.getURL(entry.referrerHash());
                 // create RSS entry
                 prop.put("item_" + c + "_title", entry.dc_title());
-                prop.putXML("item_" + c + "_link", entry.url().toNormalform(true, false));
-                prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
+                prop.putXML("item_" + c + "_link", entry.url().toNormalform(true));
+                prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true));
                 prop.putXML("item_" + c + "_description", entry.dc_title());
                 prop.put("item_" + c + "_author", entry.dc_creator());
                 prop.put("item_" + c + "_pubDate", GenericFormatter.SHORT_SECOND_FORMATTER.format(entry.moddate()));

@@ -238,10 +238,10 @@ public class Crawler_p {
                 // store this call as api call
                 if (repeat_time > 0) {
                     // store as scheduled api call
-                    sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + ((rootURLs.size() == 0) ? post.get("crawlingFile", "") : rootURLs.iterator().next().toNormalform(true, false)), repeat_time, repeat_unit.substring(3));
+                    sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + ((rootURLs.size() == 0) ? post.get("crawlingFile", "") : rootURLs.iterator().next().toNormalform(true)), repeat_time, repeat_unit.substring(3));
                 } else {
                     // store just a protocol
-                    sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + ((rootURLs.size() == 0) ? post.get("crawlingFile", "") : rootURLs.iterator().next().toNormalform(true, false)));
+                    sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + ((rootURLs.size() == 0) ? post.get("crawlingFile", "") : rootURLs.iterator().next().toNormalform(true)));
                 }
 
                 final boolean crawlingDomMaxCheck = "on".equals(post.get("crawlingDomMaxCheck", "off"));
@@ -327,7 +327,7 @@ public class Crawler_p {
                 try {
                     Pattern mmp = Pattern.compile(newcrawlingMustMatch);
                     for (DigestURI u: rootURLs) {
-                        assert mmp.matcher(u.toNormalform(true, true)).matches() : "pattern " + mmp.toString() + " does not match url " + u.toNormalform(true, true);
+                        assert mmp.matcher(u.toNormalform(true)).matches() : "pattern " + mmp.toString() + " does not match url " + u.toNormalform(true);
                     }
                 } catch (final PatternSyntaxException e) {
                     prop.put("info", "4"); // crawlfilter does not match url
@@ -570,7 +570,7 @@ public class Crawler_p {
             return "scraper cannot load URL: " + e.getMessage();
         }
         
-        final String title = scraper == null ? url.toNormalform(true, true) : scraper.dc_title();
+        final String title = scraper == null ? url.toNormalform(true) : scraper.dc_title();
         final String description = scraper.dc_description();
 
         // add the url to the crawl stack
@@ -606,7 +606,7 @@ public class Crawler_p {
         if (tagStr.length() > 2 && tagStr.startsWith("[") && tagStr.endsWith("]")) tagStr = tagStr.substring(1, tagStr.length() - 2);
 
         // we will create always a bookmark to use this to track crawled hosts
-        final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url.toNormalform(true, false), "admin");
+        final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url.toNormalform(true), "admin");
         if (bookmark != null) {
             bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title);
             bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);

@@ -173,7 +173,7 @@ public class YMarkCrawlStart extends HashMap<String,String>{
         final int depth,
         final boolean crawlingQ, final boolean medialink) {
 		final CrawlProfile pe = new CrawlProfile(
-		                (startURL.getHost() == null) ? startURL.toNormalform(true, false) : startURL.getHost(),
+		                (startURL.getHost() == null) ? startURL.toNormalform(true) : startURL.getHost(),
 		                urlMustMatch,
 		                urlMustNotMatch,
 		                CrawlProfile.MATCH_ALL_STRING,

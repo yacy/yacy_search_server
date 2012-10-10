@@ -56,7 +56,7 @@ public class RSSFeed implements Iterable<RSSMessage> {
         String u;
         RSSMessage message;
         for (MultiProtocolURI uri: links) {
-            u = uri.toNormalform(true, false);
+            u = uri.toNormalform(true);
             message = new RSSMessage(u, "", u);
             message.setAuthor(source);
             this.addMessage(message);

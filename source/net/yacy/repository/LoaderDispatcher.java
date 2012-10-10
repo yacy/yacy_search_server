@@ -209,7 +209,7 @@ public final class LoaderDispatcher {
                 requestHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
                 DigestURI refererURL = null;
                 if (request.referrerhash() != null) refererURL = this.sb.getURL(request.referrerhash());
-                if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true, true));
+                if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true));
                 final Response response = new Response(
                         request,
                         requestHeader,
@@ -223,7 +223,7 @@ public final class LoaderDispatcher {
                     // well, just take the cache and don't care about freshness of the content
                     final byte[] content = Cache.getContent(url.hash());
                     if (content != null) {
-                        this.log.logInfo("cache hit/useall for: " + url.toNormalform(true, false));
+                        this.log.logInfo("cache hit/useall for: " + url.toNormalform(true));
                         response.setContent(content);
                         return response;
                     }
@@ -234,14 +234,14 @@ public final class LoaderDispatcher {
                 if (response.isFreshForProxy()) {
                     final byte[] content = Cache.getContent(url.hash());
                     if (content != null) {
-                        this.log.logInfo("cache hit/fresh for: " + url.toNormalform(true, false));
+                        this.log.logInfo("cache hit/fresh for: " + url.toNormalform(true));
                         response.setContent(content);
                         return response;
                     }
                 }
-                this.log.logInfo("cache hit/stale for: " + url.toNormalform(true, false));
+                this.log.logInfo("cache hit/stale for: " + url.toNormalform(true));
             } else if (cachedResponse != null) {
-                this.log.logWarning("HTCACHE contained response header, but not content for url " + url.toNormalform(true, false));
+                this.log.logWarning("HTCACHE contained response header, but not content for url " + url.toNormalform(true));
             }
         }
 

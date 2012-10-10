@@ -159,7 +159,7 @@ public final class Condenser {
             Iterator<Map.Entry<MultiProtocolURI, String>> i = document.getAudiolinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
-                insertTextToWords(new SentenceReader(entry.getKey().toNormalform(false, false)), 99, flag_cat_hasaudio, this.RESULT_FLAGS, false, meaningLib);
+                insertTextToWords(new SentenceReader(entry.getKey().toNormalform(true)), 99, flag_cat_hasaudio, this.RESULT_FLAGS, false, meaningLib);
                 insertTextToWords(new SentenceReader(entry.getValue()), 99, flag_cat_hasaudio, this.RESULT_FLAGS, true, meaningLib);
             }
 
@@ -167,7 +167,7 @@ public final class Condenser {
             i = document.getVideolinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
-                insertTextToWords(new SentenceReader(entry.getKey().toNormalform(false, false)), 99, flag_cat_hasvideo, this.RESULT_FLAGS, false, meaningLib);
+                insertTextToWords(new SentenceReader(entry.getKey().toNormalform(true)), 99, flag_cat_hasvideo, this.RESULT_FLAGS, false, meaningLib);
                 insertTextToWords(new SentenceReader(entry.getValue()), 99, flag_cat_hasvideo, this.RESULT_FLAGS, true, meaningLib);
             }
 
@@ -175,7 +175,7 @@ public final class Condenser {
             i = document.getApplinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
-                insertTextToWords(new SentenceReader(entry.getKey().toNormalform(false, false)), 99, flag_cat_hasapp, this.RESULT_FLAGS, false, meaningLib);
+                insertTextToWords(new SentenceReader(entry.getKey().toNormalform(true)), 99, flag_cat_hasapp, this.RESULT_FLAGS, false, meaningLib);
                 insertTextToWords(new SentenceReader(entry.getValue()), 99, flag_cat_hasapp, this.RESULT_FLAGS, true, meaningLib);
             }
 
@@ -187,7 +187,7 @@ public final class Condenser {
                 ientry = j.next();
                 url = ientry.url();
                 if (url == null) continue;
-                insertTextToWords(new SentenceReader(url.toNormalform(false, false)), 99, flag_cat_hasimage, this.RESULT_FLAGS, false, meaningLib);
+                insertTextToWords(new SentenceReader(url.toNormalform(true)), 99, flag_cat_hasimage, this.RESULT_FLAGS, false, meaningLib);
                 insertTextToWords(new SentenceReader(ientry.alt()), 99, flag_cat_hasimage, this.RESULT_FLAGS, true, meaningLib);
             }
 

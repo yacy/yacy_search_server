@@ -208,14 +208,14 @@ public final class Cache {
         // store the response header into the header database
         final HashMap<String, String> hm = new HashMap<String, String>();
         hm.putAll(responseHeader);
-        hm.put("@@URL", url.toNormalform(true, false));
+        hm.put("@@URL", url.toNormalform(true));
         try {
             responseHeaderDB.insert(url.hash(), hm);
         } catch (final Exception e) {
             fileDB.delete(url.hash());
             throw new IOException("Cache.store: cannot write to headerDB: " + e.getMessage());
         }
-        if (log.isFine()) log.logFine("stored in cache: " + url.toNormalform(true, false));
+        if (log.isFine()) log.logFine("stored in cache: " + url.toNormalform(true));
     }
 
     /**

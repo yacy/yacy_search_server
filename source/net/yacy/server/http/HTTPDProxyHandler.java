@@ -315,7 +315,7 @@ public final class HTTPDProxyHandler {
                 //redirector
                 if (redirectorEnabled){
                     synchronized(redirectorProcess){
-                        redirectorWriter.println(url.toNormalform(false, true));
+                        redirectorWriter.println(url.toNormalform(true));
                         redirectorWriter.flush();
                     }
                     final String newUrl = redirectorReader.readLine();

@@ -536,7 +536,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     }
 
     public static String mustMatchSubpath(final MultiProtocolURI uri) {
-        String u = uri.toNormalform(true, true);
+        String u = uri.toNormalform(true);
         if (!u.endsWith("/")) {int p = u.lastIndexOf("/"); if (p > 0) u = u.substring(0, p + 1);}
         return new StringBuilder(u.length() + 5).append(Pattern.quote(u)).append(".*").toString();
     }

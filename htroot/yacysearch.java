@@ -668,7 +668,7 @@ public class yacysearch {
                     if ( documents != null ) {
                         // create a news message
                         final Map<String, String> map = new HashMap<String, String>();
-                        map.put("url", urlentry.url().toNormalform(false, true).replace(',', '|'));
+                        map.put("url", urlentry.url().toNormalform(true).replace(',', '|'));
                         map.put("title", urlentry.dc_title().replace(',', ' '));
                         map.put("description", documents[0].dc_title().replace(',', ' '));
                         map.put("author", documents[0].dc_creator());

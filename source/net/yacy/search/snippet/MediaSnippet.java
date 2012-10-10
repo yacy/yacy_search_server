@@ -180,7 +180,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             url = new DigestURI(entry.getKey());
             desc = entry.getValue();
             if (isUrlBlacklisted(BlacklistType.SEARCH, url)) continue;
-            final int ranking = removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() +
+            final int ranking = removeAppearanceHashes(url.toNormalform(true), queryhashes).size() +
                            removeAppearanceHashes(desc, queryhashes).size();
             if (ranking < 2 * queryhashes.size()) {
                 result.add(new MediaSnippet(mediatype, url, Classification.url2mime(url), desc, document.getTextLength(), null, ranking, source));
@@ -210,7 +210,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             if (ientry.width() > 0 && ientry.width() < 32) continue;
             desc = ientry.alt();
             final int appcount = queryhashes.size()  * 2 -
-                           removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() -
+                           removeAppearanceHashes(url.toNormalform(true), queryhashes).size() -
                            removeAppearanceHashes(desc, queryhashes).size();
             final long ranking = Long.MAX_VALUE - (ientry.height() + 1) * (ientry.width() + 1) * (appcount + 1);
             result.add(new MediaSnippet(ContentDomain.IMAGE, url, Classification.url2mime(url), desc, ientry.fileSize(), ientry.width(), ientry.height(), ranking, source));

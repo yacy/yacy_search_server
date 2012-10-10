@@ -104,7 +104,7 @@ public class Scanner extends Thread {
         @Override
         public String toString() {
             try {
-                return new MultiProtocolURI(this.protocol.name() + "://" + this.inetAddress.getHostAddress() + "/").toNormalform(true, false);
+                return new MultiProtocolURI(this.protocol.name() + "://" + this.inetAddress.getHostAddress() + "/").toNormalform(true);
             } catch (final MalformedURLException e) {
                 return "";
             }

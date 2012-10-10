@@ -115,7 +115,7 @@ public class yacydoc {
         prop.putXML("dc_contributor", "");
         prop.putXML("dc_date", ISO8601Formatter.FORMATTER.format(entry.moddate()));
         prop.putXML("dc_type", String.valueOf(entry.doctype()));
-        prop.putXML("dc_identifier", entry.url().toNormalform(false, true));
+        prop.putXML("dc_identifier", entry.url().toNormalform(true));
         prop.putXML("dc_language", ASCII.String(entry.language()));
         prop.putXML("collection", Arrays.toString(entry.collections()));
         prop.put("geo_lat", entry.lat());
@@ -124,7 +124,7 @@ public class yacydoc {
         prop.put("yacy_urlhash", entry.url().hash());
         prop.putXML("yacy_loaddate", entry.loaddate().toString());
         prop.putXML("yacy_referrer_hash", (le == null) ? "" : ASCII.String(le.hash()));
-        prop.putXML("yacy_referrer_url", (le == null) ? "" : le.url().toNormalform(false, true));
+        prop.putXML("yacy_referrer_url", (le == null) ? "" : le.url().toNormalform(true));
         prop.put("yacy_size", entry.size());
         prop.put("yacy_words", entry.wordCount());
         prop.put("yacy_citations", sb.index.urlCitation().count(entry.hash()));

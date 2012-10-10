@@ -185,7 +185,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.htmlFilterEventListeners = new EventListenerList();
         this.lon = 0.0d;
         this.lat = 0.0d;
-        this.evaluationScores.match(Element.url, root.toNormalform(false, false));
+        this.evaluationScores.match(Element.url, root.toNormalform(true));
         this.canonical = null;
         this.breadcrumbs = 0;
     }
@@ -348,10 +348,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             } catch (final MalformedURLException e) {}
         } else if (tagname.equalsIgnoreCase("frame")) {
             final MultiProtocolURI src = absolutePath(tagopts.getProperty("src", EMPTY_STRING));
-            tagopts.put("src", src.toNormalform(true, false));
+            tagopts.put("src", src.toNormalform(true));
             mergeAnchors(src, tagopts /* with property "name" */);
             this.frames.add(src);
-            this.evaluationScores.match(Element.framepath, src.toNormalform(true, false));
+            this.evaluationScores.match(Element.framepath, src.toNormalform(true));
         } else if (tagname.equalsIgnoreCase("body")) {
             final String c = tagopts.getProperty("class", EMPTY_STRING);
             this.evaluationScores.match(Element.bodyclass, c);
@@ -386,7 +386,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (href.length() > 0) {
                 tagopts.put("nme", areatitle);
                 MultiProtocolURI url = absolutePath(href);
-                tagopts.put("href", url.toNormalform(true, false));
+                tagopts.put("href", url.toNormalform(true));
                 mergeAnchors(url, tagopts);
             }
         } else if (tagname.equalsIgnoreCase("link")) {
@@ -394,7 +394,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final MultiProtocolURI newLink = absolutePath(href);
 
             if (newLink != null) {
-                tagopts.put("href", newLink.toNormalform(true, false));
+                tagopts.put("href", newLink.toNormalform(true));
                 final String rel = tagopts.getProperty("rel", EMPTY_STRING);
                 final String linktitle = tagopts.getProperty("title", EMPTY_STRING);
                 final String type = tagopts.getProperty("type", EMPTY_STRING);
@@ -425,7 +425,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     if (url != null) {
                         final int width = Integer.parseInt(tagopts.getProperty("width", "-1"));
                         final int height = Integer.parseInt(tagopts.getProperty("height", "-1"));
-                        tagopts.put("src", url.toNormalform(true, false));
+                        tagopts.put("src", url.toNormalform(true));
                         final EmbedEntry ie = new EmbedEntry(url, width, height, tagopts.getProperty("type", EMPTY_STRING), tagopts.getProperty("pluginspage", EMPTY_STRING));
                         this.embeds.put(url, ie);
                         mergeAnchors(url, tagopts);
@@ -436,15 +436,15 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String name = tagopts.getProperty("name", EMPTY_STRING);
             if (name.equalsIgnoreCase("movie")) {
                 MultiProtocolURI url = absolutePath(tagopts.getProperty("value", EMPTY_STRING));
-                tagopts.put("value", url.toNormalform(true, false));
+                tagopts.put("value", url.toNormalform(true));
                 mergeAnchors(url, tagopts /* with property "name" */);
             }
         } else if (tagname.equalsIgnoreCase("iframe")) {
             final MultiProtocolURI src = absolutePath(tagopts.getProperty("src", EMPTY_STRING));
-            tagopts.put("src", src.toNormalform(true, false));
+            tagopts.put("src", src.toNormalform(true));
             mergeAnchors(src, tagopts /* with property "name" */);
             this.iframes.add(src);
-            this.evaluationScores.match(Element.iframepath, src.toNormalform(true, false));
+            this.evaluationScores.match(Element.iframepath, src.toNormalform(true));
         } else if (tagname.equalsIgnoreCase("html")) {
             final String lang = tagopts.getProperty("lang", EMPTY_STRING);
             if (!lang.isEmpty()) // fake a language meta to preserv detection from <html lang="xx" />
@@ -471,7 +471,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     addImage(this.images, ie);
                 } else {
                     tagopts.put("text", recursiveParse(text));
-                    tagopts.put("href", url.toNormalform(true, false)); // we must assign this because the url may have resolved backpaths and may not be absolute
+                    tagopts.put("href", url.toNormalform(true)); // we must assign this because the url may have resolved backpaths and may not be absolute
                     mergeAnchors(url, tagopts);
                 }
             }

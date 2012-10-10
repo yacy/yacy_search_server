@@ -197,7 +197,7 @@ public class CrawlResults {
                         urltxt = null;
                         continue;
                     }
-                    urlstr = urle.url().toNormalform(false, true);
+                    urlstr = urle.url().toNormalform(true);
                     urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
 
                     initiatorSeed = entry.getValue() == null || entry.getValue().initiatorHash == null ? null : sb.peers.getConnected(ASCII.String(entry.getValue().initiatorHash));

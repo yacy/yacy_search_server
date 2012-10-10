@@ -496,7 +496,7 @@ public class BookmarksDB {
         public Bookmark(final DigestURI url) {
             this.entry = new HashMap<String, String>();
             this.urlHash = ASCII.String(url.hash());
-            this.entry.put(BOOKMARK_URL, url.toNormalform(false, true));
+            this.entry.put(BOOKMARK_URL, url.toNormalform(false));
             this.tagNames = new HashSet<String>();
             this.timestamp = System.currentTimeMillis();
             final Bookmark oldBm=getBookmark(this.urlHash);

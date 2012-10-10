@@ -81,7 +81,7 @@ public class ViewImage {
 
         if ((url == null) && (urlLicense.length() > 0)) {
             url = sb.licensedURLs.releaseLicense(urlLicense);
-            urlString = (url == null) ? null : url.toNormalform(true, true);
+            urlString = (url == null) ? null : url.toNormalform(true);
         }
 
         if (urlString == null) return null;

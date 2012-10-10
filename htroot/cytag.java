@@ -51,7 +51,7 @@ public class cytag {
         StringBuilder connect = new StringBuilder();
         connect.append('{');
         appendJSON(connect, "time", GenericFormatter.SHORT_MILSEC_FORMATTER.format());
-        appendJSON(connect, "trail", (referer == null) ? "" : referer.toNormalform(false, false));
+        appendJSON(connect, "trail", (referer == null) ? "" : referer.toNormalform(false));
         appendJSON(connect, "nick",  (post == null) ? "" : post.get("nick", ""));
         appendJSON(connect, "tag",   (post == null) ? "" : post.get("tag", ""));
         appendJSON(connect, "icon",  (post == null) ? "" : post.get("icon", ""));

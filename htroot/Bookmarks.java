@@ -199,7 +199,7 @@ public class Bookmarks {
                         if (urlentry != null) try {
                             final Document document = Document.mergeDocuments(urlentry.url(), null, sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay));
                             prop.put("mode_edit", "0"); // create mode
-                            prop.put("mode_url", urlentry.url().toNormalform(false, true));
+                            prop.put("mode_url", urlentry.url().toNormalform(false));
                             prop.putHTML("mode_title", urlentry.dc_title());
                             prop.putHTML("mode_description", (document == null) ? urlentry.dc_title(): document.dc_title());
                             prop.putHTML("mode_author", urlentry.dc_creator());

@@ -157,7 +157,7 @@ public class ViewFile {
             prop.put("url", "");
             return prop;
         }
-        prop.put("url", url.toNormalform(false, true));
+        prop.put("url", url.toNormalform(true));
 
         // loading the resource content as byte array
         prop.put("error_incache", Cache.has(url.hash()) ? 1 : 0);
@@ -200,7 +200,7 @@ public class ViewFile {
 
         } else if (viewMode.equals("iframeWeb")) {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME_FROM_WEB);
-            prop.put("viewMode_url", url.toNormalform(false, true));
+            prop.put("viewMode_url", url.toNormalform(true));
 
         } else if (viewMode.equals("iframeCache")) {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME_FROM_CACHE);
@@ -209,10 +209,10 @@ public class ViewFile {
             prop.put("viewMode_html", 0);
             if (ext.length() > 0 && "jpg.jpeg.png.gif".indexOf(ext) >= 0) {
                 prop.put("viewMode_png", 1);
-                prop.put("viewMode_png_url", url.toNormalform(false, true));
+                prop.put("viewMode_png_url", url.toNormalform(true));
             } else {
                 prop.put("viewMode_html", 1);
-                prop.put("viewMode_html_url", url.toNormalform(false, true));
+                prop.put("viewMode_html_url", url.toNormalform(true));
             }
         } else if (viewMode.equals("parsed") || viewMode.equals("sentences")  || viewMode.equals("words") || viewMode.equals("links")) {
             // parsing the resource content
@@ -317,8 +317,8 @@ public class ViewFile {
                     prop.put("viewMode_links_" + i + "_dark", dark ? "1" : "0");
                     prop.put("viewMode_links_" + i + "_type", "image");
                     prop.put("viewMode_links_" + i + "_text", (entry.alt().isEmpty()) ? "&nbsp;" : markup(wordArray, entry.alt()));
-                    prop.put("viewMode_links_" + i + "_url", entry.url().toNormalform(false, true));
-                    prop.put("viewMode_links_" + i + "_link", markup(wordArray, entry.url().toNormalform(false, true)));
+                    prop.put("viewMode_links_" + i + "_url", entry.url().toNormalform(true));
+                    prop.put("viewMode_links_" + i + "_link", markup(wordArray, entry.url().toNormalform(true)));
                     if (entry.width() > 0 && entry.height() > 0) {
                         prop.put("viewMode_links_" + i + "_rel", entry.width() + "x" + entry.height() + " Pixel");
                     } else {
@@ -336,7 +336,7 @@ public class ViewFile {
             if (document != null) document.close();
         }
         prop.put("error", "0");
-        prop.put("error_url", url.toNormalform(false, true));
+        prop.put("error_url", url.toNormalform(true));
         prop.put("error_hash", urlHash);
         prop.put("error_wordCount", wordCount);
         prop.putHTML("error_desc", (descr.isEmpty()) ? "&nbsp;" : descr);
@@ -447,8 +447,8 @@ public class ViewFile {
             prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));
             prop.putHTML("viewMode_links_" + c + "_type", type);
             prop.put("viewMode_links_" + c + "_text", text);
-            prop.put("viewMode_links_" + c + "_link", markup(wordArray, entry.getKey().toNormalform(true, false)));
-            prop.put("viewMode_links_" + c + "_url", entry.getKey().toNormalform(true, false));
+            prop.put("viewMode_links_" + c + "_link", markup(wordArray, entry.getKey().toNormalform(true)));
+            prop.put("viewMode_links_" + c + "_url", entry.getKey().toNormalform(true));
             prop.put("viewMode_links_" + c + "_rel", rel);
             prop.put("viewMode_links_" + c + "_name", name);
             dark = !dark;

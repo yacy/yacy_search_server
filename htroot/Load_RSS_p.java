@@ -203,7 +203,7 @@ public class Load_RSS_p {
                         prop.put("showscheduledfeeds_list_" + apic + "_count", apic);
                         prop.putXML("showscheduledfeeds_list_" + apic + "_rss", messageurl);
                         prop.putXML("showscheduledfeeds_list_" + apic + "_title", row.get("title", ""));
-                        prop.putXML("showscheduledfeeds_list_" + apic + "_referrer", referrer == null ? "#" : referrer.toNormalform(true, false));
+                        prop.putXML("showscheduledfeeds_list_" + apic + "_referrer", referrer == null ? "#" : referrer.toNormalform(true));
                         prop.put("showscheduledfeeds_list_" + apic + "_recording", DateFormat.getDateTimeInstance().format(row.get("recording_date", new Date())));
                         prop.put("showscheduledfeeds_list_" + apic + "_lastload", DateFormat.getDateTimeInstance().format(row.get("last_load_date", new Date())));
                         prop.put("showscheduledfeeds_list_" + apic + "_nextload", date_next_exec == null ? "" : DateFormat.getDateTimeInstance().format(date_next_exec));
@@ -217,7 +217,7 @@ public class Load_RSS_p {
                         prop.put("shownewfeeds_list_" + newc + "_count", newc);
                         prop.putXML("shownewfeeds_list_" + newc + "_rss", messageurl);
                         prop.putXML("shownewfeeds_list_" + newc + "_title", row.get("title", ""));
-                        prop.putXML("shownewfeeds_list_" + newc + "_referrer", referrer == null ? "" : referrer.toNormalform(true, false));
+                        prop.putXML("shownewfeeds_list_" + newc + "_referrer", referrer == null ? "" : referrer.toNormalform(true));
                         prop.put("shownewfeeds_list_" + newc + "_recording", DateFormat.getDateTimeInstance().format(row.get("recording_date", new Date())));
                         newc++;
                     }
@@ -256,7 +256,7 @@ public class Load_RSS_p {
         // if we have an url then try to load the rss
         RSSReader rss = null;
         if (url != null) try {
-            prop.put("url", url.toNormalform(true, false));
+            prop.put("url", url.toNormalform(true));
             final Response response = sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
             final byte[] resource = response == null ? null : response.getContent();
             rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
@@ -322,7 +322,7 @@ public class Load_RSS_p {
                     prop.putHTML("showitems_item_" + i + "_state_guid", item.getGuid());
                     prop.putHTML("showitems_item_" + i + "_author", author == null ? "" : author);
                     prop.putHTML("showitems_item_" + i + "_title", item.getTitle());
-                    prop.putHTML("showitems_item_" + i + "_link", messageurl.toNormalform(false, false));
+                    prop.putHTML("showitems_item_" + i + "_link", messageurl.toNormalform(true));
                     prop.putHTML("showitems_item_" + i + "_description", item.getDescription());
                     prop.putHTML("showitems_item_" + i + "_language", item.getLanguage());
                     prop.putHTML("showitems_item_" + i + "_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
@@ -334,10 +334,10 @@ public class Load_RSS_p {
             }
             prop.put("showitems_item", i);
             prop.put("showitems_num", i);
-            prop.putHTML("showitems_rss", url.toNormalform(true, false));
+            prop.putHTML("showitems_rss", url.toNormalform(true));
             if (i > 0) {
                 prop.put("showload", 1);
-                prop.put("showload_rss", url.toNormalform(true, false));
+                prop.put("showload_rss", url.toNormalform(true));
             }
         }
 

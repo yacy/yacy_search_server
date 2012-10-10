@@ -64,7 +64,7 @@ public class SettingsAck_p {
 
         // get referer for backlink
         final MultiProtocolURI referer = header.referer();
-        prop.put("referer", (referer == null) ? "Settings_p.html" : referer.toNormalform(true, true));
+        prop.put("referer", (referer == null) ? "Settings_p.html" : referer.toNormalform(true));
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
 
         if (post == null) {

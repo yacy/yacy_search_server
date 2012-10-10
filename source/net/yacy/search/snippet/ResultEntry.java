@@ -131,10 +131,10 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         return this.urlentry.flags();
     }
     public String urlstring() {
-        return (this.alternative_urlstring == null) ? this.urlentry.url().toNormalform(false, true) : this.alternative_urlstring;
+        return (this.alternative_urlstring == null) ? this.urlentry.url().toNormalform(true) : this.alternative_urlstring;
     }
     public String urlname() {
-        return (this.alternative_urlname == null) ? MultiProtocolURI.unescape(this.urlentry.url().toNormalform(false, true)) : this.alternative_urlname;
+        return (this.alternative_urlname == null) ? MultiProtocolURI.unescape(this.urlentry.url().toNormalform(true)) : this.alternative_urlname;
     }
     public String title() {
         return this.urlentry.dc_title();

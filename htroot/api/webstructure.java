@@ -109,13 +109,13 @@ public class webstructure {
                     prop.put("references_documents_0_count", scraper.inboundLinks().size() + scraper.outboundLinks().size());
                     prop.put("references_documents_0_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date()));
                     prop.put("references_documents_0_urle", url == null ? 0 : 1);
-                    if (url != null) prop.putXML("references_documents_0_urle_url", url.toNormalform(true, false));
+                    if (url != null) prop.putXML("references_documents_0_urle_url", url.toNormalform(true));
                     int d = 0;
                     Iterator<MultiProtocolURI> i = scraper.inboundLinks().iterator();
             		while (i.hasNext()) {
             			DigestURI refurl = new DigestURI(i.next());
                     	byte[] refhash = refurl.hash();
-                    	prop.putXML("references_documents_0_anchors_" + d + "_url", refurl.toNormalform(true, false));
+                    	prop.putXML("references_documents_0_anchors_" + d + "_url", refurl.toNormalform(true));
                     	prop.put("references_documents_0_anchors_" + d + "_hash", refhash);
                     	prop.put("references_documents_0_anchors_" + d + "_outbound", 0);
                     	d++;
@@ -124,7 +124,7 @@ public class webstructure {
             		while (i.hasNext()) {
             			DigestURI refurl = new DigestURI(i.next());
                     	byte[] refhash = refurl.hash();
-                    	prop.putXML("references_documents_0_anchors_" + d + "_url", refurl.toNormalform(true, false));
+                    	prop.putXML("references_documents_0_anchors_" + d + "_url", refurl.toNormalform(true));
                     	prop.put("references_documents_0_anchors_" + d + "_hash", refhash);
                     	prop.put("references_documents_0_anchors_" + d + "_outbound", 1);
                     	d++;
@@ -152,7 +152,7 @@ public class webstructure {
                     prop.put("citations_documents_0_count", citations.size());
                     prop.put("citations_documents_0_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(citations.lastWrote())));
                     prop.put("citations_documents_0_urle", url == null ? 0 : 1);
-                    if (url != null) prop.putXML("citations_documents_0_urle_url", url.toNormalform(true, false));
+                    if (url != null) prop.putXML("citations_documents_0_urle_url", url.toNormalform(true));
                     int d = 0;
                     Iterator<CitationReference> i = citations.entries();
             		while (i.hasNext()) {
@@ -160,7 +160,7 @@ public class webstructure {
                     	byte[] refhash = cr.urlhash();
                     	DigestURI refurl = authenticated ? sb.getURL(refhash) : null;
                     	prop.put("citations_documents_0_anchors_" + d + "_urle", refurl == null ? 0 : 1);
-                    	if (refurl != null) prop.putXML("citations_documents_0_anchors_" + d + "_urle_url", refurl.toNormalform(true, false));
+                    	if (refurl != null) prop.putXML("citations_documents_0_anchors_" + d + "_urle_url", refurl.toNormalform(true));
                     	prop.put("citations_documents_0_anchors_" + d + "_urle_hash", refhash);
                     	prop.put("citations_documents_0_anchors_" + d + "_urle_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(cr.lastModified())));
                     	d++;

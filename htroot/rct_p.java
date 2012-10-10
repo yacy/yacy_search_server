@@ -102,7 +102,7 @@ public class rct_p {
      * @return
      */
     private static String urlToString(final DigestURI url) {
-        return (url == null ? "null" : url.toNormalform(true, false));
+        return (url == null ? "null" : url.toNormalform(true));
     }
 
     private static void listHosts(final Switchboard sb, final serverObjects prop) {

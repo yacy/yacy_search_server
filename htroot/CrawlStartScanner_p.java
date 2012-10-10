@@ -195,7 +195,7 @@ public class CrawlStartScanner_p
                         if ( url != null ) {
                             String path =
                                 "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99&directDocByURL=off";
-                            path += "&crawlingURL=" + url.toNormalform(true, false);
+                            path += "&crawlingURL=" + url.toNormalform(true);
                             WorkTables.execAPICall(
                                 Domains.LOCALHOST,
                                 (int) sb.getConfigLong("port", 8090),
@@ -237,7 +237,7 @@ public class CrawlStartScanner_p
                             host = se.next();
                             try {
                                 u = new DigestURI(host.getKey().url());
-                                urlString = u.toNormalform(true, false);
+                                urlString = u.toNormalform(true);
                                 if ( host.getValue() == Access.granted
                                     && Scanner.inIndex(apiCommentCache, urlString) == null ) {
                                     String path =

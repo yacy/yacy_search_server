@@ -123,7 +123,7 @@ public final class transferURL {
 
                 // check if the entry is blacklisted
                 if ((blockBlacklist) && (Switchboard.urlBlacklist.isListed(BlacklistType.DHT, lEntry))) {
-                	if (Network.log.isFine()) Network.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url().toNormalform(false, true) + "' from peer " + otherPeerName);
+                	if (Network.log.isFine()) Network.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url().toNormalform(false) + "' from peer " + otherPeerName);
                     lEntry = null;
                     blocked++;
                     continue;
@@ -147,11 +147,11 @@ public final class transferURL {
                 }
                 
                 // write entry to database
-                if (Network.log.isFine()) Network.log.logFine("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.url().toNormalform(true, false));
+                if (Network.log.isFine()) Network.log.logFine("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.url().toNormalform(true));
                 try {
                     sb.index.fulltext().putMetadata(lEntry);
                     ResultURLs.stack(lEntry, iam.getBytes(), iam.getBytes(), EventOrigin.DHT_TRANSFER);
-                    if (Network.log.isFine()) Network.log.logFine("transferURL: received URL '" + lEntry.url().toNormalform(false, true) + "' from peer " + otherPeerName);
+                    if (Network.log.isFine()) Network.log.logFine("transferURL: received URL '" + lEntry.url().toNormalform(false) + "' from peer " + otherPeerName);
                     received++;
                 } catch (final IOException e) {
                     Log.logException(e);

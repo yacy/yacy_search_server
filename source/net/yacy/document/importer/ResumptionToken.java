@@ -106,7 +106,7 @@ public class ResumptionToken extends TreeMap<String, String> {
      * @return a string containing the url up to and including the '?'
      */
     public static String truncatedURL(final DigestURI url) {
-        String u = url.toNormalform(true, true);
+        String u = url.toNormalform(true);
         final int i = u.indexOf('?');
         if (i > 0) u = u.substring(0, i + 1);
         return u;

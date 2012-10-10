@@ -309,7 +309,7 @@ public class SnippetProcess {
         r += (128 * rentry.referencesCount() / (1 + 2 * rentry.llocal() + rentry.lother())) << this.query.ranking.coeff_citation;
 
         // prefer hit with 'prefer' pattern
-        if (this.query.prefer.matcher(rentry.url().toNormalform(true, true)).matches()) {
+        if (this.query.prefer.matcher(rentry.url().toNormalform(true)).matches()) {
             r += 256 << this.query.ranking.coeff_prefer;
         }
         if (this.query.prefer.matcher(rentry.title()).matches()) {
@@ -317,7 +317,7 @@ public class SnippetProcess {
         }
 
         // apply 'common-sense' heuristic using references
-        final String urlstring = rentry.url().toNormalform(true, true);
+        final String urlstring = rentry.url().toNormalform(true);
         final String[] urlcomps = MultiProtocolURI.urlComps(urlstring);
         final String[] descrcomps = MultiProtocolURI.splitpattern.split(rentry.title().toLowerCase());
         int tc;
@@ -491,7 +491,7 @@ public class SnippetProcess {
                         break; // no more available
                     }
 
-                    this.setName(page.url().toNormalform(true, false)); // to support debugging
+                    this.setName(page.url().toNormalform(true)); // to support debugging
                     if (SnippetProcess.this.query.filterfailurls && SnippetProcess.this.workTables.failURLsContains(page.hash())) {
                         continue;
                     }
@@ -618,7 +618,7 @@ public class SnippetProcess {
                 if (this.deleteIfSnippetFail) {
                     this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.query_include_hashes, reason);
                 }
-                log.logInfo("sorted out url " + page.url().toNormalform(true, false) + " during search: " + reason);
+                log.logInfo("sorted out url " + page.url().toNormalform(true) + " during search: " + reason);
                 return null;
             }
         }

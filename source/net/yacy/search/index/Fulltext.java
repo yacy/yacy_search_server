@@ -557,7 +557,7 @@ public final class Fulltext implements Iterable<byte[]> {
                     while (i.hasNext()) {
                         entry = i.next();
                         if (this.set != null && !this.set.has(entry.hash())) continue;
-                        url = entry.url().toNormalform(true, false);
+                        url = entry.url().toNormalform(true);
                         if (!url.matches(this.filter)) continue;
                         if (this.format == 0) {
                             pw.println(url);

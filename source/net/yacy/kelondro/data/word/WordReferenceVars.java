@@ -81,7 +81,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.lother = md.lother();
         this.positions = new LinkedBlockingQueue<Integer>();
         this.positions.add(1);
-        String urlNormalform = md.url().toNormalform(true, false);
+        String urlNormalform = md.url().toNormalform(true);
         this.urlcomps = MultiProtocolURI.urlComps(urlNormalform).length;
         this.urllength = urlNormalform.length();
         this.virtualAge = -1; // compute that later

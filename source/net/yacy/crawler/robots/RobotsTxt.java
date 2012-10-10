@@ -307,7 +307,7 @@ public class RobotsTxt {
         reqHeaders.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
 
         // adding referer
-        reqHeaders.put(RequestHeader.REFERER, (MultiProtocolURI.newURL(robotsURL,"/")).toNormalform(true, true));
+        reqHeaders.put(RequestHeader.REFERER, (MultiProtocolURI.newURL(robotsURL,"/")).toNormalform(true));
         reqHeaders.put(HeaderFramework.ACCEPT, HTTPLoader.DEFAULT_ACCEPT);
         if (entry != null) {
             oldEtag = entry.getETag();

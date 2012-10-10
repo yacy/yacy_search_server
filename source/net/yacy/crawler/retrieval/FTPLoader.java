@@ -117,7 +117,7 @@ public class FTPLoader {
                 final RequestHeader requestHeader = new RequestHeader();
                 if (request.referrerhash() != null) {
                     final DigestURI u = this.sb.getURL(request.referrerhash());
-                    if (u != null) requestHeader.put(RequestHeader.REFERER, u.toNormalform(true, false));
+                    if (u != null) requestHeader.put(RequestHeader.REFERER, u.toNormalform(true));
                 }
 
                 final StringBuilder dirList = ftpClient.dirhtml(path);
@@ -224,7 +224,7 @@ public class FTPLoader {
         final RequestHeader requestHeader = new RequestHeader();
         if (request.referrerhash() != null) {
             final DigestURI refurl = this.sb.getURL(request.referrerhash());
-            if (refurl != null) requestHeader.put(RequestHeader.REFERER, refurl.toNormalform(true, false));
+            if (refurl != null) requestHeader.put(RequestHeader.REFERER, refurl.toNormalform(true));
         }
         final ResponseHeader responseHeader = new ResponseHeader(200);
         responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(fileDate));

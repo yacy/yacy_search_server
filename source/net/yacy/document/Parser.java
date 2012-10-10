@@ -97,12 +97,12 @@ public interface Parser {
         }
 
         public Failure(final String message, final MultiProtocolURI url) {
-            super(message + "; url = " + url.toNormalform(true, false));
+            super(message + "; url = " + url.toNormalform(true));
             this.url = url;
         }
 
         public Failure(final String message, final MultiProtocolURI url, Throwable e) {
-            super(message + "; url = " + url.toNormalform(true, false), e);
+            super(message + "; url = " + url.toNormalform(true), e);
             this.url = url;
         }
 

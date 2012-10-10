@@ -116,7 +116,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
 
     @Override
     public String source() {
-        return this.source.toNormalform(true, false);
+        return this.source.toNormalform(true);
     }
 
     @Override

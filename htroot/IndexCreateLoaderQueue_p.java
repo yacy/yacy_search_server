@@ -59,7 +59,7 @@ public class IndexCreateLoaderQueue_p {
                 prop.putHTML("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("loader-set_list_"+count+"_depth", element.depth());
                 prop.put("loader-set_list_"+count+"_status", element.getStatus());
-                prop.putHTML("loader-set_list_"+count+"_url", element.url().toNormalform(true, false));
+                prop.putHTML("loader-set_list_"+count+"_url", element.url().toNormalform(true));
                 dark = !dark;
                 count++;
             }

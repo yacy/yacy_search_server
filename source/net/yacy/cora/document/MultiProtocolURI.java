@@ -61,6 +61,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     public static final MultiProtocolURI POISON = new MultiProtocolURI(); // poison pill for concurrent link generators
 
+    private static final Pattern ampPattern = Pattern.compile(Pattern.quote("&amp;"));
     private static final long serialVersionUID = -1173233022912141884L;
     private static final long SMB_TIMEOUT = 5000;
 
@@ -628,6 +629,12 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             this.searchpart = null;
         } else {
             this.searchpart = this.path.substring(r + 1);
+            // strip &amp;
+            Matcher matcher = ampPattern.matcher(this.searchpart);
+            while (matcher.find()) {
+                this.searchpart = matcher.replaceAll("&");
+                matcher.reset(this.searchpart);
+            }
             this.path = this.path.substring(0, r);
         }
     }
@@ -808,11 +815,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     @Override
     public String toString() {
-        return toNormalform(false, true);
+        return toNormalform(false);
     }
 
     public String toTokens() {
-        return toTokens(unescape(this.toNormalform(true, true)));
+        return toTokens(unescape(this.toNormalform(true)));
     }
 
     /**
@@ -881,25 +888,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return CharType.high;
     }
 
-    public String toNormalform(final boolean excludeAnchor, final boolean stripAmp) {
-        return toNormalform(excludeAnchor, stripAmp, false);
+    public String toNormalform(final boolean excludeAnchor) {
+        return toNormalform(excludeAnchor, false);
     }
 
-    private static final Pattern ampPattern = Pattern.compile(Pattern.quote("&amp;"));
-
-    public String toNormalform(final boolean excludeAnchor, final boolean stripAmp, final boolean removeSessionID) {
-        String result = toNormalform0(excludeAnchor, removeSessionID);
-        if (stripAmp) {
-            Matcher matcher = ampPattern.matcher(result);
-            while (matcher.find()) {
-                result = matcher.replaceAll("&");
-                matcher.reset(result);
-            }
-        }
-        return result;
-    }
-
-    private String toNormalform0(final boolean excludeAnchor, final boolean removeSessionID) {
+    public String toNormalform(final boolean excludeAnchor, final boolean removeSessionID) {
         // generates a normal form of the URL
         boolean defaultPort = false;
         if (this.protocol.equals("mailto")) {
@@ -915,7 +908,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         } else if (isFile()) {
             defaultPort = true;
         }
-        final String urlPath = this.getFile(excludeAnchor, removeSessionID);
+        String urlPath = this.getFile(excludeAnchor, removeSessionID);
         String h = getHost();
         final StringBuilder u = new StringBuilder(20 + urlPath.length() + ((h == null) ? 0 : h.length()));
         u.append(this.protocol);
@@ -932,12 +925,14 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             u.append(this.port);
         }
         u.append(urlPath);
-        return u.toString();
+        String result = u.toString();
+        
+        return result;
     }
 
     @Override
     public int hashCode() {
-        return this.toNormalform(true, true).hashCode();
+        return this.toNormalform(true).hashCode();
     }
 
     /* (non-Javadoc)
@@ -967,7 +962,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         if (this.userInfo != null && h.userInfo != null && (c = this.userInfo.compareTo(h.userInfo)) != 0) return c;
         if (this.path != null && h.path != null && (c = this.path.compareTo(h.path)) != 0) return c;
         if (this.searchpart != null && h.searchpart != null && (c = this.searchpart.compareTo(h.searchpart)) != 0) return c;
-        return toNormalform(true, true).compareTo(h.toNormalform(true, true));
+        return toNormalform(true).compareTo(h.toNormalform(true));
     }
 
     public boolean isPOST() {
@@ -1895,7 +1890,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
      */
     public java.net.URL getURL() throws MalformedURLException {
         if (!(isHTTP() || isHTTPS() || isFTP())) throw new MalformedURLException();
-        return new java.net.URL(this.toNormalform(false, true));
+        return new java.net.URL(this.toNormalform(false));
     }
 
     /**
@@ -1904,7 +1899,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
      */
     public java.io.File getFSFile() throws MalformedURLException {
         if (!isFile()) throw new MalformedURLException();
-        return new java.io.File(this.toNormalform(false, true).substring(7));
+        return new java.io.File(this.toNormalform(true).substring(7));
     }
 
     /**
@@ -1914,7 +1909,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
      */
     public SmbFile getSmbFile() throws MalformedURLException {
         if (!isSMB()) throw new MalformedURLException();
-        final String url = unescape(this.toNormalform(false, true));
+        final String url = unescape(this.toNormalform(true));
         return new SmbFile(url);
     }
 
@@ -2188,8 +2183,8 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
             // check stability: the normalform of the normalform must be equal to the normalform
             if (aURL != null) try {
-                aURL1 = new MultiProtocolURI(aURL.toNormalform(false, true));
-                if (!(aURL1.toNormalform(false, true).equals(aURL.toNormalform(false, true)))) {
+                aURL1 = new MultiProtocolURI(aURL.toNormalform(false));
+                if (!(aURL1.toNormalform(false).equals(aURL.toNormalform(false)))) {
                     System.out.println("no stability for url:");
                     System.out.println("aURL0=" + aURL.toString());
                     System.out.println("aURL1=" + aURL1.toString());

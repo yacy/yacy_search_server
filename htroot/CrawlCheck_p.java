@@ -78,8 +78,8 @@ public class CrawlCheck_p {
                 StringBuilder s = new StringBuilder(300);
                 int row = 0;
                 for (DigestURI u: rootURLs) {
-                    s.append(u.toNormalform(true, true)).append('\n');
-                    prop.put("table_list_" + row + "_url", u.toNormalform(true, true));
+                    s.append(u.toNormalform(true)).append('\n');
+                    prop.put("table_list_" + row + "_url", u.toNormalform(true));
 
                     // try to load the robots
                     RobotsTxtEntry robotsEntry;
@@ -94,7 +94,7 @@ public class CrawlCheck_p {
                             robotsAllowed = !robotsEntry.isDisallowed(u);
                             prop.put("table_list_" + row + "_robots", "robots exist: " + (robotsAllowed ? "crawl allowed" : "url disallowed"));
                             prop.put("table_list_" + row + "_crawldelay", Math.max(CrawlQueues.queuedMinLoadDelay, robotsEntry.getCrawlDelayMillis()) + " ms");
-                            prop.put("table_list_" + row + "_sitemap", robotsEntry.getSitemap() == null ? "-" : robotsEntry.getSitemap().toNormalform(true, true));
+                            prop.put("table_list_" + row + "_sitemap", robotsEntry.getSitemap() == null ? "-" : robotsEntry.getSitemap().toNormalform(true));
                         }                        
                     } catch (final IOException e) {
                     }

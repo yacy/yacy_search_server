@@ -170,14 +170,14 @@ public class ZURL implements Iterable<ZURL.Entry> {
         final Entry entry = new Entry(bentry, executor, workdate, workcount, reason);
         put(entry);
         this.stack.add(entry.hash());
-        if (!reason.startsWith("double")) log.logInfo(bentry.url().toNormalform(false, false) + " - " + reason);
+        if (!reason.startsWith("double")) log.logInfo(bentry.url().toNormalform(true) + " - " + reason);
         if (this.solrConnector != null && failCategory.store) {
             // send the error to solr
             try {
                 SolrInputDocument errorDoc = this.solrConfiguration.err(bentry.url(), failCategory.name() + " " + reason, httpcode);
                 this.solrConnector.add(errorDoc);
             } catch (final IOException e) {
-                Log.logWarning("SOLR", "failed to send error " + bentry.url().toNormalform(true, false) + " to solr: " + e.getMessage());
+                Log.logWarning("SOLR", "failed to send error " + bentry.url().toNormalform(true) + " to solr: " + e.getMessage());
             }
         }
         while (this.stack.size() > maxStackSize) this.stack.poll();

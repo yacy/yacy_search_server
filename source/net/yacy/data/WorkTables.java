@@ -313,7 +313,7 @@ public class WorkTables extends Tables {
             // create and insert new entry
             Data data = new Data();
             byte[] date = UTF8.getBytes(GenericFormatter.SHORT_MILSEC_FORMATTER.format());
-            data.put(TABLE_SEARCH_FAILURE_COL_URL, url.toNormalform(true, false));
+            data.put(TABLE_SEARCH_FAILURE_COL_URL, url.toNormalform(true));
             data.put(TABLE_SEARCH_FAILURE_COL_DATE, date);
             data.put(TABLE_SEARCH_FAILURE_COL_WORDS, queryHashes.export());
             data.put(TABLE_SEARCH_FAILURE_COL_COMMENT, UTF8.getBytes(reason));

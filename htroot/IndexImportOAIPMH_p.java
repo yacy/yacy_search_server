@@ -71,7 +71,7 @@ public class IndexImportOAIPMH_p {
                     // set next default url
                     try {
                         final DigestURI nexturl = (rt == null) ? null : rt.resumptionURL();
-                        if (rt != null) prop.put("defaulturl", (nexturl == null) ? "" : nexturl.toNormalform(true, false));
+                        if (rt != null) prop.put("defaulturl", (nexturl == null) ? "" : nexturl.toNormalform(true));
                     } catch (final MalformedURLException e) {
                         prop.put("defaulturl", e.getMessage());
                     } catch (final IOException e) {

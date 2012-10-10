@@ -75,14 +75,14 @@ public class SMBLoader {
         RequestHeader requestHeader = new RequestHeader();
         if (request.referrerhash() != null) {
             DigestURI ur = this.sb.getURL(request.referrerhash());
-            if (ur != null) requestHeader.put(RequestHeader.REFERER, ur.toNormalform(true, false));
+            if (ur != null) requestHeader.put(RequestHeader.REFERER, ur.toNormalform(true));
         }
 
         // process directories: transform them to html with meta robots=noindex (using the ftpc lib)
         String[] l = null;
         try {l = url.list();} catch (IOException e) {}
         if (l != null) {
-            String u = url.toNormalform(true, true);
+            String u = url.toNormalform(true);
             List<String> list = new ArrayList<String>();
             for (String s: l) {
                 if (s.startsWith(".")) continue;

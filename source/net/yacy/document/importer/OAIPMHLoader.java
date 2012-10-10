@@ -49,7 +49,7 @@ public class OAIPMHLoader {
         this.source = source;
 
         // load the file from the net
-        Log.logInfo("OAIPMHLoader", "loading record from " + source.toNormalform(true, false));
+        Log.logInfo("OAIPMHLoader", "loading record from " + source.toNormalform(true));
         Response response = null;
         IOException ee = null;
         for (int i = 0; i < 5; i++) {
@@ -58,7 +58,7 @@ public class OAIPMHLoader {
                 response = loader.load(loader.request(source, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay);
                 break;
             } catch (IOException e) {
-                Log.logWarning("OAIPMHLoader", "loading failed at attempt " + (i + 1) + ": " + source.toNormalform(true, false));
+                Log.logWarning("OAIPMHLoader", "loading failed at attempt " + (i + 1) + ": " + source.toNormalform(true));
                 ee = e;
                 continue;
             }
@@ -80,7 +80,7 @@ public class OAIPMHLoader {
     }
 
     public String source() {
-        return this.source.toNormalform(true, false);
+        return this.source.toNormalform(true);
     }
 
     public static StringBuilder escape(final String s) {

@@ -346,7 +346,7 @@ public class URIMetadataNode implements URIMetadata {
 
         try {
             s.append("hash=").append(ASCII.String(md.hash()));
-            s.append(",url=").append(crypt.simpleEncode(md.url().toNormalform(false, true)));
+            s.append(",url=").append(crypt.simpleEncode(md.url().toNormalform(true)));
             s.append(",descr=").append(crypt.simpleEncode(md.dc_title()));
             s.append(",author=").append(crypt.simpleEncode(md.dc_creator()));
             s.append(",tags=").append(crypt.simpleEncode(Tagging.cleanTagFromAutotagging(md.dc_subject())));

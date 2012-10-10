@@ -27,7 +27,7 @@ public class AugmentedHtmlStream extends FilterOutputStream {
         this.buffer = new ByteArrayOutputStream();
         this.charset = charset;
         this.url = url;
-        this.urls = this.url.toNormalform(false, true);
+        this.urls = this.url.toNormalform(false);
         this.requestHeader = requestHeader;
     }
 

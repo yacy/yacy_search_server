@@ -278,7 +278,7 @@ public class CrawlQueues {
                     }
                     try {
                         this.sb.indexingDocumentProcessor.enQueue(new IndexingQueueEntry(new Response(urlEntry, profile), null, null));
-                        Log.logInfo("CrawlQueues", "placed NOLOAD URL on indexing queue: " + urlEntry.url().toNormalform(true, false));
+                        Log.logInfo("CrawlQueues", "placed NOLOAD URL on indexing queue: " + urlEntry.url().toNormalform(true));
                     } catch (final InterruptedException e) {
                         Log.logException(e);
                     }
@@ -545,7 +545,7 @@ public class CrawlQueues {
      * @return
      */
     private static String urlToString(final DigestURI url) {
-        return (url == null ? "null" : url.toNormalform(true, false));
+        return (url == null ? "null" : url.toNormalform(true));
     }
 
     public int limitCrawlJobSize() {

@@ -262,7 +262,7 @@ public class yacysearchitem {
             if (ms == null) {
                 prop.put("content_item", "0");
             } else {
-                final String resultUrlstring = ms.url().toNormalform(true, false);
+                final String resultUrlstring = ms.url().toNormalform(true);
                 final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
 
                 final String license = sb.licensedURLs.aquireLicense(ms.url());
@@ -278,8 +278,8 @@ public class yacysearchitem {
                 prop.put("content_item_height", 0);
                 prop.put("content_item_attr", ""/*(ms.attr.equals("-1 x -1")) ? "" : "(" + ms.attr + ")"*/); // attributes, here: original size of image
                 prop.put("content_item_urlhash", ASCII.String(ms.url().hash()));
-                prop.put("content_item_source", ms.url().toNormalform(true, false));
-                prop.putXML("content_item_source-xml", ms.url().toNormalform(true, false));
+                prop.put("content_item_source", ms.url().toNormalform(true));
+                prop.putXML("content_item_source-xml", ms.url().toNormalform(true));
                 prop.put("content_item_sourcedom", ms.url().getHost());
                 prop.put("content_item_nl", (item == theQuery.offset) ? 0 : 1);
                 prop.put("content_item", 1);
@@ -299,7 +299,7 @@ public class yacysearchitem {
             if (ms == null) {
                 prop.put("content_item", "0");
             } else {
-                final String resultUrlstring = ms.url().toNormalform(true, false);
+                final String resultUrlstring = ms.url().toNormalform(true);
                 final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
                 prop.putHTML("content_item_href", resultUrlstring);
                 prop.putHTML("content_item_hrefshort", nxTools.shortenURLString(resultUrlstring, MAX_URL_LENGTH));

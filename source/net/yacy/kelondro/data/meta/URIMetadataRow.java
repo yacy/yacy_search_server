@@ -197,7 +197,7 @@ public class URIMetadataRow implements URIMetadata {
             final double lat,
             final double lon) {
         final CharBuffer s = new CharBuffer(3600, 360);
-        s.append(url.toNormalform(false, true)).appendLF();
+        s.append(url.toNormalform(true)).appendLF();
         s.append(dc_title).appendLF();
         if (dc_creator.length() > 80) s.append(dc_creator, 0, 80); else s.append(dc_creator);
         s.appendLF();
@@ -585,7 +585,7 @@ public class URIMetadataRow implements URIMetadata {
         }
         public boolean matches(final Pattern matcher) {
             if (this.urlRaw != null) return matcher.matcher(this.urlRaw.toLowerCase()).matches();
-            if (this.url != null) return matcher.matcher(this.url.toNormalform(true, true).toLowerCase()).matches();
+            if (this.url != null) return matcher.matcher(this.url.toNormalform(true).toLowerCase()).matches();
             return false;
         }
         public DigestURI url() {

@@ -119,7 +119,7 @@ public final class HTTPLoader {
         requestHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
         DigestURI refererURL = null;
         if (request.referrerhash() != null) refererURL = this.sb.getURL(request.referrerhash());
-        if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true, true));
+        if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true));
         requestHeader.put(HeaderFramework.ACCEPT, this.sb.getConfig("crawler.http.accept", DEFAULT_ACCEPT));
         requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE, this.sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));
         requestHeader.put(HeaderFramework.ACCEPT_CHARSET, this.sb.getConfig("crawler.http.acceptCharset", DEFAULT_CHARSET));
@@ -135,7 +135,7 @@ public final class HTTPLoader {
     	final byte[] responseBody = client.GETbytes(url, maxFileSize);
         final int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
     	final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
-        String requestURLString = request.url().toNormalform(false, false);
+        String requestURLString = request.url().toNormalform(true);
 
         // check redirection
     	if (statusCode > 299 && statusCode < 310) {

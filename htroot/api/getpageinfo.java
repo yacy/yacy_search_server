@@ -133,9 +133,9 @@ public class getpageinfo {
                     count = 0;
                     for (final MultiProtocolURI uri: uris) {
                         if (uri == null) continue;
-                        links.append(';').append(uri.toNormalform(true, false));
+                        links.append(';').append(uri.toNormalform(true));
                         filter.append('|').append(uri.getProtocol()).append("://").append(uri.getHost()).append(".*");
-                        prop.putXML("links_" + count + "_link", uri.toNormalform(true, false));
+                        prop.putXML("links_" + count + "_link", uri.toNormalform(true));
                         count++;
                     }
                     prop.put("links", count);

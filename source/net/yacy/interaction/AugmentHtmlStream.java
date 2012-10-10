@@ -138,8 +138,8 @@ public class AugmentHtmlStream {
 	        	d.head().append ("<script type='text/javascript'>"+loadInternal("interaction_elements/interaction_metadata.js", requestHeader)+"</script>");
 
 
-	        	d.body().append (loadInternal("interaction_elements/OverlayInteraction.html?action="+action+"&urlhash="+ ASCII.String(url.hash()) +"&url="+url.toNormalform(false, true), requestHeader));
-	        	d.body().append (loadInternal("interaction_elements/Footer.html?action="+action+"&urlhash="+ ASCII.String(url.hash()) +"&url="+url.toNormalform(false, true), requestHeader));
+	        	d.body().append (loadInternal("interaction_elements/OverlayInteraction.html?action="+action+"&urlhash="+ ASCII.String(url.hash()) +"&url="+url.toNormalform(false), requestHeader));
+	        	d.body().append (loadInternal("interaction_elements/Footer.html?action="+action+"&urlhash="+ ASCII.String(url.hash()) +"&url="+url.toNormalform(false), requestHeader));
 
         	}
 

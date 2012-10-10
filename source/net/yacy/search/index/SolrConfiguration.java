@@ -218,7 +218,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
         if (allAttr || contains(YaCySchema.failreason_t)) add(doc, YaCySchema.failreason_t, "");
         add(doc, YaCySchema.id, ASCII.String(md.hash()));
-        String us = digestURI.toNormalform(true, false);
+        String us = digestURI.toNormalform(true);
         add(doc, YaCySchema.sku, us);
         if (allAttr || contains(YaCySchema.ip_s)) {
         	final InetAddress address = digestURI.getInetAddress();
@@ -345,7 +345,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         boolean allAttr = this.isEmpty();
         add(doc, YaCySchema.id, id);
         if (allAttr || contains(YaCySchema.failreason_t)) add(doc, YaCySchema.failreason_t, ""); // overwrite a possible fail reason (in case that there was a fail reason before)
-        String us = digestURI.toNormalform(true, false);
+        String us = digestURI.toNormalform(true);
         add(doc, YaCySchema.sku, us);
         if (allAttr || contains(YaCySchema.ip_s)) {
             final InetAddress address = digestURI.getInetAddress();
@@ -562,7 +562,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 final String[] css_url = new String[csss.size()];
                 c = 0;
                 for (final Map.Entry<MultiProtocolURI, String> entry: csss.entrySet()) {
-                    final String url = entry.getKey().toNormalform(false, false);
+                    final String url = entry.getKey().toNormalform(false);
                     inboundLinks.remove(url);
                     outboundLinks.remove(url);
                     css_tag[c] =
@@ -584,7 +584,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 for (final MultiProtocolURI url: scriptss) {
                     inboundLinks.remove(url);
                     outboundLinks.remove(url);
-                    scripts[c++] = url.toNormalform(false, false);
+                    scripts[c++] = url.toNormalform(false);
                 }
                 add(doc, YaCySchema.scriptscount_i, scripts.length);
                 if (scripts.length > 0) add(doc, YaCySchema.scripts_txt, scripts);
@@ -598,7 +598,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 for (final MultiProtocolURI url: framess) {
                     inboundLinks.remove(url);
                     outboundLinks.remove(url);
-                    frames[c++] = url.toNormalform(false, false);
+                    frames[c++] = url.toNormalform(false);
                 }
                 add(doc, YaCySchema.framesscount_i, frames.length);
                 if (frames.length > 0) add(doc, YaCySchema.frames_txt, frames);
@@ -612,7 +612,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 for (final MultiProtocolURI url: iframess) {
                     inboundLinks.remove(url);
                     outboundLinks.remove(url);
-                    iframes[c++] = url.toNormalform(false, false);
+                    iframes[c++] = url.toNormalform(false);
                 }
                 add(doc, YaCySchema.iframesscount_i, iframes.length);
                 if (iframes.length > 0) add(doc, YaCySchema.iframes_txt, iframes);
@@ -624,7 +624,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 if (canonical != null) {
                     inboundLinks.remove(canonical);
                     outboundLinks.remove(canonical);
-                    add(doc, YaCySchema.canonical_t, canonical.toNormalform(false, false));
+                    add(doc, YaCySchema.canonical_t, canonical.toNormalform(false));
                 }
             }
 
@@ -638,7 +638,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                         if (refreshURL != null) {
                             inboundLinks.remove(refreshURL);
                             outboundLinks.remove(refreshURL);
-                            add(doc, YaCySchema.refresh_s, refreshURL.toNormalform(false, false));
+                            add(doc, YaCySchema.refresh_s, refreshURL.toNormalform(false));
                         }
                     } catch (MalformedURLException e) {
                         add(doc, YaCySchema.refresh_s, refresh);
@@ -692,7 +692,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             final String name = p.getProperty("name", ""); // the name attribute
             final String rel = p.getProperty("rel", "");   // the rel-attribute
             final String text = p.getProperty("text", ""); // the text between the <a></a> tag
-            final String urls = url.toNormalform(false, false);
+            final String urls = url.toNormalform(false);
             final int pr = urls.indexOf("://",0);
             inboundlinksURLProtocol.add(urls.substring(0, pr));
             inboundlinksURLStub.add(urls.substring(pr + 3));
@@ -702,7 +702,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             inboundlinksTextChars.add(text.length() > 0 ? text.length() : 0);
             inboundlinksTextWords.add(text.length() > 0 ? text.split(" ").length : 0);
             inboundlinksTag.add(
-                "<a href=\"" + url.toNormalform(false, false) + "\"" +
+                "<a href=\"" + url.toNormalform(false) + "\"" +
                 (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +
                 (name.length() > 0 ? " name=\"" + name + "\"" : "") +
                 ">" +
@@ -740,7 +740,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             final String name = p.getProperty("name", ""); // the name attribute
             final String rel = p.getProperty("rel", "");   // the rel-attribute
             final String text = p.getProperty("text", ""); // the text between the <a></a> tag
-            final String urls = url.toNormalform(false, false);
+            final String urls = url.toNormalform(false);
             final int pr = urls.indexOf("://",0);
             outboundlinksURLProtocol.add(urls.substring(0, pr));
             outboundlinksURLStub.add(urls.substring(pr + 3));
@@ -750,7 +750,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             outboundlinksTextChars.add(text.length() > 0 ? text.length() : 0);
             outboundlinksTextWords.add(text.length() > 0 ? text.split(" ").length : 0);
             outboundlinksTag.add(
-                "<a href=\"" + url.toNormalform(false, false) + "\"" +
+                "<a href=\"" + url.toNormalform(false) + "\"" +
                 (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +
                 (name.length() > 0 ? " name=\"" + name + "\"" : "") +
                 ">" +
@@ -898,7 +898,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     public SolrInputDocument err(final DigestURI digestURI, final String failReason, final int httpstatus) throws IOException {
         final SolrInputDocument solrdoc = new SolrInputDocument();
         add(solrdoc, YaCySchema.id, ASCII.String(digestURI.hash()));
-        add(solrdoc, YaCySchema.sku, digestURI.toNormalform(true, false));
+        add(solrdoc, YaCySchema.sku, digestURI.toNormalform(true));
         final InetAddress address = digestURI.getInetAddress();
         if (contains(YaCySchema.ip_s) && address != null) add(solrdoc, YaCySchema.ip_s, address.getHostAddress());
         if (contains(YaCySchema.host_s) && digestURI.getHost() != null) add(solrdoc, YaCySchema.host_s, digestURI.getHost());

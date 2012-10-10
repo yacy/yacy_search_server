@@ -198,7 +198,7 @@ public final class TextParser {
             AbstractParser.log.logWarning(errorMsg);
             throw new Parser.Failure(errorMsg, location);
         }
-        assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true, false);
+        assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true);
 
         Document[] docs = parseSource(location, mimeType, idioms, charset, content);
 
@@ -222,7 +222,7 @@ public final class TextParser {
             AbstractParser.log.logWarning(errorMsg);
             throw new Parser.Failure(errorMsg, location);
         }
-        assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true, false);
+        assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true);
 
         // if we do not have more than one parser or the content size is over MaxInt
         // then we use only one stream-oriented parser.
@@ -315,7 +315,7 @@ public final class TextParser {
             }
             String failedParsers = "";
             for (final Map.Entry<Parser, Parser.Failure> error: failedParser.entrySet()) {
-            	AbstractParser.log.logWarning("tried parser '" + error.getKey().getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + error.getValue().getMessage(), error.getValue());
+            	AbstractParser.log.logWarning("tried parser '" + error.getKey().getName() + "' to parse " + location.toNormalform(true) + " but failed: " + error.getValue().getMessage(), error.getValue());
                 failedParsers += error.getKey().getName() + " ";
             }
             throw new Parser.Failure("All parser failed: " + failedParsers, location);

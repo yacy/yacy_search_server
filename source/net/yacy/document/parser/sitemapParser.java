@@ -111,7 +111,7 @@ public class sitemapParser extends AbstractParser implements Parser {
 
     public static SitemapReader parse(final DigestURI sitemapURL) throws IOException {
         // download document
-        Log.logInfo("SitemapReader", "loading sitemap from " + sitemapURL.toNormalform(true, false));
+        Log.logInfo("SitemapReader", "loading sitemap from " + sitemapURL.toNormalform(true));
         final RequestHeader requestHeader = new RequestHeader();
         requestHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
         final HTTPClient client = new HTTPClient();

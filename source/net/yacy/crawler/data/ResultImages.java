@@ -65,7 +65,7 @@ public class ResultImages {
         for (final ImageEntry image: images.values()) {
             // do a double-check; attention: this can be time-consuming since this possibly needs a DNS-lookup
             if (image == null || image.url() == null) continue;
-            String url = image.url().toNormalform(true, false);
+            String url = image.url().toNormalform(true);
             if (doubleCheck.contains(url)) continue;
             doubleCheck.add(url);
 

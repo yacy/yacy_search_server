@@ -68,7 +68,7 @@ public class DCEntry extends TreeMap<String, String> {
             double lon
             ) {
         super((Collator) insensitiveCollator.clone());
-        this.put("dc:identifier", url.toNormalform(true, false));
+        this.put("dc:identifier", url.toNormalform(true));
         this.put("dc:date", ISO8601Formatter.FORMATTER.format(date));
         this.put("dc:title", title);
         this.put("dc:creator", author);

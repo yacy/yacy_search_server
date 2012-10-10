@@ -140,7 +140,7 @@ public final class crawlReceipt {
         // Check URL against DHT blacklist
         if (Switchboard.urlBlacklist.isListed(BlacklistType.DHT, entry)) {
             // URL is blacklisted
-            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (URL is blacklisted) for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false, true) + " from peer " + iam);
+            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (URL is blacklisted) for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false) + " from peer " + iam);
             prop.put("delay", "9999");
             return prop;
         }
@@ -150,7 +150,7 @@ public final class crawlReceipt {
             sb.index.fulltext().putMetadata(entry);
             ResultURLs.stack(entry, youare.getBytes(), iam.getBytes(), EventOrigin.REMOTE_RECEIPTS);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
-            if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false, true));
+            if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false));
 
             // ready for more
             prop.put("delay", "10");

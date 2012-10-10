@@ -70,11 +70,11 @@ public class RSSLoader extends Thread {
             Log.logWarning("Load_RSS", "rss loading for url '" + getName().substring(9) + "' failed: " + e.getMessage());
             return;
         } catch (final IOException e) {
-            Log.logWarning("Load_RSS", "rss loading for url '" + this.urlf.toNormalform(true, false) + "' failed: " + e.getMessage());
+            Log.logWarning("Load_RSS", "rss loading for url '" + this.urlf.toNormalform(true) + "' failed: " + e.getMessage());
             return;
         }
         if (rss == null) {
-            Log.logWarning("Load_RSS", "no rss for url " + this.urlf.toNormalform(true, false));
+            Log.logWarning("Load_RSS", "no rss for url " + this.urlf.toNormalform(true));
             return;
         }
         final RSSFeed feed = rss.getFeed();
@@ -111,7 +111,7 @@ public class RSSLoader extends Thread {
             final int lastAvg = rssRow.get("avg_upd_per_day", 0);
             final long thisAvg = 1000 * 60 * 60 * 24 / deltaTime * loadCount;
             final long nextAvg = lastAvg == 0 ? thisAvg : (thisAvg + lastAvg * 2) / 3;
-            rssRow.put("url", UTF8.getBytes(url.toNormalform(true, false)));
+            rssRow.put("url", UTF8.getBytes(url.toNormalform(true)));
             rssRow.put("title", feed.getChannel().getTitle());
             rssRow.put("last_load_date", new Date());
             rssRow.put("last_load_count", loadCount);
@@ -130,20 +130,20 @@ public class RSSLoader extends Thread {
         // record API action
         byte[] pk = null;
         final serverObjects post = new serverObjects();
-        post.put("url", url.toNormalform(true, false));
+        post.put("url", url.toNormalform(true));
         post.put("indexAllItemContent", "");
         if (apicall_pk != null) post.put(WorkTables.TABLE_API_COL_APICALL_PK, apicall_pk);
         if (repeat_time > 0) {
             // store as scheduled api call
-            pk = sb.tables.recordAPICall(post, "Load_RSS_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "import feed " + url.toNormalform(true, false), repeat_time, repeat_unit.substring(3));
+            pk = sb.tables.recordAPICall(post, "Load_RSS_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "import feed " + url.toNormalform(true), repeat_time, repeat_unit.substring(3));
         } else {
             // store just a protocol
-            pk = sb.tables.recordAPICall(post, "Load_RSS_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "import feed " + url.toNormalform(true, false));
+            pk = sb.tables.recordAPICall(post, "Load_RSS_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "import feed " + url.toNormalform(true));
         }
         // store pk of api table into rss table to show that the entry has been recorded
         assert pk != null;
         final Tables.Data rssRow = new Tables.Data();
-        rssRow.put("url", UTF8.getBytes(url.toNormalform(true, false)));
+        rssRow.put("url", UTF8.getBytes(url.toNormalform(true)));
         rssRow.put("title", feed.getChannel().getTitle());
         rssRow.put("api_pk", pk);
         try {

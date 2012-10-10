@@ -487,7 +487,7 @@ public class IndexControlRWIs_p {
                 if ( url == null ) {
                     continue;
                 }
-                us = url.toNormalform(false, false);
+                us = url.toNormalform(true);
                 if ( rn == -1 ) {
                     rn = entry.ranking();
                 }

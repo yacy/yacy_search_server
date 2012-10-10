@@ -74,7 +74,7 @@ public class Vocabulary_p {
                             String t;
                             while (ui.hasNext()) {
                                 DigestURI u = ui.next();
-                                String u0 = u.toNormalform(true, false);
+                                String u0 = u.toNormalform(true);
                                 t = "";
                                 if (discoverFromPath) {
                                     t = u0.substring(discoverobjectspace.length());
@@ -129,7 +129,7 @@ public class Vocabulary_p {
                     if (post.get("add_new", "").equals("checked") && post.get("newterm", "").length() > 0) {
                     	String objectlink = post.get("newobjectlink", "");
                     	if (objectlink.length() > 0) try {
-                    		objectlink = new MultiProtocolURI(objectlink).toNormalform(true, false);
+                    		objectlink = new MultiProtocolURI(objectlink).toNormalform(true);
                     	} catch (MalformedURLException e) {}
                         vocabulary.put(post.get("newterm", ""), post.get("newsynonyms", ""), objectlink);
                     }

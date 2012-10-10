@@ -247,7 +247,7 @@ dc_rights
             }
             // put to triplestore
             JenaTripleStore.addTriple(subject, vocabulary.getPredicate(), sb.substring(1));
-            JenaTripleStore.addTriple(subject, Owl.SameAs.getPredicate(), this.source.toNormalform(true, false));
+            JenaTripleStore.addTriple(subject, Owl.SameAs.getPredicate(), this.source.toNormalform(true));
         }
     }
 
@@ -290,7 +290,7 @@ dc_rights
     }
 
     public String dc_identifier() {
-        return this.source.toNormalform(true, false);
+        return this.source.toNormalform(true);
     }
 
     public MultiProtocolURI dc_source() {
@@ -482,7 +482,7 @@ dc_rights
                 } else {
                     this.outboundlinks.put(url, "anchor" + (noindex ? " noindex" : "") + (nofollow ? " nofollow" : ""));
                 }
-                u = url.toNormalform(true, false);
+                u = url.toNormalform(true);
                 final String name = entry.getValue().getProperty("name", "");
                 if (u.startsWith("mailto:")) {
                     this.emaillinks.put(u.substring(7), name);
@@ -552,7 +552,7 @@ dc_rights
                     assert false;
                     continue;
                 }
-                u = url.toNormalform(true, true);
+                u = url.toNormalform(true);
                 if (u.endsWith("/"))
                     u = u.substring(0, u.length() - 1);
                 pos = u.lastIndexOf('/');
@@ -603,7 +603,7 @@ dc_rights
                     continue loop;
                 }
                 if (url == null) continue loop;
-                u = url.toNormalform(true, true);
+                u = url.toNormalform(true);
                 if ((pos = u.toLowerCase().indexOf("http://", 7)) > 0) {
                     i.remove();
                     u = u.substring(pos);

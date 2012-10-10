@@ -703,7 +703,7 @@ public final class RWIProcess extends Thread
 				}
 			}
 
-            final String pageurl = page.url().toNormalform(true, true);
+            final String pageurl = page.url().toNormalform(true);
             final String pageauthor = page.dc_creator();
             final String pagetitle = page.dc_title().toLowerCase();
 

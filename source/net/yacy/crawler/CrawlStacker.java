@@ -209,7 +209,7 @@ public final class CrawlStacker {
             if (replace) {
                 this.indexSegment.fulltext().remove(urlhash);
                 this.nextQueue.urlRemove(urlhash);
-                String u = url.toNormalform(true, true);
+                String u = url.toNormalform(true);
                 if (u.endsWith("/")) {
                     u = u + "index.html";
                 } else if (!u.contains(".")) {
@@ -393,7 +393,7 @@ public final class CrawlStacker {
         } else if (remote) {
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.REMOTE, entry);
         }
-        if (warning != null) this.log.logWarning("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
+        if (warning != null) this.log.logWarning("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true) + " - not pushed: " + warning);
 
         return null;
     }

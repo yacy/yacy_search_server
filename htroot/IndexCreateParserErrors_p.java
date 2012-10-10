@@ -89,14 +89,14 @@ public class IndexCreateParserErrors_p {
                 executorSeed = (executorHash == null) ? null : sb.peers.getConnected(ASCII.String(executorHash));
                 prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
                 prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
-                prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false, true));
+                prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false));
                 
                 String cause = entry.anycause();
                 if (cause.startsWith(CrawlStacker.ERROR_NO_MATCH_MUST_MATCH_FILTER)) {
-                    prop.put("rejected_list_"+j+"_failreason", "(<a href=\"/RegexTest.html?text=" + url.toNormalform(false, true) +
+                    prop.put("rejected_list_"+j+"_failreason", "(<a href=\"/RegexTest.html?text=" + url.toNormalform(false) +
                             "&regex=" + cause.substring(CrawlStacker.ERROR_NO_MATCH_MUST_MATCH_FILTER.length()) + "\">test</a>) " + cause);
                 } else if (cause.startsWith(CrawlStacker.ERROR_MATCH_WITH_MUST_NOT_MATCH_FILTER)) {
-                    prop.put("rejected_list_"+j+"_failreason", "(<a href=\"/RegexTest.html?text=" + url.toNormalform(false, true) +
+                    prop.put("rejected_list_"+j+"_failreason", "(<a href=\"/RegexTest.html?text=" + url.toNormalform(false) +
                             "&regex=" + cause.substring(CrawlStacker.ERROR_MATCH_WITH_MUST_NOT_MATCH_FILTER.length()) + "\">test</a>) " + cause);
                 } else {
                     prop.putHTML("rejected_list_"+j+"_failreason", cause);

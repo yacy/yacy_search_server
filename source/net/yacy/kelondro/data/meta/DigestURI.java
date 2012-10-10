@@ -242,7 +242,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         final StringBuilder hashs = new StringBuilder(12);
         assert hashs.length() == 0;
         // form the 'local' part of the hash
-        final String normalform = toNormalform(true, true, true);
+        final String normalform = toNormalform(true, true);
         final String b64l = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(normalform));
         if (b64l.length() < 5) return null;
         hashs.append(b64l.substring(0, 5)); // 5 chars

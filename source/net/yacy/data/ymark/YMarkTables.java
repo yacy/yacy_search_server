@@ -372,7 +372,7 @@ public class YMarkTables {
         final YMarkMetadata meta = new YMarkMetadata(url);
 		final Document document = meta.loadDocument(loader);
 		final EnumMap<YMarkMetadata.METADATA, String> metadata = meta.loadMetadata();
-		final String urls = url.toNormalform(true, false);
+		final String urls = url.toNormalform(true);
 		bmk_entry.put(YMarkEntry.BOOKMARK.URL.key(), urls);
 		if(!this.worktables.has(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), YMarkUtil.getBookmarkId(urls))) {
 			bmk_entry.put(YMarkEntry.BOOKMARK.PUBLIC.key(), "false");

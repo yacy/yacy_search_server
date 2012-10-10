@@ -341,7 +341,7 @@ public class HTTPClient {
      */
     public byte[] GETbytes(final MultiProtocolURI url, final int maxBytes) throws IOException {
         final boolean localhost = Domains.isLocalhost(url.getHost());
-        final String urix = url.toNormalform(true, false);
+        final String urix = url.toNormalform(true);
         final HttpGet httpGet = new HttpGet(urix);
         if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         return getContentBytes(httpGet, maxBytes);
@@ -358,7 +358,7 @@ public class HTTPClient {
     public void GET(final String uri) throws IOException {
         if (this.currentRequest != null) throw new IOException("Client is in use!");
         final MultiProtocolURI url = new MultiProtocolURI(uri);
-        final HttpGet httpGet = new HttpGet(url.toNormalform(true, false));
+        final HttpGet httpGet = new HttpGet(url.toNormalform(true));
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         this.currentRequest = httpGet;
         execute(httpGet);
@@ -373,7 +373,7 @@ public class HTTPClient {
      */
     public HttpResponse HEADResponse(final String uri) throws IOException {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
-        final HttpHead httpHead = new HttpHead(url.toNormalform(true, false));
+        final HttpHead httpHead = new HttpHead(url.toNormalform(true));
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	execute(httpHead);
     	finish();
@@ -394,7 +394,7 @@ public class HTTPClient {
     public void POST(final String uri, final InputStream instream, final long length) throws IOException {
     	if (this.currentRequest != null) throw new IOException("Client is in use!");
         final MultiProtocolURI url = new MultiProtocolURI(uri);
-        final HttpPost httpPost = new HttpPost(url.toNormalform(true, false));
+        final HttpPost httpPost = new HttpPost(url.toNormalform(true));
         String host = url.getHost();
         if (host == null) host = Domains.LOCALHOST;
         setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
@@ -430,7 +430,7 @@ public class HTTPClient {
      * @throws IOException
      */
     public byte[] POSTbytes(final MultiProtocolURI url, final String vhost, final Map<String, ContentBody> post, final boolean usegzip) throws IOException {
-    	final HttpPost httpPost = new HttpPost(url.toNormalform(true, false));
+    	final HttpPost httpPost = new HttpPost(url.toNormalform(true));
 
         setHost(vhost); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	if (vhost == null) setHost(Domains.LOCALHOST);
@@ -461,7 +461,7 @@ public class HTTPClient {
      */
     public byte[] POSTbytes(final String uri, final InputStream instream, final long length) throws IOException {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
-        final HttpPost httpPost = new HttpPost(url.toNormalform(true, false));
+        final HttpPost httpPost = new HttpPost(url.toNormalform(true));
         String host = url.getHost();
         if (host == null) host = Domains.LOCALHOST;
         setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
