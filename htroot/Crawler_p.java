@@ -172,13 +172,6 @@ public class Crawler_p {
                         DigestURI crawlingStartURL = new DigestURI(crawlingStart);
                         rootURLs.add(crawlingStartURL);
                         crawlName += crawlingStartURL.getHost() + "_";
-                        if (fullDomain) {
-                            newcrawlingMustMatch = CrawlProfile.mustMatchFilterFullDomain(crawlingStartURL);
-                            if (subPath) newcrawlingMustMatch = newcrawlingMustMatch.substring(0, newcrawlingMustMatch.length() - 2) + crawlingStartURL.getPath() + ".*";
-                        }
-                        if (crawlingStart!= null && subPath && (pos = crawlingStart.lastIndexOf('/')) > 0) {
-                            newcrawlingMustMatch = crawlingStart.substring(0, pos + 1) + ".*";
-                        }
                         if (crawlingStartURL != null && (crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
                         
                     } catch (MalformedURLException e) {
@@ -318,16 +311,24 @@ public class Crawler_p {
                 if ((fullDomain || subPath) && newcrawlingdepth > 0) {
                     String siteFilter = ".*";
                     if (fullDomain) {
-                        siteFilter = siteFilter(rootURLs);
+                        siteFilter = CrawlProfile.siteFilter(rootURLs);
                     } else if (subPath) {
-                        siteFilter = subpathFilter(rootURLs);
+                        siteFilter = CrawlProfile.subpathFilter(rootURLs);
                     }
-                    newcrawlingMustMatch = CrawlProfile.MATCH_ALL_STRING.equals(newcrawlingMustMatch) ? siteFilter : "(?=(" + newcrawlingMustMatch + "))(" + siteFilter + ")";
+                    if (CrawlProfile.MATCH_ALL_STRING.equals(newcrawlingMustMatch)) {
+                        newcrawlingMustMatch = siteFilter;
+                    } else if (!CrawlProfile.MATCH_ALL_STRING.equals(siteFilter)) {
+                        // combine both
+                        newcrawlingMustMatch = "(" + newcrawlingMustMatch + ")|(" + siteFilter + ")";
+                    }
                 }
                 
                 // check if the crawl filter works correctly
                 try {
-                    Pattern.compile(newcrawlingMustMatch);
+                    Pattern mmp = Pattern.compile(newcrawlingMustMatch);
+                    for (DigestURI u: rootURLs) {
+                        assert mmp.matcher(u.toNormalform(true, true)).matches() : "pattern " + mmp.toString() + " does not match url " + u.toNormalform(true, true);
+                    }
                 } catch (final PatternSyntaxException e) {
                     prop.put("info", "4"); // crawlfilter does not match url
                     prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
@@ -470,9 +471,9 @@ public class Crawler_p {
                             final Map<MultiProtocolURI, Properties> hyperlinks = scraper.getAnchors();
                             if (newcrawlingdepth > 0) {
                                 if (fullDomain) {
-                                    newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
+                                    newcrawlingMustMatch = CrawlProfile.siteFilter(hyperlinks.keySet());
                                 } else if (subPath) {
-                                    newcrawlingMustMatch = subpathFilter(hyperlinks.keySet());
+                                    newcrawlingMustMatch = CrawlProfile.subpathFilter(hyperlinks.keySet());
                                 }
                             }
 
@@ -650,30 +651,4 @@ public class Crawler_p {
         sb.setPerformance(wantedPPM);
     }
 
-    private static String siteFilter(final Set<? extends MultiProtocolURI> uris) {
-        final StringBuilder filter = new StringBuilder();
-        final Set<String> filterSet = new HashSet<String>();
-        for (final MultiProtocolURI uri: uris) {
-            filterSet.add(new StringBuilder().append(uri.getProtocol()).append("://").append(uri.getHost()).append(".*").toString());
-            if (!uri.getHost().startsWith("www.")) {
-                filterSet.add(new StringBuilder().append(uri.getProtocol()).append("://www.").append(uri.getHost()).append(".*").toString());
-            }
-        }
-        for (final String element : filterSet) {
-            filter.append('|').append(element);
-        }
-        return filter.length() > 0 ? filter.substring(1) : "";
-    }
-
-    private static String subpathFilter(final Set<? extends MultiProtocolURI> uris) {
-        final StringBuilder filter = new StringBuilder();
-        final Set<String> filterSet = new HashSet<String>();
-        for (final MultiProtocolURI uri: uris) {
-            filterSet.add(new StringBuilder().append(uri.toNormalform(true, false)).append(".*").toString());
-        }
-        for (final String element : filterSet) {
-            filter.append('|').append(element);
-        }
-        return filter.length() > 0 ? filter.substring(1) : "";
-    }
 }
