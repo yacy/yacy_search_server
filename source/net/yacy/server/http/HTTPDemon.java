@@ -872,7 +872,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             } else {
                 // file
                 args.put(item.getFieldName(), item.getName());
-                fileContent = FileUtils.read(item.getInputStream());
+                fileContent = FileUtils.read(item.getInputStream(), (int) item.getSize());
                 item.getInputStream().close();
                 files.put(item.getFieldName(), fileContent);
             }
