@@ -55,7 +55,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         catchSuccessQuery.setRows(1);
         catchSuccessQuery.setStart(0);
     }
-    private final static int pagesize = 10;
+    private final static int pagesize = 100;
     
     @Override
     public boolean exists(final String id) throws IOException {
