@@ -86,7 +86,7 @@ public final class Fulltext implements Iterable<byte[]> {
         this.urlIndexFile = null;
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
-        this.solr = new MirrorSolrConnector(10000, 10000, 1000);
+        this.solr = new MirrorSolrConnector(1000, 1000, 100);
         this.solrScheme = solrScheme;
     }
 
