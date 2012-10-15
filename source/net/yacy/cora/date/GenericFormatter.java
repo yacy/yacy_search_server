@@ -40,12 +40,14 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     public static final String PATTERN_SHORT_MILSEC = "yyyyMMddHHmmssSSS";
     public static final String PATTERN_RFC1123_SHORT = "EEE, dd MMM yyyy";
     public static final String PATTERN_ANSIC   = "EEE MMM d HH:mm:ss yyyy";
-
+    public static final String PATTERN_SIMPLE  = "yyyy/MM/dd HH:mm:ss";
+    
     public static final SimpleDateFormat FORMAT_SHORT_DAY     = new SimpleDateFormat(PATTERN_SHORT_DAY, Locale.US);
     public static final SimpleDateFormat FORMAT_SHORT_SECOND  = new SimpleDateFormat(PATTERN_SHORT_SECOND, Locale.US);
     public static final SimpleDateFormat FORMAT_SHORT_MILSEC  = new SimpleDateFormat(PATTERN_SHORT_MILSEC, Locale.US);
-    public static final SimpleDateFormat FORMAT_ANSIC        = new SimpleDateFormat(PATTERN_ANSIC, Locale.US);
     public static final SimpleDateFormat FORMAT_RFC1123_SHORT = new SimpleDateFormat(PATTERN_RFC1123_SHORT, Locale.US);
+    public static final SimpleDateFormat FORMAT_ANSIC         = new SimpleDateFormat(PATTERN_ANSIC, Locale.US);
+    public static final SimpleDateFormat FORMAT_SIMPLE        = new SimpleDateFormat(PATTERN_SIMPLE, Locale.US);
 
     // find out time zone and DST offset
     private static Calendar thisCalendar = Calendar.getInstance();
@@ -65,8 +67,9 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     public static final GenericFormatter SHORT_DAY_FORMATTER     = new GenericFormatter(FORMAT_SHORT_DAY, time_minute);
     public static final GenericFormatter SHORT_SECOND_FORMATTER  = new GenericFormatter(FORMAT_SHORT_SECOND, time_second);
     public static final GenericFormatter SHORT_MILSEC_FORMATTER  = new GenericFormatter(FORMAT_SHORT_MILSEC, 1);
-    public static final GenericFormatter ANSIC_FORMATTER         = new GenericFormatter(FORMAT_ANSIC, time_second);
     public static final GenericFormatter RFC1123_SHORT_FORMATTER = new GenericFormatter(FORMAT_RFC1123_SHORT, time_minute);
+    public static final GenericFormatter ANSIC_FORMATTER         = new GenericFormatter(FORMAT_ANSIC, time_second);
+    public static final GenericFormatter SIMPLE_FORMATTER        = new GenericFormatter(FORMAT_SIMPLE, time_second);
 
     private final SimpleDateFormat dateFormat;
     private final long maxCacheDiff;

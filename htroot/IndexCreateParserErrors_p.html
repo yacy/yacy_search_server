@@ -31,6 +31,7 @@
         <col span="2" />
       </colgroup>
       <tr class="TableHeader">
+        <th>Time</th>
         <th>Initiator</th>
         <th>Executor</th>
         <th>URL</th>
@@ -38,6 +39,7 @@
       </tr>
       #{list}#
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[time]#</td>
         <td>#[initiator]#</td>
         <td>#[executor]#</td>
         <td><a href="#[url]#">#[url]#</a></td>

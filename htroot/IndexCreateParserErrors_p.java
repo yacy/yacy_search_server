@@ -25,6 +25,7 @@
 
 import java.util.ArrayList;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.CrawlStacker;
@@ -87,6 +88,7 @@ public class IndexCreateParserErrors_p {
                 executorHash = entry.executor();
                 initiatorSeed = (initiatorHash == null) ? null : sb.peers.getConnected(ASCII.String(initiatorHash));
                 executorSeed = (executorHash == null) ? null : sb.peers.getConnected(ASCII.String(executorHash));
+                prop.putHTML("rejected_list_"+j+"_time", GenericFormatter.SIMPLE_FORMATTER.format(entry.workdate()));
                 prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
                 prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
                 prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false));
