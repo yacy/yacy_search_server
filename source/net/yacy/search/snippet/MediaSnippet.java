@@ -177,7 +177,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         final List<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             entry = i.next();
-            url = new DigestURI(entry.getKey());
+            url = DigestURI.toDigestURI(entry.getKey());
             desc = entry.getValue();
             if (isUrlBlacklisted(BlacklistType.SEARCH, url)) continue;
             final int ranking = removeAppearanceHashes(url.toNormalform(true), queryhashes).size() +
@@ -202,7 +202,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         final List<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             ientry = i.next();
-            url = new DigestURI(ientry.url());
+            url = DigestURI.toDigestURI(ientry.url());
             final String u = url.toString();
             if (isUrlBlacklisted(BlacklistType.SEARCH, url)) continue;
             if (u.indexOf(".ico",0) >= 0 || u.indexOf("favicon",0) >= 0) continue;

@@ -266,7 +266,7 @@ public class Segment {
         final long urldate = urlModified.getTime();
         for (Map.Entry<MultiProtocolURI, Properties> anchorEntry: anchors.entrySet()) {
         	MultiProtocolURI anchor = anchorEntry.getKey();
-        	byte[] refhash = new DigestURI(anchor).hash();
+        	byte[] refhash = DigestURI.toDigestURI(anchor).hash();
         	//System.out.println("*** addCitationIndex: urlhash = " + ASCII.String(urlhash) + ", refhash = " + ASCII.String(refhash) + ", urldate = " + urlModified.toString());
         	if (this.urlCitationIndex != null) try {
                 this.urlCitationIndex.add(refhash, new CitationReference(urlhash, urldate));

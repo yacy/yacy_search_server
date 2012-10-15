@@ -68,6 +68,17 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 
 <h2>Web Structure</h2>
 
+    #(hosts)#::
+     <fieldset><legend>Host List</legend>
+      #{list}#
+      <div style="float:left; padding:1px 5px 1px 5px;">
+        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><a href="/WatchWebStructure_p.html?host=#[host]#&depth=3&time=1000">#[host]#</a></div>
+        <div style="width:80px; text-align:right; float: left; white-space:nowrap; overflow:hidden;">#[count]# outlinks</div>
+      </div>
+      #{/list}#
+    </fieldset>
+    #(/hosts)#
+    
 <div id="left">
 <form action="/WatchWebStructure_p.html" accept-charset="UTF-8" onsubmit="return checkform(this);">
 <fieldset>

@@ -133,13 +133,18 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
 
     /**
      * DigestURI from general URI
-     * @param baseURL
+     * @param u
      */
-    public DigestURI(final MultiProtocolURI baseURL) {
-        super(baseURL);
-        this.hash = (baseURL instanceof DigestURI) ? ((DigestURI) baseURL).hash : null;
+    private DigestURI(final MultiProtocolURI u) {
+        super(u);
+        this.hash = (u instanceof DigestURI) ? ((DigestURI) u).hash : null;
     }
 
+
+    public static DigestURI toDigestURI(MultiProtocolURI u) {
+        return (u instanceof DigestURI) ? ((DigestURI) u) : new DigestURI(u);
+    }
+    
     /**
      * DigestURI from general URI, hash already calculated
      * @param baseURL

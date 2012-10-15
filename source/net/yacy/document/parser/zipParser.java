@@ -87,7 +87,7 @@ public class zipParser extends AbstractParser implements Parser {
                 try {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
                     FileUtils.copy(zis, tmp, entry.getSize());
-                    final DigestURI virtualURL = new DigestURI(MultiProtocolURI.newURL(url, "#" + name));
+                    final DigestURI virtualURL = DigestURI.toDigestURI(MultiProtocolURI.newURL(url, "#" + name));
                     //this.log.logInfo("ZIP file parser: " + virtualURL.toNormalform(false, false));
                     docs = TextParser.parseSource(virtualURL, mime, null, tmp);
                     if (docs == null) continue;

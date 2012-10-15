@@ -4,7 +4,10 @@
 //$LastChangedBy$
 //
 
+import java.util.Iterator;
+
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -27,7 +30,7 @@ public class WatchWebStructure_p {
         int width = 1024;
         int height = 576;
         int depth = 3;
-        int nodes = 500; // maximum number of host nodes that are painted
+        int nodes = 300; // maximum number of host nodes that are painted
         int time = -1;
         String host = "auto";
         String besthost;
@@ -36,7 +39,7 @@ public class WatchWebStructure_p {
             width         = post.getInt("width", 1024);
             height        = post.getInt("height", 576);
             depth         = post.getInt("depth", 3);
-            nodes         = post.getInt("nodes", width * height * 100 / 1024 / 576);
+            nodes         = post.getInt("nodes", width * height * 300 / 1024 / 576);
             time          = post.getInt("time", -1);
             host          = post.get("host", "auto");
             color_text    = post.get("colortext",    color_text);
@@ -69,6 +72,22 @@ public class WatchWebStructure_p {
             if (sb.webStructure.referencesCount(DigestURI.hosthash6("www." + host)) > sb.webStructure.referencesCount(DigestURI.hosthash6(host))) {
                 host = "www." + host;
             }
+        }
+        
+        if (post != null && post.containsKey("hosts")) {
+            int maxcount = 200;
+            ReversibleScoreMap<String> score = sb.webStructure.hostReferenceScore();
+            int c = 0;
+            Iterator<String> i = score.keys(false);
+            String h;
+            while (i.hasNext() && c < maxcount) {
+                h = i.next();
+                prop.put("hosts_list_" + c + "_host", h);
+                prop.put("hosts_list_" + c + "_count", score.get(h));
+                c++;
+            }
+            prop.put("hosts_list", c);
+            prop.put("hosts", 1);
         }
 
         // find start point

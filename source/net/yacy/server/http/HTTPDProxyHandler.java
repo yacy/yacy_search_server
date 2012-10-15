@@ -308,7 +308,7 @@ public final class HTTPDProxyHandler {
 
             DigestURI url = null;
             try {
-                url = new DigestURI(HeaderFramework.getRequestURL(conProp));
+                url = DigestURI.toDigestURI(HeaderFramework.getRequestURL(conProp));
                 if (log.isFine()) log.logFine(reqID +" GET "+ url);
                 if (log.isFinest()) log.logFinest(reqID +"    header: "+ requestHeader);
 
@@ -391,7 +391,7 @@ public final class HTTPDProxyHandler {
             	final Request request = new Request(
             			null,
                         url,
-                        requestHeader.referer() == null ? null : new DigestURI(requestHeader.referer()).hash(),
+                        requestHeader.referer() == null ? null : DigestURI.toDigestURI(requestHeader.referer()).hash(),
                         "",
                         cachedResponseHeader.lastModified(),
                         sb.crawler.defaultProxyProfile.handle(),
@@ -527,7 +527,7 @@ public final class HTTPDProxyHandler {
                 final Request request = new Request(
             			null,
                         url,
-                        requestHeader.referer() == null ? null : new DigestURI(requestHeader.referer()).hash(),
+                        requestHeader.referer() == null ? null : DigestURI.toDigestURI(requestHeader.referer()).hash(),
                         "",
                         responseHeader.lastModified(),
                         sb.crawler.defaultProxyProfile.handle(),

@@ -79,14 +79,14 @@ public class webstructure {
                 prop.put("out", 1);
                 prop.put("in", 1);
                 WebStructureGraph.StructureEntry sentry = sb.webStructure.outgoingReferences(hosthash);
-                if (sentry != null) {
+                if (sentry != null && sentry.references.size() > 0) {
                     reference(prop, "out", 0, sentry, sb.webStructure);
                     prop.put("out_domains", 1);
                 } else {
                     prop.put("out_domains", 0);
                 }
                 sentry = sb.webStructure.incomingReferences(hosthash);
-                if (sentry != null) {
+                if (sentry != null && sentry.references.size() > 0) {
                     reference(prop, "in", 0, sentry, sb.webStructure);
                     prop.put("in_domains", 1);
                 } else {
@@ -113,7 +113,7 @@ public class webstructure {
                     int d = 0;
                     Iterator<MultiProtocolURI> i = scraper.inboundLinks().iterator();
             		while (i.hasNext()) {
-            			DigestURI refurl = new DigestURI(i.next());
+            			DigestURI refurl = DigestURI.toDigestURI(i.next());
                     	byte[] refhash = refurl.hash();
                     	prop.putXML("references_documents_0_anchors_" + d + "_url", refurl.toNormalform(true));
                     	prop.put("references_documents_0_anchors_" + d + "_hash", refhash);
@@ -122,7 +122,7 @@ public class webstructure {
             		}
                     i = scraper.outboundLinks().iterator();
             		while (i.hasNext()) {
-            			DigestURI refurl = new DigestURI(i.next());
+            			DigestURI refurl = DigestURI.toDigestURI(i.next());
                     	byte[] refhash = refurl.hash();
                     	prop.putXML("references_documents_0_anchors_" + d + "_url", refurl.toNormalform(true));
                     	prop.put("references_documents_0_anchors_" + d + "_hash", refhash);

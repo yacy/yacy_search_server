@@ -150,7 +150,7 @@ public final class HTTPLoader {
             }
 
             // normalize URL
-            final DigestURI redirectionUrl = new DigestURI(MultiProtocolURI.newURL(request.url(), redirectionUrlString));
+            final DigestURI redirectionUrl = DigestURI.toDigestURI(MultiProtocolURI.newURL(request.url(), redirectionUrlString));
 
             // restart crawling with new url
             this.log.logInfo("CRAWLER Redirection detected ('" + client.getHttpResponse().getStatusLine() + "') for URL " + requestURLString);
@@ -289,7 +289,7 @@ public final class HTTPLoader {
                     }
 
                     // normalizing URL
-                    final DigestURI redirectionUrl = new DigestURI(MultiProtocolURI.newURL(request.url(), redirectionUrlString));
+                    final DigestURI redirectionUrl = DigestURI.toDigestURI(MultiProtocolURI.newURL(request.url(), redirectionUrlString));
 
 
                     // if we are already doing a shutdown we don't need to retry crawling

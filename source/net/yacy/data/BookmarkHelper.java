@@ -155,7 +155,7 @@ public class BookmarkHelper {
             if ("".equals(title)) {//cannot be displayed
                 title = url.toString();
             }
-            bm = db.new Bookmark(new DigestURI(url));
+            bm = db.new Bookmark(DigestURI.toDigestURI(url));
             bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
             bm.setTags(tags);
             bm.setPublic(importPublic);

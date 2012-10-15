@@ -63,7 +63,7 @@ public class ServerScannerList {
                     while (se.hasNext()) {
                         host = se.next();
                         try {
-                            u = new DigestURI(host.getKey().url());
+                            u = DigestURI.toDigestURI(host.getKey().url());
                             urlString = u.toNormalform(true);
                             prop.put("servertable_list_" + i + "_edit", edit ? 1 : 0);
                             prop.put("servertable_list_" + i + "_edit_pk", ASCII.String(u.hash()));

@@ -204,7 +204,7 @@ public final class CrawlStacker {
             if (e.getKey() == null) continue;
 
             // delete old entry, if exists to force a re-load of the url (thats wanted here)
-            final DigestURI url = new DigestURI(e.getKey());
+            final DigestURI url = DigestURI.toDigestURI(e.getKey());
             final byte[] urlhash = url.hash();
             if (replace) {
                 this.indexSegment.fulltext().remove(urlhash);

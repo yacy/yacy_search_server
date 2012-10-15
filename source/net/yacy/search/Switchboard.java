@@ -2552,7 +2552,7 @@ public final class Switchboard extends serverSwitch
 
         // CREATE INDEX
         final String dc_title = document.dc_title();
-        final DigestURI url = new DigestURI(document.dc_source());
+        final DigestURI url = DigestURI.toDigestURI(document.dc_source());
         final DigestURI referrerURL = queueEntry.referrerURL();
         EventOrigin processCase = queueEntry.processCase(this.peers.mySeed().hash);
 
@@ -2620,7 +2620,7 @@ public final class Switchboard extends serverSwitch
             rssRow.put("title", UTF8.getBytes(rssEntry.getValue()));
             rssRow.put("recording_date", new Date());
             try {
-                this.tables.update("rss", new DigestURI(rssEntry.getKey()).hash(), rssRow);
+                this.tables.update("rss", DigestURI.toDigestURI(rssEntry.getKey()).hash(), rssRow);
             } catch ( final IOException e ) {
                 Log.logException(e);
             }
@@ -3180,7 +3180,7 @@ public final class Switchboard extends serverSwitch
                             final Iterator<MultiProtocolURI> i = links.keySet().iterator();
                             final boolean globalcrawljob = sb.getConfigBool("heuristic.searchresults.crawlglobal",false);
                             while (i.hasNext()) {
-                                url = new DigestURI(i.next());
+                                url = DigestURI.toDigestURI(i.next());
                                 boolean islocal = url.getHost().contentEquals(startUrl.getHost());
                                 // add all external links or links to different page to crawler
                                 if ( !islocal ) {// || (!startUrl.getPath().endsWith(url.getPath()))) {

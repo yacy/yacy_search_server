@@ -28,7 +28,6 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +60,7 @@ public class WebStructurePicture_p {
         int width = 1024;
         int height = 576;
         int depth = 3;
-        int nodes = 100; // maximum number of host nodes that are painted
+        int nodes = 300; // maximum number of host nodes that are painted
         int time = -1;
         String host = null;
         int cyc = 0;
@@ -156,16 +155,13 @@ public class WebStructurePicture_p {
         final double radius = 1.0 / (1 << nextlayer);
         final WebStructureGraph.StructureEntry sr = structure.outgoingReferences(centerhash);
         final Map<String, Integer> next = (sr == null) ? new HashMap<String, Integer>() : sr.references;
-        Map.Entry<String, Integer> entry;
         String targethash, targethost;
         // first set points to next hosts
-        final Iterator<Map.Entry<String, Integer>> i = next.entrySet().iterator();
         final List<String[]> targets = new ArrayList<String[]>();
         int maxtargetrefs = 8, maxthisrefs = 8;
         int targetrefs, thisrefs;
         double rr, re;
-        while (i.hasNext() && maxnodes > 0 && System.currentTimeMillis() < timeout) {
-            entry = i.next();
+        for (Map.Entry<String, Integer> entry: next.entrySet()) {
             targethash = entry.getKey();
             targethost = structure.hostHash2hostName(targethash);
             if (targethost == null) continue;
@@ -181,15 +177,12 @@ public class WebStructurePicture_p {
             rr = radius * 0.25 * (1 - targetrefs / (double) maxtargetrefs);
             re = radius * 0.5 * (thisrefs / (double) maxthisrefs);
             graph.addNode(targethost, x + (radius - rr - re) * Math.cos(angle), y + (radius - rr - re) * Math.sin(angle), nextlayer);
-            maxnodes--;
             mynodes++;
+            if (maxnodes-- <= 0 || System.currentTimeMillis() >= timeout) break;
         }
         // recursively set next hosts
-        final Iterator<String[]> j = targets.iterator();
-        String[] target;
         int nextnodes;
-        while (j.hasNext()) {
-            target = j.next();
+        for (String[] target: targets) {
             targethash = target[0];
             targethost = target[1];
             final GraphPlotter.Point c = graph.getNode(targethost);

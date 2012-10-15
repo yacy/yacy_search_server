@@ -296,7 +296,7 @@ public class Crawler_p {
                             scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
                             // get links and generate filter
                             for (MultiProtocolURI u: scraper.getAnchors().keySet()) {
-                                newRootURLs.add(new DigestURI(u));
+                                newRootURLs.add(DigestURI.toDigestURI(u));
                             }
                         } catch (IOException e) {
                             Log.logException(e);

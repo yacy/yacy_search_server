@@ -49,6 +49,8 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Document;
@@ -64,8 +66,7 @@ import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 
-public class WebStructureGraph
-{
+public class WebStructureGraph {
 
     public static int maxref = 300; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
     public static int maxhosts = 50000; // maximum number of hosts in web structure map
@@ -75,17 +76,16 @@ public class WebStructureGraph
     private final File structureFile;
     private final TreeMap<String, byte[]> structure_old; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
     private final TreeMap<String, byte[]> structure_new;
-    private final BlockingQueue<leanrefObject> publicRefDNSResolvingQueue;
+    private final BlockingQueue<LearnObject> publicRefDNSResolvingQueue;
     private final PublicRefDNSResolvingProcess publicRefDNSResolvingWorker;
 
-    private final static leanrefObject leanrefObjectPOISON = new leanrefObject(null, null);
+    private final static LearnObject leanrefObjectPOISON = new LearnObject(null, null);
 
-    private static class leanrefObject
-    {
+    private static class LearnObject {
         private final DigestURI url;
         private final Set<MultiProtocolURI> globalRefURLs;
 
-        private leanrefObject(final DigestURI url, final Set<MultiProtocolURI> globalRefURLs) {
+        private LearnObject(final DigestURI url, final Set<MultiProtocolURI> globalRefURLs) {
             this.url = url;
             this.globalRefURLs = globalRefURLs;
         }
@@ -95,7 +95,7 @@ public class WebStructureGraph
         this.structure_old = new TreeMap<String, byte[]>();
         this.structure_new = new TreeMap<String, byte[]>();
         this.structureFile = structureFile;
-        this.publicRefDNSResolvingQueue = new LinkedBlockingQueue<leanrefObject>();
+        this.publicRefDNSResolvingQueue = new LinkedBlockingQueue<LearnObject>();
 
         // load web structure
         Map<String, byte[]> loadedStructureB;
@@ -142,7 +142,7 @@ public class WebStructureGraph
 
         @Override
         public void run() {
-            leanrefObject lro;
+            LearnObject lro;
             try {
                 while ( (lro = WebStructureGraph.this.publicRefDNSResolvingQueue.take()) != leanrefObjectPOISON ) {
                     learnrefs(lro);
@@ -170,7 +170,7 @@ public class WebStructureGraph
                 globalRefURLs.add(u);
             }
         }
-        final leanrefObject lro = new leanrefObject(url, globalRefURLs);
+        final LearnObject lro = new LearnObject(url, globalRefURLs);
         if ( !globalRefURLs.isEmpty() ) {
             try {
                 if ( this.publicRefDNSResolvingWorker.isAlive() ) {
@@ -184,34 +184,6 @@ public class WebStructureGraph
         }
     }
 
-    private void learnrefs(final leanrefObject lro) {
-        final StringBuilder cpg = new StringBuilder(240);
-        assert cpg.length() % 12 == 0 : "cpg.length() = " + cpg.length() + ", cpg = " + cpg.toString();
-        //final String refhashp = ASCII.String(lro.url.hash(), 6, 6); // ref hash part
-        String nexturlhash;
-        for ( final MultiProtocolURI u : lro.globalRefURLs ) {
-            if (Switchboard.getSwitchboard().shallTerminate()) break;
-            final byte[] nexturlhashb = new DigestURI(u).hash();
-            assert nexturlhashb != null;
-            if ( nexturlhashb != null ) {
-                nexturlhash = ASCII.String(nexturlhashb);
-                assert nexturlhash.length() == 12 : "nexturlhash.length() = "
-                    + nexturlhash.length()
-                    + ", nexturlhash = "
-                    + nexturlhash;
-                //assert !nexturlhash.substring(6).equals(refhashp);
-                // this is a global link
-                cpg.append(nexturlhash); // store complete hash
-                assert cpg.length() % 12 == 0 : "cpg.length() = "
-                    + cpg.length()
-                    + ", cpg = "
-                    + cpg.toString();
-            }
-        }
-        assert cpg.length() % 12 == 0 : "cpg.length() = " + cpg.length() + ", cpg = " + cpg.toString();
-        learn(lro.url, cpg);
-    }
-
     private static int refstr2count(final String refs) {
         if ( (refs == null) || (refs.length() <= 8) ) {
             return 0;
@@ -220,7 +192,7 @@ public class WebStructureGraph
         return (refs.length() - 8) / 10;
     }
 
-    static Map<String, Integer> refstr2map(final String refs) {
+    private static Map<String, Integer> refstr2map(final String refs) {
         if ( (refs == null) || (refs.length() <= 8) ) {
             return new HashMap<String, Integer>();
         }
@@ -240,8 +212,12 @@ public class WebStructureGraph
         return map;
     }
 
+    private static String none2refstr() {
+        return GenericFormatter.SHORT_DAY_FORMATTER.format();
+    }
+    
     private static String map2refstr(final Map<String, Integer> map) {
-        final StringBuilder s = new StringBuilder(map.size() * 10);
+        final StringBuilder s = new StringBuilder(GenericFormatter.PATTERN_SHORT_DAY.length() + map.size() * 10);
         s.append(GenericFormatter.SHORT_DAY_FORMATTER.format());
         String h;
         for ( final Map.Entry<String, Integer> entry : map.entrySet() ) {
@@ -265,6 +241,31 @@ public class WebStructureGraph
         return s.toString();
     }
 
+    public boolean exists(final String hosthash) {
+        // returns a map with a hosthash(String):refcount(Integer) relation
+        assert hosthash.length() == 6;
+        SortedMap<String, byte[]> tailMap;
+        synchronized ( this.structure_old ) {
+            tailMap = this.structure_old.tailMap(hosthash);
+            if ( !tailMap.isEmpty() ) {
+                final String key = tailMap.firstKey();
+                if ( key.startsWith(hosthash) ) {
+                    return true;
+                }
+            }
+        }
+        synchronized ( this.structure_new ) {
+            tailMap = this.structure_new.tailMap(hosthash);
+            if ( !tailMap.isEmpty() ) {
+                final String key = tailMap.firstKey();
+                if ( key.startsWith(hosthash) ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
     public StructureEntry outgoingReferences(final String hosthash) {
         // returns a map with a hosthash(String):refcount(Integer) relation
         assert hosthash.length() == 6;
@@ -279,7 +280,7 @@ public class WebStructureGraph
                 final String key = tailMap.firstKey();
                 if ( key.startsWith(hosthash) ) {
                     hostname = key.substring(7);
-                    ref = UTF8.String(tailMap.get(key));
+                    ref = ASCII.String(tailMap.get(key));
                     date = ref.substring(0, 8);
                     h = refstr2map(ref);
                 }
@@ -290,7 +291,7 @@ public class WebStructureGraph
             if ( !tailMap.isEmpty() ) {
                 final String key = tailMap.firstKey();
                 if ( key.startsWith(hosthash) ) {
-                    ref = UTF8.String(tailMap.get(key));
+                    ref = ASCII.String(tailMap.get(key));
                     if ( hostname.isEmpty() ) {
                         hostname = key.substring(7);
                     }
@@ -371,7 +372,7 @@ public class WebStructureGraph
 
         private final Row.Entry entry;
 
-        public HostReference(final byte[] hostHash, final long modified, final int count) {
+        private HostReference(final byte[] hostHash, final long modified, final int count) {
             assert (hostHash.length == 6) : "hostHash = " + ASCII.String(hostHash);
             this.entry = hostReferenceFactory.getRow().newEntry();
             this.entry.setCol(0, hostHash);
@@ -383,7 +384,7 @@ public class WebStructureGraph
             this.entry = hostReferenceFactory.getRow().newEntry(json, true);
         }
 
-        public HostReference(final Row.Entry entry) {
+        private HostReference(final Row.Entry entry) {
             this.entry = entry;
         }
 
@@ -402,7 +403,7 @@ public class WebStructureGraph
             return this.entry.getPrimaryKeyBytes();
         }
 
-        public int count() {
+        private int count() {
             return (int) this.entry.getColLong(2);
         }
 
@@ -436,9 +437,9 @@ public class WebStructureGraph
     }
 
     public static final HostReferenceFactory hostReferenceFactory = new HostReferenceFactory();
-    public static ReferenceContainerCache<HostReference> hostReferenceIndexCache = null;
-    public static long hostReferenceIndexCacheTime = 0;
-    public static final long hostReferenceIndexCacheTTL = 1000 * 60 * 60 * 12; // 12 hours time to live for cache
+    private static ReferenceContainerCache<HostReference> hostReferenceIndexCache = null;
+    private static long hostReferenceIndexCacheTime = 0;
+    private static final long hostReferenceIndexCacheTTL = 1000 * 60 * 60 * 12; // 12 hours time to live for cache
 
     public synchronized ReferenceContainerCache<HostReference> incomingReferences() {
         // we return a cache if the cache is filled and not stale
@@ -508,22 +509,6 @@ public class WebStructureGraph
         }
     }
 
-    /*
-    private void incomingReferencesTest(ReferenceContainerCache<HostReference> idx) {
-        for (ReferenceContainer<HostReference> references: idx) {
-            log.logInfo("Term-Host: " + hostHash2hostName(UTF8.String(references.getTermHash())));
-            Iterator<HostReference> referenceIterator = references.entries();
-            StringBuilder s = new StringBuilder();
-            HostReference reference;
-            while (referenceIterator.hasNext()) {
-                reference = referenceIterator.next();
-                s.append(reference.toPropertyForm());
-                log.logInfo("   ... referenced by " + hostHash2hostName(UTF8.String(reference.metadataHash())) + ", " + reference.count() + " references");
-            }
-        }
-    }
-    */
-
     public int referencesCount(final String hosthash) {
         // returns the number of hosts that are referenced by this hosthash
         assert hosthash.length() == 6 : "hosthash = " + hosthash;
@@ -578,21 +563,31 @@ public class WebStructureGraph
         return null;
     }
 
-    private void learn(final DigestURI url, final StringBuilder reference /*string of b64(12digits)-hashes*/) {
-        final String hosthash = ASCII.String(url.hash(), 6, 6);
+
+    private void learnrefs(final LearnObject lro) {
+        final Set<String> refhosts = new HashSet<String>();
+        DigestURI du;
+        String hosthash;
+        for ( final MultiProtocolURI u : lro.globalRefURLs ) {
+            if (Switchboard.getSwitchboard().shallTerminate()) break;
+            du = DigestURI.toDigestURI(u);
+            hosthash = ASCII.String(du.hash(), 6, 12);
+            if (!exists(hosthash)) {
+                // this must be recorded as an host with no references
+                synchronized ( this.structure_new ) {
+                    this.structure_new.put(hosthash + "," + u.getHost(), UTF8.getBytes(none2refstr()));
+                }
+            }
+            refhosts.add(hosthash);
+        }
+        final DigestURI url = lro.url;
+        hosthash = ASCII.String(url.hash(), 6, 6);
 
         // parse the new reference string and join it with the stored references
         final StructureEntry structure = outgoingReferences(hosthash);
-        final Map<String, Integer> refs =
-            (structure == null) ? new HashMap<String, Integer>() : structure.references;
-        assert reference.length() % 12 == 0 : "reference.length() = "
-            + reference.length()
-            + ", reference = "
-            + reference.toString();
-        String dom;
+        final Map<String, Integer> refs = (structure == null) ? new HashMap<String, Integer>() : structure.references;
         int c;
-        for ( int i = 0; i < reference.length() / 12; i++ ) {
-            dom = reference.substring(i * 12 + 6, (i + 1) * 12);
+        for (String dom: refhosts) {
             c = 0;
             if ( refs.containsKey(dom) ) {
                 c = (refs.get(dom)).intValue();
@@ -681,14 +676,27 @@ public class WebStructureGraph
         }
         return maxhost;
     }
-
+    
+    public ReversibleScoreMap<String> hostReferenceScore() {
+        ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(ASCII.identityASCIIComparator);
+        synchronized ( this.structure_old ) {
+            for ( final Map.Entry<String, byte[]> entry : this.structure_old.entrySet() ) {
+                result.set(entry.getKey().substring(7), (entry.getValue().length - 8) / 10);
+            }
+        }
+        synchronized ( this.structure_new ) {
+            for ( final Map.Entry<String, byte[]> entry : this.structure_new.entrySet() ) {
+                result.set(entry.getKey().substring(7), (entry.getValue().length - 8) / 10);
+            }
+        }
+        return result;
+    }
+    
     public Iterator<StructureEntry> structureEntryIterator(final boolean latest) {
         return new StructureIterator(latest);
     }
 
-    private class StructureIterator extends LookAheadIterator<StructureEntry> implements
-        Iterator<StructureEntry>
-    {
+    private class StructureIterator extends LookAheadIterator<StructureEntry> implements Iterator<StructureEntry> {
 
         private final Iterator<Map.Entry<String, byte[]>> i;
 
@@ -727,22 +735,42 @@ public class WebStructureGraph
         }
     }
 
-    public static class StructureEntry
-    {
+    public static class StructureEntry implements Comparable<StructureEntry> {
+        
         public String hosthash; // the tail of the host hash
         public String hostname; // the host name
         public String date; // date of latest change
         public Map<String, Integer> references; // a map from the referenced host hash to the number of referenced to that host
 
+        private StructureEntry(final String hosthash, final String hostname) {
+            this(hosthash, hostname, GenericFormatter.SHORT_DAY_FORMATTER.format(), new HashMap<String, Integer>());
+        }
+        
         private StructureEntry(
-            final String hosthash,
-            final String hostname,
-            final String date,
-            final Map<String, Integer> references) {
+                final String hosthash,
+                final String hostname,
+                final String date,
+                final Map<String, Integer> references) {
             this.hosthash = hosthash;
             this.hostname = hostname;
             this.date = date;
             this.references = references;
+        }
+        
+        @Override
+        public int compareTo(StructureEntry arg0) {
+            return hosthash.compareTo(arg0.hosthash);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof StructureEntry)) return false;
+            return hosthash.equals(((StructureEntry)o).hosthash); 
+        }
+
+        @Override
+        public int hashCode() {
+            return this.hosthash.hashCode();
         }
     }
 

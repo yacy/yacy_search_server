@@ -213,7 +213,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     	}
 
         final SolrInputDocument doc = new SolrInputDocument();
-        final DigestURI digestURI = new DigestURI(md.url());
+        final DigestURI digestURI = DigestURI.toDigestURI(md.url());
         boolean allAttr = this.isEmpty();
 
         if (allAttr || contains(YaCySchema.failreason_t)) add(doc, YaCySchema.failreason_t, "");
@@ -341,7 +341,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     public SolrInputDocument yacy2solr(final String id, final CrawlProfile profile, final ResponseHeader header, final Document yacydoc, Condenser condenser, final URIMetadata metadata) {
         // we use the SolrCell design as index scheme
         final SolrInputDocument doc = new SolrInputDocument();
-        final DigestURI digestURI = new DigestURI(yacydoc.dc_source());
+        final DigestURI digestURI = DigestURI.toDigestURI(yacydoc.dc_source());
         boolean allAttr = this.isEmpty();
         add(doc, YaCySchema.id, id);
         if (allAttr || contains(YaCySchema.failreason_t)) add(doc, YaCySchema.failreason_t, ""); // overwrite a possible fail reason (in case that there was a fail reason before)

@@ -181,7 +181,7 @@ public class CrawlStartScanner_p
                     final Scanner.Service u = se.next().getKey();
                     DigestURI uu;
                     try {
-                        uu = new DigestURI(u.url());
+                        uu = DigestURI.toDigestURI(u.url());
                         pkmap.put(uu.hash(), uu);
                     } catch ( final MalformedURLException e ) {
                         Log.logException(e);
@@ -236,7 +236,7 @@ public class CrawlStartScanner_p
                         while ( se.hasNext() ) {
                             host = se.next();
                             try {
-                                u = new DigestURI(host.getKey().url());
+                                u = DigestURI.toDigestURI(host.getKey().url());
                                 urlString = u.toNormalform(true);
                                 if ( host.getValue() == Access.granted
                                     && Scanner.inIndex(apiCommentCache, urlString) == null ) {

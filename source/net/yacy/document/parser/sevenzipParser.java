@@ -168,7 +168,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
                      Document[] theDocs;
                      // workaround for relative links in file, normally '#' shall be used behind the location, see
                      // below for reversion of the effects
-                     final DigestURI url = new DigestURI(MultiProtocolURI.newURL(this.doc.dc_source(), this.prefix + "/" + super.filePath));
+                     final DigestURI url = DigestURI.toDigestURI(MultiProtocolURI.newURL(this.doc.dc_source(), this.prefix + "/" + super.filePath));
                      final String mime = TextParser.mimeOf(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
                      theDocs = TextParser.parseSource(url, mime, null, this.cfos.toByteArray());
 
