@@ -158,7 +158,7 @@ public class HostBrowser {
                 String host = uri.getHost();
                 prop.putHTML("outbound_host", host);
                 prop.putHTML("inbound_host", host);
-                String hosthash = ASCII.String(uri.hash(), 6, 12);
+                String hosthash = ASCII.String(uri.hash(), 6, 6);
                 
                 // get all files for a specific host from the index
                 BlockingQueue<SolrDocument> docs = fulltext.getSolr().concurrentQuery(YaCySchema.host_s.name() + ":" + host, 0, 100000, 60000);

@@ -44,7 +44,7 @@ failreason_t
 ## html status return code (i.e. "200" for ok), -1 if not loaded (see content of failreason_t for this case), int (mandatory field)
 httpstatus_i
 
-## html status return code (i.e. \"200\" for ok), -1 if not loaded
+## redirect url if the error code is 299 < httpstatus_i < 310
 #httpstatus_redirect_s
 
 

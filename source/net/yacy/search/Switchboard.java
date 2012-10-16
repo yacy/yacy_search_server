@@ -147,6 +147,7 @@ import net.yacy.interaction.contentcontrol.ContentControlImportThread;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -1529,7 +1530,7 @@ public final class Switchboard extends serverSwitch
         if ( urlhash.length == 0 ) {
             return null;
         }
-        final URIMetadata le = this.index.fulltext().getMetadata(urlhash);
+        final URIMetadataNode le = this.index.fulltext().getMetadata(urlhash);
         if ( le != null ) {
             return le.url();
         }

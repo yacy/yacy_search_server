@@ -40,7 +40,7 @@ import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
 import net.yacy.crawler.data.ResultURLs.InitExecEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
@@ -182,7 +182,7 @@ public class CrawlResults {
             boolean dark = true;
             String urlstr, urltxt;
             Seed initiatorSeed, executorSeed;
-            URIMetadata urle;
+            URIMetadataNode urle;
 
             int cnt = 0;
             final Iterator<Map.Entry<String, InitExecEntry>> i = ResultURLs.results(tabletype);

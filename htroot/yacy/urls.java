@@ -34,7 +34,7 @@ import net.yacy.crawler.data.NoticedURL;
 import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.peers.Protocol;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -110,7 +110,7 @@ public class urls {
             if (urlhashes.length() % 12 != 0) return prop;
             final int count = urlhashes.length() / 12;
         	int c = 0;
-        	URIMetadata entry;
+        	URIMetadataNode entry;
             DigestURI referrer;
             for (int i = 0; i < count; i++) {
                 entry = sb.index.fulltext().getMetadata(ASCII.getBytes(urlhashes.substring(12 * i, 12 * (i + 1))));

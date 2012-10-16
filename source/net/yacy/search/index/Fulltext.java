@@ -198,17 +198,17 @@ public final class Fulltext implements Iterable<byte[]> {
      * @param obrwi
      * @return
      */
-    public URIMetadata getMetadata(WordReference wre, long weight) {
+    public URIMetadataNode getMetadata(WordReference wre, long weight) {
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
         return getMetadata(wre.urlhash(), wre, weight);
     }
 
-    public URIMetadata getMetadata(final byte[] urlHash) {
+    public URIMetadataNode getMetadata(final byte[] urlHash) {
         if (urlHash == null) return null;
         return getMetadata(urlHash, null, 0);
     }
 
-    private URIMetadata getMetadata(final byte[] urlHash, WordReference wre, long weight) {
+    private URIMetadataNode getMetadata(final byte[] urlHash, WordReference wre, long weight) {
 
         // get the metadata from Solr
         try {
@@ -227,46 +227,9 @@ public final class Fulltext implements Iterable<byte[]> {
     		final Row.Entry entry = this.urlIndexFile.remove(urlHash);
             if (entry == null) return null;
 			URIMetadataRow row = new URIMetadataRow(entry, wre, weight);
-			this.putDocument(this.solrScheme.metadata2solr(row));
-			return row;
-        } catch (final IOException e) {
-            Log.logException(e);
-        }
-
-        return null;
-    }
-
-    public SolrDocument getDocument(WordReference wre, long weight) {
-        if (wre == null) return null; // all time was already wasted in takeRWI to get another element
-        return getDocument(wre.urlhash(), wre, weight);
-    }
-
-    public SolrDocument getDocument(final byte[] urlHash) {
-        if (urlHash == null) return null;
-        return getDocument(urlHash, null, 0);
-    }
-
-    private SolrDocument getDocument(final byte[] urlHash, WordReference wre, long weight) {
-
-        // get the document from Solr
-        try {
-            SolrDocument doc = this.solr.get(ASCII.String(urlHash));
-            if (doc != null) {
-            	if (this.urlIndexFile != null) this.urlIndexFile.remove(urlHash);
-            	return doc;
-            }
-        } catch (IOException e) {
-            Log.logException(e);
-        }
-
-        // get the document from the old metadata index
-        if (this.urlIndexFile != null) try {
-    		// slow migration to solr
-    		final Row.Entry entry = this.urlIndexFile.remove(urlHash);
-            if (entry == null) return null;
-    		URIMetadataRow row = new URIMetadataRow(entry, wre, weight);
-    		this.putDocument(this.solrScheme.metadata2solr(row));
-    		return ClientUtils.toSolrDocument(getSolrScheme().metadata2solr(row));
+			SolrInputDocument solrInput = this.solrScheme.metadata2solr(row);
+			this.putDocument(solrInput);
+			return new URIMetadataNode(ClientUtils.toSolrDocument(solrInput), wre, weight);
         } catch (final IOException e) {
             Log.logException(e);
         }
@@ -303,6 +266,7 @@ public final class Fulltext implements Iterable<byte[]> {
     public void putMetadata(final URIMetadata entry) throws IOException {
     	if (entry instanceof URIMetadataNode) {
     		putDocument(ClientUtils.toSolrInputDocument(((URIMetadataNode) entry).getDocument()));
+    		return;
     	}
     	assert entry instanceof URIMetadataRow;
     	URIMetadataRow row = (URIMetadataRow) entry;
@@ -399,12 +363,12 @@ public final class Fulltext implements Iterable<byte[]> {
                 true);
     }
 
-    public CloneableIterator<URIMetadata> entries() {
+    public CloneableIterator<URIMetadataNode> entries() {
         // enumerates entry elements
     	final Iterator<byte[]> ids = iterator();
-        return new CloneableIterator<URIMetadata>() {
+        return new CloneableIterator<URIMetadataNode>() {
             @Override
-            public CloneableIterator<URIMetadata> clone(final Object secondHash) {
+            public CloneableIterator<URIMetadataNode> clone(final Object secondHash) {
                 return this;
             }
             @Override
@@ -412,7 +376,7 @@ public final class Fulltext implements Iterable<byte[]> {
                 return ids.hasNext();
             }
             @Override
-            public final URIMetadata next() {
+            public final URIMetadataNode next() {
                 byte[] id = ids.next();
                 if (id == null) return null;
                 return getMetadata(id);
@@ -551,7 +515,7 @@ public final class Fulltext implements Iterable<byte[]> {
                         this.count++;
                     }
                 } else {
-                    final Iterator<URIMetadata> i = entries(); // iterates indexURLEntry objects
+                    final Iterator<URIMetadataNode> i = entries(); // iterates indexURLEntry objects
                     URIMetadata entry;
                     String url;
                     while (i.hasNext()) {
@@ -650,7 +614,7 @@ public final class Fulltext implements Iterable<byte[]> {
         // collect hashes from all domains
 
         // fetch urls from the database to determine the host in clear text
-        URIMetadata urlref;
+        URIMetadataNode urlref;
         if (count < 0 || count > domainSamples.size()) count = domainSamples.size();
         this.statsDump = new ArrayList<HostStat>();
         final TreeSet<String> set = new TreeSet<String>();
@@ -687,7 +651,7 @@ public final class Fulltext implements Iterable<byte[]> {
      */
     public Map<String, HostStat> domainHashResolver(final Map<String, URLHashCounter> domainSamples) {
         final HashMap<String, HostStat> hostMap = new HashMap<String, HostStat>();
-        URIMetadata urlref;
+        URIMetadataNode urlref;
 
         final ScoreMap<String> hosthashScore = new ConcurrentScoreMap<String>();
         for (final Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
@@ -708,7 +672,7 @@ public final class Fulltext implements Iterable<byte[]> {
 
         // fetch urls from the database to determine the host in clear text
         final Iterator<String> j = domainScore.keys(false); // iterate urlhash-examples in reverse order (biggest first)
-        URIMetadata urlref;
+        URIMetadataNode urlref;
         String urlhash;
         count += 10; // make some more to prevent that we have to do this again after deletions too soon.
         if (count < 0 || domainScore.sizeSmaller(count)) count = domainScore.size();

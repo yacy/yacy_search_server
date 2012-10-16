@@ -293,7 +293,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
 
         if (this.rowdef.objectOrder != null && this.rowdef.objectOrder instanceof Base64Order) {
             // first try to find in sorted area
-            assert this.rowdef.objectOrder.wellformed(a, astart, this.rowdef.primaryKeyLength) : "not wellformed: " + UTF8.String(a, astart, this.rowdef.primaryKeyLength);
+            assert this.rowdef.objectOrder.wellformed(a, astart, this.rowdef.primaryKeyLength) : "not wellformed: " + ASCII.String(a, astart, this.rowdef.primaryKeyLength);
         }
 
         // first try to find in sorted area

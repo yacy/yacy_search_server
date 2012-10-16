@@ -300,10 +300,6 @@ public class URIMetadataRow implements URIMetadata {
         }
     }
 
-    public Row.Entry toRowEntry() {
-        return this.entry;
-    }
-
     @Override
     public byte[] hash() {
         // return a url-hash, based on the md5 algorithm

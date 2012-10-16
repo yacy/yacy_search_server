@@ -52,16 +52,16 @@ import org.apache.solr.common.SolrDocument;
  */
 public class URIMetadataNode implements URIMetadata {
 
-    private final byte[] hash;
-    private final String urlRaw, keywords;
-    private DigestURI url;
-    private Bitfield flags;
-    private final int imagec, audioc, videoc, appc;
-    private double lat, lon;
-    private long ranking; // during generation of a search result this value is set
-    private final SolrDocument doc;
-    private final String snippet;
-    private WordReference word; // this is only used if the url is transported via remote search requests
+    private byte[] hash = null;
+    private String urlRaw = null, keywords = null;
+    private DigestURI url = null;
+    private Bitfield flags = null;
+    private int imagec = -1, audioc = -1, videoc = -1, appc = -1;
+    private double lat = Double.NaN, lon = Double.NaN;
+    private long ranking = -1; // during generation of a search result this value is set
+    private SolrDocument doc = null;
+    private String snippet = null;
+    private WordReference word = null; // this is only used if the url is transported via remote search requests
 
     public URIMetadataNode(final SolrDocument doc) {
         this.doc = doc;
@@ -76,30 +76,6 @@ public class URIMetadataNode implements URIMetadata {
             Log.logException(e);
             this.url = null;
         }
-
-        // to set the flags bitfield we need to pre-load some values from the Solr document
-        this.keywords = getString(YaCySchema.keywords);
-        this.imagec = getInt(YaCySchema.imagescount_i);
-        this.audioc = getInt(YaCySchema.audiolinkscount_i);
-        this.videoc = getInt(YaCySchema.videolinkscount_i);
-        this.appc = getInt(YaCySchema.videolinkscount_i);
-        this.lon = 0.0d;
-        this.lat = 0.0d;
-        String latlon = (String) this.doc.getFieldValue(YaCySchema.coordinate_p.name());
-        if (latlon != null) {
-            int p = latlon.indexOf(',');
-            if (p > 0) {
-                this.lat = Double.parseDouble(latlon.substring(0, p));
-                this.lon = Double.parseDouble(latlon.substring(p + 1));
-            }
-        }
-        this.flags = new Bitfield();
-        if (this.keywords != null && this.keywords.indexOf("indexof") >= 0) this.flags.set(Condenser.flag_cat_indexof, true);
-        if (this.lon != 0.0d || this.lat != 0.0d) this.flags.set(Condenser.flag_cat_haslocation, true);
-        if (this.imagec > 0) this.flags.set(Condenser.flag_cat_hasimage, true);
-        if (this.audioc > 0) this.flags.set(Condenser.flag_cat_hasaudio, true);
-        if (this.videoc > 0) this.flags.set(Condenser.flag_cat_hasvideo, true);
-        if (this.appc > 0) this.flags.set(Condenser.flag_cat_hasapp, true);
     }
 
     public URIMetadataNode(final SolrDocument doc, final WordReference searchedWord, final long ranking) {
@@ -206,16 +182,32 @@ public class URIMetadataNode implements URIMetadata {
 
     @Override
     public String dc_subject() {
+        if (this.keywords == null) {
+            this.keywords = getString(YaCySchema.keywords);
+        }
         return this.keywords;
     }
 
     @Override
     public double lat() {
+        if (this.lat == Double.NaN) {
+            this.lon = 0.0d;
+            this.lat = 0.0d;
+            String latlon = (String) this.doc.getFieldValue(YaCySchema.coordinate_p.name());
+            if (latlon != null) {
+                int p = latlon.indexOf(',');
+                if (p > 0) {
+                    this.lat = Double.parseDouble(latlon.substring(0, p));
+                    this.lon = Double.parseDouble(latlon.substring(p + 1));
+                }
+            }
+        }
         return this.lat;
     }
 
     @Override
     public double lon() {
+        if (this.lon == Double.NaN) lat();
         return this.lon;
     }
 
@@ -242,7 +234,7 @@ public class URIMetadataNode implements URIMetadata {
     @Override
     public char doctype() {
         ArrayList<String> a = getArrayList(YaCySchema.content_type);
-        if (a == null || a.size() == 0) return Response.docType(this.url);
+        if (a == null || a.size() == 0) return Response.docType(url());
         return Response.docType(a.get(0));
     }
 
@@ -268,6 +260,15 @@ public class URIMetadataNode implements URIMetadata {
 
     @Override
     public Bitfield flags() {
+        if (flags == null) {
+            this.flags = new Bitfield();
+            if (dc_subject() != null && dc_subject().indexOf("indexof") >= 0) this.flags.set(Condenser.flag_cat_indexof, true);
+            if (lon() != 0.0d || lat() != 0.0d) this.flags.set(Condenser.flag_cat_haslocation, true);
+            if (limage() > 0) this.flags.set(Condenser.flag_cat_hasimage, true);
+            if (laudio() > 0) this.flags.set(Condenser.flag_cat_hasaudio, true);
+            if (lvideo() > 0) this.flags.set(Condenser.flag_cat_hasvideo, true);
+            if (lapp() > 0) this.flags.set(Condenser.flag_cat_hasapp, true);
+        }
         return this.flags;
     }
 
@@ -288,21 +289,33 @@ public class URIMetadataNode implements URIMetadata {
 
     @Override
     public int limage() {
+        if (this.imagec == -1) {
+            this.imagec = getInt(YaCySchema.imagescount_i);
+        }
         return this.imagec;
     }
 
     @Override
     public int laudio() {
+        if (this.audioc == -1) {
+            this.audioc = getInt(YaCySchema.audiolinkscount_i);
+        }
         return this.audioc;
     }
 
     @Override
     public int lvideo() {
+        if (this.videoc == -1) {
+            this.videoc = getInt(YaCySchema.videolinkscount_i);
+        }
         return this.videoc;
     }
 
     @Override
     public int lapp() {
+        if (this.appc == -1) {
+            this.appc = getInt(YaCySchema.videolinkscount_i);
+        }
         return this.appc;
     }
 
@@ -337,7 +350,7 @@ public class URIMetadataNode implements URIMetadata {
         return false;
     }
 
-    public static StringBuilder corePropList(URIMetadata md) {
+    protected static StringBuilder corePropList(URIMetadata md) {
         // generate a parseable string; this is a simple property-list
         final StringBuilder s = new StringBuilder(300);
 

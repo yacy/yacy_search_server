@@ -59,6 +59,7 @@ import net.yacy.document.LibraryProvider;
 import net.yacy.interaction.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -635,7 +636,7 @@ public final class RWIProcess extends Thread
             if ( obrwi == null ) {
                 return null; // all time was already wasted in takeRWI to get another element
             }
-            final URIMetadata page = this.query.getSegment().fulltext().getMetadata(obrwi.getElement(), obrwi.getWeight());
+            final URIMetadataNode page = this.query.getSegment().fulltext().getMetadata(obrwi.getElement(), obrwi.getWeight());
             if ( page == null ) {
                 try {
                     this.misses.putUnique(obrwi.getElement().urlhash());
@@ -896,7 +897,7 @@ public final class RWIProcess extends Thread
         }
 
         final Iterator<String> domhashs = this.hostNavigator.keys(false);
-        URIMetadata row;
+        URIMetadataNode row;
         byte[] urlhash;
         String hosthash, hostname;
         if ( this.hostResolver != null ) {

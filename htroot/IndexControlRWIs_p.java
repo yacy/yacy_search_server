@@ -278,7 +278,7 @@ public class IndexControlRWIs_p {
                                 WordReferenceRow.urlEntryRow.objectOrder,
                                 index.size());
                         Reference iEntry;
-                        URIMetadata lurl;
+                        URIMetadataNode lurl;
                         while (urlIter.hasNext()) {
                             iEntry = urlIter.next();
                             lurl = segment.fulltext().getMetadata(iEntry.urlhash());
@@ -290,11 +290,7 @@ public class IndexControlRWIs_p {
                                 }
                                 urlIter.remove();
                             } else {
-                                if (lurl instanceof URIMetadataRow) {
-                                    knownURLs.put(iEntry.urlhash(), (URIMetadataRow) lurl);
-                                } else if (lurl instanceof URIMetadataNode) {
-                                    knownURLs.put(iEntry.urlhash(), ((URIMetadataNode) lurl).toRow());
-                                }
+                                knownURLs.put(iEntry.urlhash(), lurl.toRow());
                             }
                         }
 

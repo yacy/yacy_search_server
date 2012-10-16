@@ -571,7 +571,7 @@ public class WebStructureGraph {
         for ( final MultiProtocolURI u : lro.globalRefURLs ) {
             if (Switchboard.getSwitchboard().shallTerminate()) break;
             du = DigestURI.toDigestURI(u);
-            hosthash = ASCII.String(du.hash(), 6, 12);
+            hosthash = ASCII.String(du.hash(), 6, 6);
             if (!exists(hosthash)) {
                 // this must be recorded as an host with no references
                 synchronized ( this.structure_new ) {

@@ -42,6 +42,7 @@ import net.yacy.crawler.data.ResultURLs;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.RotateIterator;
@@ -175,7 +176,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            final URIMetadata entry = segment.fulltext().getMetadata(ASCII.getBytes(urlhash));
+            final URIMetadataNode entry = segment.fulltext().getMetadata(ASCII.getBytes(urlhash));
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
@@ -233,7 +234,7 @@ public class IndexControlURLs_p {
 
         // generate list
         if (post.containsKey("urlhashsimilar")) {
-            final Iterator<URIMetadata> entryIt = new RotateIterator<URIMetadata>(segment.fulltext().entries(), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), (int) segment.RWICount());
+            final Iterator<URIMetadataNode> entryIt = new RotateIterator<URIMetadataNode>(segment.fulltext().entries(), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), (int) segment.RWICount());
 			final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
 			URIMetadata entry;
 			int i = 0, rows = 0, cols = 0;
@@ -347,7 +348,7 @@ public class IndexControlURLs_p {
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
-        final URIMetadata le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.fulltext().getMetadata(entry.referrerHash());
+        final URIMetadataNode le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.fulltext().getMetadata(entry.referrerHash());
         if (entry.url() == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);

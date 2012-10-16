@@ -35,7 +35,6 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -175,16 +174,12 @@ public class Transmission {
                     notFoundx.add(e.urlhash());
                     continue;
                 }
-                final URIMetadata r = Transmission.this.segment.fulltext().getMetadata(e.urlhash());
+                final URIMetadataNode r = Transmission.this.segment.fulltext().getMetadata(e.urlhash());
                 if (r == null) {
                     notFoundx.add(e.urlhash());
                     this.badReferences.put(e.urlhash());
                 } else {
-                    if (r instanceof URIMetadataRow) {
-                        this.references.put(e.urlhash(), (URIMetadataRow) r);
-                    } else if (r instanceof URIMetadataNode) {
-                        this.references.put(e.urlhash(), ((URIMetadataNode) r).toRow());
-                    }
+                    this.references.put(e.urlhash(), r.toRow());
                 }
             }
             // now delete all references that were not found

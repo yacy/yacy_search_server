@@ -55,7 +55,7 @@ import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.server.serverObjects;
@@ -131,7 +131,7 @@ public class ViewFile {
             pre = post.getBoolean("pre");
         } catch (final MalformedURLException e) {}
 
-        URIMetadata urlEntry = null;
+        URIMetadataNode urlEntry = null;
         // get the urlEntry that belongs to the url hash
         //boolean ue = urlHash.length() > 0 && indexSegment.exists(ASCII.getBytes(urlHash));
         //if (ue) Log.logInfo("ViewFile", "exists(" + urlHash + ")");

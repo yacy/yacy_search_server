@@ -59,7 +59,7 @@ import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.SMBLoader;
 import net.yacy.interaction.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.peers.SeedDB;
@@ -447,7 +447,7 @@ public final class CrawlStacker {
 
         // check if the url is double registered
         final String dbocc = this.nextQueue.urlExists(url.hash()); // returns the name of the queue if entry exists
-        final URIMetadata oldEntry = this.indexSegment.fulltext().getMetadata(url.hash());
+        final URIMetadataNode oldEntry = this.indexSegment.fulltext().getMetadata(url.hash());
         if (oldEntry == null) {
             if (dbocc != null) {
                 // do double-check

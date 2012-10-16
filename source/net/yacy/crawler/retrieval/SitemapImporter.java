@@ -33,7 +33,7 @@ import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.document.parser.sitemapParser;
 import net.yacy.document.parser.sitemapParser.URLEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 
@@ -84,7 +84,7 @@ public class SitemapImporter extends Thread {
             final String dbocc = this.sb.urlExists(nexturlhash);
             if ((dbocc != null) && (dbocc.equalsIgnoreCase("loaded"))) {
                 // the url was already loaded. we need to check the date
-                final URIMetadata oldEntry = this.sb.index.fulltext().getMetadata(nexturlhash);
+                final URIMetadataNode oldEntry = this.sb.index.fulltext().getMetadata(nexturlhash);
                 if (oldEntry != null) {
                     final Date modDate = oldEntry.moddate();
                     // check if modDate is null

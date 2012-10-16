@@ -57,6 +57,7 @@ import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.citation.CitationReferenceFactory;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -506,7 +507,7 @@ public class Segment {
 
         if (urlhash == null) return 0;
         // determine the url string
-        final URIMetadata entry = fulltext().getMetadata(urlhash);
+        final URIMetadataNode entry = fulltext().getMetadata(urlhash);
         if (entry == null) return 0;
         if (entry.url() == null) return 0;
 

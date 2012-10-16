@@ -60,7 +60,7 @@ import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Bitfield;
@@ -653,7 +653,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                final URIMetadata urlentry = indexSegment.fulltext().getMetadata(UTF8.getBytes(recommendHash));
+                final URIMetadataNode urlentry = indexSegment.fulltext().getMetadata(UTF8.getBytes(recommendHash));
                 if ( urlentry != null ) {
                     Document[] documents = null;
                     try {
@@ -689,7 +689,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
-                final URIMetadata urlentry = indexSegment.fulltext().getMetadata(UTF8.getBytes(bookmarkHash));
+                final URIMetadataNode urlentry = indexSegment.fulltext().getMetadata(UTF8.getBytes(bookmarkHash));
                 if ( urlentry != null ) {
                     try {
                         sb.tables.bookmarks.createBookmark(

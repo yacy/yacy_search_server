@@ -37,6 +37,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
@@ -99,7 +100,7 @@ public class yacydoc {
         }
         if (urlhash == null || urlhash.isEmpty()) return prop;
 
-        final URIMetadata entry = segment.fulltext().getMetadata(urlhash.getBytes());
+        final URIMetadataNode entry = segment.fulltext().getMetadata(urlhash.getBytes());
         if (entry == null) return prop;
 
         if (entry.url() == null) {

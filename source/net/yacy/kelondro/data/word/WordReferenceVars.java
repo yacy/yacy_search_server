@@ -55,7 +55,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 	 */
 	public static final WordReferenceVars poison = new WordReferenceVars();
 	private static int cores = Runtime.getRuntime().availableProcessors();
-	public static final byte[] default_language = UTF8.getBytes("uk");
+	protected static final byte[] default_language = UTF8.getBytes("uk");
 
     private final Bitfield flags;
     private long lastModified;
@@ -274,7 +274,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return this.posofphrase;
     }
 
-    public WordReferenceRow toRowEntry() {
+    private WordReferenceRow toRowEntry() {
         return new WordReferenceRow(
                 this.urlHash,
                 this.urllength,     // byte-length of complete URL
@@ -470,13 +470,13 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     	return vars;
     }
 
-    public static class TransformDistributor extends Thread {
+    private static class TransformDistributor extends Thread {
 
     	private ReferenceContainer<WordReference> container;
     	private BlockingQueue<WordReferenceVars> out;
     	private long maxtime;
 
-    	public TransformDistributor(final ReferenceContainer<WordReference> container, final BlockingQueue<WordReferenceVars> out, final long maxtime) {
+    	private TransformDistributor(final ReferenceContainer<WordReference> container, final BlockingQueue<WordReferenceVars> out, final long maxtime) {
     		this.container = container;
     		this.out = out;
     		this.maxtime = maxtime;
@@ -521,19 +521,19 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     	}
     }
 
-    public static class TransformWorker extends Thread {
+    private static class TransformWorker extends Thread {
 
     	private BlockingQueue<Row.Entry> in;
     	private BlockingQueue<WordReferenceVars> out;
     	private long maxtime;
 
-    	public TransformWorker(final BlockingQueue<WordReferenceVars> out, final long maxtime) {
+    	private TransformWorker(final BlockingQueue<WordReferenceVars> out, final long maxtime) {
     		this.in = new LinkedBlockingQueue<Row.Entry>();
     		this.out = out;
     		this.maxtime = maxtime;
     	}
 
-    	public void add(final Row.Entry entry) {
+    	private void add(final Row.Entry entry) {
     		try {
 				this.in.put(entry);
 			} catch (final InterruptedException e) {

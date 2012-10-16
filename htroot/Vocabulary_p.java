@@ -35,7 +35,7 @@ import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
@@ -86,12 +86,12 @@ public class Vocabulary_p {
                                     if (p >= 0) t = t.substring(p + 1);
                                 }
                                 if (discoverFromTitle || discoverFromTitleSplitted) {
-                                	URIMetadata m = segment.fulltext().getMetadata(u.hash());
+                                    URIMetadataNode m = segment.fulltext().getMetadata(u.hash());
                                     if (m != null) t = m.dc_title();
                                     if (t.endsWith(".jpg") || t.endsWith(".gif")) continue;
                                 }
                                 if (discoverFromAuthor) {
-                                	URIMetadata m = segment.fulltext().getMetadata(u.hash());
+                                    URIMetadataNode m = segment.fulltext().getMetadata(u.hash());
                                     if (m != null) t = m.dc_creator();
                                 }
                                 t = t.replaceAll("_", " ").replaceAll("\"", " ").replaceAll("'", " ").replaceAll(",", " ").replaceAll("  ", " ").trim();
