@@ -26,7 +26,6 @@
 
 package net.yacy.search.query;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -456,7 +455,7 @@ public class SnippetProcess {
         public void run() {
 
             // start fetching urls and snippets
-        	URIMetadata page;
+            URIMetadataNode page;
             ResultEntry resultEntry;
             //final int fetchAhead = snippetMode == 0 ? 0 : 10;
             final boolean nav_topics = SnippetProcess.this.query.navigators.equals("all") || SnippetProcess.this.query.navigators.indexOf("topics",0) >= 0;
@@ -498,16 +497,7 @@ public class SnippetProcess {
 
                     // in case that we have an attached solr, we load also the solr document
                     String solrContent = null;
-                    SolrDocument sd = null;
-                    if (page instanceof URIMetadataNode) {
-                        sd = ((URIMetadataNode) page).getDocument();
-                    } else {
-                        try {
-                            sd = this.metadata.getSolr().get(ASCII.String(page.hash()));
-                        } catch (IOException e) {
-                            Log.logException(e);
-                        }
-                    }
+                    SolrDocument sd = page.getDocument();
                     if (sd != null) {
                         solrContent = this.metadata.getSolrScheme().solrGetText(sd);
                     }
@@ -556,7 +546,7 @@ public class SnippetProcess {
         }
     }
 
-    protected ResultEntry fetchSnippet(final URIMetadata page, final String solrText, final CacheStrategy cacheStrategy) {
+    protected ResultEntry fetchSnippet(final URIMetadataNode page, final String solrText, final CacheStrategy cacheStrategy) {
         // Snippet Fetching can has 3 modes:
         // 0 - do not fetch snippets
         // 1 - fetch snippets offline only

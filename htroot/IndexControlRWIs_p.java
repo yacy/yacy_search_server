@@ -475,7 +475,7 @@ public class IndexControlRWIs_p {
             prop.put("genUrlList_lines", maxlines);
             int i = 0;
             DigestURI url;
-            URIMetadata entry;
+            URIMetadataNode entry;
             String us;
             long rn = -1;
             while ( !ranked.isEmpty() && (entry = ranked.takeURL(false, 1000)) != null ) {

@@ -35,7 +35,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -52,7 +52,7 @@ import net.yacy.search.index.Segment;
 public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEntry> {
 
     // payload objects
-    private final URIMetadata urlentry;
+    private final URIMetadataNode urlentry;
     private String alternative_urlstring;
     private String alternative_urlname;
     private final TextSnippet textSnippet;
@@ -62,7 +62,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     // statistic objects
     public long dbRetrievalTime, snippetComputationTime, ranking;
 
-    public ResultEntry(final URIMetadata urlentry,
+    public ResultEntry(final URIMetadataNode urlentry,
                        final Segment indexSegment,
                        SeedDB peers,
                        final TextSnippet textSnippet,

@@ -58,7 +58,6 @@ import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
 import net.yacy.interaction.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -625,7 +624,7 @@ public final class RWIProcess extends Thread
      * @param waitingtime the time this method may take for a result computation
      * @return a metadata entry for a url
      */
-    public URIMetadata takeURL(final boolean skipDoubleDom, final long waitingtime) {
+    public URIMetadataNode takeURL(final boolean skipDoubleDom, final long waitingtime) {
         // returns from the current RWI list the best URL entry and removes this entry from the list
         final long timeout = System.currentTimeMillis() + Math.max(10, waitingtime);
         int p = -1;
