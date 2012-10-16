@@ -20,7 +20,6 @@
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,13 +31,18 @@ import java.util.concurrent.BlockingQueue;
 
 import org.apache.solr.common.SolrDocument;
 
+import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.peers.graphics.WebStructureGraph.StructureEntry;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.SolrConfiguration;
@@ -152,35 +156,49 @@ public class HostBrowser {
                 // generate file list from path
                 DigestURI uri = new DigestURI(path);
                 String host = uri.getHost();
+                prop.putHTML("outbound_host", host);
+                prop.putHTML("inbound_host", host);
+                String hosthash = ASCII.String(uri.hash(), 6, 12);
                 
                 // get all files for a specific host from the index
                 BlockingQueue<SolrDocument> docs = fulltext.getSolr().concurrentQuery(YaCySchema.host_s.name() + ":" + host, 0, 100000, 60000);
                 SolrDocument doc;
                 Set<String> storedDocs = new HashSet<String>();
-                Set<String> linkedDocs = new HashSet<String>();
+                Set<String> inboundLinks = new HashSet<String>();
+                Map<String, ReversibleScoreMap<String>> outboundHosts = new HashMap<String, ReversibleScoreMap<String>>();
                 int hostsize = 0;
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                     String u = (String) doc.getFieldValue(YaCySchema.sku.name());
                     hostsize++;
                     if (u.startsWith(path)) storedDocs.add(u);
-                    Collection<Object> urlstub = doc.getFieldValues(YaCySchema.inboundlinks_urlstub_txt.name());
-                    Collection<String> urlprot = urlstub == null ? null : SolrConfiguration.indexedList2protocolList(doc.getFieldValues(YaCySchema.inboundlinks_protocol_sxt.name()), urlstub.size());
-                    if (urlprot != null && urlstub != null) {
-                        assert urlprot.size() == urlstub.size();
-                        Object[] urlprota = urlprot.toArray();
-                        Object[] urlstuba = urlstub.toArray();
-                        for (int i = 0; i < urlprota.length; i++) {
-                            u = ((String) urlprota[i]) + "://" + ((String) urlstuba[i]);
-                            int hp = u.indexOf('#');
-                            if (hp > 0) u = u.substring(0, hp);
-                            if (u.startsWith(path) && !storedDocs.contains(u)) linkedDocs.add(u);
-                        }
+                    // collect inboundlinks to browse the host
+                    Iterator<String> links = SolrConfiguration.getLinks(doc, true);
+                    while (links.hasNext()) {
+                        u = links.next();
+                        if (u.startsWith(path) && !storedDocs.contains(u)) inboundLinks.add(u);
+                    }
+                    
+                    // collect outboundlinks to browse to the outbound
+                    links = SolrConfiguration.getLinks(doc, false);
+                    while (links.hasNext()) {
+                        u = links.next();
+                        try {
+                            MultiProtocolURI mu = new MultiProtocolURI(u);
+                            if (mu.getHost() != null) {
+                                ReversibleScoreMap<String> lks = outboundHosts.get(mu.getHost());
+                                if (lks == null) {
+                                    lks = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+                                    outboundHosts.put(mu.getHost(), lks);
+                                }
+                                lks.set(u, u.length());
+                            }
+                        } catch (MalformedURLException e) {}
                     }
                 }
                 // now combine both lists into one
                 Map<String, Boolean> files = new HashMap<String, Boolean>();
                 for (String u: storedDocs) files.put(u, true);
-                for (String u: linkedDocs) if (!storedDocs.contains(u)) files.put(u, false);
+                for (String u: inboundLinks) if (!storedDocs.contains(u)) files.put(u, false);
                 
                 // distinguish files and folders
                 Map<String, Object> list = new TreeMap<String, Object>();
@@ -235,6 +253,47 @@ public class HostBrowser {
                 prop.put("files_hostsize", hostsize);
                 prop.put("files_subpathsize", storedDocs.size());
                 prop.put("files", 1);
+
+                // generate inbound-links table
+                StructureEntry struct = sb.webStructure.incomingReferences(hosthash);
+                if (struct != null && struct.references.size() > 0) {
+                    maxcount = 200;
+                    ReversibleScoreMap<String> score = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+                    for (Map.Entry<String, Integer> entry: struct.references.entrySet()) score.set(entry.getKey(), entry.getValue());
+                    c = 0;
+                    Iterator<String> i = score.keys(false);
+                    while (i.hasNext() && c < maxcount) {
+                        host = i.next();
+                        prop.put("inbound_list_" + c + "_host", sb.webStructure.hostHash2hostName(host));
+                        prop.put("inbound_list_" + c + "_count", score.get(host));
+                        c++;
+                    }
+                    prop.put("inbound_list", c);
+                    prop.put("inbound", 1);
+                } else {
+                    prop.put("inbound", 0);
+                }
+                
+                // generate outbound-links table
+                if (outboundHosts.size() > 0) {
+                    maxcount = 200;
+                    ReversibleScoreMap<String> score = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+                    for (Map.Entry<String, ReversibleScoreMap<String>> entry: outboundHosts.entrySet()) score.set(entry.getKey(), entry.getValue().size());
+                    c = 0;
+                    Iterator<String> i = score.keys(false);
+                    while (i.hasNext() && c < maxcount) {
+                        host = i.next();
+                        prop.put("outbound_list_" + c + "_host", host);
+                        prop.put("outbound_list_" + c + "_count", score.get(host));
+                        prop.put("outbound_list_" + c + "_link", outboundHosts.get(host).getMinKey());
+                        c++;
+                    }
+                    prop.put("outbound_list", c);
+                    prop.put("outbound", 1);
+                } else {
+                    prop.put("outbound", 0);
+                }
+                
             } catch (Throwable e) {
                 Log.logException(e);
             }

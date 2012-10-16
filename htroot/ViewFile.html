@@ -80,8 +80,9 @@ function updatepage(str) {
         <dl>
           <dt>URL:</dt>
           <dd>
-            <input type="text" size="60" name="url" value="#[url]#" />
-            <input type="submit" name="show" value="Show" />
+            <input type="text" size="60" name="url" id="url" value="#[url]#" />
+            <input type="submit" name="show" value="Show Metadata" />
+            <input type="button" value="Browse Host" onClick="location.href='/HostBrowser.html?path=' + document.getElementById('url').value" />
             <div id="searchresults"></div>
           </dd>
         </dl>

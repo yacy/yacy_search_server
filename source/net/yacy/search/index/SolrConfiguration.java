@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -824,6 +825,25 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (iplist == null) return a;
         for (Object ip: iplist) a.set(Integer.parseInt(((String) ip).substring(0, 3)), ((String) ip).substring(4));
         return a;
+    }
+    
+    public static Iterator<String> getLinks(SolrDocument doc, boolean inbound) {
+        Collection<Object> urlstub = doc.getFieldValues((inbound ? YaCySchema.inboundlinks_urlstub_txt :  YaCySchema.outboundlinks_urlstub_txt).name());
+        Collection<String> urlprot = urlstub == null ? null : indexedList2protocolList(doc.getFieldValues((inbound ? YaCySchema.inboundlinks_protocol_sxt : YaCySchema.outboundlinks_protocol_sxt).name()), urlstub.size());
+        String u;
+        LinkedHashSet<String> list = new LinkedHashSet<String>();
+        if (urlprot != null && urlstub != null) {
+            assert urlprot.size() == urlstub.size();
+            Object[] urlprota = urlprot.toArray();
+            Object[] urlstuba = urlstub.toArray();
+            for (int i = 0; i < urlprota.length; i++) {
+                u = ((String) urlprota[i]) + "://" + ((String) urlstuba[i]);
+                int hp = u.indexOf('#');
+                if (hp > 0) u = u.substring(0, hp);
+                list.add(u);
+            }
+        }
+        return list.iterator();
     }
     
     /**
