@@ -446,9 +446,7 @@ public final class FileUtils {
 
     private final static Pattern escaped_equal = Pattern.compile("\\=", Pattern.LITERAL);
     private final static Pattern escaped_newline = Pattern.compile("\\n", Pattern.LITERAL);
-    private final static Pattern escaped_backslash = Pattern.compile("\\", Pattern.LITERAL);
-
-    //private final static Pattern escaped_backslashbackslash = Pattern.compile("\\\\", Pattern.LITERAL);
+    private final static Pattern escaped_backslash = Pattern.compile(Pattern.quote("\\"), Pattern.LITERAL);
 
     public static ConcurrentHashMap<String, String> table(final Iterator<String> li) {
         String line;
