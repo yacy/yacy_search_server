@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.date.MicroDate;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.SolrType;
@@ -123,7 +124,7 @@ public class URIMetadataNode implements URIMetadata {
     }
 
     @SuppressWarnings("unchecked")
-    private ArrayList<String> getArrayList(YaCySchema field) {
+    private ArrayList<String> getStringList(YaCySchema field) {
         assert field.isMultiValued();
         assert field.getType() == SolrType.string || field.getType() == SolrType.text_general;
         Object r = this.doc.getFieldValue(field.name());
@@ -133,6 +134,20 @@ public class URIMetadataNode implements URIMetadata {
         }
         ArrayList<String> a = new ArrayList<String>(1);
         a.add((String) r);
+        return a;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private ArrayList<Integer> getIntList(YaCySchema field) {
+        assert field.isMultiValued();
+        assert field.getType() == SolrType.integer;
+        Object r = this.doc.getFieldValue(field.name());
+        if (r == null) return new ArrayList<Integer>(0);
+        if (r instanceof ArrayList) {
+            return (ArrayList<Integer>) r;
+        }
+        ArrayList<Integer> a = new ArrayList<Integer>(1);
+        a.add((Integer) r);
         return a;
     }
 
@@ -165,7 +180,7 @@ public class URIMetadataNode implements URIMetadata {
 
     @Override
     public String dc_title() {
-        ArrayList<String> a = getArrayList(YaCySchema.title);
+        ArrayList<String> a = getStringList(YaCySchema.title);
         if (a == null || a.size() == 0) return "";
         return a.get(0);
     }
@@ -233,7 +248,7 @@ public class URIMetadataNode implements URIMetadata {
 
     @Override
     public char doctype() {
-        ArrayList<String> a = getArrayList(YaCySchema.content_type);
+        ArrayList<String> a = getStringList(YaCySchema.content_type);
         if (a == null || a.size() == 0) return Response.docType(url());
         return Response.docType(a.get(0));
     }
@@ -248,7 +263,7 @@ public class URIMetadataNode implements URIMetadata {
 
     @Override
     public byte[] referrerHash() {
-        ArrayList<String>  referrer = getArrayList(YaCySchema.referrer_id_txt);
+        ArrayList<String>  referrer = getStringList(YaCySchema.referrer_id_txt);
         if (referrer == null || referrer.size() == 0) return null;
         return ASCII.getBytes(referrer.get(0));
     }
@@ -319,6 +334,20 @@ public class URIMetadataNode implements URIMetadata {
         return this.appc;
     }
 
+    public int virtualAge() {
+        return MicroDate.microDateDays(moddate());
+    }
+
+    public int wordsintitle() {
+        ArrayList<Integer>  x = getIntList(YaCySchema.title_words_val);
+        if (x == null || x.size() == 0) return 0;
+        return x.get(0).intValue();
+    }
+
+    public int urllength() {
+        return getInt(YaCySchema.url_chars_i);
+    }
+
     @Override
     public String snippet() {
         return this.snippet;
@@ -326,7 +355,7 @@ public class URIMetadataNode implements URIMetadata {
 
     @Override
     public String[] collections() {
-        ArrayList<String> a = getArrayList(YaCySchema.collection_sxt);
+        ArrayList<String> a = getStringList(YaCySchema.collection_sxt);
         return a.toArray(new String[a.size()]);
     }
 

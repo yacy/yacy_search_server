@@ -517,7 +517,7 @@ public class SnippetProcess {
 
                     // place the result to the result vector
                     // apply post-ranking
-                    long ranking = Long.valueOf(SnippetProcess.this.rankingProcess.getOrder().cardinal(resultEntry.word()));
+                    long ranking = resultEntry.word() == null ? 0 : Long.valueOf(SnippetProcess.this.rankingProcess.getOrder().cardinal(resultEntry.word()));
                     ranking += postRanking(resultEntry, SnippetProcess.this.rankingProcess.getTopicNavigator(10));
                     resultEntry.ranking = ranking;
                     SnippetProcess.this.result.put(new ReverseElement<ResultEntry>(resultEntry, ranking)); // remove smallest in case of overflow

@@ -56,7 +56,6 @@ import net.yacy.document.Parser;
 import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.citation.CitationReferenceFactory;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -341,7 +340,7 @@ public class Segment {
         if (this.termIndex != null) this.termIndex.add(termHash, entry);
     }
 
-    public URIMetadata storeDocument(
+    public URIMetadataRow storeDocument(
             final DigestURI url,
             final DigestURI referrerURL,
             Date modDate,
@@ -368,7 +367,7 @@ public class Segment {
         // STORE URL TO LOADED-URL-DB
         if (modDate.getTime() > loadDate.getTime()) modDate = loadDate; // TODO: compare with modTime from responseHeader
         char docType = Response.docType(document.dc_format());
-        final URIMetadata metadata = new URIMetadataRow(
+        final URIMetadataRow metadata = new URIMetadataRow(
                 url,                                       // URL
                 dc_title,                                  // document description
                 document.dc_creator(),                     // author

@@ -148,6 +148,7 @@ import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -2588,8 +2589,7 @@ public final class Switchboard extends serverSwitch
         this.log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + url);
 
         // STORE WORD INDEX
-        URIMetadata newEntry = null;
-        newEntry =
+        URIMetadataRow newEntry =
             this.index.storeDocument(
                 url,
                 referrerURL,

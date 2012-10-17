@@ -76,7 +76,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     /**
 	 * object for termination of concurrent blocking queue processing
 	 */
-    public static final Row.Entry poisonRowEntry = urlEntryRow.newEntry();
+    protected static final Row.Entry poisonRowEntry = urlEntryRow.newEntry();
     
 	// static properties
     private static final int col_urlhash       =  0; // h 12 the url hash b64-encoded
@@ -114,7 +114,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
 
     private final Row.Entry entry;
 
-    public WordReferenceRow(
+    protected WordReferenceRow(
             final byte[]   urlHash,
             final int      urlLength,     // byte-length of complete URL
             final int      urlComps,      // number of path components
@@ -206,13 +206,11 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         this.entry = urlEntryRow.newEntry(external, true);
     }
 
-    public WordReferenceRow(final byte[] row) {
+    private WordReferenceRow(final byte[] row) {
         this.entry = urlEntryRow.newEntry(row);
     }
 
-    
-
-    public WordReferenceRow(final Row.Entry rentry) {
+    protected WordReferenceRow(final Row.Entry rentry) {
         // no cloning is necessary since there is no further manipulation after this initial instantiation
         this.entry = rentry;
     }
@@ -249,10 +247,6 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return MicroDate.reverseMicroDateDays((int) this.entry.getColLong(col_lastModified));
     }
 
-    public long freshUntil() {
-        return MicroDate.reverseMicroDateDays((int) this.entry.getColLong(col_freshUntil));
-    }
-
     @Override
     public int hitcount() {
         return (0xff & this.entry.getColByte(col_hitcount));
@@ -261,11 +255,6 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     @Override
     public Collection<Integer> positions() {
         return new ArrayList<Integer>(0);
-    }
-
-    public int position(final int p) {
-        assert p == 0 : "p = " + p;
-        return (int) this.entry.getColLong(col_posintext);
     }
 
     @Override

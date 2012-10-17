@@ -183,6 +183,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
 
     @Override
     public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
+        if (this.server == null) return;
         try {
             synchronized (this.server) {
                 this.server.add(solrdoc, this.commitWithinMs);

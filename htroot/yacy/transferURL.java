@@ -34,7 +34,6 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
-import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.EventChannel;
@@ -87,7 +86,7 @@ public final class transferURL {
             int doublecheck = 0;
             // read the urls from the other properties and store
             String urls;
-            URIMetadata lEntry;
+            URIMetadataRow lEntry;
             for (int i = 0; i < urlc; i++) {
                 serverCore.checkInterruption();
 

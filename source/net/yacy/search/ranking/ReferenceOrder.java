@@ -37,6 +37,7 @@ import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
@@ -254,11 +255,43 @@ public class ReferenceOrder {
            + ((flags.get(Condenser.flag_cat_hasaudio))     ? 255 << this.ranking.coeff_cathasaudio        : 0)
            + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << this.ranking.coeff_cathasvideo        : 0)
            + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << this.ranking.coeff_cathasapp          : 0)
-           + ((ByteBuffer.equals(t.getLanguage(), this.language)) ? 255 << this.ranking.coeff_language           : 0)
+           + ((ByteBuffer.equals(t.getLanguage(), this.language)) ? 255 << this.ranking.coeff_language    : 0)
            + ((DigestURI.probablyRootURL(t.urlhash())) ?  15 << this.ranking.coeff_urllength          : 0);
 
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
 
+        return r; // the higher the number the better the ranking.
+    }
+    
+    public long cardinal(final URIMetadataNode t) {
+        //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
+        // the normalizedEntry must be a normalized indexEntry
+        final Bitfield flags = t.flags();
+        assert t != null;
+        assert this.ranking != null;
+        final long r =
+             ((256 - DigestURI.domLengthNormalized(t.hash())) << this.ranking.coeff_domlength)
+           + ((this.ranking.coeff_ybr > 12) ? ((256 - (BlockRank.ranking(t.hash()) << 4)) << this.ranking.coeff_ybr) : 0)
+           + ((256 - (t.urllength() << 8)) << this.ranking.coeff_urllength)
+           + (t.virtualAge()  << this.ranking.coeff_date)
+           + (t.wordsintitle()<< this.ranking.coeff_wordsintitle)
+           + (t.wordCount()   << this.ranking.coeff_wordsintext)
+           + (t.llocal()      << this.ranking.coeff_llocal)
+           + (t.lother()      << this.ranking.coeff_lother)
+           + ((this.ranking.coeff_authority > 12) ? (authority(t.hosthash()) << this.ranking.coeff_authority) : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_identifier))  ? 255 << this.ranking.coeff_appurl             : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_title))       ? 255 << this.ranking.coeff_app_dc_title       : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_creator))     ? 255 << this.ranking.coeff_app_dc_creator     : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_subject))     ? 255 << this.ranking.coeff_app_dc_subject     : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_description)) ? 255 << this.ranking.coeff_app_dc_description : 0)
+           + ((flags.get(WordReferenceRow.flag_app_emphasized))     ? 255 << this.ranking.coeff_appemph            : 0)
+           + ((flags.get(Condenser.flag_cat_indexof))      ? 255 << this.ranking.coeff_catindexof         : 0)
+           + ((flags.get(Condenser.flag_cat_hasimage))     ? 255 << this.ranking.coeff_cathasimage        : 0)
+           + ((flags.get(Condenser.flag_cat_hasaudio))     ? 255 << this.ranking.coeff_cathasaudio        : 0)
+           + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << this.ranking.coeff_cathasvideo        : 0)
+           + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << this.ranking.coeff_cathasapp          : 0)
+           + ((ByteBuffer.equals(t.language(), this.language)) ? 255 << this.ranking.coeff_language    : 0)
+           + ((DigestURI.probablyRootURL(t.hash())) ?  15 << this.ranking.coeff_urllength          : 0);
         return r; // the higher the number the better the ranking.
     }
 

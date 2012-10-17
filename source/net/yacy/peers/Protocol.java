@@ -78,7 +78,6 @@ import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
@@ -88,7 +87,6 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
-import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -767,7 +765,7 @@ public final class Protocol
 
         // insert results to containers
         int term = count;
-        for ( final URIMetadata urlEntry : result.links ) {
+        for ( final URIMetadataRow urlEntry : result.links ) {
             if ( term-- <= 0 ) {
                 break; // do not process more that requested (in case that evil peers fill us up with rubbish)
             }
@@ -883,7 +881,7 @@ public final class Protocol
         public Map<byte[], Integer> indexcount; //
         public long searchtime; // time that the peer actually spent to create the result
         public String[] references; // search hints, the top-words
-        public List<URIMetadata> links; // LURLs of search
+        public List<URIMetadataRow> links; // LURLs of search
         public Map<byte[], String> indexabstract; // index abstracts, a collection of url-hashes per word
 
         public SearchResult(
@@ -1003,14 +1001,14 @@ public final class Protocol
                 }
             }
             this.references = resultMap.get("references").split(",");
-            this.links = new ArrayList<URIMetadata>(this.urlcount);
+            this.links = new ArrayList<URIMetadataRow>(this.urlcount);
             for ( int n = 0; n < this.urlcount; n++ ) {
                 // get one single search result
                 final String resultLine = resultMap.get("resource" + n);
                 if ( resultLine == null ) {
                     continue;
                 }
-                final URIMetadata urlEntry = URIMetadataRow.importEntry(resultLine);
+                final URIMetadataRow urlEntry = URIMetadataRow.importEntry(resultLine);
                 if ( urlEntry == null ) {
                     continue;
                 }
@@ -1026,8 +1024,6 @@ public final class Protocol
             final long time,
             final Seed target,
             final Blacklist blacklist) {
-
-        final HandleSet wordhashes = event.getQuery().query_include_hashes;
 
         if (event.getQuery().queryString == null || event.getQuery().queryString.length() == 0) {
             return -1; // we cannot query solr only with word hashes, there is no clear text string
@@ -1064,14 +1060,9 @@ public final class Protocol
         }
 
         // evaluate result
+        List<URIMetadataNode> container = new ArrayList<URIMetadataNode>();
 		if (docList.size() > 0) {// create containers
             Network.log.logInfo("SEARCH (solr), returned " + docList.size() + " documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName()))) ;
-            final List<ReferenceContainer<WordReference>> container = new ArrayList<ReferenceContainer<WordReference>>(wordhashes.size());
-            for (byte[] hash: wordhashes) {
-                try {
-                    container.add(ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, hash, count));
-                } catch (SpaceExceededException e) {} // throws SpaceExceededException
-            }
 
         	int term = count;
             for (final SolrDocument doc: docList) {
@@ -1122,27 +1113,17 @@ public final class Protocol
                     }
                 }
 
-                // we create virtual word references here which are necessary to feed search results into retrieval process
-                Reference entry = new WordReferenceVars(urlEntry);
-
                 // add the url entry to the word indexes
-                for ( final ReferenceContainer<WordReference> c : container ) {
-                    try {
-                        c.add(entry);
-                    } catch ( final SpaceExceededException e ) {
-                        Log.logException(e);
-                        break;
-                    }
-                }
+                container.add(urlEntry);
             }
 
             if (localsearch) {
-                event.rankingProcess.add(container.get(0), true, "localpeer", docList.size(), time);
+                event.rankingProcess.add(container, true, "localpeer", docList.size());
                 event.rankingProcess.addFinalize();
                 event.rankingProcess.addExpectedRemoteReferences(-count);
                 Network.log.logInfo("local search (solr): localpeer sent " + container.get(0).size() + "/" + docList.size() + " references");
             } else {
-                event.rankingProcess.add(container.get(0), false, target.getName() + "/" + target.hash, docList.size(), time);
+                event.rankingProcess.add(container, false, target.getName() + "/" + target.hash, docList.size());
                 event.rankingProcess.addFinalize();
                 event.rankingProcess.addExpectedRemoteReferences(-count);
                 Network.log.logInfo("remote search (solr): peer " + target.getName() + " sent " + container.get(0).size() + "/" + docList.size() + " references");

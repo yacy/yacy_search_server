@@ -30,6 +30,7 @@ import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.BlockingQueue;
@@ -67,6 +68,7 @@ import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
+import net.yacy.kelondro.util.Bitfield;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.FilterEngine;
@@ -97,9 +99,9 @@ public final class RWIProcess extends Thread
     private int remote_indexCount;
     private int remote_peerCount;
     private int local_indexCount;
-    private final AtomicInteger maxExpectedRemoteReferences, expectedRemoteReferences,
-        receivedRemoteReferences;
+    private final AtomicInteger maxExpectedRemoteReferences, expectedRemoteReferences, receivedRemoteReferences;
     private final WeakPriorityBlockingQueue<WordReferenceVars> stack;
+    private final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack;
     private final AtomicInteger feedersAlive, feedersTerminated;
     private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     //private final HandleSet handover; // key = urlhash; used for double-check of urls that had been handed over to search process
@@ -126,7 +128,9 @@ public final class RWIProcess extends Thread
         // sortorder: 0 = hash, 1 = url, 2 = ranking
         this.addRunning = true;
         this.localSearchInclusion = null;
-        this.stack = new WeakPriorityBlockingQueue<WordReferenceVars>(query.snippetCacheStrategy == null || query.snippetCacheStrategy == CacheStrategy.CACHEONLY ? max_results_preparation_special : max_results_preparation, false);
+        int stackMaxsize = query.snippetCacheStrategy == null || query.snippetCacheStrategy == CacheStrategy.CACHEONLY ? max_results_preparation_special : max_results_preparation;
+        this.stack = new WeakPriorityBlockingQueue<WordReferenceVars>(stackMaxsize, false);
+        this.nodeStack = new WeakPriorityBlockingQueue<URIMetadataNode>(stackMaxsize, false);
         this.doubleDomCache = new ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>>();
         this.query = query;
         this.order = order;
@@ -238,25 +242,18 @@ public final class RWIProcess extends Thread
     public void addFinalize() {
         this.addRunning = false;
     }
-
+    
     public void add(
-        final ReferenceContainer<WordReference> index,
+        final List<URIMetadataNode> index,
         final boolean local,
         final String resourceName,
-        final int fullResource,
-        final long maxtime) {
-        // we collect the urlhashes and construct a list with urlEntry objects
-        // attention: if minEntries is too high, this method will not terminate within the maxTime
-        //Log.logInfo("RWIProcess", "added a container, size = " + index.size());
+        final int fullResource) {
 
         this.addRunning = true;
-
         assert (index != null);
-        if ( index.isEmpty() ) {
-            return;
-        }
+        if (index.isEmpty()) return;
 
-        if ( !local ) {
+        if (!local) {
             assert fullResource >= 0 : "fullResource = " + fullResource;
             this.remote_resourceSize += fullResource;
             this.remote_peerCount++;
@@ -265,7 +262,6 @@ public final class RWIProcess extends Thread
         long timer = System.currentTimeMillis();
 
         // normalize entries
-        final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index, maxtime);
         int is = index.size();
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
             this.query.id(true),
@@ -279,77 +275,37 @@ public final class RWIProcess extends Thread
 
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
-        final boolean nav_hosts =
-            this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts", 0) >= 0;
+        final boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts", 0) >= 0;
 
         // apply all constraints
-        long timeout = System.currentTimeMillis() + maxtime;
         try {
-            WordReferenceVars iEntry;
             final String pattern = this.query.urlMask.pattern();
             final boolean httpPattern = pattern.equals("http://.*");
-            final boolean noHttpButProtocolPattern =
-                pattern.equals("https://.*")
-                    || pattern.equals("ftp://.*")
-                    || pattern.equals("smb://.*")
-                    || pattern.equals("file://.*");
-            long remaining;
-            pollloop: while ( true ) {
-                remaining = timeout - System.currentTimeMillis();
-                if (remaining <= 0) {
-                    Log.logWarning("RWIProcess", "terminated 'add' loop before poll time-out = " + remaining + ", decodedEntries.size = " + decodedEntries.size());
-                    break;
-                }
-                iEntry = decodedEntries.poll(remaining, TimeUnit.MILLISECONDS);
-                if ( iEntry == null ) {
-                    Log.logWarning("RWIProcess", "terminated 'add' loop after poll time-out = " + remaining + ", decodedEntries.size = " + decodedEntries.size());
-                    break pollloop;
-                }
-                if ( iEntry == WordReferenceVars.poison ) {
-                    break pollloop;
-                }
-                assert (iEntry.urlhash().length == index.row().primaryKeyLength);
-                //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
+            final boolean noHttpButProtocolPattern = pattern.equals("https://.*") || pattern.equals("ftp://.*") || pattern.equals("smb://.*") || pattern.equals("file://.*");
+            pollloop: for (URIMetadataNode iEntry: index) {
 
                 // doublecheck for urls
-                if (this.urlhashes.has(iEntry.urlhash())) {
+                if (this.urlhashes.has(iEntry.hash())) {
                     continue pollloop;
                 }
 
                 // increase flag counts
                 for ( int j = 0; j < 32; j++ ) {
-                    if ( iEntry.flags().get(j) ) {
-                        this.flagcount[j]++;
-                    }
+                    if (iEntry.flags().get(j)) this.flagcount[j]++;
                 }
 
                 // check constraints
-                if ( !testFlags(iEntry) ) {
-                    continue pollloop;
-                }
+                Bitfield flags = iEntry.flags();
+                if (!testFlags(flags)) continue pollloop;
 
                 // check document domain
-                if ( this.query.contentdom.getCode() > 0 ) {
-                    if ( (this.query.contentdom == ContentDomain.AUDIO)
-                        && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio))) ) {
-                        continue pollloop;
-                    }
-                    if ( (this.query.contentdom == ContentDomain.VIDEO)
-                        && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo))) ) {
-                        continue pollloop;
-                    }
-                    if ( (this.query.contentdom == ContentDomain.IMAGE)
-                        && (!(iEntry.flags().get(Condenser.flag_cat_hasimage))) ) {
-                        continue pollloop;
-                    }
-                    if ( (this.query.contentdom == ContentDomain.APP)
-                        && (!(iEntry.flags().get(Condenser.flag_cat_hasapp))) ) {
-                        continue pollloop;
-                    }
+                if (this.query.contentdom.getCode() > 0 &&
+                    ((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Condenser.flag_cat_hasaudio))) || 
+                     (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Condenser.flag_cat_hasvideo))) ||
+                     (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Condenser.flag_cat_hasimage))) ||
+                     (this.query.contentdom == ContentDomain.APP && !(flags.get(Condenser.flag_cat_hasapp))))) {
+                    continue pollloop;
                 }
-
-                // count domZones
-                //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
 
                 // check site constraints
                 final String hosthash = iEntry.hosthash();
@@ -358,10 +314,172 @@ public final class RWIProcess extends Thread
                         continue pollloop;
                     }
                 } else {
-                    if ( !hosthash.equals(this.query.sitehash) ) {
-                        // filter out all domains that do not match with the site constraint
+                    // filter out all domains that do not match with the site constraint
+                    if (!hosthash.equals(this.query.sitehash)) continue pollloop;
+                }
+
+                // collect host navigation information (even if we have only one; this is to provide a switch-off button)
+                if (this.query.navigators.isEmpty() && (nav_hosts || this.query.urlMask_isCatchall)) {
+                    this.hostNavigator.inc(hosthash);
+                    this.hostResolver.put(hosthash, iEntry.hash());
+                }
+
+                // check protocol
+                if ( !this.query.urlMask_isCatchall ) {
+                    final boolean httpFlagSet = DigestURI.flag4HTTPset(iEntry.hash());
+                    if ( httpPattern && !httpFlagSet ) {
                         continue pollloop;
                     }
+                    if ( noHttpButProtocolPattern && httpFlagSet ) {
+                        continue pollloop;
+                    }
+                }
+
+                // check vocabulary constraint
+                String subject = YaCyMetadata.hashURI(iEntry.hash());
+                Resource resource = JenaTripleStore.getResource(subject);
+                if (this.query.metatags != null && !this.query.metatags.isEmpty()) {
+                    // all metatags must appear in the tags list
+                    for (Tagging.Metatag metatag: this.query.metatags) {
+                        Iterator<RDFNode> ni = JenaTripleStore.getObjects(resource, metatag.getPredicate());
+                        if (!ni.hasNext()) continue pollloop;
+                        String tags = ni.next().toString();
+                        if (tags.indexOf(metatag.getObject()) < 0) continue pollloop;
+                    }
+                }
+
+                // add navigators using the triplestore
+                for (Map.Entry<String, String> v: this.taggingPredicates.entrySet()) {
+                    Iterator<RDFNode> ni = JenaTripleStore.getObjects(resource, v.getValue());
+                    while (ni.hasNext()) {
+                        String[] tags = ni.next().toString().split(",");
+                        for (String tag: tags) {
+                            ScoreMap<String> voc = this.vocabularyNavigator.get(v.getKey());
+                            if (voc == null) {
+                                voc = new ConcurrentScoreMap<String>();
+                                this.vocabularyNavigator.put(v.getKey(), voc);
+                            }
+                            voc.inc(tag);
+                        }
+                    }
+                }
+
+                // finally extend the double-check and insert result to stack
+                this.urlhashes.putUnique(iEntry.hash());
+                rankingtryloop: while (true) {
+                    try {
+                        this.nodeStack.put(new ReverseElement<URIMetadataNode>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
+                        break rankingtryloop;
+                    } catch ( final ArithmeticException e ) {
+                        // this may happen if the concurrent normalizer changes values during cardinal computation
+                        continue rankingtryloop;
+                    }
+                }
+                // increase counter for statistics
+                if (local) this.local_indexCount++; else this.remote_indexCount++;
+            }
+        } catch ( final SpaceExceededException e ) {
+        }
+
+        //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
+            this.query.id(true),
+            SearchEvent.Type.PRESORT,
+            resourceName,
+            index.size(),
+            System.currentTimeMillis() - timer), false);
+    }
+
+    public void add(
+        final ReferenceContainer<WordReference> index,
+        final boolean local,
+        final String resourceName,
+        final int fullResource,
+        final long maxtime) {
+        // we collect the urlhashes and construct a list with urlEntry objects
+        // attention: if minEntries is too high, this method will not terminate within the maxTime
+        //Log.logInfo("RWIProcess", "added a container, size = " + index.size());
+
+        this.addRunning = true;
+        assert (index != null);
+        if (index.isEmpty()) return;
+        if (!local) {
+            assert fullResource >= 0 : "fullResource = " + fullResource;
+            this.remote_resourceSize += fullResource;
+            this.remote_peerCount++;
+        }
+        long timer = System.currentTimeMillis();
+
+        // normalize entries
+        final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index, maxtime);
+        int is = index.size();
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
+            this.query.id(true),
+            SearchEvent.Type.NORMALIZING,
+            resourceName,
+            is,
+            System.currentTimeMillis() - timer), false);
+        if (!local) this.receivedRemoteReferences.addAndGet(is);
+
+        // iterate over normalized entries and select some that are better than currently stored
+        timer = System.currentTimeMillis();
+        final boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts", 0) >= 0;
+
+        // apply all constraints
+        long timeout = System.currentTimeMillis() + maxtime;
+        try {
+            WordReferenceVars iEntry;
+            final String pattern = this.query.urlMask.pattern();
+            final boolean httpPattern = pattern.equals("http://.*");
+            final boolean noHttpButProtocolPattern = pattern.equals("https://.*") || pattern.equals("ftp://.*") || pattern.equals("smb://.*") || pattern.equals("file://.*");
+            long remaining;
+            pollloop: while ( true ) {
+                remaining = timeout - System.currentTimeMillis();
+                if (remaining <= 0) {
+                    Log.logWarning("RWIProcess", "terminated 'add' loop before poll time-out = " + remaining + ", decodedEntries.size = " + decodedEntries.size());
+                    break;
+                }
+                iEntry = decodedEntries.poll(remaining, TimeUnit.MILLISECONDS);
+                if (iEntry == null) {
+                    Log.logWarning("RWIProcess", "terminated 'add' loop after poll time-out = " + remaining + ", decodedEntries.size = " + decodedEntries.size());
+                    break pollloop;
+                }
+                if (iEntry == WordReferenceVars.poison) {
+                    break pollloop;
+                }
+                assert (iEntry.urlhash().length == index.row().primaryKeyLength);
+
+                // doublecheck for urls
+                if (this.urlhashes.has(iEntry.urlhash())) continue pollloop;
+
+                // increase flag counts
+                Bitfield flags = iEntry.flags();
+                for (int j = 0; j < 32; j++) {
+                    if (flags.get(j)) this.flagcount[j]++;
+                }
+
+                // check constraints
+                if (!testFlags(flags)) continue pollloop;
+
+                // check document domain
+                if (this.query.contentdom.getCode() > 0 &&
+                    ((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Condenser.flag_cat_hasaudio))) || 
+                     (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Condenser.flag_cat_hasvideo))) ||
+                     (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Condenser.flag_cat_hasimage))) ||
+                     (this.query.contentdom == ContentDomain.APP && !(flags.get(Condenser.flag_cat_hasapp))))) {
+                    continue pollloop;
+                }
+
+                // count domZones
+                //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
+
+                // check site constraints
+                final String hosthash = iEntry.hosthash();
+                if ( this.query.sitehash == null ) {
+                    if (this.query.siteexcludes != null && this.query.siteexcludes.contains(hosthash)) continue pollloop;
+                } else {
+                    // filter out all domains that do not match with the site constraint
+                    if (!hosthash.equals(this.query.sitehash)) continue pollloop;
                 }
 
                 // collect host navigation information (even if we have only one; this is to provide a switch-off button)
@@ -371,14 +489,10 @@ public final class RWIProcess extends Thread
                 }
 
                 // check protocol
-                if ( !this.query.urlMask_isCatchall ) {
+                if (!this.query.urlMask_isCatchall) {
                     final boolean httpFlagSet = DigestURI.flag4HTTPset(iEntry.urlHash);
-                    if ( httpPattern && !httpFlagSet ) {
-                        continue pollloop;
-                    }
-                    if ( noHttpButProtocolPattern && httpFlagSet ) {
-                        continue pollloop;
-                    }
+                    if (httpPattern && !httpFlagSet) continue pollloop;
+                    if (noHttpButProtocolPattern && httpFlagSet) continue pollloop;
                 }
 
                 // check vocabulary constraint
@@ -412,7 +526,7 @@ public final class RWIProcess extends Thread
 
                 // finally extend the double-check and insert result to stack
                 this.urlhashes.putUnique(iEntry.urlhash());
-                rankingtryloop: while ( true ) {
+                rankingtryloop: while (true) {
                     try {
                         this.stack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
                         break rankingtryloop;
@@ -422,12 +536,7 @@ public final class RWIProcess extends Thread
                     }
                 }
                 // increase counter for statistics
-                if ( local ) {
-                    this.local_indexCount++;
-                } else {
-                    this.remote_indexCount++;
-                    //}
-                }
+                if (local) this.local_indexCount++; else this.remote_indexCount++;
             }
             if (System.currentTimeMillis() >= timeout) Log.logWarning("RWIProcess", "rwi normalization ended with timeout = " + maxtime);
 
@@ -464,25 +573,19 @@ public final class RWIProcess extends Thread
             //(!this.remote || this.remote_indexCount > 0);
     }
 
-    private boolean testFlags(final WordReference ientry) {
-        if ( this.query.constraint == null ) {
-            return true;
-        }
+    private boolean testFlags(final Bitfield flags) {
+        if (this.query.constraint == null) return true;
         // test if ientry matches with filter
         // if all = true: let only entries pass that has all matching bits
         // if all = false: let all entries pass that has at least one matching bit
-        if ( this.query.allofconstraint ) {
+        if (this.query.allofconstraint) {
             for ( int i = 0; i < 32; i++ ) {
-                if ( (this.query.constraint.get(i)) && (!ientry.flags().get(i)) ) {
-                    return false;
-                }
+                if ((this.query.constraint.get(i)) && (!flags.get(i))) return false;
             }
             return true;
         }
-        for ( int i = 0; i < 32; i++ ) {
-            if ( (this.query.constraint.get(i)) && (ientry.flags().get(i)) ) {
-                return true;
-            }
+        for (int i = 0; i < 32; i++) {
+            if ((this.query.constraint.get(i)) && (flags.get(i))) return true;
         }
         return false;
     }
@@ -493,17 +596,15 @@ public final class RWIProcess extends Thread
         return this.localSearchInclusion;
     }
 
-    private WeakPriorityBlockingQueue.Element<WordReferenceVars> takeRWI(
-        final boolean skipDoubleDom,
-        final long waitingtime) {
+    private URIMetadataNode takeRWI(final boolean skipDoubleDom, final long waitingtime) {
 
         // returns from the current RWI list the best entry and removes this entry from the list
         WeakPriorityBlockingQueue<WordReferenceVars> m;
         WeakPriorityBlockingQueue.Element<WordReferenceVars> rwi = null;
+        WeakPriorityBlockingQueue.Element<URIMetadataNode> page;
 
         // take one entry from the stack if there are entries on that stack or the feeding is not yet finished
         try {
-            //System.out.println("stack.poll: feeders = " + this.feeders + ", stack.sizeQueue = " + stack.sizeQueue());
             int loops = 0; // a loop counter to terminate the reading if all the results are from the same domain
             // wait some time if we did not get so much remote results so far to get a better ranking over remote results
             // we wait at most 30 milliseconds to get a maximum total waiting time of 300 milliseconds for 10 results
@@ -514,30 +615,26 @@ public final class RWIProcess extends Thread
             }
             // loop as long as we can expect that we should get more results
             final long timeout = System.currentTimeMillis() + waitingtime;
-            while ( ((!feedingIsFinished() && this.addRunning) || this.stack.sizeQueue() > 0) &&
-                   (this.query.itemsPerPage < 1 ||
-                    loops++ < this.query.itemsPerPage ||
-                    (loops > 1000 && !this.doubleDomCache.isEmpty())) ) {
+            while (((!feedingIsFinished() && this.addRunning) || this.stack.sizeQueue() > 0) &&
+                   (this.query.itemsPerPage < 1 || loops++ < this.query.itemsPerPage || (loops > 1000 && !this.doubleDomCache.isEmpty()))) {
+                page = null;
+                rwi = null;
                 if ( waitingtime <= 0 ) {
-                    rwi = this.addRunning ? this.stack.poll(waitingtime) : this.stack.poll();
+                    page = this.addRunning ? this.nodeStack.poll(waitingtime) : this.nodeStack.poll();
+                    if (page == null) rwi = this.addRunning ? this.stack.poll(waitingtime) : this.stack.poll();
                 } else {
                     timeoutloop: while ( System.currentTimeMillis() < timeout ) {
-                        if ( feedingIsFinished() && this.stack.sizeQueue() == 0 ) {
-                            break timeoutloop;
-                        }
+                        if (feedingIsFinished() && this.stack.sizeQueue() == 0) break timeoutloop;
+                        page = this.nodeStack.poll(50);
+                        if (page != null) break timeoutloop;
                         rwi = this.stack.poll(50);
-                        if ( rwi != null ) {
-                            break timeoutloop;
-                        }
+                        if (rwi != null) break timeoutloop;
                     }
                 }
-                if ( rwi == null ) {
-                    //Log.logWarning("RWIProcess", "terminated takeRWI with rwi == null");
-                    break;
-                }
-                if ( !skipDoubleDom ) {
-                    //System.out.println("!skipDoubleDom");
-                    return rwi;
+                if (page != null) return page.getElement();
+                if (rwi == null) break;
+                if (!skipDoubleDom) {
+                    return this.query.getSegment().fulltext().getMetadata(rwi.getElement(), rwi.getWeight());
                 }
 
                 // check doubledom
@@ -550,7 +647,7 @@ public final class RWIProcess extends Thread
                             // first appearance of dom. we create an entry to signal that one of that domain was already returned
                             m = new WeakPriorityBlockingQueue<WordReferenceVars>(this.query.snippetCacheStrategy == null || this.query.snippetCacheStrategy == CacheStrategy.CACHEONLY ? max_results_preparation_special : max_results_preparation, false);
                             this.doubleDomCache.put(hosthash, m);
-                            return rwi;
+                            return this.query.getSegment().fulltext().getMetadata(rwi.getElement(), rwi.getWeight());
                         }
                         // second appearances of dom
                         m.put(rwi);
@@ -577,27 +674,17 @@ public final class RWIProcess extends Thread
                 Log.logException(e);
                 continue; // not the best solution...
             }
-            if ( m == null ) {
-                continue;
-            }
-            if ( m.isEmpty() ) {
-                continue;
-            }
-            if ( bestEntry == null ) {
+            if (m == null) continue;
+            if (m.isEmpty()) continue;
+            if (bestEntry == null) {
                 bestEntry = m.peek();
                 continue;
             }
             o = m.peek();
-            if ( o == null ) {
-                continue;
-            }
-            if ( o.getWeight() < bestEntry.getWeight() ) {
-                bestEntry = o;
-            }
+            if (o == null) continue;
+            if (o.getWeight() < bestEntry.getWeight()) bestEntry = o;
         }
-        if ( bestEntry == null ) {
-            return null;
-        }
+        if (bestEntry == null) return null;
 
         // finally remove the best entry from the doubledom cache
         m = this.doubleDomCache.get(bestEntry.getElement().hosthash());
@@ -611,7 +698,8 @@ public final class RWIProcess extends Thread
                 }
             }
         }
-        return bestEntry;
+        if (bestEntry == null) return null;
+        return this.query.getSegment().fulltext().getMetadata(bestEntry.getElement(), bestEntry.getWeight());
     }
 
     /**
@@ -631,18 +719,8 @@ public final class RWIProcess extends Thread
         long timeleft;
         while ( (timeleft = timeout - System.currentTimeMillis()) > 0 ) {
             //System.out.println("timeleft = " + timeleft);
-            final WeakPriorityBlockingQueue.Element<WordReferenceVars> obrwi = takeRWI(skipDoubleDom, timeleft);
-            if ( obrwi == null ) {
-                return null; // all time was already wasted in takeRWI to get another element
-            }
-            final URIMetadataNode page = this.query.getSegment().fulltext().getMetadata(obrwi.getElement(), obrwi.getWeight());
-            if ( page == null ) {
-                try {
-                    this.misses.putUnique(obrwi.getElement().urlhash());
-                } catch ( final SpaceExceededException e ) {
-                }
-                continue;
-            }
+            final URIMetadataNode page = takeRWI(skipDoubleDom, timeleft);
+            if (page == null) return null; // all time was already wasted in takeRWI to get another element
 
             if ( !this.query.urlMask_isCatchall ) {
                 // check url mask
@@ -650,13 +728,6 @@ public final class RWIProcess extends Thread
                     this.sortout++;
                     continue;
                 }
-
-                // in case that we do not have e catchall filter for urls
-                // we must also construct the domain navigator here
-                //if (query.sitehash == null) {
-                //    this.hostNavigator.inc(UTF8.String(urlhash, 6, 6));
-                //    this.hostResolver.put(UTF8.String(urlhash, 6, 6), UTF8.String(urlhash));
-                //}
             }
 
             // check for more errors
@@ -666,16 +737,14 @@ public final class RWIProcess extends Thread
             }
 
             // check content domain
-            if ((this.query.contentdom.getCode() > 0 &&
-                page.url().getContentDomain() != this.query.contentdom) ||
-                (this.query.contentdom == Classification.ContentDomain.TEXT &&
-                page.url().getContentDomain().getCode() > 0)) {
+            if ((this.query.contentdom.getCode() > 0 && page.url().getContentDomain() != this.query.contentdom) ||
+                (this.query.contentdom == Classification.ContentDomain.TEXT && page.url().getContentDomain().getCode() > 0)) {
                 this.sortout++;
                 continue;
             }
 
             // Check for blacklist
-            if ( Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page) ) {
+            if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page)) {
                 this.sortout++;
                 continue;
             }
@@ -691,10 +760,8 @@ public final class RWIProcess extends Thread
 						.equals("")) {
 
 					FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
-
 					if (f != null) {
 						if (!f.isListed(page.url(), null)) {
-
 							this.sortout++;
 							continue;
 						}

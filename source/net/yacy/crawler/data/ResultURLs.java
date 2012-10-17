@@ -97,17 +97,17 @@ public final class ResultURLs {
     }
 
     public static void stack(
-            final URIMetadata e,
+            final URIMetadata urlEntry,
             final byte[] initiatorHash,
             final byte[] executorHash,
             final EventOrigin stackType) {
         // assert initiatorHash != null; // null == proxy !
         assert executorHash != null;
-        if (e == null) { return; }
+        if (urlEntry == null) { return; }
         try {
             final Map<String, InitExecEntry> resultStack = getStack(stackType);
             if (resultStack != null) {
-                resultStack.put(ASCII.String(e.hash()), new InitExecEntry(initiatorHash, executorHash));
+                resultStack.put(ASCII.String(urlEntry.hash()), new InitExecEntry(initiatorHash, executorHash));
             }
         } catch (final Exception ex) {
             System.out.println("INTERNAL ERROR in newEntry/2: " + ex.toString());
@@ -116,7 +116,7 @@ public final class ResultURLs {
         try {
             final ScoreMap<String> domains = getDomains(stackType);
             if (domains != null) {
-                domains.inc(e.url().getHost());
+                domains.inc(urlEntry.url().getHost());
             }
         } catch (final Exception ex) {
             System.out.println("INTERNAL ERROR in newEntry/3: " + ex.toString());

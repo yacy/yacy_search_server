@@ -192,6 +192,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     }
     public WordReference word() {
         final Reference word = this.urlentry.word();
+        if (word == null) return null;
         if (word instanceof WordReferenceVars) return (WordReferenceVars) word;
         if (word instanceof WordReferenceRow) return (WordReferenceRow) word;
         assert word instanceof WordReferenceRow || word instanceof WordReferenceVars : word == null ? "word = null" : "type = " + word.getClass().getCanonicalName();
