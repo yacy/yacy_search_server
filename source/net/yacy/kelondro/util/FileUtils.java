@@ -463,7 +463,7 @@ public final class FileUtils {
                 // search for unescaped =
                 pos = line.indexOf('=', pos + 1);
             } while ( pos > 0 && line.charAt(pos - 1) == '\\' );
-            if ( pos > 0 ) {
+            if ( pos > 0 ) try {
                 String key = escaped_equal.matcher(line.substring(0, pos).trim()).replaceAll("=");
                 key = escaped_newline.matcher(key).replaceAll("\n");
                 key = escaped_backslash.matcher(key).replaceAll("\\");
@@ -471,6 +471,8 @@ public final class FileUtils {
                 value = value.replace("\\\\", "\\"); // does not work: escaped_backslashbackslash.matcher(value).replaceAll("\\");
                 //System.out.println("key = " + key + ", value = " + value);
                 props.put(key, value);
+            } catch (IndexOutOfBoundsException e) {
+                Log.logException(e);
             }
         }
         return props;
