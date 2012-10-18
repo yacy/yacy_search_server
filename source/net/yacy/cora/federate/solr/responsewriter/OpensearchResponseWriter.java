@@ -59,11 +59,11 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         };
     static final Set<String> SOLR_FIELDS = new HashSet<String>();
     static {
-        field2tag.put(YaCySchema.sku.name(), RSSMessage.Token.link.name());
-        field2tag.put(YaCySchema.publisher_t.name(), DublinCore.Publisher.getURIref());
-        field2tag.put(YaCySchema.author.name(), DublinCore.Creator.getURIref());
+        field2tag.put(YaCySchema.sku.getSolrFieldName(), RSSMessage.Token.link.name());
+        field2tag.put(YaCySchema.publisher_t.getSolrFieldName(), DublinCore.Publisher.getURIref());
+        field2tag.put(YaCySchema.author.getSolrFieldName(), DublinCore.Creator.getURIref());
         SOLR_FIELDS.addAll(field2tag.keySet());
-        for (YaCySchema field: extrafields) SOLR_FIELDS.add(field.name());
+        for (YaCySchema field: extrafields) SOLR_FIELDS.add(field.getSolrFieldName());
     }
 
     private String title;
@@ -167,34 +167,34 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                 }
 
                 // if the rule is not generic, use the specific here
-                if (YaCySchema.id.name().equals(fieldName)) {
+                if (YaCySchema.id.getSolrFieldName().equals(fieldName)) {
                     urlhash = value.stringValue();
                     solitaireTag(writer, RSSMessage.Token.guid.name(), urlhash, "isPermaLink=\"false\"");
                     continue;
                 }
-                if (YaCySchema.title.name().equals(fieldName)) {
+                if (YaCySchema.title.getSolrFieldName().equals(fieldName)) {
                     title = value.stringValue();
                     texts.add(title);
                     continue;
                 }
-                if (YaCySchema.last_modified.name().equals(fieldName)) {
+                if (YaCySchema.last_modified.getSolrFieldName().equals(fieldName)) {
                     Date d = new Date(Long.parseLong(value.stringValue()));
                     solitaireTag(writer, RSSMessage.Token.pubDate.name(), HeaderFramework.formatRFC1123(d));
                     continue;
                 }
-                if (YaCySchema.description.name().equals(fieldName)) {
+                if (YaCySchema.description.getSolrFieldName().equals(fieldName)) {
                     description = value.stringValue();
                     solitaireTag(writer, DublinCore.Description.getURIref(), description);
                     texts.add(description);
                     continue;
                 }
-                if (YaCySchema.text_t.name().equals(fieldName)) {
+                if (YaCySchema.text_t.getSolrFieldName().equals(fieldName)) {
                     texts.add(value.stringValue());
                     continue;
                 }
-                if (YaCySchema.h1_txt.name().equals(fieldName) || YaCySchema.h2_txt.name().equals(fieldName) ||
-                    YaCySchema.h3_txt.name().equals(fieldName) || YaCySchema.h4_txt.name().equals(fieldName) ||
-                    YaCySchema.h5_txt.name().equals(fieldName) || YaCySchema.h6_txt.name().equals(fieldName)) {
+                if (YaCySchema.h1_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h2_txt.getSolrFieldName().equals(fieldName) ||
+                    YaCySchema.h3_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h4_txt.getSolrFieldName().equals(fieldName) ||
+                    YaCySchema.h5_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h6_txt.getSolrFieldName().equals(fieldName)) {
                     // because these are multi-valued fields, there can be several of each
                     texts.add(value.stringValue());
                     continue;

@@ -56,9 +56,9 @@ public class JsonResponseWriter implements QueryResponseWriter {
     // define a list of simple YaCySchema -> json Token matchings
     private static final Map<String, String> field2tag = new HashMap<String, String>();
     static {
-        field2tag.put(YaCySchema.url_protocol_s.name(), "protocol");
-        field2tag.put(YaCySchema.host_s.name(), "host");
-        field2tag.put(YaCySchema.url_file_ext_s.name(), "ext");
+        field2tag.put(YaCySchema.url_protocol_s.getSolrFieldName(), "protocol");
+        field2tag.put(YaCySchema.host_s.getSolrFieldName(), "host");
+        field2tag.put(YaCySchema.url_file_ext_s.getSolrFieldName(), "ext");
     }
      
     private String title;
@@ -142,7 +142,7 @@ public class JsonResponseWriter implements QueryResponseWriter {
                 }
                 
                 // some special handling here
-                if (YaCySchema.sku.name().equals(fieldName)) {
+                if (YaCySchema.sku.getSolrFieldName().equals(fieldName)) {
                     String u = value.stringValue();
                     try {
                         url = new MultiProtocolURI(u);
@@ -151,31 +151,31 @@ public class JsonResponseWriter implements QueryResponseWriter {
                     } catch (MalformedURLException e) {}
                     continue;
                 }
-                if (YaCySchema.title.name().equals(fieldName)) {
+                if (YaCySchema.title.getSolrFieldName().equals(fieldName)) {
                     title = value.stringValue();
                     texts.add(title);
                     continue;
                 }
-                if (YaCySchema.description.name().equals(fieldName)) {
+                if (YaCySchema.description.getSolrFieldName().equals(fieldName)) {
                     description = value.stringValue();
                     texts.add(description);
                     continue;
                 }
-                if (YaCySchema.id.name().equals(fieldName)) {
+                if (YaCySchema.id.getSolrFieldName().equals(fieldName)) {
                     urlhash = value.stringValue();
                     solitaireTag(writer, "guid", urlhash);
                     continue;
                 }
-                if (YaCySchema.url_paths_sxt.name().equals(fieldName)) {
+                if (YaCySchema.url_paths_sxt.getSolrFieldName().equals(fieldName)) {
                     path.append('/').append(value.stringValue());
                     continue;
                 }
-                if (YaCySchema.last_modified.name().equals(fieldName)) {
+                if (YaCySchema.last_modified.getSolrFieldName().equals(fieldName)) {
                     Date d = new Date(Long.parseLong(value.stringValue()));
                     solitaireTag(writer, "pubDate", HeaderFramework.formatRFC1123(d));
                     continue;
                 }
-                if (YaCySchema.size_i.name().equals(fieldName)) {
+                if (YaCySchema.size_i.getSolrFieldName().equals(fieldName)) {
                     int size = value.stringValue() != null && value.stringValue().length() > 0 ? Integer.parseInt(value.stringValue()) : -1;
                     int sizekb = size / 1024;
                     int sizemb = sizekb / 1024;
@@ -183,13 +183,13 @@ public class JsonResponseWriter implements QueryResponseWriter {
                     solitaireTag(writer, "sizename", sizemb > 0 ? (Integer.toString(sizemb) + " mbyte") : sizekb > 0 ? (Integer.toString(sizekb) + " kbyte") : (Integer.toString(size) + " byte"));
                     continue;
                 }
-                if (YaCySchema.text_t.name().equals(fieldName)) {
+                if (YaCySchema.text_t.getSolrFieldName().equals(fieldName)) {
                     texts.add(value.stringValue());
                     continue;
                 }
-                if (YaCySchema.h1_txt.name().equals(fieldName) || YaCySchema.h2_txt.name().equals(fieldName) ||
-                    YaCySchema.h3_txt.name().equals(fieldName) || YaCySchema.h4_txt.name().equals(fieldName) ||
-                    YaCySchema.h5_txt.name().equals(fieldName) || YaCySchema.h6_txt.name().equals(fieldName)) {
+                if (YaCySchema.h1_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h2_txt.getSolrFieldName().equals(fieldName) ||
+                    YaCySchema.h3_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h4_txt.getSolrFieldName().equals(fieldName) ||
+                    YaCySchema.h5_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h6_txt.getSolrFieldName().equals(fieldName)) {
                     // because these are multi-valued fields, there can be several of each
                     texts.add(value.stringValue());
                     continue;
@@ -211,11 +211,11 @@ public class JsonResponseWriter implements QueryResponseWriter {
         writer.write(",\n\"navigation\":[\n");
 
         @SuppressWarnings("unchecked")
-        NamedList<Integer> hosts = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.host_s.name());
+        NamedList<Integer> hosts = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.host_s.getSolrFieldName());
         @SuppressWarnings("unchecked")
-        NamedList<Integer> exts = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_file_ext_s.name());
+        NamedList<Integer> exts = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_file_ext_s.getSolrFieldName());
         @SuppressWarnings("unchecked")
-        NamedList<Integer> prots = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_protocol_s.name());
+        NamedList<Integer> prots = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_protocol_s.getSolrFieldName());
         
         writer.write("{\"facetname\":\"filetypes\",\"displayname\":\"Filetypes\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[]},\n".toCharArray());
         writer.write("{\"facetname\":\"protocols\",\"displayname\":\"Protocol\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[]},\n".toCharArray());

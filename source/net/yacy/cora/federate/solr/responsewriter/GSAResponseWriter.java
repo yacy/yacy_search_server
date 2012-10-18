@@ -87,9 +87,9 @@ public class GSAResponseWriter implements QueryResponseWriter {
         };
     private static final Set<String> SOLR_FIELDS = new HashSet<String>();
     static {
-        field2tag.put(YaCySchema.language_s.name(), GSAToken.LANG.name());
+        field2tag.put(YaCySchema.language_s.getSolrFieldName(), GSAToken.LANG.name());
         SOLR_FIELDS.addAll(field2tag.keySet());
-        for (YaCySchema field: extrafields) SOLR_FIELDS.add(field.name());
+        for (YaCySchema field: extrafields) SOLR_FIELDS.add(field.getSolrFieldName());
     }
 
     private static class ResHead {
@@ -112,7 +112,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
         }
         public String toSolr() {
             if ("date".equals(this.action)) {
-                return YaCySchema.last_modified.name() + " " + (("D".equals(this.direction) ? "desc" : "asc"));
+                return YaCySchema.last_modified.getSolrFieldName() + " " + (("D".equals(this.direction) ? "desc" : "asc"));
             }
             return null;
         }
@@ -231,50 +231,50 @@ public class GSAResponseWriter implements QueryResponseWriter {
                 }
 
                 // if the rule is not generic, use the specific here
-                if (YaCySchema.id.name().equals(fieldName)) {
+                if (YaCySchema.id.getSolrFieldName().equals(fieldName)) {
                     urlhash = value.stringValue();
                     continue;
                 }
-                if (YaCySchema.sku.name().equals(fieldName)) {
+                if (YaCySchema.sku.getSolrFieldName().equals(fieldName)) {
                     OpensearchResponseWriter.solitaireTag(writer, GSAToken.U.name(), value.stringValue());
                     OpensearchResponseWriter.solitaireTag(writer, GSAToken.UE.name(), value.stringValue());
                     continue;
                 }
-                if (YaCySchema.title.name().equals(fieldName)) {
+                if (YaCySchema.title.getSolrFieldName().equals(fieldName)) {
                     OpensearchResponseWriter.solitaireTag(writer, GSAToken.T.name(), highlight(value.stringValue(), query));
                     texts.add(value.stringValue());
                     continue;
                 }
-                if (YaCySchema.description.name().equals(fieldName)) {
+                if (YaCySchema.description.getSolrFieldName().equals(fieldName)) {
                     description = value.stringValue();
                     texts.add(description);
                     continue;
                 }
-                if (YaCySchema.last_modified.name().equals(fieldName)) {
+                if (YaCySchema.last_modified.getSolrFieldName().equals(fieldName)) {
                     Date d = new Date(Long.parseLong(value.stringValue()));
                     writer.write("<FS NAME=\"date\" VALUE=\"" + HeaderFramework.formatGSAFS(d) + "\"/>");
-                    //OpensearchResponseWriter.solitaireTag(writer, GSAToken.CACHE_LAST_MODIFIED.name(), HeaderFramework.formatRFC1123(d));
+                    //OpensearchResponseWriter.solitaireTag(writer, GSAToken.CACHE_LAST_MODIFIED.getSolrFieldName(), HeaderFramework.formatRFC1123(d));
                     texts.add(value.stringValue());
                     continue;
                 }
-                if (YaCySchema.load_date_dt.name().equals(fieldName)) {
+                if (YaCySchema.load_date_dt.getSolrFieldName().equals(fieldName)) {
                     Date d = new Date(Long.parseLong(value.stringValue()));
                     OpensearchResponseWriter.solitaireTag(writer, GSAToken.CRAWLDATE.name(), HeaderFramework.formatRFC1123(d));
                     texts.add(value.stringValue());
                     continue;
                 }
-                if (YaCySchema.text_t.name().equals(fieldName)) {
+                if (YaCySchema.text_t.getSolrFieldName().equals(fieldName)) {
                     texts.add(value.stringValue());
                     continue;
                 }
-                if (YaCySchema.h1_txt.name().equals(fieldName) || YaCySchema.h2_txt.name().equals(fieldName) ||
-                    YaCySchema.h3_txt.name().equals(fieldName) || YaCySchema.h4_txt.name().equals(fieldName) ||
-                    YaCySchema.h5_txt.name().equals(fieldName) || YaCySchema.h6_txt.name().equals(fieldName)) {
+                if (YaCySchema.h1_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h2_txt.getSolrFieldName().equals(fieldName) ||
+                    YaCySchema.h3_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h4_txt.getSolrFieldName().equals(fieldName) ||
+                    YaCySchema.h5_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h6_txt.getSolrFieldName().equals(fieldName)) {
                     // because these are multi-valued fields, there can be several of each
                     texts.add(value.stringValue());
                     continue;
                 }
-                if (YaCySchema.size_i.name().equals(fieldName)) {
+                if (YaCySchema.size_i.getSolrFieldName().equals(fieldName)) {
                     size = value.stringValue() != null && value.stringValue().length() > 0 ? Integer.parseInt(value.stringValue()) : -1;
                     continue;
                 }
