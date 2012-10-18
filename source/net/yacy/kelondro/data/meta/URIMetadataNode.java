@@ -24,7 +24,11 @@ package net.yacy.kelondro.data.meta;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -105,7 +109,7 @@ public class URIMetadataNode {
     }
 
     public String hosthash() {
-        String hosthash = (String) this.doc.getFieldValue(YaCySchema.host_id_s.name());
+        String hosthash = (String) this.doc.getFieldValue(YaCySchema.host_id_s.getSolrFieldName());
         if (hosthash == null) hosthash = ASCII.String(this.hash, 6, 6);
         return hosthash;
     }
@@ -147,7 +151,7 @@ public class URIMetadataNode {
         if (this.lat == Double.NaN) {
             this.lon = 0.0d;
             this.lat = 0.0d;
-            String latlon = (String) this.doc.getFieldValue(YaCySchema.coordinate_p.name());
+            String latlon = (String) this.doc.getFieldValue(YaCySchema.coordinate_p.getSolrFieldName());
             if (latlon != null) {
                 int p = latlon.indexOf(',');
                 if (p > 0) {
@@ -281,6 +285,47 @@ public class URIMetadataNode {
     public WordReference word() {
         return this.word;
     }
+    
+    private static List<String> indexedList2protocolList(Collection<Object> iplist, int dimension) {
+        List<String> a = new ArrayList<String>(dimension);
+        for (int i = 0; i < dimension; i++) a.add("http");
+        if (iplist == null) return a;
+        for (Object ip: iplist) a.set(Integer.parseInt(((String) ip).substring(0, 3)), ((String) ip).substring(4));
+        return a;
+    }
+
+    public static Iterator<String> getLinks(SolrDocument doc, boolean inbound) {
+        Collection<Object> urlstub = doc.getFieldValues((inbound ? YaCySchema.inboundlinks_urlstub_txt :  YaCySchema.outboundlinks_urlstub_txt).getSolrFieldName());
+        Collection<String> urlprot = urlstub == null ? null : indexedList2protocolList(doc.getFieldValues((inbound ? YaCySchema.inboundlinks_protocol_sxt : YaCySchema.outboundlinks_protocol_sxt).getSolrFieldName()), urlstub.size());
+        String u;
+        LinkedHashSet<String> list = new LinkedHashSet<String>();
+        if (urlprot != null && urlstub != null) {
+            assert urlprot.size() == urlstub.size();
+            Object[] urlprota = urlprot.toArray();
+            Object[] urlstuba = urlstub.toArray();
+            for (int i = 0; i < urlprota.length; i++) {
+                u = ((String) urlprota[i]) + "://" + ((String) urlstuba[i]);
+                int hp = u.indexOf('#');
+                if (hp > 0) u = u.substring(0, hp);
+                list.add(u);
+            }
+        }
+        return list.iterator();
+    }
+    
+    public static Date getDate(SolrDocument doc, final YaCySchema key) {
+        Date x = doc == null ? null : (Date) doc.getFieldValue(key.getSolrFieldName());
+        Date now = new Date();
+        return (x == null) ? new Date(0) : x.after(now) ? now : x;
+    }
+
+    public String getText() {
+        return getString(YaCySchema.text_t);
+    }
+
+    public String getDescription() {
+        return getString(YaCySchema.description);
+    }    
 
     public boolean isOlder(URIMetadataRow other) {
         if (other == null) return false;
@@ -374,10 +419,22 @@ public class URIMetadataNode {
         return core.toString();
     }
     
+    private DigestURI getURL(YaCySchema field) {
+        assert !field.isMultiValued();
+        assert field.getType() == SolrType.string || field.getType() == SolrType.text_general || field.getType() == SolrType.text_en_splitting_tight;
+        Object x = this.doc.getFieldValue(field.getSolrFieldName());
+        if (x == null) return null;
+        try {
+            return new DigestURI((String) x);
+        } catch (MalformedURLException e) {
+            return null;
+        }
+    }
+
     private int getInt(YaCySchema field) {
         assert !field.isMultiValued();
         assert field.getType() == SolrType.integer;
-        Object x = this.doc.getFieldValue(field.name());
+        Object x = this.doc.getFieldValue(field.getSolrFieldName());
         if (x == null) return 0;
         if (x instanceof Integer) return ((Integer) x).intValue();
         if (x instanceof Long) return ((Long) x).intValue();
@@ -387,7 +444,7 @@ public class URIMetadataNode {
     private Date getDate(YaCySchema field) {
         assert !field.isMultiValued();
         assert field.getType() == SolrType.date;
-        Date x = (Date) this.doc.getFieldValue(field.name());
+        Date x = (Date) this.doc.getFieldValue(field.getSolrFieldName());
         if (x == null) return new Date(0);
         Date now = new Date();
         return x.after(now) ? now : x;
@@ -396,7 +453,7 @@ public class URIMetadataNode {
     private String getString(YaCySchema field) {
         assert !field.isMultiValued();
         assert field.getType() == SolrType.string || field.getType() == SolrType.text_general || field.getType() == SolrType.text_en_splitting_tight;
-        Object x = this.doc.getFieldValue(field.name());
+        Object x = this.doc.getFieldValue(field.getSolrFieldName());
         if (x == null) return "";
         if (x instanceof ArrayList) {
             @SuppressWarnings("unchecked")
@@ -410,7 +467,7 @@ public class URIMetadataNode {
     private ArrayList<String> getStringList(YaCySchema field) {
         assert field.isMultiValued();
         assert field.getType() == SolrType.string || field.getType() == SolrType.text_general;
-        Object r = this.doc.getFieldValue(field.name());
+        Object r = this.doc.getFieldValue(field.getSolrFieldName());
         if (r == null) return new ArrayList<String>(0);
         if (r instanceof ArrayList) {
             return (ArrayList<String>) r;
@@ -424,7 +481,7 @@ public class URIMetadataNode {
     private ArrayList<Integer> getIntList(YaCySchema field) {
         assert field.isMultiValued();
         assert field.getType() == SolrType.integer;
-        Object r = this.doc.getFieldValue(field.name());
+        Object r = this.doc.getFieldValue(field.getSolrFieldName());
         if (r == null) return new ArrayList<Integer>(0);
         if (r instanceof ArrayList) {
             return (ArrayList<Integer>) r;

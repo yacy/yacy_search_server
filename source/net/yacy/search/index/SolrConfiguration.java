@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -59,7 +58,6 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Bitfield;
 
-import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
 
@@ -111,67 +109,42 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     	return this.contains(field.name());
     }
 
-    protected void add(final SolrInputDocument doc, final YaCySchema key, final byte[] value) {
-        assert !key.isMultiValued();
-        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.length != 0))) key.add(doc, UTF8.String(value));
-    }
-
-    protected void add(final SolrInputDocument doc, final YaCySchema key, final String value) {
+    private void add(final SolrInputDocument doc, final YaCySchema key, final String value) {
         assert !key.isMultiValued();
         if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && !value.isEmpty()))) key.add(doc, value);
     }
 
-    protected void add(final SolrInputDocument doc, final YaCySchema key, final String value, final float boost) {
-        assert !key.isMultiValued();
-        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && !value.isEmpty()))) key.add(doc, value, boost);
-    }
-
-    protected void add(final SolrInputDocument doc, final YaCySchema key, final Date value) {
+    private void add(final SolrInputDocument doc, final YaCySchema key, final Date value) {
         assert !key.isMultiValued();
         if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.getTime() > 0))) key.add(doc, value);
     }
 
-    protected void add(final SolrInputDocument doc, final YaCySchema key, final String[] value) {
+    private void add(final SolrInputDocument doc, final YaCySchema key, final String[] value) {
         assert key.isMultiValued();
         if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.length > 0))) key.add(doc, value);
     }
 
-    protected void add(final SolrInputDocument doc, final YaCySchema key, final Integer[] value) {
+    private void add(final SolrInputDocument doc, final YaCySchema key, final Integer[] value) {
         assert key.isMultiValued();
         if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.length > 0))) key.add(doc, value);
     }
 
-    protected void add(final SolrInputDocument doc, final YaCySchema key, final List<?> values) {
+    private void add(final SolrInputDocument doc, final YaCySchema key, final List<?> values) {
         assert key.isMultiValued();
         if ((isEmpty() || contains(key)) && (!this.lazy || (values != null && !values.isEmpty()))) key.add(doc, values);
     }
 
-    protected void add(final SolrInputDocument doc, final YaCySchema key, final int value) {
+    private void add(final SolrInputDocument doc, final YaCySchema key, final int value) {
         assert !key.isMultiValued();
         if ((isEmpty() || contains(key)) && (!this.lazy || value != 0)) key.add(doc, value);
     }
 
-    protected void add(final SolrInputDocument doc, final YaCySchema key, final long value) {
-        assert !key.isMultiValued();
-        if ((isEmpty() || contains(key)) && (!this.lazy || value != 0)) key.add(doc, value);
-    }
-
-    protected void add(final SolrInputDocument doc, final YaCySchema key, final float value) {
-        assert !key.isMultiValued();
-        if ((isEmpty() || contains(key)) && (!this.lazy || value != 0.0f)) key.add(doc, value);
-    }
-
-    protected void add(final SolrInputDocument doc, final YaCySchema key, final double value) {
-        assert !key.isMultiValued();
-        if ((isEmpty() || contains(key)) && (!this.lazy || value != 0.0d)) key.add(doc, value);
-    }
-
-    protected void add(final SolrInputDocument doc, final YaCySchema key, final boolean value) {
+    private void add(final SolrInputDocument doc, final YaCySchema key, final boolean value) {
         assert !key.isMultiValued();
         if (isEmpty() || contains(key)) key.add(doc, value);
     }
 
-    public static Date getDate(SolrInputDocument doc, final YaCySchema key) {
+    protected static Date getDate(SolrInputDocument doc, final YaCySchema key) {
         Date x = (Date) doc.getFieldValue(key.name());
         Date now = new Date();
         return (x == null) ? new Date(0) : x.after(now) ? now : x;
@@ -198,7 +171,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         } catch (final IOException e) {}
     }
 
-    public SolrInputDocument metadata2solr(final URIMetadataRow md) {
+    protected SolrInputDocument metadata2solr(final URIMetadataRow md) {
 
         final SolrInputDocument doc = new SolrInputDocument();
         final DigestURI digestURI = DigestURI.toDigestURI(md.url());
@@ -326,7 +299,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
 
-    public SolrInputDocument yacy2solr(final String id, final CrawlProfile profile, final ResponseHeader responseHeader, final Document document, Condenser condenser, DigestURI referrerURL, String language) {
+    protected SolrInputDocument yacy2solr(final String id, final CrawlProfile profile, final ResponseHeader responseHeader, final Document document, Condenser condenser, DigestURI referrerURL, String language) {
         // we use the SolrCell design as index scheme
         final SolrInputDocument doc = new SolrInputDocument();
         final DigestURI digestURI = DigestURI.toDigestURI(document.dc_source());
@@ -810,14 +783,6 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         return a;
     }
     
-    public static List<String> indexedList2protocolList(Collection<Object> iplist, int dimension) {
-        List<String> a = new ArrayList<String>(dimension);
-        for (int i = 0; i < dimension; i++) a.add("http");
-        if (iplist == null) return a;
-        for (Object ip: iplist) a.set(Integer.parseInt(((String) ip).substring(0, 3)), ((String) ip).substring(4));
-        return a;
-    }
-    
     /**
      * encode a string containing attributes from anchor rel properties binary:
      * bit 0: "me" contained in rel
@@ -835,74 +800,6 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             il.add(i);
         }
         return il;
-    }
-
-    public static Iterator<String> getLinks(SolrDocument doc, boolean inbound) {
-        Collection<Object> urlstub = doc.getFieldValues((inbound ? YaCySchema.inboundlinks_urlstub_txt :  YaCySchema.outboundlinks_urlstub_txt).name());
-        Collection<String> urlprot = urlstub == null ? null : indexedList2protocolList(doc.getFieldValues((inbound ? YaCySchema.inboundlinks_protocol_sxt : YaCySchema.outboundlinks_protocol_sxt).name()), urlstub.size());
-        String u;
-        LinkedHashSet<String> list = new LinkedHashSet<String>();
-        if (urlprot != null && urlstub != null) {
-            assert urlprot.size() == urlstub.size();
-            Object[] urlprota = urlprot.toArray();
-            Object[] urlstuba = urlstub.toArray();
-            for (int i = 0; i < urlprota.length; i++) {
-                u = ((String) urlprota[i]) + "://" + ((String) urlstuba[i]);
-                int hp = u.indexOf('#');
-                if (hp > 0) u = u.substring(0, hp);
-                list.add(u);
-            }
-        }
-        return list.iterator();
-    }
-    
-    public static Date getDate(SolrDocument doc, final YaCySchema key) {
-        Date x = doc == null ? null : (Date) doc.getFieldValue(key.name());
-        Date now = new Date();
-        return (x == null) ? new Date(0) : x.after(now) ? now : x;
-    }
-
-    public static String solrGetID(final SolrDocument solr) {
-        return (String) solr.getFieldValue(YaCySchema.id.getSolrFieldName());
-    }
-
-    public static DigestURI solrGetURL(final SolrDocument solr) {
-        try {
-            return new DigestURI((String) solr.getFieldValue(YaCySchema.sku.getSolrFieldName()));
-        } catch (final MalformedURLException e) {
-            return null;
-        }
-    }
-
-    public static String solrGetTitle(final SolrDocument solr) {
-        return (String) solr.getFieldValue(YaCySchema.title.getSolrFieldName());
-    }
-
-    public static String solrGetText(final SolrDocument solr) {
-        return (String) solr.getFieldValue(YaCySchema.text_t.getSolrFieldName());
-    }
-
-    public static String solrGetAuthor(final SolrDocument solr) {
-        return (String) solr.getFieldValue(YaCySchema.author.getSolrFieldName());
-    }
-
-    public static String solrGetDescription(final SolrDocument solr) {
-        return (String) solr.getFieldValue(YaCySchema.description.getSolrFieldName());
-    }
-
-    public static Date solrGetDate(final SolrDocument solr) {
-        Date date = (Date) solr.getFieldValue(YaCySchema.last_modified.getSolrFieldName());
-        Date now = new Date();
-        return date.after(now) ? now : date;
-    }
-
-    public static Collection<String> solrGetKeywords(final SolrDocument solr) {
-        final Collection<Object> c = solr.getFieldValues(YaCySchema.keywords.getSolrFieldName());
-        final ArrayList<String> a = new ArrayList<String>();
-        for (final Object s: c) {
-            a.add((String) s);
-        }
-        return a;
     }
     
     /**

@@ -432,7 +432,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     private void addToCache(SolrDocumentList list) {
         if (MemoryControl.shortStatus()) clearCache();
         for (final SolrDocument solrdoc: list) {
-            String id = (String) solrdoc.getFieldValue(YaCySchema.id.name());
+            String id = (String) solrdoc.getFieldValue(YaCySchema.id.getSolrFieldName());
             if (id != null) {
                 this.hitCache.put(id, EXIST);
                 cacheHit_Insert++;

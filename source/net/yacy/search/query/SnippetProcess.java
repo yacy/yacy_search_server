@@ -54,14 +54,10 @@ import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
 import net.yacy.search.snippet.MediaSnippet;
 import net.yacy.search.snippet.ResultEntry;
 import net.yacy.search.snippet.TextSnippet;
-
-import org.apache.solr.common.SolrDocument;
-
 
 public class SnippetProcess {
 
@@ -71,30 +67,28 @@ public class SnippetProcess {
     private final static int SNIPPET_WORKER_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
 
     // input values
-    final RWIProcess  rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
+    private final RWIProcess  rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
     QueryParams     query;
     private final SeedDB      peers;
     private final WorkTables workTables;
 
     // result values
-    protected final LoaderDispatcher        loader;
+    private final LoaderDispatcher        loader;
     protected       Worker[]                workerThreads;
-    protected final WeakPriorityBlockingQueue<ResultEntry>  result;
-    protected final WeakPriorityBlockingQueue<MediaSnippet> images; // container to sort images by size
-    protected final HandleSet               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
-    long urlRetrievalAllTime;
-    long snippetComputationAllTime;
-    int taketimeout;
+    private final WeakPriorityBlockingQueue<ResultEntry>  result;
+    private final WeakPriorityBlockingQueue<MediaSnippet> images; // container to sort images by size
+    private final HandleSet               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
+    private long urlRetrievalAllTime;
+    private long snippetComputationAllTime;
     private final boolean deleteIfSnippetFail, remote;
     private boolean cleanupState;
 
-    public SnippetProcess(
+    protected SnippetProcess(
             final LoaderDispatcher loader,
             final RWIProcess rankedCache,
             final QueryParams query,
             final SeedDB peers,
             final WorkTables workTables,
-            final int taketimeout,
             final boolean deleteIfSnippetFail,
             final boolean remote) {
     	assert query != null;
@@ -103,7 +97,6 @@ public class SnippetProcess {
     	this.query = query;
         this.peers = peers;
         this.workTables = workTables;
-        this.taketimeout = taketimeout;
         this.deleteIfSnippetFail = deleteIfSnippetFail;
         this.remote = remote;
         this.cleanupState = false;
@@ -133,7 +126,7 @@ public class SnippetProcess {
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(query.id(true), SearchEvent.Type.SNIPPETFETCH_START, ((this.workerThreads == null) ? "no" : this.workerThreads.length) + " online snippet fetch threads started", 0, 0), false);
     }
 
-    public void setCleanupState() {
+    protected void setCleanupState() {
         this.cleanupState = true;
     }
 
@@ -145,7 +138,7 @@ public class SnippetProcess {
         return this.snippetComputationAllTime;
     }
 
-    public ResultEntry oneResult(final int item, final long timeout) {
+    protected ResultEntry oneResult(final int item, final long timeout) {
         // check if we already retrieved this item
     	// (happens if a search pages is accessed a second time)
         final long finishTime = System.currentTimeMillis() + timeout;
@@ -221,7 +214,7 @@ public class SnippetProcess {
     }
 
     private int resultCounter = 0;
-    public ResultEntry nextResult() {
+    private ResultEntry nextResult() {
         final ResultEntry re = oneResult(this.resultCounter, Math.max(3000, this.query.timeout - System.currentTimeMillis()));
         this.resultCounter++;
         return re;
@@ -290,7 +283,7 @@ public class SnippetProcess {
         return this.result.list(Math.min(this.query.neededResults(), this.result.sizeAvailable()));
     }
 
-    public long postRanking(
+    private long postRanking(
             final ResultEntry rentry,
             final ScoreMap<String> topwords) {
 
@@ -351,7 +344,7 @@ public class SnippetProcess {
     }
 
 
-    public void deployWorker(int deployCount, final int neededResults) {
+    private void deployWorker(int deployCount, final int neededResults) {
         if (this.cleanupState ||
             (this.rankingProcess.feedingIsFinished() && this.rankingProcess.sizeQueue() == 0) ||
             this.result.sizeAvailable() >= neededResults) {
@@ -404,7 +397,7 @@ public class SnippetProcess {
         }
     }
 
-    public void stopAllWorker() {
+    private void stopAllWorker() {
         synchronized(this.workerThreads) {
             for (int i = 0; i < this.workerThreads.length; i++) {
                if (this.workerThreads[i] == null || !this.workerThreads[i].isAlive()) {
@@ -439,15 +432,13 @@ public class SnippetProcess {
         private final CacheStrategy cacheStrategy;
         private final int neededResults;
         private boolean shallrun;
-        private final Fulltext metadata;
 
-        public Worker(final long maxlifetime, final CacheStrategy cacheStrategy, final int neededResults) {
+        private Worker(final long maxlifetime, final CacheStrategy cacheStrategy, final int neededResults) {
             this.cacheStrategy = cacheStrategy;
             this.lastLifeSign = System.currentTimeMillis();
             this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
             this.neededResults = neededResults;
             this.shallrun = true;
-            this.metadata = SnippetProcess.this.rankingProcess.getQuery().getSegment().fulltext();
         }
 
         @Override
@@ -495,11 +486,7 @@ public class SnippetProcess {
                     }
 
                     // in case that we have an attached solr, we load also the solr document
-                    String solrContent = null;
-                    SolrDocument sd = page.getDocument();
-                    if (sd != null) {
-                        solrContent = this.metadata.getSolrScheme().solrGetText(sd);
-                    }
+                    String solrContent = page.getText();
 
                     resultEntry = fetchSnippet(page, solrContent, this.cacheStrategy); // does not fetch snippets if snippetMode == 0
                     if (resultEntry == null)
@@ -532,7 +519,7 @@ public class SnippetProcess {
             //Log.logInfo("SEARCH", "resultWorker thread " + this.id + " terminated");
         }
 
-        public void pleaseStop() {
+        protected void pleaseStop() {
             this.shallrun = false;
         }
 
@@ -540,12 +527,12 @@ public class SnippetProcess {
          * calculate the time since the worker has had the latest activity
          * @return time in milliseconds lasted since latest activity
          */
-        public long busytime() {
+        private long busytime() {
             return System.currentTimeMillis() - this.lastLifeSign;
         }
     }
 
-    protected ResultEntry fetchSnippet(final URIMetadataNode page, final String solrText, final CacheStrategy cacheStrategy) {
+    private ResultEntry fetchSnippet(final URIMetadataNode page, final String solrText, final CacheStrategy cacheStrategy) {
         // Snippet Fetching can has 3 modes:
         // 0 - do not fetch snippets
         // 1 - fetch snippets offline only
@@ -620,7 +607,7 @@ public class SnippetProcess {
      * @param urlhash
      * @return true if an entry was deleted, false otherwise
      */
-    public boolean delete(final String urlhash) {
+    protected boolean delete(final String urlhash) {
         final Iterator<Element<ResultEntry>> i = this.result.iterator();
         Element<ResultEntry> entry;
         while (i.hasNext()) {

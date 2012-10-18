@@ -109,7 +109,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                     try {
                         SolrDocumentList sdl = query(querystring, o, pagesize);
                         for (SolrDocument d: sdl) {
-                            try {queue.put((String) d.getFieldValue(YaCySchema.id.name()));} catch (InterruptedException e) {break;}
+                            try {queue.put((String) d.getFieldValue(YaCySchema.id.getSolrFieldName()));} catch (InterruptedException e) {break;}
                         }
                         if (sdl.size() < pagesize) break;
                         o += pagesize;

@@ -272,7 +272,6 @@ public final class SearchEvent {
                 this.query,
                 this.peers,
                 this.workTables,
-                5000,
                 deleteIfSnippetFail,
                 remote);
 

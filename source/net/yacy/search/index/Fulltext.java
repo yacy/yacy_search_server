@@ -78,7 +78,7 @@ public final class Fulltext implements Iterable<byte[]> {
     private final MirrorSolrConnector solr;
     private final SolrConfiguration   solrScheme;
 
-    public Fulltext(final File path, final SolrConfiguration solrScheme) {
+    protected Fulltext(final File path, final SolrConfiguration solrScheme) {
         this.location = path;
         this.tablename = null;
         this.urlIndexFile = null;
@@ -88,11 +88,7 @@ public final class Fulltext implements Iterable<byte[]> {
         this.solrScheme = solrScheme;
     }
 
-    public boolean connectedUrlDb() {
-        return this.urlIndexFile != null;
-    }
-
-    public void connectUrlDb(final String tablename, final boolean useTailCache, final boolean exceed134217727) {
+    protected void connectUrlDb(final String tablename, final boolean useTailCache, final boolean exceed134217727) {
     	if (this.urlIndexFile != null) return;
         this.tablename = tablename;
     	this.urlIndexFile = new SplitTable(this.location, tablename, URIMetadataRow.rowdef, useTailCache, exceed134217727);
@@ -242,7 +238,7 @@ public final class Fulltext implements Iterable<byte[]> {
         	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
         	SolrDocument sd = this.solr.get(id);
         	Date now = new Date();
-        	Date sdDate = sd == null ? null : SolrConfiguration.getDate(sd, YaCySchema.last_modified);
+        	Date sdDate = sd == null ? null : URIMetadataNode.getDate(sd, YaCySchema.last_modified);
         	if (sdDate == null || sdDate.after(now)) sdDate = now;
         	Date docDate = SolrConfiguration.getDate(doc, YaCySchema.last_modified);
         	if (docDate.after(now)) docDate = now;
@@ -318,7 +314,7 @@ public final class Fulltext implements Iterable<byte[]> {
         if (urlHash == null) return null;
         SolrDocument doc = this.solr.get(urlHash);
         if (doc == null) return null;
-        String reason = (String) doc.getFieldValue(YaCySchema.failreason_t.name());
+        String reason = (String) doc.getFieldValue(YaCySchema.failreason_t.getSolrFieldName());
         return reason == null ? null : reason.length() == 0 ? null : reason;
     }
 
@@ -468,7 +464,7 @@ public final class Fulltext implements Iterable<byte[]> {
         private final boolean dom;
         private final HandleSet set;
 
-        public Export(final File f, final String filter, final HandleSet set, final int format, boolean dom) {
+        private Export(final File f, final String filter, final HandleSet set, final int format, boolean dom) {
             // format: 0=text, 1=html, 2=rss/xml
             this.f = f;
             this.filter = filter;
@@ -603,7 +599,7 @@ public final class Fulltext implements Iterable<byte[]> {
      * @param domainSamples a map from domain hashes to hash statistics
      * @return a set of domain names, ordered by name of the domains
      */
-    public TreeSet<String> domainNameCollector(int count, final Map<String, URLHashCounter> domainSamples) {
+    private TreeSet<String> domainNameCollector(int count, final Map<String, URLHashCounter> domainSamples) {
         // collect hashes from all domains
 
         // fetch urls from the database to determine the host in clear text
@@ -699,7 +695,7 @@ public final class Fulltext implements Iterable<byte[]> {
         public String hostname, hosthash;
         public int port;
         public int count;
-        public HostStat(final String host, final int port, final String urlhashfragment, final int count) {
+        private HostStat(final String host, final int port, final String urlhashfragment, final int count) {
             assert urlhashfragment.length() == 6;
             this.hostname = host;
             this.port = port;

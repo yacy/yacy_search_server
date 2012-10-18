@@ -41,11 +41,11 @@ import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.graphics.WebStructureGraph.StructureEntry;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
-import net.yacy.search.index.SolrConfiguration;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -168,18 +168,18 @@ public class HostBrowser {
                 Map<String, ReversibleScoreMap<String>> outboundHosts = new HashMap<String, ReversibleScoreMap<String>>();
                 int hostsize = 0;
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                    String u = (String) doc.getFieldValue(YaCySchema.sku.name());
+                    String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
                     hostsize++;
                     if (u.startsWith(path)) storedDocs.add(u);
                     // collect inboundlinks to browse the host
-                    Iterator<String> links = SolrConfiguration.getLinks(doc, true);
+                    Iterator<String> links = URIMetadataNode.getLinks(doc, true);
                     while (links.hasNext()) {
                         u = links.next();
                         if (u.startsWith(path) && !storedDocs.contains(u)) inboundLinks.add(u);
                     }
                     
                     // collect outboundlinks to browse to the outbound
-                    links = SolrConfiguration.getLinks(doc, false);
+                    links = URIMetadataNode.getLinks(doc, false);
                     while (links.hasNext()) {
                         u = links.next();
                         try {
