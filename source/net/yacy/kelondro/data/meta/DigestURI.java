@@ -197,6 +197,10 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         return this.hash;
     }
 
+    public String hosthash() {
+        return ASCII.String(this.hash(), 6, 6);
+    }
+    
     /**
      * calculated YaCy-Hash of this URI
      *

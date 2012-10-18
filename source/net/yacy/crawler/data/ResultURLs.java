@@ -25,22 +25,13 @@
 
 package net.yacy.crawler.data;
 
-import java.net.MalformedURLException;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
-import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ReverseMapIterator;
 
 public final class ResultURLs {
@@ -97,17 +88,18 @@ public final class ResultURLs {
     }
 
     public static void stack(
-            final URIMetadata urlEntry,
+            final String urlhash,
+            final String hostname,
             final byte[] initiatorHash,
             final byte[] executorHash,
             final EventOrigin stackType) {
         // assert initiatorHash != null; // null == proxy !
         assert executorHash != null;
-        if (urlEntry == null) { return; }
+        if (urlhash == null || hostname == null) { return; }
         try {
             final Map<String, InitExecEntry> resultStack = getStack(stackType);
             if (resultStack != null) {
-                resultStack.put(ASCII.String(urlEntry.hash()), new InitExecEntry(initiatorHash, executorHash));
+                resultStack.put(urlhash, new InitExecEntry(initiatorHash, executorHash));
             }
         } catch (final Exception ex) {
             System.out.println("INTERNAL ERROR in newEntry/2: " + ex.toString());
@@ -116,7 +108,7 @@ public final class ResultURLs {
         try {
             final ScoreMap<String> domains = getDomains(stackType);
             if (domains != null) {
-                domains.inc(urlEntry.url().getHost());
+                domains.inc(hostname);
             }
         } catch (final Exception ex) {
             System.out.println("INTERNAL ERROR in newEntry/3: " + ex.toString());
@@ -214,25 +206,6 @@ public final class ResultURLs {
             if (resultStack != null) resultStack.remove(urlHash);
         }
         return true;
-    }
-
-    /**
-     * test and benchmark
-     * @param args
-     */
-    public static void main(final String[] args) {
-        try {
-            final DigestURI url = new DigestURI("http", "www.yacy.net", 80, "/");
-            final URIMetadata urlRef = new URIMetadataRow(url, "YaCy Homepage", "", "", "", 0.0d, 0.0d, new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), UTF8.getBytes("de"), 0, 0, 0, 0, 0, 0, new String[0]);
-            final EventOrigin stackNo = EventOrigin.LOCAL_CRAWLING;
-            System.out.println("valid test:\n=======");
-            // add
-            stack(urlRef, urlRef.hash(), url.hash(), stackNo);
-            // size
-            System.out.println("size of stack:\t"+ getStackSize(stackNo));
-        } catch (final MalformedURLException e) {
-            Log.logException(e);
-        }
     }
 
 }

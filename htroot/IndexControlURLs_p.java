@@ -41,7 +41,6 @@ import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
@@ -206,7 +205,7 @@ public class IndexControlURLs_p {
                 final DigestURI url = new DigestURI(urlstring);
                 urlhash = ASCII.String(url.hash());
                 prop.put("urlhash", urlhash);
-                final URIMetadata entry = segment.fulltext().getMetadata(ASCII.getBytes(urlhash));
+                final URIMetadataNode entry = segment.fulltext().getMetadata(ASCII.getBytes(urlhash));
                 if (entry == null) {
                     prop.putHTML("result", "No Entry for URL " + url.toNormalform(true));
                     prop.putHTML("urlstring", urlstring);
@@ -222,7 +221,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashsearch")) {
-            final URIMetadata entry = segment.fulltext().getMetadata(ASCII.getBytes(urlhash));
+            final URIMetadataNode entry = segment.fulltext().getMetadata(ASCII.getBytes(urlhash));
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash);
             } else {
@@ -236,7 +235,7 @@ public class IndexControlURLs_p {
         if (post.containsKey("urlhashsimilar")) {
             final Iterator<URIMetadataNode> entryIt = new RotateIterator<URIMetadataNode>(segment.fulltext().entries(), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), (int) segment.RWICount());
 			final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
-			URIMetadata entry;
+			URIMetadataNode entry;
 			int i = 0, rows = 0, cols = 0;
 			prop.put("urlhashsimilar", "1");
 			while (entryIt.hasNext() && i < 256) {
@@ -341,7 +340,7 @@ public class IndexControlURLs_p {
         return prop;
     }
 
-    private static serverObjects genUrlProfile(final Segment segment, final URIMetadata entry, final String urlhash) {
+    private static serverObjects genUrlProfile(final Segment segment, final URIMetadataNode entry, final String urlhash) {
         final serverObjects prop = new serverObjects();
         if (entry == null) {
             prop.put("genUrlProfile", "1");

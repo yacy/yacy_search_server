@@ -76,6 +76,8 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.solr.common.SolrInputDocument;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
@@ -146,9 +148,7 @@ import net.yacy.interaction.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.interaction.contentcontrol.ContentControlImportThread;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -2589,13 +2589,10 @@ public final class Switchboard extends serverSwitch
         this.log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + url);
 
         // STORE WORD INDEX
-        URIMetadataRow newEntry =
+        SolrInputDocument newEntry =
             this.index.storeDocument(
                 url,
                 referrerURL,
-                queueEntry.lastModified(),
-                new Date(),
-                queueEntry.size(),
                 queueEntry.profile(),
                 queueEntry.getResponseHeader(),
                 document,
@@ -2628,7 +2625,9 @@ public final class Switchboard extends serverSwitch
         }
 
         // update url result list statistics
-        ResultURLs.stack(newEntry, // loaded url db entry
+        ResultURLs.stack(
+            ASCII.String(url.hash()), // loaded url db entry
+            url.getHost(),
             queueEntry.initiator(), // initiator peer hash
             UTF8.getBytes(this.peers.mySeed().hash), // executor peer hash
             processCase // process case
@@ -2654,8 +2653,7 @@ public final class Switchboard extends serverSwitch
                     initiatorPeer.setAlternativeAddress(this.clusterhashes.get(queueEntry.initiator()));
                 }
                 // start a thread for receipt sending to avoid a blocking here
-                new Thread(new receiptSending(initiatorPeer, newEntry), "sending receipt to "
-                    + ASCII.String(queueEntry.initiator())).start();
+                new Thread(new receiptSending(initiatorPeer, new URIMetadataNode(newEntry)), "sending receipt to " + ASCII.String(queueEntry.initiator())).start();
             }
         }
     }
@@ -2820,9 +2818,9 @@ public final class Switchboard extends serverSwitch
     public class receiptSending implements Runnable
     {
         private final Seed initiatorPeer;
-        private final URIMetadata reference;
+        private final URIMetadataNode reference;
 
-        public receiptSending(final Seed initiatorPeer, final URIMetadata reference) {
+        public receiptSending(final Seed initiatorPeer, final URIMetadataNode reference) {
             this.initiatorPeer = initiatorPeer;
             this.reference = reference;
         }

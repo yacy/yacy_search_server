@@ -55,13 +55,10 @@ import net.yacy.document.Document;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
-import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Bitfield;
 
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -174,14 +171,8 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (isEmpty() || contains(key)) key.add(doc, value);
     }
 
-    public Date getDate(SolrInputDocument doc, final YaCySchema key) {
+    public static Date getDate(SolrInputDocument doc, final YaCySchema key) {
         Date x = (Date) doc.getFieldValue(key.name());
-        Date now = new Date();
-        return (x == null) ? new Date(0) : x.after(now) ? now : x;
-    }
-
-    public Date getDate(SolrDocument doc, final YaCySchema key) {
-        Date x = doc == null ? null : (Date) doc.getFieldValue(key.name());
         Date now = new Date();
         return (x == null) ? new Date(0) : x.after(now) ? now : x;
     }
@@ -207,11 +198,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         } catch (final IOException e) {}
     }
 
-    public SolrInputDocument metadata2solr(final URIMetadata md) {
-        assert md instanceof URIMetadataRow;
-    	if (md instanceof URIMetadataNode) {
-    		return ClientUtils.toSolrInputDocument(((URIMetadataNode) md).getDocument());
-    	}
+    public SolrInputDocument metadata2solr(final URIMetadataRow md) {
 
         final SolrInputDocument doc = new SolrInputDocument();
         final DigestURI digestURI = DigestURI.toDigestURI(md.url());
@@ -339,10 +326,10 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
 
-    public SolrInputDocument yacy2solr(final String id, final CrawlProfile profile, final ResponseHeader header, final Document yacydoc, Condenser condenser, final URIMetadata metadata) {
+    public SolrInputDocument yacy2solr(final String id, final CrawlProfile profile, final ResponseHeader responseHeader, final Document document, Condenser condenser, DigestURI referrerURL, String language) {
         // we use the SolrCell design as index scheme
         final SolrInputDocument doc = new SolrInputDocument();
-        final DigestURI digestURI = DigestURI.toDigestURI(yacydoc.dc_source());
+        final DigestURI digestURI = DigestURI.toDigestURI(document.dc_source());
         boolean allAttr = this.isEmpty();
         add(doc, YaCySchema.id, id);
         if (allAttr || contains(YaCySchema.failreason_t)) add(doc, YaCySchema.failreason_t, ""); // overwrite a possible fail reason (in case that there was a fail reason before)
@@ -377,7 +364,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             if (allAttr || contains(YaCySchema.host_subdomain_s)) add(doc, YaCySchema.host_subdomain_s, subdom);
         }
 
-        List<String> titles = yacydoc.titles();
+        List<String> titles = document.titles();
         if (allAttr || contains(YaCySchema.title)) add(doc, YaCySchema.title, titles);
         if (allAttr || contains(YaCySchema.title_count_i)) add(doc, YaCySchema.title_count_i, titles.size());
         if (allAttr || contains(YaCySchema.title_chars_val)) {
@@ -391,7 +378,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             add(doc, YaCySchema.title_words_val, cv);
         }
 
-        String description = yacydoc.dc_description();
+        String description = document.dc_description();
         List<String> descriptions = new ArrayList<String>();
         for (String s: description.split("\n")) descriptions.add(s);
         if (allAttr || contains(YaCySchema.description)) add(doc, YaCySchema.description, description);
@@ -407,11 +394,11 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             add(doc, YaCySchema.description_words_val, cv);
         }
 
-        if (allAttr || contains(YaCySchema.author)) add(doc, YaCySchema.author, yacydoc.dc_creator());
-        if (allAttr || contains(YaCySchema.content_type)) add(doc, YaCySchema.content_type, new String[]{yacydoc.dc_format()});
-        if (allAttr || contains(YaCySchema.last_modified)) add(doc, YaCySchema.last_modified, header == null ? new Date() : header.lastModified());
-        if (allAttr || contains(YaCySchema.keywords)) add(doc, YaCySchema.keywords, yacydoc.dc_subject(' '));
-        final String content = yacydoc.getTextString();
+        if (allAttr || contains(YaCySchema.author)) add(doc, YaCySchema.author, document.dc_creator());
+        if (allAttr || contains(YaCySchema.content_type)) add(doc, YaCySchema.content_type, new String[]{document.dc_format()});
+        if (allAttr || contains(YaCySchema.last_modified)) add(doc, YaCySchema.last_modified, responseHeader == null ? new Date() : responseHeader.lastModified());
+        if (allAttr || contains(YaCySchema.keywords)) add(doc, YaCySchema.keywords, document.dc_subject(' '));
+        final String content = document.getTextString();
         if (allAttr || contains(YaCySchema.text_t)) add(doc, YaCySchema.text_t, content);
         if (allAttr || contains(YaCySchema.wordcount_i)) {
             final int contentwc = content.split(" ").length;
@@ -427,11 +414,11 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.url_file_ext_s)) add(doc, YaCySchema.url_file_ext_s, digestURI.getFileExtension());
 
         // get list of all links; they will be shrinked by urls that appear in other fields of the solr scheme
-        Set<MultiProtocolURI> inboundLinks = yacydoc.inboundLinks();
-        Set<MultiProtocolURI> outboundLinks = yacydoc.outboundLinks();
+        Set<MultiProtocolURI> inboundLinks = document.inboundLinks();
+        Set<MultiProtocolURI> outboundLinks = document.outboundLinks();
 
         int c = 0;
-        final Object parser = yacydoc.getParserObject();
+        final Object parser = document.getParserObject();
         Map<MultiProtocolURI, ImageEntry> images = new HashMap<MultiProtocolURI, ImageEntry>();
         if (parser instanceof ContentScraper) {
             final ContentScraper html = (ContentScraper) parser;
@@ -482,10 +469,10 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 if (robots_meta.indexOf("nofollow",0) >= 0) b += 8; // set bit 3
             }
             String x_robots_tag = "";
-            if (header != null) {
-                x_robots_tag = header.get(HeaderFramework.X_ROBOTS_TAG, "");
+            if (responseHeader != null) {
+                x_robots_tag = responseHeader.get(HeaderFramework.X_ROBOTS_TAG, "");
                 if (x_robots_tag.isEmpty()) {
-                    x_robots_tag = header.get(HeaderFramework.X_ROBOTS, "");
+                    x_robots_tag = responseHeader.get(HeaderFramework.X_ROBOTS, "");
                 }
             }
             if (!x_robots_tag.isEmpty()) {
@@ -670,14 +657,14 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             }
 
             // response time
-            add(doc, YaCySchema.responsetime_i, header == null ? 0 : Integer.parseInt(header.get(HeaderFramework.RESPONSE_TIME_MILLIS, "0")));
+            add(doc, YaCySchema.responsetime_i, responseHeader == null ? 0 : Integer.parseInt(responseHeader.get(HeaderFramework.RESPONSE_TIME_MILLIS, "0")));
         }
 
         // list all links
-        final Map<MultiProtocolURI, Properties> alllinks = yacydoc.getAnchors();
+        final Map<MultiProtocolURI, Properties> alllinks = document.getAnchors();
         c = 0;
         if (allAttr || contains(YaCySchema.inboundlinkscount_i)) add(doc, YaCySchema.inboundlinkscount_i, inboundLinks.size());
-        if (allAttr || contains(YaCySchema.inboundlinksnofollowcount_i)) add(doc, YaCySchema.inboundlinksnofollowcount_i, yacydoc.inboundLinkNofollowCount());
+        if (allAttr || contains(YaCySchema.inboundlinksnofollowcount_i)) add(doc, YaCySchema.inboundlinksnofollowcount_i, document.inboundLinkNofollowCount());
         final List<String> inboundlinksTag = new ArrayList<String>(inboundLinks.size());
         final List<String> inboundlinksURLProtocol = new ArrayList<String>(inboundLinks.size());
         final List<String> inboundlinksURLStub = new ArrayList<String>(inboundLinks.size());
@@ -725,7 +712,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
         c = 0;
         if (allAttr || contains(YaCySchema.outboundlinkscount_i)) add(doc, YaCySchema.outboundlinkscount_i, outboundLinks.size());
-        if (allAttr || contains(YaCySchema.outboundlinksnofollowcount_i)) add(doc, YaCySchema.outboundlinksnofollowcount_i, yacydoc.outboundLinkNofollowCount());
+        if (allAttr || contains(YaCySchema.outboundlinksnofollowcount_i)) add(doc, YaCySchema.outboundlinksnofollowcount_i, document.outboundLinkNofollowCount());
         final List<String> outboundlinksTag = new ArrayList<String>(outboundLinks.size());
         final List<String> outboundlinksURLProtocol = new ArrayList<String>(outboundLinks.size());
         final List<String> outboundlinksURLStub = new ArrayList<String>(outboundLinks.size());
@@ -772,26 +759,30 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.outboundlinks_alttag_txt)) add(doc, YaCySchema.outboundlinks_alttag_txt, outboundlinksAltTag);
 
         // charset
-        if (allAttr || contains(YaCySchema.charset_s)) add(doc, YaCySchema.charset_s, yacydoc.getCharset());
+        if (allAttr || contains(YaCySchema.charset_s)) add(doc, YaCySchema.charset_s, document.getCharset());
 
         // coordinates
-        if (yacydoc.lat() != 0.0f && yacydoc.lon() != 0.0f) {
-            if (allAttr || contains(YaCySchema.coordinate_p)) add(doc, YaCySchema.coordinate_p, Double.toString(yacydoc.lat()) + "," + Double.toString(yacydoc.lon()));
+        if (document.lat() != 0.0f && document.lon() != 0.0f) {
+            if (allAttr || contains(YaCySchema.coordinate_p)) add(doc, YaCySchema.coordinate_p, Double.toString(document.lat()) + "," + Double.toString(document.lon()));
         }
-        if (allAttr || contains(YaCySchema.httpstatus_i)) add(doc, YaCySchema.httpstatus_i, header == null ? 200 : header.getStatusCode());
+        if (allAttr || contains(YaCySchema.httpstatus_i)) add(doc, YaCySchema.httpstatus_i, responseHeader == null ? 200 : responseHeader.getStatusCode());
 
-        // fields that are additionally in URIMetadataRow
-        if (allAttr || contains(YaCySchema.load_date_dt)) add(doc, YaCySchema.load_date_dt, metadata.loaddate());
-        if (allAttr || contains(YaCySchema.fresh_date_dt)) add(doc, YaCySchema.fresh_date_dt, metadata.freshdate());
-        if (allAttr || contains(YaCySchema.host_id_s)) add(doc, YaCySchema.host_id_s, metadata.hosthash());
-        if ((allAttr || contains(YaCySchema.referrer_id_txt)) && metadata.referrerHash() != null) add(doc, YaCySchema.referrer_id_txt, new String[]{ASCII.String(metadata.referrerHash())});
+        // fields that were additionally in URIMetadataRow
+        Date loadDate = new Date();
+        Date modDate = responseHeader.lastModified();
+        if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
+        int size = (int) Math.max(document.dc_source().length(), responseHeader.getContentLength());
+        if (allAttr || contains(YaCySchema.load_date_dt)) add(doc, YaCySchema.load_date_dt, loadDate);
+        if (allAttr || contains(YaCySchema.fresh_date_dt)) add(doc, YaCySchema.fresh_date_dt, new Date(loadDate.getTime() + Math.max(0, loadDate.getTime() - modDate.getTime()) / 2)); // freshdate, computed with Proxy-TTL formula
+        if (allAttr || contains(YaCySchema.host_id_s)) add(doc, YaCySchema.host_id_s, document.dc_source().hosthash());
+        if ((allAttr || contains(YaCySchema.referrer_id_txt)) && referrerURL != null) add(doc, YaCySchema.referrer_id_txt, new String[]{ASCII.String(referrerURL.hash())});
         //if (allAttr || contains(SolrField.md5_s)) add(solrdoc, SolrField.md5_s, new byte[0]);
-        if (allAttr || contains(YaCySchema.publisher_t)) add(doc, YaCySchema.publisher_t, yacydoc.dc_publisher());
-        if ((allAttr || contains(YaCySchema.language_s)) && metadata.language() != null) add(doc, YaCySchema.language_s, UTF8.String(metadata.language()));
-        if (allAttr || contains(YaCySchema.size_i)) add(doc, YaCySchema.size_i, metadata.size());
-        if (allAttr || contains(YaCySchema.audiolinkscount_i)) add(doc, YaCySchema.audiolinkscount_i, yacydoc.getAudiolinks().size());
-        if (allAttr || contains(YaCySchema.videolinkscount_i)) add(doc, YaCySchema.videolinkscount_i, yacydoc.getVideolinks().size());
-        if (allAttr || contains(YaCySchema.applinkscount_i)) add(doc, YaCySchema.applinkscount_i, yacydoc.getApplinks().size());
+        if (allAttr || contains(YaCySchema.publisher_t)) add(doc, YaCySchema.publisher_t, document.dc_publisher());
+        if ((allAttr || contains(YaCySchema.language_s)) && language != null) add(doc, YaCySchema.language_s, language);
+        if (allAttr || contains(YaCySchema.size_i)) add(doc, YaCySchema.size_i, size);
+        if (allAttr || contains(YaCySchema.audiolinkscount_i)) add(doc, YaCySchema.audiolinkscount_i, document.getAudiolinks().size());
+        if (allAttr || contains(YaCySchema.videolinkscount_i)) add(doc, YaCySchema.videolinkscount_i, document.getVideolinks().size());
+        if (allAttr || contains(YaCySchema.applinkscount_i)) add(doc, YaCySchema.applinkscount_i, document.getApplinks().size());
 
         return doc;
     }
@@ -827,25 +818,6 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         return a;
     }
     
-    public static Iterator<String> getLinks(SolrDocument doc, boolean inbound) {
-        Collection<Object> urlstub = doc.getFieldValues((inbound ? YaCySchema.inboundlinks_urlstub_txt :  YaCySchema.outboundlinks_urlstub_txt).name());
-        Collection<String> urlprot = urlstub == null ? null : indexedList2protocolList(doc.getFieldValues((inbound ? YaCySchema.inboundlinks_protocol_sxt : YaCySchema.outboundlinks_protocol_sxt).name()), urlstub.size());
-        String u;
-        LinkedHashSet<String> list = new LinkedHashSet<String>();
-        if (urlprot != null && urlstub != null) {
-            assert urlprot.size() == urlstub.size();
-            Object[] urlprota = urlprot.toArray();
-            Object[] urlstuba = urlstub.toArray();
-            for (int i = 0; i < urlprota.length; i++) {
-                u = ((String) urlprota[i]) + "://" + ((String) urlstuba[i]);
-                int hp = u.indexOf('#');
-                if (hp > 0) u = u.substring(0, hp);
-                list.add(u);
-            }
-        }
-        return list.iterator();
-    }
-    
     /**
      * encode a string containing attributes from anchor rel properties binary:
      * bit 0: "me" contained in rel
@@ -865,11 +837,36 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         return il;
     }
 
-    public String solrGetID(final SolrDocument solr) {
+    public static Iterator<String> getLinks(SolrDocument doc, boolean inbound) {
+        Collection<Object> urlstub = doc.getFieldValues((inbound ? YaCySchema.inboundlinks_urlstub_txt :  YaCySchema.outboundlinks_urlstub_txt).name());
+        Collection<String> urlprot = urlstub == null ? null : indexedList2protocolList(doc.getFieldValues((inbound ? YaCySchema.inboundlinks_protocol_sxt : YaCySchema.outboundlinks_protocol_sxt).name()), urlstub.size());
+        String u;
+        LinkedHashSet<String> list = new LinkedHashSet<String>();
+        if (urlprot != null && urlstub != null) {
+            assert urlprot.size() == urlstub.size();
+            Object[] urlprota = urlprot.toArray();
+            Object[] urlstuba = urlstub.toArray();
+            for (int i = 0; i < urlprota.length; i++) {
+                u = ((String) urlprota[i]) + "://" + ((String) urlstuba[i]);
+                int hp = u.indexOf('#');
+                if (hp > 0) u = u.substring(0, hp);
+                list.add(u);
+            }
+        }
+        return list.iterator();
+    }
+    
+    public static Date getDate(SolrDocument doc, final YaCySchema key) {
+        Date x = doc == null ? null : (Date) doc.getFieldValue(key.name());
+        Date now = new Date();
+        return (x == null) ? new Date(0) : x.after(now) ? now : x;
+    }
+
+    public static String solrGetID(final SolrDocument solr) {
         return (String) solr.getFieldValue(YaCySchema.id.getSolrFieldName());
     }
 
-    public DigestURI solrGetURL(final SolrDocument solr) {
+    public static DigestURI solrGetURL(final SolrDocument solr) {
         try {
             return new DigestURI((String) solr.getFieldValue(YaCySchema.sku.getSolrFieldName()));
         } catch (final MalformedURLException e) {
@@ -877,29 +874,29 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         }
     }
 
-    public String solrGetTitle(final SolrDocument solr) {
+    public static String solrGetTitle(final SolrDocument solr) {
         return (String) solr.getFieldValue(YaCySchema.title.getSolrFieldName());
     }
 
-    public String solrGetText(final SolrDocument solr) {
+    public static String solrGetText(final SolrDocument solr) {
         return (String) solr.getFieldValue(YaCySchema.text_t.getSolrFieldName());
     }
 
-    public String solrGetAuthor(final SolrDocument solr) {
+    public static String solrGetAuthor(final SolrDocument solr) {
         return (String) solr.getFieldValue(YaCySchema.author.getSolrFieldName());
     }
 
-    public String solrGetDescription(final SolrDocument solr) {
+    public static String solrGetDescription(final SolrDocument solr) {
         return (String) solr.getFieldValue(YaCySchema.description.getSolrFieldName());
     }
 
-    public Date solrGetDate(final SolrDocument solr) {
+    public static Date solrGetDate(final SolrDocument solr) {
         Date date = (Date) solr.getFieldValue(YaCySchema.last_modified.getSolrFieldName());
         Date now = new Date();
         return date.after(now) ? now : date;
     }
 
-    public Collection<String> solrGetKeywords(final SolrDocument solr) {
+    public static Collection<String> solrGetKeywords(final SolrDocument solr) {
         final Collection<Object> c = solr.getFieldValues(YaCySchema.keywords.getSolrFieldName());
         final ArrayList<String> a = new ArrayList<String>();
         for (final Object s: c) {

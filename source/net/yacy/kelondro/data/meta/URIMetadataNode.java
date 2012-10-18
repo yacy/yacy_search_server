@@ -35,7 +35,6 @@ import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
-import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.word.WordReference;
@@ -43,7 +42,9 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.utils.crypt;
 
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrInputDocument;
 
 
 /**
@@ -51,7 +52,7 @@ import org.apache.solr.common.SolrDocument;
  * The purpose of this object is the migration from the old metadata structure to solr document.
  * Future implementations should try to replace URIMetadata objects completely by SolrDocument objects
  */
-public class URIMetadataNode implements URIMetadata {
+public class URIMetadataNode {
 
     private byte[] hash = null;
     private String urlRaw = null, keywords = null;
@@ -64,6 +65,10 @@ public class URIMetadataNode implements URIMetadata {
     private String snippet = null;
     private WordReference word = null; // this is only used if the url is transported via remote search requests
 
+    public URIMetadataNode(final SolrInputDocument doc) {
+        this(ClientUtils.toSolrDocument(doc));
+    }
+    
     public URIMetadataNode(final SolrDocument doc) {
         this.doc = doc;
         this.snippet = "";
@@ -79,26 +84,304 @@ public class URIMetadataNode implements URIMetadata {
         }
     }
 
+    public URIMetadataNode(final SolrInputDocument doc, final WordReference searchedWord, final long ranking) {
+        this(ClientUtils.toSolrDocument(doc));
+        this.word = searchedWord;
+        this.ranking = ranking;
+    }
+
     public URIMetadataNode(final SolrDocument doc, final WordReference searchedWord, final long ranking) {
         this(doc);
         this.word = searchedWord;
         this.ranking = ranking;
     }
 
-    public URIMetadataRow toRow() {
-        return URIMetadataRow.importEntry(this.toString());
-    }
-
     public SolrDocument getDocument() {
         return this.doc;
     }
 
+    public byte[] hash() {
+        return this.hash;
+    }
+
+    public String hosthash() {
+        String hosthash = (String) this.doc.getFieldValue(YaCySchema.host_id_s.name());
+        if (hosthash == null) hosthash = ASCII.String(this.hash, 6, 6);
+        return hosthash;
+    }
+
+    public Date moddate() {
+        return getDate(YaCySchema.last_modified);
+    }
+
+    public DigestURI url() {
+        return this.url;
+    }
+
+    public boolean matches(Pattern matcher) {
+        return matcher.matcher(this.urlRaw.toLowerCase()).matches();
+    }
+
+    public String dc_title() {
+        ArrayList<String> a = getStringList(YaCySchema.title);
+        if (a == null || a.size() == 0) return "";
+        return a.get(0);
+    }
+
+    public String dc_creator() {
+        return getString(YaCySchema.author);
+    }
+
+    public String dc_publisher() {
+        return getString(YaCySchema.publisher_t);
+    }
+
+    public String dc_subject() {
+        if (this.keywords == null) {
+            this.keywords = getString(YaCySchema.keywords);
+        }
+        return this.keywords;
+    }
+
+    public double lat() {
+        if (this.lat == Double.NaN) {
+            this.lon = 0.0d;
+            this.lat = 0.0d;
+            String latlon = (String) this.doc.getFieldValue(YaCySchema.coordinate_p.name());
+            if (latlon != null) {
+                int p = latlon.indexOf(',');
+                if (p > 0) {
+                    this.lat = Double.parseDouble(latlon.substring(0, p));
+                    this.lon = Double.parseDouble(latlon.substring(p + 1));
+                }
+            }
+        }
+        return this.lat;
+    }
+
+    public double lon() {
+        if (this.lon == Double.NaN) lat();
+        return this.lon;
+    }
+
+    public long ranking() {
+        return this.ranking;
+    }
+
+    public Date loaddate() {
+        return getDate(YaCySchema.load_date_dt);
+    }
+
+    public Date freshdate() {
+        return getDate(YaCySchema.fresh_date_dt);
+    }
+
+    public String md5() {
+        return getString(YaCySchema.md5_s);
+    }
+
+    public char doctype() {
+        ArrayList<String> a = getStringList(YaCySchema.content_type);
+        if (a == null || a.size() == 0) return Response.docType(url());
+        return Response.docType(a.get(0));
+    }
+
+    public byte[] language() {
+        String language = getString(YaCySchema.language_s);
+        if (language == null || language.length() == 0) return ASCII.getBytes("en");
+        return UTF8.getBytes(language);
+    }
+
+    public byte[] referrerHash() {
+        ArrayList<String>  referrer = getStringList(YaCySchema.referrer_id_txt);
+        if (referrer == null || referrer.size() == 0) return null;
+        return ASCII.getBytes(referrer.get(0));
+    }
+
+    public int size() {
+        return getInt(YaCySchema.size_i);
+    }
+
+    public Bitfield flags() {
+        if (flags == null) {
+            this.flags = new Bitfield();
+            if (dc_subject() != null && dc_subject().indexOf("indexof") >= 0) this.flags.set(Condenser.flag_cat_indexof, true);
+            if (lon() != 0.0d || lat() != 0.0d) this.flags.set(Condenser.flag_cat_haslocation, true);
+            if (limage() > 0) this.flags.set(Condenser.flag_cat_hasimage, true);
+            if (laudio() > 0) this.flags.set(Condenser.flag_cat_hasaudio, true);
+            if (lvideo() > 0) this.flags.set(Condenser.flag_cat_hasvideo, true);
+            if (lapp() > 0) this.flags.set(Condenser.flag_cat_hasapp, true);
+        }
+        return this.flags;
+    }
+
+    public int wordCount() {
+        return getInt(YaCySchema.wordcount_i);
+    }
+
+    public int llocal() {
+        return getInt(YaCySchema.inboundlinkscount_i);
+    }
+
+    public int lother() {
+        return getInt(YaCySchema.outboundlinkscount_i);
+    }
+
+    public int limage() {
+        if (this.imagec == -1) {
+            this.imagec = getInt(YaCySchema.imagescount_i);
+        }
+        return this.imagec;
+    }
+
+    public int laudio() {
+        if (this.audioc == -1) {
+            this.audioc = getInt(YaCySchema.audiolinkscount_i);
+        }
+        return this.audioc;
+    }
+
+    public int lvideo() {
+        if (this.videoc == -1) {
+            this.videoc = getInt(YaCySchema.videolinkscount_i);
+        }
+        return this.videoc;
+    }
+
+    public int lapp() {
+        if (this.appc == -1) {
+            this.appc = getInt(YaCySchema.videolinkscount_i);
+        }
+        return this.appc;
+    }
+
+    public int virtualAge() {
+        return MicroDate.microDateDays(moddate());
+    }
+
+    public int wordsintitle() {
+        ArrayList<Integer>  x = getIntList(YaCySchema.title_words_val);
+        if (x == null || x.size() == 0) return 0;
+        return x.get(0).intValue();
+    }
+
+    public int urllength() {
+        return getInt(YaCySchema.url_chars_i);
+    }
+
+    public String snippet() {
+        return this.snippet;
+    }
+
+    public String[] collections() {
+        ArrayList<String> a = getStringList(YaCySchema.collection_sxt);
+        return a.toArray(new String[a.size()]);
+    }
+
+    public WordReference word() {
+        return this.word;
+    }
+
+    public boolean isOlder(URIMetadataRow other) {
+        if (other == null) return false;
+        final Date tmoddate = moddate();
+        final Date omoddate = other.moddate();
+        if (tmoddate.before(omoddate)) return true;
+        if (tmoddate.equals(omoddate)) {
+            final Date tloaddate = loaddate();
+            final Date oloaddate = other.loaddate();
+            if (tloaddate.before(oloaddate)) return true;
+            if (tloaddate.equals(oloaddate)) return true;
+        }
+        return false;
+    }
+
+    private static StringBuilder corePropList(URIMetadataNode md) {
+        // generate a parseable string; this is a simple property-list
+        final StringBuilder s = new StringBuilder(300);
+
+        // create new formatters to make concurrency possible
+        final GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
+
+        try {
+            s.append("hash=").append(ASCII.String(md.hash()));
+            s.append(",url=").append(crypt.simpleEncode(md.url().toNormalform(true)));
+            s.append(",descr=").append(crypt.simpleEncode(md.dc_title()));
+            s.append(",author=").append(crypt.simpleEncode(md.dc_creator()));
+            s.append(",tags=").append(crypt.simpleEncode(Tagging.cleanTagFromAutotagging(md.dc_subject())));
+            s.append(",publisher=").append(crypt.simpleEncode(md.dc_publisher()));
+            s.append(",lat=").append(md.lat());
+            s.append(",lon=").append(md.lon());
+            s.append(",mod=").append(formatter.format(md.moddate()));
+            s.append(",load=").append(formatter.format(md.loaddate()));
+            s.append(",fresh=").append(formatter.format(md.freshdate()));
+            s.append(",referrer=").append(md.referrerHash() == null ? "" : ASCII.String(md.referrerHash()));
+            s.append(",md5=").append(md.md5());
+            s.append(",size=").append(md.size());
+            s.append(",wc=").append(md.wordCount());
+            s.append(",dt=").append(md.doctype());
+            s.append(",flags=").append(md.flags().exportB64());
+            s.append(",lang=").append(md.language() == null ? "EN" : UTF8.String(md.language()));
+            s.append(",llocal=").append(md.llocal());
+            s.append(",lother=").append(md.lother());
+            s.append(",limage=").append(md.limage());
+            s.append(",laudio=").append(md.laudio());
+            s.append(",lvideo=").append(md.lvideo());
+            s.append(",lapp=").append(md.lapp());
+            if (md.word() != null) {
+                // append also word properties
+                final String wprop = md.word().toPropertyForm();
+                s.append(",wi=").append(Base64Order.enhancedCoder.encodeString(wprop));
+            }
+            return s;
+        } catch (final Throwable e) {
+            Log.logException(e);
+            return null;
+        }
+    }
+
+    /**
+     * the toString format must be completely identical to URIMetadataRow because that is used
+     * to transport the data over p2p connections.
+     */
+    public String toString(String snippet) {
+        // add information needed for remote transport
+        final StringBuilder core = corePropList(this);
+        if (core == null)
+            return null;
+
+        core.ensureCapacity(core.length() + snippet.length() * 2);
+        core.insert(0, '{');
+        core.append(",snippet=").append(crypt.simpleEncode(snippet));
+        core.append('}');
+
+        return core.toString();
+        //return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
+    }
+
+
+    /**
+     * @return the object as String.<br>
+     * This e.g. looks like this:
+     * <pre>{hash=jmqfMk7Y3NKw,referrer=------------,mod=20050610,load=20051003,size=51666,wc=1392,cc=0,local=true,q=AEn,dt=h,lang=uk,url=b|aHR0cDovL3d3dy50cmFuc3BhcmVuY3kub3JnL3N1cnZleXMv,descr=b|S25vd2xlZGdlIENlbnRyZTogQ29ycnVwdGlvbiBTdXJ2ZXlzIGFuZCBJbmRpY2Vz}</pre>
+     */
+    @Override
+    public String toString() {
+        final StringBuilder core = corePropList(this);
+        if (core == null) return null;
+        core.insert(0, '{');
+        core.append('}');
+        return core.toString();
+    }
+    
     private int getInt(YaCySchema field) {
         assert !field.isMultiValued();
         assert field.getType() == SolrType.integer;
-        Integer x = (Integer) this.doc.getFieldValue(field.name());
+        Object x = this.doc.getFieldValue(field.name());
         if (x == null) return 0;
-        return x.intValue();
+        if (x instanceof Integer) return ((Integer) x).intValue();
+        if (x instanceof Long) return ((Long) x).intValue();
+        return 0;
     }
 
     private Date getDate(YaCySchema field) {
@@ -151,325 +434,4 @@ public class URIMetadataNode implements URIMetadata {
         return a;
     }
 
-    @Override
-    public byte[] hash() {
-        return this.hash;
-    }
-
-    @Override
-    public String hosthash() {
-        String hosthash = (String) this.doc.getFieldValue(YaCySchema.host_id_s.name());
-        if (hosthash == null) hosthash = ASCII.String(this.hash, 6, 6);
-        return hosthash;
-    }
-
-    @Override
-    public Date moddate() {
-        return getDate(YaCySchema.last_modified);
-    }
-
-    @Override
-    public DigestURI url() {
-        return this.url;
-    }
-
-    @Override
-    public boolean matches(Pattern matcher) {
-        return matcher.matcher(this.urlRaw.toLowerCase()).matches();
-    }
-
-    @Override
-    public String dc_title() {
-        ArrayList<String> a = getStringList(YaCySchema.title);
-        if (a == null || a.size() == 0) return "";
-        return a.get(0);
-    }
-
-    @Override
-    public String dc_creator() {
-        return getString(YaCySchema.author);
-    }
-
-    @Override
-    public String dc_publisher() {
-        return getString(YaCySchema.publisher_t);
-    }
-
-    @Override
-    public String dc_subject() {
-        if (this.keywords == null) {
-            this.keywords = getString(YaCySchema.keywords);
-        }
-        return this.keywords;
-    }
-
-    @Override
-    public double lat() {
-        if (this.lat == Double.NaN) {
-            this.lon = 0.0d;
-            this.lat = 0.0d;
-            String latlon = (String) this.doc.getFieldValue(YaCySchema.coordinate_p.name());
-            if (latlon != null) {
-                int p = latlon.indexOf(',');
-                if (p > 0) {
-                    this.lat = Double.parseDouble(latlon.substring(0, p));
-                    this.lon = Double.parseDouble(latlon.substring(p + 1));
-                }
-            }
-        }
-        return this.lat;
-    }
-
-    @Override
-    public double lon() {
-        if (this.lon == Double.NaN) lat();
-        return this.lon;
-    }
-
-    @Override
-    public long ranking() {
-        return this.ranking;
-    }
-
-    @Override
-    public Date loaddate() {
-        return getDate(YaCySchema.load_date_dt);
-    }
-
-    @Override
-    public Date freshdate() {
-        return getDate(YaCySchema.fresh_date_dt);
-    }
-
-    @Override
-    public String md5() {
-        return getString(YaCySchema.md5_s);
-    }
-
-    @Override
-    public char doctype() {
-        ArrayList<String> a = getStringList(YaCySchema.content_type);
-        if (a == null || a.size() == 0) return Response.docType(url());
-        return Response.docType(a.get(0));
-    }
-
-    @Override
-    public byte[] language() {
-        String language = getString(YaCySchema.language_s);
-        if (language == null || language.length() == 0) return ASCII.getBytes("en");
-        return UTF8.getBytes(language);
-    }
-
-
-    @Override
-    public byte[] referrerHash() {
-        ArrayList<String>  referrer = getStringList(YaCySchema.referrer_id_txt);
-        if (referrer == null || referrer.size() == 0) return null;
-        return ASCII.getBytes(referrer.get(0));
-    }
-
-    @Override
-    public int size() {
-        return getInt(YaCySchema.size_i);
-    }
-
-    @Override
-    public Bitfield flags() {
-        if (flags == null) {
-            this.flags = new Bitfield();
-            if (dc_subject() != null && dc_subject().indexOf("indexof") >= 0) this.flags.set(Condenser.flag_cat_indexof, true);
-            if (lon() != 0.0d || lat() != 0.0d) this.flags.set(Condenser.flag_cat_haslocation, true);
-            if (limage() > 0) this.flags.set(Condenser.flag_cat_hasimage, true);
-            if (laudio() > 0) this.flags.set(Condenser.flag_cat_hasaudio, true);
-            if (lvideo() > 0) this.flags.set(Condenser.flag_cat_hasvideo, true);
-            if (lapp() > 0) this.flags.set(Condenser.flag_cat_hasapp, true);
-        }
-        return this.flags;
-    }
-
-    @Override
-    public int wordCount() {
-        return getInt(YaCySchema.wordcount_i);
-    }
-
-    @Override
-    public int llocal() {
-        return getInt(YaCySchema.inboundlinkscount_i);
-    }
-
-    @Override
-    public int lother() {
-        return getInt(YaCySchema.outboundlinkscount_i);
-    }
-
-    @Override
-    public int limage() {
-        if (this.imagec == -1) {
-            this.imagec = getInt(YaCySchema.imagescount_i);
-        }
-        return this.imagec;
-    }
-
-    @Override
-    public int laudio() {
-        if (this.audioc == -1) {
-            this.audioc = getInt(YaCySchema.audiolinkscount_i);
-        }
-        return this.audioc;
-    }
-
-    @Override
-    public int lvideo() {
-        if (this.videoc == -1) {
-            this.videoc = getInt(YaCySchema.videolinkscount_i);
-        }
-        return this.videoc;
-    }
-
-    @Override
-    public int lapp() {
-        if (this.appc == -1) {
-            this.appc = getInt(YaCySchema.videolinkscount_i);
-        }
-        return this.appc;
-    }
-
-    public int virtualAge() {
-        return MicroDate.microDateDays(moddate());
-    }
-
-    public int wordsintitle() {
-        ArrayList<Integer>  x = getIntList(YaCySchema.title_words_val);
-        if (x == null || x.size() == 0) return 0;
-        return x.get(0).intValue();
-    }
-
-    public int urllength() {
-        return getInt(YaCySchema.url_chars_i);
-    }
-
-    @Override
-    public String snippet() {
-        return this.snippet;
-    }
-
-    @Override
-    public String[] collections() {
-        ArrayList<String> a = getStringList(YaCySchema.collection_sxt);
-        return a.toArray(new String[a.size()]);
-    }
-
-    @Override
-    public WordReference word() {
-        return this.word;
-    }
-
-    @Override
-    public boolean isOlder(URIMetadata other) {
-        if (other == null) return false;
-        final Date tmoddate = moddate();
-        final Date omoddate = other.moddate();
-        if (tmoddate.before(omoddate)) return true;
-        if (tmoddate.equals(omoddate)) {
-            final Date tloaddate = loaddate();
-            final Date oloaddate = other.loaddate();
-            if (tloaddate.before(oloaddate)) return true;
-            if (tloaddate.equals(oloaddate)) return true;
-        }
-        return false;
-    }
-
-    protected static StringBuilder corePropList(URIMetadata md) {
-        // generate a parseable string; this is a simple property-list
-        final StringBuilder s = new StringBuilder(300);
-
-        // create new formatters to make concurrency possible
-        final GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
-
-        try {
-            s.append("hash=").append(ASCII.String(md.hash()));
-            s.append(",url=").append(crypt.simpleEncode(md.url().toNormalform(true)));
-            s.append(",descr=").append(crypt.simpleEncode(md.dc_title()));
-            s.append(",author=").append(crypt.simpleEncode(md.dc_creator()));
-            s.append(",tags=").append(crypt.simpleEncode(Tagging.cleanTagFromAutotagging(md.dc_subject())));
-            s.append(",publisher=").append(crypt.simpleEncode(md.dc_publisher()));
-            s.append(",lat=").append(md.lat());
-            s.append(",lon=").append(md.lon());
-            s.append(",mod=").append(formatter.format(md.moddate()));
-            s.append(",load=").append(formatter.format(md.loaddate()));
-            s.append(",fresh=").append(formatter.format(md.freshdate()));
-            s.append(",referrer=").append(md.referrerHash() == null ? "" : ASCII.String(md.referrerHash()));
-            s.append(",md5=").append(md.md5());
-            s.append(",size=").append(md.size());
-            s.append(",wc=").append(md.wordCount());
-            s.append(",dt=").append(md.doctype());
-            s.append(",flags=").append(md.flags().exportB64());
-            s.append(",lang=").append(md.language() == null ? "EN" : UTF8.String(md.language()));
-            s.append(",llocal=").append(md.llocal());
-            s.append(",lother=").append(md.lother());
-            s.append(",limage=").append(md.limage());
-            s.append(",laudio=").append(md.laudio());
-            s.append(",lvideo=").append(md.lvideo());
-            s.append(",lapp=").append(md.lapp());
-            if (md.word() != null) {
-                // append also word properties
-                final String wprop = md.word().toPropertyForm();
-                s.append(",wi=").append(Base64Order.enhancedCoder.encodeString(wprop));
-            }
-            return s;
-        } catch (final Throwable e) {
-            Log.logException(e);
-            return null;
-        }
-    }
-
-    /**
-     * the toString format must be completely identical to URIMetadataRow because that is used
-     * to transport the data over p2p connections.
-     */
-    @Override
-    public String toString(String snippet) {
-        // add information needed for remote transport
-        final StringBuilder core = corePropList(this);
-        if (core == null)
-            return null;
-
-        core.ensureCapacity(core.length() + snippet.length() * 2);
-        core.insert(0, '{');
-        core.append(",snippet=").append(crypt.simpleEncode(snippet));
-        core.append('}');
-
-        return core.toString();
-        //return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
-    }
-
-
-    /**
-     * @return the object as String.<br>
-     * This e.g. looks like this:
-     * <pre>{hash=jmqfMk7Y3NKw,referrer=------------,mod=20050610,load=20051003,size=51666,wc=1392,cc=0,local=true,q=AEn,dt=h,lang=uk,url=b|aHR0cDovL3d3dy50cmFuc3BhcmVuY3kub3JnL3N1cnZleXMv,descr=b|S25vd2xlZGdlIENlbnRyZTogQ29ycnVwdGlvbiBTdXJ2ZXlzIGFuZCBJbmRpY2Vz}</pre>
-     */
-    @Override
-    public String toString() {
-        final StringBuilder core = corePropList(this);
-        if (core == null) return null;
-        core.insert(0, '{');
-        core.append('}');
-        return core.toString();
-    }
-
-    @Override
-    public Request toBalancerEntry(final String initiatorHash) {
-        return new Request(
-                ASCII.getBytes(initiatorHash),
-                url(),
-                referrerHash(),
-                dc_title(),
-                moddate(),
-                null,
-                0,
-                0,
-                0,
-                0);
-    }
 }

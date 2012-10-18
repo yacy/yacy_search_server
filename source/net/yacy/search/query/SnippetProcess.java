@@ -44,7 +44,6 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.Cache;
 import net.yacy.data.WorkTables;
 import net.yacy.document.Condenser;
-import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;

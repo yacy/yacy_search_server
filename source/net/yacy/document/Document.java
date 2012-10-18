@@ -293,7 +293,7 @@ dc_rights
         return this.source.toNormalform(true);
     }
 
-    public MultiProtocolURI dc_source() {
+    public DigestURI dc_source() {
         return this.source;
     }
 

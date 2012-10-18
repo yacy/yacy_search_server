@@ -1976,16 +1976,18 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return false;
     }
 
-    public long length() throws IOException {
-        if (isFile()) return getFSFile().length();
+    public long length() {
+        if (isFile()) try {
+            return getFSFile().length();
+        } catch (final Throwable e) {
+            return -1;
+        }
         if (isSMB()) try {
             return TimeoutRequest.length(getSmbFile(), SMB_TIMEOUT);
-        } catch (final SmbException e) {
-            throw new IOException("SMB.length SmbException (" + e.getMessage() + ") for " + toString());
-        } catch (final MalformedURLException e) {
-            throw new IOException("SMB.length MalformedURLException (" + e.getMessage() + ") for " + toString());
+        } catch (final Throwable e) {
+            return -1;
         }
-        return 0;
+        return -1;
     }
 
     public long lastModified() throws IOException {

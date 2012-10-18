@@ -81,7 +81,6 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
-import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -812,7 +811,8 @@ public final class Protocol
             try {
                 event.getQuery().getSegment().fulltext().putMetadata(urlEntry);
                 ResultURLs.stack(
-                    urlEntry,
+                    ASCII.String(urlEntry.url().hash()),
+                    urlEntry.url().getHost(),
                     event.peers.mySeed().hash.getBytes(),
                     UTF8.getBytes(target.hash),
                     EventOrigin.QUERIES);
@@ -1103,7 +1103,8 @@ public final class Protocol
                     try {
                         event.getQuery().getSegment().fulltext().putDocument(ClientUtils.toSolrInputDocument(doc));
                         ResultURLs.stack(
-                            urlEntry,
+                            ASCII.String(urlEntry.url().hash()),
+                            urlEntry.url().getHost(),
                             event.peers.mySeed().hash.getBytes(),
                             UTF8.getBytes(target.hash),
                             EventOrigin.QUERIES);
@@ -1187,7 +1188,7 @@ public final class Protocol
         final String process,
         final String result,
         final String reason,
-        final URIMetadata entry,
+        final URIMetadataNode entry,
         final String wordhashes) {
         assert (target != null);
         assert (mySeed != null);
@@ -1225,8 +1226,7 @@ public final class Protocol
         // send request
         try {
             // prepare request
-            final Map<String, ContentBody> parts =
-                basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
+            final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("process", UTF8.StringBody(process));
             parts.put("urlhash", UTF8.StringBody(((entry == null) ? "" : ASCII.String(entry.hash()))));
             parts.put("result", UTF8.StringBody(result));
@@ -1266,7 +1266,7 @@ public final class Protocol
     public static String transferIndex(
         final Seed targetSeed,
         final ReferenceContainerCache<WordReference> indexes,
-        final SortedMap<byte[], URIMetadataRow> urlCache,
+        final SortedMap<byte[], URIMetadataNode> urlCache,
         final boolean gzipBody,
         final int timeout) {
 
@@ -1327,7 +1327,7 @@ public final class Protocol
         } // all url's known
 
         // extract the urlCache from the result
-        final URIMetadata[] urls = new URIMetadata[uhs.length];
+        final URIMetadataNode[] urls = new URIMetadataNode[uhs.length];
         for ( int i = 0; i < uhs.length; i++ ) {
             urls[i] = urlCache.get(ASCII.getBytes(uhs[i]));
             if ( urls[i] == null ) {
@@ -1435,7 +1435,7 @@ public final class Protocol
 
     private static Map<String, String> transferURL(
         final Seed targetSeed,
-        final URIMetadata[] urls,
+        final URIMetadataNode[] urls,
         boolean gzipBody,
         final int timeout) {
         // this post a message to the remote message board
@@ -1457,7 +1457,7 @@ public final class Protocol
         String resource;
         int urlc = 0;
         int urlPayloadSize = 0;
-        for ( final URIMetadata url : urls ) {
+        for ( final URIMetadataNode url : urls ) {
             if ( url != null ) {
                 resource = url.toString();
                 //System.out.println("*** DEBUG resource = " + resource);

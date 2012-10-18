@@ -45,7 +45,6 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ListManager;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -270,8 +269,8 @@ public class IndexControlRWIs_p {
                         index = segment.termIndex().get(keyhash, null);
                         // built urlCache
                         final Iterator<WordReference> urlIter = index.entries();
-                        final TreeMap<byte[], URIMetadataRow> knownURLs =
-                                new TreeMap<byte[], URIMetadataRow>(Base64Order.enhancedCoder);
+                        final TreeMap<byte[], URIMetadataNode> knownURLs =
+                                new TreeMap<byte[], URIMetadataNode>(Base64Order.enhancedCoder);
                         final HandleSet unknownURLEntries =
                                 new RowHandleSet(
                                 WordReferenceRow.urlEntryRow.primaryKeyLength,
@@ -290,7 +289,7 @@ public class IndexControlRWIs_p {
                                 }
                                 urlIter.remove();
                             } else {
-                                knownURLs.put(iEntry.urlhash(), lurl.toRow());
+                                knownURLs.put(iEntry.urlhash(), lurl);
                             }
                         }
 
@@ -376,7 +375,7 @@ public class IndexControlRWIs_p {
                             } catch ( final SpaceExceededException e ) {
                                 Log.logException(e);
                             }
-                            final URIMetadata e = segment.fulltext().getMetadata(b);
+                            final URIMetadataNode e = segment.fulltext().getMetadata(b);
                             segment.fulltext().remove(b);
                             if ( e != null ) {
                                 url = e.url();
@@ -411,7 +410,7 @@ public class IndexControlRWIs_p {
                             } catch ( final SpaceExceededException e ) {
                                 Log.logException(e);
                             }
-                            final URIMetadata e = segment.fulltext().getMetadata(b);
+                            final URIMetadataNode e = segment.fulltext().getMetadata(b);
                             segment.fulltext().remove(b);
                             if ( e != null ) {
                                 url = e.url();

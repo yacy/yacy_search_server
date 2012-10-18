@@ -35,6 +35,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.solr.common.SolrInputDocument;
+
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
@@ -57,7 +59,6 @@ import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.citation.CitationReferenceFactory;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
@@ -284,7 +285,7 @@ public class Segment {
         if (this.urlCitationIndex != null) this.urlCitationIndex.close();
     }
 
-    private String votedLanguage(
+    private static String votedLanguage(
                     final DigestURI url,
                     final String urlNormalform,
                     final Document document,
@@ -295,23 +296,17 @@ public class Segment {
         if (language == null) {
             // no statistics available, we take either the metadata (if given) or the TLD
             language = (bymetadata == null) ? url.language() : bymetadata;
-            if (this.log.isFine()) this.log.logFine("LANGUAGE-BY-STATISTICS: " + url + " FAILED, taking " + ((bymetadata == null) ? "TLD" : "metadata") + ": " + language);
         } else {
             if (bymetadata == null) {
                 // two possible results: compare and report conflicts
-                if (language.equals(url.language()))
-                    if (this.log.isFine()) this.log.logFine("LANGUAGE-BY-STATISTICS: " + url + " CONFIRMED - TLD IDENTICAL: " + language);
-                else {
-                    final String error = "LANGUAGE-BY-STATISTICS: " + url + " CONFLICTING: " + language + " (the language given by the TLD is " + url.language() + ")";
+                if (!language.equals(url.language())) {
                     // see if we have a hint in the url that the statistic was right
                     final String u = urlNormalform.toLowerCase();
                     if (!u.contains("/" + language + "/") && !u.contains("/" + ISO639.country(language).toLowerCase() + "/")) {
                         // no confirmation using the url, use the TLD
                         language = url.language();
-                        if (this.log.isFine()) this.log.logFine(error + ", corrected using the TLD");
                     } else {
                         // this is a strong hint that the statistics was in fact correct
-                        if (this.log.isFine()) this.log.logFine(error + ", but the url proves that the statistic is correct");
                     }
                 }
             } else {
@@ -340,12 +335,9 @@ public class Segment {
         if (this.termIndex != null) this.termIndex.add(termHash, entry);
     }
 
-    public URIMetadataRow storeDocument(
+    public SolrInputDocument storeDocument(
             final DigestURI url,
             final DigestURI referrerURL,
-            Date modDate,
-            final Date loadDate,
-            final long sourcesize,
             final CrawlProfile profile,
             final ResponseHeader responseHeader,
             final Document document,
@@ -359,44 +351,21 @@ public class Segment {
         // CREATE INDEX
 
         // load some document metadata
+        final Date loadDate = new Date();
         final String id = ASCII.String(url.hash());
         final String dc_title = document.dc_title();
         final String urlNormalform = url.toNormalform(true);
         final String language = votedLanguage(url, urlNormalform, document, condenser); // identification of the language
 
         // STORE URL TO LOADED-URL-DB
-        if (modDate.getTime() > loadDate.getTime()) modDate = loadDate; // TODO: compare with modTime from responseHeader
+        Date modDate = responseHeader.lastModified();
+        if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
         char docType = Response.docType(document.dc_format());
-        final URIMetadataRow metadata = new URIMetadataRow(
-                url,                                       // URL
-                dc_title,                                  // document description
-                document.dc_creator(),                     // author
-                document.dc_subject(' '),                  // tags
-                document.dc_publisher(),                   // publisher (may be important to get location data)
-                document.lon(),                            // decimal degrees as in WGS84;
-                document.lat(),                            // if unknown both values may be 0.0d;
-                modDate,                                   // modification date
-                loadDate,                                  // loaded date
-                new Date(loadDate.getTime() + Math.max(0, loadDate.getTime() - modDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula
-                (referrerURL == null) ? null : ASCII.String(referrerURL.hash()),            // referer hash
-                new byte[0],                               // md5
-                (int) sourcesize,                          // size
-                condenser.RESULT_NUMB_WORDS,               // word count
-                docType,                                   // doctype
-                condenser.RESULT_FLAGS,                    // flags
-                UTF8.getBytes(language),                   // language
-                document.inboundLinks().size(),            // inbound links
-                document.outboundLinks().size(),           // outbound links
-                document.getAudiolinks().size(),           // laudio
-                document.getImages().size(),               // limage
-                document.getVideolinks().size(),           // lvideo
-                document.getApplinks().size(),             // lapp
-                profile.collections()                      // collections
-        );
-
+        
         // STORE TO SOLR
+        final SolrInputDocument solrInputDoc = this.fulltext.getSolrScheme().yacy2solr(id, profile, responseHeader, document, condenser, referrerURL, language);
         try {
-            this.fulltext.putDocument(this.fulltext.getSolrScheme().yacy2solr(id, profile, responseHeader, document, condenser, metadata));
+            this.fulltext.putDocument(solrInputDoc);
         } catch ( final IOException e ) {
             Log.logWarning("SOLR", "failed to send " + urlNormalform + " to solr: " + e.getMessage());
         }
@@ -487,7 +456,7 @@ public class Segment {
         }
 
         // finished
-        return metadata;
+        return solrInputDoc;
     }
 
     public void removeAllUrlReferences(final HandleSet urls, final LoaderDispatcher loader, final CacheStrategy cacheStrategy) {

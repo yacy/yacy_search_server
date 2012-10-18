@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.ResultURLs;
@@ -149,7 +150,7 @@ public final class transferURL {
                 if (Network.log.isFine()) Network.log.logFine("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.url().toNormalform(true));
                 try {
                     sb.index.fulltext().putMetadata(lEntry);
-                    ResultURLs.stack(lEntry, iam.getBytes(), iam.getBytes(), EventOrigin.DHT_TRANSFER);
+                    ResultURLs.stack(ASCII.String(lEntry.url().hash()), lEntry.url().getHost(), iam.getBytes(), iam.getBytes(), EventOrigin.DHT_TRANSFER);
                     if (Network.log.isFine()) Network.log.logFine("transferURL: received URL '" + lEntry.url().toNormalform(false) + "' from peer " + otherPeerName);
                     received++;
                 } catch (final IOException e) {

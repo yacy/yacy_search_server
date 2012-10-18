@@ -46,7 +46,7 @@ import java.util.regex.PatternSyntaxException;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
@@ -328,17 +328,19 @@ public class Blacklist {
         return ret;
     }
 
+    public boolean isListed(final BlacklistType blacklistType, final URIMetadataNode entry) {
+        return isListed(blacklistType, entry.url());
+    }
+    public boolean isListed(final BlacklistType blacklistType, final URIMetadataRow entry) {
+        return isListed(blacklistType, entry.url());
+    }
+
     /**
      * Checks whether the given entry is listed in given blacklist type
      * @param blacklistType The used blacklist
      * @param entry Entry to be checked
-     * @return	Whether the given entry is blacklisted
+     * @return  Whether the given entry is blacklisted
      */
-    public boolean isListed(final BlacklistType blacklistType, final URIMetadata entry) {
-        // Call inner method
-        return isListed(blacklistType, entry.url());
-    }
-
     public boolean isListed(final BlacklistType blacklistType, final DigestURI url) {
         if (url == null) {
             throw new IllegalArgumentException("url may not be null");

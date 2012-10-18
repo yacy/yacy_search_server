@@ -30,9 +30,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.UTF8;
@@ -41,7 +42,6 @@ import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.query.QueryParams;
@@ -101,12 +101,12 @@ public class DocumentIndex extends Segment {
         @Override
         public void run() {
             DigestURI f;
-            URIMetadata[] resultRows;
+            SolrInputDocument[] resultRows;
             try {
                 while ( (f = DocumentIndex.this.queue.take()) != poison ) {
                     try {
                         resultRows = add(f);
-                        for ( final URIMetadata resultRow : resultRows ) {
+                        for ( final SolrInputDocument resultRow : resultRows ) {
                             if ( DocumentIndex.this.callback != null ) {
                                 if ( resultRow == null ) {
                                     DocumentIndex.this.callback.fail(f, "result is null");
@@ -138,7 +138,7 @@ public class DocumentIndex extends Segment {
         this.queue.clear();
     }
 
-    private URIMetadata[] add(final DigestURI url) throws IOException {
+    private SolrInputDocument[] add(final DigestURI url) throws IOException {
         if ( url == null ) {
             throw new IOException("file = null");
         }
@@ -161,7 +161,7 @@ public class DocumentIndex extends Segment {
             throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
         }
         //Document document = Document.mergeDocuments(url, null, documents);
-        final URIMetadata[] rows = new URIMetadata[documents.length];
+        final SolrInputDocument[] rows = new SolrInputDocument[documents.length];
         int c = 0;
         for ( final Document document : documents ) {
         	if (document == null) continue;
@@ -170,9 +170,6 @@ public class DocumentIndex extends Segment {
                 super.storeDocument(
                     url,
                     null,
-                    new Date(url.lastModified()),
-                    new Date(),
-                    url.length(),
                     null,
                     null,
                     document,
@@ -275,7 +272,7 @@ public class DocumentIndex extends Segment {
 
     public interface CallbackListener
     {
-        public void commit(DigestURI f, URIMetadata resultRow);
+        public void commit(DigestURI f, SolrInputDocument resultRow);
 
         public void fail(DigestURI f, String failReason);
     }
@@ -296,7 +293,7 @@ public class DocumentIndex extends Segment {
         System.out.println("using index files at " + segmentPath.getAbsolutePath());
         final CallbackListener callback = new CallbackListener() {
             @Override
-            public void commit(final DigestURI f, final URIMetadata resultRow) {
+            public void commit(final DigestURI f, final SolrInputDocument resultRow) {
                 System.out.println("indexed: " + f.toString());
             }
 

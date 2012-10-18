@@ -50,7 +50,6 @@ import net.yacy.cora.storage.ZIPReader;
 import net.yacy.cora.storage.ZIPWriter;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadata;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReference;
@@ -64,7 +63,6 @@ import net.yacy.kelondro.util.MergeIterator;
 import net.yacy.search.Switchboard;
 
 import org.apache.lucene.util.Version;
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
@@ -226,10 +224,10 @@ public final class Fulltext implements Iterable<byte[]> {
     		// slow migration to solr
     		final Row.Entry entry = this.urlIndexFile.remove(urlHash);
             if (entry == null) return null;
-			URIMetadataRow row = new URIMetadataRow(entry, wre, weight);
+			URIMetadataRow row = new URIMetadataRow(entry, wre);
 			SolrInputDocument solrInput = this.solrScheme.metadata2solr(row);
 			this.putDocument(solrInput);
-			return new URIMetadataNode(ClientUtils.toSolrDocument(solrInput), wre, weight);
+			return new URIMetadataNode(solrInput, wre, weight);
         } catch (final IOException e) {
             Log.logException(e);
         }
@@ -244,9 +242,9 @@ public final class Fulltext implements Iterable<byte[]> {
         	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
         	SolrDocument sd = this.solr.get(id);
         	Date now = new Date();
-        	Date sdDate = this.solrScheme.getDate(sd, YaCySchema.last_modified);
-        	if (sdDate.after(now)) sdDate = now;
-        	Date docDate = this.solrScheme.getDate(doc, YaCySchema.last_modified);
+        	Date sdDate = sd == null ? null : SolrConfiguration.getDate(sd, YaCySchema.last_modified);
+        	if (sdDate == null || sdDate.after(now)) sdDate = now;
+        	Date docDate = SolrConfiguration.getDate(doc, YaCySchema.last_modified);
         	if (docDate.after(now)) docDate = now;
         	if (sd == null || sdDate.before(docDate)) {
                 if (this.solrScheme.contains(YaCySchema.ip_s)) {
@@ -263,13 +261,8 @@ public final class Fulltext implements Iterable<byte[]> {
         if (MemoryControl.shortStatus()) clearCache();
     }
 
-    public void putMetadata(final URIMetadata entry) throws IOException {
-    	if (entry instanceof URIMetadataNode) {
-    		putDocument(ClientUtils.toSolrInputDocument(((URIMetadataNode) entry).getDocument()));
-    		return;
-    	}
-    	assert entry instanceof URIMetadataRow;
-    	URIMetadataRow row = (URIMetadataRow) entry;
+    public void putMetadata(final URIMetadataRow entry) throws IOException {
+    	URIMetadataRow row = entry;
 
         byte[] idb = row.hash();
         String id = ASCII.String(idb);
@@ -516,7 +509,7 @@ public final class Fulltext implements Iterable<byte[]> {
                     }
                 } else {
                     final Iterator<URIMetadataNode> i = entries(); // iterates indexURLEntry objects
-                    URIMetadata entry;
+                    URIMetadataNode entry;
                     String url;
                     while (i.hasNext()) {
                         entry = i.next();

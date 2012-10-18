@@ -37,7 +37,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
-import net.yacy.kelondro.data.meta.URIMetadata;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.logging.Log;
@@ -71,7 +71,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     private final Queue<Integer> positions;
     private double termFrequency;
 
-    public WordReferenceVars(final URIMetadata md) {
+    public WordReferenceVars(final URIMetadataRow md) {
         this.language = md.language();
         this.flags = md.flags();
         this.lastModified = md.moddate().getTime();
