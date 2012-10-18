@@ -111,8 +111,8 @@ public class searchresult {
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 5000 : 100));
         post.put("hl", "true");
-        post.put("hl.fl", YaCySchema.h1_txt.name() + "," + YaCySchema.h2_txt.name() + "," + YaCySchema.text_t.name());
-        post.put("hl.alternateField", YaCySchema.description.name());
+        post.put("hl.fl", YaCySchema.h1_txt.getSolrFieldName() + "," + YaCySchema.h2_txt.getSolrFieldName() + "," + YaCySchema.text_t.getSolrFieldName());
+        post.put("hl.alternateField", YaCySchema.description.getSolrFieldName());
         post.put("hl.simple.pre", "<b>");
         post.put("hl.simple.post", "</b>");
         post.put("hl.fragsize", Integer.toString(SnippetProcess.SNIPPET_MAX_LENGTH));
@@ -140,13 +140,13 @@ public class searchresult {
                 if (s.length() > 0) sites.add(s);
             }
             if (sites.size() > 1) {
-                q += " AND (" + YaCySchema.collection_sxt.name() + ":" + sites.get(0);
+                q += " AND (" + YaCySchema.collection_sxt.getSolrFieldName() + ":" + sites.get(0);
                 for (int i = 1; i < sites.size(); i++) {
-                    q += " OR " + YaCySchema.collection_sxt.name() + ":" + sites.get(i);
+                    q += " OR " + YaCySchema.collection_sxt.getSolrFieldName() + ":" + sites.get(i);
                 }
                 q += ")";
             } else if (sites.size() == 1) {
-                q += " AND " + YaCySchema.collection_sxt.name() + ":" + sites.get(0);
+                q += " AND " + YaCySchema.collection_sxt.getSolrFieldName() + ":" + sites.get(0);
             }
             post.put(CommonParams.Q, q);
         }
