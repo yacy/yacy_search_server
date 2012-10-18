@@ -228,7 +228,7 @@ public class HostBrowser {
                     if (entry.getValue() instanceof Boolean) {
                         // this is a file
                         prop.put("files_list_" + c + "_type", 0);
-                        prop.put("files_list_" + c + "_type_file", entry.getKey());
+                        prop.put("files_list_" + c + "_type_url", entry.getKey());
                         boolean indexed = ((Boolean) entry.getValue()).booleanValue();
                         try {uri = new DigestURI(entry.getKey());} catch (MalformedURLException e) {uri = null;}
                         boolean loading = load.equals(entry.getKey()) ||
@@ -237,13 +237,13 @@ public class HostBrowser {
                         prop.put("files_list_" + c + "_type_stored", indexed ? 1 : loading ? 2 : 0);
                         prop.put("files_list_" + c + "_type_stored_load", loadRight ? 1 : 0);
                         if (loadRight) {
-                            prop.put("files_list_" + c + "_type_stored_load_file", entry.getKey());
+                            prop.put("files_list_" + c + "_type_stored_load_url", entry.getKey());
                             prop.put("files_list_" + c + "_type_stored_load_path", path);
                         }
                     } else {
                         // this is a folder
                         prop.put("files_list_" + c + "_type", 1);
-                        prop.put("files_list_" + c + "_type_file", entry.getKey());
+                        prop.put("files_list_" + c + "_type_url", entry.getKey());
                         prop.put("files_list_" + c + "_type_count", ((int[]) entry.getValue())[1] + " stored / " + ((int[]) entry.getValue())[0] + " linked");
                     }
                     if (++c >= maxcount) break;

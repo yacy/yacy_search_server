@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<hostbrowser>
+ #(hosts)#::
+ <hosts>
+  #{list}#
+  <host name="#[host]#" count="#[count]#" />
+  #{/list}#
+ </hosts>
+ #(/hosts)#
+ #(files)#::
+ <files>
+  #(root)#<up>#[path]#</up>::<root />#(/root)#
+  #{list}#
+  #(type)#<file path="#[url]#" stored="#(stored)#false::true#(/stored)#" />::<dir path="#[url]#" count="#[count]#" />#(/type)#
+  #{/list}#
+ </files>
+ #(/files)#
+ #(outbound)#::
+ <outbound>
+  #{list}#
+  <host name="#[host]#" count="#[count]#" />
+  #{/list}#
+ </outbound>
+ #(/outbound)#
+ #(inbound)#::
+ <inbound>
+  #{list}#
+  <host name="#[host]#" count="#[count]#" />
+  #{/list}#
+ </inbound>
+ #(/inbound)#
+</hostbrowser>

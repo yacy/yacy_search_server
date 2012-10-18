@@ -2,7 +2,7 @@
 <!-- This page is only XHTML 1.0 Transitional because target is being used in a links -->
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>YaCy '#[clientname]#': URL References Administration</title>
+    <title>YaCy '#[clientname]#': Host Browser</title>
     #%env/templates/metas.template%#
   <script type="text/javascript">
 //<![CDATA[
@@ -103,10 +103,10 @@ function updatepage(str) {
       #{list}#
         #(type)#
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-          <td align="center"><div id="info"><a href="/ViewFile.html?url=#[file]#"><img src="/env/grafics/doc.gif"/></a><span>Show Metadata</span></div></td>
-          <td align="left" nowrap class=#(stored)#"listingem"::"listing"#(/stored)#>#[file]#&nbsp;<a href="#[file]#"><img src="/env/grafics/link.gif"/></a></td>
+          <td align="center"><div id="info"><a href="/ViewFile.html?url=#[url]#"><img src="/env/grafics/doc.gif"/></a><span>Show Metadata</span></div></td>
+          <td align="left" nowrap class=#(stored)#"listingem"::"listing"#(/stored)#>#[url]#&nbsp;<a href="#[url]#"><img src="/env/grafics/link.gif"/></a></td>
           #(stored)#
-          #(load)#::<td align="right" nowrap class="listingnok"><a href="/HostBrowser.html?load=#[file]#&path=#[path]#">load &amp; index</a>#(/load)#</td>::
+          #(load)#::<td align="right" nowrap class="listingnok"><a href="/HostBrowser.html?load=#[url]#&path=#[path]#">load &amp; index</a>#(/load)#</td>::
           <td align="right" nowrap class="listingok">indexed</td>::
  		  <td align="right" nowrap class="listingnok">loading</td>::
  		  <td align="right" nowrap class="listingnok">load fail: #[error]#</td>
@@ -114,7 +114,7 @@ function updatepage(str) {
         </tr>::
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
           <td align="center"><img src="/env/grafics/dir.gif"/></td>
-          <td align="left" nowrap class="listing"><a href="/HostBrowser.html?path=#[file]#" class="listing">#[file]#</a></td>
+          <td align="left" nowrap class="listing"><a href="/HostBrowser.html?path=#[url]#" class="listing">#[url]#</a></td>
           <td align="right" nowrap class="listing">#[count]# files</td>
         </tr>
         #(/type)#
