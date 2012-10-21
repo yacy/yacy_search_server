@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.yacy.migration;
@@ -78,6 +77,7 @@ import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
@@ -1266,7 +1266,8 @@ public final class Protocol
     public static String transferIndex(
         final Seed targetSeed,
         final ReferenceContainerCache<WordReference> indexes,
-        final SortedMap<byte[], URIMetadataNode> urlCache,
+        final HandleSet urlRefs,
+        final Segment segment,
         final boolean gzipBody,
         final int timeout) {
 
@@ -1277,7 +1278,7 @@ public final class Protocol
             eenum = ic.entries();
             while ( eenum.hasNext() ) {
                 entry = eenum.next();
-                if ( urlCache.get(entry.urlhash()) == null ) {
+                if ( !urlRefs.has(entry.urlhash()) ) {
                     if ( Network.log.isFine() ) {
                         Network.log.logFine("DEBUG transferIndex: to-send url hash '"
                             + ASCII.String(entry.urlhash())
@@ -1328,8 +1329,10 @@ public final class Protocol
 
         // extract the urlCache from the result
         final URIMetadataNode[] urls = new URIMetadataNode[uhs.length];
+        byte[] key;
         for ( int i = 0; i < uhs.length; i++ ) {
-            urls[i] = urlCache.get(ASCII.getBytes(uhs[i]));
+        	key = ASCII.getBytes(uhs[i]);
+        	if ( urlRefs.has(key) ) urls[i] = segment.fulltext().getMetadata(key);
             if ( urls[i] == null ) {
                 if ( Network.log.isFine() ) {
                     Network.log.logFine("DEBUG transferIndex: requested url hash '"

@@ -28,14 +28,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -88,7 +84,7 @@ public class Transmission {
          */
         private final byte[]                         primaryTarget;
         private final ReferenceContainerCache<WordReference> containers;
-        private final SortedMap<byte[], URIMetadataNode> references;
+        private final HandleSet                      references;
         private final HandleSet                      badReferences;
         private final List<Seed>                     targets;
         private int                                  hit, miss;
@@ -104,7 +100,7 @@ public class Transmission {
             super();
             this.primaryTarget = primaryTarget;
             this.containers = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, Segment.wordOrder, Word.commonHashLength);
-            this.references = new TreeMap<byte[], URIMetadataNode>(Base64Order.enhancedCoder);
+            this.references = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             this.badReferences = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             this.targets    = targets;
             this.hit = 0;
@@ -168,17 +164,16 @@ public class Transmission {
             final List<byte[]> notFoundx = new ArrayList<byte[]>();
             while (i.hasNext()) {
                 final WordReference e = i.next();
-                if (this.references.containsKey(e.urlhash())) continue;
+                if (this.references.has(e.urlhash())) continue;
                 if (this.badReferences.has(e.urlhash())) {
                     notFoundx.add(e.urlhash());
                     continue;
                 }
-                final URIMetadataNode r = Transmission.this.segment.fulltext().getMetadata(e.urlhash());
-                if (r == null) {
+                if (!Transmission.this.segment.fulltext().exists(e.urlhash())) {
                     notFoundx.add(e.urlhash());
                     this.badReferences.put(e.urlhash());
                 } else {
-                    this.references.put(e.urlhash(), r);
+                    this.references.put(e.urlhash());
                 }
             }
             // now delete all references that were not found
@@ -243,7 +238,7 @@ public class Transmission {
             }
             Transmission.this.log.logInfo("starting new index transmission request to " + ASCII.String(this.primaryTarget));
             final long start = System.currentTimeMillis();
-            final String error = Protocol.transferIndex(target, this.containers, this.references, Transmission.this.gzipBody4Transfer, Transmission.this.timeout4Transfer);
+            final String error = Protocol.transferIndex(target, this.containers, this.references, Transmission.this.segment, Transmission.this.gzipBody4Transfer, Transmission.this.timeout4Transfer);
             if (error == null) {
                 // words successfully transfered
                 final long transferTime = System.currentTimeMillis() - start;

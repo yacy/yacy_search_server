@@ -32,13 +32,11 @@ import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.TreeMap;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
-import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
@@ -269,19 +267,20 @@ public class IndexControlRWIs_p {
                         index = segment.termIndex().get(keyhash, null);
                         // built urlCache
                         final Iterator<WordReference> urlIter = index.entries();
-                        final TreeMap<byte[], URIMetadataNode> knownURLs =
-                                new TreeMap<byte[], URIMetadataNode>(Base64Order.enhancedCoder);
+                        final HandleSet knownURLs =
+                        		new RowHandleSet(
+                                        WordReferenceRow.urlEntryRow.primaryKeyLength,
+                                        WordReferenceRow.urlEntryRow.objectOrder,
+                                        index.size());
                         final HandleSet unknownURLEntries =
                                 new RowHandleSet(
                                 WordReferenceRow.urlEntryRow.primaryKeyLength,
                                 WordReferenceRow.urlEntryRow.objectOrder,
                                 index.size());
                         Reference iEntry;
-                        URIMetadataNode lurl;
                         while (urlIter.hasNext()) {
                             iEntry = urlIter.next();
-                            lurl = segment.fulltext().getMetadata(iEntry.urlhash());
-                            if (lurl == null) {
+                            if (!segment.fulltext().exists(iEntry.urlhash())) {
                                 try {
                                     unknownURLEntries.put(iEntry.urlhash());
                                 } catch (final SpaceExceededException e) {
@@ -289,7 +288,11 @@ public class IndexControlRWIs_p {
                                 }
                                 urlIter.remove();
                             } else {
-                                knownURLs.put(iEntry.urlhash(), lurl);
+                                try {
+									knownURLs.put(iEntry.urlhash());
+								} catch (final SpaceExceededException e) {
+									Log.logException(e);
+								}
                             }
                         }
 
@@ -308,7 +311,7 @@ public class IndexControlRWIs_p {
                         // transport to other peer
                         final boolean gzipBody = sb.getConfigBool("indexControl.gzipBody", false);
                         final int timeout = (int) sb.getConfigLong("indexControl.timeout", 60000);
-                        final String error = Protocol.transferIndex(seed, icc, knownURLs, gzipBody, timeout);
+                        final String error = Protocol.transferIndex(seed, icc, knownURLs, segment, gzipBody, timeout);
                         prop.put("result", (error == null) ? ("Successfully transferred "
                                 + knownURLs.size()
                                 + " words in "
