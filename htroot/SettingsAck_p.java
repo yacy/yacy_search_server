@@ -504,7 +504,7 @@ public class SettingsAck_p {
             }
 
             // everything is ok
-            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :PeerActions.formatInterval(crawlerTimeout));
+            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :Formatter.number(crawlerTimeout/1000.0,false)+" sec");
             prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)? "-1":Formatter.bytesToString(maxHttpSize));
             prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ? "-1":Formatter.bytesToString(maxFtpSize));
             prop.put("info_crawler.smb.maxFileSize", (maxSmbSize==-1) ? "-1":Formatter.bytesToString(maxSmbSize));
