@@ -3026,7 +3026,7 @@ public final class Switchboard extends serverSwitch
         boolean hasDoneSomething = false;
         final long kbytesUp = ConnectionInfo.getActiveUpbytes() / 1024;
         // accumulate RWIs to transmission cloud
-        if ( this.dhtDispatcher.cloudSize() > this.peers.scheme.verticalPartitions() * 2 ) {
+        if ( this.dhtDispatcher.cloudSize() > this.peers.scheme.verticalPartitions() ) {
             this.log.logInfo("dhtTransferJob: no selection, too many entries in transmission cloud: "
                 + this.dhtDispatcher.cloudSize());
         } else if ( MemoryControl.available() < 1024 * 1024 * 25 ) {
