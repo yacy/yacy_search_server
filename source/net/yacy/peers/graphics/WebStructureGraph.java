@@ -185,22 +185,18 @@ public class WebStructureGraph {
     }
 
     private static int refstr2count(final String refs) {
-        if ( (refs == null) || (refs.length() <= 8) ) {
-            return 0;
-        }
+        if (refs == null || refs.length() <= 8) return 0;
         assert (refs.length() - 8) % 10 == 0 : "refs = " + refs + ", length = " + refs.length();
         return (refs.length() - 8) / 10;
     }
 
     private static Map<String, Integer> refstr2map(final String refs) {
-        if ( (refs == null) || (refs.length() <= 8) ) {
-            return new HashMap<String, Integer>();
-        }
+        if (refs == null || refs.length() <= 8) return new HashMap<String, Integer>();
         final Map<String, Integer> map = new HashMap<String, Integer>();
         String c;
         final int refsc = refstr2count(refs);
         int d;
-        for ( int i = 0; i < refsc; i++ ) {
+        for (int i = 0; i < refsc; i++) {
             c = refs.substring(8 + i * 10, 8 + (i + 1) * 10);
             try {
                 d = Integer.valueOf(c.substring(6), 16);
@@ -302,12 +298,10 @@ public class WebStructureGraph {
                 }
             }
         }
-        if ( h.isEmpty() ) {
-            return null;
-        }
+        if (h.isEmpty()) return null;
         return new StructureEntry(hosthash, hostname, date, h);
     }
-
+    
     public StructureEntry incomingReferences(final String hosthash) {
         final String hostname = hostHash2hostName(hosthash);
         if ( hostname == null ) {
@@ -512,9 +506,7 @@ public class WebStructureGraph {
     public int referencesCount(final String hosthash) {
         // returns the number of hosts that are referenced by this hosthash
         assert hosthash.length() == 6 : "hosthash = " + hosthash;
-        if ( hosthash == null || hosthash.length() != 6 ) {
-            return 0;
-        }
+        if (hosthash == null || hosthash.length() != 6) return 0;
         SortedMap<String, byte[]> tailMap;
         int c = 0;
         synchronized ( this.structure_old ) {

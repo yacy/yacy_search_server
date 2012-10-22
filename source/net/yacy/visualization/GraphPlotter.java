@@ -169,8 +169,7 @@ public class GraphPlotter implements Cloneable {
     }
 
     public Point addNode(final String node, Point p) {
-        final Point p0 = this.nodes.put(node, p);
-        assert p0 == null; // all add shall be unique
+        this.nodes.put(node, p);
         if (p.x > this.rightmost) this.rightmost = p.x;
         if (p.x < this.leftmost) this.leftmost = p.x;
         if (p.y > this.topmost) this.topmost = p.y;
