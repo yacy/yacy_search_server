@@ -219,6 +219,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
             List<String> texts = new ArrayList<String>();
             String description = "";
             int size = 0;
+            boolean title_written = false; // the solr index may contain several; we take only the first which should be the visible tag in <title></title>
             for (int j = 0; j < fieldc; j++) {
                 Fieldable value = fields.get(j);
                 String fieldName = value.name();
@@ -240,9 +241,10 @@ public class GSAResponseWriter implements QueryResponseWriter {
                     OpensearchResponseWriter.solitaireTag(writer, GSAToken.UE.name(), value.stringValue());
                     continue;
                 }
-                if (YaCySchema.title.getSolrFieldName().equals(fieldName)) {
+                if (YaCySchema.title.getSolrFieldName().equals(fieldName) && !title_written) {
                     OpensearchResponseWriter.solitaireTag(writer, GSAToken.T.name(), highlight(value.stringValue(), query));
                     texts.add(value.stringValue());
+                    title_written = true;
                     continue;
                 }
                 if (YaCySchema.description.getSolrFieldName().equals(fieldName)) {

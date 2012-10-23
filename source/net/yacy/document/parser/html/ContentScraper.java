@@ -32,7 +32,6 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -128,7 +127,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final Map<MultiProtocolURI, EmbedEntry> embeds; // urlhash/embed relation
     private final Map<MultiProtocolURI, ImageEntry> images; // urlhash/image relation
     private final Map<String, String> metas;
-    private Collection<String> titles;
+    private LinkedHashSet<String> titles;
     //private String headline;
     private List<String>[] headlines;
     private final ClusteredScoreMap<String> bold, italic, underline;
@@ -568,10 +567,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // some documents have a title tag as meta tag
         String s = this.metas.get("title");
         if (s != null && s.length() > 0) {
-            LinkedHashSet<String> t = new LinkedHashSet<String>();
-            t.add(s);
-            t.addAll(this.titles);
-            this.titles = t;
+            this.titles.add(s);
         }
 
         if (this.titles.size() == 0) {
