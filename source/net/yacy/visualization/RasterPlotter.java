@@ -718,10 +718,9 @@ public class RasterPlotter {
     }
     
     public static ByteBuffer exportPng(final BufferedImage image) {
-        PngEncoder png = new PngEncoder(image);
         try {
             final ByteBuffer baos = new ByteBuffer();
-            byte[] pngbytes = png.pngEncode(1);
+            byte[] pngbytes = PngEncoder.pngEncode(image, 1);
             if (pngbytes == null) return null;
             baos.write(pngbytes);
             baos.flush();
