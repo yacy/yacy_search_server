@@ -116,7 +116,7 @@ public class WebStructurePicture_p {
                 String hash = null;
                 try {hash = ASCII.String((new DigestURI("http://" + host)).hash(), 6, 6);} catch (final MalformedURLException e) {Log.logException(e);}
                 Map.Entry<String, String> centernode = new AbstractMap.SimpleEntry<String, String>(hash, host);
-                double angle = 2.0d * i * Math.PI / hostlist.length - Math.PI / hostlist.length;
+                double angle = 2.0d * i * Math.PI / hostlist.length;
                 if (hostlist.length == 3) angle -= Math.PI / 2;
                 if (hostlist.length == 4) angle += Math.PI / 4;
                 graph.addNode(centernode.getValue(), Math.cos(angle) / 8, Math.sin(angle) / 8, 0);
@@ -128,7 +128,8 @@ public class WebStructurePicture_p {
                 // test with: http://localhost:8090/WebStructurePicture_p.png?pa=1&ral=0.7&raa=0.5&rar=2&rel=0.5&rea=1&rer=2
                 GraphPlotter.Ribbon rAll = new GraphPlotter.Ribbon(post.getFloat("ral", 0.1f), post.getFloat("raa", 0.1f), post.getFloat("rar", 0.1f));
                 GraphPlotter.Ribbon rEdge = new GraphPlotter.Ribbon(post.getFloat("rel", 0.05f), post.getFloat("rea", 0.1f), post.getFloat("rer", 0.1f));
-                for (int i = 0; i < post.getInt("pa", 1); i++) graph = graph.physics(rAll, rEdge);
+                int pa = post.getInt("pa", 0);
+                for (int i = 0; i < pa; i++) graph = graph.physics(rAll, rEdge);
             }
 
             // draw the graph

@@ -171,9 +171,27 @@ public class WebStructureGraph {
             }
         }
         final LearnObject lro = new LearnObject(url, globalRefURLs);
+        if (!globalRefURLs.isEmpty()) {
+            try {
+                if (this.publicRefDNSResolvingWorker.isAlive()) {
+                    this.publicRefDNSResolvingQueue.put(lro);
+                } else {
+                    learnrefs(lro);
+                }
+            } catch ( final InterruptedException e ) {
+                learnrefs(lro);
+            }
+        }
+    }
+    
+    public void generateCitationReference(final DigestURI from, final DigestURI to) {
+        final HashSet<MultiProtocolURI> globalRefURLs = new HashSet<MultiProtocolURI>();
+        final String refhost = from.getHost();
+        if (refhost != null && to.getHost() != null && !to.getHost().equals(refhost)) globalRefURLs.add(to);
+        final LearnObject lro = new LearnObject(from, globalRefURLs);
         if ( !globalRefURLs.isEmpty() ) {
             try {
-                if ( this.publicRefDNSResolvingWorker.isAlive() ) {
+                if (this.publicRefDNSResolvingWorker.isAlive()) {
                     this.publicRefDNSResolvingQueue.put(lro);
                 } else {
                     learnrefs(lro);

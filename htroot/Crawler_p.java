@@ -171,7 +171,7 @@ public class Crawler_p {
                     try {
                         DigestURI crawlingStartURL = new DigestURI(crawlingStart);
                         rootURLs.add(crawlingStartURL);
-                        crawlName += crawlingStartURL.getHost() + "_";
+                        crawlName += crawlingStartURL.getHost() + ',';
                         if (crawlingStartURL != null && (crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
                         
                     } catch (MalformedURLException e) {
@@ -180,8 +180,11 @@ public class Crawler_p {
                 } else {
                 	crawlName = crawlingFile.getName();
                 }
-                if (crawlName.length() > 80) crawlName = crawlName.substring(0, 80);
-                if (crawlName.endsWith("_")) crawlName = crawlName.substring(0, crawlName.length() - 1);
+                if (crawlName.length() > 256) {
+                    int p = crawlName.lastIndexOf(',');
+                    if (p >= 8) crawlName = crawlName.substring(0, p);
+                }
+                if (crawlName.endsWith(",")) crawlName = crawlName.substring(0, crawlName.length() - 1);
 
                 
                 // set the crawl filter
@@ -515,16 +518,41 @@ public class Crawler_p {
         final int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
         CrawlProfile profile;
         // put active crawls into list
+        String hosts = "";
         for (final byte[] h: sb.crawler.getActive()) {
             profile = sb.crawler.getActive(h);
         	if (CrawlProfile.ignoreNames.contains(profile.name())) continue;
             profile.putProfileEntry("crawlProfilesShow_list_", prop, true, dark, count, domlistlength);
+            if (profile.urlMustMatchPattern() == CrawlProfile.MATCH_ALL_PATTERN) {
+                hosts = hosts + "," + profile.name();
+            }
             dark = !dark;
             count++;
         }
         prop.put("crawlProfilesShow_list", count);
         prop.put("crawlProfilesShow", count == 0 ? 0 : 1);
 
+        if (count > 0) {
+            // collect the host names for 'wide' crawls which can be visualized
+            boolean showLinkstructure = hosts.length() > 0;
+            /*
+            // check if there is actually something to see
+            if (showLinkstructure) {
+                showLinkstructure = false;
+                for (String host: hosts.substring(1).split(",")) {
+                    String hash = null;
+                    try {hash = ASCII.String((new DigestURI("http://" + host)).hash(), 6, 6);} catch (final MalformedURLException e) {Log.logException(e);}
+                    if (hash != null && sb.webStructure.referencesCount(hash) > 0) {showLinkstructure = true; break;}
+                }
+            }
+            */
+            if (showLinkstructure) {
+                prop.put("crawlProfilesShow_linkstructure", 1);
+                prop.put("crawlProfilesShow_linkstructure_hosts", hosts.substring(1));
+            } else {
+                prop.put("crawlProfilesShow_linkstructure", 0);
+            }
+        }
 
         // return rewrite properties
         return prop;

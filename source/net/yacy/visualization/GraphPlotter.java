@@ -182,7 +182,7 @@ public class GraphPlotter implements Cloneable {
     }
 
     public boolean hasEdge(final String fromNode, final String toNode) {
-        return this.edges.contains(fromNode + "-" + toNode);
+        return this.edges.contains(fromNode + '-' + toNode);
     }
 
     public void setEdge(final String fromNode, final String toNode) {
@@ -190,18 +190,18 @@ public class GraphPlotter implements Cloneable {
         final Point to = this.nodes.get(toNode);
         assert from != null;
         assert to != null;
-        this.edges.add(fromNode + "$" + toNode);
+        this.edges.add(fromNode + '$' + toNode);
     }
 
     public Collection<String> getEdges(final String node, boolean start) {
         Collection<String> c = new ArrayList<String>();
         if (start) {
-            String s = node + "$";
+            String s = node + '$';
             for (String e: this.edges) {
                 if (e.startsWith(s)) c.add(e.substring(s.length()));
             }
         } else {
-            String s = "$" + node;
+            String s = '$' + node;
             for (String e: this.edges) {
                 if (e.endsWith(s)) c.add(e.substring(0, e.length() - s.length()));
             }
@@ -219,7 +219,7 @@ public class GraphPlotter implements Cloneable {
             entry = i.next();
             name = entry.getKey();
             c = entry.getValue();
-            System.out.println("point(" + c.x + ", " + c.y + ", " + c.layer + ") [" + name + "]");
+            System.out.println("point(" + c.x + ", " + c.y + ", " + c.layer + ") [" + name + ']');
         }
         final Iterator<String> j = this.edges.iterator();
         while (j.hasNext()) {

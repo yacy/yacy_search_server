@@ -156,6 +156,8 @@ public final class HTTPLoader {
             this.log.logInfo("CRAWLER Redirection detected ('" + client.getHttpResponse().getStatusLine() + "') for URL " + requestURLString);
             this.log.logInfo("CRAWLER ..Redirecting request to: " + redirectionUrl);
 
+            this.sb.webStructure.generateCitationReference(url, redirectionUrl);
+            
             if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_RECORD_REDIRECTS, true)) {
                 this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.FINAL_REDIRECT_RULE, "redirect to " + redirectionUrlString, statusCode);
             }
