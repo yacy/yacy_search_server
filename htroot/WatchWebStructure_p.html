@@ -18,21 +18,6 @@
     text-align:right;
   }
 </style>
-  <script type="text/javascript">
-  <!--
-    imagestub = "WebStructurePicture_p.png?host=#[besthost]#&depth=#[depth]#&width=#[width]#&height=#[height]#&nodes=#[nodes]#&time=#[time]#&colortext=#[colortext]#&colorback=#[colorback]#&colordot=#[colordot]#&colorline=#[colorline]#&colorlineend=#[colorlineend]#";
-    idx = 0;
-    setTimeout("doanimation()", 3000);
-    function doanimation() {
-      var accessPicture = document.getElementById("WebPicture");
-      if (accessPicture != null) {
-        idx++;
-        accessPicture.src = imagestub + "&idx=" + idx;
-        setTimeout("doanimation()", 3000);
-      }
-    }
-  -->
-  </script>
 </head>
 <body id="WebStructure" style="margin:0px;">
 #%env/templates/header.template%# 
@@ -65,9 +50,7 @@ Click the API icon to see the XML file.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
 </div>
 
-
 <h2>Web Structure</h2>
-
     #(hosts)#::
      <fieldset><legend>Host List</legend>
       #{list}#
@@ -78,7 +61,6 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       #{/list}#
     </fieldset>
     #(/hosts)#
-    
 <div id="left">
 <form action="/WatchWebStructure_p.html" accept-charset="UTF-8" onsubmit="return checkform(this);">
 <fieldset>
@@ -118,7 +100,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 </fieldset>
 </form>
 </div><br />
-<div style="text-align:right;">
+<div style="text-align:left;">
   <img id="WebPicture" src="WebStructurePicture_p.png?host=#[besthost]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot=#[colordot]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#" alt="WebStructurePicture"/>
 </div>
 #%env/templates/footer.template%# 

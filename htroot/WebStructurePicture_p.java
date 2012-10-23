@@ -133,7 +133,8 @@ public class WebStructurePicture_p {
             }
 
             // draw the graph
-            graphPicture = graph.draw(width, height, 40, 40, 16, 16, color_back, color_dot, color_line, color_lineend, color_text);
+            graph.normalize();
+            graphPicture = graph.draw(width, height, 40, 40, 16, 16, 12, 6, color_back, color_dot, color_line, color_lineend, color_text);
         }
         // print headline
         graphPicture.setColor(color_text);

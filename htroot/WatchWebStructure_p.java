@@ -27,8 +27,8 @@ public class WatchWebStructure_p {
         String color_line    = "222222";
         String color_lineend = "333333";
 
-        int width = 1024;
-        int height = 576;
+        int width = 1280;
+        int height = 720;
         int depth = 3;
         int nodes = 300; // maximum number of host nodes that are painted
         int time = -1;
@@ -36,10 +36,10 @@ public class WatchWebStructure_p {
         String besthost;
 
         if (post != null) {
-            width         = post.getInt("width", 1024);
-            height        = post.getInt("height", 576);
+            width         = post.getInt("width", 1280);
+            height        = post.getInt("height", 720);
             depth         = post.getInt("depth", 3);
-            nodes         = post.getInt("nodes", width * height * 300 / 1024 / 576);
+            nodes         = post.getInt("nodes", width * height * 300 / width / height);
             time          = post.getInt("time", -1);
             host          = post.get("host", "auto");
             color_text    = post.get("colortext",    color_text);

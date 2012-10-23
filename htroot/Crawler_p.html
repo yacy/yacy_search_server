@@ -181,15 +181,15 @@
 #(linkstructure)#::
 <script type="text/javascript">
   <!--
-    imagestub = "WebStructurePicture_p.png?host=#[hosts]#&depth=3&width=1024&height=576&nodes=300&time=1000&colortext=888888&colorback=FFFFFF&colordot=11BB11&colorline=222222&colorlineend=333333";
+    imagestub = "WebStructurePicture_p.png?host=#[hosts]#&depth=3&width=1024&height=512&nodes=300&time=1000&colortext=888888&colorback=FFFFFF&colordot=11BB11&colorline=222222&colorlineend=333333";
     idx = 0;
-    setTimeout("doanimation()", 2000);
-    function doanimation() {
+    setTimeout("doanimation(500)", 500);
+    function doanimation(nexttimeout) {
       var accessPicture = document.getElementById("WebPicture");
       if (accessPicture != null) {
         idx++;
         accessPicture.src = imagestub + "&idx=" + idx;
-        setTimeout("doanimation()", 1000);
+        setTimeout("doanimation(" + (nexttimeout > 3000 ? 3000 : nexttimeout * 1.2) + ")", nexttimeout);
       }
     }
   -->

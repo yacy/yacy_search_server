@@ -26,6 +26,7 @@
 
 package net.yacy.visualization;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,7 +48,7 @@ public class GraphPlotter implements Cloneable {
     // a ymageGraph is a set of points and borders between the points
     // to reference the points, they must all have a nickname
 
-    private final Map<String, Point> nodes; // the interconnected objects
+    private Map<String, Point> nodes; // the interconnected objects
     private final Set<String> edges; // the links that connect pairs of vertices
     private double leftmost, rightmost, topmost, bottommost;
 
@@ -167,7 +168,76 @@ public class GraphPlotter implements Cloneable {
         if ((from == null) || (to == null)) return null;
         return new Point[] {from, to};
     }
+    
+    private String getLeftmost() {
+        if (this.nodes.size() == 0) return null;
+        String ns = "";
+        double ps = Double.MAX_VALUE;
+        for (Map.Entry<String, Point> node: this.nodes.entrySet()) {
+            if (node.getValue().x < ps) {ns = node.getKey(); ps = node.getValue().x;}
+        }
+        assert ns != null;
+        return ns;
+    }
+    
+    private String getBottommost() {
+        if (this.nodes.size() == 0) return null;
+        String ns = "";
+        double ps = Double.MAX_VALUE;
+        for (Map.Entry<String, Point> node: this.nodes.entrySet()) {
+            if (node.getValue().y < ps) {ns = node.getKey(); ps = node.getValue().y;}
+        }
+        assert ns != null;
+        return ns;
+    }
 
+    public int normalizeVertical() {
+        Map<String, Point> nc = new HashMap<String, Point>();
+        int d = 0;
+        while (this.nodes.size() > 0) {
+            String n = getBottommost();
+            Point p = this.nodes.remove(n);
+            p.y = d++;
+            nc.put(n, p);
+        }
+        this.nodes = nc;
+        this.bottommost = 0.0d;
+        this.topmost = d - 1;
+        return d;
+    }
+    
+    public int normalizeHorizontal() {
+        ArrayList<Map.Entry<String, Point>> l = new ArrayList<Map.Entry<String, Point>>();
+        int d = 0;
+        Point p;
+        while (this.nodes.size() > 0) {
+            String n = getLeftmost();
+            p = this.nodes.remove(n);
+            p.x = d++;
+            l.add(new AbstractMap.SimpleEntry<String, Point>(n, p));
+        }
+        for (int i = 0; i < l.size() / 5; i++) {
+            p = l.get(i).getValue(); p.x = p.x + 3 * l.get(i).getKey().length() / 2; this.rightmost = Math.max(p.x, this.rightmost);
+            p = l.get(l.size() - i - 1).getValue(); p.x = p.x - 3 * l.get(i).getKey().length() / 2;  this.leftmost = Math.min(p.x, this.leftmost);
+        }
+        this.leftmost = Double.MAX_VALUE;
+        this.rightmost = Double.MIN_VALUE;
+        Map<String, Point> nc = new HashMap<String, Point>();
+        for (Map.Entry<String, Point> entry: l) {
+            p = entry.getValue();
+            nc.put(entry.getKey(), p);
+            if (p.x - entry.getKey().length() < this.leftmost) this.leftmost = p.x - entry.getKey().length();
+            if (p.x + entry.getKey().length() > this.rightmost) this.rightmost = p.x + entry.getKey().length();
+        }
+        this.nodes = nc;
+        return d;
+    }
+    
+    public void normalize() {
+        normalizeVertical();
+        normalizeHorizontal();
+    }
+    
     public Point addNode(final String node, Point p) {
         this.nodes.put(node, p);
         if (p.x > this.rightmost) this.rightmost = p.x;
@@ -226,18 +296,14 @@ public class GraphPlotter implements Cloneable {
             System.out.println("border(" + j.next() + ")");
         }
     }
-
+    
     public RasterPlotter draw(
-            final int width,
-            final int height,
-            final int leftborder,
-            final int rightborder,
-            final int topborder,
-            final int bottomborder,
-            final String color_back,
-            final String color_dot,
-            final String color_line,
-            final String color_lineend,
+            final int width, final int height,
+            final int leftborder, final int rightborder,
+            final int topborder, final int bottomborder,
+            final int xraster, final int yraster,
+            final String color_back, final String color_dot,
+            final String color_line, final String color_lineend,
             final String color_text
             ) {
         final RasterPlotter.DrawMode drawMode = (RasterPlotter.darkColor(color_back)) ? RasterPlotter.DrawMode.MODE_ADD : RasterPlotter.DrawMode.MODE_SUB;
@@ -256,12 +322,12 @@ public class GraphPlotter implements Cloneable {
             entry = i.next();
             name = entry.getKey();
             c = entry.getValue();
-            x = (xfactor == 0.0) ? width / 2 : (int) (leftborder + (c.x - this.leftmost) * xfactor);
-            y = (yfactor == 0.0) ? height / 2 : (int) (height - bottomborder - (c.y - this.bottommost) * yfactor);
+            x = (xfactor == 0.0) ? raster(width / 2, xraster) : leftborder + raster((c.x - this.leftmost) * xfactor, xraster);
+            y = (yfactor == 0.0) ? raster(height / 2, yraster) : height - bottomborder - raster((c.y - this.bottommost) * yfactor, yraster);
             image.setColor(color_dot);
             image.dot(x, y, 6, true, 100);
             image.setColor(color_text);
-            PrintTool.print(image, x, y + 10, 0, name.toUpperCase(), 0);
+            PrintTool.print(image, x, y + 10, 0, name.toUpperCase(), 0 /*x < 2 * width / 5 ? 1 : x > 3 * width / 5 ? -1 : 0*/);
         }
 
         // draw lines
@@ -273,23 +339,28 @@ public class GraphPlotter implements Cloneable {
             border = getEdge(j.next());
             if (border == null) continue;
             if (xfactor == 0.0) {
-                x0 = width / 2;
-                x1 = width / 2;
+                x0 = raster(width / 2, xraster);
+                x1 = raster(width / 2, xraster);
             } else {
-                x0 = (int) (leftborder + (border[0].x - this.leftmost) * xfactor);
-                x1 = (int) (leftborder + (border[1].x - this.leftmost) * xfactor);
+                x0 = leftborder + raster((border[0].x - this.leftmost) * xfactor, xraster);
+                x1 = leftborder + raster((border[1].x - this.leftmost) * xfactor, xraster);
             }
             if (yfactor == 0.0) {
-                y0 = height / 2;
-                y1 = height / 2;
+                y0 = raster(height / 2, yraster);
+                y1 = raster(height / 2, yraster);
             } else {
-                y0 = (int) (height - bottomborder - (border[0].y - this.bottommost) * yfactor);
-                y1 = (int) (height - bottomborder - (border[1].y - this.bottommost) * yfactor);
+                y0 = height - bottomborder - raster((border[0].y - this.bottommost) * yfactor, yraster);
+                y1 = height - bottomborder - raster((border[1].y - this.bottommost) * yfactor, yraster);
             }
             // draw the line, with the dot at the beginning of the line
             image.lineDot(x1, y1, x0, y0, 3, 4, color_line, color_lineend);
         }
         return image;
+    }
+    
+    private int raster(final double pos, final int raster) {
+        if (raster <= 1) return (int) pos;
+        return ((int) (pos / raster)) * raster;
     }
 
 }
