@@ -37,24 +37,31 @@ public class AugmentParser extends AbstractParser implements Parser {
 	@Override
 	public Document[] parse(DigestURI url, String mimeType, String charset, InputStream source) throws Failure, InterruptedException {
 
-		Document[] htmlDocs = this.rdfaParser.parse(url, mimeType, charset, source);
-		try {
-			source.reset();
-		} catch (IOException e) {
-			Log.logException(e);
-		}
+            Document[] htmlDocs = this.rdfaParser.parse(url, mimeType, charset, source);
+            try {
+                source.reset();
+            } catch (IOException e) {
+                Log.logException(e);
+            }
 
-		Document alreadyParsedDocument = htmlDocs[0];
-		Document superDoc = analyze(alreadyParsedDocument, url, mimeType, charset);
-		Document augmentDoc = parseAndAugment(url, mimeType, charset);
-		Document[] retDocs = new Document[htmlDocs.length + 2];
-		for (int i = 0; i < htmlDocs.length; i++) {
-			retDocs[i] = htmlDocs[i];
-		}
+            Document alreadyParsedDocument = htmlDocs[0];
+            Document superDoc = analyze(alreadyParsedDocument, url, mimeType, charset);
+            Document augmentDoc = parseAndAugment(url, mimeType, charset);
+            Document[] retDocs = new Document[htmlDocs.length + 1];
+            for (int i = 1; i < htmlDocs.length; i++) {
+                retDocs[i - 1] = htmlDocs[i];
+            }
 
-		retDocs[retDocs.length - 1] = augmentDoc;
-		retDocs[retDocs.length - 2] = superDoc;
-		return retDocs;
+            retDocs[retDocs.length - 1] = augmentDoc;
+            retDocs[retDocs.length - 2] = superDoc;
+            try { // merge additional result docs into the parse main document
+                alreadyParsedDocument.addSubDocuments(retDocs);
+            } catch (IOException ex) {
+                Log.logException(ex);
+            }
+            Document[] finalretDocs = new Document[1]; // return the merged document
+            finalretDocs[0] = alreadyParsedDocument;
+            return finalretDocs;
 	}
 
 	private static Document analyze (Document alreadyParsedDocument, DigestURI url,

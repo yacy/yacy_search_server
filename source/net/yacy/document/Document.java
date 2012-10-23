@@ -79,7 +79,7 @@ public class Document {
     private       List<String> titles;          // the document titles, taken from title and/or h1 tag; shall appear as headline of search result
     private final StringBuilder creator;        // author or copyright
     private final String publisher;             // publisher
-    private final List<String>  sections;       // if present: more titles/headlines appearing in the document
+    private       List<String>  sections;       // if present: more titles/headlines appearing in the document
     private final StringBuilder description;    // an abstract, if present: short content description
     private Object text;                        // the clear text, all that is visible
     private final Map<MultiProtocolURI, Properties> anchors; // all links embedded as clickeable entities (anchor tags)
@@ -631,7 +631,17 @@ dc_rights
 
     public void addSubDocuments(final Document[] docs) throws IOException {
         for (final Document doc: docs) {
-            this.sections.addAll(Arrays.asList(doc.getSectionTitles()));
+            // check class as addAll method might not be available if initialized via Arrays.toList
+            if (this.sections.getClass() == java.util.LinkedList.class) {
+                this.sections.addAll(doc.sections);
+            } else {
+                /* sections might be initialized via Arrays.toList (which does not implement the addAll method)
+                   so new list must be assigned */
+                LinkedList<String> tmplist = new LinkedList();
+                tmplist.addAll(this.sections);
+                tmplist.addAll(doc.sections);
+                this.sections = tmplist;
+            }
             this.titles.addAll(doc.titles());
             this.keywords.addAll(doc.getKeywords());
 
