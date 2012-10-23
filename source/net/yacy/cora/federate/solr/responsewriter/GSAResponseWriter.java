@@ -312,6 +312,6 @@ public class GSAResponseWriter implements QueryResponseWriter {
             if (p < 0) continue;
             text = text.substring(0, p) + "<b>" + text.substring(p, p + s.length()) + "</b>" + text.substring(p + s.length());
         }
-        return text;
+        return text.replaceAll(Pattern.quote("</b> <b>"), " ");
     }
 }
