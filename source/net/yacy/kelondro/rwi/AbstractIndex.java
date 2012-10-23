@@ -30,10 +30,8 @@ package net.yacy.kelondro.rwi;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import net.yacy.cora.order.Base64Order;
-import net.yacy.cora.order.Order;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Row;

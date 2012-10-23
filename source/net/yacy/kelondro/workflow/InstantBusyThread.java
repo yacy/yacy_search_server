@@ -37,7 +37,6 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
     private final Object environment;
     private final Long   handle;
 
-    private static int instantThreadCounter = 0;
     private static final TreeMap<Long, String> jobs = new TreeMap<Long, String>();
 
     public InstantBusyThread(
@@ -101,7 +100,6 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
 
     @Override
     public boolean job() throws Exception {
-        instantThreadCounter++;
         //System.out.println("started job " + this.handle + ": " + this.getName());
         synchronized(jobs) {jobs.put(this.handle, getName());}
         boolean jobHasDoneSomething = false;
@@ -131,7 +129,6 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
             Log.logSevere("BUSYTHREAD", "Generic Exception, thread '" + getName() + "': " + e.getMessage());
             Log.logException(e);
         }
-        instantThreadCounter--;
         synchronized(jobs) {jobs.remove(this.handle);}
         return jobHasDoneSomething;
     }

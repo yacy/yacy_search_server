@@ -1021,7 +1021,6 @@ public final class Protocol
             final SearchEvent event,
             final int offset,
             final int count,
-            final long time,
             final Seed target,
             final Blacklist blacklist) {
 

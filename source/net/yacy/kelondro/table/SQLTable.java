@@ -41,9 +41,7 @@ import java.util.TreeMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
-import net.yacy.cora.order.NaturalOrder;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
@@ -74,7 +72,6 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
     private static final String db_pwd_str    = "yacy";
 
     private Connection theDBConnection = null;
-    private static final ByteOrder order = new NaturalOrder(true);
     private final Row rowdef;
 
     public SQLTable(final String dbType, final Row rowdef) throws Exception {

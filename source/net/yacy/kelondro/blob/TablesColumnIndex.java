@@ -64,21 +64,6 @@ public abstract class TablesColumnIndex {
     public INDEXTYPE getType() {
     	return this.type;
     }
-	
-    /**
-     * create an index for a given table and column
-     * @param columnName - name of the column you want to build an index for
-     * @param valueIsArray - indicates whether the column value consist of an array (e.g. comma separated tags)
-     * @param separator - a string value used to split column values into an array
-     * @param table - an iterator over table rows which should be added to the index
-     */    
-    private synchronized void buildIndex(final String columnName, final String separator, final Iterator<Tables.Row> table) {
-    	this.deleteIndex(columnName);
-    	// loop through all rows of the table      
-    	while (table.hasNext()) {
-    		this.add(columnName, separator, table.next());
-        }    	
-    }
     
     /**
      * create an index for a given table and given columns

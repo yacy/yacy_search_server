@@ -637,7 +637,7 @@ dc_rights
             } else {
                 /* sections might be initialized via Arrays.toList (which does not implement the addAll method)
                    so new list must be assigned */
-                LinkedList<String> tmplist = new LinkedList();
+                LinkedList<String> tmplist = new LinkedList<String>();
                 tmplist.addAll(this.sections);
                 tmplist.addAll(doc.sections);
                 this.sections = tmplist;

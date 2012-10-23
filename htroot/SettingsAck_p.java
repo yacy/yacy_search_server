@@ -42,7 +42,6 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.Network;
-import net.yacy.peers.PeerActions;
 import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacySeedUploader;
 import net.yacy.search.Switchboard;

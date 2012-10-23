@@ -168,7 +168,7 @@ public class RemoteSearch extends Thread {
         for (Seed s: targetPeers) omit.add(s);
         Seed[] nodes = DHTSelection.selectNodeSearchTargets(event.peers, 20, omit);
         for (Seed s: nodes) {
-            solrRemoteSearch(event, count, time, s, blacklist);
+            solrRemoteSearch(event, count, s, blacklist);
         }
         
         // start search to YaCy peers
@@ -257,7 +257,6 @@ public class RemoteSearch extends Thread {
     public static Thread solrRemoteSearch(
                     final SearchEvent event,
                     final int count,
-                    final long time,
                     final Seed targetPeer,
                     final Blacklist blacklist) {
 
@@ -276,7 +275,6 @@ public class RemoteSearch extends Thread {
                                     event,
                                     0,
                                     count,
-                                    time,
                                     targetPeer,
                                     blacklist);
                     if (urls >= 0) {

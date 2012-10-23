@@ -25,7 +25,6 @@ import java.util.Collection;
 
 import net.yacy.cora.date.MicroDate;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Column;

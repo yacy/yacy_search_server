@@ -27,10 +27,7 @@
 package net.yacy.kelondro.data.word;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
-import java.util.Set;
 
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
@@ -38,7 +35,6 @@ import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Bitfield;
@@ -80,7 +76,6 @@ public class Word {
     public  int      posInText;   // unique handle, is initialized with word position (excluding double occurring words)
     public  int      posInPhrase; // position of word in phrase
     public  int      numOfPhrase; // number of phrase. 'normal' phrases begin with number 100
-    private Set<Integer> phrases;         // a set of handles to all phrases where this word appears
     public  Bitfield flags;       // the flag bits for each word
 
     public Word(final int handle, final int pip, final int nop) {
@@ -88,7 +83,6 @@ public class Word {
         this.posInText = handle;
         this.posInPhrase = pip;
         this.numOfPhrase = nop;
-        this.phrases = new HashSet<Integer>();
         this.flags = null;
     }
 
