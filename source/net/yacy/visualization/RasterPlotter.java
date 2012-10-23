@@ -704,9 +704,9 @@ public class RasterPlotter {
 
     public static ByteBuffer exportImage(final BufferedImage image, final String targetExt) {
     	// generate an byte array from the given image
-    	//serverByteBuffer baos = new serverByteBuffer();
+    	if ("png".equals(targetExt)) return exportPng(image);
     	final ByteBuffer baos = new ByteBuffer();
-    	ImageIO.setUseCache(false);
+    	ImageIO.setUseCache(false); // because we write into ram here
     	try {
     		ImageIO.write(image, targetExt, baos);
     		return baos;
@@ -716,6 +716,23 @@ public class RasterPlotter {
     		return null;
     	}
     }
+    
+    public static ByteBuffer exportPng(final BufferedImage image) {
+        PngEncoder png = new PngEncoder(image);
+        try {
+            final ByteBuffer baos = new ByteBuffer();
+            byte[] pngbytes = png.pngEncode(1);
+            if (pngbytes == null) return null;
+            baos.write(pngbytes);
+            baos.flush();
+            baos.close();
+            return baos;
+        } catch (IOException e) {
+            // should not happen
+            Log.logException(e);
+            return null;
+        }
+    }       
 
     public static void main(final String[] args) {
         // go into headless awt mode
@@ -730,6 +747,7 @@ public class RasterPlotter {
             fos.close();
         } catch (final IOException e) {}
 
+        Log.shutdown();
         // open file automatically, works only on Mac OS X
         /*
         Process p = null;
