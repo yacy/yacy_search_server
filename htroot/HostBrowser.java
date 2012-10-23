@@ -144,7 +144,9 @@ public class HostBrowser {
         }
         
         if (path.length() > 0) {
-
+            boolean complete = post.getBoolean("complete");
+            prop.put("files_complete", complete ? 1 : 0);
+            prop.put("files_complete_path", path);
             p = path.substring(0, path.length() - 1).lastIndexOf('/');
             if (p < 8) {
                 prop.put("files_root", 1);
@@ -170,12 +172,13 @@ public class HostBrowser {
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                     String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
                     hostsize++;
-                    if (u.startsWith(path)) storedDocs.add(u);
+                    boolean considerPath = complete || u.startsWith(path);
+                    if (considerPath) storedDocs.add(u);
                     // collect inboundlinks to browse the host
                     Iterator<String> links = URIMetadataNode.getLinks(doc, true);
                     while (links.hasNext()) {
                         u = links.next();
-                        if (u.startsWith(path) && !storedDocs.contains(u)) inboundLinks.add(u);
+                        if (considerPath && !storedDocs.contains(u)) inboundLinks.add(u);
                     }
                     
                     // collect outboundlinks to browse to the outbound
@@ -195,29 +198,37 @@ public class HostBrowser {
                         } catch (MalformedURLException e) {}
                     }
                 }
+                
                 // now combine both lists into one
                 Map<String, Boolean> files = new HashMap<String, Boolean>();
                 for (String u: storedDocs) files.put(u, true);
                 for (String u: inboundLinks) if (!storedDocs.contains(u)) files.put(u, false);
-                
+                Log.logInfo("HostBrowser", "collected " + files.size() + " urls for path " + path);
+
                 // distinguish files and folders
                 Map<String, Object> list = new TreeMap<String, Object>();
+                int pl = path.length();
                 for (Map.Entry<String, Boolean> entry: files.entrySet()) {
-                    String file = entry.getKey().substring(path.length());
+                    String file = entry.getKey().substring(pl);
                     p = file.indexOf('/');
                     if (p < 0) {
-                        // this is a file in the root path
+                        // this is a file
                         list.put(entry.getKey(), entry.getValue()); // Boolean value: this is a file
                     } else {
-                        // this is a directory path
-                        String dir = path + file.substring(0, p + 1);
-                        Object c = list.get(dir);
-                        if (c == null) {
-                            int[] linkedStored = new int[]{0,0};
-                            linkedStored[entry.getValue().booleanValue() ? 1 : 0]++;
-                            list.put(dir, linkedStored);
-                        } else if (c instanceof int[]) {
-                            ((int[]) c)[entry.getValue().booleanValue() ? 1 : 0]++;
+                        // this is a directory path or a file in a subdirectory
+                        String remainingPath = file.substring(0, p + 1);
+                        if (complete && remainingPath.indexOf('.') > 0) {
+                            list.put(entry.getKey(), entry.getValue()); // Boolean value: this is a file
+                        } else {
+                            String dir = path + remainingPath;
+                            Object c = list.get(dir);
+                            if (c == null) {
+                                int[] linkedStored = new int[]{0,0};
+                                linkedStored[entry.getValue().booleanValue() ? 1 : 0]++;
+                                list.put(dir, linkedStored);
+                            } else if (c instanceof int[]) {
+                                ((int[]) c)[entry.getValue().booleanValue() ? 1 : 0]++;
+                            }
                         }
                     }
                 }

@@ -31,8 +31,6 @@ function search(query) {
 }
 
 function updatepage(str) {
-  var raw = document.getElementById("raw");
-  //if (raw != null) raw.innerHTML = str;
   var rsp = eval("("+str+")");
   var firstChannel = rsp.channels[0];
   var totalResults = firstChannel.totalResults.replace(/[,.]/,"");
@@ -67,10 +65,9 @@ function updatepage(str) {
       Host/URL: 
       <input id="search" type="text" name="path" value="#[path]#" size="40" maxlength="250" />
       <input type="submit" name="list" value="Browse Host" class="submitready" style="width:240px;"/><br />
-      <div id="searchresults">
+      <div id="searchresults"></div>
     </fieldset>
     </form>
-    <div id="raw"></div>
     #[result]#
     
     #(hosts)#::
@@ -86,7 +83,8 @@ function updatepage(str) {
     
     #(files)#::
      <fieldset><legend>Browser for #[path]#</legend>
-     <p>Documents on host: #[hostsize]#; Documents in subpath: #[subpathsize]#</p>
+     <p>Documents on host: #[hostsize]#; Documents in subpath: #[subpathsize]#; #(complete)#<a href="/HostBrowser.html?complete=true&path=#[path]#">get complete list</a>::<a href="/HostBrowser.html?path=#[path]#">directory view</a>#(/complete)#
+     </p>
       <table border="0" cellpadding="2" cellspacing="2" style="float:left">
       <tr>
         <th align="center" width="32"></th>
