@@ -799,7 +799,7 @@ body#Surftips div.searchresults {
   overflow:hidden;
 }
 body#ViewLog div.log {
-  height:600px;
+  height:900px;
   overflow:scroll;
 }
 

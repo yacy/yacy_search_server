@@ -48,9 +48,9 @@ public class ViewLog_p {
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         String[] log = new String[0];
-        boolean reversed = false;
+        boolean reversed = true;
         boolean json = false;
-        int maxlines = 400, lines = 200;
+        int maxlines = 10000, lines = 1000;
         /* Usually a regex like this would make no sense, ".*" would be
          * sufficient, but ".*.*" makes it a little bit more convenient
          * for the user to input regexes like ".*FOO.*" in the HTML
@@ -58,7 +58,7 @@ public class ViewLog_p {
          */
         String filter = ".*.*";
 
-        if(post != null){
+        if (post != null){
             reversed = (post.containsKey("mode") && "reversed".equals(post.get("mode")));
             json = post.containsKey("json");
 
