@@ -372,6 +372,12 @@ public class Crawler_p {
                         collection);
                 byte[] handle = ASCII.getBytes(profile.handle());
                 
+                // before we fire up a new crawl, we make sure that another crawl with the same name is not running
+                sb.crawler.removeActive(handle);
+                sb.crawler.removePassive(handle);
+                try {sb.crawlQueues.noticeURL.removeByProfileHandle(profile.handle(), 10000);} catch (SpaceExceededException e1) {}
+                
+                // start the crawl
                 if ("url".equals(crawlingMode)) {
                     if (rootURLs.size() == 0) {
                         prop.put("info", "5"); //Crawling failed

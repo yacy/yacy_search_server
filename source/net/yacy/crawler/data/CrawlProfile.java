@@ -155,7 +155,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (name == null || name.isEmpty()) {
             throw new NullPointerException("name must not be null or empty");
         }
-        if (name.length() > 60) name = name.substring(0, 60);
+        if (name.length() > 256) name = name.substring(256);
         this.doms = new ConcurrentHashMap<String, DomProfile>();
         final String handle = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(name)).substring(0, Word.commonHashLength);
         put(HANDLE,           handle);
