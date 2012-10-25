@@ -4,10 +4,6 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
 // LICENSE
 //
 // This program is free software; you can redistribute it and/or modify
@@ -46,7 +42,6 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -66,6 +61,10 @@ public class RasterPlotter {
     public final Log log = new Log("RasterPlotter");
 
     public static final double PI180 = Math.PI / 180.0d;
+    public static final double PI4 = Math.PI / 4.0d;
+    public static final double PI2 = Math.PI / 2.0d;
+    public static final double PI32 = PI2 * 3.0d;
+    public static final double TL = Math.sqrt(3) / 2;
 
     // colors regarding RGB Color Model
     public static final long RED    = 0xFF0000;
@@ -380,9 +379,6 @@ public class RasterPlotter {
         line(x2, y2, xt, yt, 100); // left line
         line(x3, y3, xt, yt, 100); // right line
     }
-
-    private final static double TL = Math.sqrt(3) / 2;
-    private final static double PI2 = Math.PI / 2;
     
     public int[] getColor(final int x, final int y) {
         final int[] c = new int[3];
@@ -836,10 +832,9 @@ public class RasterPlotter {
         int i = 0;
         for (int row = 0; row < height; row++) {
             compBytes.write(0);
-            for (int column = 0; column < width; column++) {
-                compBytes.write(frame, i, 3); // this replaces the whole PixelGrabber process which makes it probably more than 800x faster. See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4835595
-                i += 3;
-            }
+            // this replaces the whole PixelGrabber process which makes it probably more than 800x faster. See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4835595
+            compBytes.write(frame, i, 3 * width);
+            i += 3 * width;
         }
         compBytes.close();
 

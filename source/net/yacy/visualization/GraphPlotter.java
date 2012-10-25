@@ -103,9 +103,6 @@ public class GraphPlotter implements Cloneable {
         }
     }
 
-    private final static double p2 = Math.PI / 2.0;
-    private final static double p23 = p2 * 3.0;
-
     public static void force(Point calcPoint, Point currentPoint, Point otherPoint, Ribbon r) {
         double dx = otherPoint.x - currentPoint.x;
         double dy = otherPoint.y - currentPoint.y;
@@ -121,10 +118,10 @@ public class GraphPlotter implements Cloneable {
         assert !(!attraction && a < Math.PI) || y1 <= 0 : "attraction = " + attraction + ", a = " + a + ", y1 = " + y1;
         assert !(attraction && a > Math.PI) || y1 <= 0 : "attraction = " + attraction + ", a = " + a + ", y1 = " + y1;
         assert !(!attraction && a > Math.PI) || y1 >= 0 : "attraction = " + attraction + ", a = " + a + ", y1 = " + y1;
-        assert !(attraction && (a < p2 || a > p23)) || x1 >= 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
-        assert !(!attraction && (a < p2 || a > p23)) || x1 <= 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
-        assert !(attraction && !(a < p2 || a > p23)) || x1 <= 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
-        assert !(!attraction && !(a < p2 || a > p23)) || x1 >= 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
+        assert !(attraction && (a < RasterPlotter.PI2 || a > RasterPlotter.PI32)) || x1 >= 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
+        assert !(!attraction && (a < RasterPlotter.PI2 || a > RasterPlotter.PI32)) || x1 <= 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
+        assert !(attraction && !(a < RasterPlotter.PI2 || a > RasterPlotter.PI32)) || x1 <= 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
+        assert !(!attraction && !(a < RasterPlotter.PI2 || a > RasterPlotter.PI32)) || x1 >= 0  : "attraction = " + attraction + ", a = " + a + ", x1 = " + x1;
         calcPoint.x += x1;
         calcPoint.y += y1;
     }

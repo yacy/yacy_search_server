@@ -62,15 +62,15 @@ public class CircleTool {
             r1 = (short) (r + 1);
             crc = new ArrayList<short[]>();
             for (short a = 0; a < 2 * (r + 1); a++) {
-                x = (short) (r1 * Math.cos(Math.PI * a / (4 * r1)));
-                y = (short) (r1 * Math.sin(Math.PI * a / (4 * r1)));
+                x = (short) (r1 * Math.cos(RasterPlotter.PI4 * a / r1));
+                y = (short) (r1 * Math.sin(RasterPlotter.PI4 * a / r1));
                 co = x + "|" + y;
                 if (!(crds.contains(co))) {
                     crc.add(new short[]{x, y});
                     crds.add(co);
                 }
-                x = (short) ((r + 0.5) * Math.cos(Math.PI * a / (4 * r1)));
-                y = (short) ((r + 0.5) * Math.sin(Math.PI * a / (4 * r1)));
+                x = (short) ((r + 0.5) * Math.cos(RasterPlotter.PI4 * a / r1));
+                y = (short) ((r + 0.5) * Math.sin(RasterPlotter.PI4 * a / r1));
                 co = x + "|" + y;
                 if (!(crds.contains(co))) {
                     crc.add(new short[]{x, y});
