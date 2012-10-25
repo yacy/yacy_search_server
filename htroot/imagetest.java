@@ -46,7 +46,7 @@ public class imagetest {
         img.dot(620, 200, 90, true, 100);
         img.setColor(RasterPlotter.RED);
         img.arc(300, 270, 30, 70, 100);
-        img.setColor("330000");
+        img.setColor(Long.parseLong("330000", 16));
         img.arc(220, 110, 50, 90, 30, 110);
         img.arc(210, 120, 50, 90, 30, 110);
         img.setColor(RasterPlotter.GREY);
@@ -57,7 +57,7 @@ public class imagetest {
             img.setColor(i);
             img.dot(10 + 14 * (int) (i / 16), 200 + 14 * (int) (i % 16), 6, true, 100);
         }
-        img.setColor("008000");
+        img.setColor(Long.parseLong("008000", 16));
         img.dot(10 + 14 * 8, 200 + 14 * 8, 90, true, 100);
         /*
         for (long r = 0; r < 256; r = r + 16) {
@@ -68,9 +68,9 @@ public class imagetest {
                 }
             }
         }*/
-        img.setColor("0000A0");
+        img.setColor(Long.parseLong("0000A0", 16));
         img.arc(550, 400, 40, 81, 100);
-        img.setColor("010100");
+        img.setColor(Long.parseLong("010100", 16));
         for (int i = 0; i <= 360; i++) {
             img.arc(550, 400, 40, 41 + i/9, 0, i);
         }

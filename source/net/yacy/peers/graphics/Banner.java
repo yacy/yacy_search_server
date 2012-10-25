@@ -79,7 +79,7 @@ public final class Banner {
         final int width = data.getWidth();
 
         // draw description
-        bannerPicture.setColor(data.getTextcolor());
+        bannerPicture.setColor(Long.parseLong(data.getTextcolor(), 16));
         PrintTool.print(bannerPicture, 100, 12, 0, "PEER:  " + addTrailingBlanks(data.getName(), exprlength), -1);
         PrintTool.print(bannerPicture, 100, 22, 0, "LINKS: " + addBlanksAndDots(data.getLinks(), exprlength), -1);
         PrintTool.print(bannerPicture, 100, 32, 0, "WORDS: " + addBlanksAndDots(data.getWords(), exprlength), -1);
@@ -100,7 +100,7 @@ public final class Banner {
 
         final String bordercolor = data.getBordercolor();
         if (bordercolor != null && !bordercolor.isEmpty()) {
-            bannerPicture.setColor(bordercolor);
+            bannerPicture.setColor(Long.parseLong(bordercolor, 16));
             bannerPicture.line(0, 0, 0, height - 1, 100);
             bannerPicture.line(0, 0, width - 1, 0, 100);
             bannerPicture.line(width - 1, 0, width - 1, height - 1, 100);

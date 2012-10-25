@@ -69,7 +69,7 @@ public class RasterPlotter {
 
     protected final int            width, height;
     private final   int[]          cc;
-    private   BufferedImage  image;
+    private BufferedImage  image;
     private final   WritableRaster grid;
     private         int            defaultColR, defaultColG, defaultColB;
     private final   long           backgroundCol;
@@ -90,9 +90,23 @@ public class RasterPlotter {
         this.defaultMode = drawMode;
         try {
             this.image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            /*
+            byte[] frame = new byte[width * height * 3];
+            DataBuffer videoBuffer = new DataBufferByte(frame, frame.length);
+            ComponentSampleModel sampleModel = new ComponentSampleModel(DataBuffer.TYPE_BYTE, width, height, 3, width*3, new int[] {2,1,0});
+            Raster raster = Raster.createRaster(sampleModel, videoBuffer, null);
+            this.image.setData(raster);
+            */
         } catch (final OutOfMemoryError e) {
-            this.image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
-            //throw new RuntimeException(RasterPlotter.class.getSimpleName() + ": not enough memory (" + MemoryControl.available() + ") available");
+            try {
+                this.image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_INDEXED);
+            } catch (final OutOfMemoryError ee) {
+                try {
+                    this.image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY);
+                } catch (final OutOfMemoryError eee) {
+                    this.image = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_BINARY);
+                }
+            }
         }
         clear();
         this.grid = this.image.getRaster();
@@ -154,10 +168,6 @@ public class RasterPlotter {
             this.defaultColB = (int) (c & 0xff);
     	}
 
-    }
-
-    public void setColor(final String s) {
-        setColor(Long.parseLong(s, 16));
     }
 
     public void plot(final int x, final int y) {
@@ -229,8 +239,8 @@ public class RasterPlotter {
 
     public void line(
             int Ax, int Ay, final int Bx, final int By,
-            final String colorLine, final int intensityLine,
-            final String colorDot, final int intensityDot, final int dotDist, final int dotPos, final int dotRadius, final boolean dotFilled
+            final Long colorLine, final int intensityLine,
+            final Long colorDot, final int intensityDot, final int dotDist, final int dotPos, final int dotRadius, final boolean dotFilled
             ) {
         // Bresenham's line drawing algorithm
         int dX = Math.abs(Bx-Ax);
@@ -287,33 +297,77 @@ public class RasterPlotter {
         }
     }
 
-    public void lineDot(final int x0, final int y0, final int x1, final int y1, final int radius, final int distance, final String lineColor, final String dotColor) {
-        lineDot(x0, y0, x1, y1, radius, distance, Long.parseLong(lineColor, 16), Long.parseLong(dotColor, 16));
+    /**
+     * draw a line with a dot at the end
+     * @param x0 start point
+     * @param y0 start point
+     * @param x1 end point
+     * @param y1 end point
+     * @param radius radius of the dot
+     * @param padding the distance of the dot border to the end point
+     * @param lineColor the color of the line
+     * @param dotColor the color of the dot
+     */
+    public void lineDot(final int x0, final int y0, final int x1, final int y1, final int radius, final int padding, final long lineColor, final long dotColor) {
+        final double dx = x1 - x0;                          // distance of points, x component
+        final double dy = y1 - y0;                          // distance of points, y component
+        final double angle = Math.atan2(dy, dx);            // the angle of the line between the points
+        final double d = Math.sqrt((dx * dx + dy * dy));    // the distance between the points (Pythagoras)
+        final double ddotcenter = d - radius - padding;     // distance from {x0, y0} to dot center near {x1, y1}
+        final double ddotborder = ddotcenter - radius;      // distance to point {x3, y3} at border of dot center at {x2, y2}
+        final double xn = Math.cos(angle);                  // normalized vector component x
+        final double yn = Math.sin(angle);                  // normalized vector component y
+        final int x2 = x0 + ((int) (ddotcenter * xn));      // dot center, x component
+        final int y2 = y0 + ((int) (ddotcenter * yn));      // dot center, y component
+        final int x3 = x0 + ((int) (ddotborder * xn));      // dot border, x component
+        final int y3 = y0 + ((int) (ddotborder * yn));      // dot border, y component
+        setColor(lineColor); line(x0, y0, x3, y3, 100);     // draw line from {x0, y0} to dot border
+        setColor(dotColor); dot(x2, y2, radius, true, 100); // draw dot at {x2, y2}
     }
 
-    public void lineDot(final int x0, final int y0, final int x1, final int y1, final int radius, final int distance, final long lineColor, final long dotColor) {
-        // draw a line with a dot at the end.
-        // the radius value is the radius of the dot
-        // the distance value is the distance of the dot border to the endpoint
-
-        // compute first the angle of the line between the points
-        final double angle = (x1 - x0 > 0) ? Math.atan(((double) (y0 - y1)) / ((double) (x1 - x0))) : Math.PI - Math.atan(((double) (y0 - y1)) / ((double) (x0 - x1)));
-        // now find two more points in between
-        // first calculate the radius' of the points
-        final double ra = Math.sqrt(((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1))); // from a known point x1, y1
-        final double rb = ra - radius - distance;
-        final double rc = rb - radius;
-        // the points are on a circle with radius rb and rc
-        final int x2 = x0 + ((int) (rb * Math.cos(angle)));
-        final int y2 = y0 - ((int) (rb * Math.sin(angle)));
-        final int x3 = x0 + ((int) (rc * Math.cos(angle)));
-        final int y3 = y0 - ((int) (rc * Math.sin(angle)));
+    /**
+     * draw a line with an arrow at the end
+     * @param x0 start point
+     * @param y0 start point
+     * @param x1 end point
+     * @param y1 end point
+     * @param sidelength the side length of the arrow tip (all 3 sides are equal)
+     * @param padding the distance of the arrow tip to the end point
+     * @param lineColor the color of the line
+     * @param arrowColor the color of the arrow tip
+     */
+    public void lineArrow(final int x0, final int y0, final int x1, final int y1, final int sidelength, final int padding, final long lineColor, final long arrowColor) {
+        final double dx = x1 - x0;                          // distance of points, x component
+        final double dy = y1 - y0;                          // distance of points, y component
+        final double angle = Math.atan2(dy, dx);            // the angle of the line between the points
+        final double d = Math.sqrt((dx * dx + dy * dy));    // the distance between the points (Pythagoras)
+        final double arrowtip = d - padding;                // the distance from {x0, y0} to the arrow tip
+        final double arrowlength = TL * sidelength;         // the length of the arrow (distance from base to tip)
+        final double arrowbase = arrowtip - arrowlength;    // the distance from {x0, y0} to the arrow base
+        final double xn = Math.cos(angle);                  // normalized vector component x
+        final double yn = Math.sin(angle);                  // normalized vector component y
+        final int xt = x0 + ((int) (arrowtip * xn));        // arrow tip point component x
+        final int yt = y0 + ((int) (arrowtip * yn));        // arrow tip point component y
+        final double xb = x0 + arrowbase * xn;              // arrow base point component x
+        final double yb = y0 + arrowbase * yn;              // arrow base point component y
+        final double sl2 = sidelength / 2.0;                // half of the side length
+        final double xk = sl2 * Math.cos(angle + PI2);      // point at 90 degree on arrow direction to left side, vector component x
+        final double yk = sl2 * Math.sin(angle + PI2);      // point at 90 degree on arrow direction to left side, vector component y
+        final int x2 = (int) (xb + xk);
+        final int y2 = (int) (yb + yk);
+        final int x3 = (int) (xb - xk);
+        final int y3 = (int) (yb - yk);
         setColor(lineColor);
-        line(x0, y0, x3, y3, 100);
-        setColor(dotColor);
-        dot(x2, y2, radius, true, 100);
+        line(x0, y0, (int) xb, (int) yb, 100);              // draw line from {x0, y0} to arrow base
+        setColor(arrowColor);
+        line(x2, y2, x3, y3, 100); // base line
+        line(x2, y2, xt, yt, 100); // left line
+        line(x3, y3, xt, yt, 100); // right line
     }
 
+    private final static double TL = Math.sqrt(3) / 2;
+    private final static double PI2 = Math.PI / 2;
+    
     public int[] getColor(final int x, final int y) {
         final int[] c = new int[3];
         return this.grid.getPixel(x, y, c);
@@ -342,7 +396,7 @@ public class RasterPlotter {
     }
 
     public void arcLine(final int cx, final int cy, final int innerRadius, final int outerRadius, final double angle, final boolean in,
-            final String colorLine, final String colorDot, final int dotDist, final int dotPos, final int dotRadius, final boolean dotFilled) {
+            final Long colorLine, final Long colorDot, final int dotDist, final int dotPos, final int dotRadius, final boolean dotFilled) {
         final double a = PI180 * angle;
         final double cosa = Math.cos(a);
         final double sina = Math.sin(a);
@@ -374,8 +428,8 @@ public class RasterPlotter {
     }
 
     public void arcConnect(final int cx, final int cy, final int arcRadius, final double angle1, final double angle2, final boolean in,
-            final String colorLine, final int intensityLine,
-            final String colorDot, final int intensityDot, final int dotDist, final int dotPos, final int dotRadius, final boolean dotFilled) {
+            final Long colorLine, final int intensityLine,
+            final Long colorDot, final int intensityDot, final int dotDist, final int dotPos, final int dotRadius, final boolean dotFilled) {
         final double a1 = PI180 * angle1;
         final double a2 = PI180 * angle2;
         final int x1 = cx + (int) (arcRadius * Math.cos(a1));

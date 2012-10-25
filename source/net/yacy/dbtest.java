@@ -461,7 +461,7 @@ final class memprofiler extends Thread {
             int seconds0 = 0, kilobytes0 = 0;
             int seconds1 = 0, kilobytes1 = 0;
             while (this.run) {
-                this.memChart.setColor("FF0000");
+                this.memChart.setColor(Long.parseLong("FF0000", 16));
                 seconds1 = (int) ((System.currentTimeMillis() - this.start) / 1000);
                 kilobytes1 = (int) (MemoryControl.used() / 1024);
                 this.memChart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_LEFT, seconds0, kilobytes0, seconds1, kilobytes1);

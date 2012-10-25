@@ -87,7 +87,11 @@ public class AccessPicture_p {
         // draw home peer
         final int centerx = (picture.gridWidth() >> 1) - 1;
         final int centery = picture.gridHeight() >> 1;
-        picture.setColor(color_dot);
+        long color_dot_l = Long.parseLong(color_dot, 16);
+        long color_text_l = Long.parseLong(color_text, 16);
+        long color_line_l = Long.parseLong(color_line, 16);
+        long color_grid_l = Long.parseLong(color_grid, 16);
+        picture.setColor(color_dot_l);
         picture.gridDot(centerx, centery, 5, true, 100);
         if (corona) {
             for (int i = 0; i < 6; i++) {
@@ -97,7 +101,7 @@ public class AccessPicture_p {
             picture.gridDot(centerx, centery, 50, false, 100);
         }
         //picture.gridDot(centerx, centery, 31, false);
-        picture.setColor(color_text);
+        picture.setColor(color_text_l);
         picture.gridPrint(centerx, centery, 5, "THIS YACY PEER", "\"" + sb.peers.myName().toUpperCase() + "\"", 0);
 
         // left column: collect data for access from outside
@@ -128,10 +132,10 @@ public class AccessPicture_p {
         // draw left column: access from outside
         for (int i = 0; i < hosts.length; i++) {
             if (hosts[i] != null) {
-                picture.setColor(color_dot);
+                picture.setColor(color_dot_l);
                 picture.gridDot(gridLeft, i * 2 + 1, 7, false, 100);
                 picture.gridDot(gridLeft, i * 2 + 1, 8, false, 100);
-                picture.setColor(color_text);
+                picture.setColor(color_text_l);
                 picture.gridPrint(gridLeft, i * 2 + 1, 8, hosts[i].toUpperCase(), "COUNT = " + count[i] + ", TIME > " + ((time[i] >= 60000) ? ((time[i] / 60000) + " MINUTES") : ((time[i] / 1000) + " SECONDS")), -1);
                 if (corona) {
                     picture.gridLine((centerx - gridLeft) / 2 - 2, i * 2 + 1, gridLeft, i * 2 + 1,
@@ -139,7 +143,7 @@ public class AccessPicture_p {
                     picture.gridLine(centerx, centery, (centerx - gridLeft) / 2 - 2, i * 2 + 1,
                             color_line, 100, "AAAAAA", 100, 12, 11 - coronaangle / 30, 0, true);
                 } else {
-                    picture.setColor(color_line);
+                    picture.setColor(color_line_l);
                     picture.gridLine(gridLeft, i * 2 + 1, (centerx - gridLeft) / 2, i * 2 + 1);
                     picture.gridLine(centerx, centery, (centerx - gridLeft) / 2, i * 2 + 1);
                 }
@@ -163,10 +167,10 @@ public class AccessPicture_p {
         // draw right column: access to outside
         for (int i = 0; i < hosts.length; i++) {
             if (hosts[i] != null) {
-                picture.setColor(color_dot);
+                picture.setColor(color_dot_l);
                 picture.gridDot(gridRight, i * 2 + 1, 7, false, 100);
                 picture.gridDot(gridRight, i * 2 + 1, 8, false, 100);
-                picture.setColor(color_text);
+                picture.setColor(color_text_l);
                 picture.gridPrint(gridRight, i * 2 + 1, 8, hosts[i].toUpperCase(), count[i] + " BYTES, " + time[i] + " MS DUE", 1);
                 if (corona) {
                     picture.gridLine(gridRight, i * 2 + 1, centerx + (gridRight - centerx) / 2 + 2, i * 2 + 1,
@@ -174,7 +178,7 @@ public class AccessPicture_p {
                     picture.gridLine(centerx, centery, centerx + (gridRight - centerx) / 2 + 2, i * 2 + 1,
                             color_line, 100, "AAAAAA", 100, 12, coronaangle / 30, 0, true);
                 } else {
-                    picture.setColor(color_line);
+                    picture.setColor(color_line_l);
                     picture.gridLine(gridRight, i * 2 + 1, centerx + (gridRight - centerx) / 2, i * 2 + 1);
                     picture.gridLine(centerx, centery, centerx + (gridRight - centerx) / 2, i * 2 + 1);
                 }
@@ -182,24 +186,24 @@ public class AccessPicture_p {
         }
 
         // print headline
-        picture.setColor(color_text);
+        picture.setColor(color_text_l);
         PrintTool.print(picture, 2, 6, 0, "YACY NODE ACCESS GRID", -1);
         PrintTool.print(picture, width - 2, 6, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
 
         // print legend
-        picture.setColor(color_grid);
+        picture.setColor(color_grid_l);
         picture.gridLine(gridLeft, 0, centerx - 3, 0);
         picture.gridLine(gridLeft, 0, gridLeft, picture.gridHeight() - 1);
         picture.gridLine(centerx - 3, 0, centerx - 3, picture.gridHeight() - 1);
-        picture.setColor(color_dot);
+        picture.setColor(color_dot_l);
         picture.gridLine(gridLeft, picture.gridHeight() - 1, centerx - 3, picture.gridHeight() - 1);
         picture.gridPrint(gridLeft, picture.gridHeight() - 1, 8, "", "INCOMING CONNECTIONS", -1);
 
-        picture.setColor(color_grid);
+        picture.setColor(color_grid_l);
         picture.gridLine(centerx + 3, 0, gridRight, 0);
         picture.gridLine(centerx + 3, 0, centerx + 3, picture.gridHeight() - 1);
         picture.gridLine(gridRight, 0, gridRight, picture.gridHeight() - 1);
-        picture.setColor(color_dot);
+        picture.setColor(color_dot_l);
         picture.gridLine(centerx + 3, picture.gridHeight() - 1, gridRight, picture.gridHeight() - 1);
         picture.gridPrint(gridRight, picture.gridHeight() - 1, 8, "", "OUTGOING CONNECTIONS", 1);
 

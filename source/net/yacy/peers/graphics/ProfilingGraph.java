@@ -121,9 +121,9 @@ public class ProfilingGraph {
                         bytes = ((Long) event.payload).longValue();
                         x1 = (int) (time/1000);
                         y1 = (int) (bytes / 1024 / 1024);
-                        chart.setColor("AAAAFF");
+                        chart.setColor(Long.parseLong("AAAAFF", 16));
                         chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x1, y1, 2, null, 0);
-                        chart.setColor("0000FF");
+                        chart.setColor(Long.parseLong("0000FF", 16));
                         if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x0, y0, x1, y1);
                         x0 = x1; y0 = y1;
                     }
@@ -142,9 +142,9 @@ public class ProfilingGraph {
                     words = (int) ((Long) event.payload).longValue();
                     x1 = (int) (time/1000);
                     y1 = words;
-                    chart.setColor("228822");
+                    chart.setColor(Long.parseLong("228822", 16));
                     chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_LEFT, x1, y1, 2, null, 315);
-                    chart.setColor("008800");
+                    chart.setColor(Long.parseLong("008800", 16));
                     if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_LEFT, x0, y0, x1, y1);
                     x0 = x1; y0 = y1;
                 }
@@ -162,9 +162,9 @@ public class ProfilingGraph {
                     ppm = (int) ((Long) event.payload).longValue();
                     x1 = (int) (time/1000);
                     y1 = ppm;
-                    chart.setColor("AA8888");
+                    chart.setColor(Long.parseLong("AA8888", 16));
                     if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT0, x0, y0, x1, y1);
-                    chart.setColor("AA2222");
+                    chart.setColor(Long.parseLong("AA2222", 16));
                     chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT0, x1, y1, 2, ppm + " PPM", 0);
                     x0 = x1; y0 = y1;
                 }
@@ -184,7 +184,7 @@ public class ProfilingGraph {
                     x1 = (int) (time/1000);
                     y1 = Math.abs((ping.outgoing ? ping.toPeer : ping.fromPeer).hashCode()) % vspace;
                     pingPeer = ping.outgoing ? "-> " + ping.toPeer.toUpperCase() : "<- " + ping.fromPeer.toUpperCase();
-                    chart.setColor("444444");
+                    chart.setColor(Long.parseLong("444444", 16));
                     chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT2, x1, y1, 2, pingPeer + (ping.newPeers > 0 ? "(+" + ping.newPeers + ")" : ""), 0);
                     x0 = x1; y0 = y1;
                 }

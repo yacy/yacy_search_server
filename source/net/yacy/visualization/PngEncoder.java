@@ -81,7 +81,7 @@ public class PngEncoder extends Object {
         final int width = image.getWidth(null);
         final int height = image.getHeight(null);
         
-        final TreeMap<Integer, ScanLines> scan = new TreeMap<Integer, ScanLines>();
+        final TreeMap<Integer, byte[]> scan = new TreeMap<Integer, byte[]>();
         if (height > 80) {
             // prepare an input list for concurrent PixelGrabber computation
             final BlockingQueue<int[]> grabberInput = new LinkedBlockingQueue<int[]>();
@@ -95,7 +95,7 @@ public class PngEncoder extends Object {
             }
             // do the PixelGrabber computation and allocate the result in the right order
             ArrayList<Thread> ts = new ArrayList<Thread>();
-            int tc = Math.min(grabberInput.size() / 40, Runtime.getRuntime().availableProcessors());
+            int tc = Math.max(2, Math.min(1 + grabberInput.size() / 40, Runtime.getRuntime().availableProcessors()));
             for (int i = 0; i < tc; i++) {
                 grabberInput.add(POISON_IN);
                 Thread t = new Thread() {
@@ -126,9 +126,7 @@ public class PngEncoder extends Object {
         final Deflater scrunch = new Deflater(compressionLevel);
         ByteArrayOutputStream outBytes = new ByteArrayOutputStream(1024);
         final DeflaterOutputStream compBytes = new DeflaterOutputStream(outBytes, scrunch);
-        for (Map.Entry<Integer, ScanLines> entry: scan.entrySet()) {
-            compBytes.write(entry.getValue().scan, 0, entry.getValue().count);
-        }
+        for (Map.Entry<Integer, byte[]> entry: scan.entrySet()) compBytes.write(entry.getValue());
         compBytes.close();
         final byte[] compressedLines = outBytes.toByteArray();
         outBytes.close();
@@ -171,28 +169,23 @@ public class PngEncoder extends Object {
         return offset + data.length;
     }
     
-    private final static void pixelGrabber(final Image image, final int width, int y, int nRows, TreeMap<Integer, ScanLines> scan) throws IOException {
+    private final static void pixelGrabber(final Image image, final int width, int y, int nRows, TreeMap<Integer, byte[]> scan) throws IOException {
         int[] pixels = new int[width * nRows];
         PixelGrabber pg = new PixelGrabber(image, 0, y, width, nRows, pixels, 0, width);
         try {pg.grabPixels();} catch (InterruptedException e) {throw new IOException("interrupted waiting for pixels!");}
         if ((pg.getStatus() & ImageObserver.ABORT) != 0) throw new IOException("image fetch aborted or errored");
-        byte[] scanLines = new byte[width * nRows * 4]; // the scan lines to be compressed
-        int scanPos = 0; // where we are in the scan lines
-        for (int i = 0; i < width * nRows; i++) {
-            if (i % width == 0) scanLines[scanPos++] = (byte) 0;
-            scanLines[scanPos++] = (byte) ((pixels[i] >> 16) & 0xff);
-            scanLines[scanPos++] = (byte) ((pixels[i] >>  8) & 0xff);
-            scanLines[scanPos++] = (byte) ((pixels[i]) & 0xff);
-        }
-        synchronized (scan) {scan.put(y, new ScanLines(scanLines, scanPos));}
-    }
-
-    private static class ScanLines {
-        protected byte[] scan;
-        protected int count;
-        public ScanLines(final byte[] scan, final int count) {
-            this.scan = scan;
-            this.count = count;
+        try {
+            ByteArrayOutputStream scanLines = new ByteArrayOutputStream(width * nRows * 3 + width);
+            for (int i = 0; i < width * nRows; i++) {
+                if (i % width == 0) scanLines.write(0);
+                scanLines.write((pixels[i] >> 16) & 0xff);
+                scanLines.write((pixels[i] >>  8) & 0xff);
+                scanLines.write((pixels[i]) & 0xff);
+            }
+            synchronized (scan) {scan.put(y, scanLines.toByteArray());}
+            scanLines.close();
+        } catch (OutOfMemoryError e) {
+            throw new IOException("out of memory, needed bytes: " + width * nRows * 4);
         }
     }
     

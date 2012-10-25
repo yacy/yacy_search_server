@@ -193,7 +193,7 @@ public class NetworkGraph {
         final int outerradius = maxradius - 20;
 
         // draw network circle
-        networkPicture.setColor(COL_DHTCIRCLE);
+        networkPicture.setColor(Long.parseLong(COL_DHTCIRCLE, 16));
         networkPicture.arc(width / 2, height / 2, innerradius - 20, innerradius + 20, 100);
 
         //System.out.println("Seed Maximum distance is       " + yacySeed.maxDHTDistance);
@@ -301,7 +301,7 @@ public class NetworkGraph {
         }
 
         // draw description
-        networkPicture.setColor(COL_HEADLINE);
+        networkPicture.setColor(Long.parseLong(COL_HEADLINE, 16));
         PrintTool.print(networkPicture, 2, 6, 0, "YACY NETWORK '" + networkName.toUpperCase() + "'", -1);
         PrintTool.print(networkPicture, 2, 14, 0, networkTitle.toUpperCase(), -1);
         PrintTool.print(networkPicture, width - 2, 6, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
@@ -317,12 +317,13 @@ public class NetworkGraph {
         final int angleMy = cyc + (int) (360.0d * Distribution.horizontalDHTPosition(ASCII.getBytes(mySeed.hash)) / DOUBLE_LONG_MAX_VALUE);
         final int angleOther = cyc + (int) (360.0d * Distribution.horizontalDHTPosition(ASCII.getBytes(otherSeed.hash)) / DOUBLE_LONG_MAX_VALUE);
         // draw line
+        Long colorLine_l = Long.parseLong(colorLine, 16);
         img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleMy, !out,
-                colorLine, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
+                colorLine_l, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
         img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleOther, out,
-                colorLine, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
+                colorLine_l, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
         img.arcConnect(centerX, centerY, innerradius - 20, angleMy, angleOther, out,
-                colorLine, 100, null, 100, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
+                colorLine_l, 100, null, 100, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
     }
 
     private static class drawNetworkPicturePeerJob {
@@ -364,12 +365,12 @@ public class NetworkGraph {
             if (this.colorDot.equals(COL_MYPEER_DOT)) dotsize = dotsize + 4;
             if (dotsize > 18) dotsize = 18;
             // draw dot
-            this.img.setColor(this.colorDot);
+            this.img.setColor(Long.parseLong(this.colorDot, 16));
             this.img.arcDot(this.centerX, this.centerY, this.innerradius, angle, dotsize);
             // draw line to text
-            this.img.arcLine(this.centerX, this.centerY, this.innerradius + 18, this.innerradius + linelength, angle, true, this.colorLine, "444444", 12, this.coronaangle / 30, 0, true);
+            this.img.arcLine(this.centerX, this.centerY, this.innerradius + 18, this.innerradius + linelength, angle, true, Long.parseLong(this.colorLine, 16), Long.parseLong("444444", 16), 12, this.coronaangle / 30, 0, true);
             // draw text
-            this.img.setColor(this.colorText);
+            this.img.setColor(Long.parseLong(this.colorText, 16));
             PrintTool.arcPrint(this.img, this.centerX, this.centerY, this.innerradius + linelength, angle, name);
 
             // draw corona around dot for crawling activity

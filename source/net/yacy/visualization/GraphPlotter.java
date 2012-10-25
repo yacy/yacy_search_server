@@ -319,22 +319,27 @@ public class GraphPlotter implements Cloneable {
         String name;
         Point c;
         int x, y;
+        Long color_dot0_l = Long.parseLong(color_dot0, 16);
+        Long color_dota_l = Long.parseLong(color_dota, 16);
+        Long color_line_l = Long.parseLong(color_line, 16);
+        Long color_lineend_l = Long.parseLong(color_lineend, 16);
+        Long color_text_l = Long.parseLong(color_text, 16);
         while (i.hasNext()) {
             entry = i.next();
             name = entry.getKey();
             c = entry.getValue();
             x = (xfactor == 0.0) ? raster(width / 2, xraster) : leftborder + raster((c.x - this.leftmost) * xfactor, xraster);
             y = (yfactor == 0.0) ? raster(height / 2, yraster) : height - bottomborder - raster((c.y - this.bottommost) * yfactor, yraster);
-            image.setColor(c.layer == 0 ? color_dot0 : color_dota);
+            image.setColor(c.layer == 0 ? color_dot0_l : color_dota_l);
             image.dot(x, y, 6, true, 100);
-            image.setColor(color_text);
+            image.setColor(color_text_l);
             PrintTool.print(image, x, y + 10, 0, name.toUpperCase(), 0 /*x < 2 * width / 5 ? 1 : x > 3 * width / 5 ? -1 : 0*/);
         }
 
         // draw lines
         final Iterator<String> j = this.edges.iterator();
         Point[] border;
-        image.setColor(color_line);
+        image.setColor(color_line_l);
         int x0, x1, y0, y1;
         while (j.hasNext()) {
             border = getEdge(j.next());
@@ -353,8 +358,8 @@ public class GraphPlotter implements Cloneable {
                 y0 = height - bottomborder - raster((border[0].y - this.bottommost) * yfactor, yraster);
                 y1 = height - bottomborder - raster((border[1].y - this.bottommost) * yfactor, yraster);
             }
-            // draw the line, with the dot at the beginning of the line
-            image.lineDot(x1, y1, x0, y0, 3, 4, color_line, color_lineend);
+            // draw the line, with an errow at the end of the line
+            image.lineArrow(x0, y0, x1, y1, 6, 5, color_line_l, color_lineend_l);
         }
         return image;
     }

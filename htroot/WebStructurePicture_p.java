@@ -139,7 +139,7 @@ public class WebStructurePicture_p {
             graphPicture = graph.draw(width, height, 40, 40, 16, 16, 12, 6, color_back, color_dot0, color_dota, color_line, color_lineend, color_text);
         }
         // print headline
-        graphPicture.setColor(color_text);
+        graphPicture.setColor(Long.parseLong(color_text, 16));
         PrintTool.print(graphPicture, 2, 8, 0, "YACY WEB-STRUCTURE ANALYSIS", -1);
         if (hosts != null) PrintTool.print(graphPicture, 2, 16, 0, "LINK ENVIRONMENT OF DOMAIN " + hosts.toUpperCase(), -1);
         PrintTool.print(graphPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
