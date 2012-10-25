@@ -145,6 +145,10 @@ public class HostBrowser {
         
         if (path.length() > 0) {
             boolean complete = post.getBoolean("complete");
+            if (complete) { // we want only root paths for complete lists
+                p = path.indexOf('/', 10);
+                if (p > 0) path = path.substring(0, p + 1);
+            }
             prop.put("files_complete", complete ? 1 : 0);
             prop.put("files_complete_path", path);
             p = path.substring(0, path.length() - 1).lastIndexOf('/');
@@ -172,13 +176,12 @@ public class HostBrowser {
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                     String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
                     hostsize++;
-                    boolean considerPath = complete || u.startsWith(path);
-                    if (considerPath) storedDocs.add(u);
+                    if (complete || u.startsWith(path)) storedDocs.add(u);
                     // collect inboundlinks to browse the host
                     Iterator<String> links = URIMetadataNode.getLinks(doc, true);
                     while (links.hasNext()) {
                         u = links.next();
-                        if (considerPath && !storedDocs.contains(u)) inboundLinks.add(u);
+                        if ((complete || u.startsWith(path)) && !storedDocs.contains(u)) inboundLinks.add(u);
                     }
                     
                     // collect outboundlinks to browse to the outbound
@@ -208,8 +211,9 @@ public class HostBrowser {
                 // distinguish files and folders
                 Map<String, Object> list = new TreeMap<String, Object>();
                 int pl = path.length();
+                String file;
                 for (Map.Entry<String, Boolean> entry: files.entrySet()) {
-                    String file = entry.getKey().substring(pl);
+                    file = entry.getKey().substring(pl);
                     p = file.indexOf('/');
                     if (p < 0) {
                         // this is a file
