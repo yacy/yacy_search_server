@@ -137,9 +137,22 @@ public class RasterPlotter {
         final int bgG = (int) ((this.backgroundCol >> 8) & 0xff);
         final int bgB = (int) (this.backgroundCol & 0xff);
 
-        final Graphics2D gr = this.image.createGraphics();
-        gr.setBackground(new Color(bgR, bgG, bgB));
-        gr.clearRect(0, 0, this.width, this.height);
+        if (this.frame == null) {
+            final Graphics2D gr = this.image.createGraphics();
+            gr.setBackground(new Color(bgR, bgG, bgB));
+            gr.clearRect(0, 0, this.width, this.height);
+        } else {
+            int p = 0;
+            for (int i = 0; i < width; i++) {
+                this.frame[p++] = (byte) bgR;
+                this.frame[p++] = (byte) bgG;
+                this.frame[p++] = (byte) bgB;
+            }
+            final int rw = width * 3;
+            for (int i = 1; i < height; i++) {
+                System.arraycopy(this.frame, 0, this.frame, i * rw, rw);
+            }
+        }
     }
 
     public void setDrawMode(final DrawMode drawMode) {
@@ -168,6 +181,30 @@ public class RasterPlotter {
         final int b = (int) (c & 0xff);
         return r + g + b < 384;
     }
+    
+    public int[] getPixel(final int x, final int y) {
+        return getPixel(x, y, new int[3]);
+    }
+
+    public int[] getPixel(final int x, final int y, int[] c) {
+        if (this.frame == null) return this.grid.getPixel(x, y, c);
+        int cell = (this.width * y + x) * 3;
+        c[0] = this.frame[cell++] & 0xff;
+        c[1] = this.frame[cell++] & 0xff;
+        c[2] = this.frame[cell++] & 0xff;
+        return c;
+    }
+    
+    public void setPixel(final int x, final int y, int[] c) {
+        if (this.frame == null) {
+            this.grid.setPixel(x, y, c);
+            return;
+        }
+        int cell = (this.width * y + x) * 3;
+        this.frame[cell++] = (byte) c[0];
+        this.frame[cell++] = (byte) c[1];
+        this.frame[cell++] = (byte) c[2];
+    }
 
     public void setColor(final long c) {
     	if (this.defaultMode == DrawMode.MODE_SUB) {
@@ -182,7 +219,6 @@ public class RasterPlotter {
             this.defaultColG = (int) ((c >> 8) & 0xff);
             this.defaultColB = (int) (c & 0xff);
     	}
-
     }
 
     public void plot(final int x, final int y) {
@@ -198,18 +234,18 @@ public class RasterPlotter {
                 this.cc[0] = this.defaultColR;
                 this.cc[1] = this.defaultColG;
                 this.cc[2] = this.defaultColB;
-                this.grid.setPixel(x, y, this.cc);
+                setPixel(x, y, this.cc);
             } else synchronized (this.cc) {
-                final int[] c = this.grid.getPixel(x, y, this.cc);
+                final int[] c = getPixel(x, y, this.cc);
                 c[0] = (intensity * this.defaultColR + (100 - intensity) * c[0]) / 100;
                 c[1] = (intensity * this.defaultColG + (100 - intensity) * c[1]) / 100;
                 c[2] = (intensity * this.defaultColB + (100 - intensity) * c[2]) / 100;
-                this.grid.setPixel(x, y, c);
+                setPixel(x, y, c);
             }
         } else if (this.defaultMode == DrawMode.MODE_ADD) synchronized (this.cc) {
             int[] c = null;
             try {
-                c = this.grid.getPixel(x, y, this.cc);
+                c = getPixel(x, y, this.cc);
             }   catch (final ArrayIndexOutOfBoundsException e) {
                 // catch "Coordinate out of bounds"
                 return;
@@ -223,11 +259,11 @@ public class RasterPlotter {
                 c[1] = (0xff & c[1]) + (intensity * this.defaultColG / 100); if (this.cc[1] > 255) this.cc[1] = 255;
                 c[2] = (0xff & c[2]) + (intensity * this.defaultColB / 100); if (this.cc[2] > 255) this.cc[2] = 255;
             }
-            this.grid.setPixel(x, y, c);
+            setPixel(x, y, c);
         } else if (this.defaultMode == DrawMode.MODE_SUB) synchronized (this.cc) {
             int[] c = null;
             try {
-                c = this.grid.getPixel(x, y, this.cc);
+                c = getPixel(x, y, this.cc);
             }   catch (final ArrayIndexOutOfBoundsException e) {
                 // catch "Coordinate out of bounds"
                 return;
@@ -241,7 +277,7 @@ public class RasterPlotter {
                 c[1] = (0xff & c[1]) - (intensity * this.defaultColG / 100); if (this.cc[1] < 0) this.cc[1] = 0;
                 c[2] = (0xff & c[2]) - (intensity * this.defaultColB / 100); if (this.cc[2] < 0) this.cc[2] = 0;
             }
-            this.grid.setPixel(x, y, c);
+            setPixel(x, y, c);
         }
         } catch (ArrayIndexOutOfBoundsException e) {
             this.log.logWarning(e.getMessage() + ": x = " + x + ", y = " + y);
@@ -378,11 +414,6 @@ public class RasterPlotter {
         line(x2, y2, x3, y3, 100); // base line
         line(x2, y2, xt, yt, 100); // left line
         line(x3, y3, xt, yt, 100); // right line
-    }
-    
-    public int[] getColor(final int x, final int y) {
-        final int[] c = new int[3];
-        return this.grid.getPixel(x, y, c);
     }
 
     public void dot(final int x, final int y, final int radius, final boolean filled, final int intensity) {
@@ -837,6 +868,7 @@ public class RasterPlotter {
             i += 3 * width;
         }
         compBytes.close();
+        scrunch.finish();
 
         // finally write the result of the concurrent calculation into an DeflaterOutputStream to compress the png
         final int nCompressed = outBytes.length();
@@ -861,7 +893,6 @@ public class RasterPlotter {
         crc.update(pngBytes, bytePos, nCompressed);
         bytePos += nCompressed;
         bytePos = writeInt4(pngBytes, (int) crc.getValue(), bytePos);
-        scrunch.finish();
         bytePos = writeInt4(pngBytes, 0, bytePos);
         bytePos = writeBytes(pngBytes, IEND, bytePos);
         crc.reset();
