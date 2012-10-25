@@ -184,6 +184,10 @@ public final class ByteBuffer extends OutputStream {
         return tmp;
     }
 
+    public void copyTo(byte[] otherArray, int offset) {
+        System.arraycopy(this.buffer, 0, otherArray, offset, this.length);
+    }
+    
     public ByteBuffer trim(final int start) {
         this.offset += start;
         this.length -= start;

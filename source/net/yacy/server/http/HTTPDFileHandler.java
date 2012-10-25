@@ -591,12 +591,20 @@ public final class HTTPDFileHandler {
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
                         final String mimeType = Classification.ext2mime(targetExt, "text/html");
-                        final ByteBuffer result = RasterPlotter.exportImage(yp.getImage(), targetExt);
-
                         // write the array to the client
-                        HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length(), targetDate, null, null, null, null, nocache);
-                        if (!method.equals(HeaderFramework.METHOD_HEAD)) {
-                            result.writeTo(out);
+                        if ("png".equals(targetExt)) {
+                            final byte[] result =  ((RasterPlotter) img).pngEncode(1);
+                            HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, null, null, null, nocache);
+                            if (!method.equals(HeaderFramework.METHOD_HEAD)) {
+                                out.write(result);
+                            }
+                        } else {
+                            final ByteBuffer result = RasterPlotter.exportImage(yp.getImage(), targetExt);
+                            HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length(), targetDate, null, null, null, null, nocache);
+                            if (!method.equals(HeaderFramework.METHOD_HEAD)) {
+                                result.writeTo(out);
+                            }
+                            result.close();
                         }
                     }
                     if (img instanceof EncodedImage) {

@@ -35,11 +35,25 @@ package net.yacy.visualization;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.ComponentSampleModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.zip.CRC32;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 
 import javax.imageio.ImageIO;
 
@@ -69,12 +83,13 @@ public class RasterPlotter {
 
     protected final int            width, height;
     private final   int[]          cc;
-    private BufferedImage  image;
-    private final   WritableRaster grid;
+    private         BufferedImage  image;
+    private         WritableRaster grid;
     private         int            defaultColR, defaultColG, defaultColB;
     private final   long           backgroundCol;
     private         DrawMode       defaultMode;
-
+    private byte[]  frame;
+    
     public RasterPlotter(final int width, final int height, final DrawMode drawMode, final String backgroundColor) {
         this(width, height, drawMode, Long.parseLong(backgroundColor, 16));
     }
@@ -89,15 +104,16 @@ public class RasterPlotter {
         this.defaultColB = 0xFF;
         this.defaultMode = drawMode;
         try {
-            this.image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            /*
-            byte[] frame = new byte[width * height * 3];
+            // we need our own frame buffer to get a very, very fast transformation to png because we can omit the PixedGrabber, which is up to 800 times slower
+            // see: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4835595
+            this.frame = new byte[width * height * 3];
             DataBuffer videoBuffer = new DataBufferByte(frame, frame.length);
-            ComponentSampleModel sampleModel = new ComponentSampleModel(DataBuffer.TYPE_BYTE, width, height, 3, width*3, new int[] {2,1,0});
-            Raster raster = Raster.createRaster(sampleModel, videoBuffer, null);
-            this.image.setData(raster);
-            */
+            ComponentSampleModel sampleModel = new ComponentSampleModel(DataBuffer.TYPE_BYTE, width, height, 3, width * 3, new int[] {0, 1, 2});
+            this.grid = Raster.createWritableRaster(sampleModel, videoBuffer, null);
+            ColorModel colorModel = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), null, false, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+            this.image = new BufferedImage(colorModel, this.grid, false, null);
         } catch (final OutOfMemoryError e) {
+            this.frame = null;
             try {
                 this.image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_INDEXED);
             } catch (final OutOfMemoryError ee) {
@@ -107,9 +123,9 @@ public class RasterPlotter {
                     this.image = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_BINARY);
                 }
             }
+            this.grid = this.image.getRaster();
         }
         clear();
-        this.grid = this.image.getRaster();
     }
 
     /**
@@ -758,7 +774,6 @@ public class RasterPlotter {
 
     public static ByteBuffer exportImage(final BufferedImage image, final String targetExt) {
     	// generate an byte array from the given image
-    	if ("png".equals(targetExt)) return exportPng(image);
     	final ByteBuffer baos = new ByteBuffer();
     	ImageIO.setUseCache(false); // because we write into ram here
     	try {
@@ -771,10 +786,10 @@ public class RasterPlotter {
     	}
     }
     
-    public static ByteBuffer exportPng(final BufferedImage image) {
+    public ByteBuffer exportPng() {
         try {
             final ByteBuffer baos = new ByteBuffer();
-            byte[] pngbytes = PngEncoder.pngEncode(image, 1);
+            byte[] pngbytes = pngEncode(1);
             if (pngbytes == null) return null;
             baos.write(pngbytes);
             baos.flush();
@@ -785,8 +800,90 @@ public class RasterPlotter {
             Log.logException(e);
             return null;
         }
-    }       
+    }
+    
+    /*
+     * The following code was transformed from a library, coded by J. David Eisenberg, version 1.5, 19 Oct 2003 (C) LGPL
+     * This code was very strongly transformed into the following very short method for an ultra-fast png generation.
+     * These changes had been made 23.10.2012 by [MC] to the original code:
+     * For the integration into YaCy this class was adopted to YaCy graphics by Michael Christen:
+     * - removed alpha encoding
+     * - removed not used code
+     * - inlined static values
+     * - inlined all methods that had been called only once
+     * - moved class objects which appear after all refactoring only within a single method into this method
+     * - removed a giant number of useless (obvious things) comments and empty lines to increase readability (!)
+     * - new order of data computation: first compute the size of compressed deflater output,
+     *   then assign an exact-sized byte[] which makes resizing afterwards superfluous
+     * - after all enhancements all class objects were removed; result is just one short static method
+     * - made objects final where possible
+     * - removed the PixelGrabber call and replaced it with a call to this.frame which is just a byte[]
+     * - added more speed woodoo like a buffer around the deflater which makes this much faster
+     */
 
+    private static final byte IHDR[] = {73, 72, 68, 82};
+    private static final byte IDAT[] = {73, 68, 65, 84};
+    private static final byte IEND[] = {73, 69, 78, 68};
+
+    public final byte[] pngEncode(final int compressionLevel) throws IOException {
+        if (this.frame == null) return exportImage(this.getImage(), "png").getBytes();
+        final int width = image.getWidth(null);
+        final int height = image.getHeight(null);
+        
+        final Deflater scrunch = new Deflater(compressionLevel);
+        ByteBuffer outBytes = new ByteBuffer(1024);
+        final OutputStream compBytes = new BufferedOutputStream(new DeflaterOutputStream(outBytes, scrunch));
+        int i = 0;
+        for (int row = 0; row < height; row++) {
+            compBytes.write(0);
+            for (int column = 0; column < width; column++) {
+                compBytes.write(frame, i, 3); // this replaces the whole PixelGrabber process which makes it probably more than 800x faster. See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4835595
+                i += 3;
+            }
+        }
+        compBytes.close();
+
+        // finally write the result of the concurrent calculation into an DeflaterOutputStream to compress the png
+        final int nCompressed = outBytes.length();
+        final byte[] pngBytes = new byte[nCompressed + 57]; // yes thats the exact size, not too less, not too much. No resizing needed.
+        int bytePos = writeBytes(pngBytes, new byte[]{-119, 80, 78, 71, 13, 10, 26, 10}, 0);
+        final int startPos = bytePos = writeInt4(pngBytes, 13, bytePos);
+        bytePos = writeBytes(pngBytes, IHDR, bytePos);
+        bytePos = writeInt4(pngBytes, width, bytePos);
+        bytePos = writeInt4(pngBytes, height, bytePos);
+        bytePos = writeBytes(pngBytes, new byte[]{8, 2, 0, 0, 0}, bytePos);
+        final CRC32 crc = new CRC32();
+        crc.reset();
+        crc.update(pngBytes, startPos, bytePos - startPos);
+        bytePos = writeInt4(pngBytes, (int) crc.getValue(), bytePos);
+        crc.reset();
+        bytePos = writeInt4(pngBytes, nCompressed, bytePos);
+        bytePos = writeBytes(pngBytes, IDAT, bytePos);
+        crc.update(IDAT);
+        outBytes.copyTo(pngBytes, bytePos);
+        outBytes.close();
+        outBytes = null;
+        crc.update(pngBytes, bytePos, nCompressed);
+        bytePos += nCompressed;
+        bytePos = writeInt4(pngBytes, (int) crc.getValue(), bytePos);
+        scrunch.finish();
+        bytePos = writeInt4(pngBytes, 0, bytePos);
+        bytePos = writeBytes(pngBytes, IEND, bytePos);
+        crc.reset();
+        crc.update(IEND);
+        bytePos = writeInt4(pngBytes, (int) crc.getValue(), bytePos);
+        return pngBytes;
+    }
+    
+    private final static int writeInt4(final byte[] target, final int n, final int offset) {
+        return writeBytes(target, new byte[]{(byte) ((n >> 24) & 0xff), (byte) ((n >> 16) & 0xff), (byte) ((n >> 8) & 0xff), (byte) (n & 0xff)}, offset);
+    }
+
+    private final static int writeBytes(final byte[] target, final byte[] data, final int offset) {
+        System.arraycopy(data, 0, target, offset, data.length);
+        return offset + data.length;
+    }
+    
     public static void main(final String[] args) {
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");
@@ -799,21 +896,13 @@ public class RasterPlotter {
             ImageIO.write(m.getImage(), "png", fos);
             fos.close();
         } catch (final IOException e) {}
-
         Log.shutdown();
+        
         // open file automatically, works only on Mac OS X
         /*
         Process p = null;
-        try {
-            p = Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", "open \"" + args[0] + "\""});
-        } catch (java.io.IOException e) {
-            Log.logException(e);
-        }
-        try {
-            p.waitFor();
-        } catch (InterruptedException e) {
-            Log.logException(e);
-        }
+        try {p = Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", "open \"" + args[0] + "\""});} catch (java.io.IOException e) {Log.logException(e);}
+        try {p.waitFor();} catch (InterruptedException e) {Log.logException(e);}
         */
     }
 

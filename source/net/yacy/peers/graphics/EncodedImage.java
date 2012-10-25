@@ -1,7 +1,5 @@
 package net.yacy.peers.graphics;
 
-import java.awt.image.BufferedImage;
-
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.visualization.RasterPlotter;
 
@@ -9,8 +7,8 @@ public class EncodedImage {
     private ByteBuffer image;
     private String extension;
     
-    public EncodedImage(final BufferedImage sourceImage, final String targetExt) {
-        this.image = RasterPlotter.exportImage(sourceImage, targetExt);
+    public EncodedImage(final RasterPlotter sourceImage, final String targetExt) {
+        this.image = "png".equals(targetExt) ? sourceImage.exportPng() : RasterPlotter.exportImage(sourceImage.getImage(), targetExt);
         this.extension = targetExt;
     }
     

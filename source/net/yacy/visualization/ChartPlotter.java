@@ -29,10 +29,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
-
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.ByteBuffer;
 
 
 public class ChartPlotter extends RasterPlotter {
