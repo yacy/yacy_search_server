@@ -238,17 +238,17 @@ public class GraphPlotter implements Cloneable {
         normalizeHorizontal();
     }
     
-    public Point addNode(final String node, Point p) {
-        this.nodes.put(node, p);
+    public void addNode(final String node, Point p) {
+        Point op = this.nodes.get(node);
+        if (op == null) this.nodes.put(node, p); else op.layer = Math.min(op.layer, p.layer);
         if (p.x > this.rightmost) this.rightmost = p.x;
         if (p.x < this.leftmost) this.leftmost = p.x;
         if (p.y > this.topmost) this.topmost = p.y;
         if (p.y < this.bottommost) this.bottommost = p.y;
-        return p;
     }
 
-    public Point addNode(final String node, final double x, final double y, final int layer) {
-        return addNode(node, new Point(x, y, layer));
+    public void addNode(final String node, final double x, final double y, final int layer) {
+        addNode(node, new Point(x, y, layer));
     }
 
     public boolean hasEdge(final String fromNode, final String toNode) {
@@ -302,7 +302,8 @@ public class GraphPlotter implements Cloneable {
             final int leftborder, final int rightborder,
             final int topborder, final int bottomborder,
             final int xraster, final int yraster,
-            final String color_back, final String color_dot,
+            final String color_back,
+            final String color_dot0, final String color_dota,
             final String color_line, final String color_lineend,
             final String color_text
             ) {
@@ -324,7 +325,7 @@ public class GraphPlotter implements Cloneable {
             c = entry.getValue();
             x = (xfactor == 0.0) ? raster(width / 2, xraster) : leftborder + raster((c.x - this.leftmost) * xfactor, xraster);
             y = (yfactor == 0.0) ? raster(height / 2, yraster) : height - bottomborder - raster((c.y - this.bottommost) * yfactor, yraster);
-            image.setColor(color_dot);
+            image.setColor(c.layer == 0 ? color_dot0 : color_dota);
             image.dot(x, y, 6, true, 100);
             image.setColor(color_text);
             PrintTool.print(image, x, y + 10, 0, name.toUpperCase(), 0 /*x < 2 * width / 5 ? 1 : x > 3 * width / 5 ? -1 : 0*/);

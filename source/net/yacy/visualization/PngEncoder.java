@@ -81,20 +81,19 @@ public class PngEncoder extends Object {
         final int width = image.getWidth(null);
         final int height = image.getHeight(null);
         
-        // prepare an input list for concurrent PixelGrabber computation
-        final BlockingQueue<int[]> grabberInput = new LinkedBlockingQueue<int[]>();
-        int startRow = 0;       // starting row to process this time through
-        int rowsLeft = height;  // number of rows remaining to write
-        while (rowsLeft > 0) {
-            int nRows = Math.max(Math.min(32767 / (width * 4), rowsLeft), 1); // how many rows to grab at a time
-            grabberInput.add(new int[]{startRow, nRows});
-            startRow += nRows;
-            rowsLeft -= nRows;
-        }
-
-        // do the PixelGrabber computation and allocate the result in the right order
         final TreeMap<Integer, ScanLines> scan = new TreeMap<Integer, ScanLines>();
-        if (grabberInput.size() > 80) {
+        if (height > 80) {
+            // prepare an input list for concurrent PixelGrabber computation
+            final BlockingQueue<int[]> grabberInput = new LinkedBlockingQueue<int[]>();
+            int startRow = 0;       // starting row to process this time through
+            int rowsLeft = height;  // number of rows remaining to write
+            while (rowsLeft > 0) {
+                int nRows = Math.max(Math.min(32767 / (width * 4), rowsLeft), 1); // how many rows to grab at a time
+                grabberInput.add(new int[]{startRow, nRows});
+                startRow += nRows;
+                rowsLeft -= nRows;
+            }
+            // do the PixelGrabber computation and allocate the result in the right order
             ArrayList<Thread> ts = new ArrayList<Thread>();
             int tc = Math.min(grabberInput.size() / 40, Runtime.getRuntime().availableProcessors());
             for (int i = 0; i < tc; i++) {
@@ -113,7 +112,14 @@ public class PngEncoder extends Object {
             }
             for (Thread t: ts) try {t.join();} catch (InterruptedException e) {}
         } else {
-            for (int[] gi: grabberInput) pixelGrabber(image, width, gi[0], gi[1], scan);
+            int startRow = 0;       // starting row to process this time through
+            int rowsLeft = height;  // number of rows remaining to write
+            while (rowsLeft > 0) {
+                int nRows = Math.max(Math.min(32767 / (width * 4), rowsLeft), 1); // how many rows to grab at a time
+                pixelGrabber(image, width, startRow, nRows, scan);
+                startRow += nRows;
+                rowsLeft -= nRows;
+            }
         }
         
         // finally write the result of the concurrent calculation into an DeflaterOutputStream to compress the png
