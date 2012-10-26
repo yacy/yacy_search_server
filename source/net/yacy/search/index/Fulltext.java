@@ -69,6 +69,8 @@ import org.apache.solr.common.SolrInputDocument;
 
 public final class Fulltext implements Iterable<byte[]> {
 
+    private static final long forcedCommitTimeout = 3000; // wait this time until a next forced commit is executed
+    
     // class objects
 	private final File                location;
     private       Index               urlIndexFile;
@@ -77,6 +79,7 @@ public final class Fulltext implements Iterable<byte[]> {
     private       ArrayList<HostStat> statsDump;
     private final MirrorSolrConnector solr;
     private final SolrConfiguration   solrScheme;
+    private long                forcedCommitTime;
 
     protected Fulltext(final File path, final SolrConfiguration solrScheme) {
         this.location = path;
@@ -86,6 +89,7 @@ public final class Fulltext implements Iterable<byte[]> {
         this.statsDump = null;
         this.solr = new MirrorSolrConnector(1000, 1000, 100);
         this.solrScheme = solrScheme;
+        this.forcedCommitTime = 0;
     }
 
     protected void connectUrlDb(final String tablename, final boolean useTailCache, final boolean exceed134217727) {
@@ -191,7 +195,10 @@ public final class Fulltext implements Iterable<byte[]> {
     }
     
     public void commit() {
+        if (this.forcedCommitTime + forcedCommitTimeout < System.currentTimeMillis()) return;
+        this.forcedCommitTime = Long.MAX_VALUE - forcedCommitTimeout; // set the time high to prevent that other processes get to this point meanwhile
         this.solr.commit();
+        this.forcedCommitTime = System.currentTimeMillis(); // set the exact time
     }
 
     /**

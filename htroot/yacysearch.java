@@ -111,7 +111,8 @@ public class yacysearch {
                 "network.unit.description",
                 "") : env.getConfig(SwitchboardConstants.GREETING, "");
         final String client = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
-
+        if (authenticated) sb.index.fulltext().commit();
+        
         // get query
         final String originalquerystring =
             (post == null) ? "" : post.get("query", post.get("search", "")).trim();

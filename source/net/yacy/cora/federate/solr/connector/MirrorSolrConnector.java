@@ -33,7 +33,6 @@ import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.util.MemoryControl;
 
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
