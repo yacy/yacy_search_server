@@ -97,6 +97,11 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
     }
 
     @Override
+    public void commit() {
+        this.solr.commit();
+    }
+    
+    @Override
     public void close() {
         // send termination signal to worker
         for (@SuppressWarnings("unused") AddWorker element : this.worker) {

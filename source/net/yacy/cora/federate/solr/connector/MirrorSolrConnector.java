@@ -33,6 +33,7 @@ import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.util.MemoryControl;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
@@ -132,6 +133,12 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         if (this.solr1 != null) this.solr1.setCommitWithinMs(c);
     }
 
+    @Override
+    public void commit() {
+        if (this.solr0 != null) this.solr0.commit();
+        if (this.solr1 != null) this.solr1.commit();
+    }
+    
     @Override
     public synchronized void close() {
         if (this.solr0 != null) this.solr0.close();

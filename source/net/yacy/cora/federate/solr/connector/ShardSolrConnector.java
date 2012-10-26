@@ -73,6 +73,11 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
     @Override
+    public void commit() {
+        for (final SolrConnector connector: this.connectors) connector.commit();
+    }
+
+    @Override
     public synchronized void close() {
         for (final SolrConnector connector: this.connectors) connector.close();
     }

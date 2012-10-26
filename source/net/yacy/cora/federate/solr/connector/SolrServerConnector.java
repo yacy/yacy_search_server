@@ -84,6 +84,15 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     }
 
     @Override
+    public synchronized void commit() {
+        try {
+            this.server.commit();
+        } catch (SolrServerException e) {
+        } catch (IOException e) {
+        }
+    }
+
+    @Override
     public synchronized void close() {
         try {
             if (this.server != null) synchronized (this.server) {this.server.commit();}

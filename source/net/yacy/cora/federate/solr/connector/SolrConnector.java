@@ -49,6 +49,11 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public void setCommitWithinMs(int c);
 
     /**
+     * force a commit
+     */
+    public void commit();
+    
+    /**
      * close the server connection
      */
     public void close();

@@ -60,6 +60,11 @@ public class RetrySolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
     @Override
+    public void commit() {
+        this.solrConnector.commit();
+    }
+
+    @Override
     public synchronized void close() {
         this.solrConnector.close();
     }

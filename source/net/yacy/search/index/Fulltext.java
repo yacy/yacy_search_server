@@ -186,6 +186,14 @@ public final class Fulltext implements Iterable<byte[]> {
         this.solr.close();
     }
 
+    public int getCommitWithinMs() {
+        return this.solr.getCommitWithinMs();
+    }
+    
+    public void commit() {
+        this.solr.commit();
+    }
+
     /**
      * generates an plasmaLURLEntry using the url hash
      * if the url cannot be found, this returns null
