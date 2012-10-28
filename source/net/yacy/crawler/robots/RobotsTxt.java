@@ -36,17 +36,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
-import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.crawler.retrieval.HTTPLoader;
+import net.yacy.crawler.retrieval.Request;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.blob.BEncodedHeap;
-import net.yacy.kelondro.io.ByteCount;
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.repository.LoaderDispatcher;
 
 import org.apache.log4j.Logger;
 
@@ -61,14 +59,16 @@ public class RobotsTxt {
     private final ConcurrentHashMap<String, DomSync> syncObjects;
     //private static final HashSet<String> loadedRobots = new HashSet<String>(); // only for debugging
     private final WorkTables tables;
+    private final LoaderDispatcher loader;
 
     private static class DomSync {
     	private DomSync() {}
     }
 
-    public RobotsTxt(final WorkTables worktables) {
+    public RobotsTxt(final WorkTables worktables, LoaderDispatcher loader) {
         this.syncObjects = new ConcurrentHashMap<String, DomSync>();
         this.tables = worktables;
+        this.loader = loader;
         try {
             this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
             //log.info("initiated robots table: " + this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME).getFile());
@@ -90,22 +90,30 @@ public class RobotsTxt {
         return this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME).size();
     }
 
-    public RobotsTxtEntry getEntry(final MultiProtocolURI theURL, final Set<String> thisAgents) throws IOException {
+    public RobotsTxtEntry getEntry(final MultiProtocolURI theURL, final Set<String> thisAgents) {
         if (theURL == null) throw new IllegalArgumentException();
         if (!theURL.getProtocol().startsWith("http")) return null;
         return getEntry(theURL, thisAgents, true);
     }
 
-    private RobotsTxtEntry getEntry(final MultiProtocolURI theURL, final Set<String> thisAgents, final boolean fetchOnlineIfNotAvailableOrNotFresh) throws IOException {
+    private RobotsTxtEntry getEntry(final MultiProtocolURI theURL, final Set<String> thisAgents, final boolean fetchOnlineIfNotAvailableOrNotFresh) {
             // this method will always return a non-null value
         final String urlHostPort = getHostPort(theURL);
         RobotsTxtEntry robotsTxt4Host = null;
         Map<String, byte[]> record;
-        final BEncodedHeap robotsTable = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
+        BEncodedHeap robotsTable = null;
+        try {
+            robotsTable = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
+        } catch (IOException e1) {
+            log.fatal("tables not available", e1);
+        }
         try {
             record = robotsTable.get(robotsTable.encodedKey(urlHostPort));
         } catch (final SpaceExceededException e) {
             log.warn("memory exhausted", e);
+            record = null;
+        } catch (IOException e) {
+            log.warn("cannot get robotstxt from table", e);
             record = null;
         }
         if (record != null) robotsTxt4Host = new RobotsTxtEntry(urlHostPort, record);
@@ -135,6 +143,9 @@ public class RobotsTxt {
                 } catch (final SpaceExceededException e) {
                     log.warn("memory exhausted", e);
                     record = null;
+                } catch (IOException e) {
+                    log.warn("cannot get robotstxt from table", e);
+                    record = null;
                 }
                 if (record != null) robotsTxt4Host = new RobotsTxtEntry(urlHostPort, record);
                 if (robotsTxt4Host != null &&
@@ -144,32 +155,26 @@ public class RobotsTxt {
                 }
 
                 // generating the proper url to download the robots txt
-                MultiProtocolURI robotsURL = null;
+                DigestURI robotsURL = null;
                 try {
-                    robotsURL = new MultiProtocolURI("http://" + urlHostPort + "/robots.txt");
+                    robotsURL = new DigestURI("http://" + urlHostPort + "/robots.txt");
                 } catch (final MalformedURLException e) {
                     log.fatal("Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.", e);
                     robotsURL = null;
                 }
 
-                Object[] result = null;
+                Response response = null;
                 if (robotsURL != null) {
                     if (log.isDebugEnabled()) log.debug("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
+                    Request request = new Request(robotsURL, null);
                     try {
-                        result = downloadRobotsTxt(robotsURL, 3, robotsTxt4Host);
-                    } catch (final Exception e) {
-                        result = null;
+                        response = this.loader.load(request, CacheStrategy.NOCACHE, null, 0);
+                    } catch (IOException e) {
+                        response = null;
                     }
                 }
-                /*
-                assert !loadedRobots.contains(robotsURL.toNormalform(false, false)) :
-                    "robots-url=" + robotsURL.toString() +
-                    ", robots=" + ((result == null || result[DOWNLOAD_ROBOTS_TXT] == null) ? "NULL" : UTF8.String((byte[]) result[DOWNLOAD_ROBOTS_TXT])) +
-                    ", robotsTxt4Host=" + ((robotsTxt4Host == null) ? "NULL" : robotsTxt4Host.getLoadedDate().toString());
-                loadedRobots.add(robotsURL.toNormalform(false, false));
-                */
 
-                if (result == null) {
+                if (response == null) {
                     // no robots.txt available, make an entry to prevent that the robots loading is done twice
                     if (robotsTxt4Host == null) {
                         // generate artificial entry
@@ -192,15 +197,15 @@ public class RobotsTxt {
                     addEntry(robotsTxt4Host);
                     if (robotsTable.size() <= sz) {
                     	log.fatal("new entry in robots.txt table failed, resetting database");
-                    	clear();
+                    	try {clear();} catch (IOException e) {}
                     	addEntry(robotsTxt4Host);
                     }
                 } else {
-                    final byte[] robotsTxt = (byte[]) result[DOWNLOAD_ROBOTS_TXT];
+                    final byte[] robotsTxt = response.getContent();
                     //Log.logInfo("RobotsTxt", "robots of " + robotsURL.toNormalform(true, true) + ":\n" + ((robotsTxt == null) ? "null" : UTF8.String(robotsTxt))); // debug TODO remove
                     RobotsTxtParser parserResult;
                     ArrayList<String> denyPath;
-                    if (((Boolean) result[DOWNLOAD_ACCESS_RESTRICTED]).booleanValue()) {
+                    if (response.getResponseHeader().getStatusCode() == 401 || response.getResponseHeader().getStatusCode() == 403) {
                         parserResult = new RobotsTxtParser(thisAgents);
                         // create virtual deny path
                         denyPath = new ArrayList<String>();
@@ -211,13 +216,14 @@ public class RobotsTxt {
                     }
 
                     // store the data into the robots DB
+                    String etag = response.getResponseHeader().containsKey(HeaderFramework.ETAG) ? (response.getResponseHeader().get(HeaderFramework.ETAG)).trim() : null;
                     robotsTxt4Host = addEntry(
                             robotsURL,
                             parserResult.allowList(),
                             denyPath,
                             new Date(),
-                            (Date) result[DOWNLOAD_MODDATE],
-                            (String) result[DOWNLOAD_ETAG],
+                            response.getResponseHeader().lastModified(),
+                            etag,
                             parserResult.sitemap(),
                             parserResult.crawlDelayMillis(),
                             parserResult.agentName());
@@ -259,13 +265,6 @@ public class RobotsTxt {
         }
     }
 
-    // methods that had been in robotsParser.java:
-
-    private static final int DOWNLOAD_ACCESS_RESTRICTED = 0;
-    static final int DOWNLOAD_ROBOTS_TXT = 1;
-    private static final int DOWNLOAD_ETAG = 2;
-    private static final int DOWNLOAD_MODDATE = 3;
-
     static final String getHostPort(final MultiProtocolURI theURL) {
         final int port = getPort(theURL);
         String host = theURL.getHost();
@@ -285,133 +284,6 @@ public class RobotsTxt {
 
         }
         return port;
-    }
-
-    protected static Object[] downloadRobotsTxt(final MultiProtocolURI robotsURL, int redirectionCount, final RobotsTxtEntry entry) throws Exception {
-        if (robotsURL == null || !robotsURL.getProtocol().startsWith("http")) return null;
-
-        if (redirectionCount < 0) return new Object[]{Boolean.FALSE,null,null};
-        redirectionCount--;
-
-        boolean accessCompletelyRestricted = false;
-        byte[] robotsTxt = null;
-        long downloadStart, downloadEnd;
-        String eTag=null, oldEtag = null;
-        Date lastMod=null;
-        downloadStart = System.currentTimeMillis();
-
-        // if we previously have downloaded this robots.txt then we can set the if-modified-since header
-        RequestHeader reqHeaders = new RequestHeader();
-
-        // add yacybot user agent
-        reqHeaders.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
-
-        // adding referer
-        reqHeaders.put(RequestHeader.REFERER, (MultiProtocolURI.newURL(robotsURL,"/")).toNormalform(true));
-        reqHeaders.put(HeaderFramework.ACCEPT, HTTPLoader.DEFAULT_ACCEPT);
-        if (entry != null) {
-            oldEtag = entry.getETag();
-            reqHeaders = new RequestHeader();
-            final Date modDate = entry.getModDate();
-            if (modDate != null) reqHeaders.put(RequestHeader.IF_MODIFIED_SINCE, HeaderFramework.formatRFC1123(entry.getModDate()));
-
-        }
-
-        // setup http-client
-        //TODO: adding Traffic statistic for robots download?
-        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
-        client.setHeader(reqHeaders.entrySet());
-        try {
-            // check for interruption
-            if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress.");
-
-            // sending the get request
-            robotsTxt = client.GETbytes(robotsURL);
-            // statistics:
-            if (robotsTxt != null) {
-            	ByteCount.addAccountCount(ByteCount.CRAWLER, robotsTxt.length);
-            }
-            final int code = client.getHttpResponse().getStatusLine().getStatusCode();
-            final ResponseHeader header = new ResponseHeader(code, client.getHttpResponse().getAllHeaders());
-
-            // check the response status
-            if (code > 199 && code < 300) {
-            	if (!header.mime().startsWith("text/plain")) {
-                    robotsTxt = null;
-                    log.info("Robots.txt from URL '" + robotsURL + "' has wrong mimetype '" + header.mime() + "'.");
-                } else {
-
-                    // getting some metadata
-                	eTag = header.containsKey(HeaderFramework.ETAG)?(header.get(HeaderFramework.ETAG)).trim():null;
-                    lastMod = header.lastModified();
-
-                    // if the robots.txt file was not changed we break here
-                    if ((eTag != null) && (oldEtag != null) && (eTag.equals(oldEtag))) {
-                        if (log.isDebugEnabled()) log.debug("Robots.txt from URL '" + robotsURL + "' was not modified. Abort downloading of new version.");
-                        return null;
-                    }
-
-
-                    downloadEnd = System.currentTimeMillis();
-                    if (log.isDebugEnabled()) log.debug("Robots.txt successfully loaded from URL '" + robotsURL + "' in " + (downloadEnd-downloadStart) + " ms.");
-                }
-            } else if (code == 304) {
-                return null;
-            } else if (code > 299 && code < 400) {
-                // getting redirection URL
-            	String redirectionUrlString = header.get(HeaderFramework.LOCATION);
-                if (redirectionUrlString==null) {
-                    if (log.isDebugEnabled())
-                		log.debug("robots.txt could not be downloaded from URL '" + robotsURL + "' because of missing redirecton header. [" + client.getHttpResponse().getStatusLine() + "].");
-                    robotsTxt = null;
-                } else {
-
-                    redirectionUrlString = redirectionUrlString.trim();
-
-                    // generating the new URL object
-                    final MultiProtocolURI redirectionUrl = MultiProtocolURI.newURL(robotsURL, redirectionUrlString);
-
-                    // following the redirection
-                    if (log.isDebugEnabled()) log.debug("Redirection detected for robots.txt with URL '" + robotsURL + "'." +
-                            "\nRedirecting request to: " + redirectionUrl);
-                    return downloadRobotsTxt(redirectionUrl,redirectionCount,entry);
-                }
-            } else if (code == 401 || code == 403) {
-                accessCompletelyRestricted = true;
-                log.info("Access to Robots.txt not allowed on URL '" + robotsURL + "', redirectionCount = " + redirectionCount); // since this is a strange case we log it all the time
-            } else {
-            	if (log.isDebugEnabled())
-            		log.debug("robots.txt could not be downloaded from URL '" + robotsURL + "'. [" + client.getHttpResponse().getStatusLine() + "].");
-                robotsTxt = null;
-            }
-        } catch (final Exception e) {
-            throw e;
-        }
-        return new Object[]{Boolean.valueOf(accessCompletelyRestricted),robotsTxt,eTag,lastMod};
-    }
-
-    public final static void main(final String[] args) throws Exception {
-
-        final String url = "http://www.badelatschen.net/robots.txt";
-        final Object[] o = downloadRobotsTxt(new MultiProtocolURI(url), 0, null);
-        if (o == null) {
-            System.out.println("result: null");
-        } else {
-            System.out.println("not allowed = " + ((Boolean) o[0]).toString());
-            System.out.println("robots = " + ((o[1] == null) ? "null" : UTF8.String((byte[]) o[1])));
-        }
-        System.exit(0);
-/*
-        final HttpClient httpclient = new DefaultHttpClient();
-        try {
-            final HttpGet httpget = new HttpGet(url);
-            final ResponseHandler<String> responseHandler = new BasicResponseHandler();
-            final String responseBody = httpclient.execute(httpget, responseHandler);
-            System.out.println(responseBody);
-        } finally {
-            httpclient.getConnectionManager().shutdown();
-        }
-        */
     }
 
 }

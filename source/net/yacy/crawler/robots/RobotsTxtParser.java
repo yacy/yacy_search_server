@@ -35,15 +35,11 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 /*
  * A class for Parsing robots.txt files.
@@ -98,35 +94,6 @@ public final class RobotsTxtParser {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(bin));
             parse(reader);
         }
-    }
-
-
-    public static RobotsTxtParser getRobots(String homepage) {
-        DigestURI theURL;
-        try {
-            theURL = new DigestURI(homepage);
-        } catch (MalformedURLException e1) {
-            return null;
-        }
-
-        final String urlHostPort = RobotsTxt.getHostPort(theURL);
-        MultiProtocolURI robotsURL = null;
-        try {
-            robotsURL = new MultiProtocolURI("http://" + urlHostPort + "/robots.txt");
-        } catch (final MalformedURLException e) {
-            return null;
-        }
-
-        Object[] result;
-        try {
-            result = RobotsTxt.downloadRobotsTxt(robotsURL, 0, null);
-        } catch (Exception e) {
-            return null;
-        }
-
-        final byte[] robotsTxt = (byte[]) result[RobotsTxt.DOWNLOAD_ROBOTS_TXT];
-        RobotsTxtParser parserResult = new RobotsTxtParser(new HashSet<String>(), robotsTxt);
-        return parserResult;
     }
 
     private void parse(final BufferedReader reader) {

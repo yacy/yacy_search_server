@@ -464,10 +464,13 @@ public class Balancer {
             	rest = rest + 1000 * loops;
             	loops = 0;
             }
-            if (rest > 0) {try {Thread.sleep(rest);} catch (final InterruptedException e) {}}
-            for (int i = 0; i < loops; i++) {
-            	Log.logInfo("BALANCER", "waiting for " + crawlEntry.url().getHost() + ": " + (loops - i) + " seconds remaining...");
-                try {Thread.sleep(1000); } catch (final InterruptedException e) {}
+            synchronized(this) {
+                // must be synchronized here to avoid 'takeover' moves from other threads which then idle the same time which would not be enough
+                if (rest > 0) {try {this.wait(rest);} catch (final InterruptedException e) {}}
+                for (int i = 0; i < loops; i++) {
+                	Log.logInfo("BALANCER", "waiting for " + crawlEntry.url().getHost() + ": " + (loops - i) + " seconds remaining...");
+                	try {this.wait(1000); } catch (final InterruptedException e) {}
+                }
             }
             Latency.updateAfterSelection(crawlEntry.url(), robotsTime);
         }

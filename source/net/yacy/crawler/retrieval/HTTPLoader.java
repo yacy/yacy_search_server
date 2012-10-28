@@ -201,7 +201,7 @@ public final class HTTPLoader {
             }
 
             // create a new cache entry
-            final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
+            final CrawlProfile profile = request.profileHandle() == null ? null : this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
             response = new Response(
                     request,
                     requestHeader,

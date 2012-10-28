@@ -194,8 +194,8 @@ public final class LoaderDispatcher {
         }
 
         // check if we have the page in the cache
-        final CrawlProfile crawlProfile = this.sb.crawler.getActive(UTF8.getBytes(request.profileHandle()));
-        if (crawlProfile != null && cacheStrategy != CacheStrategy.NOCACHE) {
+        final CrawlProfile crawlProfile = request.profileHandle() == null ? null : this.sb.crawler.getActive(UTF8.getBytes(request.profileHandle()));
+        if (cacheStrategy != CacheStrategy.NOCACHE && crawlProfile != null) {
             // we have passed a first test if caching is allowed
             // now see if there is a cache entry
 

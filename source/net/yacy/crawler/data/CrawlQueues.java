@@ -316,7 +316,6 @@ public class CrawlQueues {
      * @param stats String for log prefixing
      * @return
      */
-    @SuppressWarnings("unused")
     private void load(final Request urlEntry, final String stats, final String profileHandle) {
         final CrawlProfile profile = this.sb.crawler.getActive(UTF8.getBytes(profileHandle));
         if (profile != null) {
@@ -340,7 +339,16 @@ public class CrawlQueues {
                 if (urlEntry == null || urlEntry.url() == null) {
                     this.log.logInfo(stats + ": urlEntry = null");
                 } else {
-                	new Loader(urlEntry);
+                    if (!this.workers.containsKey(Integer.valueOf(urlEntry.hashCode()))) {
+                        Loader loader = new Loader(urlEntry);
+                        this.workers.put(loader.code, loader);
+                        try {
+                            loader.start();
+                        } catch (final OutOfMemoryError e) {
+                            Log.logWarning("CrawlQueues", "crawlWorker sequential fail-over: " + e.getMessage());
+                            loader.run();
+                        }
+                    }
                 }
 
             } else {
@@ -615,16 +623,7 @@ public class CrawlQueues {
             this.request = entry;
             this.request.setStatus("worker-initialized", WorkflowJob.STATUS_INITIATED);
             this.code = Integer.valueOf(entry.hashCode());
-            if (!CrawlQueues.this.workers.containsKey(this.code)) {
-                CrawlQueues.this.workers.put(this.code, this);
-                try {
-                    start();
-                } catch (final OutOfMemoryError e) {
-                    Log.logWarning("CrawlQueues", "crawlWorker sequential fail-over: " + e.getMessage());
-                    run();
-                }
-            }
-            setPriority(Thread.MIN_PRIORITY); // http requests from the crawler should not cause that other functions work worse
+            this.setPriority(Thread.MIN_PRIORITY); // http requests from the crawler should not cause that other functions work worse
         }
 
         public long age() {

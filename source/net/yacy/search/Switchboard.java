@@ -596,11 +596,6 @@ public final class Switchboard extends serverSwitch
         }.start();
         */
 
-        // load the robots.txt db
-        this.log.logConfig("Initializing robots.txt DB");
-        this.robots = new RobotsTxt(this.tables);
-        this.log.logConfig("Loaded robots.txt DB: " + this.robots.size() + " entries");
-
         // start a cache manager
         this.log.logConfig("Starting HT Cache Manager");
 
@@ -718,6 +713,13 @@ public final class Switchboard extends serverSwitch
         // start a loader
         this.log.logConfig("Starting Crawl Loader");
         this.loader = new LoaderDispatcher(this);
+        
+        // load the robots.txt db
+        this.log.logConfig("Initializing robots.txt DB");
+        this.robots = new RobotsTxt(this.tables, this.loader);
+        this.log.logConfig("Loaded robots.txt DB: " + this.robots.size() + " entries");
+
+        // load oai tables
         final Map<String, File> oaiFriends =
             OAIListFriendsLoader.loadListFriendsSources(
                 new File("defaults/oaiListFriendsSource.xml"),

@@ -23,7 +23,6 @@
 
 package net.yacy.crawler.data;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -100,12 +99,7 @@ public class Latency {
      */
     public static long waitingRobots(final MultiProtocolURI url, final RobotsTxt robots, final Set<String> thisAgents) {
         long robotsDelay = 0;
-        RobotsTxtEntry robotsEntry;
-        try {
-            robotsEntry = robots.getEntry(url, thisAgents);
-        } catch (final IOException e) {
-            robotsEntry = null;
-        }
+        RobotsTxtEntry robotsEntry = robots.getEntry(url, thisAgents);
         robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
         if (robotsEntry != null && robotsDelay == 0 && robotsEntry.getAgentName() != null) return -1; // no limits if granted exclusively for this peer
         return robotsDelay;

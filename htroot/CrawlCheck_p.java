@@ -84,19 +84,16 @@ public class CrawlCheck_p {
                     // try to load the robots
                     RobotsTxtEntry robotsEntry;
                     boolean robotsAllowed = true;
-                    try {
-                        robotsEntry = sb.robots.getEntry(u, sb.peers.myBotIDs());
-                        if (robotsEntry == null) {
-                            prop.put("table_list_" + row + "_robots", "no robots");
-                            prop.put("table_list_" + row + "_crawldelay", CrawlQueues.queuedMinLoadDelay + " ms");
-                            prop.put("table_list_" + row + "_sitemap", "");
-                        } else {
-                            robotsAllowed = !robotsEntry.isDisallowed(u);
-                            prop.put("table_list_" + row + "_robots", "robots exist: " + (robotsAllowed ? "crawl allowed" : "url disallowed"));
-                            prop.put("table_list_" + row + "_crawldelay", Math.max(CrawlQueues.queuedMinLoadDelay, robotsEntry.getCrawlDelayMillis()) + " ms");
-                            prop.put("table_list_" + row + "_sitemap", robotsEntry.getSitemap() == null ? "-" : robotsEntry.getSitemap().toNormalform(true));
-                        }                        
-                    } catch (final IOException e) {
+                    robotsEntry = sb.robots.getEntry(u, sb.peers.myBotIDs());
+                    if (robotsEntry == null) {
+                        prop.put("table_list_" + row + "_robots", "no robots");
+                        prop.put("table_list_" + row + "_crawldelay", CrawlQueues.queuedMinLoadDelay + " ms");
+                        prop.put("table_list_" + row + "_sitemap", "");
+                    } else {
+                        robotsAllowed = !robotsEntry.isDisallowed(u);
+                        prop.put("table_list_" + row + "_robots", "robots exist: " + (robotsAllowed ? "crawl allowed" : "url disallowed"));
+                        prop.put("table_list_" + row + "_crawldelay", Math.max(CrawlQueues.queuedMinLoadDelay, robotsEntry.getCrawlDelayMillis()) + " ms");
+                        prop.put("table_list_" + row + "_sitemap", robotsEntry.getSitemap() == null ? "-" : robotsEntry.getSitemap().toNormalform(true));
                     }
                     
                     // try to load the url

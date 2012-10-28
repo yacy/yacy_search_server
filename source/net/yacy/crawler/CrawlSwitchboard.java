@@ -45,8 +45,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 
-public final class CrawlSwitchboard
-{
+public final class CrawlSwitchboard {
 
     public static final String CRAWL_PROFILE_PROXY = "proxy";
     public static final String CRAWL_PROFILE_REMOTE = "remote";

@@ -292,9 +292,7 @@ public class Request extends WorkflowJob
 
     public String profileHandle() {
         // the handle of the crawl profile
-        assert this.profileHandle.length() == Word.commonHashLength : this.profileHandle
-            + " != "
-            + Word.commonHashLength;
+        assert this.profileHandle == null || this.profileHandle.length() == Word.commonHashLength : this.profileHandle + " != " + Word.commonHashLength;
         return this.profileHandle;
     }
 

@@ -148,13 +148,7 @@ public class getpageinfo {
                     final DigestURI theURL = new DigestURI(url);
 
                 	// determine if crawling of the current URL is allowed
-                    RobotsTxtEntry robotsEntry;
-                    try {
-                        robotsEntry = sb.robots.getEntry(theURL, sb.peers.myBotIDs());
-                    } catch (final IOException e) {
-                        robotsEntry = null;
-                        Log.logException(e);
-                    }
+                    RobotsTxtEntry robotsEntry = sb.robots.getEntry(theURL, sb.peers.myBotIDs());
                 	prop.put("robots-allowed", robotsEntry == null ? 1 : robotsEntry.isDisallowed(theURL) ? 0 : 1);
                     prop.putHTML("robotsInfo", robotsEntry == null ? "" : robotsEntry.getInfo());
 
