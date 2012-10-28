@@ -29,9 +29,12 @@ package net.yacy.kelondro.blob;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,7 +42,6 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
-import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.util.SpaceExceededException;
@@ -127,7 +129,7 @@ public class MapDataMining extends MapHeap {
                 if (sortfields != null && cluster != null) {
                     for (int i = 0; i < sortfields.length; i++) {
                         cell = map.get(sortfields[i]);
-                        if (cell != null) cluster[i].set(UTF8.String(mapnameb), ClusteredScoreMap.object2score(cell));
+                        if (cell != null) cluster[i].set(UTF8.String(mapnameb), object2score(cell));
                     }
                 }
 
@@ -272,7 +274,7 @@ public class MapDataMining extends MapHeap {
             cell = map.get(sortfield);
             if (cell != null) {
                 cluster = this.sortClusterMap.get(sortfield);
-                cluster.set(key, ClusteredScoreMap.object2score(cell));
+                cluster.set(key, object2score(cell));
                 this.sortClusterMap.put(sortfield, cluster);
             }
         }
@@ -406,6 +408,81 @@ public class MapDataMining extends MapHeap {
         }
 
         super.close();
+    }
+    
+    private static final String shortDateFormatString = "yyyyMMddHHmmss";
+    private static final SimpleDateFormat shortFormatter = new SimpleDateFormat(shortDateFormatString, Locale.US);
+    private static final long minutemillis = 60000;
+    private static long date2000 = 0;
+
+    static {
+        try {
+            date2000 = shortFormatter.parse("20000101000000").getTime();
+        } catch (final ParseException e) {}
+    }
+
+    private static final byte[] plainByteArray = new byte[256];
+    static {
+        for (int i = 0; i < 32; i++) plainByteArray[i] = (byte) i;
+        for (int i = 32; i < 96; i++) plainByteArray[i] = (byte) (i - 32);
+        for (int i = 96; i < 128; i++) plainByteArray[i] = (byte) (i - 64);
+        for (int i = 128; i < 256; i++) plainByteArray[i] = (byte) (i & 0X20);
+    }
+
+    private static int object2score(Object o) {
+        if (o instanceof Integer) return ((Integer) o).intValue();
+        if (o instanceof Long) {
+            final long l = ((Long) o).longValue();
+            if (l < Integer.MAX_VALUE) return (int) l;
+            return (int) (l & Integer.MAX_VALUE);
+        }
+        if (o instanceof Float) {
+            final double d = 1000f * ((Float) o).floatValue();
+            return (int) Math.round(d);
+        }
+        if (o instanceof Double) {
+            final double d = 1000d * ((Double) o).doubleValue();
+            return (int) Math.round(d);
+        }
+        String s = null;
+        if (o instanceof String) s = (String) o;
+        if (o instanceof byte[]) s = UTF8.String((byte[]) o);
+
+        // this can be used to calculate a score from a string
+        if (s == null || s.isEmpty() || s.charAt(0) == '-') return 0;
+        try {
+            long l = 0;
+            if (s.length() == shortDateFormatString.length()) {
+                // try a date
+                l = ((shortFormatter.parse(s).getTime() - date2000) / minutemillis);
+                if (l < 0) l = 0;
+            } else {
+                // try a number
+                l = Long.parseLong(s);
+            }
+            // fix out-of-ranges
+            if (l > Integer.MAX_VALUE) return (int) (l & Integer.MAX_VALUE);
+            if (l < 0) {
+                System.out.println("string2score: negative score for input " + s);
+                return 0;
+            }
+            return (int) l;
+        } catch (final Throwable e) {
+            // try it lex
+            int len = s.length();
+            if (len > 5) len = 5;
+            int c = 0;
+            for (int i = 0; i < len; i++) {
+                c <<= 6;
+                c += plainByteArray[(byte) s.charAt(i)];
+            }
+            for (int i = len; i < 5; i++) c <<= 6;
+            if (c < 0) {
+                System.out.println("string2score: negative score for input " + s);
+                return 0;
+            }
+            return c;
+        }
     }
 
 /*

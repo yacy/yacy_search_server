@@ -24,23 +24,19 @@
 
 package net.yacy.cora.sorting;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.OutOfLimitsException;
 
 public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements ReversibleScoreMap<E> {
 
-    protected final Map<E, Long> map; // a mapping from a reference to the cluster key
-    protected final TreeMap<Long, E> pam; // a mapping from the cluster key to the reference
+    private final Map<E, Long> map; // a mapping from a reference to the cluster key
+    private final TreeMap<Long, E> pam; // a mapping from the cluster key to the reference
     private long gcount;
     private int encnt;
 
@@ -109,86 +105,11 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
         }
     }
 
-    public static final String shortDateFormatString = "yyyyMMddHHmmss";
-    public static final SimpleDateFormat shortFormatter = new SimpleDateFormat(shortDateFormatString, Locale.US);
-    public static final long minutemillis = 60000;
-    public static long date2000 = 0;
-
-    static {
-        try {
-            date2000 = shortFormatter.parse("20000101000000").getTime();
-        } catch (final ParseException e) {}
-    }
-
-    public static int object2score(Object o) {
-        if (o instanceof Integer) return ((Integer) o).intValue();
-        if (o instanceof Long) {
-            final long l = ((Long) o).longValue();
-            if (l < Integer.MAX_VALUE) return (int) l;
-            return (int) (l & Integer.MAX_VALUE);
-        }
-        if (o instanceof Float) {
-            final double d = 1000f * ((Float) o).floatValue();
-            return (int) Math.round(d);
-        }
-        if (o instanceof Double) {
-            final double d = 1000d * ((Double) o).doubleValue();
-            return (int) Math.round(d);
-        }
-        String s = null;
-        if (o instanceof String) s = (String) o;
-        if (o instanceof byte[]) s = UTF8.String((byte[]) o);
-
-        // this can be used to calculate a score from a string
-        if (s == null || s.isEmpty() || s.charAt(0) == '-') return 0;
-        try {
-            long l = 0;
-            if (s.length() == shortDateFormatString.length()) {
-                // try a date
-                l = ((shortFormatter.parse(s).getTime() - date2000) / minutemillis);
-                if (l < 0) l = 0;
-            } else {
-                // try a number
-                l = Long.parseLong(s);
-            }
-            // fix out-of-ranges
-            if (l > Integer.MAX_VALUE) return (int) (l & Integer.MAX_VALUE);
-            if (l < 0) {
-                System.out.println("string2score: negative score for input " + s);
-                return 0;
-            }
-            return (int) l;
-        } catch (final Throwable e) {
-            // try it lex
-            int len = s.length();
-            if (len > 5) len = 5;
-            int c = 0;
-            for (int i = 0; i < len; i++) {
-                c <<= 6;
-                c += plainByteArray[(byte) s.charAt(i)];
-            }
-            for (int i = len; i < 5; i++) c <<= 6;
-            if (c < 0) {
-                System.out.println("string2score: negative score for input " + s);
-                return 0;
-            }
-            return c;
-        }
-    }
-
-    private static final byte[] plainByteArray = new byte[256];
-    static {
-        for (int i = 0; i < 32; i++) plainByteArray[i] = (byte) i;
-        for (int i = 32; i < 96; i++) plainByteArray[i] = (byte) (i - 32);
-        for (int i = 96; i < 128; i++) plainByteArray[i] = (byte) (i - 64);
-        for (int i = 128; i < 256; i++) plainByteArray[i] = (byte) (i & 0X20);
-    }
-
     private long scoreKey(final int elementNr, final int elementCount) {
         return (((elementCount & 0xFFFFFFFFL)) << 32) | ((elementNr & 0xFFFFFFFFL));
     }
 
-    public synchronized long totalCount() {
+    private synchronized long totalCount() {
         return this.gcount;
     }
 
@@ -427,13 +348,6 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
     }
 
     public static void main(final String[] args) {
-
-        final String t = "ZZZZZZZZZZ";
-        System.out.println("score of " + t + ": " + object2score(t));
-        if (args.length > 0) {
-            System.out.println("score of " + args[0] + ": " + object2score(args[0]));
-            System.exit(0);
-        }
 
         System.out.println("Test for Score: start");
         final ClusteredScoreMap<String> s = new ClusteredScoreMap<String>();
