@@ -59,9 +59,9 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     private SolrConnector solr1;
     private final ARC<String, Object> hitCache, missCache;
     private final ARC<String, SolrDocument> documentCache;
-    public long cacheHit_Hit = 0, cacheHit_Miss = 0, cacheHit_Insert = 0; // for statistics only; do not write
-    public long cacheMiss_Hit = 0, cacheMiss_Miss = 0, cacheMiss_Insert = 0; // for statistics only; do not write
-    public long cacheDocument_Hit = 0, cacheDocument_Miss = 0, cacheDocument_Insert = 0; // for statistics only; do not write
+    public long hitCache_Hit = 0, hitCache_Miss = 0, hitCache_Insert = 0; // for statistics only; do not write
+    public long missCache_Hit = 0, missCache_Miss = 0, missCache_Insert = 0; // for statistics only; do not write
+    public long documentCache_Hit = 0, documentCache_Miss = 0, documentCache_Insert = 0; // for statistics only; do not write
 
 
     public MirrorSolrConnector(int hitCacheMax, int missCacheMax, int docCacheMax) {
@@ -164,7 +164,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     public void delete(final String id) throws IOException {
         this.hitCache.remove(id);
         this.missCache.put(id, EXIST);
-        cacheMiss_Insert++;
+        this.missCache_Insert++;
         this.documentCache.remove(id);
         if (this.solr0 != null) this.solr0.delete(id);
         if (this.solr1 != null) this.solr1.delete(id);
@@ -180,7 +180,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         for (String id: ids) {
             this.hitCache.remove(id);
             this.missCache.put(id, EXIST);
-            cacheMiss_Insert++;
+            this.missCache_Insert++;
             this.documentCache.remove(id);
         }
         if (this.solr0 != null) this.solr0.delete(ids);
@@ -203,31 +203,28 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     @Override
     public boolean exists(final String id) throws IOException {
         if (this.hitCache.containsKey(id)) {
-        	cacheHit_Hit++;
+            this.hitCache_Hit++;
         	return true;
         }
-        cacheHit_Miss++;
+        this.hitCache_Miss++;
         if (this.documentCache.containsKey(id)) {
-        	cacheDocument_Hit++;
+            this.documentCache_Hit++;
         	return true;
         }
-        cacheDocument_Miss++;
+        this.documentCache_Miss++;
         if (this.missCache.containsKey(id)) {
-        	cacheMiss_Hit++;
+            this.missCache_Hit++;
         	return false;
         }
-        cacheMiss_Miss++;
-        for (SolrConnector solr: new SolrConnector[]{this.solr0, this.solr1}) {
-            if (solr != null) {
-                if (solr.exists(id)) {
-                    this.hitCache.put(id, EXIST);
-                    cacheHit_Insert++;
-                    return true;
-                }
-            }
+        this.missCache_Miss++;
+        if ((solr0 != null && solr0.exists(id)) || (solr1 != null && solr1.exists(id))) {
+            this.missCache.remove(id);
+            this.hitCache.put(id, EXIST);
+            this.hitCache_Insert++;
+            return true;
         }
         this.missCache.put(id, EXIST);
-        cacheMiss_Insert++;
+        this.missCache_Insert++;
         return false;
     }
 
@@ -235,30 +232,25 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     public SolrDocument get(String id) throws IOException {
         SolrDocument doc = this.documentCache.get(id);
         if (doc != null) {
-        	cacheDocument_Hit++;
+            this.documentCache_Hit++;
         	return doc;
         }
-        cacheDocument_Miss++;
+        documentCache_Miss++;
         if (this.missCache.containsKey(id)) {
-        	cacheMiss_Hit++;
+            this.missCache_Hit++;
         	return null;
         }
-        cacheMiss_Miss++;
-        
-        for (SolrConnector solr: new SolrConnector[]{this.solr0, this.solr1}) {
-            if (solr != null) {
-                doc = solr.get(id);
-                if (doc != null) {
-                    this.hitCache.put(id, EXIST);
-                    cacheHit_Insert++;
-                    this.documentCache.put(id, doc);
-                    cacheDocument_Insert++;
-                    return doc;
-                }
-            }
+        missCache_Miss++;
+        if ((solr0 != null && ((doc = solr0.get(id)) != null)) || (solr1 != null && ((doc = solr1.get(id)) != null))) {
+            this.missCache.remove(id);
+            this.hitCache.put(id, EXIST);
+            this.hitCache_Insert++;
+            this.documentCache.put(id, doc);
+            this.documentCache_Insert++;
+            return doc;
         }
         this.missCache.put(id, EXIST);
-        cacheMiss_Insert++;
+        this.missCache_Insert++;
         return null;
     }
 
@@ -274,11 +266,11 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         if (id == null) return;
         this.missCache.remove(id);
         this.documentCache.put(id, ClientUtils.toSolrDocument(solrdoc));
-        cacheDocument_Insert++;
+        this.documentCache_Insert++;
+        this.hitCache.put(id, EXIST);
+        this.hitCache_Insert++;
         if (this.solr0 != null) this.solr0.add(solrdoc);
         if (this.solr1 != null) this.solr1.add(solrdoc);
-        this.hitCache.put(id, EXIST);
-        cacheHit_Insert++;
     }
 
     @Override
@@ -441,9 +433,9 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
             String id = (String) solrdoc.getFieldValue(YaCySchema.id.getSolrFieldName());
             if (id != null) {
                 this.hitCache.put(id, EXIST);
-                cacheHit_Insert++;
+                hitCache_Insert++;
                 this.documentCache.put(id, solrdoc);
-                cacheDocument_Insert++;
+                documentCache_Insert++;
             }
         }
     }

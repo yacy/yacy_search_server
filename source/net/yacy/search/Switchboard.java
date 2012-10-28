@@ -1512,9 +1512,7 @@ public final class Switchboard extends serverSwitch
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,
         // if it not exists, null is returned
-        if ( this.index.fulltext().exists(hash) ) {
-            return "loaded";
-        }
+        if (this.index.exists(hash)) return "loaded";
         return this.crawlQueues.urlExists(hash);
     }
 
