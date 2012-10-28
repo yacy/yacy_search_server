@@ -374,7 +374,7 @@ public final class CrawlStacker {
         final DigestURI referrerURL = (entry.referrerhash() == null || entry.referrerhash().length == 0) ? null : this.nextQueue.getURL(entry.referrerhash());
 
         // add domain to profile domain list
-        if (profile.domMaxPages() != Integer.MAX_VALUE) {
+        if (profile.domMaxPages() != Integer.MAX_VALUE && profile.domMaxPages() > 0) {
             profile.domInc(entry.url().getHost(), (referrerURL == null) ? null : referrerURL.getHost().toLowerCase(), entry.depth());
         }
 
@@ -478,7 +478,7 @@ public final class CrawlStacker {
 
         // deny urls that exceed allowed number of occurrences
         final int maxAllowedPagesPerDomain = profile.domMaxPages();
-        if (maxAllowedPagesPerDomain < Integer.MAX_VALUE) {
+        if (maxAllowedPagesPerDomain < Integer.MAX_VALUE && maxAllowedPagesPerDomain > 0) {
             final DomProfile dp = profile.getDom(url.getHost());
             if (dp != null && dp.count >= maxAllowedPagesPerDomain) {
                 if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' appeared too often in crawl stack, a maximum of " + profile.domMaxPages() + " is allowed.");

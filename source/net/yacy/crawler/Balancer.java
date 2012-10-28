@@ -310,6 +310,15 @@ public class Balancer {
         return sleeptime;
     }
     
+    /**
+     * load a robots.txt to get the robots time.
+     * ATTENTION: this method causes that a robots.txt is loaded from the web which may cause a longer delay in execution.
+     * This shall therefore not be called in synchronized environments.
+     * @param robots
+     * @param profileEntry
+     * @param crawlURL
+     * @return
+     */
     private long getRobotsTime(final RobotsTxt robots, final CrawlProfile profileEntry, final DigestURI crawlURL) {
         if (profileEntry == null) return 0;
         long sleeptime = Latency.waitingRobots(crawlURL, robots, this.myAgentIDs); // this uses the robots.txt database and may cause a loading of robots.txt from the server
@@ -455,10 +464,10 @@ public class Balancer {
             	rest = rest + 1000 * loops;
             	loops = 0;
             }
-            if (rest > 0) {try {this.wait(rest); } catch (final InterruptedException e) {}}
+            if (rest > 0) {try {Thread.sleep(rest);} catch (final InterruptedException e) {}}
             for (int i = 0; i < loops; i++) {
             	Log.logInfo("BALANCER", "waiting for " + crawlEntry.url().getHost() + ": " + (loops - i) + " seconds remaining...");
-                try {this.wait(1000); } catch (final InterruptedException e) {}
+                try {Thread.sleep(1000); } catch (final InterruptedException e) {}
             }
             Latency.updateAfterSelection(crawlEntry.url(), robotsTime);
         }
@@ -488,6 +497,7 @@ public class Balancer {
         	byte[] besturlhash = null;
         	String besthost = null;
         	OrderedScoreMap<Map.Entry<String, byte[]>> nextZeroCandidates = new OrderedScoreMap<Map.Entry<String, byte[]>>(null);
+        	int newCandidatesForward = 10;
         	while (i.hasNext() && nextZeroCandidates.size() < 1000) {
                 entry = i.next();
     
@@ -516,7 +526,13 @@ public class Balancer {
                 }
 
                 if (w <= 0) {
-                    nextZeroCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(entry.getKey(), urlhash), w == Integer.MIN_VALUE ? 1000 /* get new domains a chance */ : entry.getValue().size());
+                    if (w == Integer.MIN_VALUE && newCandidatesForward > 0) {
+                        // give new domains a chance, but not too much; otherwise a massive downloading of robots.txt from too much domains (dns lock!) will more likely block crawling
+                        newCandidatesForward--;
+                        nextZeroCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(entry.getKey(), urlhash), 1000);
+                    } else {
+                        nextZeroCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(entry.getKey(), urlhash), entry.getValue().size());
+                    }
                 }
                 if (w < smallestWaiting || (w == smallestWaiting && this.random.nextBoolean())) {
                     smallestWaiting = w;

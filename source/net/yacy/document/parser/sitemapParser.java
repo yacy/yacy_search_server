@@ -42,7 +42,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ClientIdentification;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
@@ -113,9 +112,7 @@ public class sitemapParser extends AbstractParser implements Parser {
         // download document
         Log.logInfo("SitemapReader", "loading sitemap from " + sitemapURL.toNormalform(true));
         final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
-        final HTTPClient client = new HTTPClient();
-        client.setTimout(5000);
+        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), 5000);
         client.setHeader(requestHeader.entrySet());
         try {
             client.GET(sitemapURL.toString());

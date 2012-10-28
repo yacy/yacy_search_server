@@ -40,6 +40,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
@@ -214,7 +215,7 @@ public class WorkTables extends Tables {
      */
     public Map<String, Integer> execAPICalls(String host, int port, String realm, Collection<String> pks) {
         // now call the api URLs and store the result status
-        final HTTPClient client = new HTTPClient();
+        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
         client.setRealm(realm);
         client.setTimout(120000);
         Tables.Row row;
@@ -246,7 +247,7 @@ public class WorkTables extends Tables {
 
     public static int execAPICall(String host, int port, String realm, String path, byte[] pk) {
         // now call the api URLs and store the result status
-        final HTTPClient client = new HTTPClient();
+        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
         client.setRealm(realm);
         client.setTimout(120000);
         String url = "http://" + host + ":" + port + path;

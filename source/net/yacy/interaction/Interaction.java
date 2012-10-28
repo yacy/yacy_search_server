@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
@@ -186,7 +187,7 @@ public static String Tableentry(String url, String type, String comment, String 
 
 				Seed host = sb.peers.lookupByName(sb.getConfig("interaction.contribution.accumulationpeer", ""));
 
-				return (UTF8.String(new HTTPClient().POSTbytes(
+				return (UTF8.String(new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT).POSTbytes(
 						"http://"+host.getPublicAddress()+"/interaction/Contribution.json"
 								+ "?url=" + url + "&comment=" + comment
 								+ "&from=" + from + "&peer=" + peer,

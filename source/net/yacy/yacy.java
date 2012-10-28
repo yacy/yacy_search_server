@@ -531,7 +531,7 @@ public final class yacy {
         final RequestHeader requestHeader = new RequestHeader();
         requestHeader.put(RequestHeader.AUTHORIZATION, "realm=" + encodedPassword); // for http-authentify
 //        final Client con = new Client(10000, requestHeader);
-        final HTTPClient con = new HTTPClient();
+        final HTTPClient con = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
         con.setHeader(requestHeader.entrySet());
 //        ResponseContainer res = null;
         try {

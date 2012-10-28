@@ -9,6 +9,7 @@ import java.io.StringReader;
 import java.net.URLEncoder;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
@@ -31,7 +32,7 @@ public class AugmentHtmlStream {
      * @return the web page with integrated REFLECT elements
      */
     private static String processExternal(String url, String fieldname, String data) throws IOException {
-        final HTTPClient client = new HTTPClient();
+        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
         try {
             StringBuilder postdata = new StringBuilder();
             postdata.append(fieldname);

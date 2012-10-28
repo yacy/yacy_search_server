@@ -287,7 +287,7 @@ public class RobotsTxt {
         return port;
     }
 
-    static Object[] downloadRobotsTxt(final MultiProtocolURI robotsURL, int redirectionCount, final RobotsTxtEntry entry) throws Exception {
+    protected static Object[] downloadRobotsTxt(final MultiProtocolURI robotsURL, int redirectionCount, final RobotsTxtEntry entry) throws Exception {
         if (robotsURL == null || !robotsURL.getProtocol().startsWith("http")) return null;
 
         if (redirectionCount < 0) return new Object[]{Boolean.FALSE,null,null};
@@ -319,7 +319,7 @@ public class RobotsTxt {
 
         // setup http-client
         //TODO: adding Traffic statistic for robots download?
-        final HTTPClient client = new HTTPClient();
+        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
         client.setHeader(reqHeaders.entrySet());
         try {
             // check for interruption

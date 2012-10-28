@@ -610,7 +610,7 @@ public class serverSwitch
                 try {
                     final RequestHeader reqHeader = new RequestHeader();
                     reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
-                    final HTTPClient client = new HTTPClient();
+                    final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
                     client.setHeader(reqHeader.entrySet());
                     byte[] data = client.GETbytes(uri);
                     if ( data == null || data.length == 0 ) {

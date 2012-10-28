@@ -27,6 +27,8 @@ package net.yacy.cora.protocol;
 
 public class ClientIdentification {
 
+    public static final int DEFAULT_TIMEOUT = 10000;
+    
     /**
      * provide system information (this is part of YaCy protocol)
      */

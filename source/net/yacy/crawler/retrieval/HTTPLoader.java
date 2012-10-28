@@ -126,7 +126,7 @@ public final class HTTPLoader {
         requestHeader.put(HeaderFramework.ACCEPT_ENCODING, this.sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
 
         // HTTP-Client
-        final HTTPClient client = new HTTPClient();
+        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
         client.setRedirecting(false); // we want to handle redirection ourselves, so we don't index pages twice
         client.setTimout(this.socketTimeout);
         client.setHeader(requestHeader.entrySet());
@@ -252,7 +252,7 @@ public final class HTTPLoader {
         requestHeader.put(HeaderFramework.ACCEPT_CHARSET, DEFAULT_CHARSET);
         requestHeader.put(HeaderFramework.ACCEPT_ENCODING, DEFAULT_ENCODING);
 
-        final HTTPClient client = new HTTPClient();
+        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
         client.setTimout(20000);
         client.setHeader(requestHeader.entrySet());
         	final byte[] responseBody = client.GETbytes(request.url());

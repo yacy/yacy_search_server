@@ -95,7 +95,7 @@ public class NoticedURL {
         this.noloadStack.clear();
     }
 
-    protected synchronized void close() {
+    protected void close() {
         Log.logInfo("NoticedURL", "CLOSING ALL STACKS");
         if (this.coreStack != null) {
             this.coreStack.close();
@@ -303,19 +303,17 @@ public class NoticedURL {
         int s;
         Request entry;
         int errors = 0;
-        synchronized (balancer) {
-            while ((s = balancer.size()) > 0) {
-                entry = balancer.pop(delay, cs, robots);
-                if (entry == null) {
-                    if (s > balancer.size()) continue;
-                    errors++;
-                    if (errors < 100) continue;
-                    final int aftersize = balancer.size();
-                    balancer.clear(); // the balancer is broken and cannot shrink
-                    Log.logWarning("BALANCER", "entry is null, balancer cannot shrink (bevore pop = " + s + ", after pop = " + aftersize + "); reset of balancer");
-                }
-                return entry;
+        while ((s = balancer.size()) > 0) {
+            entry = balancer.pop(delay, cs, robots);
+            if (entry == null) {
+                if (s > balancer.size()) continue;
+                errors++;
+                if (errors < 100) continue;
+                final int aftersize = balancer.size();
+                balancer.clear(); // the balancer is broken and cannot shrink
+                Log.logWarning("BALANCER", "entry is null, balancer cannot shrink (bevore pop = " + s + ", after pop = " + aftersize + "); reset of balancer");
             }
+            return entry;
         }
         return null;
     }

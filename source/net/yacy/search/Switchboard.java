@@ -3359,10 +3359,8 @@ public final class Switchboard extends serverSwitch
                     final RequestHeader reqHeader = new RequestHeader();
                     reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
                     reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache");
-                    reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
-                    final HTTPClient client = new HTTPClient();
+                    final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
                     client.setHeader(reqHeader.entrySet());
-                    client.setTimout(timeout);
 
                     client.HEADResponse(url.toString());
                     int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();

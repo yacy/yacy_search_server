@@ -49,8 +49,6 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
-import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.storage.Files;
@@ -288,16 +286,10 @@ public final class yacyRelease extends yacyVersion {
     public File downloadRelease() {
         final File storagePath = Switchboard.getSwitchboard().releasePath;
         File download = null;
-        // setup httpClient
-        final RequestHeader reqHeader = new RequestHeader();
-        reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
 
         final String name = getUrl().getFileName();
         byte[] signatureBytes = null;
-
-        final HTTPClient client = new HTTPClient();
-        client.setTimout(6000);
-        client.setHeader(reqHeader.entrySet());
+        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
 
         // download signature first, if public key is available
         try {

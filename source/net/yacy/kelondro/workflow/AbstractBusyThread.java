@@ -204,14 +204,8 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
 
     // ratzen: German for to sleep (coll.)
     private void ratz(final long millis) {
-        try {/*
-            if (this.syncObject != null) {
-                synchronized (this.syncObject) {
-                    this.syncObject.wait(millis);
-                }
-            } else {*/
-                Thread.sleep(millis);
-            //}
+        try {
+            Thread.sleep(millis);
         } catch (final InterruptedException e) {
             if (log != null)
                 log.logConfig("thread '" + this.getName() + "' interrupted because of shutdown.");

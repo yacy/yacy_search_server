@@ -118,19 +118,17 @@ public class HTTPClient {
 	private boolean redirecting = true;
 	private String realm = null;
 
-	public HTTPClient() {
-        super();
-    }
-
 	public HTTPClient(final String userAgent) {
         super();
         this.userAgent = userAgent;
+        HttpProtocolParams.setUserAgent(httpClient.getParams(), userAgent);
     }
 
 	public HTTPClient(final String userAgent, final int timeout) {
         super();
         this.userAgent = userAgent;
         this.timeout = timeout;
+        HttpProtocolParams.setUserAgent(httpClient.getParams(), userAgent);
     }
 
     public static void setDefaultUserAgent(final String defaultAgent) {
@@ -759,7 +757,7 @@ public class HTTPClient {
         } catch (final UnsupportedEncodingException e) {
             System.out.println(e.getStackTrace());
         }
-        final HTTPClient client = new HTTPClient();
+        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
         client.setUserAgent("foobar");
         client.setRedirecting(false);
         // Get some

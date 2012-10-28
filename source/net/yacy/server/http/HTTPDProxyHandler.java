@@ -1074,8 +1074,7 @@ public final class HTTPDProxyHandler {
      */
     private static HTTPClient setupHttpClient(final RequestHeader requestHeader, final String connectHost) {
         // setup HTTP-client
-    	final HTTPClient client = new HTTPClient();
-    	client.setTimout(timeout);
+    	final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
     	client.setHeader(requestHeader.entrySet());
     	client.setRedirecting(false);
         return client;

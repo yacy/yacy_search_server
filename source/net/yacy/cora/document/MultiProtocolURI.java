@@ -2042,9 +2042,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             return new ByteArrayInputStream(b);
         }
         if (isHTTP() || isHTTPS()) {
-                final HTTPClient client = new HTTPClient();
-                client.setTimout(timeout);
-                client.setUserAgent(userAgent);
+                final HTTPClient client = new HTTPClient(userAgent, timeout);
                 client.setHost(getHost());
                 return new ByteArrayInputStream(client.GETbytes(this));
         }
@@ -2063,9 +2061,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             return b;
         }
         if (isHTTP() || isHTTPS()) {
-                final HTTPClient client = new HTTPClient();
-                client.setTimout(timeout);
-                client.setUserAgent(userAgent);
+                final HTTPClient client = new HTTPClient(userAgent, timeout);
                 client.setHost(getHost());
                 return client.GETbytes(this);
         }
