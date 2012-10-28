@@ -130,7 +130,7 @@ public class IndexCreateQueues_p {
                 prop.put("crawler_host_" + hc + "_urlsPerHost", urlsPerHost);
                 prop.putHTML("crawler_host_" + hc + "_queuename", stackType.name());
                 prop.put("crawler_host_" + hc + "_hostcount", host.getValue()[0]);
-                prop.put("crawler_host_" + hc + "_hostdelta", host.getValue()[1]);
+                prop.put("crawler_host_" + hc + "_hostdelta", host.getValue()[1] == Integer.MIN_VALUE ? "not accessed" : Integer.toString(host.getValue()[1]));
                 List<Request> domainStackReferences = sb.crawlQueues.noticeURL.getDomainStackReferences(stackType, host.getKey(), urlsPerHost);
 
                 Seed initiator;

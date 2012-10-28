@@ -43,7 +43,12 @@ public class Latency {
     // the map is a mapping from host names to host configurations
     private static final ConcurrentHashMap<String, Host> map = new ConcurrentHashMap<String, Host>();
 
-    public static void update(final MultiProtocolURI url, final long time) {
+    /**
+     * update the latency entry after a host was accessed to load a file
+     * @param url
+     * @param time the time to load the file in milliseconds
+     */
+    public static void updateAfterLoad(final MultiProtocolURI url, final long time) {
         final String host = url.getHost();
         if (host == null) return;
         Host h = map.get(host);
@@ -56,12 +61,17 @@ public class Latency {
         }
     }
 
-    public static void update(final MultiProtocolURI url) {
+    /**
+     * update the latency entry after a host was selected for queueing into the loader
+     * @param url
+     * @param robotsCrawlDelay the crawl-delay given by the robots; 0 if not exist
+     */
+    public static void updateAfterSelection(final MultiProtocolURI url, final long robotsCrawlDelay) {
         final String host = url.getHost();
         if (host == null) return;
         Host h = map.get(host);
         if (h == null) {
-            h = new Host(host, DEFAULT_AVERAGE);
+            h = new Host(host, DEFAULT_AVERAGE, robotsCrawlDelay);
             if (map.size() > 1000 || MemoryControl.shortStatus()) map.clear();
             map.put(host, h);
         } else {
@@ -69,50 +79,37 @@ public class Latency {
         }
     }
 
-    public static void slowdown(final MultiProtocolURI url) {
-        final String host = url.getHost();
-        if (host == null) return;
-        Host h = map.get(host);
-        if (h == null) {
-            h = new Host(host, DEFAULT_AVERAGE);
-            if (map.size() > 1000 || MemoryControl.shortStatus()) map.clear();
-            map.put(host, h);
-        } else {
-            h.slowdown();
-        }
-    }
-
-    public static Host host(final MultiProtocolURI url) {
+    private static Host host(final MultiProtocolURI url) {
         final String host = url.getHost();
         if (host == null) return null;
         return map.get(host);
-    }
-
-    public static int average(final MultiProtocolURI url) {
-        final String host = url.getHost();
-        if (host == null) return 0;
-        final Host h = map.get(host);
-        if (h == null) return 0;
-        return h.average();
     }
 
     public static Iterator<Map.Entry<String, Host>> iterator() {
         return map.entrySet().iterator();
     }
 
-
     /**
-     * calculate the time since the last access of the domain as referenced by the url hash
-     * @param urlhash
-     * @return a time in milliseconds since last access of the domain or Long.MAX_VALUE if the domain was not accessed before
+     * Return the waiting time demanded by the robots.txt file of the target host.
+     * A special case is, if the remote host has a special crawl-delay assignment for
+     * this crawler with 0. This causes that a -1 is returned
+     * @param url
+     * @param robots
+     * @param thisAgents
+     * @return the waiting time in milliseconds; 0 if not known; -1 if host gives us special rights
      */
-    public static long lastAccessDelta(final MultiProtocolURI url) {
-        final Latency.Host host = Latency.host(url);
-        if (host == null) return Long.MAX_VALUE; // never accessed
-        return System.currentTimeMillis() - host.lastacc();
+    public static long waitingRobots(final MultiProtocolURI url, final RobotsTxt robots, final Set<String> thisAgents) {
+        long robotsDelay = 0;
+        RobotsTxtEntry robotsEntry;
+        try {
+            robotsEntry = robots.getEntry(url, thisAgents);
+        } catch (final IOException e) {
+            robotsEntry = null;
+        }
+        robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
+        if (robotsEntry != null && robotsDelay == 0 && robotsEntry.getAgentName() != null) return -1; // no limits if granted exclusively for this peer
+        return robotsDelay;
     }
-
-
 
     /**
      * guess a minimum waiting time
@@ -125,11 +122,11 @@ public class Latency {
      *         which expresses how long the time is over the minimum waiting time.
      */
     public static long waitingRemainingGuessed(final String hostname, final long minimumLocalDelta, final long minimumGlobalDelta) {
-        if (hostname == null) return Long.MIN_VALUE;
+        if (hostname == null) return Integer.MIN_VALUE;
 
         // first check if the domain was _ever_ accessed before
         final Host host = map.get(hostname);
-        if (host == null) return Long.MIN_VALUE; // no delay if host is new
+        if (host == null) return Integer.MIN_VALUE; // no delay if host is new; use Integer because there is a cast to int somewhere
 
         // find the minimum waiting time based on the network domain (local or global)
         final boolean local = Domains.isLocal(hostname, null);
@@ -139,14 +136,15 @@ public class Latency {
         // if we have accessed the domain many times, get slower (the flux factor)
         waiting += host.flux(waiting);
 
+        // the time since last access to the domain is the basis of the remaining calculation
+        final long timeSinceLastAccess = System.currentTimeMillis() - host.lastacc();
+        
         // use the access latency as rule how fast we can access the server
         // this applies also to localhost, but differently, because it is not necessary to
         // consider so many external accesses
         waiting = Math.max(waiting, host.average() * 2);
 
-        // the time since last access to the domain is the basis of the remaining calculation
-        final long timeSinceLastAccess = System.currentTimeMillis() - host.lastacc();
-        return Math.max(0, Math.min(60000, waiting) - timeSinceLastAccess);
+        return Math.min(60000, waiting) - timeSinceLastAccess;
     }
 
     /**
@@ -159,13 +157,13 @@ public class Latency {
      * - and a given minimum access time as given in robots.txt
      * @param minimumLocalDelta
      * @param minimumGlobalDelta
-     * @return the remaining waiting time in milliseconds
+     * @return the remaining waiting time in milliseconds. can be negative to reflect the due-time after a possible nex loading time
      */
     public static long waitingRemaining(final MultiProtocolURI url, final RobotsTxt robots, final Set<String> thisAgents, final long minimumLocalDelta, final long minimumGlobalDelta) {
 
         // first check if the domain was _ever_ accessed before
         final Host host = host(url);
-        if (host == null) return Long.MIN_VALUE; // no delay if host is new
+        if (host == null) return Integer.MIN_VALUE; // no delay if host is new; use Integer because there is a cast to int somewhere
 
         // find the minimum waiting time based on the network domain (local or global)
         final boolean local = url.isLocal();
@@ -185,22 +183,15 @@ public class Latency {
         // consider so many external accesses
         waiting = Math.max(waiting, host.average() * 2);
 
-        // find the delay as given by robots.txt on target site
-        long robotsDelay = 0;
-        RobotsTxtEntry robotsEntry;
-        try {
-            robotsEntry = robots.getEntry(url, thisAgents);
-        } catch (final IOException e) {
-            robotsEntry = null;
-        }
-        robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
-        if (robotsEntry != null && robotsDelay == 0 && robotsEntry.getAgentName() != null) return 0; // no limits if granted exclusively for this peer
-
-        waiting = Math.max(waiting, robotsDelay);
-
         // the time since last access to the domain is the basis of the remaining calculation
         final long timeSinceLastAccess = System.currentTimeMillis() - host.lastacc();
-        return Math.max(0, Math.min(60000, waiting) - timeSinceLastAccess);
+        
+        // find the delay as given by robots.txt on target site
+        long robotsDelay = waitingRobots(url, robots, thisAgents);
+        if (robotsDelay < 0) return -timeSinceLastAccess; // no limits if granted exclusively for this peer
+
+        waiting = Math.max(waiting, robotsDelay);
+        return Math.min(60000, waiting) - timeSinceLastAccess;
     }
 
 
@@ -235,15 +226,8 @@ public class Latency {
         waiting = Math.max(waiting, host.average() * 2);
 
         // find the delay as given by robots.txt on target site
-        long robotsDelay = 0;
-        RobotsTxtEntry robotsEntry;
-        try {
-            robotsEntry = robots.getEntry(url, thisAgents);
-        } catch (final IOException e) {
-            robotsEntry = null;
-        }
-        robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
-        if (robotsEntry != null && robotsDelay == 0 && robotsEntry.getAgentName() != null)  return "no waiting for exclusive granted peer"; // no limits if granted exclusively for this peer
+        long robotsDelay = waitingRobots(url, robots, thisAgents);
+        if (robotsDelay < 0) return "no waiting for exclusive granted peer"; // no limits if granted exclusively for this peer
 
         waiting = Math.max(waiting, robotsDelay);
         s.append(", robots.delay = ").append(robotsDelay);
@@ -262,25 +246,23 @@ public class Latency {
         private int count;
         private final String host;
         private long robotsMinDelay;
-        public Host(final String host, final long time) {
+        private Host(final String host, final long time) {
+            this(host, time, 0);
+        }
+        private Host(final String host, final long time, long robotsMinDelay) {
             this.host = host;
             this.timeacc = time;
             this.count = 1;
             this.lastacc = System.currentTimeMillis();
-            this.robotsMinDelay = 0;
+            this.robotsMinDelay = robotsMinDelay;
         }
-        public void update(final long time) {
+        private void update(final long time) {
             this.lastacc = System.currentTimeMillis();
             this.timeacc += Math.min(30000, time);
             this.count++;
         }
-        public void update() {
+        private void update() {
             this.lastacc = System.currentTimeMillis();
-        }
-        public void slowdown() {
-            this.lastacc = System.currentTimeMillis();
-            this.timeacc = Math.min(60000, average() * 2);
-            this.count = 1;
         }
         public int count() {
             return this.count;
@@ -294,14 +276,11 @@ public class Latency {
         public String host() {
             return this.host;
         }
-        public void robotsDelay(final long ur) {
-            this.robotsMinDelay = ur;
-        }
         public long robotsDelay() {
             return this.robotsMinDelay;
         }
         public long flux(final long range) {
-            return this.count >= 1000 ? range * Math.min(5000, this.count) / 1000 : range / (1000 - this.count);
+            return this.count >= 10000 ? range * Math.min(5000, this.count) / 10000 : range / (10000 - this.count);
         }
     }
 

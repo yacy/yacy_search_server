@@ -51,15 +51,15 @@ public class NoticedURL {
         LOCAL, GLOBAL, OVERHANG, REMOTE, NOLOAD;
     }
 
-    public static final long minimumLocalDeltaInit  =  10; // the minimum time difference between access of the same local domain
-    public static final long minimumGlobalDeltaInit = 500; // the minimum time difference between access of the same global domain
+    private static final long minimumLocalDeltaInit  =  10; // the minimum time difference between access of the same local domain
+    public  static final long minimumGlobalDeltaInit = 500; // the minimum time difference between access of the same global domain
 
     private Balancer coreStack;      // links found by crawling to depth-1
     private Balancer limitStack;     // links found by crawling at target depth
     private Balancer remoteStack;    // links from remote crawl orders
     private Balancer noloadStack;    // links that are not passed to a loader; the index will be generated from the Request entry
 
-    public NoticedURL(
+    protected NoticedURL(
             final File cachePath,
             final Set<String> myAgentIDs,
             final boolean useTailCache,
@@ -87,7 +87,7 @@ public class NoticedURL {
         this.noloadStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
     }
 
-    public void clear() {
+    protected void clear() {
     	Log.logInfo("NoticedURL", "CLEARING ALL STACKS");
         this.coreStack.clear();
         this.limitStack.clear();
@@ -95,7 +95,7 @@ public class NoticedURL {
         this.noloadStack.clear();
     }
 
-    public synchronized void close() {
+    protected synchronized void close() {
         Log.logInfo("NoticedURL", "CLOSING ALL STACKS");
         if (this.coreStack != null) {
             this.coreStack.close();
@@ -158,7 +158,7 @@ public class NoticedURL {
         }
     }
 
-    public boolean existsInStack(final byte[] urlhashb) {
+    protected boolean existsInStack(final byte[] urlhashb) {
         return
             this.coreStack.has(urlhashb) ||
             this.limitStack.has(urlhashb) ||
@@ -193,7 +193,7 @@ public class NoticedURL {
         }
     }
 
-    public Request get(final byte[] urlhash) {
+    protected Request get(final byte[] urlhash) {
         Request entry = null;
         try {if ((entry = this.noloadStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
         try {if ((entry = this.coreStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
@@ -235,7 +235,7 @@ public class NoticedURL {
 
     /**
      * get a list of domains that are currently maintained as domain stacks
-     * @return a map of clear text strings of host names to the size of the domain stacks
+     * @return a map of clear text strings of host names to two integers: the size of the domain stacks and the access delta time
      */
     public Map<String, Integer[]> getDomainStackHosts(final StackType stackType) {
         switch (stackType) {
@@ -244,20 +244,6 @@ public class NoticedURL {
             case REMOTE:   return this.remoteStack.getDomainStackHosts();
             case NOLOAD:   return this.noloadStack.getDomainStackHosts();
             default: return null;
-        }
-    }
-
-    /**
-     * get a list of domains that are currently maintained as domain stacks
-     * @return a collection of clear text strings of host names
-     */
-    public long getDomainSleepTime(final StackType stackType, final RobotsTxt robots, final CrawlSwitchboard cs, Request crawlEntry) {
-        switch (stackType) {
-            case LOCAL:     return this.coreStack.getDomainSleepTime(cs, robots, crawlEntry);
-            case GLOBAL:    return this.limitStack.getDomainSleepTime(cs, robots, crawlEntry);
-            case REMOTE:   return this.remoteStack.getDomainSleepTime(cs, robots, crawlEntry);
-            case NOLOAD:   return this.noloadStack.getDomainSleepTime(cs, robots, crawlEntry);
-            default: return 0;
         }
     }
 
@@ -287,7 +273,7 @@ public class NoticedURL {
         }
     }
 
-    public void shift(final StackType fromStack, final StackType toStack, final CrawlSwitchboard cs, final RobotsTxt robots) {
+    protected void shift(final StackType fromStack, final StackType toStack, final CrawlSwitchboard cs, final RobotsTxt robots) {
         try {
             final Request entry = pop(fromStack, false, cs, robots);
             if (entry != null) {
