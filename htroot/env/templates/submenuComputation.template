@@ -11,6 +11,7 @@
     <li><a href="/PerformanceSearch_p.html" class="MenuItemLink">Search Sequence</a></li>
   </ul>
   </div>
+  #(p2p)#::
   <div class="SubMenugroup">
     <h3>Messages</h3>
     <ul class="SubMenu">
@@ -21,4 +22,5 @@
       <li><a href="/News.html?page=4" class="MenuItemLink">Published&nbsp;News</a></li>
     </ul>
   </div>
+  #(/p2p)#
 </div>

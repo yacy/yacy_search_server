@@ -2,7 +2,7 @@
   <h3>Index Administration</h3>
   <ul class="SubMenu">
     <li><a href="/IndexControlURLs_p.html" class="MenuItemLink lock">URL References Database</a></li>
-    <li><a href="/IndexControlRWIs_p.html" class="MenuItemLink lock">Reverse Word Index Administration</a></li>
+    #(p2p)#::<li><a href="/IndexControlRWIs_p.html" class="MenuItemLink lock">Reverse Word Index Administration</a></li>#(/p2p)#
     <!--<li><a href="/IndexControlCleaner_p.html" class="MenuItemLink lock">Index Cleaner</a></li>-->
     <li><a href="/ViewFile.html?display=1" class="MenuItemLink">URL Viewer</a></li>
     <li><a href="/IndexFederated_p.html" class="MenuItemLink lock">Federated Index</a></li>

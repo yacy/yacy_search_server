@@ -995,6 +995,7 @@ public final class HTTPDFileHandler {
                         final Seed myPeer = sb.peers.mySeed();
                         templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
                         templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
+                        templatePatterns.put("p2p", sb.getConfigBool(SwitchboardConstants.DHT_ENABLED, true) || !sb.isRobinsonMode() ? 1 : 0);
                         //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
                         nocache = true;
                     }
