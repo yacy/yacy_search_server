@@ -458,7 +458,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         long s = 0;
         if (this.solr0 != null) s += this.solr0.getSize();
         if (this.solr1 != null) s += this.solr1.getSize();
-        return s;
+        return Math.max(this.documentCache.size(), Math.max(this.hitCache.size(), s));
     }
 
 	public int nameCacheHitSize() {
