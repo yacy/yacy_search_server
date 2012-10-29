@@ -34,7 +34,7 @@ import net.yacy.server.serverSwitch;
 
 public class yacyinteractive {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
@@ -47,6 +47,9 @@ public class yacyinteractive {
         prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
         prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
 
+        final boolean admin = sb.verifyAuthentication(header);
+        if (admin && sb.crawler.getActiveSize() > 0) sb.index.fulltext().commit();
+        
         final String query = (post == null) ? "" : post.get("query", "");
         final String startRecord = (post == null) ? "0" : post.get("startRecord", "");
         final String maximumRecords = (post == null) ? "10" : post.get("maximumRecords", "");

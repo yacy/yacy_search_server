@@ -62,7 +62,7 @@ public class index {
             }
         }
 
-        if (authorizedAccess) {
+        if (authorizedAccess && sb.crawler.getActiveSize() > 0) {
             sb.index.fulltext().commit(); // call this only as superuser to prevent that this can be misused for DoS
         }
         

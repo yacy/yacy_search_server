@@ -75,12 +75,13 @@ public class HostBrowser {
             prop.put("result", "You are not allowed to use this page. Please ask an administrator for permission.");
             return prop;
         }
-        
+
+        String path = post == null ? "" : post.get("path", "").trim();
+        if (admin && path.length() == 0 && sb.crawler.getActiveSize() > 0) sb.index.fulltext().commit();
         if (post == null || env == null) {
             return prop;
         }
 
-        String path = post.get("path", "").trim();
         int p = path.lastIndexOf('/');
         if (p < 0 && path.length() > 0) path = path + "/"; else if (p > 7) path = path.substring(0, p + 1); // the search path shall always end with "/"
         if (path.length() > 0 && (

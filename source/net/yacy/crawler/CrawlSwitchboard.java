@@ -183,6 +183,14 @@ public final class CrawlSwitchboard {
         return new CrawlProfile(m);
     }
 
+    public int getActiveSize() {
+        return this.profilesActiveCrawls.size();
+    }
+
+    public int getPassiveSize() {
+        return this.profilesPassiveCrawls.size();
+    }
+
     public Set<byte[]> getActive() {
         return this.profilesActiveCrawls.keySet();
     }
