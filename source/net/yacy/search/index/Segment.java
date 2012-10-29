@@ -445,7 +445,7 @@ public class Segment {
         final long indexingEndTime = System.currentTimeMillis();
 
         if (this.log.isInfo()) {
-            this.log.logInfo("*Indexed " + wordCount + " words in URL " + url +
+            this.log.logInfo("*Indexed " + condenser.words().size() + " words in URL " + url +
                     " [" + id + "]" +
                     "\n\tDescription:  " + dc_title +
                     "\n\tMimeType: "  + document.dc_format() + " | Charset: " + document.getCharset() + " | " +

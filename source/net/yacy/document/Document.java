@@ -864,6 +864,12 @@ dc_rights
         final Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
         for (final Document d: documents) {
             result.putAll(d.getHyperlinks());
+            final Object parser = d.getParserObject();
+            if (parser instanceof ContentScraper) {
+                final ContentScraper html = (ContentScraper) parser;
+                String refresh = html.getRefreshPath();
+                if (refresh != null && refresh.length() > 0)try {result.put(new MultiProtocolURI(refresh), "refresh");} catch (MalformedURLException e) {}
+            }
         }
         return result;
     }
