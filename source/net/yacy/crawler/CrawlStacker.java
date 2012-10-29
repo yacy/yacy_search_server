@@ -37,6 +37,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification.ContentDomain;
@@ -50,13 +51,13 @@ import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.data.NoticedURL;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ZURL;
-import net.yacy.crawler.data.CrawlProfile.DomProfile;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
 import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.crawler.retrieval.FTPLoader;
 import net.yacy.crawler.retrieval.HTTPLoader;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.SMBLoader;
+import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.interaction.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -75,7 +76,7 @@ public final class CrawlStacker {
     
 
     private final Log log = new Log("STACKCRAWL");
-
+    private final RobotsTxt robots;
     private final WorkflowProcessor<Request>  fastQueue, slowQueue;
     private final CrawlQueues       nextQueue;
     private final CrawlSwitchboard  crawler;
@@ -87,6 +88,7 @@ public final class CrawlStacker {
     // this is the process that checks url for double-occurrences and for allowance/disallowance by robots.txt
 
     public CrawlStacker(
+            final RobotsTxt robots,
             final CrawlQueues cq,
             final CrawlSwitchboard cs,
             final Segment indexSegment,
@@ -94,6 +96,7 @@ public final class CrawlStacker {
             final boolean acceptLocalURLs,
             final boolean acceptGlobalURLs,
             final FilterEngine domainList) {
+        this.robots = robots;
         this.nextQueue = cq;
         this.crawler = cs;
         this.indexSegment = indexSegment;
@@ -366,32 +369,30 @@ public final class CrawlStacker {
             entry.url().getContentDomain() == ContentDomain.AUDIO  ||
             entry.url().getContentDomain() == ContentDomain.VIDEO ||
             entry.url().getContentDomain() == ContentDomain.CTRL) {
-            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry);
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry, this.robots);
             //if (warning != null) this.log.logWarning("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
             return null;
         }
-
-        final DigestURI referrerURL = (entry.referrerhash() == null || entry.referrerhash().length == 0) ? null : this.nextQueue.getURL(entry.referrerhash());
-
+        
         // add domain to profile domain list
         if (profile.domMaxPages() != Integer.MAX_VALUE && profile.domMaxPages() > 0) {
-            profile.domInc(entry.url().getHost(), (referrerURL == null) ? null : referrerURL.getHost().toLowerCase(), entry.depth());
+            profile.domInc(entry.url().getHost());
         }
 
         if (global) {
             // it may be possible that global == true and local == true, so do not check an error case against it
             if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
             if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.GLOBAL, entry);
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.GLOBAL, entry, this.robots);
         } else if (local) {
             if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
             if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry);
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry, this.robots);
         } else if (proxy) {
             if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry);
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry, this.robots);
         } else if (remote) {
-            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.REMOTE, entry);
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.REMOTE, entry, this.robots);
         }
         if (warning != null) this.log.logWarning("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true) + " - not pushed: " + warning);
 
@@ -479,13 +480,13 @@ public final class CrawlStacker {
         // deny urls that exceed allowed number of occurrences
         final int maxAllowedPagesPerDomain = profile.domMaxPages();
         if (maxAllowedPagesPerDomain < Integer.MAX_VALUE && maxAllowedPagesPerDomain > 0) {
-            final DomProfile dp = profile.getDom(url.getHost());
-            if (dp != null && dp.count >= maxAllowedPagesPerDomain) {
+            final AtomicInteger dp = profile.getCount(url.getHost());
+            if (dp != null && dp.get() >= maxAllowedPagesPerDomain) {
                 if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' appeared too often in crawl stack, a maximum of " + profile.domMaxPages() + " is allowed.");
                 return "crawl stack domain counter exceeded";
             }
 
-            if (ResultURLs.domainCount(EventOrigin.LOCAL_CRAWLING, url.getHost()) >= profile.domMaxPages()) {
+            if (ResultURLs.domainCount(EventOrigin.LOCAL_CRAWLING, url.getHost()) >= maxAllowedPagesPerDomain) {
                 if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' appeared too often in result stack, a maximum of " + profile.domMaxPages() + " is allowed.");
                 return "result stack domain counter exceeded";
             }

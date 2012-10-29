@@ -173,19 +173,14 @@ public class NoticedURL {
      * @param entry
      * @return null if this was successful or a String explaining what went wrong in case of an error
      */
-    public String push(final StackType stackType, final Request entry) {
+    public String push(final StackType stackType, final Request entry, final RobotsTxt robots) {
         try {
             switch (stackType) {
-                case LOCAL:
-                    return this.coreStack.push(entry);
-                case GLOBAL:
-                    return this.limitStack.push(entry);
-                case REMOTE:
-                    return this.remoteStack.push(entry);
-                case NOLOAD:
-                    return this.noloadStack.push(entry);
-                default:
-                    return "stack type unknown";
+                case LOCAL: return this.coreStack.push(entry, robots);
+                case GLOBAL: return this.limitStack.push(entry, robots);
+                case REMOTE: return this.remoteStack.push(entry, robots);
+                case NOLOAD: return this.noloadStack.push(entry, robots);
+                default: return "stack type unknown";
             }
         } catch (final Exception er) {
             Log.logException(er);
@@ -277,7 +272,7 @@ public class NoticedURL {
         try {
             final Request entry = pop(fromStack, false, cs, robots);
             if (entry != null) {
-                final String warning = push(toStack, entry);
+                final String warning = push(toStack, entry, robots);
                 if (warning != null) {
                     Log.logWarning("NoticedURL", "shift from " + fromStack + " to " + toStack + ": " + warning);
                 }

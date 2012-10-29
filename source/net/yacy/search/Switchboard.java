@@ -804,6 +804,7 @@ public final class Switchboard extends serverSwitch
         // initializing the stackCrawlThread
         this.crawlStacker =
             new CrawlStacker(
+                this.robots,
                 this.crawlQueues,
                 this.crawler,
                 this.index,
@@ -1318,6 +1319,7 @@ public final class Switchboard extends serverSwitch
 
             this.crawlStacker =
                 new CrawlStacker(
+                    this.robots,
                     this.crawlQueues,
                     this.crawler,
                     this.index,
@@ -2802,9 +2804,9 @@ public final class Switchboard extends serverSwitch
         }
         final String s;
         if (asglobal) {
-            s = sb.crawlQueues.noticeURL.push(StackType.GLOBAL, request);
+            s = sb.crawlQueues.noticeURL.push(StackType.GLOBAL, request, this.robots);
         } else {
-            s = sb.crawlQueues.noticeURL.push(StackType.LOCAL, request);
+            s = sb.crawlQueues.noticeURL.push(StackType.LOCAL, request, this.robots);
         }
 
         if (s != null) {

@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -53,55 +54,34 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final Pattern MATCH_NEVER_PATTERN = Pattern.compile(MATCH_NEVER_STRING);
 
     // this is a simple record structure that hold all properties of a single crawl start
-    public static final String HANDLE           = "handle";
-    public static final String NAME             = "name";
-    public static final String DEPTH            = "generalDepth";
-    public static final String DIRECT_DOC_BY_URL= "directDocByURL";
-    public static final String RECRAWL_IF_OLDER = "recrawlIfOlder";
-    public static final String DOM_MAX_PAGES    = "domMaxPages";
-    public static final String CRAWLING_Q       = "crawlingQ";
-    public static final String PUSH_SOLR        = "pushSolr";
-    public static final String INDEX_TEXT       = "indexText";
-    public static final String INDEX_MEDIA      = "indexMedia";
-    public static final String STORE_HTCACHE    = "storeHTCache";
-    public static final String REMOTE_INDEXING  = "remoteIndexing";
-    public static final String XSSTOPW          = "xsstopw";
-    public static final String XDSTOPW          = "xdstopw";
-    public static final String XPSTOPW          = "xpstopw";
-    public static final String CACHE_STRAGEGY   = "cacheStrategy";
-    public static final String CRAWLER_URL_MUSTMATCH         = "crawlerURLMustMatch";
-    public static final String CRAWLER_URL_MUSTNOTMATCH      = "crawlerURLMustNotMatch";
-    public static final String CRAWLER_IP_MUSTMATCH          = "crawlerIPMustMatch";
-    public static final String CRAWLER_IP_MUSTNOTMATCH       = "crawlerIPMustNotMatch";
-    public static final String CRAWLER_COUNTRY_MUSTMATCH     = "crawlerCountryMustMatch";
-    public static final String CRAWLER_URL_NODEPTHLIMITMATCH = "crawlerNoLimitURLMustMatch";
-    public static final String INDEXING_URL_MUSTMATCH        = "indexURLMustMatch";
-    public static final String INDEXING_URL_MUSTNOTMATCH     = "indexURLMustNotMatch";
-    public static final String COLLECTIONS = "collections";
+    private static final String HANDLE           = "handle";
+    public  static final String NAME             = "name";
+    public  static final String DEPTH            = "generalDepth";
+    private static final String DIRECT_DOC_BY_URL= "directDocByURL";
+    public  static final String RECRAWL_IF_OLDER = "recrawlIfOlder";
+    public  static final String DOM_MAX_PAGES    = "domMaxPages";
+    public  static final String CRAWLING_Q       = "crawlingQ";
+    public  static final String INDEX_TEXT       = "indexText";
+    public  static final String INDEX_MEDIA      = "indexMedia";
+    public  static final String STORE_HTCACHE    = "storeHTCache";
+    public  static final String REMOTE_INDEXING  = "remoteIndexing";
+    private static final String CACHE_STRAGEGY   = "cacheStrategy";
+    public  static final String CRAWLER_URL_MUSTMATCH         = "crawlerURLMustMatch";
+    public  static final String CRAWLER_URL_MUSTNOTMATCH      = "crawlerURLMustNotMatch";
+    private static final String CRAWLER_IP_MUSTMATCH          = "crawlerIPMustMatch";
+    private static final String CRAWLER_IP_MUSTNOTMATCH       = "crawlerIPMustNotMatch";
+    private static final String CRAWLER_COUNTRY_MUSTMATCH     = "crawlerCountryMustMatch";
+    private static final String CRAWLER_URL_NODEPTHLIMITMATCH = "crawlerNoLimitURLMustMatch";
+    private static final String INDEXING_URL_MUSTMATCH        = "indexURLMustMatch";
+    private static final String INDEXING_URL_MUSTNOTMATCH     = "indexURLMustNotMatch";
+    private static final String COLLECTIONS = "collections";
 
     private Pattern crawlerurlmustmatch = null, crawlerurlmustnotmatch = null;
     private Pattern crawleripmustmatch = null, crawleripmustnotmatch = null;
     private Pattern crawlernodepthlimitmatch = null;
     private Pattern indexurlmustmatch = null, indexurlmustnotmatch = null;
 
-    public final static class DomProfile {
-
-        public String referrer;
-        public int depth, count;
-
-        public DomProfile(final String ref, final int d) {
-            this.referrer = ref;
-            this.depth = d;
-            this.count = 1;
-        }
-
-        public void inc() {
-            this.count++;
-        }
-
-    }
-
-    private final Map<String, DomProfile> doms;
+    private final Map<String, AtomicInteger> doms;
 
     /**
      * Constructor which creates CrawlPofile from parameters.
@@ -156,7 +136,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             throw new NullPointerException("name must not be null or empty");
         }
         if (name.length() > 256) name = name.substring(256);
-        this.doms = new ConcurrentHashMap<String, DomProfile>();
+        this.doms = new ConcurrentHashMap<String, AtomicInteger>();
         final String handle = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(name)).substring(0, Word.commonHashLength);
         put(HANDLE,           handle);
         put(NAME,             name);
@@ -177,9 +157,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(INDEX_MEDIA,      indexMedia);
         put(STORE_HTCACHE,    storeHTCache);
         put(REMOTE_INDEXING,  remoteIndexing);
-        put(XSSTOPW,          xsstopw); // exclude static stop-words
-        put(XDSTOPW,          xdstopw); // exclude dynamic stop-word
-        put(XPSTOPW,          xpstopw); // exclude parent stop-words
         put(CACHE_STRAGEGY,   cacheStrategy.toString());
         put(COLLECTIONS,      collections.trim().replaceAll(" ", ""));
     }
@@ -191,25 +168,25 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public CrawlProfile(final Map<String, String> ext) {
         super(ext == null ? 1 : ext.size());
         if (ext != null) putAll(ext);
-        this.doms = new ConcurrentHashMap<String, DomProfile>();
+        this.doms = new ConcurrentHashMap<String, AtomicInteger>();
     }
 
-    public void domInc(final String domain, final String referrer, final int depth) {
-        final DomProfile dp = this.doms.get(domain);
+    public void domInc(final String domain) {
+        final AtomicInteger dp = this.doms.get(domain);
         if (dp == null) {
             // new domain
-            this.doms.put(domain, new DomProfile(referrer, depth));
+            this.doms.put(domain, new AtomicInteger(1));
         } else {
             // increase counter
-            dp.inc();
+            dp.incrementAndGet();
         }
     }
 
-    public String domName(final boolean attr, final int index){
-        final Iterator<Map.Entry<String, DomProfile>> domnamesi = this.doms.entrySet().iterator();
+    private String domName(final boolean attr, final int index){
+        final Iterator<Map.Entry<String, AtomicInteger>> domnamesi = this.doms.entrySet().iterator();
         String domname="";
-        Map.Entry<String, DomProfile> ey;
-        DomProfile dp;
+        Map.Entry<String, AtomicInteger> ey;
+        AtomicInteger dp;
         int i = 0;
         while ((domnamesi.hasNext()) && (i < index)) {
             ey = domnamesi.next();
@@ -218,16 +195,12 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (domnamesi.hasNext()) {
             ey = domnamesi.next();
             dp = ey.getValue();
-            domname = ey.getKey() + ((attr) ? ("/r=" + dp.referrer + ", d=" + dp.depth + ", c=" + dp.count) : " ");
+            domname = ey.getKey() + ((attr) ? ("/c=" + dp.get()) : " ");
         }
         return domname;
     }
 
-    public void clearDoms() {
-        this.doms.clear();
-    }
-
-    public DomProfile getDom(final String domain) {
+    public AtomicInteger getCount(final String domain) {
         return this.doms.get(domain);
     }
 
@@ -245,7 +218,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * @param key name of the parameter
      * @param value values if the parameter
      */
-    public final void put(final String key, final int value) {
+    private final void put(final String key, final int value) {
         super.put(key, Integer.toString(value));
     }
 
@@ -254,7 +227,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
      * @param key name of the parameter
      * @param value values if the parameter
      */
-    public final void put(final String key, final long value) {
+    private final void put(final String key, final long value) {
         super.put(key, Long.toString(value));
     }
 
@@ -476,12 +449,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return (r.equals(Boolean.TRUE.toString()));
     }
 
-    public boolean pushSolr() {
-        final String r = get(PUSH_SOLR);
-        if (r == null) return true;
-        return (r.equals(Boolean.TRUE.toString()));
-    }
-
     public boolean indexText() {
         final String r = get(INDEX_TEXT);
         if (r == null) return true;
@@ -505,24 +472,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return (r.equals(Boolean.TRUE.toString()));
     }
 
-    public boolean excludeStaticStopwords() {
-        final String r = get(XSSTOPW);
-        if (r == null) return false;
-        return (r.equals(Boolean.TRUE.toString()));
-    }
-
-    public boolean excludeDynamicStopwords() {
-        final String r = get(XDSTOPW);
-        if (r == null) return false;
-        return (r.equals(Boolean.TRUE.toString()));
-    }
-
-    public boolean excludeParentStopwords() {
-        final String r = get(XPSTOPW);
-        if (r == null) return false;
-        return (r.equals(Boolean.TRUE.toString()));
-    }
-
     public static long getRecrawlDate(final long oldTimeMinutes) {
         return System.currentTimeMillis() - (60000L * oldTimeMinutes);
     }
@@ -535,7 +484,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return new StringBuilder(host.length() + 20).append(protocol).append("://(www.)?").append(Pattern.quote(host)).append(".*").toString();
     }
 
-    public static String mustMatchSubpath(final MultiProtocolURI uri) {
+    private static String mustMatchSubpath(final MultiProtocolURI uri) {
         String u = uri.toNormalform(true);
         if (!u.endsWith("/")) {int p = u.lastIndexOf("/"); if (p > 0) u = u.substring(0, p + 1);}
         return new StringBuilder(u.length() + 5).append(Pattern.quote(u)).append(".*").toString();

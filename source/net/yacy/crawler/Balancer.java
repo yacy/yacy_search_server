@@ -256,7 +256,7 @@ public class Balancer {
      * @throws IOException
      * @throws SpaceExceededException
      */
-    public String push(final Request entry) throws IOException, SpaceExceededException {
+    public String push(final Request entry, final RobotsTxt robots) throws IOException, SpaceExceededException {
         assert entry != null;
         final byte[] hash = entry.url().hash();
         synchronized (this) {
@@ -275,8 +275,9 @@ public class Balancer {
 
 	        // add the hash to a queue
 	        pushHashToDomainStacks(entry.url().getHost(), entry.url().hash());
-	        return null;
         }
+        robots.ensureExist(entry.url(), Balancer.this.myAgentIDs, true); // concurrently load all robots.txt
+        return null;
     }
 
     /**
@@ -319,8 +320,7 @@ public class Balancer {
      * @param crawlURL
      * @return
      */
-    private long getRobotsTime(final RobotsTxt robots, final CrawlProfile profileEntry, final DigestURI crawlURL) {
-        if (profileEntry == null) return 0;
+    private long getRobotsTime(final RobotsTxt robots, final DigestURI crawlURL) {
         long sleeptime = Latency.waitingRobots(crawlURL, robots, this.myAgentIDs); // this uses the robots.txt database and may cause a loading of robots.txt from the server
         return sleeptime < 0 ? 0 : sleeptime;
     }
@@ -450,7 +450,7 @@ public class Balancer {
     	}
     	if (crawlEntry == null) return null;
 
-    	long robotsTime = getRobotsTime(robots, profileEntry, crawlEntry.url());
+    	long robotsTime = getRobotsTime(robots, crawlEntry.url());
         Latency.updateAfterSelection(crawlEntry.url(), profileEntry == null ? 0 : robotsTime);
         if (delay && sleeptime > 0) {
             // force a busy waiting here

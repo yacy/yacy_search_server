@@ -234,6 +234,109 @@ public class RobotsTxt {
         return robotsTxt4Host;
     }
 
+    public void ensureExist(final MultiProtocolURI theURL, final Set<String> thisAgents, boolean concurrent) {
+        final String urlHostPort = getHostPort(theURL);
+        final BEncodedHeap robotsTable;
+        try {
+            robotsTable = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
+        } catch (IOException e1) {
+            log.fatal("tables not available", e1);
+            return;
+        }
+        if (robotsTable == null || robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
+
+        if (concurrent)
+            new Thread() {public void run(){ensureExist(urlHostPort, robotsTable, thisAgents);}}.start();
+        else
+            ensureExist(urlHostPort, robotsTable, thisAgents);
+    }
+    
+    private void ensureExist(final String urlHostPort, BEncodedHeap robotsTable, final Set<String> thisAgents) {
+
+        // make or get a synchronization object
+        DomSync syncObj = RobotsTxt.this.syncObjects.get(urlHostPort);
+        if (syncObj == null) {
+            syncObj = new DomSync();
+            RobotsTxt.this.syncObjects.put(urlHostPort, syncObj);
+        }
+        // we can now synchronize for each host separately
+        synchronized (syncObj) {
+            if (robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
+
+            // generating the proper url to download the robots txt
+            DigestURI robotsURL = null;
+            try {
+                robotsURL = new DigestURI("http://" + urlHostPort + "/robots.txt");
+            } catch (final MalformedURLException e) {
+                log.fatal("Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.", e);
+                robotsURL = null;
+            }
+
+            Response response = null;
+            if (robotsURL != null) {
+                if (log.isDebugEnabled()) log.debug("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
+                Request request = new Request(robotsURL, null);
+                try {
+                    response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE, null, 0);
+                } catch (IOException e) {
+                    response = null;
+                }
+            }
+
+            RobotsTxtEntry robotsTxt4Host = null;
+            if (response == null) {
+                // no robots.txt available, make an entry to prevent that the robots loading is done twice
+                // generate artificial entry
+                robotsTxt4Host = new RobotsTxtEntry(
+                        robotsURL,
+                        new ArrayList<String>(),
+                        new ArrayList<String>(),
+                        new Date(),
+                        new Date(),
+                        null,
+                        null,
+                        Integer.valueOf(0),
+                        null);
+
+                // store the data into the robots DB
+                final int sz = robotsTable.size();
+                addEntry(robotsTxt4Host);
+                if (robotsTable.size() <= sz) {
+                    log.fatal("new entry in robots.txt table failed, resetting database");
+                    try {clear();} catch (IOException e) {}
+                    addEntry(robotsTxt4Host);
+                }
+            } else {
+                final byte[] robotsTxt = response.getContent();
+                //Log.logInfo("RobotsTxt", "robots of " + robotsURL.toNormalform(true, true) + ":\n" + ((robotsTxt == null) ? "null" : UTF8.String(robotsTxt))); // debug TODO remove
+                RobotsTxtParser parserResult;
+                ArrayList<String> denyPath;
+                if (response.getResponseHeader().getStatusCode() == 401 || response.getResponseHeader().getStatusCode() == 403) {
+                    parserResult = new RobotsTxtParser(thisAgents);
+                    // create virtual deny path
+                    denyPath = new ArrayList<String>();
+                    denyPath.add("/");
+                } else {
+                    parserResult = new RobotsTxtParser(thisAgents, robotsTxt);
+                    denyPath = parserResult.denyList();
+                }
+
+                // store the data into the robots DB
+                String etag = response.getResponseHeader().containsKey(HeaderFramework.ETAG) ? (response.getResponseHeader().get(HeaderFramework.ETAG)).trim() : null;
+                robotsTxt4Host = addEntry(
+                        robotsURL,
+                        parserResult.allowList(),
+                        denyPath,
+                        new Date(),
+                        response.getResponseHeader().lastModified(),
+                        etag,
+                        parserResult.sitemap(),
+                        parserResult.crawlDelayMillis(),
+                        parserResult.agentName());
+            }
+        }
+    }
+    
     private RobotsTxtEntry addEntry(
     		final MultiProtocolURI theURL,
     		final ArrayList<String> allowPathList,
