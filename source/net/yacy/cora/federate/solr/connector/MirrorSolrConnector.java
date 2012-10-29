@@ -162,10 +162,10 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
      */
     @Override
     public void delete(final String id) throws IOException {
+        this.documentCache.remove(id);
         this.hitCache.remove(id);
         this.missCache.put(id, EXIST);
         this.missCache_Insert++;
-        this.documentCache.remove(id);
         if (this.solr0 != null) this.solr0.delete(id);
         if (this.solr1 != null) this.solr1.delete(id);
     }
@@ -178,10 +178,10 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     @Override
     public void delete(final List<String> ids) throws IOException {
         for (String id: ids) {
+            this.documentCache.remove(id);
             this.hitCache.remove(id);
             this.missCache.put(id, EXIST);
             this.missCache_Insert++;
-            this.documentCache.remove(id);
         }
         if (this.solr0 != null) this.solr0.delete(ids);
         if (this.solr1 != null) this.solr1.delete(ids);
@@ -248,6 +248,19 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
             this.documentCache.put(id, doc);
             this.documentCache_Insert++;
             return doc;
+        }
+        // check if there is a autocommit problem
+        if (this.hitCache.containsKey(id)) {
+            // the document should be there, therefore make a commit and check again
+            this.commit();
+            if ((solr0 != null && ((doc = solr0.get(id)) != null)) || (solr1 != null && ((doc = solr1.get(id)) != null))) {
+                this.missCache.remove(id);
+                this.hitCache.put(id, EXIST);
+                this.hitCache_Insert++;
+                this.documentCache.put(id, doc);
+                this.documentCache_Insert++;
+                return doc;
+            }
         }
         this.missCache.put(id, EXIST);
         this.missCache_Insert++;
