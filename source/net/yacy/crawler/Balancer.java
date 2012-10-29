@@ -273,8 +273,9 @@ public class Balancer {
 	        assert s < this.urlFileIndex.size() : "hash = " + ASCII.String(hash) + ", s = " + s + ", size = " + this.urlFileIndex.size();
 	        assert this.urlFileIndex.has(hash) : "hash = " + ASCII.String(hash);
 
-	        // add the hash to a queue
-	        pushHashToDomainStacks(entry.url().getHost(), entry.url().hash());
+	        // add the hash to a queue if the host is unknown to get this fast into the balancer
+	        // now disabled to prevent that a crawl 'freezes' to a specific domain which hosts a lot of pages; the queues are filled anyway
+	        //if (!this.domainStacks.containsKey(entry.url().getHost())) pushHashToDomainStacks(entry.url().getHost(), entry.url().hash());
         }
         robots.ensureExist(entry.url(), Balancer.this.myAgentIDs, true); // concurrently load all robots.txt
         return null;

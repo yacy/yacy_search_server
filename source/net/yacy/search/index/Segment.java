@@ -376,7 +376,6 @@ public class Segment {
         int outlinksSame = document.inboundLinks().size();
         int outlinksOther = document.outboundLinks().size();
         final RWIProcess rankingProcess = (searchEvent == null) ? null : searchEvent.getRankingResult();
-        int wordCount = 0;
         final int urlLength = urlNormalform.length();
         final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
 
@@ -409,7 +408,6 @@ public class Segment {
                 } catch (final Exception e) {
                     Log.logException(e);
                 }
-                wordCount++;
     
                 // during a search event it is possible that a heuristic is used which aquires index
                 // data during search-time. To transfer indexed data directly to the search process
