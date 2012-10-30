@@ -51,8 +51,8 @@ public class NoticedURL {
         LOCAL, GLOBAL, OVERHANG, REMOTE, NOLOAD;
     }
 
-    private static final long minimumLocalDeltaInit  =  10; // the minimum time difference between access of the same local domain
-    public  static final long minimumGlobalDeltaInit = 500; // the minimum time difference between access of the same global domain
+    private static final int minimumLocalDeltaInit  =  10; // the minimum time difference between access of the same local domain
+    public  static final int minimumGlobalDeltaInit = 500; // the minimum time difference between access of the same global domain
 
     private Balancer coreStack;      // links found by crawling to depth-1
     private Balancer limitStack;     // links found by crawling at target depth
@@ -72,15 +72,15 @@ public class NoticedURL {
         this.noloadStack = new Balancer(cachePath, "urlNoticeNoLoadStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
     }
 
-    public long getMinimumLocalDelta() {
+    public int getMinimumLocalDelta() {
         return this.coreStack.getMinimumLocalDelta();
     }
 
-    public long getMinimumGlobalDelta() {
+    public int getMinimumGlobalDelta() {
         return this.coreStack.getMinimumGlobalDelta();
     }
 
-    public void setMinimumDelta(final long minimumLocalDelta, final long minimumGlobalDelta) {
+    public void setMinimumDelta(final int minimumLocalDelta, final int minimumGlobalDelta) {
         this.coreStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
         this.limitStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
         this.remoteStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);

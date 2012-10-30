@@ -70,8 +70,8 @@ public class Balancer {
 
     // class variables filled with external values
     private final File                 cacheStacksPath;
-    private       long                 minimumLocalDelta;
-    private       long                 minimumGlobalDelta;
+    private       int                  minimumLocalDelta;
+    private       int                  minimumGlobalDelta;
     private final Set<String>          myAgentIDs;
     private       BufferedObjectIndex  urlFileIndex;
 
@@ -86,8 +86,8 @@ public class Balancer {
     public Balancer(
             final File cachePath,
             final String stackname,
-            final long minimumLocalDelta,
-            final long minimumGlobalDelta,
+            final int minimumLocalDelta,
+            final int minimumGlobalDelta,
             final Set<String> myAgentIDs,
             final boolean useTailCache,
             final boolean exceed134217727) {
@@ -118,15 +118,15 @@ public class Balancer {
         Log.logInfo("Balancer", "opened balancer file with " + this.urlFileIndex.size() + " entries from " + f.toString());
     }
 
-    public long getMinimumLocalDelta() {
+    public int getMinimumLocalDelta() {
         return this.minimumLocalDelta;
     }
 
-    public long getMinimumGlobalDelta() {
+    public int getMinimumGlobalDelta() {
         return this.minimumGlobalDelta;
     }
 
-    public void setMinimumDelta(final long minimumLocalDelta, final long minimumGlobalDelta) {
+    public void setMinimumDelta(final int minimumLocalDelta, final int minimumGlobalDelta) {
         this.minimumLocalDelta = minimumLocalDelta;
         this.minimumGlobalDelta = minimumGlobalDelta;
     }
@@ -289,7 +289,7 @@ public class Balancer {
         Map<String, Integer[]> map = new TreeMap<String, Integer[]>(); // we use a tree map to get a stable ordering
         for (Map.Entry<String, HandleSet> entry: this.domainStacks.entrySet()) {
             int size = entry.getValue().size();
-            int delta =  (int) Latency.waitingRemainingGuessed(entry.getKey(), this.minimumLocalDelta, this.minimumGlobalDelta);
+            int delta = Latency.waitingRemainingGuessed(entry.getKey(), this.minimumLocalDelta, this.minimumGlobalDelta);
             map.put(entry.getKey(), new Integer[]{size, delta});
         }
         return map;
@@ -297,7 +297,7 @@ public class Balancer {
 
     /**
      * Get the minimum sleep time for a given url. The result can also be negative to reflect the time since the last access
-     * The time can be as low as Long.MIN_VALUE to show that there should not be any limitation at all.
+     * The time can be as low as Integer.MIN_VALUE to show that there should not be any limitation at all.
      * @param robots
      * @param profileEntry
      * @param crawlURL
@@ -616,7 +616,7 @@ public class Balancer {
                 break;
             }
             count++;
-            if (!this.domainStacks.isEmpty() && count > 120 * this.domainStacks.size()) break;
+            if (this.domainStacks.size() >= 100 || (!this.domainStacks.isEmpty() && count > 600 * this.domainStacks.size())) break;
     	}
     	Log.logInfo("BALANCER", "re-fill of domain stacks; fileIndex.size() = " + this.urlFileIndex.size() + ", domainStacks.size = " + this.domainStacks.size() + ", collection time = " + (System.currentTimeMillis() - this.lastDomainStackFill) + " ms");
         this.domStackInitSize = this.domainStacks.size();

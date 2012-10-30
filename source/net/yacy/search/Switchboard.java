@@ -727,8 +727,8 @@ public final class Switchboard extends serverSwitch
         OAIListFriendsLoader.init(this.loader, oaiFriends);
         this.crawlQueues = new CrawlQueues(this, this.queuesRoot);
         this.crawlQueues.noticeURL.setMinimumDelta(
-            getConfigLong("minimumLocalDelta", this.crawlQueues.noticeURL.getMinimumLocalDelta()),
-            getConfigLong("minimumGlobalDelta", this.crawlQueues.noticeURL.getMinimumGlobalDelta()));
+            getConfigInt("minimumLocalDelta", this.crawlQueues.noticeURL.getMinimumLocalDelta()),
+            getConfigInt("minimumGlobalDelta", this.crawlQueues.noticeURL.getMinimumGlobalDelta()));
 
         /*
          * Creating sync objects and loading status for the crawl jobs

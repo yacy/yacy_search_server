@@ -205,14 +205,14 @@ public class RobotsTxtEntry {
         return null;
     }
 
-    public long getCrawlDelayMillis() {
+    public int getCrawlDelayMillis() {
         if (this.mem.containsKey(CRAWL_DELAY_MILLIS)) try {
-            return ByteArray.parseDecimal(this.mem.get(CRAWL_DELAY_MILLIS));
+            return (int) ByteArray.parseDecimal(this.mem.get(CRAWL_DELAY_MILLIS));
         } catch (final NumberFormatException e) {
             return 0;
         }
         if (this.mem.containsKey(CRAWL_DELAY)) try {
-            return 1000 * ByteArray.parseDecimal(this.mem.get(CRAWL_DELAY));
+            return 1000 * ((int) ByteArray.parseDecimal(this.mem.get(CRAWL_DELAY)));
         } catch (final NumberFormatException e) {
             return 0;
         }

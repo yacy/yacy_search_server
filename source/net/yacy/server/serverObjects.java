@@ -92,11 +92,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         super();
     }
 
-    public serverObjects(final int initialCapacity) {
-        super(initialCapacity);
-    }
-
-    public serverObjects(final Map<String, String> input) {
+    protected serverObjects(final Map<String, String> input) {
         super(input);
     }
 
@@ -219,10 +215,6 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         return put(key, toJSON(value));
     }
 
-    public String putJSON(final String key, final StringBuilder value) {
-        return put(key, toJSON(value.toString()));
-    }
-
     public static String toJSON(String value) {
         // value = value.replaceAll("\\", "\\\\");
         value = patternDoublequote.matcher(value).replaceAll("'");
@@ -233,10 +225,6 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         value = patternR.matcher(value).replaceAll("\\r");
         value = patternT.matcher(value).replaceAll("\\t");
         return value;
-    }
-
-    public String putJSON(final String key, final byte[] value) {
-        return putJSON(key, UTF8.String(value));
     }
 
     /**
@@ -384,11 +372,6 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         if (s == null) return false;
         s = s.toLowerCase();
         return s.equals("true") || s.equals("on") || s.equals("1");
-    }
-
-    public boolean hasValue(final String key) {
-        final String s = super.get(key);
-        return (s != null && !s.isEmpty());
     }
 
     // returns a set of all values where their key mappes the keyMapper

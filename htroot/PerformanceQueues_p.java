@@ -287,8 +287,8 @@ public class PerformanceQueues_p {
         }
 
         if ((post != null) && (post.containsKey("minimumDeltaSubmit"))) {
-            final long minimumLocalDelta = post.getLong("minimumLocalDelta", sb.crawlQueues.noticeURL.getMinimumLocalDelta());
-            final long minimumGlobalDelta = post.getLong("minimumGlobalDelta", sb.crawlQueues.noticeURL.getMinimumGlobalDelta());
+            final int minimumLocalDelta = post.getInt("minimumLocalDelta", sb.crawlQueues.noticeURL.getMinimumLocalDelta());
+            final int minimumGlobalDelta = post.getInt("minimumGlobalDelta", sb.crawlQueues.noticeURL.getMinimumGlobalDelta());
             sb.setConfig("minimumLocalDelta", minimumLocalDelta);
             sb.setConfig("minimumGlobalDelta", minimumGlobalDelta);
             sb.crawlQueues.noticeURL.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);

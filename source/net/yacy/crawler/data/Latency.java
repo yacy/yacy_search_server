@@ -97,8 +97,8 @@ public class Latency {
      * @param thisAgents
      * @return the waiting time in milliseconds; 0 if not known; -1 if host gives us special rights
      */
-    public static long waitingRobots(final MultiProtocolURI url, final RobotsTxt robots, final Set<String> thisAgents) {
-        long robotsDelay = 0;
+    public static int waitingRobots(final MultiProtocolURI url, final RobotsTxt robots, final Set<String> thisAgents) {
+        int robotsDelay = 0;
         RobotsTxtEntry robotsEntry = robots.getEntry(url, thisAgents);
         robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
         if (robotsEntry != null && robotsDelay == 0 && robotsEntry.getAgentName() != null) return -1; // no limits if granted exclusively for this peer
@@ -115,7 +115,7 @@ public class Latency {
      * @return the remaining waiting time in milliseconds. The return value may be negative
      *         which expresses how long the time is over the minimum waiting time.
      */
-    public static long waitingRemainingGuessed(final String hostname, final long minimumLocalDelta, final long minimumGlobalDelta) {
+    public static int waitingRemainingGuessed(final String hostname, final int minimumLocalDelta, final int minimumGlobalDelta) {
         if (hostname == null) return Integer.MIN_VALUE;
 
         // first check if the domain was _ever_ accessed before
@@ -123,15 +123,13 @@ public class Latency {
         if (host == null) return Integer.MIN_VALUE; // no delay if host is new; use Integer because there is a cast to int somewhere
 
         // find the minimum waiting time based on the network domain (local or global)
-        final boolean local = Domains.isLocal(hostname, null);
-        if (local) return minimumLocalDelta;
-        long waiting =  minimumGlobalDelta;
-
+        int waiting = (Domains.isLocal(hostname, null)) ? minimumLocalDelta : minimumGlobalDelta;
+        
         // if we have accessed the domain many times, get slower (the flux factor)
         waiting += host.flux(waiting);
 
         // the time since last access to the domain is the basis of the remaining calculation
-        final long timeSinceLastAccess = System.currentTimeMillis() - host.lastacc();
+        final int timeSinceLastAccess = (int) (System.currentTimeMillis() - host.lastacc());
         
         // use the access latency as rule how fast we can access the server
         // this applies also to localhost, but differently, because it is not necessary to
@@ -153,16 +151,14 @@ public class Latency {
      * @param minimumGlobalDelta
      * @return the remaining waiting time in milliseconds. can be negative to reflect the due-time after a possible nex loading time
      */
-    public static long waitingRemaining(final MultiProtocolURI url, final RobotsTxt robots, final Set<String> thisAgents, final long minimumLocalDelta, final long minimumGlobalDelta) {
+    public static int waitingRemaining(final MultiProtocolURI url, final RobotsTxt robots, final Set<String> thisAgents, final int minimumLocalDelta, final int minimumGlobalDelta) {
 
         // first check if the domain was _ever_ accessed before
         final Host host = host(url);
         if (host == null) return Integer.MIN_VALUE; // no delay if host is new; use Integer because there is a cast to int somewhere
 
         // find the minimum waiting time based on the network domain (local or global)
-        final boolean local = url.isLocal();
-        if (local) return minimumLocalDelta;
-        long waiting = minimumGlobalDelta;
+        int waiting = (url.isLocal()) ? minimumLocalDelta : minimumGlobalDelta;
 
         // for CGI accesses, we double the minimum time
         // mostly there is a database access in the background
@@ -178,10 +174,10 @@ public class Latency {
         waiting = Math.max(waiting, host.average() * 2);
 
         // the time since last access to the domain is the basis of the remaining calculation
-        final long timeSinceLastAccess = System.currentTimeMillis() - host.lastacc();
+        final int timeSinceLastAccess = (int) (System.currentTimeMillis() - host.lastacc());
         
         // find the delay as given by robots.txt on target site
-        long robotsDelay = waitingRobots(url, robots, thisAgents);
+        int robotsDelay = waitingRobots(url, robots, thisAgents);
         if (robotsDelay < 0) return -timeSinceLastAccess; // no limits if granted exclusively for this peer
 
         waiting = Math.max(waiting, robotsDelay);
@@ -189,18 +185,16 @@ public class Latency {
     }
 
 
-    public static String waitingRemainingExplain(final MultiProtocolURI url, final RobotsTxt robots, final Set<String> thisAgents, final long minimumLocalDelta, final long minimumGlobalDelta) {
+    public static String waitingRemainingExplain(final MultiProtocolURI url, final RobotsTxt robots, final Set<String> thisAgents, final int minimumLocalDelta, final int minimumGlobalDelta) {
 
         // first check if the domain was _ever_ accessed before
         final Host host = host(url);
-        if (host == null) return "host " + host + " never accessed before -> Long.MIN_VALUE"; // no delay if host is new
+        if (host == null) return "host " + host + " never accessed before -> Integer.MIN_VALUE"; // no delay if host is new
 
         final StringBuilder s = new StringBuilder(50);
 
         // find the minimum waiting time based on the network domain (local or global)
-        final boolean local = url.isLocal();
-        if (local) return "local host -> minimum local: " + minimumLocalDelta;
-        long waiting = minimumGlobalDelta;
+        int waiting = (url.isLocal()) ? minimumLocalDelta : minimumGlobalDelta;
         s.append("minimumDelta = ").append(waiting);
 
         // for CGI accesses, we double the minimum time
@@ -209,7 +203,7 @@ public class Latency {
         if (url.isCGI()) { waiting = waiting * 2; s.append(", isCGI = true -> double"); }
 
         // if we have accessed the domain many times, get slower (the flux factor)
-        long flux = host.flux(waiting);
+        int flux = host.flux(waiting);
         waiting += flux;
         s.append(", flux = ").append(flux);
 
@@ -220,7 +214,7 @@ public class Latency {
         waiting = Math.max(waiting, host.average() * 2);
 
         // find the delay as given by robots.txt on target site
-        long robotsDelay = waitingRobots(url, robots, thisAgents);
+        int robotsDelay = waitingRobots(url, robots, thisAgents);
         if (robotsDelay < 0) return "no waiting for exclusive granted peer"; // no limits if granted exclusively for this peer
 
         waiting = Math.max(waiting, robotsDelay);
@@ -273,7 +267,7 @@ public class Latency {
         public long robotsDelay() {
             return this.robotsMinDelay;
         }
-        public long flux(final long range) {
+        public int flux(final int range) {
             return this.count >= 10000 ? range * Math.min(5000, this.count) / 10000 : range / (10000 - this.count);
         }
     }
