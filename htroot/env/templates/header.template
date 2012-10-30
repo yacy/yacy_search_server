@@ -5,13 +5,14 @@
 
 <ul id="menu">
   <li class="menugroup" id="menugroupGlobalIndex">
-    <h3>Search</h3>
+    <h3>Search Interfaces</h3>
     <ul class="menu">
       <li><a href="/index.html" accesskey="s" class="MenuItemLink">Web Search</a></li>
       <li><a href="/yacyinteractive.html" class="MenuItemLink">File Search</a></li>
       <li><a href="/HostBrowser.html?hosts=" class="MenuItemLink">Host Browser</a></li>
       <li><a href="/yacysearch_location.html" class="MenuItemLink">Location Search</a></li>
       <li><a href="/solr/select?q=*:*&start=0&rows=3" class="MenuItemLink">Embedded Solr API</a></li>
+      <li><a href="/gsa/search?q=www&size=3" class="MenuItemLink">Embedded GSA API</a></li>
       <!--<li><a href="/yacy/ui/" accesskey="s" class="MenuItemLink">Rich Client Search</a></li>-->
       <li><a href="/compare_yacy.html?display=1" class="MenuItemLink">Compare Search</a></li>
       <li><a href="/ConfigPortal.html" class="MenuItemLink">Search Integration</a></li>

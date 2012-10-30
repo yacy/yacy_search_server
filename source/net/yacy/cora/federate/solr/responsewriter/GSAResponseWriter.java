@@ -74,7 +74,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
 
 
     private static final char[] XML_START = (
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<GSP VER=\"3.2\">\n").toCharArray();
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<GSP VER=\"3.2\">\n<!-- This is a Google Search Appliance API, see https://developers.google.com/search-appliance/documentation/68/xml_reference -->\n").toCharArray();
     private static final char[] XML_STOP = "</GSP>\n".toCharArray();
 
     // define a list of simple YaCySchema -> RSS Token matchings
