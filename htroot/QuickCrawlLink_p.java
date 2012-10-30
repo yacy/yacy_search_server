@@ -102,9 +102,6 @@ public class QuickCrawlLink_p {
         final boolean indexMedia     = post.get("indexMedia", "off").equals("on");
         final boolean storeHTCache   = post.get("storeHTCache", "").equals("on");
         final boolean remoteIndexing = post.get("crawlOrder", "").equals("on");
-        final boolean xsstopw        = post.get("xsstopw", "").equals("on");
-        final boolean xdstopw        = post.get("xdstopw", "").equals("on");
-        final boolean xpstopw        = post.get("xpstopw", "").equals("on");
         final String collection      = post.get("collection", "user");
 
         prop.put("mode_url", (crawlingStart == null) ? "unknown" : crawlingStart);
@@ -151,9 +148,6 @@ public class QuickCrawlLink_p {
                         indexMedia,
                         storeHTCache,
                         remoteIndexing,
-                        xsstopw,
-                        xdstopw,
-                        xpstopw,
                         CacheStrategy.IFFRESH,
                         collection);
                 sb.crawler.putActive(pe.handle().getBytes(), pe);

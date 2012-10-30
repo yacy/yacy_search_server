@@ -265,15 +265,6 @@ public class Crawler_p {
                 CacheStrategy cachePolicy = CacheStrategy.parse(post.get("cachePolicy", "iffresh"));
                 if (cachePolicy == null) cachePolicy = CacheStrategy.IFFRESH;
 
-                final boolean xsstopw = "on".equals(post.get("xsstopw", "off"));
-                env.setConfig("xsstopw", xsstopw);
-
-                final boolean xdstopw = "on".equals(post.get("xdstopw", "off"));
-                env.setConfig("xdstopw", xdstopw);
-
-                final boolean xpstopw = "on".equals(post.get("xpstopw", "off"));
-                env.setConfig("xpstopw", xpstopw);
-
                 String crawlingMode = post.get("crawlingMode","url");
                 
                 if ("file".equals(crawlingMode) && post.containsKey("crawlingFile")) {
@@ -365,9 +356,6 @@ public class Crawler_p {
                         indexMedia,
                         storeHTCache,
                         crawlOrder,
-                        xsstopw,
-                        xdstopw,
-                        xpstopw,
                         cachePolicy,
                         collection);
                 byte[] handle = ASCII.getBytes(profile.handle());

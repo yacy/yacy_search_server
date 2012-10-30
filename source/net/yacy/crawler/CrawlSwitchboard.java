@@ -245,9 +245,6 @@ public final class CrawlSwitchboard {
                 true /*getConfigBool(PROXY_INDEXING_LOCAL_MEDIA, true)*/,
                 true,
                 false /*getConfigBool(PROXY_INDEXING_REMOTE, false)*/,
-                true,
-                true,
-                true,
                 CacheStrategy.IFFRESH,
                 "robot_" + CRAWL_PROFILE_PROXY);
         this.profilesActiveCrawls.put(
@@ -273,9 +270,6 @@ public final class CrawlSwitchboard {
                 true,
                 true,
                 false,
-                false,
-                true,
-                true,
                 false,
                 CacheStrategy.IFFRESH,
                 "robot_" + CRAWL_PROFILE_REMOTE);
@@ -303,9 +297,6 @@ public final class CrawlSwitchboard {
                 false,
                 true,
                 false,
-                true,
-                true,
-                false,
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_TEXT);
         this.profilesActiveCrawls.put(
@@ -329,9 +320,6 @@ public final class CrawlSwitchboard {
                 -1,
                 true,
                 true,
-                true,
-                true,
-                false,
                 true,
                 true,
                 false,
@@ -362,9 +350,6 @@ public final class CrawlSwitchboard {
                 false,
                 true,
                 false,
-                true,
-                true,
-                false,
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA);
         this.profilesActiveCrawls.put(
@@ -386,9 +371,6 @@ public final class CrawlSwitchboard {
                 false,
                 CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE),
                 -1,
-                true,
-                false,
-                true,
                 true,
                 false,
                 true,
@@ -419,9 +401,6 @@ public final class CrawlSwitchboard {
                 true,
                 false,
                 false,
-                false,
-                true,
-                true,
                 false,
                 CacheStrategy.NOCACHE,
                 "robot_" + CRAWL_PROFILE_SURROGATE);

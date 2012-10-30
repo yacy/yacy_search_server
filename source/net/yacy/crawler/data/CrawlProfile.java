@@ -126,9 +126,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final boolean indexMedia,
                  final boolean storeHTCache,
                  final boolean remoteIndexing,
-                 final boolean xsstopw,
-                 final boolean xdstopw,
-                 final boolean xpstopw,
                  final CacheStrategy cacheStrategy,
                  final String collections) {
         super(40);

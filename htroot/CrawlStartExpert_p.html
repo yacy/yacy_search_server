@@ -310,14 +310,6 @@
             so they can omit starting a crawl with the same start point.
           </td>
         </tr>
-        <tr valign="top" class="TableCellDark">
-          <td><label for="xsstopw">Exclude <em>static</em> Stop-Words</label>:</td>
-          <td><input type="checkbox" name="xsstopw" id="xsstopw" #(xsstopwChecked)#::checked="checked"#(/xsstopwChecked)# /></td>
-          <td>
-            This can be useful to circumvent that extremely common words are added to the database, i.e. "the", "he", "she", "it"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,
-            check this box.
-          </td>
-        </tr>
         <tr valign="top" class="TableCellLight">
           <td><label for="collection">Add Crawl result to collection(s)</label>:</td>
           <td>
@@ -327,24 +319,6 @@
             A crawl result can be tagged with names which are candidates for a collection request. These tags can be selected with the <a href="/gsa/search?q=www&site=#[collection]#">GSA interface</a> using the 'site' operator. To use this option, the 'collection_sxt'-field must be switched on in the <a href="/IndexFederated_p.html">Solr Schema</a>
           </td>
         </tr>
-        <!--
-        <tr valign="top" class="TableCellDark">
-          <td>Exclude <em>dynamic</em> Stop-Words</td>
-          <td><input type="checkbox" name="xdstopw" #(xdstopwChecked)#::checked="checked"#(/xdstopwChecked)# /></td>
-          <td colspan="3">
-            Excludes all words from indexing which are listed by statistic rules.
-            <em>THIS IS NOT YET FUNCTIONAL</em>
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td>Exclude <em>parent-indexed</em> words</td>
-          <td><input type="checkbox" name="xpstopw" #(xpstopwChecked)#::checked="checked"#(/xpstopwChecked)# /></td>
-          <td colspan="3">
-            Excludes all words from indexing which had been indexed in the parent web page.
-            <em>THIS IS NOT YET FUNCTIONAL</em>
-          </td>
-        </tr>
-        -->
         <tr valign="top" class="TableCellSummary">
           <td colspan="5"><input type="submit" name="crawlingstart" value="Start New Crawl" class="submitready"/></td>
         </tr>
