@@ -232,12 +232,12 @@ public class NoticedURL {
      * get a list of domains that are currently maintained as domain stacks
      * @return a map of clear text strings of host names to two integers: the size of the domain stacks and the access delta time
      */
-    public Map<String, Integer[]> getDomainStackHosts(final StackType stackType) {
+    public Map<String, Integer[]> getDomainStackHosts(final StackType stackType, RobotsTxt robots) {
         switch (stackType) {
-            case LOCAL:     return this.coreStack.getDomainStackHosts();
-            case GLOBAL:    return this.limitStack.getDomainStackHosts();
-            case REMOTE:   return this.remoteStack.getDomainStackHosts();
-            case NOLOAD:   return this.noloadStack.getDomainStackHosts();
+            case LOCAL:     return this.coreStack.getDomainStackHosts(robots);
+            case GLOBAL:    return this.limitStack.getDomainStackHosts(robots);
+            case REMOTE:   return this.remoteStack.getDomainStackHosts(robots);
+            case NOLOAD:   return this.noloadStack.getDomainStackHosts(robots);
             default: return null;
         }
     }

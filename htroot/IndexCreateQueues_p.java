@@ -121,7 +121,7 @@ public class IndexCreateQueues_p {
             prop.put("crawler_embed_deletepattern", deletepattern);
             prop.put("crawler_embed_queuename", stackType.name());
 
-            final Map<String, Integer[]> hosts = sb.crawlQueues.noticeURL.getDomainStackHosts(stackType);
+            final Map<String, Integer[]> hosts = sb.crawlQueues.noticeURL.getDomainStackHosts(stackType, sb.robots);
 
             int hc = 0;
             for (Map.Entry<String, Integer[]> host: hosts.entrySet()) {

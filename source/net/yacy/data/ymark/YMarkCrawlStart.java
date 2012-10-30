@@ -159,7 +159,7 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 		}
 	}
 
-	public static String crawlStart(
+	protected static String crawlStart(
         final Switchboard sb,
         final DigestURI startURL,
         final String urlMustMatch,

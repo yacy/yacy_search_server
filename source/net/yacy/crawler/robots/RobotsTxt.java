@@ -93,12 +93,11 @@ public class RobotsTxt {
     public RobotsTxtEntry getEntry(final MultiProtocolURI theURL, final Set<String> thisAgents) {
         if (theURL == null) throw new IllegalArgumentException();
         if (!theURL.getProtocol().startsWith("http")) return null;
-        return getEntry(theURL, thisAgents, true);
+        return getEntry(getHostPort(theURL), thisAgents, true);
     }
 
-    private RobotsTxtEntry getEntry(final MultiProtocolURI theURL, final Set<String> thisAgents, final boolean fetchOnlineIfNotAvailableOrNotFresh) {
+    public RobotsTxtEntry getEntry(final String urlHostPort, final Set<String> thisAgents, final boolean fetchOnlineIfNotAvailableOrNotFresh) {
             // this method will always return a non-null value
-        final String urlHostPort = getHostPort(theURL);
         RobotsTxtEntry robotsTxt4Host = null;
         Map<String, byte[]> record;
         BEncodedHeap robotsTable = null;
