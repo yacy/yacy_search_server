@@ -134,7 +134,7 @@ public class Latency {
         // use the access latency as rule how fast we can access the server
         // this applies also to localhost, but differently, because it is not necessary to
         // consider so many external accesses
-        waiting = Math.max(waiting, host.average() * 2);
+        waiting = Math.max(waiting, host.average() * 3 / 2);
 
         return Math.min(60000, waiting) - timeSinceLastAccess;
     }
@@ -171,7 +171,7 @@ public class Latency {
         // use the access latency as rule how fast we can access the server
         // this applies also to localhost, but differently, because it is not necessary to
         // consider so many external accesses
-        waiting = Math.max(waiting, host.average() * 2);
+        waiting = Math.max(waiting, host.average() * 3 / 2);
 
         // the time since last access to the domain is the basis of the remaining calculation
         final int timeSinceLastAccess = (int) (System.currentTimeMillis() - host.lastacc());
@@ -211,7 +211,7 @@ public class Latency {
         // this applies also to localhost, but differently, because it is not necessary to
         // consider so many external accesses
         s.append(", host.average = ").append(host.average());
-        waiting = Math.max(waiting, host.average() * 2);
+        waiting = Math.max(waiting, host.average() * 3 / 2);
 
         // find the delay as given by robots.txt on target site
         int robotsDelay = waitingRobots(url, robots, thisAgents);
