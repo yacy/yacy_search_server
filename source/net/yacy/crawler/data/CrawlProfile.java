@@ -55,26 +55,26 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
 
     // this is a simple record structure that hold all properties of a single crawl start
     private static final String HANDLE           = "handle";
-    public  static final String NAME             = "name";
-    public  static final String DEPTH            = "generalDepth";
-    private static final String DIRECT_DOC_BY_URL= "directDocByURL";
-    public  static final String RECRAWL_IF_OLDER = "recrawlIfOlder";
-    public  static final String DOM_MAX_PAGES    = "domMaxPages";
-    public  static final String CRAWLING_Q       = "crawlingQ";
-    public  static final String INDEX_TEXT       = "indexText";
-    public  static final String INDEX_MEDIA      = "indexMedia";
-    public  static final String STORE_HTCACHE    = "storeHTCache";
-    public  static final String REMOTE_INDEXING  = "remoteIndexing";
-    private static final String CACHE_STRAGEGY   = "cacheStrategy";
-    public  static final String CRAWLER_URL_MUSTMATCH         = "crawlerURLMustMatch";
-    public  static final String CRAWLER_URL_MUSTNOTMATCH      = "crawlerURLMustNotMatch";
-    private static final String CRAWLER_IP_MUSTMATCH          = "crawlerIPMustMatch";
-    private static final String CRAWLER_IP_MUSTNOTMATCH       = "crawlerIPMustNotMatch";
-    private static final String CRAWLER_COUNTRY_MUSTMATCH     = "crawlerCountryMustMatch";
-    private static final String CRAWLER_URL_NODEPTHLIMITMATCH = "crawlerNoLimitURLMustMatch";
-    private static final String INDEXING_URL_MUSTMATCH        = "indexURLMustMatch";
-    private static final String INDEXING_URL_MUSTNOTMATCH     = "indexURLMustNotMatch";
-    private static final String COLLECTIONS = "collections";
+    public static final String NAME             = "name";
+    public static final String DEPTH            = "generalDepth";
+    public static final String DIRECT_DOC_BY_URL= "directDocByURL";
+    public static final String RECRAWL_IF_OLDER = "recrawlIfOlder";
+    public static final String DOM_MAX_PAGES    = "domMaxPages";
+    public static final String CRAWLING_Q       = "crawlingQ";
+    public static final String INDEX_TEXT       = "indexText";
+    public static final String INDEX_MEDIA      = "indexMedia";
+    public static final String STORE_HTCACHE    = "storeHTCache";
+    public static final String REMOTE_INDEXING  = "remoteIndexing";
+    public static final String CACHE_STRAGEGY   = "cacheStrategy";
+    public static final String COLLECTIONS      = "collections";
+    public static final String CRAWLER_URL_MUSTMATCH         = "crawlerURLMustMatch";
+    public static final String CRAWLER_URL_MUSTNOTMATCH      = "crawlerURLMustNotMatch";
+    public static final String CRAWLER_IP_MUSTMATCH          = "crawlerIPMustMatch";
+    public static final String CRAWLER_IP_MUSTNOTMATCH       = "crawlerIPMustNotMatch";
+    public static final String CRAWLER_COUNTRY_MUSTMATCH     = "crawlerCountryMustMatch";
+    public static final String CRAWLER_URL_NODEPTHLIMITMATCH = "crawlerNoLimitURLMustMatch";
+    public static final String INDEXING_URL_MUSTMATCH        = "indexURLMustMatch";
+    public static final String INDEXING_URL_MUSTNOTMATCH     = "indexURLMustNotMatch";
 
     private Pattern crawlerurlmustmatch = null, crawlerurlmustnotmatch = null;
     private Pattern crawleripmustmatch = null, crawleripmustnotmatch = null;

@@ -110,8 +110,8 @@
           <dd>#(readonly)# 
             <input id="#[name]#" name="#[name]#"
                    #(type)# type="checkbox"#(checked)#:: checked="checked"#(/checked)#::
-                    type="text" value="#[value]#"::
-                    type="text" value="#[value]#"#(/type)# />::
+                    type="text" value="#[value]#" size="120" maxlength="10000"::
+                    type="text" value="#[value]#" size="120" maxlength="10000"#(/type)# />::
             <strong>#(type)##(checked)#false::true#(/checked)#::#[value]#::#[value]##(/type)#</strong>#(/readonly)# 
           </dd>#{/entries}# 
         <dt>&nbsp;</dt><dd><input type="submit" name="submit" value="Submit changes" class="submitready"/></dd>
