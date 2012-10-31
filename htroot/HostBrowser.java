@@ -20,10 +20,12 @@
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -91,6 +93,8 @@ public class HostBrowser {
             !path.startsWith("smb://") &&
             !path.startsWith("file://"))) { path = "http://" + path; }
         prop.putHTML("path", path);
+        prop.put("delete", admin && path.length() > 0 ? 1 : 0);
+        
         DigestURI pathURI = null;
         try {pathURI = new DigestURI(path);} catch (MalformedURLException e) {}
 
@@ -145,6 +149,12 @@ public class HostBrowser {
         }
         
         if (path.length() > 0) {
+            boolean delete = false;
+            if (admin && post.containsKey("delete")) {
+                // delete the complete path!! That includes everything that matches with this prefix.
+                delete = true;
+            }
+            
             boolean complete = post.getBoolean("complete");
             if (complete) { // we want only root paths for complete lists
                 p = path.indexOf('/', 10);
@@ -174,10 +184,19 @@ public class HostBrowser {
                 Set<String> inboundLinks = new HashSet<String>();
                 Map<String, ReversibleScoreMap<String>> outboundHosts = new HashMap<String, ReversibleScoreMap<String>>();
                 int hostsize = 0;
+                final List<byte[]> deleteIDs = new ArrayList<byte[]>();
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                     String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
                     hostsize++;
-                    if (complete || u.startsWith(path)) storedDocs.add(u);
+                    if (u.startsWith(path)) {
+                        if (delete) {
+                            deleteIDs.add(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.name())));
+                        } else {
+                            storedDocs.add(u);
+                        }
+                    } else if (complete) {
+                        storedDocs.add(u);
+                    }
                     // collect inboundlinks to browse the host
                     Iterator<String> links = URIMetadataNode.getLinks(doc, true);
                     while (links.hasNext()) {
@@ -202,6 +221,7 @@ public class HostBrowser {
                         } catch (MalformedURLException e) {}
                     }
                 }
+                if (deleteIDs.size() > 0) sb.index.fulltext().removeConcurrently(deleteIDs);
                 
                 // now combine both lists into one
                 Map<String, Boolean> files = new HashMap<String, Boolean>();

@@ -293,7 +293,7 @@ public class RemoteSearch extends Thread {
                 }
             }
         };
-        if (targetPeer == null) solr.run(); else solr.start();
+        /*if (targetPeer == null) solr.run(); else*/ solr.start();
         return solr;
     }
 

@@ -295,6 +295,13 @@ public final class Fulltext implements Iterable<byte[]> {
         if (MemoryControl.shortStatus()) clearCache();
     }
 
+    public void removeConcurrently(final List<byte[]> deleteIDs) {
+        new Thread() {
+            public void run() {for (byte[] id: deleteIDs) {remove(id);}}
+        }.start();
+        this.solr.commit();
+    }
+    
     public boolean remove(final byte[] urlHash) {
         if (urlHash == null) return false;
         try {
@@ -720,7 +727,7 @@ public final class Fulltext implements Iterable<byte[]> {
     }
 
     /**
-     * using a fragment of the url hash (5 bytes: bytes 6 to 10) it is possible to address all urls from a specific domain
+     * using a fragment of the url hash (6 bytes: bytes 6 to 11) it is possible to address all urls from a specific domain
      * here such a fragment can be used to delete all these domains at once
      * @param hosthash
      * @return number of deleted domains

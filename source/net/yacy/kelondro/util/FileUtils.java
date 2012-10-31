@@ -396,6 +396,10 @@ public final class FileUtils {
         return mb;
     }
 
+    private final static Pattern ps = Pattern.compile("\\\\");
+    private final static Pattern pn = Pattern.compile("\\n");
+    private final static Pattern pe = Pattern.compile("=");
+    
     public static void saveMap(final File file, final Map<String, String> props, final String comment) {
         PrintWriter pw = null;
         final File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
@@ -406,12 +410,16 @@ public final class FileUtils {
             for ( final Map.Entry<String, String> entry : props.entrySet() ) {
                 key = entry.getKey();
                 if ( key != null ) {
-                    key = key.replace("\\", "\\\\").replace("\n", "\\n").replace("=", "\\=");
+                    key = ps.matcher(key).replaceAll("\\\\");
+                    key = pn.matcher(key).replaceAll("\\n");
+                    key = pe.matcher(key).replaceAll("\\=");
                 }
                 if ( entry.getValue() == null ) {
                     value = "";
                 } else {
-                    value = entry.getValue().replace("\\", "\\\\").replace("\n", "\\n");
+                    value = entry.getValue();
+                    value = ps.matcher(value).replaceAll("\\\\");
+                    value = pn.matcher(value).replaceAll("\\n");
                 }
                 pw.println(key + "=" + value);
             }
@@ -432,7 +440,7 @@ public final class FileUtils {
             // ignore
         }
     }
-
+    
     public static void saveMapB(final File file, final Map<String, byte[]> props, final String comment) {
         HashMap<String, String> m = new HashMap<String, String>();
         for (Map.Entry<String, byte[]> e: props.entrySet()) m.put(e.getKey(), UTF8.String(e.getValue()));

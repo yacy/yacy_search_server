@@ -1061,7 +1061,7 @@ public final class Protocol
         // evaluate result
         List<URIMetadataNode> container = new ArrayList<URIMetadataNode>();
 		if (docList.size() > 0) {// create containers
-            Network.log.logInfo("SEARCH (solr), returned " + docList.size() + " documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName()))) ;
+            Network.log.logInfo("SEARCH (solr), returned " + docList.size() + " out of " + docList.getNumFound() + " documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName()))) ;
 
         	int term = count;
             for (final SolrDocument doc: docList) {

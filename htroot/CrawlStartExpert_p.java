@@ -85,7 +85,7 @@ public class CrawlStartExpert_p {
 
         boolean collectionEnabled = sb.index.fulltext().getSolrScheme().isEmpty() || sb.index.fulltext().getSolrScheme().contains(YaCySchema.collection_sxt);
         prop.put("collectionEnabled", collectionEnabled ? 1 : 0);
-        prop.put("collection", collectionEnabled ? sb.getConfig("collection", "user") : "");
+        prop.put("collection", collectionEnabled ? "user" : "");
 
         // return rewrite properties
         return prop;

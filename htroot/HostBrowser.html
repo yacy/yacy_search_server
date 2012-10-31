@@ -64,7 +64,9 @@ function updatepage(str) {
     <fieldset class="yacys">
       Host/URL: 
       <input id="search" type="text" name="path" value="#[path]#" size="40" maxlength="250" />
-      <input type="submit" name="list" value="Browse Host" class="submitready" style="width:240px;"/><br />
+      <input type="submit" name="list" value="Browse Host" class="submitready" style="width:240px;"/>
+      #(delete)#::<input type="submit" name="delete" value="Delete Subpath" class="submitready" style="width:240px;" onclick="return confirm('Confirm Deletion')"/>#(/delete)#
+      <br />
       <div id="searchresults"></div>
     </fieldset>
     </form>

@@ -43,13 +43,8 @@ import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.SitemapImporter;
-import net.yacy.data.BookmarkHelper;
-import net.yacy.data.BookmarksDB;
-import net.yacy.data.ListManager;
 import net.yacy.data.WorkTables;
-import net.yacy.data.ymark.YMarkTables;
 import net.yacy.document.Document;
-import net.yacy.document.Parser.Failure;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -212,7 +207,7 @@ public class Crawler_p {
                 boolean directDocByURL = "on".equals(post.get("directDocByURL", "off")); // catch also all linked media documents without loading them
                 env.setConfig("crawlingDirectDocByURL", directDocByURL);
 
-                final String collection = post.get("collection", sb.getConfig("collection", "user"));
+                final String collection = post.get("collection", "user");
                 env.setConfig("collection", collection);
 
                 // recrawl
@@ -376,13 +371,10 @@ public class Crawler_p {
                         // stack requests
                         sb.crawler.putActive(handle, profile);
                         sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                        Set<DigestURI> successurls = new HashSet<DigestURI>();
-                        Map<DigestURI,String> failurls = new HashMap<DigestURI, String>();
-                        String failreason;
-                        for (DigestURI url: rootURLs) {
-                            if ((failreason = stackUrl(sb, profile, url)) == null) successurls.add(url); else failurls.put(url, failreason);
-                        }
-                        
+                        final Set<DigestURI> successurls = new HashSet<DigestURI>();
+                        final Map<DigestURI,String> failurls = new HashMap<DigestURI, String>();
+                        sb.stackURLs(rootURLs, profile, successurls, failurls);
+
                         if (failurls.size() == 0) {
                             // liftoff!
                             prop.put("info", "8");
@@ -552,106 +544,6 @@ public class Crawler_p {
         return prop;
     }
 
-    /**
-     * stack the url to the crawler
-     * @param sb
-     * @param profile
-     * @param url
-     * @return null if this was ok. If this failed, return a string with a fail reason
-     */
-    private static String stackUrl(Switchboard sb, CrawlProfile profile, DigestURI url) {
-        
-        byte[] handle = ASCII.getBytes(profile.handle());
-
-        // remove url from the index to be prepared for a re-crawl
-        final byte[] urlhash = url.hash();
-        sb.index.fulltext().remove(urlhash);
-        sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
-        sb.crawlQueues.errorURL.remove(urlhash);
-        
-        // special handling of ftp protocol
-        if (url.isFTP()) {
-            try {
-                sb.crawler.putActive(handle, profile);
-                sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                sb.crawlStacker.enqueueEntriesFTP(sb.peers.mySeed().hash.getBytes(), profile.handle(), url.getHost(), url.getPort(), false);
-                return null;
-            } catch (final Exception e) {
-                // mist
-                Log.logException(e);
-                return "problem crawling an ftp site: " + e.getMessage();
-            }
-        }
-
-        // get a scraper to get the title
-        Document scraper;
-        try {
-            scraper = sb.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
-        } catch (IOException e) {
-            Log.logException(e);
-            return "scraper cannot load URL: " + e.getMessage();
-        }
-        
-        final String title = scraper == null ? url.toNormalform(true) : scraper.dc_title();
-        final String description = scraper.dc_description();
-
-        // add the url to the crawl stack
-        sb.crawler.removePassive(handle); // if there is an old entry, delete it
-        sb.crawler.putActive(handle, profile);
-        final String reasonString = sb.crawlStacker.stackCrawl(new Request(
-                sb.peers.mySeed().hash.getBytes(),
-                url,
-                null,
-                "CRAWLING-ROOT",
-                new Date(),
-                profile.handle(),
-                0,
-                0,
-                0,
-                0
-                ));
-        
-        if (reasonString != null) return reasonString;
-        
-        // create a bookmark from crawl start url
-        //final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));
-        final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString("/crawlStart"));
-        tags.add("crawlStart");
-        final String[] keywords = scraper.dc_subject();
-        if (keywords != null) {
-            for (final String k: keywords) {
-                final String kk = BookmarkHelper.cleanTagsString(k);
-                if (kk.length() > 0) tags.add(kk);
-            }
-        }
-        String tagStr = tags.toString();
-        if (tagStr.length() > 2 && tagStr.startsWith("[") && tagStr.endsWith("]")) tagStr = tagStr.substring(1, tagStr.length() - 2);
-
-        // we will create always a bookmark to use this to track crawled hosts
-        final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url.toNormalform(true), "admin");
-        if (bookmark != null) {
-            bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title);
-            bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
-            bookmark.setOwner("admin");
-            bookmark.setPublic(false);
-            bookmark.setTags(tags, true);
-            sb.bookmarksDB.saveBookmark(bookmark);
-        }
-
-        // do the same for ymarks
-        // TODO: could a non admin user add crawls?
-        try {
-            sb.tables.bookmarks.createBookmark(sb.loader, url, YMarkTables.USER_ADMIN, true, "crawlStart", "/Crawl Start");
-        } catch (IOException e) {
-            Log.logException(e);
-        } catch (Failure e) {
-            Log.logException(e);
-        }
-
-        // that was ok
-        return null;
-    }
-    
     private static long recrawlIfOlderC(final boolean recrawlIfOlderCheck, final int recrawlIfOlderNumber, final String crawlingIfOlderUnit) {
         if (!recrawlIfOlderCheck) return 0L;
         if ("year".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 365L;
