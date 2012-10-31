@@ -260,6 +260,15 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     }
 
     /**
+     * create a name that takes the collection as name if this is not "user".
+     * @return the name of the collection if that is not "user" or the name() otherwise;
+     */
+    public String collectionName() {
+        final String r = get(COLLECTIONS);
+        return r == null || r.length() == 0 || "user".equals(r) ? name() : r;
+    }
+    
+    /**
      * Gets the regex which must be matched by URLs in order to be crawled.
      * @return regex which must be matched
      */
@@ -521,7 +530,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             final int domlistlength) {
 
         prop.put(CRAWL_PROFILE_PREFIX + count + "_dark", dark ? "1" : "0");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_name", this.name());
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_name", this.collectionName());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton", (!active || ignoreNames.contains(this.name())) ? "0" : "1");
         prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton_handle", this.handle());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton", (active) ? "0" : "1");

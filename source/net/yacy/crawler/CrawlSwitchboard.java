@@ -121,7 +121,7 @@ public final class CrawlSwitchboard {
             CrawlProfile p;
             try {
                 p = new CrawlProfile(this.profilesPassiveCrawls.get(handle));
-                Log.logInfo("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.name());
+                Log.logInfo("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.collectionName());
             } catch ( final IOException e ) {
                 continue;
             } catch ( final SpaceExceededException e ) {

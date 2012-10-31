@@ -63,7 +63,7 @@ public class IndexCreateQueues_p {
                         final Pattern compiledPattern = Pattern.compile(deletepattern);
 
                         if (option == PROFILE) {
-                            // search and delete the crawl profile (_much_ faster, independant of queue size)
+                            // search and delete the crawl profile (_much_ faster, independent of queue size)
                             CrawlProfile entry;
                             for (final byte[] handle: sb.crawler.getActive()) {
                                 entry = sb.crawler.getActive(handle);
@@ -143,7 +143,7 @@ public class IndexCreateQueues_p {
                     profileHandle = request.profileHandle();
                     profileEntry = profileHandle == null ? null : sb.crawler.getActive(profileHandle.getBytes());
                     prop.putHTML("crawler_host_" + hc + "_list_" + count + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
-                    prop.put("crawler_host_" + hc + "_list_" + count + "_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));
+                    prop.put("crawler_host_" + hc + "_list_" + count + "_profile", ((profileEntry == null) ? "unknown" : profileEntry.collectionName()));
                     prop.put("crawler_host_" + hc + "_list_" + count + "_depth", request.depth());
                     prop.put("crawler_host_" + hc + "_list_" + count + "_modified", daydate(request.appdate()) );
                     prop.putHTML("crawler_host_" + hc + "_list_" + count + "_anchor", request.name());

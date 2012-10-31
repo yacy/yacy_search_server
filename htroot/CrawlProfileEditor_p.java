@@ -114,7 +114,7 @@ public class CrawlProfileEditor_p {
         for (final byte[] h : sb.crawler.getActive()) {
             selentry = sb.crawler.getActive(h);
             if (selentry != null && !CrawlProfile.ignoreNames.contains(selentry.name())) {
-                orderdHandles.put(selentry.name(), selentry.handle());
+                orderdHandles.put(selentry.collectionName(), selentry.handle());
             }
         }
 
@@ -184,7 +184,7 @@ public class CrawlProfileEditor_p {
         	prop.put("edit", "0");
         } else {
             prop.put("edit", "1");
-            prop.put("edit_name", selentry.name());
+            prop.put("edit_name", selentry.collectionName());
             prop.put("edit_handle", selentry.handle());
             final Iterator<eentry> lit = labels.iterator();
             count = 0;

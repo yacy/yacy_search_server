@@ -538,7 +538,7 @@ public class Response {
 
         // check profile
         if (!profile().indexText() && !profile().indexMedia()) {
-            return "indexing not allowed - indexText and indexMedia not set (for proxy = " + this.profile.name()+ ")";
+            return "indexing not allowed - indexText and indexMedia not set (for proxy = " + this.profile.collectionName()+ ")";
         }
 
         // -CGI access in request
@@ -683,7 +683,7 @@ public class Response {
 
         // check profile
         if (!profile().indexText() && !profile().indexMedia()) {
-            return "indexing not allowed - indexText and indexMedia not set (for crawler = " + this.profile.name() + ")";
+            return "indexing not allowed - indexText and indexMedia not set (for crawler = " + this.profile.collectionName() + ")";
         }
 
         // -CGI access in request
