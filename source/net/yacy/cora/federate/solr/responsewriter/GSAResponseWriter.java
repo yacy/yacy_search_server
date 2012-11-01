@@ -67,6 +67,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
         RK,         // Provides a ranking number used internally by the search appliance.
         ENT_SOURCE, // Identifies the application ID (serial number) of the search appliance that contributes to a result. Example: <ENT_SOURCE>S5-KUB000F0ADETLA</ENT_SOURCE>
         FS,         // Additional details about the search result.
+        R,          // details of an individual search result.
         S,          // The snippet for the search result. Query terms appear in bold in the results. Line breaks are included for proper text wrapping.
         LANG,       // Indicates the language of the search result. The LANG element contains a two-letter language code.
         HAS;        // Encapsulates special features that are included for this search result.
@@ -211,11 +212,24 @@ public class GSAResponseWriter implements QueryResponseWriter {
         DocIterator iterator = response.iterator();
         String urlhash = null;
         for (int i = 0; i < responseCount; i++) {
-            writer.write("<R N=\"" + (resHead.offset + i + 1)  + "\"" + (i == 1 ? " L=\"2\"" : "") + ">"); writer.write(lb);
             int id = iterator.nextDoc();
             Document doc = searcher.doc(id, SOLR_FIELDS);
             List<Fieldable> fields = doc.getFields();
             int fieldc = fields.size();
+
+            // pre-scan the fields to get the mime-type            
+            String mime = "";
+            for (int j = 0; j < fieldc; j++) {
+                Fieldable value = fields.get(j);
+                String fieldName = value.name();
+                if (YaCySchema.content_type.getSolrFieldName().equals(fieldName)) {
+                    mime = value.stringValue();
+                    break;
+                }
+            }
+            
+            // write the R header for a search result
+            writer.write("<R N=\"" + (resHead.offset + i + 1)  + "\"" + (i == 1 ? " L=\"2\"" : "")  + (mime != null && mime.length() > 0 ? " MIME=\"" + mime + "\"" : "") + ">"); writer.write(lb);
             List<String> texts = new ArrayList<String>();
             String description = "";
             int size = 0;
