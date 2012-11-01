@@ -29,25 +29,17 @@ package net.yacy.search.index;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.solr.common.SolrInputDocument;
 
-import net.yacy.cora.document.Classification;
-import net.yacy.cora.document.UTF8;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.search.query.QueryParams;
-import net.yacy.search.query.RWIProcess;
-import net.yacy.search.ranking.RankingProfile;
-import net.yacy.search.ranking.ReferenceOrder;
 
 /**
  * convenience class to access the yacycore library from outside of yacy to put files into the index
@@ -55,9 +47,6 @@ import net.yacy.search.ranking.ReferenceOrder;
  * @author Michael Christen
  */
 public class DocumentIndex extends Segment {
-
-    private static final RankingProfile textRankingDefault = new RankingProfile(Classification.ContentDomain.TEXT);
-    //private Bitfield zeroConstraint = new Bitfield(4);
 
     private static DigestURI poison;
     static {
@@ -219,34 +208,6 @@ public class DocumentIndex extends Segment {
     }
 
     /**
-     * do a full-text search of a given string and return a specific number of results
-     *
-     * @param querystring
-     * @param count
-     * @return a list of files that contain the given string
-     */
-    public ArrayList<DigestURI> find(final String querystring, int count) {
-        // make a query and start a search
-        final QueryParams query =
-            new QueryParams(querystring, count, null, this, textRankingDefault, "DocumentIndex");
-        final ReferenceOrder order = new ReferenceOrder(query.ranking, UTF8.getBytes(query.targetlang));
-        final RWIProcess rankedCache = new RWIProcess(query, order, false);
-        rankedCache.start();
-
-        // search is running; retrieve results
-        URIMetadataNode row;
-        final ArrayList<DigestURI> files = new ArrayList<DigestURI>();
-        while ( (row = rankedCache.takeURL(false, 1000)) != null ) {
-            files.add(row.url());
-            count--;
-            if ( count == 0 ) {
-                break;
-            }
-        }
-        return files;
-    }
-
-    /**
      * close the index. This terminates all worker threads and then closes the segment.
      */
     @Override
@@ -275,58 +236,6 @@ public class DocumentIndex extends Segment {
         public void commit(DigestURI f, SolrInputDocument resultRow);
 
         public void fail(DigestURI f, String failReason);
-    }
-
-    public static void main(final String[] args) {
-        // first argument: path to segment
-        // second argument: either 'add' or 'search'
-        // third and more arguments exists only in case that second argument is 'search': these are then the search words
-        //
-        // example:
-        // DocumentIndex yacyindex add test/parsertest
-        // DocumentIndex yacyindex search steht
-        System.setProperty("java.awt.headless", "true");
-        if ( args.length < 3 ) {
-            return;
-        }
-        final File segmentPath = new File(args[0]);
-        System.out.println("using index files at " + segmentPath.getAbsolutePath());
-        final CallbackListener callback = new CallbackListener() {
-            @Override
-            public void commit(final DigestURI f, final SolrInputDocument resultRow) {
-                System.out.println("indexed: " + f.toString());
-            }
-
-            @Override
-            public void fail(final DigestURI f, final String failReason) {
-                System.out.println("not indexed " + f.toString() + ": " + failReason);
-            }
-        };
-        try {
-            if ( args[1].equals("add") ) {
-                final DigestURI f = new DigestURI(args[2]);
-                final DocumentIndex di = new DocumentIndex(segmentPath, null, callback, 100000);
-                di.addConcurrent(f);
-                di.close();
-            } else {
-                String query = "";
-                for ( int i = 2; i < args.length; i++ ) {
-                    query += args[i];
-                }
-                query.trim();
-                final DocumentIndex di = new DocumentIndex(segmentPath, null, callback, 100000);
-                final ArrayList<DigestURI> results = di.find(query, 100);
-                for ( final DigestURI f : results ) {
-                    if ( f != null ) {
-                        System.out.println(f.toString());
-                    }
-                }
-                di.close();
-            }
-        } catch ( final IOException e ) {
-            Log.logException(e);
-        }
-        //System.exit(0);
     }
 
 }

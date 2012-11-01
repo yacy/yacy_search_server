@@ -37,6 +37,7 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.query.SearchEventType;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -338,7 +339,7 @@ public class yacysearchtrailer {
         final String aboutBody = env.getConfig("about.body", "");
         final String aboutHeadline = env.getConfig("about.headline", "");
         if ((aboutBody.isEmpty() && aboutHeadline.isEmpty()) ||
-            theSearch.getRankingResult().rwiAvailableCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount() == 0) {
+            theSearch.rankingProcess.rwiAvailableCount() - theSearch.rankingProcess.getMissCount() - theSearch.getSortOutCount() + theSearch.rankingProcess.getRemoteIndexCount() == 0) {
             prop.put("nav-about", 0);
         } else {
             prop.put("nav-about", 1);
@@ -349,7 +350,7 @@ public class yacysearchtrailer {
         // category: location search
         // show only if there is a location database present and if there had been any search results
         if (LibraryProvider.geoLoc.isEmpty() ||
-            theSearch.getRankingResult().rwiAvailableCount() == 0) {
+            theSearch.rankingProcess.rwiAvailableCount() == 0) {
             prop.put("cat-location", 0);
         } else {
             prop.put("cat-location", 1);
@@ -357,10 +358,10 @@ public class yacysearchtrailer {
             prop.put(fileType, "cat-location_queryenc", theQuery.queryString(true).replace(' ', '+'));
         }
 
-        final int indexcount = theSearch.getRankingResult().rwiAvailableCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();
+        final int indexcount = theSearch.rankingProcess.rwiAvailableCount() - theSearch.rankingProcess.getMissCount() - theSearch.getSortOutCount() + theSearch.rankingProcess.getRemoteIndexCount();
         prop.put("num-results_totalcount", indexcount);
 
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEvent.Type.FINALIZATION, "bottomline", 0, 0), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEventType.FINALIZATION, "bottomline", 0, 0), false);
 
         return prop;
     }

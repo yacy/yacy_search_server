@@ -103,6 +103,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.SearchEvent;
+import net.yacy.search.query.SecondarySearchSuperviser;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
@@ -603,7 +604,7 @@ public final class Protocol
         final int maxDistance,
         final int partitions,
         final Seed target,
-        final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
+        final SecondarySearchSuperviser secondarySearchSuperviser,
         final Blacklist blacklist) {
         // send a search request to peer with remote Hash
 
@@ -621,7 +622,7 @@ public final class Protocol
         // duetime    : maximum time that a peer should spent to create a result
 
         final long timestamp = System.currentTimeMillis();
-        event.rankingProcess.addExpectedRemoteReferences(count);
+        event.addExpectedRemoteReferences(count);
         SearchResult result;
         try {
             result =
@@ -701,7 +702,7 @@ public final class Protocol
         final Blacklist blacklist) {
 
         final long timestamp = System.currentTimeMillis();
-        event.rankingProcess.addExpectedRemoteReferences(count);
+        event.addExpectedRemoteReferences(count);
         SearchResult result;
         try {
             result =
@@ -847,7 +848,7 @@ public final class Protocol
         // one is enough, only the references are used, not the word
         event.rankingProcess.add(container.get(0), false, target.getName() + "/" + target.hash, result.joincount, time);
         event.rankingProcess.addFinalize();
-        event.rankingProcess.addExpectedRemoteReferences(-count);
+        event.addExpectedRemoteReferences(-count);
 
         // insert the containers to the index
         for ( final ReferenceContainer<WordReference> c : container ) {
@@ -901,7 +902,7 @@ public final class Protocol
             final int partitions,
             final String hostname,
             final String hostaddress,
-            final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser
+            final SecondarySearchSuperviser secondarySearchSuperviser
             ) throws IOException {
             // send a search request to peer with remote Hash
 
@@ -1027,7 +1028,7 @@ public final class Protocol
         if (event.getQuery().queryString == null || event.getQuery().queryString.length() == 0) {
             return -1; // we cannot query solr only with word hashes, there is no clear text string
         }
-        event.rankingProcess.addExpectedRemoteReferences(count);
+        event.addExpectedRemoteReferences(count);
         SolrDocumentList docList = null;
         final SolrQuery solrQuery = event.getQuery().solrQuery();
         solrQuery.setStart(offset);
@@ -1120,14 +1121,14 @@ public final class Protocol
             }
 
             if (localsearch) {
-                event.rankingProcess.add(container, true, "localpeer", docList.size());
+                event.add(container, true, "localpeer", docList.size());
                 event.rankingProcess.addFinalize();
-                event.rankingProcess.addExpectedRemoteReferences(-count);
+                event.addExpectedRemoteReferences(-count);
                 Network.log.logInfo("local search (solr): localpeer sent " + container.get(0).size() + "/" + docList.size() + " references");
             } else {
-                event.rankingProcess.add(container, false, target.getName() + "/" + target.hash, docList.size());
+                event.add(container, false, target.getName() + "/" + target.hash, docList.size());
                 event.rankingProcess.addFinalize();
-                event.rankingProcess.addExpectedRemoteReferences(-count);
+                event.addExpectedRemoteReferences(-count);
                 Network.log.logInfo("remote search (solr): peer " + target.getName() + " sent " + container.get(0).size() + "/" + docList.size() + " references");
             }
 		}

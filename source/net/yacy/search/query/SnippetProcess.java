@@ -31,11 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Classification;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.Element;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
@@ -43,9 +39,6 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.Cache;
 import net.yacy.data.WorkTables;
-import net.yacy.document.Condenser;
-import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
@@ -54,10 +47,8 @@ import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segment;
 import net.yacy.search.snippet.MediaSnippet;
 import net.yacy.search.snippet.ResultEntry;
-import net.yacy.search.snippet.TextSnippet;
 
 public class SnippetProcess {
 
@@ -67,40 +58,41 @@ public class SnippetProcess {
     private final static int SNIPPET_WORKER_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
 
     // input values
-    private final RWIProcess  rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
-    QueryParams     query;
-    private final SeedDB      peers;
-    private final WorkTables workTables;
+    final SearchEvent searchEvent;
+    QueryParams       query;
+    final SeedDB      peers;
+    final WorkTables  workTables;
 
     // result values
-    private final LoaderDispatcher        loader;
-    protected       Worker[]                workerThreads;
-    private final WeakPriorityBlockingQueue<ResultEntry>  result;
-    private final WeakPriorityBlockingQueue<MediaSnippet> images; // container to sort images by size
-    private final HandleSet               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
-    private long urlRetrievalAllTime;
-    private long snippetComputationAllTime;
-    private final boolean deleteIfSnippetFail, remote;
+    private   final WeakPriorityBlockingQueue<MediaSnippet> images; // container to sort images by size
+    protected final WeakPriorityBlockingQueue<ResultEntry>  result;
+    protected final LoaderDispatcher                        loader;
+    protected final HandleSet                               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
+    protected final boolean                                 deleteIfSnippetFail;
+    protected SnippetWorker[]                               workerThreads;
+    protected long                                          urlRetrievalAllTime;
+    protected long                                          snippetComputationAllTime;
+
+    private final boolean remote;
     private boolean cleanupState;
 
     protected SnippetProcess(
+            final SearchEvent searchEvent,
             final LoaderDispatcher loader,
-            final RWIProcess rankedCache,
             final QueryParams query,
             final SeedDB peers,
             final WorkTables workTables,
             final boolean deleteIfSnippetFail,
             final boolean remote) {
     	assert query != null;
+    	this.searchEvent = searchEvent;
         this.loader = loader;
-    	this.rankingProcess = rankedCache;
     	this.query = query;
         this.peers = peers;
         this.workTables = workTables;
         this.deleteIfSnippetFail = deleteIfSnippetFail;
         this.remote = remote;
         this.cleanupState = false;
-
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
         this.result = new WeakPriorityBlockingQueue<ResultEntry>(Math.max(1000, 10 * query.itemsPerPage()), true); // this is the result, enriched with snippets, ranked and ordered by ranking
@@ -123,7 +115,7 @@ public class SnippetProcess {
         // start worker threads to fetch urls and snippets
         this.workerThreads = null;
         deployWorker(Math.min(SNIPPET_WORKER_THREADS, query.itemsPerPage), query.neededResults());
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(query.id(true), SearchEvent.Type.SNIPPETFETCH_START, ((this.workerThreads == null) ? "no" : this.workerThreads.length) + " online snippet fetch threads started", 0, 0), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(query.id(true), SearchEventType.SNIPPETFETCH_START, ((this.workerThreads == null) ? "no" : this.workerThreads.length) + " online snippet fetch threads started", 0, 0), false);
     }
 
     protected void setCleanupState() {
@@ -142,12 +134,12 @@ public class SnippetProcess {
         // check if we already retrieved this item
     	// (happens if a search pages is accessed a second time)
         final long finishTime = System.currentTimeMillis() + timeout;
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEvent.Type.ONERESULT, "started, item = " + item + ", available = " + this.result.sizeAvailable(), 0, 0), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "started, item = " + item + ", available = " + this.result.sizeAvailable(), 0, 0), false);
         //Log.logInfo("SnippetProcess", "*start method for item = " + item + "; anyWorkerAlive=" + anyWorkerAlive() + "; this.rankingProcess.isAlive() = " + this.rankingProcess.isAlive() + "; this.rankingProcess.feedingIsFinished() = " + this.rankingProcess.feedingIsFinished() + "; this.result.sizeAvailable() = " + this.result.sizeAvailable() + ", this.rankingProcess.sizeQueue() = " + this.rankingProcess.sizeQueue());
 
         // we must wait some time until the first result page is full to get enough elements for ranking
         final long waittimeout = System.currentTimeMillis() + 300;
-        if (this.remote && item < 10 && !this.rankingProcess.feedingIsFinished()) {
+        if (this.remote && item < 10 && !this.searchEvent.rankingProcess.feedingIsFinished()) {
             // the first 10 results have a very special timing to get most of the remote results ordered
             // before they are presented on the first lines .. yes sleeps seem to be bad. but how shall we predict how long other
             // peers will take until they respond?
@@ -158,7 +150,7 @@ public class SnippetProcess {
         int thisRankingQueueSize, lastRankingQueueSize = 0;
         if (item < 10) {
             while (
-              ((thisRankingQueueSize = this.rankingProcess.rwiQueueSize()) > 0 || !this.rankingProcess.feedingIsFinished()) &&
+              ((thisRankingQueueSize = this.searchEvent.rankingProcess.rwiQueueSize()) > 0 || !this.searchEvent.rankingProcess.feedingIsFinished()) &&
                (thisRankingQueueSize > lastRankingQueueSize || this.result.sizeAvailable() < item + 1) &&
                System.currentTimeMillis() < waittimeout &&
                anyWorkerAlive()
@@ -172,7 +164,7 @@ public class SnippetProcess {
         if (this.result.sizeAvailable() > item) {
             // we have the wanted result already in the result array .. return that
             final ResultEntry re = this.result.element(item).getElement();
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEvent.Type.ONERESULT, "prefetched, item = " + item + ", available = " + this.result.sizeAvailable() + ": " + re.urlstring(), 0, 0), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "prefetched, item = " + item + ", available = " + this.result.sizeAvailable() + ": " + re.urlstring(), 0, 0), false);
             return re;
         }
 
@@ -180,9 +172,9 @@ public class SnippetProcess {
         WeakPriorityBlockingQueue.Element<ResultEntry> entry = null;
         while (System.currentTimeMillis() < finishTime) {
 
-            Log.logInfo("SnippetProcess", "item = " + item + "; anyWorkerAlive=" + anyWorkerAlive() + "; this.rankingProcess.isAlive() = " + this.rankingProcess.isAlive() + "; this.rankingProcess.feedingIsFinished() = " + this.rankingProcess.feedingIsFinished() + "; this.result.sizeAvailable() = " + this.result.sizeAvailable() + ", this.rankingProcess.sizeQueue() = " + this.rankingProcess.rwiQueueSize() + ", this.rankingProcess.nodeStack.sizeAvailable() = " + this.rankingProcess.nodeStack.sizeAvailable());
+            Log.logInfo("SnippetProcess", "item = " + item + "; anyWorkerAlive=" + anyWorkerAlive() + "; this.rankingProcess.isAlive() = " + this.searchEvent.rankingProcess.isAlive() + "; this.rankingProcess.feedingIsFinished() = " + this.searchEvent.rankingProcess.feedingIsFinished() + "; this.result.sizeAvailable() = " + this.result.sizeAvailable() + ", this.rankingProcess.sizeQueue() = " + this.searchEvent.rankingProcess.rwiQueueSize() + ", this.rankingProcess.nodeStack.sizeAvailable() = " + this.searchEvent.nodeStack.sizeAvailable());
 
-            if (!anyWorkerAlive() && !this.rankingProcess.isAlive() && this.result.sizeAvailable() + this.rankingProcess.rwiQueueSize() + this.rankingProcess.nodeStack.sizeAvailable() <= item && this.rankingProcess.feedingIsFinished()) {
+            if (!anyWorkerAlive() && !this.searchEvent.rankingProcess.isAlive() && this.result.sizeAvailable() + this.searchEvent.rankingProcess.rwiQueueSize() + this.searchEvent.nodeStack.sizeAvailable() <= item && this.searchEvent.rankingProcess.feedingIsFinished()) {
                 //Log.logInfo("SnippetProcess", "interrupted result fetching; item = " + item + "; this.result.sizeAvailable() = " + this.result.sizeAvailable() + ", this.rankingProcess.sizeQueue() = " + this.rankingProcess.sizeQueue() + "; this.rankingProcess.feedingIsFinished() = " + this.rankingProcess.feedingIsFinished());
                 break; // the fail case
             }
@@ -199,12 +191,12 @@ public class SnippetProcess {
 
         // finally, if there is something, return the result
         if (entry == null) {
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEvent.Type.ONERESULT, "not found, item = " + item + ", available = " + this.result.sizeAvailable(), 0, 0), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "not found, item = " + item + ", available = " + this.result.sizeAvailable(), 0, 0), false);
             //Log.logInfo("SnippetProcess", "NO ENTRY computed (possible timeout); anyWorkerAlive=" + anyWorkerAlive() + "; this.rankingProcess.isAlive() = " + this.rankingProcess.isAlive() + "; this.rankingProcess.feedingIsFinished() = " + this.rankingProcess.feedingIsFinished() + "; this.result.sizeAvailable() = " + this.result.sizeAvailable() + ", this.rankingProcess.sizeQueue() = " + this.rankingProcess.sizeQueue());
             return null;
         }
         final ResultEntry re = entry.getElement();
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEvent.Type.ONERESULT, "retrieved, item = " + item + ", available = " + this.result.sizeAvailable() + ": " + re.urlstring(), 0, 0), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "retrieved, item = " + item + ", available = " + this.result.sizeAvailable() + ": " + re.urlstring(), 0, 0), false);
         if (item == this.query.offset + this.query.itemsPerPage - 1) {
             stopAllWorker(); // we don't need more
         }
@@ -281,87 +273,27 @@ public class SnippetProcess {
         return this.result.list(Math.min(this.query.neededResults(), this.result.sizeAvailable()));
     }
 
-    private long postRanking(
-            final ResultEntry rentry,
-            final ScoreMap<String> topwords) {
-
-        long r = 0;
-
-        // for media search: prefer pages with many links
-        r += rentry.limage() << this.query.ranking.coeff_cathasimage;
-        r += rentry.laudio() << this.query.ranking.coeff_cathasaudio;
-        r += rentry.lvideo() << this.query.ranking.coeff_cathasvideo;
-        r += rentry.lapp()   << this.query.ranking.coeff_cathasapp;
-
-        // apply citation count
-        //System.out.println("POSTRANKING CITATION: references = " + rentry.referencesCount() + ", inbound = " + rentry.llocal() + ", outbound = " + rentry.lother());
-        r += (128 * rentry.referencesCount() / (1 + 2 * rentry.llocal() + rentry.lother())) << this.query.ranking.coeff_citation;
-
-        // prefer hit with 'prefer' pattern
-        if (this.query.prefer.matcher(rentry.url().toNormalform(true)).matches()) {
-            r += 256 << this.query.ranking.coeff_prefer;
-        }
-        if (this.query.prefer.matcher(rentry.title()).matches()) {
-            r += 256 << this.query.ranking.coeff_prefer;
-        }
-
-        // apply 'common-sense' heuristic using references
-        final String urlstring = rentry.url().toNormalform(true);
-        final String[] urlcomps = MultiProtocolURI.urlComps(urlstring);
-        final String[] descrcomps = MultiProtocolURI.splitpattern.split(rentry.title().toLowerCase());
-        int tc;
-        for (final String urlcomp : urlcomps) {
-            tc = topwords.get(urlcomp);
-            if (tc > 0) {
-                r += Math.max(1, tc) << this.query.ranking.coeff_urlcompintoplist;
-            }
-        }
-        for (final String descrcomp : descrcomps) {
-            tc = topwords.get(descrcomp);
-            if (tc > 0) {
-                r += Math.max(1, tc) << this.query.ranking.coeff_descrcompintoplist;
-            }
-        }
-
-        // apply query-in-result matching
-        final HandleSet urlcomph = Word.words2hashesHandles(urlcomps);
-        final HandleSet descrcomph = Word.words2hashesHandles(descrcomps);
-        final Iterator<byte[]> shi = this.query.query_include_hashes.iterator();
-        byte[] queryhash;
-        while (shi.hasNext()) {
-            queryhash = shi.next();
-            if (urlcomph.has(queryhash)) {
-                r += 256 << this.query.ranking.coeff_appurl;
-            }
-            if (descrcomph.has(queryhash)) {
-                r += 256 << this.query.ranking.coeff_app_dc_title;
-            }
-        }
-
-        return r;
-    }
-
 
     private void deployWorker(int deployCount, final int neededResults) {
         if (this.cleanupState ||
-            (this.rankingProcess.feedingIsFinished() && this.rankingProcess.rwiQueueSize() == 0 && this.rankingProcess.nodeStack.sizeAvailable() == 0) ||
+            (this.searchEvent.rankingProcess.feedingIsFinished() && this.searchEvent.rankingProcess.rwiQueueSize() == 0 && this.searchEvent.nodeStack.sizeAvailable() == 0) ||
             this.result.sizeAvailable() >= neededResults) {
             return;
         }
-        Worker worker;
+        SnippetWorker worker;
         if (this.workerThreads == null) {
-            this.workerThreads = new Worker[deployCount];
+            this.workerThreads = new SnippetWorker[deployCount];
             synchronized(this.workerThreads) {try {
                 for (int i = 0; i < this.workerThreads.length; i++) {
                     if (this.result.sizeAvailable() >= neededResults ||
-                        (this.rankingProcess.feedingIsFinished() && this.rankingProcess.rwiQueueSize() == 0) && this.rankingProcess.nodeStack.sizeAvailable() == 0) {
+                        (this.searchEvent.rankingProcess.feedingIsFinished() && this.searchEvent.rankingProcess.rwiQueueSize() == 0) && this.searchEvent.nodeStack.sizeAvailable() == 0) {
                         break;
                     }
-                    worker = new Worker(this.query.maxtime, this.query.snippetCacheStrategy, neededResults);
+                    worker = new SnippetWorker(this, this.query.maxtime, this.query.snippetCacheStrategy, neededResults);
                     worker.start();
                     this.workerThreads[i] = worker;
-                    if (this.rankingProcess.expectMoreRemoteReferences()) {
-                        long wait = this.rankingProcess.waitTimeRecommendation();
+                    if (this.searchEvent.expectMoreRemoteReferences()) {
+                        long wait = this.searchEvent.waitTimeRecommendation();
                         if (wait > 0) {
                             try {Thread.sleep(wait);} catch ( InterruptedException e ) {}
                         }
@@ -375,17 +307,17 @@ public class SnippetProcess {
                 for (int i = 0; i < this.workerThreads.length; i++) {
                     if (deployCount <= 0 ||
                         this.result.sizeAvailable() >= neededResults ||
-                        (this.rankingProcess.feedingIsFinished() && this.rankingProcess.rwiQueueSize() == 0) && this.rankingProcess.nodeStack.sizeAvailable() == 0) {
+                        (this.searchEvent.rankingProcess.feedingIsFinished() && this.searchEvent.rankingProcess.rwiQueueSize() == 0) && this.searchEvent.nodeStack.sizeAvailable() == 0) {
                         break;
                     }
                     if (this.workerThreads[i] == null || !this.workerThreads[i].isAlive()) {
-                        worker = new Worker(this.query.maxtime, this.query.snippetCacheStrategy, neededResults);
+                        worker = new SnippetWorker(this, this.query.maxtime, this.query.snippetCacheStrategy, neededResults);
                         worker.start();
                         this.workerThreads[i] = worker;
                         deployCount--;
                     }
-                    if (this.rankingProcess.expectMoreRemoteReferences()) {
-                        long wait = this.rankingProcess.waitTimeRecommendation();
+                    if (this.searchEvent.expectMoreRemoteReferences()) {
+                        long wait = this.searchEvent.waitTimeRecommendation();
                         if (wait > 0) {
                             try {Thread.sleep(wait);} catch ( InterruptedException e ) {}
                         }
@@ -412,7 +344,7 @@ public class SnippetProcess {
             return false;
         }
         synchronized(this.workerThreads) {
-            for (final Worker workerThread : this.workerThreads) {
+            for (final SnippetWorker workerThread : this.workerThreads) {
                if ((workerThread != null) &&
                    (workerThread.isAlive()) &&
                    (workerThread.busytime() < 10000)) {
@@ -421,177 +353,6 @@ public class SnippetProcess {
             }
         }
         return false;
-    }
-
-    protected class Worker extends Thread {
-
-        private final long timeout; // the date until this thread should try to work
-        private long lastLifeSign; // when the last time the run()-loop was executed
-        private final CacheStrategy cacheStrategy;
-        private final int neededResults;
-        private boolean shallrun;
-
-        private Worker(final long maxlifetime, final CacheStrategy cacheStrategy, final int neededResults) {
-            this.cacheStrategy = cacheStrategy;
-            this.lastLifeSign = System.currentTimeMillis();
-            this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
-            this.neededResults = neededResults;
-            this.shallrun = true;
-        }
-
-        @Override
-        public void run() {
-
-            // start fetching urls and snippets
-            URIMetadataNode page;
-            ResultEntry resultEntry;
-            //final int fetchAhead = snippetMode == 0 ? 0 : 10;
-            final boolean nav_topics = SnippetProcess.this.query.navigators.equals("all") || SnippetProcess.this.query.navigators.indexOf("topics",0) >= 0;
-            try {
-                while (this.shallrun && System.currentTimeMillis() < this.timeout) {
-                    this.lastLifeSign = System.currentTimeMillis();
-
-                    if (MemoryControl.shortStatus()) {
-                        Log.logWarning("SnippetProcess", "shortStatus");
-                    	break;
-                    }
-
-                    // check if we have enough; we stop only if we can fetch online; otherwise its better to run this to get better navigation
-                    if ((this.cacheStrategy == null || this.cacheStrategy.isAllowedToFetchOnline()) && SnippetProcess.this.result.sizeAvailable() >= this.neededResults) {
-                        Log.logWarning("SnippetProcess", SnippetProcess.this.result.sizeAvailable() + " = result.sizeAvailable() >= this.neededResults = " + this.neededResults);
-                        break;
-                    }
-
-                    // check if we can succeed if we try to take another url
-                    if (SnippetProcess.this.rankingProcess.feedingIsFinished() && SnippetProcess.this.rankingProcess.rwiQueueSize() == 0 && SnippetProcess.this.rankingProcess.nodeStack.sizeAvailable() == 0) {
-                        Log.logWarning("SnippetProcess", "rankingProcess.feedingIsFinished() && rankingProcess.sizeQueue() == 0");
-                        break;
-                    }
-
-                    // get next entry
-                    page = SnippetProcess.this.rankingProcess.takeURL(true, Math.min(500, Math.max(20, this.timeout - System.currentTimeMillis())));
-                    //if (page != null) Log.logInfo("SnippetProcess", "got one page: " + page.metadata().url().toNormalform(true, false));
-                    //if (page == null) page = rankedCache.takeURL(false, this.timeout - System.currentTimeMillis());
-                    if (page == null) {
-                        Log.logWarning("SnippetProcess", "page == null");
-                        break; // no more available
-                    }
-
-                    this.setName(page.url().toNormalform(true)); // to support debugging
-                    if (SnippetProcess.this.query.filterfailurls && SnippetProcess.this.workTables.failURLsContains(page.hash())) {
-                        continue;
-                    }
-
-                    // in case that we have an attached solr, we load also the solr document
-                    String solrContent = page.getText();
-
-                    resultEntry = fetchSnippet(page, solrContent, this.cacheStrategy); // does not fetch snippets if snippetMode == 0
-                    if (resultEntry == null) {
-                        continue; // the entry had some problems, cannot be used
-                    }
-
-                    //if (result.contains(resultEntry)) continue;
-                    SnippetProcess.this.urlRetrievalAllTime += resultEntry.dbRetrievalTime;
-                    SnippetProcess.this.snippetComputationAllTime += resultEntry.snippetComputationTime;
-
-                    // place the result to the result vector
-                    // apply post-ranking
-                    long ranking = resultEntry.word() == null ? 0 : Long.valueOf(SnippetProcess.this.rankingProcess.getOrder().cardinal(resultEntry.word()));
-                    ranking += postRanking(resultEntry, SnippetProcess.this.rankingProcess.getTopicNavigator(10));
-                    resultEntry.ranking = ranking;
-                    SnippetProcess.this.result.put(new ReverseElement<ResultEntry>(resultEntry, ranking)); // remove smallest in case of overflow
-                    if (nav_topics) {
-                        SnippetProcess.this.rankingProcess.addTopics(resultEntry);
-                    }
-                }
-                if (System.currentTimeMillis() >= this.timeout) {
-                    Log.logWarning("SnippetProcess", "worker ended with timeout");
-                }
-                //System.out.println("FINISHED WORKER " + id + " FOR " + this.neededResults + " RESULTS, loops = " + loops);
-            } catch (final Exception e) { Log.logException(e); }
-            //Log.logInfo("SEARCH", "resultWorker thread " + this.id + " terminated");
-        }
-
-        protected void pleaseStop() {
-            this.shallrun = false;
-        }
-
-        /**
-         * calculate the time since the worker has had the latest activity
-         * @return time in milliseconds lasted since latest activity
-         */
-        private long busytime() {
-            return System.currentTimeMillis() - this.lastLifeSign;
-        }
-    }
-
-    private ResultEntry fetchSnippet(final URIMetadataNode page, final String solrText, final CacheStrategy cacheStrategy) {
-        // Snippet Fetching can has 3 modes:
-        // 0 - do not fetch snippets
-        // 1 - fetch snippets offline only
-        // 2 - online snippet fetch
-
-        // load only urls if there was not yet a root url of that hash
-        // find the url entry
-
-        long startTime = System.currentTimeMillis();
-        if (page == null) {
-            return null;
-        }
-        final long dbRetrievalTime = System.currentTimeMillis() - startTime;
-
-        if (cacheStrategy == null) {
-            final TextSnippet snippet = new TextSnippet(
-                    null,
-                    solrText,
-                    page,
-                    this.snippetFetchWordHashes,
-                    //this.query.queryString,
-                    null,
-                    ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof))),
-                    SNIPPET_MAX_LENGTH,
-                    !this.query.isLocal());
-            return new ResultEntry(page, this.query.getSegment(), this.peers, snippet, null, dbRetrievalTime, 0); // result without snippet
-        }
-
-        // load snippet
-        if (page.url().getContentDomain() == Classification.ContentDomain.TEXT || page.url().getContentDomain() == Classification.ContentDomain.ALL) {
-            // attach text snippet
-            startTime = System.currentTimeMillis();
-            final TextSnippet snippet = new TextSnippet(
-                    this.loader,
-                    solrText,
-                    page,
-                    this.snippetFetchWordHashes,
-                    cacheStrategy,
-                    ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof))),
-                    180,
-                    !this.query.isLocal());
-            final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            log.logInfo("text snippet load time for " + page.url() + ": " + snippetComputationTime + ", " + (!snippet.getErrorCode().fail() ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
-
-            if (!snippet.getErrorCode().fail()) {
-                // we loaded the file and found the snippet
-                return new ResultEntry(page, this.query.getSegment(), this.peers, snippet, null, dbRetrievalTime, snippetComputationTime); // result with snippet attached
-            } else if (cacheStrategy.mustBeOffline()) {
-                // we did not demand online loading, therefore a failure does not mean that the missing snippet causes a rejection of this result
-                // this may happen during a remote search, because snippet loading is omitted to retrieve results faster
-                return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
-            } else {
-                // problems with snippet fetch
-            	if (this.snippetFetchWordHashes.has(Segment.catchallHash)) {
-            		// we accept that because the word cannot be on the page
-            		return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, dbRetrievalTime, 0);
-            	}
-                final String reason = "no text snippet; errorCode = " + snippet.getErrorCode();
-                if (this.deleteIfSnippetFail) {
-                    this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.query_include_hashes, reason);
-                }
-                log.logInfo("sorted out url " + page.url().toNormalform(true) + " during search: " + reason);
-                return null;
-            }
-        }
-        return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, dbRetrievalTime, 0); // result without snippet
     }
 
     /**

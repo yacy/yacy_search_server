@@ -44,9 +44,11 @@ import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.query.HeuristicResult;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.query.SearchEventType;
 import net.yacy.search.snippet.ResultEntry;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverObjects;
@@ -90,17 +92,17 @@ public class yacysearchitem {
         final QueryParams theQuery = theSearch.getQuery();
 
         // dynamically update count values
-        final int totalcount = theSearch.getRankingResult().rwiAvailableCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();
+        final int totalcount = theSearch.rankingProcess.rwiAvailableCount() - theSearch.rankingProcess.getMissCount() - theSearch.getSortOutCount() + theSearch.rankingProcess.getRemoteIndexCount();
         final int offset = theQuery.neededResults() - theQuery.itemsPerPage() + 1;
         prop.put("offset", offset);
         prop.put("itemscount", Formatter.number(Math.min((item < 0) ? theQuery.neededResults() : item + 1, totalcount)));
         prop.put("itemsperpage", Formatter.number(theQuery.itemsPerPage));
         prop.put("totalcount", Formatter.number(totalcount, true));
-        prop.put("localResourceSize", Formatter.number(theSearch.getRankingResult().rwiAvailableCount(), true));
-        prop.put("localMissCount", Formatter.number(theSearch.getRankingResult().getMissCount(), true));
-        prop.put("remoteResourceSize", Formatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
-        prop.put("remoteIndexCount", Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
-        prop.put("remotePeerCount", Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
+        prop.put("localResourceSize", Formatter.number(theSearch.rankingProcess.rwiAvailableCount(), true));
+        prop.put("localMissCount", Formatter.number(theSearch.rankingProcess.getMissCount(), true));
+        prop.put("remoteResourceSize", Formatter.number(theSearch.rankingProcess.getRemoteResourceSize(), true));
+        prop.put("remoteIndexCount", Formatter.number(theSearch.rankingProcess.getRemoteIndexCount(), true));
+        prop.put("remotePeerCount", Formatter.number(theSearch.rankingProcess.getRemotePeerCount(), true));
         prop.put("navurlBase", QueryParams.navurlBase("html", theQuery, null, theQuery.urlMask.toString(), theQuery.navigators).toString());
         final String target_special_pattern = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
 
@@ -222,7 +224,7 @@ public class yacysearchitem {
             prop.put("content_description", desc);
             prop.putXML("content_description-xml", desc);
             prop.putJSON("content_description-json", desc);
-            final SearchEvent.HeuristicResult heuristic = theSearch.getHeuristic(result.hash());
+            final HeuristicResult heuristic = theSearch.getHeuristic(result.hash());
             if (heuristic == null) {
                 prop.put("content_heuristic", 0);
             } else {
@@ -233,7 +235,7 @@ public class yacysearchitem {
                 }
                 prop.put("content_heuristic_name", heuristic.heuristicName);
             }
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEvent.Type.FINALIZATION, "" + item, 0, 0), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEventType.FINALIZATION, "" + item, 0, 0), false);
             final String ext = resultURL.getFileExtension().toLowerCase();
             if (ext.equals("png") || ext.equals("jpg") || ext.equals("gif")) {
                 final String license = sb.licensedURLs.aquireLicense(resultURL);

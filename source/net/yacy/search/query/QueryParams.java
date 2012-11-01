@@ -136,7 +136,7 @@ public final class QueryParams {
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
     private boolean specialRights; // is true if the user has a special authorization and my use more database-extensive options
     public final String userAgent;
-    protected boolean filterfailurls;
+    public boolean filterfailurls;
     protected double lat, lon, radius;
     
 

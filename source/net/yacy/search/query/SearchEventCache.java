@@ -42,11 +42,11 @@ import net.yacy.search.SwitchboardConstants;
 public class SearchEventCache {
 
     private volatile static Map<String, SearchEvent> lastEvents = new ConcurrentHashMap<String, SearchEvent>(); // a cache for objects from this class: re-use old search requests
-    public static final long eventLifetimeBigMem = 600000; // the time an event will stay in the cache when available memory is high, 10 Minutes
-    public static final long eventLifetimeMediumMem = 60000; // the time an event will stay in the cache when available memory is medium, 1 Minute
-    public static final long eventLifetimeShortMem = 10000; // the time an event will stay in the cache when memory is low, 10 seconds
-    public static final long memlimitHigh = 600 * 1024 * 1024; // 400 MB
-    public static final long memlimitMedium = 200 * 1024 * 1024; // 100 MB
+    private static final long eventLifetimeBigMem = 600000; // the time an event will stay in the cache when available memory is high, 10 Minutes
+    private static final long eventLifetimeMediumMem = 60000; // the time an event will stay in the cache when available memory is medium, 1 Minute
+    private static final long eventLifetimeShortMem = 10000; // the time an event will stay in the cache when memory is low, 10 seconds
+    private static final long memlimitHigh = 600 * 1024 * 1024; // 400 MB
+    private static final long memlimitMedium = 200 * 1024 * 1024; // 100 MB
     public volatile static String lastEventID = "";
     public static long cacheInsert = 0, cacheHit = 0, cacheMiss = 0, cacheDelete = 0;
 
@@ -54,7 +54,7 @@ public class SearchEventCache {
         return lastEvents.size();
     }
 
-    public static void put(final String eventID, final SearchEvent event) {
+    protected static void put(final String eventID, final SearchEvent event) {
         if (MemoryControl.shortStatus()) cleanupEvents(false);
         lastEventID = eventID;
         final SearchEvent oldEvent = lastEvents.put(eventID, event);
@@ -105,7 +105,7 @@ public class SearchEventCache {
         return event;
     }
 
-    public static int countAliveThreads() {
+    private static int countAliveThreads() {
         int alive = 0;
         for (final SearchEvent e: lastEvents.values()) {
             if (e.workerAlive()) alive++;
@@ -143,7 +143,6 @@ public class SearchEventCache {
             }
         }
         if (event == null) {
-
             // check if there are too many other searches alive now
             Log.logInfo("SearchEventCache", "getEvent: " + lastEvents.size() + " in cache; " + countAliveThreads() + " alive");
 

@@ -35,7 +35,6 @@ import java.util.List;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
@@ -61,12 +60,13 @@ import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.QueryParams;
-import net.yacy.search.query.RWIProcess;
+import net.yacy.search.query.RankingProcess;
+import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.BlockRank;
-import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -125,8 +125,8 @@ public class IndexControlRWIs_p {
 
             if ( post.containsKey("keystringsearch") ) {
                 prop.put("keyhash", keyhash);
-                final RWIProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
-                if ( ranking.rwiAvailableCount() == 0 ) {
+                final SearchEvent theSearch = genSearchresult(prop, sb, segment, keyhash, null);
+                if ( theSearch.rankingProcess.rwiAvailableCount() == 0 ) {
                     prop.put("searchresult", 1);
                     prop.putHTML("searchresult_word", keystring);
                 }
@@ -136,8 +136,8 @@ public class IndexControlRWIs_p {
                 if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
                     prop.put("keystring", "&lt;" + errmsg + "&gt;");
                 }
-                final RWIProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
-                if ( ranking.rwiAvailableCount() == 0 ) {
+                final SearchEvent theSearch = genSearchresult(prop, sb, segment, keyhash, null);
+                if ( theSearch.rankingProcess.rwiAvailableCount() == 0 ) {
                     prop.put("searchresult", 2);
                     prop.putHTML("searchresult_wordhash", ASCII.String(keyhash));
                 }
@@ -232,8 +232,8 @@ public class IndexControlRWIs_p {
                 }
                 final Bitfield flags = compileFlags(post);
                 final int count = (post.get("lines", "all").equals("all")) ? -1 : post.getInt("lines", -1);
-                final RWIProcess ranking = genSearchresult(prop, sb, segment, keyhash, flags);
-                genURLList(prop, keyhash, keystring, ranking, flags, count);
+                final SearchEvent theSearch = genSearchresult(prop, sb, segment, keyhash, flags);
+                genURLList(prop, keyhash, keystring, theSearch, flags, count);
             }
 
             // transfer to other peer
@@ -459,14 +459,14 @@ public class IndexControlRWIs_p {
         final serverObjects prop,
         final byte[] keyhash,
         final String keystring,
-        final RWIProcess ranked,
+        final SearchEvent theSearch,
         final Bitfield flags,
         final int maxlines) {
         // search for a word hash and generate a list of url links
         final String keyhashs = ASCII.String(keyhash);
         prop.put("genUrlList_keyHash", keyhashs);
 
-        if ( ranked.rwiAvailableCount() == 0 ) {
+        if ( theSearch.rankingProcess.rwiAvailableCount() == 0 ) {
             prop.put("genUrlList", 1);
             prop.put("genUrlList_count", 0);
             prop.put("searchresult", 2);
@@ -480,7 +480,7 @@ public class IndexControlRWIs_p {
             URIMetadataNode entry;
             String us;
             long rn = -1;
-            while ( !ranked.rwiIsEmpty() && (entry = ranked.takeURL(false, 1000)) != null ) {
+            while ( !theSearch.rankingProcess.rwiIsEmpty() && (entry = theSearch.takeURL(false, 1000)) != null ) {
                 url = entry.url();
                 if ( url == null ) {
                     continue;
@@ -507,9 +507,9 @@ public class IndexControlRWIs_p {
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_tf", 1000.0 * entry
                     .word()
                     .termFrequency());
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_authority", (ranked.getOrder() == null)
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_authority", (theSearch.rankingProcess.getOrder() == null)
                     ? -1
-                    : ranked.getOrder().authority(ASCII.String(entry.hash(), 6, 6)));
+                    : theSearch.rankingProcess.getOrder().authority(ASCII.String(entry.hash(), 6, 6)));
                 prop.put(
                     "genUrlList_urlList_" + i + "_urlExists_date",
                     GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(entry.word().lastModified())));
@@ -575,7 +575,7 @@ public class IndexControlRWIs_p {
                     break;
                 }
             }
-            final Iterator<byte[]> iter = ranked.miss(); // iterates url hash strings
+            final Iterator<byte[]> iter = theSearch.rankingProcess.miss(); // iterates url hash strings
             byte[] b;
             while ( iter.hasNext() ) {
                 b = iter.next();
@@ -666,18 +666,17 @@ public class IndexControlRWIs_p {
         prop.put("searchresult_hosts", hc);
     }
 
-    public static RWIProcess genSearchresult(
+    public static SearchEvent genSearchresult(
         final serverObjects prop,
         final Switchboard sb,
         final Segment segment,
         final byte[] keyhash,
         final Bitfield filter) {
-        final QueryParams query =
-            new QueryParams(ASCII.String(keyhash), -1, filter, segment, sb.getRanking(), "IndexControlRWIs_p");
-        final ReferenceOrder order = new ReferenceOrder(query.ranking, UTF8.getBytes(query.targetlang));
-        final RWIProcess ranked = new RWIProcess(query, order, false);
-        ranked.run();
-
+        
+        final QueryParams query = new QueryParams(ASCII.String(keyhash), -1, filter, segment, sb.getRanking(), "IndexControlRWIs_p");
+        final SearchEvent theSearch = SearchEventCache.getEvent(query, sb.peers, sb.tables, null, false, sb.loader, Integer.MAX_VALUE, Long.MAX_VALUE, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
+        //theSearch.rankingProcess.run();
+        RankingProcess ranked = theSearch.rankingProcess;
         if ( ranked.rwiAvailableCount() == 0 ) {
             prop.put("searchresult", 2);
             prop.put("searchresult_wordhash", keyhash);
@@ -697,6 +696,6 @@ public class IndexControlRWIs_p {
             prop.put("searchresult_app", ranked.flagCount()[Condenser.flag_cat_hasapp]);
             prop.put("searchresult_indexof", ranked.flagCount()[Condenser.flag_cat_indexof]);
         }
-        return ranked;
+        return theSearch;
     }
 }

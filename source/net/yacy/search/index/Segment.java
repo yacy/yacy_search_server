@@ -71,7 +71,7 @@ import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
-import net.yacy.search.query.RWIProcess;
+import net.yacy.search.query.RankingProcess;
 import net.yacy.search.query.SearchEvent;
 
 public class Segment {
@@ -375,7 +375,7 @@ public class Segment {
         // STORE PAGE INDEX INTO WORD INDEX DB
         int outlinksSame = document.inboundLinks().size();
         int outlinksOther = document.outboundLinks().size();
-        final RWIProcess rankingProcess = (searchEvent == null) ? null : searchEvent.getRankingResult();
+        final RankingProcess rankingProcess = (searchEvent == null) ? null : searchEvent.getRankingResult();
         final int urlLength = urlNormalform.length();
         final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
 
@@ -425,7 +425,7 @@ public class Segment {
                     }
                 }
             }
-            if (rankingProcess != null) rankingProcess.addFinalize();
+            if (searchEvent != null) searchEvent.rankingProcess.addFinalize();
     
             // assign the catchall word
             ientry.setWord(wprop == null ? catchallWord : wprop); // we use one of the word properties as template to get the document characteristics

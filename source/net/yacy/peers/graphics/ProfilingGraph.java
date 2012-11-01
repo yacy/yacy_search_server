@@ -31,7 +31,7 @@ import java.util.Iterator;
 
 import net.yacy.search.EventTracker;
 import net.yacy.search.EventTracker.Event;
-import net.yacy.search.query.SearchEvent;
+import net.yacy.search.query.SearchEventType;
 import net.yacy.visualization.ChartPlotter;
 import net.yacy.visualization.RasterPlotter;
 
@@ -199,13 +199,13 @@ public class ProfilingGraph {
     }
 
     public static class EventSearch {
-        public SearchEvent.Type processName;
+        public SearchEventType processName;
         public String comment;
     	public String queryID;
     	public long duration;
     	public int resultCount;
 
-    	public EventSearch(final String queryID, final SearchEvent.Type processName, final String comment, final int resultCount, final long duration) {
+    	public EventSearch(final String queryID, final SearchEventType processName, final String comment, final int resultCount, final long duration) {
     		this.queryID = queryID;
     		this.processName = processName;
     		this.comment = comment;

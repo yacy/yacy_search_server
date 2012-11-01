@@ -80,6 +80,7 @@ import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.query.SearchEventType;
 import net.yacy.search.query.SnippetProcess;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.snippet.TextSnippet;
@@ -766,7 +767,7 @@ public class yacysearch {
             EventTracker.delete(EventTracker.EClass.SEARCH);
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
                 theQuery.id(true),
-                SearchEvent.Type.INITIALIZATION,
+                SearchEventType.INITIALIZATION,
                 "",
                 0,
                 0), false);
@@ -832,26 +833,26 @@ public class yacysearch {
                 + theQuery.queryString
                 + " - "
                 + "local-unfiltered("
-                + theSearch.getRankingResult().rwiAvailableCount()
+                + theSearch.rankingProcess.rwiAvailableCount()
                 + "), "
                 + "local_miss("
-                + theSearch.getRankingResult().getMissCount()
+                + theSearch.rankingProcess.getMissCount()
                 + "), "
                 + "local_sortout("
-                + theSearch.getRankingResult().getSortOutCount()
+                + theSearch.getSortOutCount()
                 + "), "
                 + "remote("
-                + theSearch.getRankingResult().getRemoteResourceSize()
+                + theSearch.rankingProcess.getRemoteResourceSize()
                 + ") links found, "
                 + (System.currentTimeMillis() - timestamp)
                 + " ms");
 
             // prepare search statistics
             theQuery.resultcount =
-                theSearch.getRankingResult().rwiAvailableCount()
-                    - theSearch.getRankingResult().getMissCount()
-                    - theSearch.getRankingResult().getSortOutCount()
-                    + theSearch.getRankingResult().getRemoteIndexCount();
+                theSearch.rankingProcess.rwiAvailableCount()
+                    - theSearch.getSortOutCount()
+                    - theSearch.rankingProcess.getMissCount()
+                    + theSearch.rankingProcess.getRemoteIndexCount();
             theQuery.searchtime = System.currentTimeMillis() - timestamp;
             theQuery.urlretrievaltime = theSearch.result().getURLRetrievalTime();
             theQuery.snippetcomputationtime = theSearch.result().getSnippetComputationTime();
@@ -933,10 +934,10 @@ public class yacysearch {
             }
 
             final int indexcount =
-                theSearch.getRankingResult().rwiAvailableCount()
-                    - theSearch.getRankingResult().getMissCount()
-                    - theSearch.getRankingResult().getSortOutCount()
-                    + theSearch.getRankingResult().getRemoteIndexCount();
+                theSearch.rankingProcess.rwiAvailableCount()
+                    - theSearch.getSortOutCount()
+                    - theSearch.rankingProcess.getMissCount()
+                    + theSearch.rankingProcess.getRemoteIndexCount();
             prop.put("num-results_offset", startRecord == 0 ? 0 : startRecord + 1);
             prop.put("num-results_itemscount", Formatter.number(
                 startRecord + theSearch.getQuery().itemsPerPage > indexcount ? startRecord
@@ -950,19 +951,19 @@ public class yacysearch {
                 : "0");
             prop.put(
                 "num-results_globalresults_localResourceSize",
-                Formatter.number(theSearch.getRankingResult().rwiAvailableCount(), true));
+                Formatter.number(theSearch.rankingProcess.rwiAvailableCount(), true));
             prop.put(
                 "num-results_globalresults_localMissCount",
-                Formatter.number(theSearch.getRankingResult().getMissCount(), true));
+                Formatter.number(theSearch.rankingProcess.getMissCount(), true));
             prop.put(
                 "num-results_globalresults_remoteResourceSize",
-                Formatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
+                Formatter.number(theSearch.rankingProcess.getRemoteResourceSize(), true));
             prop.put(
                 "num-results_globalresults_remoteIndexCount",
-                Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
+                Formatter.number(theSearch.rankingProcess.getRemoteIndexCount(), true));
             prop.put(
                 "num-results_globalresults_remotePeerCount",
-                Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
+                Formatter.number(theSearch.rankingProcess.getRemotePeerCount(), true));
 
             // compose page navigation
             final StringBuilder resnav = new StringBuilder(200);

@@ -35,6 +35,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
+import net.yacy.search.query.SecondarySearchSuperviser;
 
 
 public class RemoteSearch extends Thread {
@@ -44,7 +45,7 @@ public class RemoteSearch extends Thread {
     final private SearchEvent event;
     final private String wordhashes, excludehashes, sitehash, authorhash, contentdom;
     final private int partitions;
-    final private SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser;
+    final private SecondarySearchSuperviser secondarySearchSuperviser;
     final private Blacklist blacklist;
     final private Seed targetPeer;
     private int urls;
@@ -67,7 +68,7 @@ public class RemoteSearch extends Thread {
               final int maxDistance,
               final int partitions,
               final Seed targetPeer,
-              final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
+              final SecondarySearchSuperviser secondarySearchSuperviser,
               final Blacklist blacklist) {
         super(ysThreadGroup, "yacySearch_" + targetPeer.getName());
         this.event = event;
@@ -127,14 +128,6 @@ public class RemoteSearch extends Thread {
         final Iterator<byte[]> iter = hashes.iterator();
         while (iter.hasNext()) { wh.append(ASCII.String(iter.next())); }
         return wh.toString();
-    }
-
-    public int links() {
-        return this.urls;
-    }
-
-    public int count() {
-        return this.count;
     }
 
     public Seed target() {
