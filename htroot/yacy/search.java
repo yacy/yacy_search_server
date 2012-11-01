@@ -323,7 +323,7 @@ public final class search {
             theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, null, abstracts.length() > 0, sb.loader, count, maxtime, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
 
             // set statistic details of search result and find best result index set
-            joincount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount();
+            joincount = theSearch.getRankingResult().rwiAvailableCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount();
             prop.put("joincount", Integer.toString(joincount));
             if (joincount != 0) {
                 accu = theSearch.result().completeResults(maxtime);

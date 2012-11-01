@@ -338,7 +338,7 @@ public class yacysearchtrailer {
         final String aboutBody = env.getConfig("about.body", "");
         final String aboutHeadline = env.getConfig("about.headline", "");
         if ((aboutBody.isEmpty() && aboutHeadline.isEmpty()) ||
-            theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount() == 0) {
+            theSearch.getRankingResult().rwiAvailableCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount() == 0) {
             prop.put("nav-about", 0);
         } else {
             prop.put("nav-about", 1);
@@ -349,7 +349,7 @@ public class yacysearchtrailer {
         // category: location search
         // show only if there is a location database present and if there had been any search results
         if (LibraryProvider.geoLoc.isEmpty() ||
-            theSearch.getRankingResult().getLocalIndexCount() == 0) {
+            theSearch.getRankingResult().rwiAvailableCount() == 0) {
             prop.put("cat-location", 0);
         } else {
             prop.put("cat-location", 1);
@@ -357,7 +357,7 @@ public class yacysearchtrailer {
             prop.put(fileType, "cat-location_queryenc", theQuery.queryString(true).replace(' ', '+'));
         }
 
-        final int indexcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();
+        final int indexcount = theSearch.getRankingResult().rwiAvailableCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();
         prop.put("num-results_totalcount", indexcount);
 
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEvent.Type.FINALIZATION, "bottomline", 0, 0), false);

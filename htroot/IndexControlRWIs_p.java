@@ -126,7 +126,7 @@ public class IndexControlRWIs_p {
             if ( post.containsKey("keystringsearch") ) {
                 prop.put("keyhash", keyhash);
                 final RWIProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
-                if ( ranking.filteredCount() == 0 ) {
+                if ( ranking.rwiAvailableCount() == 0 ) {
                     prop.put("searchresult", 1);
                     prop.putHTML("searchresult_word", keystring);
                 }
@@ -137,7 +137,7 @@ public class IndexControlRWIs_p {
                     prop.put("keystring", "&lt;" + errmsg + "&gt;");
                 }
                 final RWIProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
-                if ( ranking.filteredCount() == 0 ) {
+                if ( ranking.rwiAvailableCount() == 0 ) {
                     prop.put("searchresult", 2);
                     prop.putHTML("searchresult_wordhash", ASCII.String(keyhash));
                 }
@@ -466,7 +466,7 @@ public class IndexControlRWIs_p {
         final String keyhashs = ASCII.String(keyhash);
         prop.put("genUrlList_keyHash", keyhashs);
 
-        if ( ranked.filteredCount() == 0 ) {
+        if ( ranked.rwiAvailableCount() == 0 ) {
             prop.put("genUrlList", 1);
             prop.put("genUrlList_count", 0);
             prop.put("searchresult", 2);
@@ -480,7 +480,7 @@ public class IndexControlRWIs_p {
             URIMetadataNode entry;
             String us;
             long rn = -1;
-            while ( !ranked.isEmpty() && (entry = ranked.takeURL(false, 1000)) != null ) {
+            while ( !ranked.rwiIsEmpty() && (entry = ranked.takeURL(false, 1000)) != null ) {
                 url = entry.url();
                 if ( url == null ) {
                     continue;
@@ -678,12 +678,12 @@ public class IndexControlRWIs_p {
         final RWIProcess ranked = new RWIProcess(query, order, false);
         ranked.run();
 
-        if ( ranked.filteredCount() == 0 ) {
+        if ( ranked.rwiAvailableCount() == 0 ) {
             prop.put("searchresult", 2);
             prop.put("searchresult_wordhash", keyhash);
         } else {
             prop.put("searchresult", 3);
-            prop.put("searchresult_allurl", ranked.filteredCount());
+            prop.put("searchresult_allurl", ranked.rwiAvailableCount());
             prop
                 .put("searchresult_description", ranked.flagCount()[WordReferenceRow.flag_app_dc_description]);
             prop.put("searchresult_title", ranked.flagCount()[WordReferenceRow.flag_app_dc_title]);

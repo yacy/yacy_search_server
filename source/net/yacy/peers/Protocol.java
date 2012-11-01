@@ -870,7 +870,7 @@ public final class Protocol
         Network.log.logInfo("remote search: peer " + target.getName() + " sent " + container.get(0).size() + "/" + result.joincount + " references");
     }
 
-    public static class SearchResult {
+    private static class SearchResult {
         public String version; // version : application version of responder
         public String uptime; // uptime : uptime in seconds of responder
         public String fwhop; // hops (depth) of forwards that had been performed to construct this result
@@ -1060,7 +1060,9 @@ public final class Protocol
 
         // evaluate result
         List<URIMetadataNode> container = new ArrayList<URIMetadataNode>();
-		if (docList.size() > 0) {// create containers
+		if (docList.size() == 0) {
+		    Network.log.logInfo("SEARCH (solr), returned 0 out of " + docList.getNumFound() + " documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())) + " query = " + solrQuery.toString()) ;
+		} else {// create containers
             Network.log.logInfo("SEARCH (solr), returned " + docList.size() + " out of " + docList.getNumFound() + " documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName()))) ;
 
         	int term = count;
@@ -1623,7 +1625,7 @@ public final class Protocol
         return false;
     }
 
-    public static final LinkedHashMap<String, ContentBody> basicRequestParts(
+    private static final LinkedHashMap<String, ContentBody> basicRequestParts(
         final Switchboard sb,
         final String targetHash,
         final String salt) {
@@ -1655,7 +1657,7 @@ public final class Protocol
         return parts;
     }
 
-    public static final LinkedHashMap<String, ContentBody> basicRequestParts(
+    private static final LinkedHashMap<String, ContentBody> basicRequestParts(
         final String myHash,
         final String targetHash,
         final String networkName) {

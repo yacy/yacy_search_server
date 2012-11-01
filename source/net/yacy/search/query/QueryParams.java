@@ -74,13 +74,6 @@ public final class QueryParams {
     public enum Searchdom {
         LOCAL, CLUSTER, GLOBAL;
 
-        public static Searchdom contentdomParser(final String dom) {
-            if ("local".equals(dom)) return LOCAL;
-            else if ("global".equals(dom)) return GLOBAL;
-            else if ("cluster".equals(dom)) return CLUSTER;
-            return LOCAL;
-        }
-
         @Override
         public String toString() {
             if (this == LOCAL) return "local";
@@ -92,15 +85,9 @@ public final class QueryParams {
 
     private static final String ampersand = "&amp;";
 
-    public static enum FetchMode {
-    	NO_FETCH_NO_VERIFY,
-    	FETCH_BUT_ACCEPT_OFFLINE_OR_USE_CACHE,
-    	FETCH_AND_VERIFY_ONLINE;
-    }
-
     public static class Modifier {
-        String s;
-        public Modifier(final String modifier) {
+        private String s;
+        private Modifier(final String modifier) {
             this.s = modifier;
         }
         public String getModifier() {
@@ -111,44 +98,47 @@ public final class QueryParams {
 
     public static final Bitfield empty_constraint    = new Bitfield(4, "AAAAAA");
     public static final Pattern catchall_pattern = Pattern.compile(".*");
-    public static final Pattern matchnothing_pattern = Pattern.compile("");
+    private static final Pattern matchnothing_pattern = Pattern.compile("");
 
     public final String queryString;
     public final HandleSet query_include_hashes, query_exclude_hashes, query_all_hashes;
-    public final Collection<String> query_include_words, query_exclude_words, query_all_words;
+    private final Collection<String> query_include_words, query_exclude_words, query_all_words;
     public final int itemsPerPage;
     public int offset;
     public final Pattern urlMask, prefer;
-    public final boolean urlMask_isCatchall, prefer_isMatchnothing;
+    final boolean urlMask_isCatchall;
+    private final boolean prefer_isMatchnothing;
     public final Classification.ContentDomain contentdom;
     public final String targetlang;
-    public final Collection<Tagging.Metatag> metatags;
+    protected final Collection<Tagging.Metatag> metatags;
     public final String navigators;
     public final Searchdom domType;
-    public final int zonecode;
-    public final int domMaxTargets;
+    private final int zonecode;
+    private final int domMaxTargets;
     public final int maxDistance;
     public final Bitfield constraint;
-    public final boolean allofconstraint;
-    public CacheStrategy snippetCacheStrategy;
+    final boolean allofconstraint;
+    protected CacheStrategy snippetCacheStrategy;
     public final RankingProfile ranking;
     private final Segment indexSegment;
     public final String host; // this is the client host that starts the query, not a site operator
     public final String sitehash; // this is a domain hash, 6 bytes long or null
-    public final Set<String> siteexcludes; // set of domain hashes that are excluded if not included by sitehash
+    protected final Set<String> siteexcludes; // set of domain hashes that are excluded if not included by sitehash
     public final String authorhash;
     public final Modifier modifier;
     public Seed remotepeer;
-    public final long starttime, maxtime, timeout; // the time when the query started, how long it should take and the time when the timeout is reached (milliseconds)
+    public final long starttime; // the time when the query started, how long it should take and the time when the timeout is reached (milliseconds)
+    protected final long maxtime;
+    protected final long timeout;
     // values that are set after a search:
     public int resultcount; // number of found results
     public int transmitcount; // number of results that had been shown to the user
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
-    public boolean specialRights; // is true if the user has a special authorization and my use more database-extensive options
+    private boolean specialRights; // is true if the user has a special authorization and my use more database-extensive options
     public final String userAgent;
-    public boolean filterfailurls;
-    public double lat, lon, radius;
-    public String solrQueryString = null;
+    protected boolean filterfailurls;
+    protected double lat, lon, radius;
+    
 
     public QueryParams(
             final String queryString,
@@ -303,7 +293,7 @@ public final class QueryParams {
         this.radius = Math.floor(radius * this.kmNormal + 1) / this.kmNormal;
     }
 
-    double kmNormal = 100.d; // 100 =ca 40000.d / 360.d == 111.11 - if lat/lon is multiplied with this, rounded and diveded by this, the location is normalized to a 1km grid
+    private double kmNormal = 100.d; // 100 =ca 40000.d / 360.d == 111.11 - if lat/lon is multiplied with this, rounded and diveded by this, the location is normalized to a 1km grid
 
     public Segment getSegment() {
         return this.indexSegment;
@@ -397,7 +387,7 @@ public final class QueryParams {
      * @param text
      * @return true if the query matches with the given text
      */
-    public final boolean matchesText(final String text) {
+    private final boolean matchesText(final String text) {
         boolean ret = false;
         final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text, null).keySet());
         if (!SetTools.anymatch(wordhashes, this.query_exclude_hashes)) {
@@ -406,7 +396,7 @@ public final class QueryParams {
         return ret;
     }
 
-    public static final boolean anymatch(final String text, final HandleSet keyhashes) {
+    protected static final boolean anymatch(final String text, final HandleSet keyhashes) {
     	// returns true if any of the word hashes in keyhashes appear in the String text
     	// to do this, all words in the string must be recognized and transcoded to word hashes
         if (keyhashes == null || keyhashes.isEmpty()) return false;
@@ -469,12 +459,12 @@ public final class QueryParams {
         return ret;
     }
 
-    final static YaCySchema[] fields = new YaCySchema[]{
+    private final static YaCySchema[] fields = new YaCySchema[]{
         YaCySchema.sku,YaCySchema.title,YaCySchema.h1_txt,YaCySchema.h2_txt,
         YaCySchema.author,YaCySchema.description,YaCySchema.keywords,YaCySchema.text_t,YaCySchema.synonyms_sxt
     };
     
-    final static Map<YaCySchema,Float> boosts = new LinkedHashMap<YaCySchema,Float>();
+    private final static Map<YaCySchema,Float> boosts = new LinkedHashMap<YaCySchema,Float>();
     static {
         boosts.put(YaCySchema.sku, 20.0f);
         boosts.put(YaCySchema.title, 15.0f);
@@ -485,19 +475,6 @@ public final class QueryParams {
         boosts.put(YaCySchema.keywords, 2.0f);
         boosts.put(YaCySchema.text_t, 1.0f);
     }
-    
-    /*
-  public static final String QT ="qt";
-  public static final String WT ="wt";
-  public static final String Q ="q";
-  public static final String START ="start";
-  public static final String ROWS ="rows";
-  public static final String XSL ="xsl";
-  public static final String VERSION ="version";
-  public static final String FL = "fl";
-  public static final String DF = "df";
-     */
-
 
     public SolrQuery solrQuery() {
         if (this.query_include_words == null || this.query_include_words.size() == 0) return null;
@@ -567,6 +544,7 @@ public final class QueryParams {
             w.append(s);
             wc++;
         }
+        if (wc > 1) {w.insert(0, '('); w.append(')');}
         
         // combine these queries for all relevant fields
         wc = 0;

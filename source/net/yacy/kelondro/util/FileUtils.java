@@ -396,10 +396,12 @@ public final class FileUtils {
         return mb;
     }
 
-    private final static Pattern ps = Pattern.compile("\\\\");
-    private final static Pattern pn = Pattern.compile("\\n");
-    private final static Pattern pe = Pattern.compile("=");
-    
+    private final static Pattern backslashbackslash = Pattern.compile("\\\\");
+    private final static Pattern unescaped_equal = Pattern.compile("=");
+    private final static Pattern escaped_equal = Pattern.compile("\\=", Pattern.LITERAL);
+    private final static Pattern escaped_newline = Pattern.compile("\\n", Pattern.LITERAL);
+    private final static Pattern escaped_backslash = Pattern.compile(Pattern.quote("\\"), Pattern.LITERAL);
+
     public static void saveMap(final File file, final Map<String, String> props, final String comment) {
         PrintWriter pw = null;
         final File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
@@ -410,16 +412,16 @@ public final class FileUtils {
             for ( final Map.Entry<String, String> entry : props.entrySet() ) {
                 key = entry.getKey();
                 if ( key != null ) {
-                    key = ps.matcher(key).replaceAll("\\\\");
-                    key = pn.matcher(key).replaceAll("\\n");
-                    key = pe.matcher(key).replaceAll("\\=");
+                    key = backslashbackslash.matcher(key).replaceAll("\\\\");
+                    key = escaped_newline.matcher(key).replaceAll("\\n");
+                    key = unescaped_equal.matcher(key).replaceAll("\\=");
                 }
                 if ( entry.getValue() == null ) {
                     value = "";
                 } else {
                     value = entry.getValue();
-                    value = ps.matcher(value).replaceAll("\\\\");
-                    value = pn.matcher(value).replaceAll("\\n");
+                    value = backslashbackslash.matcher(value).replaceAll("\\\\");
+                    value = escaped_newline.matcher(value).replaceAll("\\n");
                 }
                 pw.println(key + "=" + value);
             }
@@ -451,10 +453,6 @@ public final class FileUtils {
         final BufferedReader br = new BufferedReader(r);
         return table(new StringsIterator(br));
     }
-
-    private final static Pattern escaped_equal = Pattern.compile("\\=", Pattern.LITERAL);
-    private final static Pattern escaped_newline = Pattern.compile("\\n", Pattern.LITERAL);
-    private final static Pattern escaped_backslash = Pattern.compile(Pattern.quote("\\"), Pattern.LITERAL);
 
     public static ConcurrentHashMap<String, String> table(final Iterator<String> li) {
         String line;

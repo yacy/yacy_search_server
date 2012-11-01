@@ -158,7 +158,7 @@ public class SnippetProcess {
         int thisRankingQueueSize, lastRankingQueueSize = 0;
         if (item < 10) {
             while (
-              ((thisRankingQueueSize = this.rankingProcess.sizeQueue()) > 0 || !this.rankingProcess.feedingIsFinished()) &&
+              ((thisRankingQueueSize = this.rankingProcess.rwiQueueSize()) > 0 || !this.rankingProcess.feedingIsFinished()) &&
                (thisRankingQueueSize > lastRankingQueueSize || this.result.sizeAvailable() < item + 1) &&
                System.currentTimeMillis() < waittimeout &&
                anyWorkerAlive()
@@ -180,9 +180,9 @@ public class SnippetProcess {
         WeakPriorityBlockingQueue.Element<ResultEntry> entry = null;
         while (System.currentTimeMillis() < finishTime) {
 
-            //Log.logInfo("SnippetProcess", "item = " + item + "; anyWorkerAlive=" + anyWorkerAlive() + "; this.rankingProcess.isAlive() = " + this.rankingProcess.isAlive() + "; this.rankingProcess.feedingIsFinished() = " + this.rankingProcess.feedingIsFinished() + "; this.result.sizeAvailable() = " + this.result.sizeAvailable() + ", this.rankingProcess.sizeQueue() = " + this.rankingProcess.sizeQueue());
+            Log.logInfo("SnippetProcess", "item = " + item + "; anyWorkerAlive=" + anyWorkerAlive() + "; this.rankingProcess.isAlive() = " + this.rankingProcess.isAlive() + "; this.rankingProcess.feedingIsFinished() = " + this.rankingProcess.feedingIsFinished() + "; this.result.sizeAvailable() = " + this.result.sizeAvailable() + ", this.rankingProcess.sizeQueue() = " + this.rankingProcess.rwiQueueSize() + ", this.rankingProcess.nodeStack.sizeAvailable() = " + this.rankingProcess.nodeStack.sizeAvailable());
 
-            if (!anyWorkerAlive() && !this.rankingProcess.isAlive() && this.result.sizeAvailable() + this.rankingProcess.sizeQueue() <= item && this.rankingProcess.feedingIsFinished()) {
+            if (!anyWorkerAlive() && !this.rankingProcess.isAlive() && this.result.sizeAvailable() + this.rankingProcess.rwiQueueSize() + this.rankingProcess.nodeStack.sizeAvailable() <= item && this.rankingProcess.feedingIsFinished()) {
                 //Log.logInfo("SnippetProcess", "interrupted result fetching; item = " + item + "; this.result.sizeAvailable() = " + this.result.sizeAvailable() + ", this.rankingProcess.sizeQueue() = " + this.rankingProcess.sizeQueue() + "; this.rankingProcess.feedingIsFinished() = " + this.rankingProcess.feedingIsFinished());
                 break; // the fail case
             }
@@ -194,9 +194,7 @@ public class SnippetProcess {
             }
 
             try {entry = this.result.element(item, 50);} catch (final InterruptedException e) {break;}
-            if (entry != null) {
-                break;
-            }
+            if (entry != null) { break; }
         }
 
         // finally, if there is something, return the result
@@ -346,7 +344,7 @@ public class SnippetProcess {
 
     private void deployWorker(int deployCount, final int neededResults) {
         if (this.cleanupState ||
-            (this.rankingProcess.feedingIsFinished() && this.rankingProcess.sizeQueue() == 0) ||
+            (this.rankingProcess.feedingIsFinished() && this.rankingProcess.rwiQueueSize() == 0 && this.rankingProcess.nodeStack.sizeAvailable() == 0) ||
             this.result.sizeAvailable() >= neededResults) {
             return;
         }
@@ -356,7 +354,7 @@ public class SnippetProcess {
             synchronized(this.workerThreads) {try {
                 for (int i = 0; i < this.workerThreads.length; i++) {
                     if (this.result.sizeAvailable() >= neededResults ||
-                        (this.rankingProcess.feedingIsFinished() && this.rankingProcess.sizeQueue() == 0)) {
+                        (this.rankingProcess.feedingIsFinished() && this.rankingProcess.rwiQueueSize() == 0) && this.rankingProcess.nodeStack.sizeAvailable() == 0) {
                         break;
                     }
                     worker = new Worker(this.query.maxtime, this.query.snippetCacheStrategy, neededResults);
@@ -377,7 +375,7 @@ public class SnippetProcess {
                 for (int i = 0; i < this.workerThreads.length; i++) {
                     if (deployCount <= 0 ||
                         this.result.sizeAvailable() >= neededResults ||
-                        (this.rankingProcess.feedingIsFinished() && this.rankingProcess.sizeQueue() == 0)) {
+                        (this.rankingProcess.feedingIsFinished() && this.rankingProcess.rwiQueueSize() == 0) && this.rankingProcess.nodeStack.sizeAvailable() == 0) {
                         break;
                     }
                     if (this.workerThreads[i] == null || !this.workerThreads[i].isAlive()) {
@@ -450,33 +448,32 @@ public class SnippetProcess {
             //final int fetchAhead = snippetMode == 0 ? 0 : 10;
             final boolean nav_topics = SnippetProcess.this.query.navigators.equals("all") || SnippetProcess.this.query.navigators.indexOf("topics",0) >= 0;
             try {
-                //System.out.println("DEPLOYED WORKER " + id + " FOR " + this.neededResults + " RESULTS, timeoutd = " + (this.timeout - System.currentTimeMillis()));
                 while (this.shallrun && System.currentTimeMillis() < this.timeout) {
-                    //Log.logInfo("SnippetProcess", "***** timeleft = " + (this.timeout - System.currentTimeMillis()));
                     this.lastLifeSign = System.currentTimeMillis();
 
                     if (MemoryControl.shortStatus()) {
+                        Log.logWarning("SnippetProcess", "shortStatus");
                     	break;
                     }
 
                     // check if we have enough; we stop only if we can fetch online; otherwise its better to run this to get better navigation
                     if ((this.cacheStrategy == null || this.cacheStrategy.isAllowedToFetchOnline()) && SnippetProcess.this.result.sizeAvailable() >= this.neededResults) {
-                        //Log.logWarning("ResultFetcher", SnippetProcess.this.result.sizeAvailable() + " = result.sizeAvailable() >= this.neededResults = " + this.neededResults);
+                        Log.logWarning("SnippetProcess", SnippetProcess.this.result.sizeAvailable() + " = result.sizeAvailable() >= this.neededResults = " + this.neededResults);
                         break;
                     }
 
                     // check if we can succeed if we try to take another url
-                    if (SnippetProcess.this.rankingProcess.feedingIsFinished() && SnippetProcess.this.rankingProcess.sizeQueue() == 0) {
-                        //Log.logWarning("ResultFetcher", "rankingProcess.feedingIsFinished() && rankingProcess.sizeQueue() == 0");
+                    if (SnippetProcess.this.rankingProcess.feedingIsFinished() && SnippetProcess.this.rankingProcess.rwiQueueSize() == 0 && SnippetProcess.this.rankingProcess.nodeStack.sizeAvailable() == 0) {
+                        Log.logWarning("SnippetProcess", "rankingProcess.feedingIsFinished() && rankingProcess.sizeQueue() == 0");
                         break;
                     }
 
                     // get next entry
                     page = SnippetProcess.this.rankingProcess.takeURL(true, Math.min(500, Math.max(20, this.timeout - System.currentTimeMillis())));
-                    //if (page != null) Log.logInfo("ResultFetcher", "got one page: " + page.metadata().url().toNormalform(true, false));
+                    //if (page != null) Log.logInfo("SnippetProcess", "got one page: " + page.metadata().url().toNormalform(true, false));
                     //if (page == null) page = rankedCache.takeURL(false, this.timeout - System.currentTimeMillis());
                     if (page == null) {
-                        //Log.logWarning("ResultFetcher", "page == null");
+                        Log.logWarning("SnippetProcess", "page == null");
                         break; // no more available
                     }
 
@@ -489,12 +486,8 @@ public class SnippetProcess {
                     String solrContent = page.getText();
 
                     resultEntry = fetchSnippet(page, solrContent, this.cacheStrategy); // does not fetch snippets if snippetMode == 0
-                    if (resultEntry == null)
-                     {
+                    if (resultEntry == null) {
                         continue; // the entry had some problems, cannot be used
-                        //final String rawLine = resultEntry.textSnippet() == null ? null : resultEntry.textSnippet().getLineRaw();
-                        //System.out.println("***SNIPPET*** raw='" + rawLine + "', pattern='" + this.snippetPattern.toString() + "'");
-                        //if (rawLine != null && !this.snippetPattern.matcher(rawLine).matches()) continue;
                     }
 
                     //if (result.contains(resultEntry)) continue;

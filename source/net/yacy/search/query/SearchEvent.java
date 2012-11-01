@@ -103,6 +103,7 @@ public final class SearchEvent {
     private final SortedMap<byte[], HeuristicResult> heuristics;
     private byte[] IAmaxcounthash, IAneardhthash;
     private final ReferenceOrder order;
+    private final Thread localsearch;
 
     protected SearchEvent(
         final QueryParams query,
@@ -150,7 +151,7 @@ public final class SearchEvent {
         this.rankingProcess = new RWIProcess(this.query, this.order, remote);
 
         // start a local solr search
-        RemoteSearch.solrRemoteSearch(this, 1000, null /*this peer*/, Switchboard.urlBlacklist);
+        this.localsearch = RemoteSearch.solrRemoteSearch(this, 100, null /*this peer*/, Switchboard.urlBlacklist);
 
         // start a local RWI search concurrently
         this.rankingProcess.start();
@@ -476,6 +477,7 @@ public final class SearchEvent {
     }
 
     public ResultEntry oneResult(final int item, final long timeout) {
+        if (this.localsearch != null && this.localsearch.isAlive()) try {this.localsearch.join();} catch (InterruptedException e) {}
         return this.resultFetcher.oneResult(item, timeout);
     }
 

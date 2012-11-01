@@ -47,7 +47,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
 	private final TreeSet<Element<E>>   queue;    // object within the stack, ordered using a TreeSet
     private final Semaphore    enqueued; // semaphore for elements in the stack
     private final ArrayList<Element<E>> drained;  // objects that had been on the stack but had been removed
-    protected int maxsize;
+    private int maxsize;
 
     /**
      * create a new WeakPriorityBlockingQueue
@@ -158,18 +158,6 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         }
     }
 
-    /**
-     * Retrieves and removes the head of this queue, waiting if no elements are present on this queue.
-     * @return the head element from the queue
-     * @throws InterruptedException
-     */
-    public Element<E> take() throws InterruptedException {
-        this.enqueued.acquire();
-        synchronized (this) {
-            return takeUnsafe();
-        }
-    }
-
     private Element<E> takeUnsafe() {
         final Element<E> element = this.queue.first();
         assert element != null;
@@ -265,7 +253,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
      * return all entries as they would be retrievable with element()
      * @return a list of all elements in the stack
      */
-    public synchronized ArrayList<Element<E>> list() {
+    private synchronized ArrayList<Element<E>> list() {
         if (this.drained == null) return null;
         // shift all elements
         while (!this.queue.isEmpty()) this.poll();
@@ -293,7 +281,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         public String toString();
     }
 
-    protected abstract static class AbstractElement<E> implements Element<E>, Serializable {
+    private abstract static class AbstractElement<E> implements Element<E>, Serializable {
 
 		private static final long serialVersionUID = -7026597258248026566L;
 

@@ -832,7 +832,7 @@ public class yacysearch {
                 + theQuery.queryString
                 + " - "
                 + "local-unfiltered("
-                + theSearch.getRankingResult().getLocalIndexCount()
+                + theSearch.getRankingResult().rwiAvailableCount()
                 + "), "
                 + "local_miss("
                 + theSearch.getRankingResult().getMissCount()
@@ -848,7 +848,7 @@ public class yacysearch {
 
             // prepare search statistics
             theQuery.resultcount =
-                theSearch.getRankingResult().getLocalIndexCount()
+                theSearch.getRankingResult().rwiAvailableCount()
                     - theSearch.getRankingResult().getMissCount()
                     - theSearch.getRankingResult().getSortOutCount()
                     + theSearch.getRankingResult().getRemoteIndexCount();
@@ -933,7 +933,7 @@ public class yacysearch {
             }
 
             final int indexcount =
-                theSearch.getRankingResult().getLocalIndexCount()
+                theSearch.getRankingResult().rwiAvailableCount()
                     - theSearch.getRankingResult().getMissCount()
                     - theSearch.getRankingResult().getSortOutCount()
                     + theSearch.getRankingResult().getRemoteIndexCount();
@@ -950,7 +950,7 @@ public class yacysearch {
                 : "0");
             prop.put(
                 "num-results_globalresults_localResourceSize",
-                Formatter.number(theSearch.getRankingResult().getLocalIndexCount(), true));
+                Formatter.number(theSearch.getRankingResult().rwiAvailableCount(), true));
             prop.put(
                 "num-results_globalresults_localMissCount",
                 Formatter.number(theSearch.getRankingResult().getMissCount(), true));

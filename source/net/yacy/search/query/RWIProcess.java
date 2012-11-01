@@ -100,8 +100,8 @@ public final class RWIProcess extends Thread
     private int remote_peerCount;
     private int local_indexCount;
     private final AtomicInteger maxExpectedRemoteReferences, expectedRemoteReferences, receivedRemoteReferences;
-    private final WeakPriorityBlockingQueue<WordReferenceVars> stack;
-    private final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack;
+    private final WeakPriorityBlockingQueue<WordReferenceVars> rwiStack;
+    protected final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack;
     private final AtomicInteger feedersAlive, feedersTerminated;
     private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     //private final HandleSet handover; // key = urlhash; used for double-check of urls that had been handed over to search process
@@ -129,7 +129,7 @@ public final class RWIProcess extends Thread
         this.addRunning = true;
         this.localSearchInclusion = null;
         int stackMaxsize = query.snippetCacheStrategy == null || query.snippetCacheStrategy == CacheStrategy.CACHEONLY ? max_results_preparation_special : max_results_preparation;
-        this.stack = new WeakPriorityBlockingQueue<WordReferenceVars>(stackMaxsize, false);
+        this.rwiStack = new WeakPriorityBlockingQueue<WordReferenceVars>(stackMaxsize, false);
         this.nodeStack = new WeakPriorityBlockingQueue<URIMetadataNode>(stackMaxsize, false);
         this.doubleDomCache = new ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>>();
         this.query = query;
@@ -176,11 +176,11 @@ public final class RWIProcess extends Thread
         this.expectedRemoteReferences.addAndGet(x);
     }
 
-    public boolean expectMoreRemoteReferences() {
+    protected boolean expectMoreRemoteReferences() {
         return this.expectedRemoteReferences.get() > 0;
     }
 
-    public long waitTimeRecommendation() {
+    protected long waitTimeRecommendation() {
         return
             this.maxExpectedRemoteReferences.get() == 0 ? 0 :
                 Math.min(maxWaitPerResult,
@@ -528,7 +528,7 @@ public final class RWIProcess extends Thread
                 this.urlhashes.putUnique(iEntry.urlhash());
                 rankingtryloop: while (true) {
                     try {
-                        this.stack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
+                        this.rwiStack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
                         break rankingtryloop;
                     } catch ( final ArithmeticException e ) {
                         // this may happen if the concurrent normalizer changes values during cardinal computation
@@ -566,7 +566,7 @@ public final class RWIProcess extends Thread
         this.feedersAlive.addAndGet(1);
     }
 
-    public boolean feedingIsFinished() {
+    protected boolean feedingIsFinished() {
         return
             this.feedersTerminated.intValue() > (this.remote ? 1 : 0) &&
             this.feedersAlive.get() == 0;// &&
@@ -590,7 +590,7 @@ public final class RWIProcess extends Thread
         return false;
     }
 
-    public Map<byte[], ReferenceContainer<WordReference>> searchContainerMap() {
+    protected Map<byte[], ReferenceContainer<WordReference>> searchContainerMap() {
         // direct access to the result maps is needed for abstract generation
         // this is only available if execQuery() was called before
         return this.localSearchInclusion;
@@ -615,19 +615,20 @@ public final class RWIProcess extends Thread
             }
             // loop as long as we can expect that we should get more results
             final long timeout = System.currentTimeMillis() + waitingtime;
-            while (((!feedingIsFinished() && this.addRunning) || this.stack.sizeQueue() > 0) &&
+            while (((!feedingIsFinished() && this.addRunning) || this.nodeStack.sizeQueue() > 0 || this.rwiStack.sizeQueue() > 0) &&
                    (this.query.itemsPerPage < 1 || loops++ < this.query.itemsPerPage || (loops > 1000 && !this.doubleDomCache.isEmpty()))) {
                 page = null;
                 rwi = null;
                 if ( waitingtime <= 0 ) {
                     page = this.addRunning ? this.nodeStack.poll(waitingtime) : this.nodeStack.poll();
-                    if (page == null) rwi = this.addRunning ? this.stack.poll(waitingtime) : this.stack.poll();
+                    if (page == null) rwi = this.addRunning ? this.rwiStack.poll(waitingtime) : this.rwiStack.poll();
                 } else {
                     timeoutloop: while ( System.currentTimeMillis() < timeout ) {
-                        if (feedingIsFinished() && this.stack.sizeQueue() == 0) break timeoutloop;
+                        //System.out.println("### RWIProcess feedingIsFinished() = " + feedingIsFinished() + ", this.nodeStack.sizeQueue() = " + this.nodeStack.sizeQueue());
+                        if (feedingIsFinished() && this.rwiStack.sizeQueue() == 0 && this.nodeStack.sizeQueue() == 0) break timeoutloop;
                         page = this.nodeStack.poll(50);
                         if (page != null) break timeoutloop;
-                        rwi = this.stack.poll(50);
+                        rwi = this.rwiStack.poll(50);
                         if (rwi != null) break timeoutloop;
                     }
                 }
@@ -658,7 +659,13 @@ public final class RWIProcess extends Thread
             }
         } catch ( final InterruptedException e1 ) {
         }
-        if ( this.doubleDomCache.isEmpty() ) {
+        //Log.logWarning("RWIProcess", "feedingIsFinished() = " + feedingIsFinished());
+        //Log.logWarning("RWIProcess", "this.addRunning = " + this.addRunning);
+        //Log.logWarning("RWIProcess", "this.nodeStack.sizeQueue() = " + this.nodeStack.sizeQueue());
+        //Log.logWarning("RWIProcess", "this.stack.sizeQueue() = " + this.rwiStack.sizeQueue());
+        //Log.logWarning("RWIProcess", "this.doubleDomCachee.size() = " + this.doubleDomCache.size());
+        if (this.doubleDomCache.isEmpty()) {
+            Log.logWarning("RWIProcess", "doubleDomCache.isEmpty");
             return null;
         }
 
@@ -684,7 +691,10 @@ public final class RWIProcess extends Thread
             if (o == null) continue;
             if (o.getWeight() < bestEntry.getWeight()) bestEntry = o;
         }
-        if (bestEntry == null) return null;
+        if (bestEntry == null) {
+            Log.logWarning("RWIProcess", "bestEntry == null (1)");
+            return null;
+        }
 
         // finally remove the best entry from the doubledom cache
         m = this.doubleDomCache.get(bestEntry.getElement().hosthash());
@@ -698,7 +708,10 @@ public final class RWIProcess extends Thread
                 }
             }
         }
-        if (bestEntry == null) return null;
+        if (bestEntry == null) {
+            Log.logWarning("RWIProcess", "bestEntry == null (2)");
+            return null;
+        }
         return this.query.getSegment().fulltext().getMetadata(bestEntry.getElement(), bestEntry.getWeight());
     }
 
@@ -720,7 +733,10 @@ public final class RWIProcess extends Thread
         while ( (timeleft = timeout - System.currentTimeMillis()) > 0 ) {
             //System.out.println("timeleft = " + timeleft);
             final URIMetadataNode page = takeRWI(skipDoubleDom, timeleft);
-            if (page == null) return null; // all time was already wasted in takeRWI to get another element
+            if (page == null) {
+                Log.logWarning("RWIProcess", "takeRWI returned null");
+                return null; // all time was already wasted in takeRWI to get another element
+            }
 
             if ( !this.query.urlMask_isCatchall ) {
                 // check url mask
@@ -751,8 +767,7 @@ public final class RWIProcess extends Thread
 
             // content control
 
-			if (Switchboard.getSwitchboard().getConfigBool(
-					"contentcontrol.enabled", false) == true) {
+			if (Switchboard.getSwitchboard().getConfigBool("contentcontrol.enabled", false) == true) {
 
 				// check global network filter from bookmark list
 				if (!Switchboard.getSwitchboard()
@@ -766,7 +781,6 @@ public final class RWIProcess extends Thread
 							continue;
 						}
 					}
-
 				}
 			}
 
@@ -873,29 +887,16 @@ public final class RWIProcess extends Thread
             // accept url
             return page;
         }
+        Log.logWarning("RWIProcess", "loop terminated");
         return null;
     }
 
-    final static Pattern SPACE_PATTERN = Pattern.compile(" ");
-
-    public int sizeQueue() {
-        int c = this.stack.sizeQueue();
-        for ( final WeakPriorityBlockingQueue<WordReferenceVars> s : this.doubleDomCache.values() ) {
-            c += s.sizeQueue();
-        }
-        return c;
+    public int[] flagCount() {
+        return this.flagcount;
     }
 
-    public int sizeAvailable() {
-        int c = this.stack.sizeAvailable();
-        for ( final WeakPriorityBlockingQueue<WordReferenceVars> s : this.doubleDomCache.values() ) {
-            c += s.sizeAvailable();
-        }
-        return c;
-    }
-
-    public boolean isEmpty() {
-        if ( !this.stack.isEmpty() ) {
+    public boolean rwiIsEmpty() {
+        if ( !this.rwiStack.isEmpty() ) {
             return false;
         }
         for ( final WeakPriorityBlockingQueue<WordReferenceVars> s : this.doubleDomCache.values() ) {
@@ -906,20 +907,17 @@ public final class RWIProcess extends Thread
         return true;
     }
 
-    public int[] flagCount() {
-        return this.flagcount;
+    protected int rwiQueueSize() {
+        int c = this.rwiStack.sizeQueue();
+        for ( final WeakPriorityBlockingQueue<WordReferenceVars> s : this.doubleDomCache.values() ) {
+            c += s.sizeQueue();
+        }
+        return c;
     }
 
-    // "results from a total number of <remote_resourceSize + local_resourceSize> known (<local_resourceSize> local, <remote_resourceSize> remote), <remote_indexCount> links from <remote_peerCount> other YaCy peers."
-
-    public int filteredCount() {
-        // the number of index entries that are considered as result set
-        return this.stack.sizeAvailable();
-    }
-
-    public int getLocalIndexCount() {
+    public int rwiAvailableCount() {
         // the number of results in the local peer after filtering
-        return this.local_indexCount;
+        return this.rwiStack.sizeAvailable();
     }
 
     public int getRemoteIndexCount() {

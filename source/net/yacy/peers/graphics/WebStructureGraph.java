@@ -68,8 +68,8 @@ import net.yacy.search.Switchboard;
 
 public class WebStructureGraph {
 
-    public static int maxref = 300; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
-    public static int maxhosts = 50000; // maximum number of hosts in web structure map
+    public static int maxref = 200; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
+    public static int maxhosts = 10000; // maximum number of hosts in web structure map
 
     private final static Log log = new Log("WebStructureGraph");
 
@@ -110,7 +110,8 @@ public class WebStructureGraph {
         if ( loadedStructureB != null ) {
             this.structure_old.putAll(loadedStructureB);
         }
-
+        log.logInfo("loaded dump of " + loadedStructureB.size() + " entries from " + this.structureFile.toString());
+        
         // delete out-dated entries in case the structure is too big
         if ( this.structure_old.size() > maxhosts ) {
             // fill a set with last-modified - dates of the structure
@@ -152,6 +153,11 @@ public class WebStructureGraph {
         }
     }
 
+    public void clear() {
+        this.structure_old.clear();
+        this.structure_new.clear();
+    }
+    
     public void generateCitationReference(final DigestURI url, final Document document) {
         // generate citation reference
         final Map<MultiProtocolURI, String> hl = document.getHyperlinks();
@@ -527,6 +533,7 @@ public class WebStructureGraph {
         if (hosthash == null || hosthash.length() != 6) return 0;
         SortedMap<String, byte[]> tailMap;
         int c = 0;
+        try {
         synchronized ( this.structure_old ) {
             tailMap = this.structure_old.tailMap(hosthash);
             if ( !tailMap.isEmpty() ) {
@@ -544,6 +551,9 @@ public class WebStructureGraph {
                     c += refstr2count(UTF8.String(tailMap.get(key)));
                 }
             }
+        }
+        } catch (Throwable t) {
+            this.clear();
         }
         return c;
     }
@@ -803,6 +813,7 @@ public class WebStructureGraph {
             + " entries");
         final long time = System.currentTimeMillis();
         joinOldNew();
+        log.logInfo("dumping " + structure_old.size() + " entries to " + structureFile.toString());
         if ( !this.structure_old.isEmpty() ) {
             synchronized ( this.structure_old ) {
                 if ( !this.structure_old.isEmpty() ) {
