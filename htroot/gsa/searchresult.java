@@ -37,7 +37,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
-import net.yacy.search.query.SnippetProcess;
+import net.yacy.search.query.SearchEvent;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -115,7 +115,7 @@ public class searchresult {
         post.put("hl.alternateField", YaCySchema.description.getSolrFieldName());
         post.put("hl.simple.pre", "<b>");
         post.put("hl.simple.post", "</b>");
-        post.put("hl.fragsize", Integer.toString(SnippetProcess.SNIPPET_MAX_LENGTH));
+        post.put("hl.fragsize", Integer.toString(SearchEvent.SNIPPET_MAX_LENGTH));
         GSAResponseWriter.Sort sort = new GSAResponseWriter.Sort(post.get(CommonParams.SORT, ""));
         String sorts = sort.toSolr();
         if (sorts == null) {

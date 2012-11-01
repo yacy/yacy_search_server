@@ -327,7 +327,7 @@ public final class search {
             joincount = theSearch.rankingProcess.rwiAvailableCount() - theSearch.rankingProcess.getMissCount() - theSearch.getSortOutCount();
             prop.put("joincount", Integer.toString(joincount));
             if (joincount != 0) {
-                accu = theSearch.result().completeResults(maxtime);
+                accu = theSearch.completeResults(maxtime);
             }
             if (joincount <= 0 || abstracts.isEmpty()) {
                 prop.put("indexcount", "");
@@ -421,8 +421,8 @@ public final class search {
         theQuery.remotepeer = client == null ? null : sb.peers.lookupByIP(Domains.dnsResolve(client), -1, true, false, false);
         theQuery.resultcount = (theSearch == null) ? 0 : joincount;
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
-        theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.result().getURLRetrievalTime();
-        theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.result().getSnippetComputationTime();
+        theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.getURLRetrievalTime();
+        theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.getSnippetComputationTime();
         AccessTracker.add(AccessTracker.Location.remote, theQuery);
 
         // update the search tracker

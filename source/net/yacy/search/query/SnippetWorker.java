@@ -38,14 +38,14 @@ import net.yacy.search.snippet.ResultEntry;
 import net.yacy.search.snippet.TextSnippet;
 
 public class SnippetWorker extends Thread {
-    private final SnippetProcess snippetProcess;
+    private final SearchEvent snippetProcess;
     private final long timeout; // the date until this thread should try to work
     private long lastLifeSign; // when the last time the run()-loop was executed
     private final CacheStrategy cacheStrategy;
     private final int neededResults;
     private boolean shallrun;
 
-    public SnippetWorker(final SnippetProcess snippetProcess, final long maxlifetime, final CacheStrategy cacheStrategy, final int neededResults) {
+    public SnippetWorker(final SearchEvent snippetProcess, final long maxlifetime, final CacheStrategy cacheStrategy, final int neededResults) {
         this.snippetProcess = snippetProcess;
         this.cacheStrategy = cacheStrategy;
         this.lastLifeSign = System.currentTimeMillis();
@@ -78,13 +78,13 @@ public class SnippetWorker extends Thread {
                 }
 
                 // check if we can succeed if we try to take another url
-                if (this.snippetProcess.searchEvent.rankingProcess.feedingIsFinished() && this.snippetProcess.searchEvent.rankingProcess.rwiQueueSize() == 0 && this.snippetProcess.searchEvent.nodeStack.sizeAvailable() == 0) {
+                if (this.snippetProcess.rankingProcess.feedingIsFinished() && this.snippetProcess.rankingProcess.rwiQueueSize() == 0 && this.snippetProcess.nodeStack.sizeAvailable() == 0) {
                     Log.logWarning("SnippetProcess", "rankingProcess.feedingIsFinished() && rankingProcess.sizeQueue() == 0");
                     break;
                 }
 
                 // get next entry
-                page = this.snippetProcess.searchEvent.takeURL(true, Math.min(500, Math.max(20, this.timeout - System.currentTimeMillis())));
+                page = this.snippetProcess.takeURL(true, Math.min(500, Math.max(20, this.timeout - System.currentTimeMillis())));
                 //if (page != null) Log.logInfo("SnippetProcess", "got one page: " + page.metadata().url().toNormalform(true, false));
                 //if (page == null) page = rankedCache.takeURL(false, this.timeout - System.currentTimeMillis());
                 if (page == null) {
@@ -111,12 +111,12 @@ public class SnippetWorker extends Thread {
 
                 // place the result to the result vector
                 // apply post-ranking
-                long ranking = resultEntry.word() == null ? 0 : Long.valueOf(this.snippetProcess.searchEvent.rankingProcess.order.cardinal(resultEntry.word()));
-                ranking += postRanking(resultEntry, this.snippetProcess.searchEvent.rankingProcess.getTopicNavigator(10));
+                long ranking = resultEntry.word() == null ? 0 : Long.valueOf(this.snippetProcess.rankingProcess.order.cardinal(resultEntry.word()));
+                ranking += postRanking(resultEntry, this.snippetProcess.rankingProcess.getTopicNavigator(10));
                 resultEntry.ranking = ranking;
                 this.snippetProcess.result.put(new ReverseElement<ResultEntry>(resultEntry, ranking)); // remove smallest in case of overflow
                 if (nav_topics) {
-                    this.snippetProcess.searchEvent.rankingProcess.addTopics(resultEntry);
+                    this.snippetProcess.rankingProcess.addTopics(resultEntry);
                 }
             }
             if (System.currentTimeMillis() >= this.timeout) {
@@ -135,7 +135,7 @@ public class SnippetWorker extends Thread {
      * calculate the time since the worker has had the latest activity
      * @return time in milliseconds lasted since latest activity
      */
-    public long busytime() {
+    protected long busytime() {
         return System.currentTimeMillis() - this.lastLifeSign;
     }
 
@@ -223,7 +223,7 @@ public class SnippetWorker extends Thread {
                     //this.query.queryString,
                     null,
                     ((this.snippetProcess.query.constraint != null) && (this.snippetProcess.query.constraint.get(Condenser.flag_cat_indexof))),
-                    SnippetProcess.SNIPPET_MAX_LENGTH,
+                    SearchEvent.SNIPPET_MAX_LENGTH,
                     !this.snippetProcess.query.isLocal());
             return new ResultEntry(page, this.snippetProcess.query.getSegment(), this.snippetProcess.peers, snippet, null, dbRetrievalTime, 0); // result without snippet
         }
@@ -242,7 +242,7 @@ public class SnippetWorker extends Thread {
                     180,
                     !this.snippetProcess.query.isLocal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            SnippetProcess.log.logInfo("text snippet load time for " + page.url() + ": " + snippetComputationTime + ", " + (!snippet.getErrorCode().fail() ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
+            SearchEvent.log.logInfo("text snippet load time for " + page.url() + ": " + snippetComputationTime + ", " + (!snippet.getErrorCode().fail() ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
 
             if (!snippet.getErrorCode().fail()) {
                 // we loaded the file and found the snippet
@@ -261,7 +261,7 @@ public class SnippetWorker extends Thread {
                 if (this.snippetProcess.deleteIfSnippetFail) {
                     this.snippetProcess.workTables.failURLsRegisterMissingWord(this.snippetProcess.query.getSegment().termIndex(), page.url(), this.snippetProcess.query.query_include_hashes, reason);
                 }
-                SnippetProcess.log.logInfo("sorted out url " + page.url().toNormalform(true) + " during search: " + reason);
+                SearchEvent.log.logInfo("sorted out url " + page.url().toNormalform(true) + " during search: " + reason);
                 return null;
             }
         }

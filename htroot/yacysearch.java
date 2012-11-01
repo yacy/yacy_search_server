@@ -81,7 +81,6 @@ import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.query.SearchEventType;
-import net.yacy.search.query.SnippetProcess;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverCore;
@@ -709,7 +708,7 @@ public class yacysearch {
             try {
                 Pattern.compile(urlmask);
             } catch ( final PatternSyntaxException ex ) {
-                SnippetProcess.log.logWarning("Illegal URL mask, not a valid regex: " + urlmask);
+                SearchEvent.log.logWarning("Illegal URL mask, not a valid regex: " + urlmask);
                 prop.put("urlmaskerror", 1);
                 prop.putHTML("urlmaskerror_urlmask", urlmask);
                 urlmask = ".*";
@@ -718,7 +717,7 @@ public class yacysearch {
             try {
                 Pattern.compile(prefermask);
             } catch ( final PatternSyntaxException ex ) {
-            	SnippetProcess.log.logWarning("Illegal prefer mask, not a valid regex: " + prefermask);
+                SearchEvent.log.logWarning("Illegal prefer mask, not a valid regex: " + prefermask);
                 prop.put("prefermaskerror", 1);
                 prop.putHTML("prefermaskerror_prefermask", prefermask);
                 prefermask = "";
@@ -854,8 +853,8 @@ public class yacysearch {
                     - theSearch.rankingProcess.getMissCount()
                     + theSearch.rankingProcess.getRemoteIndexCount();
             theQuery.searchtime = System.currentTimeMillis() - timestamp;
-            theQuery.urlretrievaltime = theSearch.result().getURLRetrievalTime();
-            theQuery.snippetcomputationtime = theSearch.result().getSnippetComputationTime();
+            theQuery.urlretrievaltime = theSearch.getURLRetrievalTime();
+            theQuery.snippetcomputationtime = theSearch.getSnippetComputationTime();
             AccessTracker.add(AccessTracker.Location.local, theQuery);
 
             // check suggestions

@@ -40,7 +40,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.AccessTracker;
-import net.yacy.search.query.SnippetProcess;
+import net.yacy.search.query.SearchEvent;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -166,7 +166,7 @@ public class select {
             post.put("hl.fl", "text_t,h1,h2");
             post.put("hl.simple.pre", "");
             post.put("hl.simple.post", "");
-            post.put("hl.fragsize", Integer.toString(SnippetProcess.SNIPPET_MAX_LENGTH));
+            post.put("hl.fragsize", Integer.toString(SearchEvent.SNIPPET_MAX_LENGTH));
         }
 
         // get the embedded connector

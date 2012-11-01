@@ -63,7 +63,7 @@ public class SearchEventCache {
 
     public static boolean delete(final String urlhash) {
         for (final SearchEvent event: lastEvents.values()) {
-            if (event.result().delete(urlhash)) return true;
+            if (event.delete(urlhash)) return true;
         }
         return false;
     }
