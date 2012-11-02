@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,11 +35,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.solr.YaCySchema;
+import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.connector.MirrorSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
@@ -295,11 +298,50 @@ public final class Fulltext implements Iterable<byte[]> {
         if (MemoryControl.shortStatus()) clearCache();
     }
 
-    public void removeConcurrently(final List<byte[]> deleteIDs) {
-        new Thread() {
-            public void run() {for (byte[] id: deleteIDs) {remove(id);}}
-        }.start();
-        this.solr.commit();
+    /**
+     * remove a full subpath from the index
+     * @param subpath the left path of the url; at least until the end of the host
+     * @param concurrently if true, then the method returnes immediately and runs concurrently
+     */
+    public void remove(String subpath, final boolean concurrently) {
+        int p = subpath.substring(0, subpath.length() - 1).lastIndexOf('/');
+        final String path = p > 8 ? subpath.substring(0, p + 1) : subpath;
+        DigestURI uri;
+        try {uri = new DigestURI(path);} catch (MalformedURLException e) {return;}
+        final String host = uri.getHost();
+        Thread t = new Thread(){
+            public void run() {
+                final BlockingQueue<SolrDocument> docs = getSolr().concurrentQuery(YaCySchema.host_s.name() + ":" + host, 0, 100000, 60000);
+                try {
+                    SolrDocument doc;
+                    boolean removed = false;
+                    while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+                        String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
+                        if (u.startsWith(path)) {
+                            remove(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.name())));
+                            removed = true;
+                        }
+                    }
+                    if (removed) Fulltext.this.solr.commit();
+                } catch (InterruptedException e) {}
+            }
+        };
+        if (concurrently) t.start(); else t.run();
+    }
+    
+    /**
+     * remove a list of id's from the index
+     * @param deleteIDs a list of urlhashes; each denoting a document
+     * @param concurrently if true, then the method returnes immediately and runs concurrently
+     */
+    public void remove(final List<byte[]> deleteIDs, final boolean concurrently) {
+        Thread t = new Thread() {
+            public void run() {
+                for (byte[] id: deleteIDs) {remove(id);}
+                Fulltext.this.solr.commit();
+            }
+        };
+        if (concurrently) t.start(); else t.run();
     }
     
     public boolean remove(final byte[] urlHash) {

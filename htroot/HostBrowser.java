@@ -166,8 +166,9 @@ public class HostBrowser {
             if (p < 8) {
                 prop.put("files_root", 1);
             } else {
+                path = path.substring(0, p + 1);
                 prop.put("files_root", 0);
-                prop.put("files_root_path", path.substring(0, p + 1));
+                prop.put("files_root_path", path);
             }
             try {
                 // generate file list from path
@@ -221,7 +222,7 @@ public class HostBrowser {
                         } catch (MalformedURLException e) {}
                     }
                 }
-                if (deleteIDs.size() > 0) sb.index.fulltext().removeConcurrently(deleteIDs);
+                if (deleteIDs.size() > 0) sb.index.fulltext().remove(deleteIDs, true);
                 
                 // now combine both lists into one
                 Map<String, Boolean> files = new HashMap<String, Boolean>();
