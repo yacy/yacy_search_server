@@ -239,7 +239,7 @@ public class HostBrowser {
                 if (deleteIDs.size() > 0) sb.index.fulltext().remove(deleteIDs, true);
                 
                 // collect from crawler
-                List<Request> domainStackReferences = sb.crawlQueues.noticeURL.getDomainStackReferences(StackType.LOCAL, host, 1000, 3000);
+                List<Request> domainStackReferences = (admin) ? sb.crawlQueues.noticeURL.getDomainStackReferences(StackType.LOCAL, host, 1000, 3000) : new ArrayList<Request>(0);
                 Set<String> loadingLinks = new HashSet<String>();
                 for (Request crawlEntry: domainStackReferences) loadingLinks.add(crawlEntry.url().toNormalform(true));
                 
@@ -247,32 +247,40 @@ public class HostBrowser {
                 Map<String, Boolean> files = new HashMap<String, Boolean>();
                 for (String u: storedDocs) files.put(u, true);
                 for (String u: inboundLinks) if (!storedDocs.contains(u)) files.put(u, false);
+                for (String u: loadingLinks) if (u.startsWith(path) && !storedDocs.contains(u)) files.put(u, false);
                 Log.logInfo("HostBrowser", "collected " + files.size() + " urls for path " + path);
 
                 // distinguish files and folders
-                Map<String, Object> list = new TreeMap<String, Object>();
+                Map<String, Object> list = new TreeMap<String, Object>(); // a directory list; if object is boolean, its a file; if its a int[], then its a folder
                 int pl = path.length();
                 String file;
+                boolean loaded;
                 for (Map.Entry<String, Boolean> entry: files.entrySet()) {
+                    if (entry.getKey().length() < pl) continue; // this is not inside the path
+                    if (!entry.getKey().startsWith(path)) continue;
                     file = entry.getKey().substring(pl);
+                    loaded = entry.getValue().booleanValue();
                     p = file.indexOf('/');
                     if (p < 0) {
                         // this is a file
-                        list.put(entry.getKey(), entry.getValue()); // Boolean value: this is a file
+                        list.put(entry.getKey(), loaded); // Boolean value: this is a file; true -> file is in index; false -> not in index, maybe in crawler
                     } else {
                         // this is a directory path or a file in a subdirectory
                         String remainingPath = file.substring(0, p + 1);
                         if (complete && remainingPath.indexOf('.') > 0) {
-                            list.put(entry.getKey(), entry.getValue()); // Boolean value: this is a file
+                            list.put(entry.getKey(), loaded); // Boolean value: this is a file
                         } else {
                             String dir = path + remainingPath;
                             Object c = list.get(dir);
+                            boolean incrawler = loadingLinks.contains(entry.getKey());
                             if (c == null) {
-                                int[] linkedStored = new int[]{0,0};
-                                linkedStored[entry.getValue().booleanValue() ? 1 : 0]++;
+                                int[] linkedStored = new int[]{0,0,0};
+                                linkedStored[loaded ? 1 : 0]++;
+                                if (incrawler) linkedStored[2]++;
                                 list.put(dir, linkedStored);
                             } else if (c instanceof int[]) {
-                                ((int[]) c)[entry.getValue().booleanValue() ? 1 : 0]++;
+                                ((int[]) c)[loaded ? 1 : 0]++;
+                                if (incrawler) ((int[]) c)[2]++;
                             }
                         }
                     }
@@ -299,7 +307,10 @@ public class HostBrowser {
                         // this is a folder
                         prop.put("files_list_" + c + "_type", 1);
                         prop.put("files_list_" + c + "_type_url", entry.getKey());
-                        prop.put("files_list_" + c + "_type_count", ((int[]) entry.getValue())[1] + " stored / " + ((int[]) entry.getValue())[0] + " linked");
+                        int linked = ((int[]) entry.getValue())[0];
+                        int stored = ((int[]) entry.getValue())[1];
+                        int crawler = ((int[]) entry.getValue())[2];
+                        prop.put("files_list_" + c + "_type_count", stored + " stored / " + linked + " linked" + (crawler > 0 ? (" / " + crawler + " pending") : ""));
                     }
                     if (++c >= maxcount) break;
                 }
