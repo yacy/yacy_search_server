@@ -248,12 +248,12 @@ public class NoticedURL {
      * @param maxcount
      * @return a list of crawl loader requests
      */
-    public List<Request> getDomainStackReferences(final StackType stackType, String host, int maxcount) {
+    public List<Request> getDomainStackReferences(final StackType stackType, String host, int maxcount, final long maxtime) {
         switch (stackType) {
-            case LOCAL:     return this.coreStack.getDomainStackReferences(host, maxcount);
-            case GLOBAL:    return this.limitStack.getDomainStackReferences(host, maxcount);
-            case REMOTE:   return this.remoteStack.getDomainStackReferences(host, maxcount);
-            case NOLOAD:   return this.noloadStack.getDomainStackReferences(host, maxcount);
+            case LOCAL:     return this.coreStack.getDomainStackReferences(host, maxcount, maxtime);
+            case GLOBAL:    return this.limitStack.getDomainStackReferences(host, maxcount, maxtime);
+            case REMOTE:   return this.remoteStack.getDomainStackReferences(host, maxcount, maxtime);
+            case NOLOAD:   return this.noloadStack.getDomainStackReferences(host, maxcount, maxtime);
             default: return null;
         }
     }

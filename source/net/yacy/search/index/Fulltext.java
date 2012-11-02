@@ -318,7 +318,7 @@ public final class Fulltext implements Iterable<byte[]> {
         final String host = uri.getHost();
         Thread t = new Thread(){
             public void run() {
-                final BlockingQueue<SolrDocument> docs = getSolr().concurrentQuery(YaCySchema.host_s.name() + ":" + host, 0, 100000, 60000);
+                final BlockingQueue<SolrDocument> docs = getSolr().concurrentQuery(YaCySchema.host_s.name() + ":" + host, 0, 1000000, 600000, -1);
                 try {
                     SolrDocument doc;
                     boolean removed = false;
@@ -342,12 +342,25 @@ public final class Fulltext implements Iterable<byte[]> {
      * @param concurrently if true, then the method returnes immediately and runs concurrently
      */
     public void remove(final List<byte[]> deleteIDs, final boolean concurrently) {
+        if (deleteIDs == null || deleteIDs.size() == 0) return;
         Thread t = new Thread() {
             public void run() {
-                for (byte[] id: deleteIDs) {remove(id);}
-                Fulltext.this.solr.commit();
-            }
-        };
+                try {
+                    synchronized (Fulltext.this.solr) {
+                        for (byte[] urlHash: deleteIDs) {
+                            Fulltext.this.solr.delete(ASCII.String(urlHash));
+                        }
+                    }
+                } catch (final Throwable e) {
+                    Log.logException(e);
+                }
+                if (Fulltext.this.urlIndexFile != null) try {
+                    for (byte[] urlHash: deleteIDs) {
+                        final Row.Entry r = Fulltext.this.urlIndexFile.remove(urlHash);
+                        if (r != null) Fulltext.this.statsDump = null;
+                    }
+                } catch (final IOException e) {}
+        }};
         if (concurrently) t.start(); else t.run();
     }
     

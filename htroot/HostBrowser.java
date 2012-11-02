@@ -41,6 +41,7 @@ import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -130,8 +131,17 @@ public class HostBrowser {
         if (post.containsKey("hosts")) {
             // generate host list
             try {
-                int maxcount = 200;
+                int maxcount = 360; // == 6!/2 which makes nice matrixes for 3, 4, 5, 6 rows/colums
+                
+                // collect from index
                 ReversibleScoreMap<String> score = fulltext.getSolr().getFacet(YaCySchema.host_s.name(), maxcount);
+                
+                // collect from crawler
+                final Map<String, Integer[]> crawler = (admin) ? sb.crawlQueues.noticeURL.getDomainStackHosts(StackType.LOCAL, sb.robots) : new HashMap<String, Integer[]>();
+                for (Map.Entry<String, Integer[]> host: crawler.entrySet()) {
+                    score.inc(host.getKey(), host.getValue()[0]);
+                }
+                
                 int c = 0;
                 Iterator<String> i = score.keys(false);
                 String host;
@@ -139,6 +149,9 @@ public class HostBrowser {
                     host = i.next();
                     prop.put("hosts_list_" + c + "_host", host);
                     prop.put("hosts_list_" + c + "_count", score.get(host));
+                    boolean inCrawler = crawler.containsKey(host);
+                    prop.put("hosts_list_" + c + "_crawler", inCrawler ? 1 : 0);
+                    if (inCrawler) prop.put("hosts_list_" + c + "_crawler_pending", crawler.get(host)[0]);
                     c++;
                 }
                 prop.put("hosts_list", c);
@@ -166,9 +179,8 @@ public class HostBrowser {
             if (p < 8) {
                 prop.put("files_root", 1);
             } else {
-                path = path.substring(0, p + 1);
                 prop.put("files_root", 0);
-                prop.put("files_root_path", path);
+                prop.put("files_root_path", path.substring(0, p + 1));
             }
             try {
                 // generate file list from path
@@ -179,13 +191,14 @@ public class HostBrowser {
                 String hosthash = ASCII.String(uri.hash(), 6, 6);
                 
                 // get all files for a specific host from the index
-                BlockingQueue<SolrDocument> docs = fulltext.getSolr().concurrentQuery(YaCySchema.host_s.name() + ":" + host, 0, 100000, 60000);
+                BlockingQueue<SolrDocument> docs = fulltext.getSolr().concurrentQuery(YaCySchema.host_s.name() + ":" + host, 0, 100000, 3000, 100);
                 SolrDocument doc;
                 Set<String> storedDocs = new HashSet<String>();
                 Set<String> inboundLinks = new HashSet<String>();
                 Map<String, ReversibleScoreMap<String>> outboundHosts = new HashMap<String, ReversibleScoreMap<String>>();
                 int hostsize = 0;
                 final List<byte[]> deleteIDs = new ArrayList<byte[]>();
+                long timeout = System.currentTimeMillis() + 3000;
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                     String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
                     hostsize++;
@@ -221,10 +234,16 @@ public class HostBrowser {
                             }
                         } catch (MalformedURLException e) {}
                     }
+                    if (System.currentTimeMillis() > timeout) break;
                 }
                 if (deleteIDs.size() > 0) sb.index.fulltext().remove(deleteIDs, true);
                 
-                // now combine both lists into one
+                // collect from crawler
+                List<Request> domainStackReferences = sb.crawlQueues.noticeURL.getDomainStackReferences(StackType.LOCAL, host, 1000, 3000);
+                Set<String> loadingLinks = new HashSet<String>();
+                for (Request crawlEntry: domainStackReferences) loadingLinks.add(crawlEntry.url().toNormalform(true));
+                
+                // now combine all lists into one
                 Map<String, Boolean> files = new HashMap<String, Boolean>();
                 for (String u: storedDocs) files.put(u, true);
                 for (String u: inboundLinks) if (!storedDocs.contains(u)) files.put(u, false);
@@ -268,8 +287,7 @@ public class HostBrowser {
                         prop.put("files_list_" + c + "_type_url", entry.getKey());
                         boolean indexed = ((Boolean) entry.getValue()).booleanValue();
                         try {uri = new DigestURI(entry.getKey());} catch (MalformedURLException e) {uri = null;}
-                        boolean loading = load.equals(entry.getKey()) ||
-                                (uri != null && sb.crawlQueues.urlExists(uri.hash()) != null);
+                        boolean loading = load.equals(entry.getKey()) || (uri != null && sb.crawlQueues.urlExists(uri.hash()) != null);
                         //String failr = fulltext.failReason(ASCII.String(uri.hash()));
                         prop.put("files_list_" + c + "_type_stored", indexed ? 1 : loading ? 2 : 0);
                         prop.put("files_list_" + c + "_type_stored_load", loadRight ? 1 : 0);

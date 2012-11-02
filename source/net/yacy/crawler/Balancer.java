@@ -339,16 +339,18 @@ public class Balancer {
      * get lists of crawl request entries for a specific host
      * @param host
      * @param maxcount
+     * @param maxtime
      * @return a list of crawl loader requests
      */
-    public List<Request> getDomainStackReferences(String host, int maxcount) {
-        HostHandles hh = this.domainStacks.get(host);
+    public List<Request> getDomainStackReferences(final String host, int maxcount, final long maxtime) {
+        final HostHandles hh = this.domainStacks.get(host);
         if (hh == null) return new ArrayList<Request>(0);
-        HandleSet domainList = hh.handleSet;
+        final HandleSet domainList = hh.handleSet;
         if (domainList.isEmpty()) return new ArrayList<Request>(0);
-        ArrayList<Request> cel = new ArrayList<Request>(maxcount);
+        maxcount = Math.min(maxcount, domainList.size());
+        final ArrayList<Request> cel = new ArrayList<Request>(maxcount);
+        long timeout = System.currentTimeMillis() + maxtime;
         for (int i = 0; i < maxcount; i++) {
-            if (domainList.size() <= i) break;
             final byte[] urlhash = domainList.getOne(i);
             if (urlhash == null) continue;
             Row.Entry rowEntry;
@@ -365,6 +367,7 @@ public class Balancer {
                 continue;
             }
             cel.add(crawlEntry);
+            if (System.currentTimeMillis() > timeout) break;
         }
         return cel;
     }

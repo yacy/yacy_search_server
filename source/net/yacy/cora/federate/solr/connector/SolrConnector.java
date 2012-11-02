@@ -146,12 +146,14 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * Get a query result from solr as a stream of documents.
      * The result queue is considered as terminated if AbstractSolrConnector.POISON_DOCUMENT is returned.
      * The method returns immediately and feeds the search results into the queue
-     * @param querystring
-     * @param offset
-     * @param maxcount
-     * @return
+     * @param querystring the solr query string
+     * @param offset first result offset
+     * @param maxcount the maximum number of results
+     * @param maxtime the maximum time in milliseconds
+     * @param buffersize the size of an ArrayBlockingQueue; if <= 0 then a LinkedBlockingQueue is used
+     * @return a blocking queue which is terminated  with AbstractSolrConnector.POISON_DOCUMENT as last element
      */
-    public BlockingQueue<SolrDocument> concurrentQuery(final String querystring, final int offset, final int maxcount, final long maxtime);
+    public BlockingQueue<SolrDocument> concurrentQuery(final String querystring, final int offset, final int maxcount, final long maxtime, final int buffersize);
 
     /**
      * get a document id result stream from a solr query.
