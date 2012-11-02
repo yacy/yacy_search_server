@@ -72,6 +72,9 @@ import org.apache.solr.common.SolrInputDocument;
 
 public final class Fulltext implements Iterable<byte[]> {
 
+    private static final String SOLR_PATH = "solr_40"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
+    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36"};
+    
     private static final long forcedCommitTimeout = 3000; // wait this time until a next forced commit is executed
     
     // class objects
@@ -116,16 +119,20 @@ public final class Fulltext implements Iterable<byte[]> {
     }
 
     public void connectLocalSolr(final int commitWithin) throws IOException {
-        File solrLocation = this.location;
-        if (solrLocation.getName().equals("default")) solrLocation = solrLocation.getParentFile();
-        String solrPath = "solr_36";
-        solrLocation = new File(solrLocation, solrPath); // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
+        File baseLocation = this.location;
+        if (baseLocation.getName().equals("default")) baseLocation = baseLocation.getParentFile();
+        File solrLocation = new File(baseLocation, SOLR_PATH);
+        // migrate old solr to new
+        for (String oldVersion: SOLR_OLD_PATH) {
+            File oldLocation = new File(baseLocation, oldVersion);
+            if (oldLocation.exists()) oldLocation.renameTo(solrLocation);
+        }
         EmbeddedSolrConnector esc = new EmbeddedSolrConnector(solrLocation, new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"));
         esc.setCommitWithinMs(commitWithin);
         Version luceneVersion = esc.getConfig().getLuceneVersion("luceneMatchVersion");
         String lvn = luceneVersion.name();
         int p = lvn.indexOf('_');
-        assert solrPath.endsWith(lvn.substring(p)) : "luceneVersion = " + lvn + ", solrPath = " + solrPath + ", p = " + p;
+        assert SOLR_PATH.endsWith(lvn.substring(p)) : "luceneVersion = " + lvn + ", solrPath = " + SOLR_PATH + ", p = " + p + ", check defaults/solr/solrconfig.xml";
         Log.logInfo("MetadataRepository", "connected solr in " + solrLocation.toString() + ", lucene version " + lvn);
         this.solr.connect0(esc);
     }

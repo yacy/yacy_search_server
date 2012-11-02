@@ -29,12 +29,13 @@ import java.util.Set;
 import net.yacy.cora.federate.solr.SolrType;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Fieldable;
+import org.apache.lucene.index.IndexableField;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.common.util.XML;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
+import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.schema.DateField;
 import org.apache.solr.schema.FieldType;
@@ -43,7 +44,6 @@ import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TextField;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
-import org.apache.solr.search.DocSlice;
 import org.apache.solr.search.SolrIndexSearcher;
 
 public class EnhancedXMLResponseWriter implements QueryResponseWriter {
@@ -74,9 +74,8 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         assert values.get("responseHeader") != null;
         assert values.get("response") != null;
 
-        @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
-        DocSlice response = (DocSlice) values.get("response");
+        DocList response = ((ResultContext) values.get("response")).docs;
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) values.get("highlighting");
         writeProps(writer, "responseHeader", responseHeader); // this.writeVal("responseHeader", responseHeader);
@@ -139,11 +138,11 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
             writeTag(writer, "float", "score", Float.toString(score), false);
         }
 
-        List<Fieldable> fields = doc.getFields();
+        List<IndexableField> fields = doc.getFields();
         int sz = fields.size();
         int fidx1 = 0, fidx2 = 0;
         while (fidx1 < sz) {
-            Fieldable value = fields.get(fidx1);
+            IndexableField value = fields.get(fidx1);
             String fieldName = value.name();
             fidx2 = fidx1 + 1;
             while (fidx2 < sz && fieldName.equals(fields.get(fidx2).name())) {

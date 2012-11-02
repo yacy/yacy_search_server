@@ -45,7 +45,6 @@ import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 
 import org.apache.lucene.document.Document;
 import org.apache.solr.common.SolrException;
-import org.apache.solr.common.util.FastWriter;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.ServletSolrParams;
 import org.apache.solr.request.SolrQueryRequest;
@@ -58,6 +57,7 @@ import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.servlet.cache.HttpCacheHeaderUtil;
 import org.apache.solr.servlet.cache.Method;
+import org.apache.solr.util.FastWriter;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;

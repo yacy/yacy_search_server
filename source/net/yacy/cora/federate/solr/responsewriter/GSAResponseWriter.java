@@ -37,15 +37,16 @@ import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Fieldable;
+import org.apache.lucene.index.IndexableField;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.common.util.XML;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
+import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.DocIterator;
-import org.apache.solr.search.DocSlice;
+import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
 
 /**
@@ -139,9 +140,8 @@ public class GSAResponseWriter implements QueryResponseWriter {
 
         long start = System.currentTimeMillis();
 
-        @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
-        DocSlice response = (DocSlice) rsp.getValues().get("response");
+        DocList response = ((ResultContext) rsp.getValues().get("response")).docs;
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) rsp.getValues().get("highlighting");
         Map<String, List<String>> snippets = OpensearchResponseWriter.highlighting(highlighting);
@@ -214,13 +214,13 @@ public class GSAResponseWriter implements QueryResponseWriter {
         for (int i = 0; i < responseCount; i++) {
             int id = iterator.nextDoc();
             Document doc = searcher.doc(id, SOLR_FIELDS);
-            List<Fieldable> fields = doc.getFields();
+            List<IndexableField> fields = doc.getFields();
             int fieldc = fields.size();
 
             // pre-scan the fields to get the mime-type            
             String mime = "";
             for (int j = 0; j < fieldc; j++) {
-                Fieldable value = fields.get(j);
+                IndexableField value = fields.get(j);
                 String fieldName = value.name();
                 if (YaCySchema.content_type.getSolrFieldName().equals(fieldName)) {
                     mime = value.stringValue();
@@ -235,7 +235,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
             int size = 0;
             boolean title_written = false; // the solr index may contain several; we take only the first which should be the visible tag in <title></title>
             for (int j = 0; j < fieldc; j++) {
-                Fieldable value = fields.get(j);
+                IndexableField value = fields.get(j);
                 String fieldName = value.name();
 
                 // apply generic matching rule

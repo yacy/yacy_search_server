@@ -47,7 +47,6 @@ import net.yacy.server.serverSwitch;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.common.util.FastWriter;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
@@ -55,6 +54,7 @@ import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.response.XSLTResponseWriter;
 import org.apache.solr.search.DocSlice;
+import org.apache.solr.util.FastWriter;
 
 
 // try
@@ -72,12 +72,14 @@ public class select {
         try {solrServlet.init(null);} catch (ServletException e) {}
         RESPONSE_WRITER.putAll(SolrCore.DEFAULT_RESPONSE_WRITERS);
         XSLTResponseWriter xsltWriter = new XSLTResponseWriter();
+        OpensearchResponseWriter opensearchResponseWriter = new OpensearchResponseWriter();
         @SuppressWarnings("rawtypes")
         NamedList initArgs = new NamedList();
         xsltWriter.init(initArgs);
         RESPONSE_WRITER.put("xslt", xsltWriter); // try i.e. http://localhost:8090/solr/select?q=*:*&start=0&rows=10&wt=xslt&tr=json.xsl
         RESPONSE_WRITER.put("exml", new EnhancedXMLResponseWriter());
-        RESPONSE_WRITER.put("rss", new OpensearchResponseWriter()); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
+        RESPONSE_WRITER.put("rss", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
+        RESPONSE_WRITER.put("opensearch", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
         RESPONSE_WRITER.put("yjson", new JsonResponseWriter()); //try http://localhost:8090/solr/select?wt=json&q=olympia&hl=true&hl.fl=text_t,h1,h2
     }
 

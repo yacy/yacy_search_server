@@ -43,10 +43,10 @@ import net.yacy.server.serverSwitch;
 
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
-import org.apache.solr.common.util.FastWriter;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.DocSlice;
+import org.apache.solr.util.FastWriter;
 
 
 // try

@@ -174,7 +174,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
 
     public void add(final File file, final String solrId) throws IOException {
         final ContentStreamUpdateRequest up = new ContentStreamUpdateRequest("/update/extract");
-        up.addFile(file);
+        up.addFile(file, "application/octet-stream");
         up.setParam("literal.id", solrId);
         up.setParam("uprefix", "attr_");
         up.setParam("fmap.content", "attr_content");

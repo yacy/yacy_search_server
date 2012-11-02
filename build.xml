@@ -159,8 +159,8 @@
         <pathelement location="${lib}/J7Zip-modified.jar" />
     	<pathelement location="${lib}/activation.jar" />
         <pathelement location="${lib}/apache-mime4j-0.6.jar" />
-        <pathelement location="${lib}/apache-solr-core-3.6.1.jar" />
-        <pathelement location="${lib}/apache-solr-solrj-3.6.1.jar" />
+        <pathelement location="${lib}/apache-solr-core-4.0.0.jar" />
+        <pathelement location="${lib}/apache-solr-solrj-4.0.0.jar" />
         <pathelement location="${lib}/arq-2.8.7.jar" />
     	<pathelement location="${lib}/bcmail-jdk15-145.jar" />
     	<pathelement location="${lib}/bcprov-jdk15-145.jar" />
@@ -182,6 +182,7 @@
         <pathelement location="${lib}/icu4j-core.jar" />
         <pathelement location="${lib}/iri-0.8.jar" />
         <pathelement location="${lib}/jakarta-oro-2.0.8.jar" />
+    	<pathelement location="${lib}/jaudiotagger-2.0.4-20111207.115108-15.jar" />
     	<pathelement location="${lib}/jcifs-1.3.15.jar" />
     	<pathelement location="${lib}/jcl-over-slf4j-1.6.4.jar" />
     	<pathelement location="${lib}/jempbox-1.7.0" />
@@ -193,14 +194,17 @@
     	<pathelement location="${lib}/jsoup-1.6.3.jar" />
     	<pathelement location="${lib}/log4j-1.2.16.jar" />
     	<pathelement location="${lib}/log4j-over-slf4j-1.6.4.jar" />
-    	<pathelement location="${lib}/lucene-analyzers-3.6.1.jar" />
-    	<pathelement location="${lib}/lucene-grouping-3.6.1.jar" />
-    	<pathelement location="${lib}/lucene-core-3.6.1.jar" />
-    	<pathelement location="${lib}/lucene-highlighter-3.6.1.jar" />
-    	<pathelement location="${lib}/lucene-phonetic-3.6.1.jar" />
-    	<pathelement location="${lib}/lucene-spatial-3.6.1.jar" />
-    	<pathelement location="${lib}/lucene-spellchecker-3.6.1.jar" />
-    	<pathelement location="${lib}/lucene-memory-3.6.1.jar" />
+    	<pathelement location="${lib}/lucene-analyzers-common-4.0.0.jar" />
+    	<pathelement location="${lib}/lucene-analyzers-phonetic-4.0.0.jar" />
+    	<pathelement location="${lib}/lucene-core-4.0.0.jar" />
+    	<pathelement location="${lib}/lucene-grouping-4.0.0.jar" />
+    	<pathelement location="${lib}/lucene-highlighter-4.0.0.jar" />
+    	<pathelement location="${lib}/lucene-memory-4.0.0.jar" />
+    	<pathelement location="${lib}/lucene-misc-4.0.0.jar" />
+    	<pathelement location="${lib}/lucene-queries-4.0.0.jar" />
+    	<pathelement location="${lib}/lucene-queryparser-4.0.0.jar" />
+    	<pathelement location="${lib}/lucene-spatial-4.0.0.jar" />
+    	<pathelement location="${lib}/lucene-suggest-4.0.0.jar" />
     	<pathelement location="${lib}/metadata-extractor-2.4.0-beta-1.jar" />
     	<pathelement location="${lib}/mysql-connector-java-5.1.12-bin.jar" />
         <pathelement location="${lib}/pdfbox-1.7.0.jar" />
@@ -210,11 +214,12 @@
         <pathelement location="${lib}/servlet-api-2.5-20081211.jar" />
         <pathelement location="${lib}/slf4j-api-1.6.4.jar" />
         <pathelement location="${lib}/slf4j-jdk14-1.6.4.jar" />
+    	<pathelement location="${lib}/spatial4j-0.3.jar" />
     	<pathelement location="${lib}/webcat-0.1-swf.jar" />
     	<pathelement location="${lib}/wstx-asl-3.2.7.jar" />
     	<pathelement location="${lib}/xercesImpl.jar" />
     	<pathelement location="${lib}/xml-apis.jar" />
-    	<pathelement location="${lib}/jaudiotagger-2.0.4-20111207.115108-15.jar" />
+    	<pathelement location="${lib}/zookeeper-3.3.6.jar" />
     </path>
 
   <target name="compile-core" depends="init" description="compile YaCy core">
