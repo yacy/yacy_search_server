@@ -150,7 +150,8 @@ public class Crawler_p {
                 if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = CrawlProfile.MATCH_ALL_STRING; // avoid that all urls are filtered out if bad value was submitted
                 final boolean fullDomain = "domain".equals(post.get("range", "wide")); // special property in simple crawl start
                 final boolean subPath    = "subpath".equals(post.get("range", "wide")); // special property in simple crawl start
-
+                final boolean deleteold =  (fullDomain || subPath) && post.getBoolean("deleteold");
+                
                 String crawlingStart0 = post.get("crawlingURL","").trim(); // the crawljob start url
                 String[] rootURLs0 = crawlingStart0.indexOf('\n') > 0 || crawlingStart0.indexOf('\r') > 0 ? crawlingStart0.split("[\\r\\n]+") : crawlingStart0.split(Pattern.quote("|"));
                 Set<DigestURI> rootURLs = new HashSet<DigestURI>();
@@ -301,8 +302,18 @@ public class Crawler_p {
                     String siteFilter = ".*";
                     if (fullDomain) {
                         siteFilter = CrawlProfile.siteFilter(rootURLs);
+                        if (deleteold) {
+                            for (DigestURI u: rootURLs) sb.index.fulltext().deleteDomain(u.hosthash(), true);
+                        }
                     } else if (subPath) {
                         siteFilter = CrawlProfile.subpathFilter(rootURLs);
+                        if (deleteold) {
+                            for (DigestURI u: rootURLs) {
+                                String subpath = CrawlProfile.mustMatchSubpath(u);
+                                if (subpath.endsWith(".*")) subpath = subpath.substring(0, subpath.length() - 2);
+                                sb.index.fulltext().remove(subpath, true);
+                            }
+                        }
                     }
                     if (CrawlProfile.MATCH_ALL_STRING.equals(newcrawlingMustMatch)) {
                         newcrawlingMustMatch = siteFilter;

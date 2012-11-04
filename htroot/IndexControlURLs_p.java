@@ -297,12 +297,7 @@ public class IndexControlURLs_p {
 
         if (post.containsKey("deletedomain")) {
             final String hp = post.get("hashpart");
-            try {
-                segment.fulltext().deleteDomain(hp);
-            } catch (final IOException e) {
-                // TODO Auto-generated catch block
-                Log.logException(e);
-            }
+            segment.fulltext().deleteDomain(hp, false);
             // trigger the loading of the table
             post.put("statistics", "");
         }

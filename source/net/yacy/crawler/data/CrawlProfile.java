@@ -482,6 +482,12 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return System.currentTimeMillis() - (60000L * oldTimeMinutes);
     }
 
+    public static String siteFilter(final Set<? extends MultiProtocolURI> uris) {
+        final StringBuilder filter = new StringBuilder();
+        for (final MultiProtocolURI uri: uris) filter.append('|').append(mustMatchFilterFullDomain(uri));
+        return filter.length() > 0 ? filter.substring(1) : CrawlProfile.MATCH_ALL_STRING;
+    }
+
     public static String mustMatchFilterFullDomain(final MultiProtocolURI uri) {
         String host = uri.getHost();
         if (host.startsWith("www.")) host = host.substring(4);
@@ -490,22 +496,16 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return new StringBuilder(host.length() + 20).append(protocol).append("://(www.)?").append(Pattern.quote(host)).append(".*").toString();
     }
 
-    private static String mustMatchSubpath(final MultiProtocolURI uri) {
-        String u = uri.toNormalform(true);
-        if (!u.endsWith("/")) {int p = u.lastIndexOf("/"); if (p > 0) u = u.substring(0, p + 1);}
-        return new StringBuilder(u.length() + 5).append(Pattern.quote(u)).append(".*").toString();
-    }
-
-    public static String siteFilter(final Set<? extends MultiProtocolURI> uris) {
-        final StringBuilder filter = new StringBuilder();
-        for (final MultiProtocolURI uri: uris) filter.append('|').append(mustMatchFilterFullDomain(uri));
-        return filter.length() > 0 ? filter.substring(1) : CrawlProfile.MATCH_ALL_STRING;
-    }
-
     public static String subpathFilter(final Set<? extends MultiProtocolURI> uris) {
         final StringBuilder filter = new StringBuilder();
         for (final MultiProtocolURI uri: uris) filter.append('|').append(mustMatchSubpath(uri));
         return filter.length() > 0 ? filter.substring(1) : CrawlProfile.MATCH_ALL_STRING;
+    }
+
+    public static String mustMatchSubpath(final MultiProtocolURI uri) {
+        String u = uri.toNormalform(true);
+        if (!u.endsWith("/")) {int p = u.lastIndexOf("/"); if (p > 0) u = u.substring(0, p + 1);}
+        return new StringBuilder(u.length() + 5).append(Pattern.quote(u)).append(".*").toString();
     }
 
     public static final Set<String> ignoreNames = new HashSet<String>();
