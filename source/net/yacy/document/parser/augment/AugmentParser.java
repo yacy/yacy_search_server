@@ -20,94 +20,70 @@ public class AugmentParser extends AbstractParser implements Parser {
 
     RDFaParser rdfaParser;
 
-	public AugmentParser() {
-		super("AugmentParser");
-		this.rdfaParser = new RDFaParser();
+    public AugmentParser() {
+        super("AugmentParser");
+        this.rdfaParser = new RDFaParser();
 
-		Log.logInfo("AugmentedParser", "augmented parser was initialized");
+        Log.logInfo("AugmentedParser", "augmented parser was initialized");
 
-		this.SUPPORTED_EXTENSIONS.add("html");
-		this.SUPPORTED_EXTENSIONS.add("php");
-		this.SUPPORTED_MIME_TYPES.add("text/html");
-		this.SUPPORTED_MIME_TYPES.add("text/xhtml+xml");
-		this.SUPPORTED_EXTENSIONS.add("html");
-		this.SUPPORTED_EXTENSIONS.add("htm");
-	}
+        this.SUPPORTED_EXTENSIONS.add("html");
+        this.SUPPORTED_EXTENSIONS.add("php");
+        this.SUPPORTED_MIME_TYPES.add("text/html");
+        this.SUPPORTED_MIME_TYPES.add("text/xhtml+xml");
+        this.SUPPORTED_EXTENSIONS.add("html");
+        this.SUPPORTED_EXTENSIONS.add("htm");
+    }
 
-	@Override
-	public Document[] parse(DigestURI url, String mimeType, String charset, InputStream source) throws Failure, InterruptedException {
+    @Override
+    public Document[] parse(DigestURI url, String mimeType, String charset, InputStream source) throws Parser.Failure, InterruptedException {
 
-            Document[] htmlDocs = this.rdfaParser.parse(url, mimeType, charset, source);
-            try {
-                source.reset();
-            } catch (IOException e) {
-                Log.logException(e);
+        Document[] htmlDocs = this.rdfaParser.parse(url, mimeType, charset, source);
+        try {
+            source.reset();
+        } catch (IOException e) {
+            Log.logException(e);
+        }
+
+        for (final Document doc : htmlDocs) {
+            /* analyze(doc, url, mimeType, charset);  // enrich document text */
+            parseAndAugment(doc, url, mimeType, charset); // enrich document with additional tags
+        }
+        return htmlDocs;
+    }
+
+/*  TODO: not implemented yet
+ *
+    private void analyze(Document origDoc, DigestURI url,
+            String mimeType, String charset) {
+        // if the magic word appears in the document, perform extra actions.
+        if (origDoc.getKeywords().contains("magicword")) {
+            String all = "";
+            all = "yacylatest";
+            // TODO: append content of string all to origDoc.text, maybe use Document.mergeDocuments() to do so
+        }
+    }
+*/
+    private void parseAndAugment(Document origDoc, DigestURI url, String mimeType, String charset) {
+
+        Iterator<net.yacy.kelondro.blob.Tables.Row> it;
+        try {
+            it = Switchboard.getSwitchboard().tables.iterator("aggregatedtags");
+            it = Switchboard.getSwitchboard().tables.orderBy(it, -1, "timestamp_creation").iterator();
+            while (it.hasNext()) {
+                net.yacy.kelondro.blob.Tables.Row r = it.next();
+                if (r.get("url", "").equals(url.toNormalform(false))) {
+                    Set<String> tags = new HashSet<String>();
+                    for (String s : YMarkUtil.keysStringToSet(r.get("scitag", ""))) {
+                        tags.add(s);
+                    }
+                    origDoc.addTags(tags);
+                }
             }
 
-            Document alreadyParsedDocument = htmlDocs[0];
-            Document superDoc = analyze(alreadyParsedDocument, url, mimeType, charset);
-            Document augmentDoc = parseAndAugment(url, mimeType, charset);
-            Document[] retDocs = new Document[htmlDocs.length + 1];
-            for (int i = 1; i < htmlDocs.length; i++) {
-                retDocs[i - 1] = htmlDocs[i];
-            }
-
-            retDocs[retDocs.length - 1] = augmentDoc;
-            retDocs[retDocs.length - 2] = superDoc;
-            try { // merge additional result docs into the parse main document
-                alreadyParsedDocument.addSubDocuments(retDocs);
-            } catch (IOException ex) {
-                Log.logException(ex);
-            }
-            Document[] finalretDocs = new Document[1]; // return the merged document
-            finalretDocs[0] = alreadyParsedDocument;
-            return finalretDocs;
-	}
-
-	private static Document analyze (Document alreadyParsedDocument, DigestURI url,
-			String mimeType, String charset) {
-
-		Document newDoc = new Document(url, mimeType, charset, null, null, null, singleList(""), "",
-				"", null, "", 0, 0, null, null, null, null, false);
-
-		// if the magic word appears in the document, perform extra actions.
-		if (alreadyParsedDocument.getKeywords().contains("magicword")) {
-			String all = "";
-			all = "yacylatest";
-			newDoc = new Document(url, mimeType, charset, null, null, null, singleList(""), "",
-					"", null, "", 0, 0, all, null, null, null, false);
-		}
-
-		return newDoc;
-	}
-
-	private Document parseAndAugment(DigestURI url, String mimeType, String charset) {
-
-		String all = "";
-		Document newDoc = new Document(url, mimeType, charset, null, null, null, singleList(""), "",
-				"", null, "", 0, 0, all, null, null, null, false);
-
-		Iterator<net.yacy.kelondro.blob.Tables.Row> it;
-		try {
-			it = Switchboard.getSwitchboard().tables.iterator("aggregatedtags");
-			it = Switchboard.getSwitchboard().tables.orderBy(it, -1, "timestamp_creation").iterator();
-			while (it.hasNext()) {
-				net.yacy.kelondro.blob.Tables.Row r = it.next();
-				if (r.get("url", "").equals (url.toNormalform(false))) {
-					Set<String> tags = new HashSet<String>();
-					for (String s : YMarkUtil.keysStringToSet(r.get("scitag", ""))) {
-						tags.add(s);
-					}
-					newDoc.addTags(tags);
-				}
-			}
-
-		} catch (IOException e) {
-			Log.logException(e);
-		}
-
-		return newDoc;
-	}
+        } catch (IOException e) {
+            Log.logException(e);
+        }
+    }
 
 
 }
