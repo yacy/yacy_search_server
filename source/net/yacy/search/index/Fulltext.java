@@ -795,44 +795,53 @@ public final class Fulltext implements Iterable<byte[]> {
      * @return number of deleted domains
      * @throws IOException
      */
-    public int deleteDomain(final String hosthash) throws IOException {
+    public void deleteDomain(final String hosthash, boolean concurrent) {
         // first collect all url hashes that belong to the domain
         assert hosthash.length() == 6;
-        // delete in solr
-        synchronized (this.solr) {
-            this.solr.deleteByQuery(YaCySchema.host_id_s.name() + ":\"" + hosthash + "\"");
-        }
-
-        // delete in old metadata structure
-        final ArrayList<String> l = new ArrayList<String>();
-        synchronized (this) {
-            final CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
-            String hash;
-            while (i != null && i.hasNext()) {
-                hash = ASCII.String(i.next());
-                if (hosthash.equals(hash.substring(6))) l.add(hash);
-            }
-        }
-
-        // then delete the urls using this list
-        int cnt = 0;
-        for (final String h: l) {
-            if (this.urlIndexFile.delete(ASCII.getBytes(h))) cnt++;
-        }
-
-        // finally remove the line with statistics
-        if (this.statsDump != null) {
-            final Iterator<HostStat> hsi = this.statsDump.iterator();
-            HostStat hs;
-            while (hsi.hasNext()) {
-                hs = hsi.next();
-                if (hs.hosthash.equals(hosthash)) {
-                    hsi.remove();
-                    break;
+        
+        Thread t = new Thread() {
+            public void run() {
+                // delete in solr
+                synchronized (Fulltext.this.solr) {
+                    try {
+                        Fulltext.this.solr.deleteByQuery(YaCySchema.host_id_s.name() + ":\"" + hosthash + "\"");
+                        Fulltext.this.solr.commit();
+                    } catch (IOException e) {}
+                }
+        
+                // delete in old metadata structure
+                if (Fulltext.this.urlIndexFile != null) {
+                    final ArrayList<String> l = new ArrayList<String>();
+                    synchronized (this) {
+                        CloneableIterator<byte[]> i;
+                        try {
+                            i = Fulltext.this.urlIndexFile.keys(true, null);
+                            String hash;
+                            while (i != null && i.hasNext()) {
+                                hash = ASCII.String(i.next());
+                                if (hosthash.equals(hash.substring(6))) l.add(hash);
+                            }
+                            
+                            // then delete the urls using this list
+                            for (final String h: l) Fulltext.this.urlIndexFile.delete(ASCII.getBytes(h));
+                        } catch (IOException e) {}
+                    }
+                }
+        
+                // finally remove the line with statistics
+                if (Fulltext.this.statsDump != null) {
+                    final Iterator<HostStat> hsi = Fulltext.this.statsDump.iterator();
+                    HostStat hs;
+                    while (hsi.hasNext()) {
+                        hs = hsi.next();
+                        if (hs.hosthash.equals(hosthash)) {
+                            hsi.remove();
+                            break;
+                        }
+                    }
                 }
             }
-        }
-
-        return cnt;
+        };
+        if (concurrent) t.start(); else t.run();
     }
 }

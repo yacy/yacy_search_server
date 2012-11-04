@@ -127,13 +127,8 @@ public class CrawlResults {
                 final String domain = post.get("domain", null);
                 final String hashpart = domain == null ? null : DigestURI.hosthash6(domain);
                 if (hashpart != null) {
-                    // delete all urls for this domain from database
-                    try {
-                        sb.index.fulltext().deleteDomain(hashpart);
-                        ResultURLs.deleteDomain(tabletype, domain, hashpart);
-                    } catch (final IOException e) {
-                        Log.logException(e);
-                    }
+                    sb.index.fulltext().deleteDomain(hashpart, false);
+                    ResultURLs.deleteDomain(tabletype, domain, hashpart);
                 }
             }
 
