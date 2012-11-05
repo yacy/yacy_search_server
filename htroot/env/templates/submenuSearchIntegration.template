@@ -1,0 +1,7 @@
+<div class="SubMenu">
+  <h3>Search Integration into External Sites</h3>
+  <ul class="SubMenu">
+    <li><a href="/ConfigLiveSearch.html" class="MenuItemLink">Live Search Anywhere</a></li>
+    <li><a href="/ConfigSearchBox.html" class="MenuItemLink">Search Box Anywhere</a></li>
+  </ul>
+</div>

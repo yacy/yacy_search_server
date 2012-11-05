@@ -15,15 +15,12 @@
       <li><a href="/gsa/search?q=www&size=3" class="MenuItemLink">Embedded GSA API</a></li>
       <!--<li><a href="/yacy/ui/" accesskey="s" class="MenuItemLink">Rich Client Search</a></li>-->
       <li><a href="/compare_yacy.html?display=1" class="MenuItemLink">Compare Search</a></li>
-      <li><a href="/ConfigPortal.html" class="MenuItemLink">Search Integration</a></li>
     </ul>
-  </li>
   <li class="menugroup" id="menugroupGlobalIndex">
-    <h3>Browse</h3>
+    <h3>Search Design</h3>
     <ul class="menu">
-      <li><a href="/YMarks.html" class="MenuItemLink">Bookmarks</a></li>
-      <li><a href="/Surftips.html?display=1" class="MenuItemLink">Surftips</a></li>
-      <li><a href="/Wiki.html?display=1" class="MenuItemLink">Local Peer Wiki</a></li>
+      <li><a href="/ConfigPortal.html" class="MenuItemLink">Integrated Search Configuration</a></li>
+      <li><a href="/ConfigLiveSearch.html" class="MenuItemLink">Search Integration into External Sites</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupCrawlerControl">
@@ -34,6 +31,7 @@
       <li><a href="/IndexControlURLs_p.html" class="MenuItemLink lock">Index Administration</a></li>
       <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Filter &amp; Blacklists</a></li>
       <li><a href="/Vocabulary_p.html" class="MenuItemLink lock">Content Semantic</a></li>
+      <li><a href="/Table_API_p.html" class="MenuItemLink lock">Process Scheduler</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupMonitoring">
@@ -44,27 +42,26 @@
       <li><a href="/AccessGrid_p.html" class="MenuItemLink lock">Network Access</a></li>
       <li><a href="/ViewLog_p.html" class="MenuItemLink lock">Computation</a></li>
       <li><a href="/terminal_p.html" accesskey="t" class="MenuItemLink lock">Terminal</a></li>
+      <li><a href="/YMarks.html" class="MenuItemLink">Bookmarks</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupPeerControl">
     <h3>Peer Control</h3>
     <ul class="menu">
       <li><a href="/Status.html?noforward=" class="MenuItemLink">Admin Console</a></li>
-      <li><a href="/Table_API_p.html" class="MenuItemLink lock">API Action Steering</a></li>
-      <li><a href="/Help.html" class="MenuItemLink">Tutorial</a></li>
       <li><a href="/Steering.html?restart=" class="MenuItemLink lock" onclick="return confirm('Confirm Restart')">Re-Start</a></li>
       <li><a href="/Steering.html?shutdown=" class="MenuItemLink lock" onclick="return confirm('Confirm Shutdown')">Shutdown</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupTheProjekt">
-    <h3>The Project</h3>
+    <h3>The YaCy Project</h3>
     <ul class="menu">
       <li><a href="http://www.yacy.net/" class="MenuItemLink">Project Home</a></li>
-      <li><a href="http://forum.yacy.de" class="MenuItemLink">Deutsches Forum</a></li>
-      <li><a href="http://www.yacy-forum.org" class="MenuItemLink">English Forum</a></li>
-      <li><a href="http://wiki.yacy.de" class="MenuItemLink">YaCy Project Wiki</a></li>
-      <li><a href="https://gitorious.org/yacy/rc1/commits/master" class="MenuItemLink">Development Change Log</a></li>
-      <li><a href="http://bugs.yacy.net" class="MenuItemLink">YaCy Bugtracker</a></li>      
+      <li><a href="/Help.html" class="MenuItemLink">Tutorials</a></li>
+      <li><a href="http://forum.yacy.de" class="MenuItemLink">Forum/Discussion</a></li>
+      <li><a href="http://wiki.yacy.de" class="MenuItemLink">Project Wiki</a></li>
+      <li><a href="https://gitorious.org/yacy/rc1/commits/master" class="MenuItemLink">Git Repository</a></li>
+      <li><a href="http://bugs.yacy.net" class="MenuItemLink">Bugtracker</a></li>      
       <li><a href="#(newpeer)#http://www.yacystats.de/peer/#[peerhash]#::http://www.yacystats.de#(/newpeer)#" class="MenuItemLink">#(newpeer)#Peer Statistics::YaCy Statistics#(/newpeer)#</a></li>
     </ul>
   </li>
