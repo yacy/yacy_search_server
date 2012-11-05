@@ -71,6 +71,7 @@ import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.RankingProcess;
 import net.yacy.search.query.SearchEvent;
 
@@ -367,7 +368,10 @@ public class Segment {
         try {
             this.fulltext.putDocument(solrInputDoc);
         } catch ( final IOException e ) {
-            Log.logWarning("SOLR", "failed to send " + urlNormalform + " to solr: " + e.getMessage());
+            Log.logWarning("SOLR", "failed to send " + urlNormalform + " to solr, pausing Crawler! - " + e.getMessage());
+            // pause the crawler!!!
+            Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+            Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         }
 
         final long storageEndTime = System.currentTimeMillis();
