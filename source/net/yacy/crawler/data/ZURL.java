@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -38,16 +39,15 @@ import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.federate.solr.connector.ShardSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.table.Table;
@@ -56,7 +56,7 @@ import net.yacy.search.index.SolrConfiguration;
 
 public class ZURL implements Iterable<ZURL.Entry> {
 
-    public static Log log = new Log("REJECTED");
+    private static Log log = new Log("REJECTED");
 
     private static final int EcoFSBufferSize = 2000;
     private static final int maxStackSize    = 1000;
@@ -93,7 +93,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
     private final SolrConnector solrConnector;
     private final SolrConfiguration solrConfiguration;
 
-    public ZURL(
+    protected ZURL(
             final SolrConnector solrConnector,
             final SolrConfiguration solrConfiguration,
     		final File cachePath,
@@ -124,21 +124,12 @@ public class ZURL implements Iterable<ZURL.Entry> {
         this.stack = new LinkedBlockingQueue<byte[]>();
     }
 
-    public ZURL(final ShardSolrConnector solrConnector,
-                    final SolrConfiguration solrConfiguration) {
-        this.solrConnector = solrConnector;
-        this.solrConfiguration = solrConfiguration;
-        // creates a new ZUR in RAM
-        this.urlIndex = new RowSet(rowdef);
-        this.stack = new LinkedBlockingQueue<byte[]>();
-    }
-
-    public void clear() throws IOException {
+    protected void clear() throws IOException {
         if (this.urlIndex != null) this.urlIndex.clear();
         if (this.stack != null) this.stack.clear();
     }
 
-    public void close() {
+    protected void close() {
         try {clear();} catch (final IOException e) {}
         if (this.urlIndex != null) this.urlIndex.close();
     }
@@ -151,6 +142,22 @@ public class ZURL implements Iterable<ZURL.Entry> {
             return true;
         } catch (final IOException e) {
             return false;
+        }
+    }
+    
+    public void removeHost(final byte[] hosthash) throws IOException {
+        if (hosthash == null) return;
+        Iterator<byte[]> i = this.urlIndex.keys(true, null);
+        List<byte[]> r = new ArrayList<byte[]>();
+        while (i.hasNext()) {
+            byte[] b = i.next();
+            if (NaturalOrder.naturalOrder.equal(hosthash, 0, b, 6, 6)) r.add(b);
+        }
+        for (byte[] b: r) this.urlIndex.remove(b);
+        i = this.stack.iterator();
+        while (i.hasNext()) {
+            byte[] b = i.next();
+            if (NaturalOrder.naturalOrder.equal(hosthash, 0, b, 6, 6)) i.remove();
         }
     }
 
@@ -259,7 +266,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         }
     }
 
-    public boolean exists(final byte[] urlHash) {
+    boolean exists(final byte[] urlHash) {
         return this.urlIndex.has(urlHash);
     }
 
@@ -273,14 +280,14 @@ public class ZURL implements Iterable<ZURL.Entry> {
 
     public class Entry {
 
-        Request bentry;    // the balancer entry
+        private Request bentry;    // the balancer entry
         private final byte[]   executor;  // the crawling executor
         private final Date     workdate;  // the time when the url was last time tried to load
         private final int      workcount; // number of tryings
         private final String   anycause;  // string describing reason for load fail
         private boolean  stored;
 
-        protected Entry(
+        private Entry(
                 final Request bentry,
                 final byte[] executor,
                 final Date workdate,
@@ -297,7 +304,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             this.stored = false;
         }
 
-        protected Entry(final Row.Entry entry) throws IOException {
+        private Entry(final Row.Entry entry) throws IOException {
             assert (entry != null);
             this.executor = entry.getColBytes(1, true);
             this.workdate = new Date(entry.getColLong(2));
@@ -317,7 +324,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             return this.bentry.initiator();
         }
 
-        public byte[] hash() {
+        private byte[] hash() {
             // return a url-hash, based on the md5 algorithm
             // the result is a String of 12 bytes within a 72-bit space
             // (each byte has an 6-bit range)

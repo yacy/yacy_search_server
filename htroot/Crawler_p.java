@@ -35,6 +35,7 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.SpaceExceededException;
@@ -370,6 +371,16 @@ public class Crawler_p {
                 sb.crawler.removeActive(handle);
                 sb.crawler.removePassive(handle);
                 try {sb.crawlQueues.noticeURL.removeByProfileHandle(profile.handle(), 10000);} catch (SpaceExceededException e1) {}
+                
+                // delete all error urls for that domain
+                for (DigestURI u: rootURLs) {
+                    String hosthash = u.hosthash();
+                    try {
+                        sb.crawlQueues.errorURL.removeHost(ASCII.getBytes(hosthash));
+                        sb.index.fulltext().getSolr().deleteByQuery(YaCySchema.host_id_s.name() + ":\"" + hosthash + "\" AND " + YaCySchema.failreason_t.name() + ":[* TO *]");
+                        sb.index.fulltext().commit();
+                    } catch (IOException e) {Log.logException(e);}
+                }
                 
                 // start the crawl
                 if ("url".equals(crawlingMode)) {

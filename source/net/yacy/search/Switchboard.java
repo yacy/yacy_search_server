@@ -183,7 +183,6 @@ import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.SolrConfiguration;
 import net.yacy.search.query.AccessTracker;
-import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.BlockRank;
