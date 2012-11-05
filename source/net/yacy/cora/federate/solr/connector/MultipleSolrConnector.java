@@ -23,6 +23,7 @@ package net.yacy.cora.federate.solr.connector;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import net.yacy.cora.sorting.ReversibleScoreMap;
@@ -183,8 +184,8 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
     }
 
     @Override
-    public ReversibleScoreMap<String> getFacet(final String field, final int maxresults) throws IOException {
-        return this.solr.getFacet(field, maxresults);
+    public Map<String, ReversibleScoreMap<String>> getFacets(String query, String[] fields, int maxresults) throws IOException {
+        return this.solr.getFacets(query, fields, maxresults);
     }
 
     @Override

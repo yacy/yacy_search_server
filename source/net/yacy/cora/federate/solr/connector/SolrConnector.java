@@ -23,6 +23,7 @@ package net.yacy.cora.federate.solr.connector;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.sorting.ReversibleScoreMap;
@@ -134,13 +135,14 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public long getQueryCount(final String querystring) throws IOException;
 
     /**
-     * get a facet of the index: a list of values that are most common in a specific field
-     * @param field the field which is selected for the facet
-     * @param maxresults the maximum size of the resulting map
-     * @return an ordered map of fields
+     * get facets of the index: a list of lists with values that are most common in a specific field
+     * @param query a query which is performed to get the facets
+     * @param fields the field names which are selected as facet
+     * @param maxresults the maximum size of the resulting maps
+     * @return a map with key = facet field name, value = an ordered map of field values for that field
      * @throws IOException
      */
-    public ReversibleScoreMap<String> getFacet(String field, int maxresults) throws IOException;
+    public Map<String, ReversibleScoreMap<String>> getFacets(String query, String[] fields, int maxresults) throws IOException;
     
     /**
      * Get a query result from solr as a stream of documents.

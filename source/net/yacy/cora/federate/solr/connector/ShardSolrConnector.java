@@ -24,11 +24,11 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-import net.yacy.cora.document.UTF8;
-import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.protocol.Domains;
 
@@ -225,21 +225,23 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
         return count.get();
     }
 
-    /**
-     * get a facet of the index: a list of values that are most common in a specific field
-     * @param field the field which is selected for the facet
-     * @param maxresults the maximum size of the resulting map
-     * @return an ordered map of fields
-     * @throws IOException
-     */
-    public ReversibleScoreMap<String> getFacet(final String field, final int maxresults) throws IOException {
-        ReversibleScoreMap<String> acc = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+    @Override
+    public Map<String, ReversibleScoreMap<String>> getFacets(String query, String[] fields, int maxresults) throws IOException {
+        Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>();
         for (final SolrConnector connector: this.connectors) {
-            ReversibleScoreMap<String> peer = connector.getFacet(field, maxresults);
-            for (String key: peer) acc.inc(key, peer.get(key));
+            Map<String, ReversibleScoreMap<String>> peer = connector.getFacets(query, fields, maxresults);        
+            innerloop: for (Map.Entry<String, ReversibleScoreMap<String>> facet: facets.entrySet()) {
+                ReversibleScoreMap<String> peerfacet = peer.remove(facet.getKey());
+                if (peerfacet == null) continue innerloop;
+                for (String key: peerfacet) facet.getValue().inc(key, peerfacet.get(key));
+            }
+            for (Map.Entry<String, ReversibleScoreMap<String>> peerfacet: peer.entrySet()) {
+                facets.put(peerfacet.getKey(), peerfacet.getValue());
+            }
         }
-        return acc;
+        return facets;
     }
+    
     
     public long[] getSizeList() {
         final long[] size = new long[this.connectors.size()];

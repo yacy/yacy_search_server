@@ -350,6 +350,7 @@ public final class Fulltext implements Iterable<byte[]> {
                         for (byte[] urlHash: deleteIDs) {
                             Fulltext.this.solr.delete(ASCII.String(urlHash));
                         }
+                        Fulltext.this.solr.commit();
                     }
                 } catch (final Throwable e) {
                     Log.logException(e);

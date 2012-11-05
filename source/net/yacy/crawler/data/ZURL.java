@@ -37,7 +37,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.solr.common.SolrInputDocument;
 
-import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.order.Base64Order;
@@ -345,45 +344,6 @@ public class ZURL implements Iterable<ZURL.Entry> {
             return this.anycause;
         }
 
-    }
-
-    private class kiter implements Iterator<Entry> {
-        // enumerates entry elements
-        private final Iterator<Row.Entry> i;
-        private boolean error = false;
-
-        private kiter(final boolean up, final String firstHash) throws IOException {
-            this.i = ZURL.this.urlIndex.rows(up, (firstHash == null) ? null : ASCII.getBytes(firstHash));
-            this.error = false;
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (this.error) return false;
-            return this.i.hasNext();
-        }
-
-        @Override
-        public Entry next() throws RuntimeException {
-            final Row.Entry e = this.i.next();
-            if (e == null) return null;
-            try {
-                return new Entry(e);
-            } catch (final IOException ex) {
-                throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + e.getPrimaryKeyASCII());
-            }
-        }
-
-        @Override
-        public void remove() {
-            this.i.remove();
-        }
-
-    }
-
-    public Iterator<Entry> entries(final boolean up, final String firstHash) throws IOException {
-        // enumerates entry elements
-        return new kiter(up, firstHash);
     }
 
 }

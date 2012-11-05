@@ -24,7 +24,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.sorting.ClusteredScoreMap;
@@ -261,34 +263,38 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         final SolrDocumentList docs = rsp.getResults();
         return docs.getNumFound();
     }
-    
+
     /**
-     * get a facet of the index: a list of values that are most common in a specific field
-     * @param field the field which is selected for the facet
-     * @param maxresults the maximum size of the resulting map
-     * @return an ordered map of fields
+     * get facets of the index: a list of lists with values that are most common in a specific field
+     * @param query a query which is performed to get the facets
+     * @param fields the field names which are selected as facet
+     * @param maxresults the maximum size of the resulting maps
+     * @return a map with key = facet field name, value = an ordered map of field values for that field
      * @throws IOException
      */
-    @Override
-    public ReversibleScoreMap<String> getFacet(String field, int maxresults) throws IOException {
+    public Map<String, ReversibleScoreMap<String>> getFacets(String query, String[] fields, int maxresults) throws IOException {
         // construct query
         final SolrQuery params = new SolrQuery();
-        params.setQuery("*:*");
+        params.setQuery(query);
         params.setRows(0);
         params.setStart(0);
         params.setFacet(true);
         params.setFacetLimit(maxresults);
         params.setFacetSort(FacetParams.FACET_SORT_COUNT);
-        params.addFacetField(field);
+        for (String field: fields) params.addFacetField(field);
         
         // query the server
         QueryResponse rsp = query(params);
-        FacetField facet = rsp.getFacetField(field);
-        ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
-        List<Count> values = facet.getValues();
-        if (values == null) return result;
-        for (Count ff: values) result.set(ff.getName(), (int) ff.getCount());
-        return result;
+        Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>(fields.length);
+        for (String field: fields) {
+            FacetField facet = rsp.getFacetField(field);
+            ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+            List<Count> values = facet.getValues();
+            if (values == null) continue;
+            for (Count ff: values) result.set(ff.getName(), (int) ff.getCount());
+            facets.put(field, result);
+        }
+        return facets;
     }
 
     @Override

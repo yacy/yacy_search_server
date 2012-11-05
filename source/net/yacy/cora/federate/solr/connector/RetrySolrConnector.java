@@ -22,10 +22,10 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import net.yacy.cora.document.UTF8;
-import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -225,18 +225,18 @@ public class RetrySolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
     @Override
-    public ReversibleScoreMap<String> getFacet(final String field, final int maxresults) throws IOException {
+    public Map<String, ReversibleScoreMap<String>> getFacets(String query, String[] fields, int maxresults) throws IOException {
         final long t = System.currentTimeMillis() + this.retryMaxTime;
         Throwable ee = null;
         while (System.currentTimeMillis() < t) try {
-            return this.solrConnector.getFacet(field, maxresults);
+            return this.solrConnector.getFacets(query, fields, maxresults);
         } catch (final Throwable e) {
             ee = e;
             try {Thread.sleep(10);} catch (final InterruptedException e1) {}
             continue;
         }
         if (ee != null) throw (ee instanceof IOException) ? (IOException) ee : new IOException(ee.getMessage());
-        return new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+        return new HashMap<String, ReversibleScoreMap<String>>();
     }
     
     @Override
