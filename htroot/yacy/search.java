@@ -213,7 +213,6 @@ public final class search {
         // prepare an abstract result
         final StringBuilder indexabstract = new StringBuilder(6000);
         int indexabstractContainercount = 0;
-        int joincount = 0;
         QueryParams theQuery = null;
         SearchEvent theSearch = null;
         ArrayList<WeakPriorityBlockingQueue.Element<ResultEntry>> accu = null;
@@ -324,12 +323,11 @@ public final class search {
             theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, null, abstracts.length() > 0, sb.loader, count, maxtime, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
 
             // set statistic details of search result and find best result index set
-            joincount = theSearch.rankingProcess.rwiAvailableCount() - theSearch.rankingProcess.getMissCount() - theSearch.getSortOutCount();
-            prop.put("joincount", Integer.toString(joincount));
-            if (joincount != 0) {
+            prop.put("joincount", Integer.toString(theQuery.getResultCount()));
+            if (theQuery.getResultCount() > 0) {
                 accu = theSearch.completeResults(maxtime);
             }
-            if (joincount <= 0 || abstracts.isEmpty()) {
+            if (theQuery.getResultCount() <= 0 || abstracts.isEmpty()) {
                 prop.put("indexcount", "");
             } else {
                 // attach information about index abstracts
@@ -391,7 +389,7 @@ public final class search {
         prop.put("indexabstract", indexabstract.toString());
 
         // prepare result
-        if (joincount == 0 || accu == null || accu.isEmpty()) {
+        if (theQuery.getResultCount() == 0 || accu == null || accu.isEmpty()) {
 
             // no results
             prop.put("links", "");
@@ -419,7 +417,6 @@ public final class search {
 
         // prepare search statistics
         theQuery.remotepeer = client == null ? null : sb.peers.lookupByIP(Domains.dnsResolve(client), -1, true, false, false);
-        theQuery.resultcount = (theSearch == null) ? 0 : joincount;
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
         theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.getURLRetrievalTime();
         theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.getSnippetComputationTime();
@@ -436,7 +433,7 @@ public final class search {
 
         // log
         Network.log.logInfo("EXIT HASH SEARCH: " +
-                QueryParams.anonymizedQueryHashes(theQuery.query_include_hashes) + " - " + joincount + " links found, " +
+                QueryParams.anonymizedQueryHashes(theQuery.query_include_hashes) + " - " + theQuery.getResultCount() + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstracts, " +
                 (System.currentTimeMillis() - timestamp) + " milliseconds");

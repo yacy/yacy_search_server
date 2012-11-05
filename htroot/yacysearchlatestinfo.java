@@ -30,21 +30,19 @@ public class yacysearchlatestinfo {
             prop.put("remotePeerCount", 0);
             return prop;
         }
-        final QueryParams theQuery = theSearch.getQuery();
 
         // dynamically update count values
-        final int totalcount = theSearch.rankingProcess.rwiAvailableCount() - theSearch.rankingProcess.getMissCount() - theSearch.getSortOutCount() + theSearch.rankingProcess.getRemoteIndexCount();
-        final int offset = theQuery.neededResults() - theQuery.itemsPerPage() + 1;
+        final int offset = theSearch.query.neededResults() - theSearch.query.itemsPerPage() + 1;
         prop.put("offset", offset);
-        prop.put("itemscount",Formatter.number(offset + theSearch.getQuery().itemsPerPage >= totalcount ? offset + totalcount % theSearch.getQuery().itemsPerPage - 1 : offset + theSearch.getQuery().itemsPerPage - 1));
-        prop.put("itemsperpage", theSearch.getQuery().itemsPerPage);
-        prop.put("totalcount", Formatter.number(totalcount, true));
-        prop.put("localResourceSize", Formatter.number(theSearch.rankingProcess.rwiAvailableCount(), true));
-        prop.put("localMissCount", Formatter.number(theSearch.rankingProcess.getMissCount(), true));
-        prop.put("remoteResourceSize", Formatter.number(theSearch.rankingProcess.getRemoteResourceSize(), true));
-        prop.put("remoteIndexCount", Formatter.number(theSearch.rankingProcess.getRemoteIndexCount(), true));
-        prop.put("remotePeerCount", Formatter.number(theSearch.rankingProcess.getRemotePeerCount(), true));
-        prop.putJSON("navurlBase", QueryParams.navurlBase("html", theQuery, null, theQuery.urlMask.toString(), theQuery.navigators).toString());
+        prop.put("itemscount",Formatter.number(offset + theSearch.query.itemsPerPage >= theSearch.query.getResultCount() ? offset + theSearch.query.getResultCount() % theSearch.query.itemsPerPage - 1 : offset + theSearch.query.itemsPerPage - 1));
+        prop.put("itemsperpage", theSearch.query.itemsPerPage);
+        prop.put("totalcount", Formatter.number(theSearch.query.getResultCount(), true));
+        prop.put("localResourceSize", Formatter.number(theSearch.query.local_rwi_available.get() + theSearch.query.local_solr_available.get(), true));
+        prop.put("localMissCount", Formatter.number(theSearch.query.misses.size(), true));
+        prop.put("remoteResourceSize", Formatter.number(theSearch.query.remote_available.get(), true));
+        prop.put("remoteIndexCount", Formatter.number(theSearch.query.remote_stored.get(), true));
+        prop.put("remotePeerCount", Formatter.number(theSearch.query.remote_peerCount.get(), true));
+        prop.putJSON("navurlBase", QueryParams.navurlBase("html", theSearch.query, null, theSearch.query.urlMask.toString(), theSearch.query.navigators).toString());
 
         return prop;
     }

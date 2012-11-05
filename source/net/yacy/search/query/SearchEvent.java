@@ -90,7 +90,7 @@ public final class SearchEvent {
     private final static int SNIPPET_WORKER_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
 
     private long eventTime;
-    protected QueryParams query;
+    public QueryParams query;
     public final SeedDB peers;
     final WorkTables workTables;
     public  final RankingProcess rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
@@ -104,8 +104,7 @@ public final class SearchEvent {
     private final SortedMap<byte[], HeuristicResult> heuristics;
     private byte[] IAmaxcounthash, IAneardhthash;
     private final Thread localsearch;
-    private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences;
-    private int sortout; // counter for referenced that had been sorted out for other reasons
+    private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences; // counter for referenced that had been sorted out for other reasons
     private final ScoreMap<String> authorNavigator; // a counter for the appearances of authors
     private final ScoreMap<String> namespaceNavigator; // a counter for name spaces
     private final ScoreMap<String> protocolNavigator; // a counter for protocol types
@@ -120,7 +119,6 @@ public final class SearchEvent {
     protected long                                          snippetComputationAllTime;
     private final boolean remote;
     private boolean cleanupState;
-    private int resultCounter = 0;
 
     protected SearchEvent(
         final QueryParams query,
@@ -144,7 +142,6 @@ public final class SearchEvent {
         
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
-        this.sortout = 0;
         this.authorNavigator = new ConcurrentScoreMap<String>();
         this.namespaceNavigator = new ConcurrentScoreMap<String>();
         this.protocolNavigator = new ConcurrentScoreMap<String>();
@@ -306,21 +303,13 @@ public final class SearchEvent {
         }
         SearchEventCache.put(this.query.id(false), this);
     }
-
+    
     public long getEventTime() {
         return this.eventTime;
     }
 
     protected void resetEventTime() {
         this.eventTime = System.currentTimeMillis();
-    }
-
-    public QueryParams getQuery() {
-        return this.query;
-    }
-
-    public void setQuery(final QueryParams query) {
-        this.query = query;
     }
 
     protected void cleanup() {
@@ -486,10 +475,12 @@ public final class SearchEvent {
         assert (index != null);
         if (index.isEmpty()) return;
 
-        if (!local) {
+        if (local) {
+            this.query.local_solr_stored.set(fullResource);
+        } else {
             assert fullResource >= 0 : "fullResource = " + fullResource;
-            this.rankingProcess.remote_resourceSize += fullResource;
-            this.rankingProcess.remote_peerCount++;
+            this.query.remote_stored.addAndGet(fullResource);
+            this.query.remote_peerCount.incrementAndGet();
         }
 
         long timer = System.currentTimeMillis();
@@ -604,7 +595,7 @@ public final class SearchEvent {
                     }
                 }
                 // increase counter for statistics
-                if (local) this.rankingProcess.local_indexCount++; else this.rankingProcess.remote_indexCount++;
+                if (local) this.query.local_solr_available.incrementAndGet(); else this.query.remote_available.incrementAndGet();
             }
         } catch ( final SpaceExceededException e ) {
         }
@@ -624,10 +615,6 @@ public final class SearchEvent {
             this.maxExpectedRemoteReferences.addAndGet(x);
         }
         this.expectedRemoteReferences.addAndGet(x);
-    }
-
-    public int getSortOutCount() {
-        return this.sortout;
     }
 
     private URIMetadataNode takeRWI(final boolean skipDoubleDom, final long waitingtime) {
@@ -771,27 +758,27 @@ public final class SearchEvent {
             if ( !this.query.urlMask_isCatchall ) {
                 // check url mask
                 if ( !page.matches(this.query.urlMask) ) {
-                    this.sortout++;
+                    this.query.misses.add(page.hash());
                     continue;
                 }
             }
 
             // check for more errors
             if ( page.url() == null ) {
-                this.sortout++;
+                this.query.misses.add(page.hash());
                 continue; // rare case where the url is corrupted
             }
 
             // check content domain
             if ((this.query.contentdom.getCode() > 0 && page.url().getContentDomain() != this.query.contentdom) ||
                 (this.query.contentdom == Classification.ContentDomain.TEXT && page.url().getContentDomain().getCode() > 0)) {
-                this.sortout++;
+                this.query.misses.add(page.hash());
                 continue;
             }
 
             // Check for blacklist
             if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page)) {
-                this.sortout++;
+                this.query.misses.add(page.hash());
                 continue;
             }
 
@@ -805,7 +792,7 @@ public final class SearchEvent {
                     FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
                     if (f != null) {
                         if (!f.isListed(page.url(), null)) {
-                            this.sortout++;
+                            this.query.misses.add(page.hash());
                             continue;
                         }
                     }
@@ -821,7 +808,7 @@ public final class SearchEvent {
                 ((QueryParams.anymatch(pagetitle, this.query.query_exclude_hashes))
                 || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.query_exclude_hashes))
                 || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.query_exclude_hashes)))) {
-                this.sortout++;
+                this.query.misses.add(page.hash());
                 continue;
             }
 
@@ -831,13 +818,13 @@ public final class SearchEvent {
                 while ( wi.hasNext() ) {
                     this.query.getSegment().termIndex().removeDelayed(wi.next(), page.hash());
                 }
-                this.sortout++;
+                this.query.misses.add(page.hash());
                 continue;
             }
 
             // check location constraint
             if ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_haslocation)) && (page.lat() == 0.0f || page.lon() == 0.0f)) {
-                this.sortout++;
+                this.query.misses.add(page.hash());
                 continue;
             }
 
@@ -848,7 +835,7 @@ public final class SearchEvent {
                 double lonDelta = this.query.lon - lon;
                 double distance = Math.sqrt(latDelta * latDelta + lonDelta * lonDelta); // pythagoras
                 if (distance > this.query.radius) {
-                    this.sortout++;
+                    this.query.misses.add(page.hash());
                     continue;
                 }
             }
@@ -861,20 +848,20 @@ public final class SearchEvent {
 
                 // check if we already are filtering for authors
                 if ( this.query.authorhash != null && !this.query.authorhash.equals(authorhash) ) {
-                    this.sortout++;
+                    this.query.misses.add(page.hash());
                     continue;
                 }
 
                 // add author to the author navigator
                 this.authorNavigator.inc(pageauthor);
             } else if ( this.query.authorhash != null ) {
-                this.sortout++;
+                this.query.misses.add(page.hash());
                 continue;
             }
 
             // check Scanner
             if ( !Scanner.acceptURL(page.url()) ) {
-                this.sortout++;
+                this.query.misses.add(page.hash());
                 continue;
             }
 

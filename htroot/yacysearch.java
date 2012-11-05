@@ -831,27 +831,18 @@ public class yacysearch {
             Log.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: "
                 + theQuery.queryString
                 + " - "
-                + "local-unfiltered("
-                + theSearch.rankingProcess.rwiAvailableCount()
-                + "), "
-                + "local_miss("
-                + theSearch.rankingProcess.getMissCount()
-                + "), "
-                + "local_sortout("
-                + theSearch.getSortOutCount()
-                + "), "
-                + "remote("
-                + theSearch.rankingProcess.getRemoteResourceSize()
-                + ") links found, "
+                + "local_rwi_available(" + theSearch.query.local_rwi_available.get() + "), "
+                + "local_rwi_stored(" + theSearch.query.local_rwi_stored.get() + "), "
+                + "local_solr_available(" + theSearch.query.local_solr_available.get() + "), "
+                + "local_solr_stored(" + theSearch.query.local_solr_stored.get() + "), "
+                + "remote_available(" + theSearch.query.remote_available.get() + "), "
+                + "remote_stored(" + theSearch.query.remote_stored.get() + "), "
+                + "remote_peerCount(" + theSearch.query.remote_peerCount.get() + "), "
+                + "local_sortout(" + theSearch.query.misses.size() + "), "
                 + (System.currentTimeMillis() - timestamp)
                 + " ms");
 
             // prepare search statistics
-            theQuery.resultcount =
-                theSearch.rankingProcess.rwiAvailableCount()
-                    - theSearch.getSortOutCount()
-                    - theSearch.rankingProcess.getMissCount()
-                    + theSearch.rankingProcess.getRemoteIndexCount();
             theQuery.searchtime = System.currentTimeMillis() - timestamp;
             theQuery.urlretrievaltime = theSearch.getURLRetrievalTime();
             theQuery.snippetcomputationtime = theSearch.getSnippetComputationTime();
@@ -932,37 +923,16 @@ public class yacysearch {
                 Log.logException(e);
             }
 
-            final int indexcount =
-                theSearch.rankingProcess.rwiAvailableCount()
-                    - theSearch.getSortOutCount()
-                    - theSearch.rankingProcess.getMissCount()
-                    + theSearch.rankingProcess.getRemoteIndexCount();
             prop.put("num-results_offset", startRecord == 0 ? 0 : startRecord + 1);
-            prop.put("num-results_itemscount", Formatter.number(
-                startRecord + theSearch.getQuery().itemsPerPage > indexcount ? startRecord
-                    + indexcount
-                    % theSearch.getQuery().itemsPerPage : startRecord + theSearch.getQuery().itemsPerPage,
-                true));
-            prop.put("num-results_itemsPerPage", itemsPerPage);
-            prop.put("num-results_totalcount", indexcount);
-            prop.put("num-results_globalresults", global && (indexReceiveGranted || clustersearch)
-                ? "1"
-                : "0");
-            prop.put(
-                "num-results_globalresults_localResourceSize",
-                Formatter.number(theSearch.rankingProcess.rwiAvailableCount(), true));
-            prop.put(
-                "num-results_globalresults_localMissCount",
-                Formatter.number(theSearch.rankingProcess.getMissCount(), true));
-            prop.put(
-                "num-results_globalresults_remoteResourceSize",
-                Formatter.number(theSearch.rankingProcess.getRemoteResourceSize(), true));
-            prop.put(
-                "num-results_globalresults_remoteIndexCount",
-                Formatter.number(theSearch.rankingProcess.getRemoteIndexCount(), true));
-            prop.put(
-                "num-results_globalresults_remotePeerCount",
-                Formatter.number(theSearch.rankingProcess.getRemotePeerCount(), true));
+            prop.put("num-results_itemscount", Formatter.number(startRecord + theSearch.query.itemsPerPage > theSearch.query.getResultCount() ? startRecord + theSearch.query.getResultCount() % theSearch.query.itemsPerPage : startRecord + theSearch.query.itemsPerPage, true));
+            prop.put("num-results_itemsPerPage", Formatter.number(itemsPerPage));
+            prop.put("num-results_totalcount", Formatter.number(theSearch.query.getResultCount()));
+            prop.put("num-results_globalresults", global && (indexReceiveGranted || clustersearch) ? "1" : "0");
+            prop.put("num-results_globalresults_localResourceSize", Formatter.number(theSearch.query.local_rwi_available.get() + theSearch.query.local_solr_available.get(), true));
+            prop.put("num-results_globalresults_localMissCount", Formatter.number(theSearch.query.misses.size(), true));
+            prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.query.remote_available.get(), true));
+            prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.query.remote_stored.get(), true));
+            prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.query.remote_peerCount.get(), true));
 
             // compose page navigation
             final StringBuilder resnav = new StringBuilder(200);
@@ -982,7 +952,7 @@ public class yacysearch {
                 resnav
                     .append("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
             }
-            final int numberofpages = Math.min(10, 1 + ((indexcount - 1) / theQuery.itemsPerPage()));
+            final int numberofpages = Math.min(10, 1 + ((theSearch.query.getResultCount() - 1) / theQuery.itemsPerPage()));
 
             for ( int i = 0; i < numberofpages; i++ ) {
                 if ( i == thispage ) {
@@ -1020,7 +990,7 @@ public class yacysearch {
             }
             final String resnavs = resnav.toString();
             prop.put("num-results_resnav", resnavs);
-            prop.put("pageNavBottom", (indexcount - startRecord > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
+            prop.put("pageNavBottom", (theSearch.query.getResultCount() - startRecord > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
             prop.put("pageNavBottom_resnav", resnavs);
 
             // generate the search result lines; the content will be produced by another servlet

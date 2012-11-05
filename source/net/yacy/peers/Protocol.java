@@ -117,6 +117,10 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.util.NamedList;
+import org.apache.solr.common.util.SimpleOrderedMap;
+import org.apache.solr.response.ResultContext;
+import org.apache.solr.search.DocList;
 
 
 public final class Protocol
@@ -590,7 +594,7 @@ public final class Protocol
             null);
     }
 
-    public static int primarySearch(
+    protected static int primarySearch(
         final SearchEvent event,
         final String wordhashes,
         final String excludehashes,
@@ -689,7 +693,7 @@ public final class Protocol
         return result.urlcount;
     }
 
-    public static int secondarySearch(
+    protected static int secondarySearch(
         final SearchEvent event,
         final String wordhashes,
         final String urlhashes,
@@ -810,7 +814,7 @@ public final class Protocol
 
             // passed all checks, store url
             try {
-                event.getQuery().getSegment().fulltext().putMetadata(urlEntry);
+                event.query.getSegment().fulltext().putMetadata(urlEntry);
                 ResultURLs.stack(
                     ASCII.String(urlEntry.url().hash()),
                     urlEntry.url().getHost(),
@@ -853,7 +857,7 @@ public final class Protocol
         // insert the containers to the index
         for ( final ReferenceContainer<WordReference> c : container ) {
             try {
-                event.getQuery().getSegment().storeRWI(c);
+                event.query.getSegment().storeRWI(c);
             } catch ( final Exception e ) {
                 Log.logException(e);
             }
@@ -938,8 +942,8 @@ public final class Protocol
             parts.put("exclude", UTF8.StringBody(excludehashes));
             parts.put("duetime", UTF8.StringBody("1000"));
             parts.put("urls", UTF8.StringBody(urlhashes));
-            parts.put("prefer", UTF8.StringBody(event.getQuery().prefer.pattern()));
-            parts.put("filter", UTF8.StringBody(event.getQuery().urlMask.pattern()));
+            parts.put("prefer", UTF8.StringBody(event.query.prefer.pattern()));
+            parts.put("filter", UTF8.StringBody(event.query.urlMask.pattern()));
             parts.put("modifier", UTF8.StringBody(modifier));
             parts.put("language", UTF8.StringBody(language));
             parts.put("sitehash", UTF8.StringBody(sitehash));
@@ -947,8 +951,8 @@ public final class Protocol
             parts.put("contentdom", UTF8.StringBody(contentdom));
             parts.put("ttl", UTF8.StringBody("0"));
             parts.put("maxdist", UTF8.StringBody(Integer.toString(maxDistance)));
-            parts.put("profile", UTF8.StringBody(crypt.simpleEncode(event.getQuery().ranking.toExternalString())));
-            parts.put("constraint", UTF8.StringBody((event.getQuery().constraint == null) ? "" : event.getQuery().constraint.exportB64()));
+            parts.put("profile", UTF8.StringBody(crypt.simpleEncode(event.query.ranking.toExternalString())));
+            parts.put("constraint", UTF8.StringBody((event.query.constraint == null) ? "" : event.query.constraint.exportB64()));
             if ( secondarySearchSuperviser != null ) {
                 parts.put("abstracts", UTF8.StringBody("auto"));
                 // resultMap = FileUtils.table(HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), 60000, hostname, parts));
@@ -1018,26 +1022,27 @@ public final class Protocol
         }
     }
 
-    public static int solrQuery(
+    protected static int solrQuery(
             final SearchEvent event,
             final int offset,
             final int count,
             final Seed target,
             final Blacklist blacklist) {
 
-        if (event.getQuery().queryString == null || event.getQuery().queryString.length() == 0) {
+        if (event.query.queryString == null || event.query.queryString.length() == 0) {
             return -1; // we cannot query solr only with word hashes, there is no clear text string
         }
         event.addExpectedRemoteReferences(count);
+        QueryResponse rsp = null;
         SolrDocumentList docList = null;
-        final SolrQuery solrQuery = event.getQuery().solrQuery();
+        final SolrQuery solrQuery = event.query.solrQuery();
         solrQuery.setStart(offset);
         solrQuery.setRows(count);
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
         if (localsearch) {
             // search the local index
             try {
-                QueryResponse rsp = event.rankingProcess.getQuery().getSegment().fulltext().getSolr().query(solrQuery);
+                rsp = event.rankingProcess.getQuery().getSegment().fulltext().getSolr().query(solrQuery);
                 docList = rsp.getResults();
             } catch (SolrException e) {
                 Network.log.logInfo("SEARCH failed (solr, 1), localpeer (" + e.getMessage() + ")", e);
@@ -1050,7 +1055,7 @@ public final class Protocol
             final String solrURL = "http://" + target.getPublicAddress() + "/solr";
             try {
                 SolrConnector solrConnector = new RemoteSolrConnector(solrURL);
-                QueryResponse rsp = solrConnector.query(solrQuery);
+                rsp = solrConnector.query(solrQuery);
                 docList = rsp.getResults();
                 // no need to close this here because that sends a commit to remote solr which is not wanted here
             } catch (IOException e) {
@@ -1103,7 +1108,7 @@ public final class Protocol
                 // passed all checks, store url
                 if (!localsearch) {
                     try {
-                        event.getQuery().getSegment().fulltext().putDocument(ClientUtils.toSolrInputDocument(doc));
+                        event.query.getSegment().fulltext().putDocument(ClientUtils.toSolrInputDocument(doc));
                         ResultURLs.stack(
                             ASCII.String(urlEntry.url().hash()),
                             urlEntry.url().getHost(),
@@ -1121,12 +1126,12 @@ public final class Protocol
             }
 
             if (localsearch) {
-                event.add(container, true, "localpeer", docList.size());
+                event.add(container, true, "localpeer", (int) docList.getNumFound());
                 event.rankingProcess.addFinalize();
                 event.addExpectedRemoteReferences(-count);
                 Network.log.logInfo("local search (solr): localpeer sent " + container.get(0).size() + "/" + docList.size() + " references");
             } else {
-                event.add(container, false, target.getName() + "/" + target.hash, docList.size());
+                event.add(container, false, target.getName() + "/" + target.hash, (int) docList.getNumFound());
                 event.rankingProcess.addFinalize();
                 event.addExpectedRemoteReferences(-count);
                 Network.log.logInfo("remote search (solr): peer " + target.getName() + " sent " + container.get(0).size() + "/" + docList.size() + " references");

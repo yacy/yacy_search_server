@@ -2671,7 +2671,7 @@ public final class Switchboard extends serverSwitch {
         }
 
         // check if some of the links match with the query
-        final Map<MultiProtocolURI, String> matcher = searchEvent.getQuery().separateMatches(links);
+        final Map<MultiProtocolURI, String> matcher = searchEvent.query.separateMatches(links);
 
         // take the matcher and load them all
         for ( final Map.Entry<MultiProtocolURI, String> entry : matcher.entrySet() ) {
@@ -3319,8 +3319,7 @@ public final class Switchboard extends serverSwitch {
         new Thread() {
             @Override
             public void run() {
-                QueryParams query = searchEvent.getQuery();
-                String queryString = query.queryString(true);
+                String queryString = searchEvent.query.queryString(true);
                 Thread.currentThread().setName("Switchboard.heuristicRSS:" + queryString);
                 final int meta = queryString.indexOf("heuristic:", 0);
                 if ( meta >= 0 ) {

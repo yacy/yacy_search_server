@@ -132,7 +132,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
 
     @Override
     public synchronized void close() {
+        this.commit();
         super.close();
+        this.defaultCore.close();
         this.cores.shutdown();
     }
 

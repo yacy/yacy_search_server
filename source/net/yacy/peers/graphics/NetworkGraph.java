@@ -157,8 +157,7 @@ public class NetworkGraph {
         */
 
         // draw in the search target
-        final QueryParams query = event.getQuery();
-        final Iterator<byte[]> i = query.query_include_hashes.iterator();
+        final Iterator<byte[]> i = event.query.query_include_hashes.iterator();
         eventPicture.setColor(RasterPlotter.GREY);
         while (i.hasNext()) {
             byte[] wordHash = i.next();

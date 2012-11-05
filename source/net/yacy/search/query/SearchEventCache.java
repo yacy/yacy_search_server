@@ -138,8 +138,9 @@ public class SearchEventCache {
             if (event != null) {
                 //re-new the event time for this event, so it is not deleted next time too early
                 event.resetEventTime();
-                // replace the query, because this contains the current result offset
-                event.setQuery(query);
+                // replace the current result offset
+                event.query.offset = query.offset;
+                event.query.itemsPerPage = query.itemsPerPage;
             }
         }
         if (event == null) {

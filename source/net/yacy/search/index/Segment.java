@@ -413,7 +413,7 @@ public class Segment {
                 // data during search-time. To transfer indexed data directly to the search process
                 // the following lines push the index data additionally to the search process
                 // this is done only for searched words
-                if (searchEvent != null && !searchEvent.getQuery().query_exclude_hashes.has(wordhash) && searchEvent.getQuery().query_include_hashes.has(wordhash)) {
+                if (searchEvent != null && !searchEvent.query.query_exclude_hashes.has(wordhash) && searchEvent.query.query_include_hashes.has(wordhash)) {
                     // if the page was added in the context of a heuristic this shall ensure that findings will fire directly into the search result
                     ReferenceContainer<WordReference> container;
                     try {

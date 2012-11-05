@@ -149,7 +149,7 @@ public class RemoteSearch extends Thread {
             (clusterselection == null) ?
                     DHTSelection.selectSearchTargets(
                             event.peers,
-                            event.getQuery().query_include_hashes,
+                            event.query.query_include_hashes,
                             event.peers.redundancy(),
                             burstRobinsonPercent,
                             burstMultiwordPercent)
@@ -172,16 +172,16 @@ public class RemoteSearch extends Thread {
             try {
                 RemoteSearch rs = new RemoteSearch(
                     event,
-                    QueryParams.hashSet2hashString(event.getQuery().query_include_hashes),
-                    QueryParams.hashSet2hashString(event.getQuery().query_exclude_hashes),
-                    event.getQuery().modifier,
-                    event.getQuery().targetlang == null ? "" : event.getQuery().targetlang,
-                    event.getQuery().sitehash == null ? "" : event.getQuery().sitehash,
-                    event.getQuery().authorhash == null ? "" : event.getQuery().authorhash,
-                    event.getQuery().contentdom == null ? "all" : event.getQuery().contentdom.toString(),
+                    QueryParams.hashSet2hashString(event.query.query_include_hashes),
+                    QueryParams.hashSet2hashString(event.query.query_exclude_hashes),
+                    event.query.modifier,
+                    event.query.targetlang == null ? "" : event.query.targetlang,
+                    event.query.sitehash == null ? "" : event.query.sitehash,
+                    event.query.authorhash == null ? "" : event.query.authorhash,
+                    event.query.contentdom == null ? "all" : event.query.contentdom.toString(),
                     count,
                     time,
-                    event.getQuery().maxDistance,
+                    event.query.maxDistance,
                     targets,
                     targetPeers[i],
                     event.secondarySearchSuperviser,

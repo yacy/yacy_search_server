@@ -173,18 +173,18 @@ public class AccessTracker_p {
                 }
                 prop.putNum("page_list_" + m + "_querycount", query.itemsPerPage);
                 prop.putNum("page_list_" + m + "_transmitcount", query.transmitcount);
-                prop.putNum("page_list_" + m + "_resultcount", query.resultcount);
+                prop.putNum("page_list_" + m + "_resultcount", query.getResultCount());
                 prop.putNum("page_list_" + m + "_urltime", query.urlretrievaltime);
                 prop.putNum("page_list_" + m + "_snippettime", query.snippetcomputationtime);
                 prop.putNum("page_list_" + m + "_resulttime", query.searchtime);
                 prop.putHTML("page_list_" + m + "_userAgent", query.userAgent);
                 qcountSum += query.itemsPerPage;
-                rcountSum += query.resultcount;
+                rcountSum += query.getResultCount();
                 tcountSum += query.transmitcount;
                 utimeSum += query.urlretrievaltime;
                 stimeSum += query.snippetcomputationtime;
                 rtimeSum += query.searchtime;
-                if (query.resultcount > 0){
+                if (query.getResultCount() > 0){
                 	rcount++;
                     utimeSum1 += query.urlretrievaltime;
                     stimeSum1 += query.snippetcomputationtime;

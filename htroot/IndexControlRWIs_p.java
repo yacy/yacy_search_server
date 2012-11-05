@@ -126,7 +126,7 @@ public class IndexControlRWIs_p {
             if ( post.containsKey("keystringsearch") ) {
                 prop.put("keyhash", keyhash);
                 final SearchEvent theSearch = genSearchresult(prop, sb, segment, keyhash, null);
-                if ( theSearch.rankingProcess.rwiAvailableCount() == 0 ) {
+                if (theSearch.query.local_rwi_available.get() == 0) {
                     prop.put("searchresult", 1);
                     prop.putHTML("searchresult_word", keystring);
                 }
@@ -137,7 +137,7 @@ public class IndexControlRWIs_p {
                     prop.put("keystring", "&lt;" + errmsg + "&gt;");
                 }
                 final SearchEvent theSearch = genSearchresult(prop, sb, segment, keyhash, null);
-                if ( theSearch.rankingProcess.rwiAvailableCount() == 0 ) {
+                if (theSearch.query.local_rwi_available.get() == 0) {
                     prop.put("searchresult", 2);
                     prop.putHTML("searchresult_wordhash", ASCII.String(keyhash));
                 }
@@ -466,7 +466,7 @@ public class IndexControlRWIs_p {
         final String keyhashs = ASCII.String(keyhash);
         prop.put("genUrlList_keyHash", keyhashs);
 
-        if ( theSearch.rankingProcess.rwiAvailableCount() == 0 ) {
+        if (theSearch.query.local_rwi_stored.get() == 0) {
             prop.put("genUrlList", 1);
             prop.put("genUrlList_count", 0);
             prop.put("searchresult", 2);
@@ -533,39 +533,17 @@ public class IndexControlRWIs_p {
                 prop
                     .put(
                         "genUrlList_urlList_" + i + "_urlExists_props",
-                        ((entry.word().flags().get(Condenser.flag_cat_indexof))
-                            ? "appears on index page, "
-                            : "")
-                            + ((entry.word().flags().get(Condenser.flag_cat_hasimage))
-                                ? "contains images, "
-                                : "")
-                            + ((entry.word().flags().get(Condenser.flag_cat_hasaudio))
-                                ? "contains audio, "
-                                : "")
-                            + ((entry.word().flags().get(Condenser.flag_cat_hasvideo))
-                                ? "contains video, "
-                                : "")
-                            + ((entry.word().flags().get(Condenser.flag_cat_hasapp))
-                                ? "contains applications, "
-                                : "")
-                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_identifier))
-                                ? "appears in url, "
-                                : "")
-                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_title))
-                                ? "appears in title, "
-                                : "")
-                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_creator))
-                                ? "appears in author, "
-                                : "")
-                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_subject))
-                                ? "appears in subject, "
-                                : "")
-                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_description))
-                                ? "appears in description, "
-                                : "")
-                            + ((entry.word().flags().get(WordReferenceRow.flag_app_emphasized))
-                                ? "appears emphasized, "
-                                : "")
+                        ((entry.word().flags().get(Condenser.flag_cat_indexof)) ? "appears on index page, " : "")
+                            + ((entry.word().flags().get(Condenser.flag_cat_hasimage)) ? "contains images, " : "")
+                            + ((entry.word().flags().get(Condenser.flag_cat_hasaudio)) ? "contains audio, " : "")
+                            + ((entry.word().flags().get(Condenser.flag_cat_hasvideo)) ? "contains video, " : "")
+                            + ((entry.word().flags().get(Condenser.flag_cat_hasapp)) ? "contains applications, " : "")
+                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_identifier)) ? "appears in url, " : "")
+                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_title)) ? "appears in title, " : "")
+                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_creator)) ? "appears in author, " : "")
+                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_subject)) ? "appears in subject, " : "")
+                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_description)) ? "appears in description, " : "")
+                            + ((entry.word().flags().get(WordReferenceRow.flag_app_emphasized)) ? "appears emphasized, " : "")
                             + ((DigestURI.probablyRootURL(entry.word().urlhash())) ? "probably root url" : ""));
                 if ( Switchboard.urlBlacklist.isListed(BlacklistType.DHT, url) ) {
                     prop.put("genUrlList_urlList_" + i + "_urlExists_urlhxChecked", "1");
@@ -575,7 +553,7 @@ public class IndexControlRWIs_p {
                     break;
                 }
             }
-            final Iterator<byte[]> iter = theSearch.rankingProcess.miss(); // iterates url hash strings
+            final Iterator<byte[]> iter = theSearch.query.misses.iterator(); // iterates url hash strings
             byte[] b;
             while ( iter.hasNext() ) {
                 b = iter.next();
@@ -677,12 +655,12 @@ public class IndexControlRWIs_p {
         final SearchEvent theSearch = SearchEventCache.getEvent(query, sb.peers, sb.tables, null, false, sb.loader, Integer.MAX_VALUE, Long.MAX_VALUE, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
         //theSearch.rankingProcess.run();
         RankingProcess ranked = theSearch.rankingProcess;
-        if ( ranked.rwiAvailableCount() == 0 ) {
+        if (theSearch.query.local_rwi_available.get() == 0) {
             prop.put("searchresult", 2);
             prop.put("searchresult_wordhash", keyhash);
         } else {
             prop.put("searchresult", 3);
-            prop.put("searchresult_allurl", ranked.rwiAvailableCount());
+            prop.put("searchresult_allurl", theSearch.query.local_rwi_available.get());
             prop
                 .put("searchresult_description", ranked.flagCount()[WordReferenceRow.flag_app_dc_description]);
             prop.put("searchresult_title", ranked.flagCount()[WordReferenceRow.flag_app_dc_title]);

@@ -189,9 +189,12 @@ public class HostBrowser {
                 prop.putHTML("outbound_host", host);
                 prop.putHTML("inbound_host", host);
                 String hosthash = ASCII.String(uri.hash(), 6, 6);
+                String[] pathparts = uri.getPaths();
                 
                 // get all files for a specific host from the index
-                BlockingQueue<SolrDocument> docs = fulltext.getSolr().concurrentQuery(YaCySchema.host_s.name() + ":" + host, 0, 100000, 3000, 100);
+                String query = YaCySchema.host_s.name() + ":" + host;
+                for (String pe: pathparts) if (pe.length() > 0) query += " AND " + YaCySchema.url_paths_sxt.name() + ":" + pe;
+                BlockingQueue<SolrDocument> docs = fulltext.getSolr().concurrentQuery(query, 0, 100000, 3000, 100);
                 SolrDocument doc;
                 Set<String> storedDocs = new HashSet<String>();
                 Set<String> inboundLinks = new HashSet<String>();

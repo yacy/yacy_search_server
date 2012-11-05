@@ -84,23 +84,18 @@ public final class RankingProcess extends Thread {
     protected final WeakPriorityBlockingQueue<WordReferenceVars> rwiStack;
     protected final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     private final int[] flagcount; // flag counter
-    private final HandleSet misses; // contains url-hashes that could not been found in the LURL-DB
     private final AtomicInteger feedersAlive, feedersTerminated;
     private boolean addRunning;
     protected final AtomicInteger receivedRemoteReferences;
     protected final ReferenceOrder order;
-    int local_indexCount;
-    int remote_indexCount;
-    int remote_resourceSize;
-    int remote_peerCount;
-    final HandleSet urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
-    final ScoreMap<String> hostNavigator; // a counter for the appearance of the host hash
-    final Map<String, byte[]> hostResolver; // a mapping from a host hash (6 bytes) to the full url hash of one of these urls that have the host hash
-    final Map<String, String> taggingPredicates; // a map from tagging vocabulary names to tagging predicate uris
-    final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
+    protected final HandleSet urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
+    protected final ScoreMap<String> hostNavigator; // a counter for the appearance of the host hash
+    protected final Map<String, byte[]> hostResolver; // a mapping from a host hash (6 bytes) to the full url hash of one of these urls that have the host hash
+    protected final Map<String, String> taggingPredicates; // a map from tagging vocabulary names to tagging predicate uris
+    protected final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
     private boolean remote;
     
-    public RankingProcess(final QueryParams query, boolean remote) {
+    protected RankingProcess(final QueryParams query, boolean remote) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
@@ -112,7 +107,6 @@ public final class RankingProcess extends Thread {
         int stackMaxsize = query.snippetCacheStrategy == null || query.snippetCacheStrategy == CacheStrategy.CACHEONLY ? max_results_preparation_special : max_results_preparation;
         this.rwiStack = new WeakPriorityBlockingQueue<WordReferenceVars>(stackMaxsize, false);
         this.doubleDomCache = new ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>>();
-        this.misses = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
         this.flagcount = new int[32];
         for ( int i = 0; i < 32; i++ ) {
             this.flagcount[i] = 0;
@@ -122,10 +116,6 @@ public final class RankingProcess extends Thread {
         this.addRunning = true;
         this.receivedRemoteReferences = new AtomicInteger(0);
         this.order = new ReferenceOrder(this.query.ranking, UTF8.getBytes(this.query.targetlang));
-        this.remote_resourceSize = 0;
-        this.remote_indexCount = 0;
-        this.remote_peerCount = 0;
-        this.local_indexCount = 0;
         this.urlhashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
         this.hostNavigator = new ConcurrentScoreMap<String>();
         this.hostResolver = new ConcurrentHashMap<String, byte[]>();
@@ -160,25 +150,12 @@ public final class RankingProcess extends Thread {
         this.feedersAlive.addAndGet(1);
     }
     
-    public int rwiAvailableCount() {
-        // the number of results in the local peer after filtering
-        return this.rwiStack.sizeAvailable();
-    }
-    
     public QueryParams getQuery() {
         return this.query;
     }
 
     public int[] flagCount() {
         return this.flagcount;
-    }
-
-    public Iterator<byte[]> miss() {
-        return this.misses.iterator();
-    }
-
-    public int getMissCount() {
-        return this.misses.size();
     }
 
     protected void addBegin() {
@@ -228,21 +205,6 @@ public final class RankingProcess extends Thread {
             if ((this.query.constraint.get(i)) && (flags.get(i))) return true;
         }
         return false;
-    }
-
-    public int getRemoteIndexCount() {
-        // the number of result contributions from all the remote peers
-        return this.remote_indexCount;
-    }
-
-    public int getRemoteResourceSize() {
-        // the number of all hits in all the remote peers
-        return Math.max(this.remote_resourceSize, this.remote_indexCount);
-    }
-
-    public int getRemotePeerCount() {
-        // the number of remote peers that have contributed
-        return this.remote_peerCount;
     }
 
     @Override
@@ -300,10 +262,12 @@ public final class RankingProcess extends Thread {
         this.addRunning = true;
         assert (index != null);
         if (index.isEmpty()) return;
-        if (!local) {
+        if (local) {
+            this.query.local_rwi_stored.addAndGet(fullResource);
+        } else {
             assert fullResource >= 0 : "fullResource = " + fullResource;
-            this.remote_resourceSize += fullResource;
-            this.remote_peerCount++;
+            this.query.remote_stored.addAndGet(fullResource);
+            this.query.remote_peerCount.incrementAndGet();
         }
         long timer = System.currentTimeMillis();
 
@@ -433,7 +397,7 @@ public final class RankingProcess extends Thread {
                     }
                 }
                 // increase counter for statistics
-                if (local) this.local_indexCount++; else this.remote_indexCount++;
+                if (local) this.query.local_rwi_available.incrementAndGet(); else this.query.remote_available.incrementAndGet();
             }
             if (System.currentTimeMillis() >= timeout) Log.logWarning("RWIProcess", "rwi normalization ended with timeout = " + maxtime);
 

@@ -89,28 +89,25 @@ public class yacysearchitem {
             // the event does not exist, show empty page
             return prop;
         }
-        final QueryParams theQuery = theSearch.getQuery();
 
         // dynamically update count values
-        final int totalcount = theSearch.rankingProcess.rwiAvailableCount() - theSearch.rankingProcess.getMissCount() - theSearch.getSortOutCount() + theSearch.rankingProcess.getRemoteIndexCount();
-        final int offset = theQuery.neededResults() - theQuery.itemsPerPage() + 1;
-        prop.put("offset", offset);
-        prop.put("itemscount", Formatter.number(Math.min((item < 0) ? theQuery.neededResults() : item + 1, totalcount)));
-        prop.put("itemsperpage", Formatter.number(theQuery.itemsPerPage));
-        prop.put("totalcount", Formatter.number(totalcount, true));
-        prop.put("localResourceSize", Formatter.number(theSearch.rankingProcess.rwiAvailableCount(), true));
-        prop.put("localMissCount", Formatter.number(theSearch.rankingProcess.getMissCount(), true));
-        prop.put("remoteResourceSize", Formatter.number(theSearch.rankingProcess.getRemoteResourceSize(), true));
-        prop.put("remoteIndexCount", Formatter.number(theSearch.rankingProcess.getRemoteIndexCount(), true));
-        prop.put("remotePeerCount", Formatter.number(theSearch.rankingProcess.getRemotePeerCount(), true));
-        prop.put("navurlBase", QueryParams.navurlBase("html", theQuery, null, theQuery.urlMask.toString(), theQuery.navigators).toString());
+        prop.put("offset", theSearch.query.neededResults() - theSearch.query.itemsPerPage() + 1);
+        prop.put("itemscount", Formatter.number(Math.min((item < 0) ? theSearch.query.neededResults() : item + 1, theSearch.query.getResultCount())));
+        prop.put("itemsperpage", Formatter.number(theSearch.query.itemsPerPage));
+        prop.put("totalcount", Formatter.number(theSearch.query.getResultCount(), true));
+        prop.put("localResourceSize", Formatter.number(theSearch.query.local_rwi_available.get() + theSearch.query.local_solr_available.get(), true));
+        prop.put("localMissCount", Formatter.number(theSearch.query.misses.size(), true));
+        prop.put("remoteResourceSize", Formatter.number(theSearch.query.remote_available.get(), true));
+        prop.put("remoteIndexCount", Formatter.number(theSearch.query.remote_stored.get(), true));
+        prop.put("remotePeerCount", Formatter.number(theSearch.query.remote_peerCount.get(), true));
+        prop.put("navurlBase", QueryParams.navurlBase("html", theSearch.query, null, theSearch.query.urlMask.toString(), theSearch.query.navigators).toString());
         final String target_special_pattern = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
 
-        if (theQuery.contentdom == Classification.ContentDomain.TEXT || theQuery.contentdom == Classification.ContentDomain.ALL) {
+        if (theSearch.query.contentdom == Classification.ContentDomain.TEXT || theSearch.query.contentdom == Classification.ContentDomain.ALL) {
             // text search
 
             // generate result object
-            final ResultEntry result = theSearch.oneResult(item, theQuery.isLocal() ? 1000 : 5000);
+            final ResultEntry result = theSearch.oneResult(item, theSearch.query.isLocal() ? 1000 : 5000);
             if (result == null) return prop; // no content
             final String resultUrlstring = result.urlstring();
             final DigestURI resultURL = result.url();
@@ -124,7 +121,7 @@ public class yacysearchitem {
                 Log.logException(e1);
                 faviconURL = null;
             }
-            final String resource = theQuery.domType.toString();
+            final String resource = theSearch.query.domType.toString();
             prop.put("content", 1); // switch on specific content
             prop.put("content_showDate", sb.getConfigBool("search.result.show.date", true) ? 1 : 0);
             prop.put("content_showSize", sb.getConfigBool("search.result.show.size", true) ? 1 : 0);
@@ -137,10 +134,10 @@ public class yacysearchitem {
             prop.put("content_authorized", authenticated ? "1" : "0");
             final String urlhash = ASCII.String(result.hash());
             prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
-            prop.putHTML("content_authorized_bookmark_bookmarklink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.itemsPerPage() + "&offset=" + (theQuery.neededResults() - theQuery.itemsPerPage()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=" + resource + "&time=3&bookmarkref=" + urlhash + "&urlmaskfilter=.*");
+            prop.putHTML("content_authorized_bookmark_bookmarklink", "/yacysearch.html?query=" + theSearch.query.queryString.replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&order=" + crypt.simpleEncode(theSearch.query.ranking.toExternalString()) + "&resource=" + resource + "&time=3&bookmarkref=" + urlhash + "&urlmaskfilter=.*");
             prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
-            prop.putHTML("content_authorized_recommend_deletelink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.itemsPerPage() + "&offset=" + (theQuery.neededResults() - theQuery.itemsPerPage()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=" + resource + "&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
-            prop.putHTML("content_authorized_recommend_recommendlink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.itemsPerPage() + "&offset=" + (theQuery.neededResults() - theQuery.itemsPerPage()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=" + resource + "&time=3&recommendref=" + urlhash + "&urlmaskfilter=.*");
+            prop.putHTML("content_authorized_recommend_deletelink", "/yacysearch.html?query=" + theSearch.query.queryString.replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&order=" + crypt.simpleEncode(theSearch.query.ranking.toExternalString()) + "&resource=" + resource + "&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
+            prop.putHTML("content_authorized_recommend_recommendlink", "/yacysearch.html?query=" + theSearch.query.queryString.replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&order=" + crypt.simpleEncode(theSearch.query.ranking.toExternalString()) + "&resource=" + resource + "&time=3&recommendref=" + urlhash + "&urlmaskfilter=.*");
             prop.put("content_authorized_urlhash", urlhash);
             final String resulthashString = urlhash;
             prop.putHTML("content_title", result.title());
@@ -205,11 +202,11 @@ public class yacysearchitem {
             prop.putHTML("content_host", resultURL.getHost() == null ? "" : resultURL.getHost());
             prop.putHTML("content_file", resultURL.getFileName());
             prop.putHTML("content_path", resultURL.getPath());
-            prop.put("content_nl", (item == theQuery.offset) ? 0 : 1);
+            prop.put("content_nl", (item == theSearch.query.offset) ? 0 : 1);
             prop.putHTML("content_publisher", result.publisher());
             prop.putHTML("content_creator", result.creator());// author
             prop.putHTML("content_subject", result.subject());
-            final Collection<String>[] query = theQuery.queryWords();
+            final Collection<String>[] query = theSearch.query.queryWords();
             final StringBuilder s = new StringBuilder(query[0].size() * 20);
             for (final String t: query[0]) {
                 s.append('+').append(t);
@@ -217,10 +214,10 @@ public class yacysearchitem {
             final String words = (s.length() > 0) ? s.substring(1) : "";
             prop.putHTML("content_words", words);
             prop.putHTML("content_showParser_words", words);
-            prop.putHTML("content_former", theQuery.queryString);
-            prop.putHTML("content_showPictures_former", theQuery.queryString);
+            prop.putHTML("content_former", theSearch.query.queryString);
+            prop.putHTML("content_showPictures_former", theSearch.query.queryString);
             final TextSnippet snippet = result.textSnippet();
-            final String desc = (snippet == null) ? "" : snippet.getLineMarked(theQuery.query_all_hashes);
+            final String desc = (snippet == null) ? "" : snippet.getLineMarked(theSearch.query.query_all_hashes);
             prop.put("content_description", desc);
             prop.putXML("content_description-xml", desc);
             prop.putJSON("content_description-json", desc);
@@ -235,7 +232,7 @@ public class yacysearchitem {
                 }
                 prop.put("content_heuristic_name", heuristic.heuristicName);
             }
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEventType.FINALIZATION, "" + item, 0, 0), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theSearch.query.id(true), SearchEventType.FINALIZATION, "" + item, 0, 0), false);
             final String ext = resultURL.getFileExtension().toLowerCase();
             if (ext.equals("png") || ext.equals("jpg") || ext.equals("gif")) {
                 final String license = sb.licensedURLs.aquireLicense(resultURL);
@@ -251,16 +248,16 @@ public class yacysearchitem {
                 prop.put("content_loc_lon", result.lon());
             }
             if (sb.getConfigBool("heuristic.searchresults",false)) sb.heuristicSearchResults(resultUrlstring);
-            theQuery.transmitcount = item + 1;
+            theSearch.query.transmitcount = item + 1;
             return prop;
         }
 
-        if (theQuery.contentdom == Classification.ContentDomain.IMAGE) {
+        if (theSearch.query.contentdom == Classification.ContentDomain.IMAGE) {
             // image search; shows thumbnails
 
-            prop.put("content", theQuery.contentdom.getCode() + 1); // switch on specific content
+            prop.put("content", theSearch.query.contentdom.getCode() + 1); // switch on specific content
             //final MediaSnippet ms = theSearch.result().oneImage(item);
-            final ResultEntry ms = theSearch.oneResult(item, theQuery.isLocal() ? 1000 : 5000);
+            final ResultEntry ms = theSearch.oneResult(item, theSearch.query.isLocal() ? 1000 : 5000);
             if (ms == null) {
                 prop.put("content_item", "0");
             } else {
@@ -283,21 +280,21 @@ public class yacysearchitem {
                 prop.put("content_item_source", ms.url().toNormalform(true));
                 prop.putXML("content_item_source-xml", ms.url().toNormalform(true));
                 prop.put("content_item_sourcedom", ms.url().getHost());
-                prop.put("content_item_nl", (item == theQuery.offset) ? 0 : 1);
+                prop.put("content_item_nl", (item == theSearch.query.offset) ? 0 : 1);
                 prop.put("content_item", 1);
             }
-            theQuery.transmitcount = item + 1;
+            theSearch.query.transmitcount = item + 1;
             return prop;
         }
 
-        if ((theQuery.contentdom == ContentDomain.AUDIO) ||
-            (theQuery.contentdom == ContentDomain.VIDEO) ||
-            (theQuery.contentdom == ContentDomain.APP)) {
+        if ((theSearch.query.contentdom == ContentDomain.AUDIO) ||
+            (theSearch.query.contentdom == ContentDomain.VIDEO) ||
+            (theSearch.query.contentdom == ContentDomain.APP)) {
             // any other media content
 
             // generate result object
-            final ResultEntry ms = theSearch.oneResult(item, theQuery.isLocal() ? 1000 : 5000);
-            prop.put("content", theQuery.contentdom.getCode() + 1); // switch on specific content
+            final ResultEntry ms = theSearch.oneResult(item, theSearch.query.isLocal() ? 1000 : 5000);
+            prop.put("content", theSearch.query.contentdom.getCode() + 1); // switch on specific content
             if (ms == null) {
                 prop.put("content_item", "0");
             } else {
@@ -308,10 +305,10 @@ public class yacysearchitem {
                 prop.putHTML("content_item_target", target);
                 prop.putHTML("content_item_name", shorten(ms.title(), MAX_NAME_LENGTH));
                 prop.put("content_item_col", (item % 2 == 0) ? "0" : "1");
-                prop.put("content_item_nl", (item == theQuery.offset) ? 0 : 1);
+                prop.put("content_item_nl", (item == theSearch.query.offset) ? 0 : 1);
                 prop.put("content_item", 1);
             }
-            theQuery.transmitcount = item + 1;
+            theSearch.query.transmitcount = item + 1;
             return prop;
         }
 

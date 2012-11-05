@@ -30,12 +30,15 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -58,6 +61,7 @@ import net.yacy.document.Condenser;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.RowHandleSet;
@@ -103,18 +107,16 @@ public final class QueryParams {
     public final String queryString;
     public final HandleSet query_include_hashes, query_exclude_hashes, query_all_hashes;
     private final Collection<String> query_include_words, query_exclude_words, query_all_words;
-    public final int itemsPerPage;
+    public int itemsPerPage;
     public int offset;
     public final Pattern urlMask, prefer;
     final boolean urlMask_isCatchall;
-    private final boolean prefer_isMatchnothing;
     public final Classification.ContentDomain contentdom;
     public final String targetlang;
     protected final Collection<Tagging.Metatag> metatags;
     public final String navigators;
     public final Searchdom domType;
     private final int zonecode;
-    private final int domMaxTargets;
     public final int maxDistance;
     public final Bitfield constraint;
     final boolean allofconstraint;
@@ -131,14 +133,21 @@ public final class QueryParams {
     protected final long maxtime;
     protected final long timeout;
     // values that are set after a search:
-    public int resultcount; // number of found results
     public int transmitcount; // number of results that had been shown to the user
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
-    private boolean specialRights; // is true if the user has a special authorization and my use more database-extensive options
     public final String userAgent;
-    public boolean filterfailurls;
+    protected boolean filterfailurls;
     protected double lat, lon, radius;
     
+    // the following values are filled during the search process as statistics for the search
+    public final AtomicInteger local_rwi_available;  // the number of hits generated/ranked by the local search in rwi index
+    public final AtomicInteger local_rwi_stored;     // the number of existing hits by the local search in rwi index
+    public final AtomicInteger local_solr_available; // the number of hits generated/ranked by the local search in solr
+    public final AtomicInteger local_solr_stored;    // the number of existing hits by the local search in solr
+    public final AtomicInteger remote_available;     // the number of hits imported from remote peers (rwi/solr mixed)
+    public final AtomicInteger remote_stored;        // the number of existing hits at remote site
+    public final AtomicInteger remote_peerCount;     // the number of peers which contributed to the remote search result 
+    public final SortedSet<byte[]> misses; // url hashes that had been sorted out because of constraints in postranking
 
     public QueryParams(
             final String queryString,
@@ -178,7 +187,6 @@ public final class QueryParams {
         this.urlMask = catchall_pattern;
         this.urlMask_isCatchall = true;
         this.prefer = matchnothing_pattern;
-        this.prefer_isMatchnothing = true;
         this.contentdom = ContentDomain.ALL;
         this.itemsPerPage = itemsPerPage;
         this.offset = 0;
@@ -186,7 +194,6 @@ public final class QueryParams {
         this.metatags = new ArrayList<Tagging.Metatag>(0);
         this.domType = Searchdom.LOCAL;
         this.zonecode = DigestURI.TLD_any_zone_filter;
-        this.domMaxTargets = 0;
         this.constraint = constraint;
         this.allofconstraint = false;
         this.snippetCacheStrategy = null;
@@ -198,7 +205,6 @@ public final class QueryParams {
         this.starttime = Long.valueOf(System.currentTimeMillis());
         this.maxtime = 10000;
         this.timeout = this.starttime + this.timeout;
-        this.specialRights = false;
         this.navigators = "all";
         this.indexSegment = indexSegment;
         this.userAgent = userAgent;
@@ -207,6 +213,14 @@ public final class QueryParams {
         this.lat = 0.0d;
         this.lon = 0.0d;
         this.radius = 0.0d;
+        this.local_rwi_available = new AtomicInteger(0); // the number of results in the local peer after filtering
+        this.local_rwi_stored    = new AtomicInteger(0);
+        this.local_solr_available= new AtomicInteger(0);
+        this.local_solr_stored   = new AtomicInteger(0);
+        this.remote_stored       = new AtomicInteger(0);
+        this.remote_available    = new AtomicInteger(0); // the number of result contributions from all the remote peers
+        this.remote_peerCount    = new AtomicInteger(0); // the number of remote peers that have contributed
+        this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
     }
 
     public QueryParams(
@@ -262,14 +276,13 @@ public final class QueryParams {
         } catch (final PatternSyntaxException ex) {
             throw new IllegalArgumentException("Not a valid regular expression: " + prefer, ex);
         }
-        this.prefer_isMatchnothing = this.prefer.toString().equals(matchnothing_pattern.toString());
+        this.prefer.toString().equals(matchnothing_pattern.toString());
         assert language != null;
         this.targetlang = language;
         this.metatags = metatags;
         this.navigators = navigators;
         this.domType = domType;
         this.zonecode = domainzone;
-        this.domMaxTargets = domMaxTargets;
         this.constraint = constraint;
         this.allofconstraint = allofconstraint;
         this.sitehash = site; assert site == null || site.length() == 6;
@@ -281,7 +294,6 @@ public final class QueryParams {
         this.starttime = Long.valueOf(System.currentTimeMillis());
         this.maxtime = 10000;
         this.timeout = this.starttime + this.timeout;
-        this.specialRights = specialRights;
         this.indexSegment = indexSegment;
         this.userAgent = userAgent;
         this.transmitcount = 0;
@@ -291,6 +303,14 @@ public final class QueryParams {
         this.lat = Math.floor(lat * this.kmNormal) / this.kmNormal;
         this.lon = Math.floor(lon * this.kmNormal) / this.kmNormal;
         this.radius = Math.floor(radius * this.kmNormal + 1) / this.kmNormal;
+        this.local_rwi_available = new AtomicInteger(0); // the number of results in the local peer after filtering
+        this.local_rwi_stored    = new AtomicInteger(0);
+        this.local_solr_available= new AtomicInteger(0);
+        this.local_solr_stored   = new AtomicInteger(0);
+        this.remote_stored       = new AtomicInteger(0);
+        this.remote_available    = new AtomicInteger(0); // the number of result contributions from all the remote peers
+        this.remote_peerCount    = new AtomicInteger(0); // the number of remote peers that have contributed
+        this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
     }
 
     private double kmNormal = 100.d; // 100 =ca 40000.d / 360.d == 111.11 - if lat/lon is multiplied with this, rounded and diveded by this, the location is normalized to a 1km grid
@@ -309,6 +329,10 @@ public final class QueryParams {
         return this.itemsPerPage;
     }
 
+    public int getResultCount() {
+        return this.local_rwi_available.get() + this.local_solr_stored.get() - this.misses.size();
+    }
+    
     public void setOffset(final int newOffset) {
         this.offset = newOffset;
     }
@@ -502,7 +526,7 @@ public final class QueryParams {
         final SolrQuery params = new SolrQuery();
         params.setQuery(q.toString());
         params.setStart(this.offset);
-        params.setRows(this.resultcount);
+        params.setRows(this.itemsPerPage);
         params.setFacet(false);
         
         if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {

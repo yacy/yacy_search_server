@@ -44,9 +44,9 @@ public class AccessTracker {
 
     private final static long DUMP_PERIOD = 60000L;
 
-    public static final int minSize = 100;
-    public static final int maxSize = 1000;
-    public static final int maxAge = 24 * 60 * 60 * 1000;
+    private static final int minSize = 100;
+    private static final int maxSize = 1000;
+    private static final int maxAge = 24 * 60 * 60 * 1000;
 
     public enum Location {local, remote}
 
@@ -67,7 +67,7 @@ public class AccessTracker {
 
     private static void add(final LinkedList<QueryParams> list, final QueryParams query) {
         // learn that this word can be a word completion for the DidYouMeanLibrary
-        if (query.resultcount > 10 && query.queryString != null && query.queryString.length() > 0) {
+        if (query.getResultCount() > 10 && query.queryString != null && query.queryString.length() > 0) {
             final StringBuilder sb = new StringBuilder(query.queryString);
             sb.append(query.queryString);
             WordCache.learn(sb);
@@ -109,7 +109,7 @@ public class AccessTracker {
 
     private static void addToDump(final QueryParams query) {
         if (query.queryString == null || query.queryString.isEmpty()) return;
-        addToDump(query.queryString, Integer.toString(query.resultcount), new Date(query.starttime));
+        addToDump(query.queryString, Integer.toString(query.getResultCount()), new Date(query.starttime));
     }
 
     public static void addToDump(String querystring, String resultcount) {
