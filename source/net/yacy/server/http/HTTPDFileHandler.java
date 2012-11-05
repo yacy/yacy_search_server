@@ -1098,21 +1098,21 @@ public final class HTTPDFileHandler {
                         final String contentEncoding = (zipContent) ? "gzip" : null;
                         // apply templates
                         final ByteBuffer o1 = new ByteBuffer();
-                        TemplateEngine.writeTemplate(fis, o1, templatePatterns, ASCII.getBytes("-UNRESOLVED_PATTERN-"));
+                        TemplateEngine.writeTemplate(fis, o1, templatePatterns, UNRESOLVED_PATTERN);
                         fis.close();
                         final ByteBuffer o = new ByteBuffer();
 
                         if (zipContent) {
                             GZIPOutputStream zippedOut = new GZIPOutputStream(o);
                             ServerSideIncludes.writeSSI(o1, zippedOut, realmProp, clientIP, requestHeader);
-                            //httpTemplate.writeTemplate(fis, zippedOut, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                            //httpTemplate.writeTemplate(fis, zippedOut, tp, UNRESOLVED_PATTERN);
                             zippedOut.finish();
                             zippedOut.flush();
                             zippedOut.close();
                             zippedOut = null;
                         } else {
                             ServerSideIncludes.writeSSI(o1, o, realmProp, clientIP, requestHeader);
-                            //httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                            //httpTemplate.writeTemplate(fis, o, tp, UNRESOLVED_PATTERN);
                         }
                         ResponseHeader rh = (templatePatterns == null) ? new ResponseHeader(200) : templatePatterns.getOutgoingHeader();
                         if (method.equals(HeaderFramework.METHOD_HEAD)) {
