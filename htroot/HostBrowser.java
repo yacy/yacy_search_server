@@ -167,7 +167,7 @@ public class HostBrowser {
                 // delete the complete path!! That includes everything that matches with this prefix.
                 delete = true;
             }
-            
+            int facetcount=post.getInt("facetcount", 0);
             boolean complete = post.getBoolean("complete");
             if (complete) { // we want only root paths for complete lists
                 p = path.indexOf('/', 10);
@@ -192,9 +192,17 @@ public class HostBrowser {
                 String[] pathparts = uri.getPaths();
                 
                 // get all files for a specific host from the index
-                String query = YaCySchema.host_s.name() + ":" + host;
-                for (String pe: pathparts) if (pe.length() > 0) query += " AND " + YaCySchema.url_paths_sxt.name() + ":" + pe;
-                BlockingQueue<SolrDocument> docs = fulltext.getSolr().concurrentQuery(query, 0, 100000, 3000, 100);
+                StringBuilder q = new StringBuilder();
+                q.append(YaCySchema.host_s.name()).append(':').append(host);
+                if (pathparts.length > 0 && pathparts[0].length() > 0) {
+                    for (String pe: pathparts) {
+                        if (pe.length() > 0) q.append(" AND ").append(YaCySchema.url_paths_sxt.name()).append(':').append(pe);
+                    }
+                } else {
+                    if (facetcount > 1000 && !post.containsKey("nepr")) q.append(" AND ").append(YaCySchema.url_paths_sxt.name()).append(":[* TO *]");
+                }
+                q.append(" AND -").append(YaCySchema.failreason_t.name()).append(":[* TO *]");
+                BlockingQueue<SolrDocument> docs = fulltext.getSolr().concurrentQuery(q.toString(), 0, 100000, 3000, 100);
                 SolrDocument doc;
                 Set<String> storedDocs = new HashSet<String>();
                 Set<String> inboundLinks = new HashSet<String>();
