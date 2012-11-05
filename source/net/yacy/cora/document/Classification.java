@@ -135,12 +135,12 @@ public class Classification {
         return appsExtSet.contains(appsExt.trim().toLowerCase());
     }
 
-    public static boolean isControlExtension(final String ctrlExt) {
+    private static boolean isControlExtension(final String ctrlExt) {
         if (ctrlExt == null) return false;
         return ctrlExtSet.contains(ctrlExt.trim().toLowerCase());
     }
 
-    public static ContentDomain getContentDomain(final String ext) {
+    protected static ContentDomain getContentDomain(final String ext) {
         if (isTextExtension(ext)) return ContentDomain.TEXT;
         if (isImageExtension(ext)) return ContentDomain.IMAGE;
         if (isAudioExtension(ext)) return ContentDomain.AUDIO;

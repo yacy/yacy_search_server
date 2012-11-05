@@ -502,7 +502,14 @@ public final class SearchEvent {
             final boolean httpPattern = pattern.equals("http://.*");
             final boolean noHttpButProtocolPattern = pattern.equals("https://.*") || pattern.equals("ftp://.*") || pattern.equals("smb://.*") || pattern.equals("file://.*");
             pollloop: for (URIMetadataNode iEntry: index) {
-
+                
+                if ( !this.query.urlMask_isCatchall ) {
+                    // check url mask
+                    if (!iEntry.matches(this.query.urlMask)) {
+                        continue pollloop;
+                    }
+                }
+                
                 // doublecheck for urls
                 if (this.rankingProcess.urlhashes.has(iEntry.hash())) {
                     continue pollloop;
@@ -770,8 +777,8 @@ public final class SearchEvent {
             }
 
             // check content domain
-            if ((this.query.contentdom.getCode() > 0 && page.url().getContentDomain() != this.query.contentdom) ||
-                (this.query.contentdom == Classification.ContentDomain.TEXT && page.url().getContentDomain().getCode() > 0)) {
+            if (((this.query.contentdom.getCode() > 0 && page.url().getContentDomain() != this.query.contentdom) ||
+                (this.query.contentdom == Classification.ContentDomain.TEXT && page.url().getContentDomain().getCode() > 0)) && this.query.urlMask_isCatchall) {
                 this.query.misses.add(page.hash());
                 continue;
             }

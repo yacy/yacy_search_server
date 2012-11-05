@@ -45,7 +45,7 @@ public class SnippetWorker extends Thread {
     private final int neededResults;
     private boolean shallrun;
 
-    public SnippetWorker(final SearchEvent snippetProcess, final long maxlifetime, final CacheStrategy cacheStrategy, final int neededResults) {
+    protected SnippetWorker(final SearchEvent snippetProcess, final long maxlifetime, final CacheStrategy cacheStrategy, final int neededResults) {
         this.snippetProcess = snippetProcess;
         this.cacheStrategy = cacheStrategy;
         this.lastLifeSign = System.currentTimeMillis();
