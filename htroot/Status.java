@@ -84,9 +84,9 @@ public class Status
             } else if ( post.containsKey("pauseCrawlJob") ) {
                 final String jobType = post.get("jobType");
                 if ( "localCrawl".equals(jobType) ) {
-                    sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                    sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, "user demand on Status.html");
                 } else if ( "remoteTriggeredCrawl".equals(jobType) ) {
-                    sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                    sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "user demand on Status.html");
                 }
                 redirect = true;
             } else if ( post.containsKey("continueCrawlJob") ) {

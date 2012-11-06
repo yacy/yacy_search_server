@@ -66,14 +66,16 @@ public class ResourceObserver {
     	this.normalizedMemoryFree = getNormalizedMemoryFree();
 
     	if (this.normalizedDiskFree.compareTo(Space.HIGH) < 0 || this.normalizedMemoryFree.compareTo(Space.HIGH) < 0 ) {
-
+    	    String reason = "";
+            if (this.normalizedDiskFree.compareTo(Space.HIGH) < 0) reason += " not enough disk space, " + this.path.getUsableSpace();
+            if (this.normalizedMemoryFree.compareTo(Space.HIGH) < 0 ) reason += " not enough memory space";
 			if (!this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
 				log.logInfo("pausing local crawls");
-				this.sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+				this.sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, "resource observer:" + reason);
 			}
 			if (!this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
 				log.logInfo("pausing remote triggered crawls");
-				this.sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+				this.sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "resource observer:" + reason);
 			}
 
     		if ((this.normalizedDiskFree == Space.LOW || this.normalizedMemoryFree.compareTo(Space.HIGH) < 0) && this.sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false)) {

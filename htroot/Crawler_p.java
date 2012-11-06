@@ -63,7 +63,7 @@ public class Crawler_p {
     // this servlet does NOT create the Crawler servlet page content!
     // this servlet starts a web crawl. The interface for entering the web crawl parameters is in IndexCreate_p.html
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         // inital values for AJAX Elements (without JavaScript)
@@ -107,9 +107,9 @@ public class Crawler_p {
             // pause queue
             final String queue = post.get("pause", "");
             if ("localcrawler".equals(queue)) {
-                sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, "user request in Crawler_p from " + header.refererHost());
             } else if ("remotecrawler".equals(queue)) {
-                sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "user request in Crawler_p from " + header.refererHost());
             }
         }
 
@@ -392,7 +392,6 @@ public class Crawler_p {
                         
                         // stack requests
                         sb.crawler.putActive(handle, profile);
-                        sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                         final Set<DigestURI> successurls = new HashSet<DigestURI>();
                         final Map<DigestURI,String> failurls = new HashMap<DigestURI, String>();
                         sb.stackURLs(rootURLs, profile, successurls, failurls);
@@ -489,7 +488,6 @@ public class Crawler_p {
                             }
 
                             sb.crawler.putActive(handle, profile);
-                            sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                             sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks);
                         } catch (final PatternSyntaxException e) {
                             prop.put("info", "4"); // crawlfilter does not match url

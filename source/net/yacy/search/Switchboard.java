@@ -1189,11 +1189,11 @@ public final class Switchboard extends serverSwitch {
         // pause crawls
         final boolean lcp = crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
         if ( !lcp ) {
-            pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+            pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, "network switch to " + networkDefinition);
         }
         final boolean rcp = crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         if ( !rcp ) {
-            pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+            pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "network switch to " + networkDefinition);
         }
         // trigger online caution
         this.proxyLastAccess = System.currentTimeMillis() + 3000; // at least 3 seconds online caution to prevent unnecessary action on database meanwhile
@@ -2269,12 +2269,14 @@ public final class Switchboard extends serverSwitch {
      *
      * @param jobType
      */
-    public void pauseCrawlJob(final String jobType) {
+    public void pauseCrawlJob(final String jobType, String cause) {
         final Object[] status = this.crawlJobsStatus.get(jobType);
         synchronized ( status[SwitchboardConstants.CRAWLJOB_SYNC] ) {
             status[SwitchboardConstants.CRAWLJOB_STATUS] = Boolean.TRUE;
         }
         setConfig(jobType + "_isPaused", "true");
+        setConfig(jobType + "_isPaused_cause", "cause");
+        log.logWarning("Crawl job '" + jobType + "' is paused: " + cause);
     }
 
     /**
@@ -2728,7 +2730,6 @@ public final class Switchboard extends serverSwitch {
         if (url.isFTP()) {
             try {
                 this.crawler.putActive(handle, profile);
-                this.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                 this.crawlStacker.enqueueEntriesFTP(this.peers.mySeed().hash.getBytes(), profile.handle(), url.getHost(), url.getPort(), false);
                 return null;
             } catch (final Exception e) {

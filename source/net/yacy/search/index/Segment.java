@@ -368,10 +368,11 @@ public class Segment {
         try {
             this.fulltext.putDocument(solrInputDoc);
         } catch ( final IOException e ) {
-            Log.logWarning("SOLR", "failed to send " + urlNormalform + " to solr, pausing Crawler! - " + e.getMessage());
+            String error = "failed to send " + urlNormalform + " to solr";
+            Log.logWarning("SOLR", error + ", pausing Crawler! - " + e.getMessage());
             // pause the crawler!!!
-            Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-            Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+            Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, error);
+            Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, error);
         }
 
         final long storageEndTime = System.currentTimeMillis();
