@@ -231,7 +231,6 @@ public final class search {
                     ContentDomain.contentdomParser(contentdom),
                     language,
                     new HashSet<Tagging.Metatag>(),
-                    "", // no navigation
                     null, // no snippet computation
                     count,
                     0,
@@ -241,6 +240,7 @@ public final class search {
                     null,
                     false,
                     sitehash,
+                    null,
                     null,
                     authorhash,
                     DigestURI.TLD_any_zone_filter,
@@ -296,7 +296,6 @@ public final class search {
                     ContentDomain.contentdomParser(contentdom),
                     language,
                     new HashSet<Tagging.Metatag>(),
-                    "", // no navigation
                     null, // no snippet computation
                     count,
                     0,
@@ -306,6 +305,7 @@ public final class search {
                     constraint,
                     false,
                     sitehash,
+                    null,
                     null,
                     authorhash,
                     DigestURI.TLD_any_zone_filter,
@@ -373,7 +373,7 @@ public final class search {
 
             // prepare reference hints
             final long timer = System.currentTimeMillis();
-            final ScoreMap<String> topicNavigator = theSearch.getTopicNavigator(5);
+            final ScoreMap<String> topicNavigator = theSearch.rankingProcess.getTopicNavigator(5);
             final StringBuilder refstr = new StringBuilder(6000);
             final Iterator<String> navigatorIterator = topicNavigator.keys(false);
             int i = 0;

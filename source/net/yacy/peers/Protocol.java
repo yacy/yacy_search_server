@@ -69,6 +69,7 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.opensearch.SRURSSConnector;
+import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -77,6 +78,8 @@ import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.ResultURLs;
@@ -112,11 +115,14 @@ import net.yacy.utils.crypt;
 
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.response.ResultContext;
@@ -1022,6 +1028,8 @@ public final class Protocol
         }
     }
 
+    private final static YaCySchema[] snippetFields = new YaCySchema[]{YaCySchema.h1_txt, YaCySchema.h2_txt, YaCySchema.text_t};
+    
     protected static int solrQuery(
             final SearchEvent event,
             final int offset,
@@ -1038,6 +1046,24 @@ public final class Protocol
         final SolrQuery solrQuery = event.query.solrQuery();
         solrQuery.setStart(offset);
         solrQuery.setRows(count);
+        
+        // set facet query attributes
+        if (event.query.facetfields.length > 0) {
+            solrQuery.setFacet(true);
+            solrQuery.setFacetLimit(event.query.maxfacets);
+            solrQuery.setFacetSort(FacetParams.FACET_SORT_COUNT);
+            for (String field: event.query.facetfields) solrQuery.addFacetField(field);
+        }
+        
+        // set highlightning query attributes
+        solrQuery.setHighlight(true);
+        solrQuery.setHighlightFragsize(SearchEvent.SNIPPET_MAX_LENGTH);
+        //solrQuery.setHighlightRequireFieldMatch();
+        solrQuery.setHighlightSimplePost("</b>");
+        solrQuery.setHighlightSimplePre("<b>");
+        solrQuery.setHighlightSnippets(1);
+        for (YaCySchema field: snippetFields) solrQuery.addHighlightField(field.getSolrFieldName());
+        
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
         if (localsearch) {
             // search the local index
@@ -1062,6 +1088,34 @@ public final class Protocol
                 Network.log.logInfo("SEARCH failed (solr), Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")", e);
                 return -1;
             }
+        }
+
+        // evaluate facets
+        Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>(event.query.facetfields.length);
+        for (String field: event.query.facetfields) {
+            FacetField facet = rsp.getFacetField(field);
+            ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+            List<Count> values = facet == null ? null : facet.getValues();
+            if (values == null) continue;
+            for (Count ff: values) result.set(ff.getName(), (int) ff.getCount());
+            facets.put(field, result);
+        }
+        
+        // evaluate snippets
+        Map<String, Map<String, List<String>>> rawsnippets = rsp.getHighlighting(); // a map from the urlhash to a map with key=field and value = list of snippets
+        Map<String, String> snippets = new HashMap<String, String>(); // this will be a list of urlhash-snippet entries
+        nextsnippet: for (Map.Entry<String, Map<String, List<String>>> re: rawsnippets.entrySet()) {
+            Map<String, List<String>> rs = re.getValue();
+            for (YaCySchema field: snippetFields) {
+                if (rs.containsKey(field.getSolrFieldName())) {
+                    List<String> s = rs.get(field.getSolrFieldName());
+                    if (s.size() > 0) {
+                        snippets.put(re.getKey(), s.get(0));
+                        continue nextsnippet;
+                    }
+                }
+            }
+            // no snippet found :( --we don't assign a value here by default; that can be done as an evaluation outside this method
         }
 
         // evaluate result
@@ -1126,12 +1180,12 @@ public final class Protocol
             }
 
             if (localsearch) {
-                event.add(container, true, "localpeer", (int) docList.getNumFound());
+                event.add(container, facets, snippets, true, "localpeer", (int) docList.getNumFound());
                 event.rankingProcess.addFinalize();
                 event.addExpectedRemoteReferences(-count);
                 Network.log.logInfo("local search (solr): localpeer sent " + container.get(0).size() + "/" + docList.size() + " references");
             } else {
-                event.add(container, false, target.getName() + "/" + target.hash, (int) docList.getNumFound());
+                event.add(container, facets, snippets, false, target.getName() + "/" + target.hash, (int) docList.getNumFound());
                 event.rankingProcess.addFinalize();
                 event.addExpectedRemoteReferences(-count);
                 Network.log.logInfo("remote search (solr): peer " + target.getName() + " sent " + container.get(0).size() + "/" + docList.size() + " references");

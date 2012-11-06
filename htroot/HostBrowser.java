@@ -138,7 +138,7 @@ public class HostBrowser {
                 int maxcount = admin ? 2 * 3 * 2 * 5 * 7 * 2 * 3 : 360; // which makes nice matrixes for 2, 3, 4, 5, 6, 7, 8, 9 rows/colums
                 
                 // collect hosts from index
-                ReversibleScoreMap<String> hostscore = fulltext.getSolr().getFacets("*:*", new String[]{YaCySchema.host_s.name()}, maxcount).get(YaCySchema.host_s.name());
+                ReversibleScoreMap<String> hostscore = fulltext.getSolr().getFacets("*:*", new String[]{YaCySchema.host_s.getSolrFieldName()}, maxcount).get(YaCySchema.host_s.getSolrFieldName());
                 if (hostscore == null) hostscore = new ClusteredScoreMap<String>();
                 
                 // collect hosts from crawler
@@ -148,7 +148,7 @@ public class HostBrowser {
                 }
                 
                 // collect the errorurls
-                ReversibleScoreMap<String> errorscore = admin ? fulltext.getSolr().getFacets(YaCySchema.failreason_t.name() + ":[* TO *]", new String[]{YaCySchema.host_s.name()}, maxcount).get(YaCySchema.host_s.name()) : null;
+                ReversibleScoreMap<String> errorscore = admin ? fulltext.getSolr().getFacets(YaCySchema.failreason_t.getSolrFieldName() + ":[* TO *]", new String[]{YaCySchema.host_s.getSolrFieldName()}, maxcount).get(YaCySchema.host_s.getSolrFieldName()) : null;
                 if (errorscore == null) errorscore = new ClusteredScoreMap<String>();
                 
                 int c = 0;
@@ -205,13 +205,13 @@ public class HostBrowser {
                 
                 // get all files for a specific host from the index
                 StringBuilder q = new StringBuilder();
-                q.append(YaCySchema.host_s.name()).append(':').append(host);
+                q.append(YaCySchema.host_s.getSolrFieldName()).append(':').append(host);
                 if (pathparts.length > 0 && pathparts[0].length() > 0) {
                     for (String pe: pathparts) {
-                        if (pe.length() > 0) q.append(" AND ").append(YaCySchema.url_paths_sxt.name()).append(':').append(pe);
+                        if (pe.length() > 0) q.append(" AND ").append(YaCySchema.url_paths_sxt.getSolrFieldName()).append(':').append(pe);
                     }
                 } else {
-                    if (facetcount > 1000 && !post.containsKey("nepr")) q.append(" AND ").append(YaCySchema.url_paths_sxt.name()).append(":[* TO *]");
+                    if (facetcount > 1000 && !post.containsKey("nepr")) q.append(" AND ").append(YaCySchema.url_paths_sxt.getSolrFieldName()).append(":[* TO *]");
                 }
                 BlockingQueue<SolrDocument> docs = fulltext.getSolr().concurrentQuery(q.toString(), 0, 100000, 3000, 100);
                 SolrDocument doc;
@@ -224,7 +224,7 @@ public class HostBrowser {
                 long timeout = System.currentTimeMillis() + 3000;
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                     String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
-                    String error = (String) doc.getFieldValue(YaCySchema.failreason_t.name());
+                    String error = (String) doc.getFieldValue(YaCySchema.failreason_t.getSolrFieldName());
                     if (u.startsWith(path)) {
                         if (delete) {
                             deleteIDs.add(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.name())));

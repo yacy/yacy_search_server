@@ -22,9 +22,11 @@ package net.yacy.search.query;
 
 import java.util.Iterator;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.cora.storage.HandleSet;
@@ -36,6 +38,7 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.index.Segment;
 import net.yacy.search.snippet.ResultEntry;
 import net.yacy.search.snippet.TextSnippet;
+import net.yacy.search.snippet.TextSnippet.ResultClass;
 
 public class SnippetWorker extends Thread {
     private final SearchEvent snippetProcess;
@@ -60,8 +63,6 @@ public class SnippetWorker extends Thread {
         // start fetching urls and snippets
         URIMetadataNode page;
         ResultEntry resultEntry;
-        //final int fetchAhead = snippetMode == 0 ? 0 : 10;
-        final boolean nav_topics = this.snippetProcess.query.navigators.equals("all") || this.snippetProcess.query.navigators.indexOf("topics",0) >= 0;
         try {
             while (this.shallrun && System.currentTimeMillis() < this.timeout) {
                 this.lastLifeSign = System.currentTimeMillis();
@@ -97,27 +98,21 @@ public class SnippetWorker extends Thread {
                     continue;
                 }
 
-                // in case that we have an attached solr, we load also the solr document
-                String solrContent = page.getText();
-
-                resultEntry = fetchSnippet(page, solrContent, this.cacheStrategy); // does not fetch snippets if snippetMode == 0
+                resultEntry = fetchSnippet(page, this.cacheStrategy); // does not fetch snippets if snippetMode == 0
                 if (resultEntry == null) {
                     continue; // the entry had some problems, cannot be used
                 }
 
                 //if (result.contains(resultEntry)) continue;
-                this.snippetProcess.urlRetrievalAllTime += resultEntry.dbRetrievalTime;
                 this.snippetProcess.snippetComputationAllTime += resultEntry.snippetComputationTime;
 
                 // place the result to the result vector
                 // apply post-ranking
                 long ranking = resultEntry.word() == null ? 0 : Long.valueOf(this.snippetProcess.rankingProcess.order.cardinal(resultEntry.word()));
-                ranking += postRanking(resultEntry, this.snippetProcess.rankingProcess.getTopicNavigator(10));
+                ranking += postRanking(resultEntry, new ConcurrentScoreMap<String>() /*this.snippetProcess.rankingProcess.getTopicNavigator(10)*/);
                 resultEntry.ranking = ranking;
                 this.snippetProcess.result.put(new ReverseElement<ResultEntry>(resultEntry, ranking)); // remove smallest in case of overflow
-                if (nav_topics) {
-                    this.snippetProcess.rankingProcess.addTopics(resultEntry);
-                }
+                this.snippetProcess.rankingProcess.addTopics(resultEntry);
             }
             if (System.currentTimeMillis() >= this.timeout) {
                 Log.logWarning("SnippetProcess", "worker ended with timeout");
@@ -199,7 +194,7 @@ public class SnippetWorker extends Thread {
         return r;
     }
     
-    private ResultEntry fetchSnippet(final URIMetadataNode page, final String solrText, final CacheStrategy cacheStrategy) {
+    private ResultEntry fetchSnippet(final URIMetadataNode page, final CacheStrategy cacheStrategy) {
         // Snippet Fetching can has 3 modes:
         // 0 - do not fetch snippets
         // 1 - fetch snippets offline only
@@ -208,16 +203,15 @@ public class SnippetWorker extends Thread {
         // load only urls if there was not yet a root url of that hash
         // find the url entry
 
-        long startTime = System.currentTimeMillis();
-        if (page == null) {
-            return null;
+        String solrsnippet = this.snippetProcess.snippets.get(ASCII.String(page.hash()));
+        if (solrsnippet != null && solrsnippet.length() > 0) {
+            final TextSnippet snippet = new TextSnippet(page.hash(), solrsnippet, true, ResultClass.SOURCE_CACHE, "");
+            return new ResultEntry(page, this.snippetProcess.query.getSegment(), this.snippetProcess.peers, snippet, null, 0);
         }
-        final long dbRetrievalTime = System.currentTimeMillis() - startTime;
-
+        
         if (cacheStrategy == null) {
             final TextSnippet snippet = new TextSnippet(
                     null,
-                    solrText,
                     page,
                     this.snippetProcess.snippetFetchWordHashes,
                     //this.query.queryString,
@@ -225,16 +219,15 @@ public class SnippetWorker extends Thread {
                     ((this.snippetProcess.query.constraint != null) && (this.snippetProcess.query.constraint.get(Condenser.flag_cat_indexof))),
                     SearchEvent.SNIPPET_MAX_LENGTH,
                     !this.snippetProcess.query.isLocal());
-            return new ResultEntry(page, this.snippetProcess.query.getSegment(), this.snippetProcess.peers, snippet, null, dbRetrievalTime, 0); // result without snippet
+            return new ResultEntry(page, this.snippetProcess.query.getSegment(), this.snippetProcess.peers, snippet, null, 0); // result without snippet
         }
 
         // load snippet
         if (page.url().getContentDomain() == Classification.ContentDomain.TEXT || page.url().getContentDomain() == Classification.ContentDomain.ALL) {
             // attach text snippet
-            startTime = System.currentTimeMillis();
+            long startTime = System.currentTimeMillis();
             final TextSnippet snippet = new TextSnippet(
                     this.snippetProcess.loader,
-                    solrText,
                     page,
                     this.snippetProcess.snippetFetchWordHashes,
                     cacheStrategy,
@@ -246,16 +239,16 @@ public class SnippetWorker extends Thread {
 
             if (!snippet.getErrorCode().fail()) {
                 // we loaded the file and found the snippet
-                return new ResultEntry(page, this.snippetProcess.query.getSegment(), this.snippetProcess.peers, snippet, null, dbRetrievalTime, snippetComputationTime); // result with snippet attached
+                return new ResultEntry(page, this.snippetProcess.query.getSegment(), this.snippetProcess.peers, snippet, null, snippetComputationTime); // result with snippet attached
             } else if (cacheStrategy.mustBeOffline()) {
                 // we did not demand online loading, therefore a failure does not mean that the missing snippet causes a rejection of this result
                 // this may happen during a remote search, because snippet loading is omitted to retrieve results faster
-                return new ResultEntry(page, this.snippetProcess.query.getSegment(), this.snippetProcess.peers, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
+                return new ResultEntry(page, this.snippetProcess.query.getSegment(), this.snippetProcess.peers, null, null, snippetComputationTime); // result without snippet
             } else {
                 // problems with snippet fetch
                 if (this.snippetProcess.snippetFetchWordHashes.has(Segment.catchallHash)) {
                     // we accept that because the word cannot be on the page
-                    return new ResultEntry(page, this.snippetProcess.query.getSegment(), this.snippetProcess.peers, null, null, dbRetrievalTime, 0);
+                    return new ResultEntry(page, this.snippetProcess.query.getSegment(), this.snippetProcess.peers, null, null, 0);
                 }
                 final String reason = "no text snippet; errorCode = " + snippet.getErrorCode();
                 if (this.snippetProcess.deleteIfSnippetFail) {
@@ -265,6 +258,6 @@ public class SnippetWorker extends Thread {
                 return null;
             }
         }
-        return new ResultEntry(page, this.snippetProcess.query.getSegment(), this.snippetProcess.peers, null, null, dbRetrievalTime, 0); // result without snippet
+        return new ResultEntry(page, this.snippetProcess.query.getSegment(), this.snippetProcess.peers, null, null, 0); // result without snippet
     }
 }

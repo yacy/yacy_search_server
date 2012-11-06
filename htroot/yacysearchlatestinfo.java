@@ -42,7 +42,7 @@ public class yacysearchlatestinfo {
         prop.put("remoteResourceSize", Formatter.number(theSearch.query.remote_available.get(), true));
         prop.put("remoteIndexCount", Formatter.number(theSearch.query.remote_stored.get(), true));
         prop.put("remotePeerCount", Formatter.number(theSearch.query.remote_peerCount.get(), true));
-        prop.putJSON("navurlBase", QueryParams.navurlBase("html", theSearch.query, null, theSearch.query.urlMask.toString(), theSearch.query.navigators).toString());
+        prop.putJSON("navurlBase", QueryParams.navurlBase("html", theSearch.query, null, theSearch.query.urlMask.toString()).toString());
 
         return prop;
     }

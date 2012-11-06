@@ -100,7 +100,7 @@ public class yacysearchitem {
         prop.put("remoteResourceSize", Formatter.number(theSearch.query.remote_available.get(), true));
         prop.put("remoteIndexCount", Formatter.number(theSearch.query.remote_stored.get(), true));
         prop.put("remotePeerCount", Formatter.number(theSearch.query.remote_peerCount.get(), true));
-        prop.put("navurlBase", QueryParams.navurlBase("html", theSearch.query, null, theSearch.query.urlMask.toString(), theSearch.query.navigators).toString());
+        prop.put("navurlBase", QueryParams.navurlBase("html", theSearch.query, null, theSearch.query.urlMask.toString()).toString());
         final String target_special_pattern = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
 
         if (theSearch.query.contentdom == Classification.ContentDomain.TEXT || theSearch.query.contentdom == Classification.ContentDomain.ALL) {
@@ -217,7 +217,7 @@ public class yacysearchitem {
             prop.putHTML("content_former", theSearch.query.queryString);
             prop.putHTML("content_showPictures_former", theSearch.query.queryString);
             final TextSnippet snippet = result.textSnippet();
-            final String desc = (snippet == null) ? "" : snippet.getLineMarked(theSearch.query.query_all_hashes);
+            final String desc = (snippet == null) ? "" : snippet.isMarked() ? snippet.getLineRaw() : snippet.getLineMarked(theSearch.query.query_all_hashes);
             prop.put("content_description", desc);
             prop.putXML("content_description-xml", desc);
             prop.putJSON("content_description-json", desc);

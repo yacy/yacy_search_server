@@ -159,7 +159,7 @@ public class AccessTracker_p {
                 // put values in template
                 prop.put("page_list_" + m + "_dark", ((dark) ? 1 : 0) );
                 dark =! dark;
-                prop.putHTML("page_list_" + m + "_host", query.host);
+                prop.putHTML("page_list_" + m + "_host", query.clienthost);
                 prop.put("page_list_" + m + "_date", GenericFormatter.SIMPLE_FORMATTER.format(new Date(query.starttime)));
                 prop.put("page_list_" + m + "_timestamp", query.starttime);
                 if (page == 2) {

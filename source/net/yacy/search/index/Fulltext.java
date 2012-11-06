@@ -318,14 +318,14 @@ public final class Fulltext implements Iterable<byte[]> {
         final String host = uri.getHost();
         Thread t = new Thread(){
             public void run() {
-                final BlockingQueue<SolrDocument> docs = getSolr().concurrentQuery(YaCySchema.host_s.name() + ":" + host, 0, 1000000, 600000, -1);
+                final BlockingQueue<SolrDocument> docs = getSolr().concurrentQuery(YaCySchema.host_s.getSolrFieldName() + ":" + host, 0, 1000000, 600000, -1);
                 try {
                     SolrDocument doc;
                     boolean removed = false;
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                         String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
                         if (u.startsWith(path)) {
-                            remove(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.name())));
+                            remove(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())));
                             removed = true;
                         }
                     }
@@ -805,7 +805,7 @@ public final class Fulltext implements Iterable<byte[]> {
                 // delete in solr
                 synchronized (Fulltext.this.solr) {
                     try {
-                        Fulltext.this.solr.deleteByQuery(YaCySchema.host_id_s.name() + ":\"" + hosthash + "\"");
+                        Fulltext.this.solr.deleteByQuery(YaCySchema.host_id_s.getSolrFieldName() + ":\"" + hosthash + "\"");
                         Fulltext.this.solr.commit();
                     } catch (IOException e) {}
                 }

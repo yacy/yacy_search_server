@@ -64,20 +64,20 @@ public class yacysearchtrailer {
         // compose search navigation
 
         // namespace navigators
-        final ScoreMap<String> namespaceNavigator = theSearch.getNamespaceNavigator();
         String name;
         int count;
         Iterator<String> navigatorIterator;
-        if (namespaceNavigator == null || namespaceNavigator.isEmpty()) {
+        if (theSearch.namespaceNavigator == null || theSearch.namespaceNavigator.isEmpty()) {
             prop.put("nav-namespace", 0);
         } else {
             prop.put("nav-namespace", 1);
-            navigatorIterator = namespaceNavigator.keys(false);
+            navigatorIterator = theSearch.namespaceNavigator.keys(false);
             int i = 0, p, pos = 0, neg = 0;
             String nav, queryStringForUrl;
             while (i < 10 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
-                count = namespaceNavigator.get(name);
+                count = theSearch.namespaceNavigator.get(name);
+                if (count == 0) break;
                 nav = "inurl%3A" + name;
                 queryStringForUrl = theSearch.query.queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
@@ -93,7 +93,7 @@ public class yacysearchtrailer {
                     queryStringForUrl = (queryStringForUrl.substring(0, p) + queryStringForUrl.substring(p + nav.length())).trim();
                 }
                 prop.put(fileType, "nav-namespace_element_" + i + "_name", name);
-                prop.put(fileType, "nav-namespace_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, theSearch.query.urlMask.toString(), theSearch.query.navigators).toString());
+                prop.put(fileType, "nav-namespace_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, theSearch.query.urlMask.toString()).toString());
                 prop.put("nav-namespace_element_" + i + "_count", count);
                 prop.put("nav-namespace_element_" + i + "_nl", 1);
                 i++;
@@ -106,7 +106,7 @@ public class yacysearchtrailer {
         }
 
         // host navigators
-        final ScoreMap<String> hostNavigator = theSearch.getHostNavigator();
+        final ScoreMap<String> hostNavigator = theSearch.rankingProcess.getHostNavigator();
         if (hostNavigator == null || hostNavigator.isEmpty()) {
             prop.put("nav-domains", 0);
         } else {
@@ -117,6 +117,7 @@ public class yacysearchtrailer {
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = hostNavigator.get(name);
+                if (count == 0) break;
                 nav = "site%3A" + name;
                 queryStringForUrl = theSearch.query.queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
@@ -132,7 +133,7 @@ public class yacysearchtrailer {
                     prop.put(fileType, "nav-authors_element_" + i + "_modifier", "-" + nav);
                 }
                 prop.put(fileType, "nav-domains_element_" + i + "_name", name);
-                prop.put(fileType, "nav-domains_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, theSearch.query.urlMask.toString(), theSearch.query.navigators).toString());
+                prop.put(fileType, "nav-domains_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, theSearch.query.urlMask.toString()).toString());
                 prop.put("nav-domains_element_" + i + "_count", count);
                 prop.put("nav-domains_element_" + i + "_nl", 1);
                 i++;
@@ -145,17 +146,17 @@ public class yacysearchtrailer {
         }
 
         // author navigators
-        final ScoreMap<String> authorNavigator = theSearch.getAuthorNavigator();
-        if (authorNavigator == null || authorNavigator.isEmpty()) {
+        if (theSearch.authorNavigator == null || theSearch.authorNavigator.isEmpty()) {
             prop.put("nav-authors", 0);
         } else {
             prop.put("nav-authors", 1);
-            navigatorIterator = authorNavigator.keys(false);
+            navigatorIterator = theSearch.authorNavigator.keys(false);
             int i = 0, p, pos = 0, neg = 0;
             String nav, queryStringForUrl;
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
-                count = authorNavigator.get(name);
+                count = theSearch.authorNavigator.get(name);
+                if (count == 0) break;
                 nav = (name.indexOf(' ', 0) < 0) ? "author%3A" + name : "author%3A%28" + name.replace(" ", "+") + "%29";
                 queryStringForUrl = theSearch.query.queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
@@ -171,7 +172,7 @@ public class yacysearchtrailer {
                     prop.put(fileType, "nav-authors_element_" + i + "_modifier", "-" + nav);
                 }
                 prop.put(fileType, "nav-authors_element_" + i + "_name", name);
-                prop.put(fileType, "nav-authors_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, theSearch.query.urlMask.toString(), theSearch.query.navigators).toString());
+                prop.put(fileType, "nav-authors_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, theSearch.query.urlMask.toString()).toString());
                 prop.put("nav-authors_element_" + i + "_count", count);
                 prop.put("nav-authors_element_" + i + "_nl", 1);
                 i++;
@@ -184,7 +185,7 @@ public class yacysearchtrailer {
         }
 
         // topics navigator
-        final ScoreMap<String> topicNavigator = theSearch.getTopicNavigator(MAX_TOPWORDS);
+        final ScoreMap<String> topicNavigator = theSearch.rankingProcess.getTopicNavigator(MAX_TOPWORDS);
         if (topicNavigator == null || topicNavigator.isEmpty()) {
             prop.put("nav-topics", "0");
         } else {
@@ -195,13 +196,14 @@ public class yacysearchtrailer {
             while (i < MAX_TOPWORDS && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = topicNavigator.get(name);
+                if (count == 0) break;
                 if (theSearch.query.queryString == null) break;
                 if (name != null) {
                     queryStringForUrl = theSearch.query.queryStringForUrl();
                     prop.put("nav-topics_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-topics_element_" + i + "_modifier", name);
                     prop.put(fileType, "nav-topics_element_" + i + "_name", name);
-                    prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl + "+" + name, theSearch.query.urlMask.toString(), theSearch.query.navigators).toString());
+                    prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl + "+" + name, theSearch.query.urlMask.toString()).toString());
                     prop.put("nav-topics_element_" + i + "_count", count);
                     prop.put("nav-topics_element_" + i + "_nl", 1);
                     i++;
@@ -213,17 +215,17 @@ public class yacysearchtrailer {
         }
 
         // protocol navigators
-        final ScoreMap<String> protocolNavigator = theSearch.getProtocolNavigator();
-        if (protocolNavigator == null || protocolNavigator.isEmpty()) {
+        if (theSearch.protocolNavigator == null || theSearch.protocolNavigator.isEmpty()) {
             prop.put("nav-protocols", 0);
         } else {
             prop.put("nav-protocols", 1);
-            navigatorIterator = protocolNavigator.keys(false);
+            navigatorIterator = theSearch.protocolNavigator.keys(false);
             int i = 0, p, pos = 0, neg = 0;
             String nav, queryStringForUrl;
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
-                count = protocolNavigator.get(name);
+                count = theSearch.protocolNavigator.get(name);
+                if (count == 0) break;
                 nav = "%2F" + name;
                 queryStringForUrl = theSearch.query.queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
@@ -239,7 +241,7 @@ public class yacysearchtrailer {
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", "-" + nav);
                 }
                 prop.put(fileType, "nav-protocols_element_" + i + "_name", name);
-                prop.put(fileType, "nav-protocols_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, (p >= 0 && theSearch.query.urlMask.toString().startsWith(name)) ? ".*" : theSearch.query.urlMask.toString(), theSearch.query.navigators).toString());
+                prop.put(fileType, "nav-protocols_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, (p >= 0 && theSearch.query.urlMask.toString().startsWith(name)) ? ".*" : theSearch.query.urlMask.toString()).toString());
                 prop.put("nav-protocols_element_" + i + "_count", count);
                 prop.put("nav-protocols_element_" + i + "_nl", 1);
                 i++;
@@ -252,17 +254,17 @@ public class yacysearchtrailer {
         }
 
         // filetype navigators
-        final ScoreMap<String> filetypeNavigator = theSearch.getFiletypeNavigator();
-        if (filetypeNavigator == null || filetypeNavigator.isEmpty()) {
+        if (theSearch.filetypeNavigator == null || theSearch.filetypeNavigator.isEmpty()) {
             prop.put("nav-filetypes", 0);
         } else {
             prop.put("nav-filetypes", 1);
-            navigatorIterator = filetypeNavigator.keys(false);
+            navigatorIterator = theSearch.filetypeNavigator.keys(false);
             int i = 0, p, pos = 0, neg = 0;
             String nav, queryStringForUrl;
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
-                count = filetypeNavigator.get(name);
+                count = theSearch.filetypeNavigator.get(name);
+                if (count == 0) break;
                 nav = "filetype%3A" + name;
                 queryStringForUrl = theSearch.query.queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
@@ -278,7 +280,7 @@ public class yacysearchtrailer {
                     prop.put(fileType, "nav-filetypes_element_" + i + "_modifier", "-" + nav);
                 }
                 prop.put(fileType, "nav-filetypes_element_" + i + "_name", name);
-                prop.put(fileType, "nav-filetypes_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, (p >= 0 && theSearch.query.urlMask.toString().endsWith(name)) ? ".*" : theSearch.query.urlMask.toString(), theSearch.query.navigators).toString());
+                prop.put(fileType, "nav-filetypes_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, (p >= 0 && theSearch.query.urlMask.toString().endsWith(name)) ? ".*" : theSearch.query.urlMask.toString()).toString());
                 prop.put("nav-filetypes_element_" + i + "_count", count);
                 prop.put("nav-filetypes_element_" + i + "_nl", 1);
                 i++;
@@ -291,7 +293,7 @@ public class yacysearchtrailer {
         }
 
         // vocabulary navigators
-        final Map<String, ScoreMap<String>> vocabularyNavigators = theSearch.getVocabularyNavigators();
+        final Map<String, ScoreMap<String>> vocabularyNavigators = theSearch.rankingProcess.getVocabularyNavigators();
         if (vocabularyNavigators != null && !vocabularyNavigators.isEmpty()) {
             int navvoccount = 0;
             vocnav: for (Map.Entry<String, ScoreMap<String>> ve: vocabularyNavigators.entrySet()) {
@@ -306,6 +308,7 @@ public class yacysearchtrailer {
                 while (i < 20 && navigatorIterator.hasNext()) {
                     name = navigatorIterator.next();
                     count = ve.getValue().get(name);
+                    if (count == 0) break;
                     nav = "%2Fvocabulary%2F" + navname + "%2F" + MultiProtocolURI.escape(Tagging.encodePrintname(name)).toString();
                     queryStringForUrl = theSearch.query.queryStringForUrl();
                     p = queryStringForUrl.indexOf(nav);
@@ -319,7 +322,7 @@ public class yacysearchtrailer {
                         prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_modifier", "-" + nav);
                     }
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_name", name);
-                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, theSearch.query.urlMask.toString(), theSearch.query.navigators).toString());
+                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, theSearch.query.urlMask.toString()).toString());
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_count", count);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_nl", 1);
                     i++;

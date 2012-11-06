@@ -176,7 +176,7 @@ public class RemoteSearch extends Thread {
                     QueryParams.hashSet2hashString(event.query.query_exclude_hashes),
                     event.query.modifier,
                     event.query.targetlang == null ? "" : event.query.targetlang,
-                    event.query.sitehash == null ? "" : event.query.sitehash,
+                    event.query.nav_sitehash == null ? "" : event.query.nav_sitehash,
                     event.query.authorhash == null ? "" : event.query.authorhash,
                     event.query.contentdom == null ? "all" : event.query.contentdom.toString(),
                     count,

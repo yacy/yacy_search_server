@@ -87,6 +87,14 @@ public final class QueryParams {
         }
     }
 
+    private static final String[] defaultfacetfields = new String[]{
+        YaCySchema.host_s.getSolrFieldName(),
+        YaCySchema.url_protocol_s.getSolrFieldName(),
+        YaCySchema.url_file_ext_s.getSolrFieldName(),
+        YaCySchema.author.getSolrFieldName()};
+    
+    private static final int defaultmaxfacets = 30;
+    
     private static final String ampersand = "&amp;";
 
     public static class Modifier {
@@ -114,7 +122,6 @@ public final class QueryParams {
     public final Classification.ContentDomain contentdom;
     public final String targetlang;
     protected final Collection<Tagging.Metatag> metatags;
-    public final String navigators;
     public final Searchdom domType;
     private final int zonecode;
     public final int maxDistance;
@@ -123,8 +130,9 @@ public final class QueryParams {
     protected CacheStrategy snippetCacheStrategy;
     public final RankingProfile ranking;
     private final Segment indexSegment;
-    public final String host; // this is the client host that starts the query, not a site operator
-    public final String sitehash; // this is a domain hash, 6 bytes long or null
+    public final String clienthost; // this is the client host that starts the query, not a site operator
+    public final String nav_sitehost; // this is a domain name which is used to navigate to that host
+    public final String nav_sitehash; // this is a domain hash, 6 bytes long or null
     protected final Set<String> siteexcludes; // set of domain hashes that are excluded if not included by sitehash
     public final String authorhash;
     public final Modifier modifier;
@@ -138,6 +146,8 @@ public final class QueryParams {
     public final String userAgent;
     protected boolean filterfailurls;
     protected double lat, lon, radius;
+    public String[] facetfields;
+    public int maxfacets;
     
     // the following values are filled during the search process as statistics for the search
     public final AtomicInteger local_rwi_available;  // the number of hits generated/ranked by the local search in rwi index
@@ -197,15 +207,15 @@ public final class QueryParams {
         this.constraint = constraint;
         this.allofconstraint = false;
         this.snippetCacheStrategy = null;
-        this.host = null;
-        this.sitehash = null;
+        this.clienthost = null;
+        this.nav_sitehash = null;
+        this.nav_sitehost = null;
         this.siteexcludes = null;
         this.authorhash = null;
         this.remotepeer = null;
         this.starttime = Long.valueOf(System.currentTimeMillis());
         this.maxtime = 10000;
         this.timeout = this.starttime + this.timeout;
-        this.navigators = "all";
         this.indexSegment = indexSegment;
         this.userAgent = userAgent;
         this.transmitcount = 0;
@@ -221,6 +231,8 @@ public final class QueryParams {
         this.remote_available    = new AtomicInteger(0); // the number of result contributions from all the remote peers
         this.remote_peerCount    = new AtomicInteger(0); // the number of remote peers that have contributed
         this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
+        this.facetfields = defaultfacetfields;
+        this.maxfacets = defaultmaxfacets;
     }
 
     public QueryParams(
@@ -235,12 +247,12 @@ public final class QueryParams {
         final int maxDistance, final String prefer, final ContentDomain contentdom,
         final String language,
         final Collection<Tagging.Metatag> metatags,
-        final String navigators,
         final CacheStrategy snippetCacheStrategy,
         final int itemsPerPage, final int offset, final String urlMask,
         final Searchdom domType, final int domMaxTargets,
         final Bitfield constraint, final boolean allofconstraint,
-        final String site,
+        final String nav_sitehash,
+        final String nav_sitehost,
         final Set<String> siteexcludes,
         final String authorhash,
         final int domainzone,
@@ -280,16 +292,16 @@ public final class QueryParams {
         assert language != null;
         this.targetlang = language;
         this.metatags = metatags;
-        this.navigators = navigators;
         this.domType = domType;
         this.zonecode = domainzone;
         this.constraint = constraint;
         this.allofconstraint = allofconstraint;
-        this.sitehash = site; assert site == null || site.length() == 6;
+        this.nav_sitehash = nav_sitehash; assert nav_sitehash == null || nav_sitehash.length() == 6;
+        this.nav_sitehost = nav_sitehost;
         this.siteexcludes = siteexcludes != null && siteexcludes.isEmpty() ? null: siteexcludes;
         this.authorhash = authorhash; assert authorhash == null || !authorhash.isEmpty();
         this.snippetCacheStrategy = snippetCacheStrategy;
-        this.host = host;
+        this.clienthost = host;
         this.remotepeer = null;
         this.starttime = Long.valueOf(System.currentTimeMillis());
         this.maxtime = 10000;
@@ -311,6 +323,8 @@ public final class QueryParams {
         this.remote_available    = new AtomicInteger(0); // the number of result contributions from all the remote peers
         this.remote_peerCount    = new AtomicInteger(0); // the number of remote peers that have contributed
         this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
+        this.facetfields = defaultfacetfields;
+        this.maxfacets = defaultmaxfacets;
     }
 
     private double kmNormal = 100.d; // 100 =ca 40000.d / 360.d == 111.11 - if lat/lon is multiplied with this, rounded and diveded by this, the location is normalized to a 1km grid
@@ -506,22 +520,30 @@ public final class QueryParams {
         final StringBuilder q = solrQueryString(this.query_include_words, this.query_exclude_words, this.indexSegment.fulltext().getSolrScheme());
 
         // add constraints
-        if ( this.sitehash == null ) {
+        if (this.nav_sitehash == null && this.nav_sitehost == null) {
             if (this.siteexcludes != null) {
                 for (String ex: this.siteexcludes) {
-                    q.append(" -").append(YaCySchema.host_id_s.name()).append(':').append(ex);
+                    q.append(" -").append(YaCySchema.host_id_s.getSolrFieldName()).append(':').append(ex);
                 }
             }
         } else {
-            q.append(' ').append(YaCySchema.host_id_s.name()).append(':').append(this.sitehash);
+            if (this.nav_sitehost != null)
+                q.append(" AND ").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.nav_sitehost).append('\"');
+            else
+                q.append(" AND ").append(YaCySchema.host_id_s.getSolrFieldName()).append(":\"").append(this.nav_sitehash).append('\"');
         }
         String urlMaskPattern = this.urlMask.pattern();
         int extm = urlMaskPattern.indexOf(".*\\.");
         if (extm >= 0) {
             String ext = urlMaskPattern.substring(extm + 4);
-            q.append(" AND ").append(YaCySchema.url_file_ext_s.name()).append(':').append(ext);
+            q.append(" AND ").append(YaCySchema.url_file_ext_s.getSolrFieldName()).append(':').append(ext);
         }
-
+        extm = urlMaskPattern.indexOf("?://.*");
+        if (extm >= 0) {
+            String protocol = urlMaskPattern.substring(0, extm);
+            q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append(protocol);
+        }
+        
         // construct query
         final SolrQuery params = new SolrQuery();
         params.setQuery(q.toString());
@@ -537,13 +559,13 @@ public final class QueryParams {
             //params.set("sfield", YaCySchema.coordinate_p.name());
             //params.set("pt", Double.toString(this.lat) + "," + Double.toString(this.lon));
             //params.set("d", GeoLocation.degreeToKm(this.radius));
-            params.setFilterQueries("{!bbox sfield=" + YaCySchema.coordinate_p.name() + " pt=" + Double.toString(this.lat) + "," + Double.toString(this.lon) + " d=" + GeoLocation.degreeToKm(this.radius) + "}");
+            params.setFilterQueries("{!bbox sfield=" + YaCySchema.coordinate_p.getSolrFieldName() + " pt=" + Double.toString(this.lat) + "," + Double.toString(this.lon) + " d=" + GeoLocation.degreeToKm(this.radius) + "}");
             //params.setRows(Integer.MAX_VALUE);
         } else {
             // set ranking
             if (this.ranking.coeff_date == RankingProfile.COEFF_MAX) {
                 // set a most-recent ordering
-                params.setSortField(YaCySchema.last_modified.name(), ORDER.desc);
+                params.setSortField(YaCySchema.last_modified.getSolrFieldName(), ORDER.desc);
             }
         }
         
@@ -574,10 +596,10 @@ public final class QueryParams {
         wc = 0;
         Float boost;
         for (YaCySchema field: fields) {
-            if (configuration != null && !configuration.contains(field.name())) continue;
+            if (configuration != null && !configuration.contains(field.getSolrFieldName())) continue;
             if (wc > 0) q.append(" OR ");
             q.append('(');
-            q.append(field.name()).append(':').append(w);
+            q.append(field.getSolrFieldName()).append(':').append(w);
             boost = boosts.get(field);
             if (boost != null) q.append('^').append(boost.toString());
             q.append(')');
@@ -587,7 +609,7 @@ public final class QueryParams {
         q.append(')');
 
         // add filter to prevent that results come from failed urls
-        q.append(" AND -").append(YaCySchema.failreason_t.name()).append(":[* TO *]");
+        q.append(" AND -").append(YaCySchema.failreason_t.getSolrFieldName()).append(":[* TO *]");
 
         return q;
     }
@@ -665,7 +687,7 @@ public final class QueryParams {
             context.append(ASCII.String(Word.word2hash(this.ranking.toExternalString()))).append(asterisk);
             context.append(Base64Order.enhancedCoder.encodeString(this.prefer.toString())).append(asterisk);
             context.append(Base64Order.enhancedCoder.encodeString(this.urlMask.toString())).append(asterisk);
-            context.append(this.sitehash).append(asterisk);
+            context.append(this.nav_sitehash).append(asterisk);
             context.append(this.siteexcludes).append(asterisk);
             context.append(this.authorhash).append(asterisk);
             context.append(this.targetlang).append(asterisk);
@@ -694,9 +716,9 @@ public final class QueryParams {
      */
     public static StringBuilder navurl(
             final String ext, final int page, final QueryParams theQuery,
-            final String newQueryString, final String originalUrlMask, final String nav) {
+            final String newQueryString, final String originalUrlMask) {
 
-        final StringBuilder sb = navurlBase(ext, theQuery, newQueryString, originalUrlMask, nav);
+        final StringBuilder sb = navurlBase(ext, theQuery, newQueryString, originalUrlMask);
 
         sb.append(ampersand);
         sb.append("startRecord=");
@@ -707,7 +729,7 @@ public final class QueryParams {
 
     public static StringBuilder navurlBase(
                     final String ext, final QueryParams theQuery,
-                    final String newQueryString, final String originalUrlMask, final String nav) {
+                    final String newQueryString, final String originalUrlMask) {
 
         final StringBuilder sb = new StringBuilder(120);
         sb.append("/yacysearch.");
@@ -726,10 +748,6 @@ public final class QueryParams {
         sb.append(ampersand);
         sb.append("verify=");
         sb.append(theQuery.snippetCacheStrategy == null ? "false" : theQuery.snippetCacheStrategy.toName());
-
-        sb.append(ampersand);
-        sb.append("nav=");
-        sb.append(nav);
 
         sb.append(ampersand);
         sb.append("urlmaskfilter=");

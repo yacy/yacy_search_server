@@ -215,6 +215,11 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         writer.write("</rss>\n".toCharArray());
     }
 
+    /**
+     * produce snippets from solr (they call that 'highlighting')
+     * @param val
+     * @return a map from urlhashes to a list of snippets for that url
+     */
     @SuppressWarnings("unchecked")
     public static Map<String, List<String>> highlighting(final SimpleOrderedMap<Object> val) {
         Map<String, List<String>> snippets = new HashMap<String, List<String>>();

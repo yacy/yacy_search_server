@@ -600,10 +600,6 @@ public class yacysearch {
                 }
             }
 
-            // navigation
-            final String navigation =
-                (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "");
-
             // the query
             final Collection<String>[] query = QueryParams.cleanQuery(querystring.trim()); // converts also umlaute
 
@@ -739,7 +735,6 @@ public class yacysearch {
                     contentdom,
                     language,
                     metatags,
-                    navigation,
                     snippetFetchStrategy,
                     itemsPerPage,
                     startRecord,
@@ -751,6 +746,7 @@ public class yacysearch {
                     constraint,
                     true,
                     sitehash,
+                    sitehost,
                     DigestURI.hosthashess(sb.getConfig("search.excludehosth", "")),
                     authorhash,
                     DigestURI.TLD_any_zone_filter,
@@ -869,8 +865,7 @@ public class yacysearch {
                                     0,
                                     theQuery,
                                     suggestion,
-                                    originalUrlMask.toString(),
-                                    theQuery.navigators).toString());
+                                    originalUrlMask.toString()).toString());
                             prop.put("didYouMean_suggestions_" + meanCount + "_sep", "|");
                             meanCount++;
                         } catch (ConcurrentModificationException e) {break meanCollect;}
@@ -947,8 +942,7 @@ public class yacysearch {
                     thispage - 1,
                     theQuery,
                     null,
-                    originalUrlMask,
-                    navigation).toString());
+                    originalUrlMask).toString());
                 resnav
                     .append("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
             }
@@ -964,7 +958,7 @@ public class yacysearch {
                 } else {
                     resnav.append("<a href=\"");
                     resnav.append(QueryParams
-                        .navurl("html", i, theQuery, null, originalUrlMask, navigation)
+                        .navurl("html", i, theQuery, null, originalUrlMask)
                         .toString());
                     resnav.append("\"><img src=\"env/grafics/navd");
                     resnav.append(i + 1);
@@ -983,8 +977,7 @@ public class yacysearch {
                     thispage + 1,
                     theQuery,
                     null,
-                    originalUrlMask,
-                    navigation).toString());
+                    originalUrlMask).toString());
                 resnav
                     .append("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
             }

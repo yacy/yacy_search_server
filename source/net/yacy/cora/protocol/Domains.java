@@ -708,7 +708,7 @@ public class Domains {
 
     /**
      * resolve a host address using a local DNS cache and a DNS lookup if necessary
-     * @param host
+     * @param clienthost
      * @return the hosts InetAddress or null if the address cannot be resolved
      */
     public static InetAddress dnsResolve(final String host0) {

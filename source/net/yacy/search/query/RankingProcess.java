@@ -89,8 +89,9 @@ public final class RankingProcess extends Thread {
     protected final AtomicInteger receivedRemoteReferences;
     protected final ReferenceOrder order;
     protected final HandleSet urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
-    protected final ScoreMap<String> hostNavigator; // a counter for the appearance of the host hash
-    protected final Map<String, byte[]> hostResolver; // a mapping from a host hash (6 bytes) to the full url hash of one of these urls that have the host hash
+    protected final ScoreMap<String> hostNavigator = new ConcurrentScoreMap<String>(); // a counter for the appearance of host names
+    protected final ScoreMap<String> hostHashNavigator; // a counter for the appearance of the host hash (this can be filled during classic remote search)
+    protected final Map<String, byte[]> hostHashResolver; // a mapping from a host hash (6 bytes) to the full url hash of one of these urls that have the host hash
     protected final Map<String, String> taggingPredicates; // a map from tagging vocabulary names to tagging predicate uris
     protected final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
     private boolean remote;
@@ -117,8 +118,8 @@ public final class RankingProcess extends Thread {
         this.receivedRemoteReferences = new AtomicInteger(0);
         this.order = new ReferenceOrder(this.query.ranking, UTF8.getBytes(this.query.targetlang));
         this.urlhashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
-        this.hostNavigator = new ConcurrentScoreMap<String>();
-        this.hostResolver = new ConcurrentHashMap<String, byte[]>();
+        this.hostHashNavigator = new ConcurrentScoreMap<String>();
+        this.hostHashResolver = new ConcurrentHashMap<String, byte[]>();
         this.vocabularyNavigator = new ConcurrentHashMap<String, ScoreMap<String>>();
         this.taggingPredicates = new HashMap<String, String>();
         for (Tagging t: LibraryProvider.autotagging.getVocabularies()) {
@@ -284,7 +285,6 @@ public final class RankingProcess extends Thread {
 
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
-        final boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts", 0) >= 0;
 
         // apply all constraints
         long timeout = System.currentTimeMillis() + maxtime;
@@ -336,18 +336,16 @@ public final class RankingProcess extends Thread {
 
                 // check site constraints
                 final String hosthash = iEntry.hosthash();
-                if ( this.query.sitehash == null ) {
+                if ( this.query.nav_sitehash == null ) {
                     if (this.query.siteexcludes != null && this.query.siteexcludes.contains(hosthash)) continue pollloop;
                 } else {
                     // filter out all domains that do not match with the site constraint
-                    if (!hosthash.equals(this.query.sitehash)) continue pollloop;
+                    if (!hosthash.equals(this.query.nav_sitehash)) continue pollloop;
                 }
 
                 // collect host navigation information (even if we have only one; this is to provide a switch-off button)
-                if (this.query.navigators.isEmpty() && (nav_hosts || this.query.urlMask_isCatchall)) {
-                    this.hostNavigator.inc(hosthash);
-                    this.hostResolver.put(hosthash, iEntry.urlhash());
-                }
+                this.hostHashNavigator.inc(hosthash);
+                this.hostHashResolver.put(hosthash, iEntry.urlhash());
 
                 // check protocol
                 if (!this.query.urlMask_isCatchall) {
@@ -420,31 +418,37 @@ public final class RankingProcess extends Thread {
         return this.localSearchInclusion;
     }
 
-    
     public ScoreMap<String> getHostNavigator() {
         final ScoreMap<String> result = new ConcurrentScoreMap<String>();
-        if ( !this.query.navigators.equals("all") && this.query.navigators.indexOf("hosts", 0) < 0 ) {
-            return result;
-        }
 
-        final Iterator<String> domhashs = this.hostNavigator.keys(false);
+        final Iterator<String> domhashs = this.hostHashNavigator.keys(false);
         URIMetadataNode row;
         byte[] urlhash;
         String hosthash, hostname;
-        if ( this.hostResolver != null ) {
+        if ( this.hostHashResolver != null ) {
             while ( domhashs.hasNext() && result.sizeSmaller(30) ) {
                 hosthash = domhashs.next();
                 if ( hosthash == null ) {
                     continue;
                 }
-                urlhash = this.hostResolver.get(hosthash);
+                urlhash = this.hostHashResolver.get(hosthash);
                 row = urlhash == null ? null : this.query.getSegment().fulltext().getMetadata(urlhash);
                 hostname = row == null ? null : row.url().getHost();
                 if ( hostname != null ) {
-                    result.set(hostname, this.hostNavigator.get(hosthash));
+                    result.set(hostname, this.hostHashNavigator.get(hosthash));
                 }
             }
         }
+
+        // add only navigation hosts which have more than one entry
+        Iterator<String> i = this.hostNavigator.keys(false);
+        while (i.hasNext()) {
+            String h = i.next();
+            int c = this.hostNavigator.get(h);
+            if (c <= 0) break;
+            result.inc(h, c);
+        }
+        
         return result;
     }
 
@@ -452,13 +456,10 @@ public final class RankingProcess extends Thread {
         return this.vocabularyNavigator;
     }
 
-    protected ScoreMap<String> getTopicNavigator(final int count) {
+    public ScoreMap<String> getTopicNavigator(final int count) {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
         final ScoreMap<String> result = new ConcurrentScoreMap<String>();
-        if ( !this.query.navigators.equals("all") && this.query.navigators.indexOf("topics", 0) < 0 ) {
-            return result;
-        }
         if ( this.ref.sizeSmaller(2) ) {
             this.ref.clear(); // navigators with one entry are not useful
         }

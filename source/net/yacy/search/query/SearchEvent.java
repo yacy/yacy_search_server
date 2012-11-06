@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -41,6 +42,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.Classification.ContentDomain;
+import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.lod.JenaTripleStore;
@@ -48,8 +50,8 @@ import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Scanner;
-import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
+import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.Element;
@@ -105,10 +107,10 @@ public final class SearchEvent {
     private byte[] IAmaxcounthash, IAneardhthash;
     private final Thread localsearch;
     private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences; // counter for referenced that had been sorted out for other reasons
-    private final ScoreMap<String> authorNavigator; // a counter for the appearances of authors
-    private final ScoreMap<String> namespaceNavigator; // a counter for name spaces
-    private final ScoreMap<String> protocolNavigator; // a counter for protocol types
-    private final ScoreMap<String> filetypeNavigator; // a counter for file types
+    public final ScoreMap<String> authorNavigator; // a counter for the appearances of authors
+    public final ScoreMap<String> namespaceNavigator; // a counter for name spaces
+    public final ScoreMap<String> protocolNavigator; // a counter for protocol types
+    public final ScoreMap<String> filetypeNavigator; // a counter for file types
     protected final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack;
     protected final WeakPriorityBlockingQueue<ResultEntry>  result;
     protected final LoaderDispatcher                        loader;
@@ -117,6 +119,7 @@ public final class SearchEvent {
     private   SnippetWorker[]                               workerThreads;
     protected long                                          urlRetrievalAllTime;
     protected long                                          snippetComputationAllTime;
+    protected ConcurrentHashMap<String, String> snippets;
     private final boolean remote;
     private boolean cleanupState;
 
@@ -146,7 +149,8 @@ public final class SearchEvent {
         this.namespaceNavigator = new ConcurrentScoreMap<String>();
         this.protocolNavigator = new ConcurrentScoreMap<String>();
         this.filetypeNavigator = new ConcurrentScoreMap<String>();
-        
+        this.snippets = new ConcurrentHashMap<String, String>();
+            
         this.secondarySearchSuperviser =
             (this.query.query_include_hashes.size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
         if ( this.secondarySearchSuperviser != null ) {
@@ -393,53 +397,6 @@ public final class SearchEvent {
         return this.secondarySearchThreads;
     }
 
-    public RankingProcess getRankingResult() {
-        return this.rankingProcess;
-    }
-
-    public ScoreMap<String> getHostNavigator() {
-        return this.rankingProcess.getHostNavigator();
-    }
-
-    public ScoreMap<String> getTopicNavigator(final int count) {
-        // returns a set of words that are computed as toplist
-        return this.rankingProcess.getTopicNavigator(count);
-    }
-
-    public ScoreMap<String> getNamespaceNavigator() {
-        if ( !this.query.navigators.equals("all") && this.query.navigators.indexOf("namespace", 0) < 0 ) {
-            return new ClusteredScoreMap<String>();
-        }
-        return this.namespaceNavigator;
-    }
-    
-    public ScoreMap<String> getProtocolNavigator() {
-        if ( !this.query.navigators.equals("all") && this.query.navigators.indexOf("protocol", 0) < 0 ) {
-            return new ClusteredScoreMap<String>();
-        }
-        return this.protocolNavigator;
-    }
-
-    public ScoreMap<String> getFiletypeNavigator() {
-        if ( !this.query.navigators.equals("all") && this.query.navigators.indexOf("filetype", 0) < 0 ) {
-            return new ClusteredScoreMap<String>();
-        }
-        return this.filetypeNavigator;
-    }
-
-    public ScoreMap<String> getAuthorNavigator() {
-        // create a list of words that had been computed by statistics over all
-        // words that appeared in the url or the description of all urls
-        if ( !this.query.navigators.equals("all") && this.query.navigators.indexOf("authors", 0) < 0 ) {
-            return new ConcurrentScoreMap<String>();
-        }
-        return this.authorNavigator;
-    }
-    
-    public Map<String,ScoreMap<String>> getVocabularyNavigators() {
-        return this.rankingProcess.getVocabularyNavigators();
-    }
-
     public void addHeuristic(final byte[] urlhash, final String heuristicName, final boolean redundant) {
         synchronized ( this.heuristics ) {
             this.heuristics.put(urlhash, new HeuristicResult(urlhash, heuristicName, redundant));
@@ -451,7 +408,6 @@ public final class SearchEvent {
             return this.heuristics.get(urlhash);
         }
     }
-
 
     protected boolean workerAlive() {
         if ( this.workerThreads == null ) {
@@ -467,11 +423,14 @@ public final class SearchEvent {
     
     public void add(
         final List<URIMetadataNode> index,
+        final Map<String, ReversibleScoreMap<String>> facets, // a map from a field name to scored values
+        final Map<String, String> solrsnippets, // a map from urlhash to snippet text
         final boolean local,
         final String resourceName,
         final int fullResource) {
 
         this.rankingProcess.addBegin();
+        this.snippets.putAll(solrsnippets);
         assert (index != null);
         if (index.isEmpty()) return;
 
@@ -494,8 +453,20 @@ public final class SearchEvent {
 
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
-        final boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts", 0) >= 0;
 
+        // collect navigation information
+        ReversibleScoreMap<String> fcts = facets.get(YaCySchema.host_s.getSolrFieldName());
+        if (fcts != null) this.rankingProcess.hostNavigator.inc(fcts);
+        
+        fcts = facets.get(YaCySchema.url_file_ext_s.getSolrFieldName());
+        if (fcts != null) this.filetypeNavigator.inc(fcts);
+        
+        fcts = facets.get(YaCySchema.url_protocol_s.getSolrFieldName());
+        if (fcts != null) this.protocolNavigator.inc(fcts);
+        
+        //fcts = facets.get(YaCySchema.author.getSolrFieldName());
+        //if (fcts != null) this.authorNavigator.inc(fcts);
+        
         // apply all constraints
         try {
             final String pattern = this.query.urlMask.pattern();
@@ -535,19 +506,13 @@ public final class SearchEvent {
 
                 // check site constraints
                 final String hosthash = iEntry.hosthash();
-                if ( this.query.sitehash == null ) {
+                if ( this.query.nav_sitehash == null ) {
                     if (this.query.siteexcludes != null && this.query.siteexcludes.contains(hosthash)) {
                         continue pollloop;
                     }
                 } else {
                     // filter out all domains that do not match with the site constraint
-                    if (!hosthash.equals(this.query.sitehash)) continue pollloop;
-                }
-
-                // collect host navigation information (even if we have only one; this is to provide a switch-off button)
-                if (this.query.navigators.isEmpty() && (nav_hosts || this.query.urlMask_isCatchall)) {
-                    this.rankingProcess.hostNavigator.inc(hosthash);
-                    this.rankingProcess.hostResolver.put(hosthash, iEntry.hash());
+                    if (!hosthash.equals(this.query.nav_sitehash)) continue pollloop;
                 }
 
                 // check protocol
@@ -874,13 +839,6 @@ public final class SearchEvent {
 
             // from here: collect navigation information
 
-            // collect host navigation information (even if we have only one; this is to provide a switch-off button)
-            if (!this.query.navigators.isEmpty() && (this.query.urlMask_isCatchall || this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts", 0) >= 0)) {
-                final String hosthash = page.hosthash();
-                this.rankingProcess.hostNavigator.inc(hosthash);
-                this.rankingProcess.hostResolver.put(hosthash, page.hash());
-            }
-
             // namespace navigation
             String pagepath = page.url().getPath();
             if ( (p = pagepath.indexOf(':')) >= 0 ) {
@@ -895,10 +853,6 @@ public final class SearchEvent {
             // protocol navigation
             final String protocol = page.url().getProtocol();
             this.protocolNavigator.inc(protocol);
-
-            // file type navigation
-            final String fileext = page.url().getFileExtension();
-            if ( fileext.length() > 0 ) this.filetypeNavigator.inc(fileext);
 
             return page; // accept url
         }

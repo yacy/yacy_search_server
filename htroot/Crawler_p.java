@@ -377,7 +377,7 @@ public class Crawler_p {
                     String hosthash = u.hosthash();
                     try {
                         sb.crawlQueues.errorURL.removeHost(ASCII.getBytes(hosthash));
-                        sb.index.fulltext().getSolr().deleteByQuery(YaCySchema.host_id_s.name() + ":\"" + hosthash + "\" AND " + YaCySchema.failreason_t.name() + ":[* TO *]");
+                        sb.index.fulltext().getSolr().deleteByQuery(YaCySchema.host_id_s.getSolrFieldName() + ":\"" + hosthash + "\" AND " + YaCySchema.failreason_t.getSolrFieldName() + ":[* TO *]");
                         sb.index.fulltext().commit();
                     } catch (IOException e) {Log.logException(e);}
                 }

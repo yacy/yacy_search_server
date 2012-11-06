@@ -60,21 +60,20 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     private final Segment indexSegment;
 
     // statistic objects
-    public long dbRetrievalTime, snippetComputationTime, ranking;
+    public long snippetComputationTime, ranking;
 
     public ResultEntry(final URIMetadataNode urlentry,
                        final Segment indexSegment,
                        SeedDB peers,
                        final TextSnippet textSnippet,
                        final List<MediaSnippet> mediaSnippets,
-                       final long dbRetrievalTime, final long snippetComputationTime) {
+                       final long snippetComputationTime) {
         this.urlentry = urlentry;
         this.indexSegment = indexSegment;
         this.alternative_urlstring = null;
         this.alternative_urlname = null;
         this.textSnippet = textSnippet;
         this.mediaSnippets = mediaSnippets;
-        this.dbRetrievalTime = dbRetrievalTime;
         this.snippetComputationTime = snippetComputationTime;
         final String host = urlentry.url().getHost();
         if (host != null && host.endsWith(".yacyh")) {

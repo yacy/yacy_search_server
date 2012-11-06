@@ -379,7 +379,7 @@ public class Segment {
         // STORE PAGE INDEX INTO WORD INDEX DB
         int outlinksSame = document.inboundLinks().size();
         int outlinksOther = document.outboundLinks().size();
-        final RankingProcess rankingProcess = (searchEvent == null) ? null : searchEvent.getRankingResult();
+        final RankingProcess rankingProcess = (searchEvent == null) ? null : searchEvent.rankingProcess;
         final int urlLength = urlNormalform.length();
         final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
 
