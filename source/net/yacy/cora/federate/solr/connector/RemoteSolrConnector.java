@@ -154,6 +154,11 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
     @Override
     public QueryResponse query(ModifiableSolrParams params) throws IOException {
         try {
+            // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
+            String q = params.get("q");
+            String threadname = Thread.currentThread().getName();
+            if (q != null) Thread.currentThread().setName("solr query: q = " + q);
+            
             QueryRequest request = new QueryRequest(params);
             ResponseParser responseParser = new XMLResponseParser();
             request.setResponseParser(responseParser);
@@ -161,6 +166,8 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
             NamedList<Object> result = server.request(request);
             QueryResponse response = new QueryResponse(result, server);
             response.setElapsedTime(System.currentTimeMillis() - t);
+
+            if (q != null) Thread.currentThread().setName(threadname);
             return response;
         } catch (SolrServerException e) {
             throw new IOException(e);

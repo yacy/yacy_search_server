@@ -48,7 +48,6 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.servlet.SolrRequestParsers;
 import org.xml.sax.SAXException;
 
 import com.google.common.io.Files;
@@ -62,7 +61,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     private final CoreContainer cores;
     private final String defaultCoreName;
     private final SolrCore defaultCore;
-    protected SolrRequestParsers adminRequestParser;
+    
     private final SearchHandler requestHandler;
     private final File storagePath;
 
@@ -149,6 +148,11 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     public SolrQueryResponse query(SolrQueryRequest req) throws SolrException {
         final long startTime = System.currentTimeMillis();
 
+        // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
+        String q = req.getParams().get("q");
+        String threadname = Thread.currentThread().getName();
+        if (q != null) Thread.currentThread().setName("solr query: q = " + q);
+        
         SolrQueryResponse rsp = new SolrQueryResponse();
         NamedList<Object> responseHeader = new SimpleOrderedMap<Object>();
         responseHeader.add("params", req.getOriginalParams().toNamedList());
@@ -164,6 +168,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         responseHeader.add("status", status);
         responseHeader.add("QTime",(int) (System.currentTimeMillis() - startTime));
 
+        if (q != null) Thread.currentThread().setName(threadname);
         // return result
         return rsp;
     }
