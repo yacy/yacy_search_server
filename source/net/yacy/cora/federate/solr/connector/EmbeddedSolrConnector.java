@@ -172,7 +172,13 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     public QueryResponse query(ModifiableSolrParams params) throws IOException {
         if (this.server == null) throw new IOException("server disconnected");
         try {
-            return this.server.query(params);
+            // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
+            String q = params.get("q");
+            String threadname = Thread.currentThread().getName();
+            if (q != null) Thread.currentThread().setName("solr query: q = " + q);
+            QueryResponse rsp = this.server.query(params);
+            if (q != null) Thread.currentThread().setName(threadname);
+            return rsp;
         } catch (SolrServerException e) {
             throw new IOException(e);
         } catch (Throwable e) {
