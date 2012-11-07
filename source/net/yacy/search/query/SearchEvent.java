@@ -726,12 +726,15 @@ public final class SearchEvent {
             }
 
             // check content domain
-            if (((this.query.contentdom.getCode() > 0 && page.url().getContentDomain() != this.query.contentdom) ||
-                (this.query.contentdom == Classification.ContentDomain.TEXT && page.url().getContentDomain().getCode() > 0)) && this.query.urlMask_isCatchall) {
+            if (((this.query.contentdom == Classification.ContentDomain.TEXT && page.url().getContentDomain() == Classification.ContentDomain.IMAGE) ||
+                (this.query.contentdom == Classification.ContentDomain.IMAGE && page.url().getContentDomain() != Classification.ContentDomain.IMAGE) ||
+                (this.query.contentdom == Classification.ContentDomain.AUDIO && page.url().getContentDomain() != Classification.ContentDomain.AUDIO) ||
+                (this.query.contentdom == Classification.ContentDomain.VIDEO && page.url().getContentDomain() != Classification.ContentDomain.VIDEO) ||
+                (this.query.contentdom == Classification.ContentDomain.APP && page.url().getContentDomain() != Classification.ContentDomain.APP)) && this.query.urlMask_isCatchall) {
                 this.query.misses.add(page.hash());
                 continue;
             }
-
+            
             // Check for blacklist
             if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page)) {
                 this.query.misses.add(page.hash());

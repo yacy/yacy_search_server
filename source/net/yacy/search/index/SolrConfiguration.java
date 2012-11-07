@@ -371,7 +371,10 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.content_type)) add(doc, YaCySchema.content_type, new String[]{document.dc_format()});
         if (allAttr || contains(YaCySchema.last_modified)) add(doc, YaCySchema.last_modified, responseHeader == null ? new Date() : responseHeader.lastModified());
         if (allAttr || contains(YaCySchema.keywords)) add(doc, YaCySchema.keywords, document.dc_subject(' '));
-        final String content = document.getTextString();
+        String content = document.getTextString();
+        if (content == null || content.length() == 0) {
+            content = digestURI.toTokens();
+        }
         if (allAttr || contains(YaCySchema.text_t)) add(doc, YaCySchema.text_t, content);
         if (allAttr || contains(YaCySchema.wordcount_i)) {
             final int contentwc = content.split(" ").length;
