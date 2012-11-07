@@ -505,6 +505,7 @@ public final class QueryParams {
     private final static Map<YaCySchema,Float> boosts = new LinkedHashMap<YaCySchema,Float>();
     static {
         boosts.put(YaCySchema.sku, 20.0f);
+        boosts.put(YaCySchema.url_paths_sxt, 20.0f);
         boosts.put(YaCySchema.title, 15.0f);
         boosts.put(YaCySchema.h1_txt, 11.0f);
         boosts.put(YaCySchema.h2_txt, 10.0f);
