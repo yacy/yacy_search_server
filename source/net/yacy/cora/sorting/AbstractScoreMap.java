@@ -36,7 +36,8 @@ public abstract class AbstractScoreMap<E> implements ScoreMap<E> {
     public void inc(ScoreMap<E> map) {
         if (map == null) return;
         for (E entry: map) {
-            this.inc(entry, map.get(entry));
+            int count = map.get(entry);
+            if (count > 0) this.inc(entry, count);
         }
     }
     

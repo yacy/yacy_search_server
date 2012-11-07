@@ -22,6 +22,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
 import net.yacy.cora.protocol.HeaderFramework;
@@ -72,16 +73,18 @@ public class suggest {
             String suggestion;
             //[#[query]#,[#{suggestions}##[text]##(eol)#,::#(/eol)##{/suggestions}#]]
             while (c < meanMax && meanIt.hasNext()) {
-                suggestion = meanIt.next().toString();
-                if (json) {
-                    prop.putJSON("suggestions_" + c + "_text", suggestion);
-                } else if (xml) {
-                    prop.putXML("suggestions_" + c + "_text", suggestion);
-                } else {
-                    prop.putHTML("suggestions_" + c + "_text", suggestion);
-                }
-                prop.put("suggestions_" + c + "_eol", 0);
-                c++;
+                try {
+                    suggestion = meanIt.next().toString();
+                    if (json) {
+                        prop.putJSON("suggestions_" + c + "_text", suggestion);
+                    } else if (xml) {
+                        prop.putXML("suggestions_" + c + "_text", suggestion);
+                    } else {
+                        prop.putHTML("suggestions_" + c + "_text", suggestion);
+                    }
+                    prop.put("suggestions_" + c + "_eol", 0);
+                    c++;
+                } catch (ConcurrentModificationException e) {}
             }
         }
 

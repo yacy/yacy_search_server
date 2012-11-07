@@ -374,15 +374,14 @@ public class yacysearch {
                 ranking.coeff_date = RankingProfile.COEFF_MAX;
                 modifier.append("/date ");
             }
-            if ( querystring.indexOf("/http", 0) >= 0 ) {
-                querystring = querystring.replace("/http", "");
-                urlmask = "https?://.*";
-                modifier.append("/http ");
-            }
             if ( querystring.indexOf("/https", 0) >= 0 ) {
                 querystring = querystring.replace("/https", "");
-                urlmask = "https?://.*";
+                urlmask = "https://.*";
                 modifier.append("/https ");
+            } else if ( querystring.indexOf("/http", 0) >= 0 ) {
+                querystring = querystring.replace("/http", "");
+                urlmask = "http://.*";
+                modifier.append("/http ");
             }
             if ( querystring.indexOf("/ftp", 0) >= 0 ) {
                 querystring = querystring.replace("/ftp", "");

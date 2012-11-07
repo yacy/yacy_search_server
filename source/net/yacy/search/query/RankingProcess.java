@@ -51,7 +51,6 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -290,9 +289,6 @@ public final class RankingProcess extends Thread {
         long timeout = System.currentTimeMillis() + maxtime;
         try {
             WordReferenceVars iEntry;
-            final String pattern = this.query.urlMask.pattern();
-            final boolean httpPattern = pattern.equals("http://.*");
-            final boolean noHttpButProtocolPattern = pattern.equals("https://.*") || pattern.equals("ftp://.*") || pattern.equals("smb://.*") || pattern.equals("file://.*");
             long remaining;
             pollloop: while ( true ) {
                 remaining = timeout - System.currentTimeMillis();
@@ -346,13 +342,6 @@ public final class RankingProcess extends Thread {
                 // collect host navigation information (even if we have only one; this is to provide a switch-off button)
                 this.hostHashNavigator.inc(hosthash);
                 this.hostHashResolver.put(hosthash, iEntry.urlhash());
-
-                // check protocol
-                if (!this.query.urlMask_isCatchall) {
-                    final boolean httpFlagSet = DigestURI.flag4HTTPset(iEntry.urlHash);
-                    if (httpPattern && !httpFlagSet) continue pollloop;
-                    if (noHttpButProtocolPattern && httpFlagSet) continue pollloop;
-                }
 
                 // check vocabulary constraint
                 String subject = YaCyMetadata.hashURI(iEntry.urlhash());

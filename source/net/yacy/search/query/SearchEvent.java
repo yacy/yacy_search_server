@@ -62,7 +62,6 @@ import net.yacy.data.WorkTables;
 import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.interaction.contentcontrol.ContentControlFilterUpdateThread;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -469,9 +468,6 @@ public final class SearchEvent {
         
         // apply all constraints
         try {
-            final String pattern = this.query.urlMask.pattern();
-            final boolean httpPattern = pattern.equals("http://.*");
-            final boolean noHttpButProtocolPattern = pattern.equals("https://.*") || pattern.equals("ftp://.*") || pattern.equals("smb://.*") || pattern.equals("file://.*");
             pollloop: for (URIMetadataNode iEntry: index) {
                 
                 if ( !this.query.urlMask_isCatchall ) {
@@ -513,17 +509,6 @@ public final class SearchEvent {
                 } else {
                     // filter out all domains that do not match with the site constraint
                     if (!hosthash.equals(this.query.nav_sitehash)) continue pollloop;
-                }
-
-                // check protocol
-                if ( !this.query.urlMask_isCatchall ) {
-                    final boolean httpFlagSet = DigestURI.flag4HTTPset(iEntry.hash());
-                    if ( httpPattern && !httpFlagSet ) {
-                        continue pollloop;
-                    }
-                    if ( noHttpButProtocolPattern && httpFlagSet ) {
-                        continue pollloop;
-                    }
                 }
 
                 // check vocabulary constraint
@@ -849,10 +834,6 @@ public final class SearchEvent {
                     this.namespaceNavigator.inc(pagepath);
                 }
             }
-
-            // protocol navigation
-            final String protocol = page.url().getProtocol();
-            this.protocolNavigator.inc(protocol);
 
             return page; // accept url
         }

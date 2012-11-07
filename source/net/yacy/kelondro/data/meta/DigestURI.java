@@ -270,18 +270,6 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         return b;
     }
 
-    /**
-     * return true if the protocol of the URL was 'http'
-     * this is not true if the protocol was 'https'
-     * @param hash
-     * @return true for url hashes that point to http services; false otherwise
-     */
-    public static final boolean flag4HTTPset(final byte[] hash) {
-        assert hash.length == 12;
-        final byte flagbyte = hash[11];
-        return (flagbyte & 32) == 1;
-    }
-
     private static char subdomPortPath(final String subdom, final int port, final String rootpath) {
         final StringBuilder sb = new StringBuilder(subdom.length() + rootpath.length() + 8);
         sb.append(subdom).append(':').append(Integer.toString(port)).append(':').append(rootpath);

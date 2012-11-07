@@ -533,17 +533,21 @@ public final class QueryParams {
                 q.append(" AND ").append(YaCySchema.host_id_s.getSolrFieldName()).append(":\"").append(this.nav_sitehash).append('\"');
         }
         String urlMaskPattern = this.urlMask.pattern();
+        
+        // translate filetype navigation
         int extm = urlMaskPattern.indexOf(".*\\.");
         if (extm >= 0) {
             String ext = urlMaskPattern.substring(extm + 4);
             q.append(" AND ").append(YaCySchema.url_file_ext_s.getSolrFieldName()).append(':').append(ext);
         }
-        extm = urlMaskPattern.indexOf("?://.*");
-        if (extm >= 0) {
-            String protocol = urlMaskPattern.substring(0, extm);
-            q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append(protocol);
-        }
         
+        // translate protocol navigation
+        if (urlMaskPattern.startsWith("http://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("http");
+        else if (urlMaskPattern.startsWith("https://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("https");
+        else if (urlMaskPattern.startsWith("ftp://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("ftp");
+        else if (urlMaskPattern.startsWith("smb://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("smb");
+        else if (urlMaskPattern.startsWith("file://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("file");
+
         // construct query
         final SolrQuery params = new SolrQuery();
         params.setQuery(q.toString());
