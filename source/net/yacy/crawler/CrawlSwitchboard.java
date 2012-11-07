@@ -164,7 +164,7 @@ public final class CrawlSwitchboard {
             m = null;
         }
         if ( m == null ) {
-            return getPassive(profileKey);
+            return null; //return getPassive(profileKey);
         }
         p = new CrawlProfile(m);
         this.profilesActiveCrawlsCache.put(profileKey, p);
