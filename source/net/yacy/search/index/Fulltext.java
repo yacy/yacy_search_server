@@ -467,8 +467,21 @@ public final class Fulltext implements Iterable<byte[]> {
     
     public List<File> dumpFiles() {
         EmbeddedSolrConnector esc = (EmbeddedSolrConnector) this.solr.getSolr0();
-        File storagePath = esc.getStoragePath().getParentFile();
         ArrayList<File> zips = new ArrayList<File>();
+        if (esc == null) {
+            Log.logWarning("Fulltext", "HOT DUMP selected solr0 == NULL, no dump list!");
+            return zips;
+        }
+        if (esc.getStoragePath() == null) {
+            Log.logWarning("Fulltext", "HOT DUMP selected solr0.getStoragePath() == NULL, no dump list!");
+            return zips;
+        }
+        File storagePath = esc.getStoragePath().getParentFile();
+        if (storagePath == null) {
+            Log.logWarning("Fulltext", "HOT DUMP selected esc.getStoragePath().getParentFile() == NULL, no dump list!");
+            return zips;
+        }
+        Log.logInfo("Fulltext", "HOT DUMP dump path = " + storagePath.toString());
         for (String p: storagePath.list()) {
             if (p.endsWith("zip")) zips.add(new File(storagePath, p));
         }
