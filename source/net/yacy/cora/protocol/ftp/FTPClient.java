@@ -71,6 +71,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.kelondro.logging.Log;
 
 import org.apache.log4j.Logger;
 
@@ -2041,9 +2042,17 @@ public class FTPClient {
      */
     private void createDataSocket() throws IOException {
         if (isPassive()) {
-            createPassiveDataPort();
+            try {
+                createPassiveDataPort();
+            } catch (IOException e) {
+                createActiveDataPort();
+            }
         } else {
-            createActiveDataPort();
+            try {
+                createActiveDataPort();
+            } catch (IOException e) {
+                createPassiveDataPort();
+            }
         }
     }
 
@@ -2554,7 +2563,7 @@ public class FTPClient {
         try {
             list = ftpClient.list(path, true);
         } catch (final IOException e) {
-            //e.printStackTrace();
+            Log.logException(e);
             return;
         }
         if (!path.endsWith("/")) path += "/";
