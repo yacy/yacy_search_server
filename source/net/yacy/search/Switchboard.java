@@ -2277,7 +2277,7 @@ public final class Switchboard extends serverSwitch {
             status[SwitchboardConstants.CRAWLJOB_STATUS] = Boolean.TRUE;
         }
         setConfig(jobType + "_isPaused", "true");
-        setConfig(jobType + "_isPaused_cause", "cause");
+        setConfig(jobType + "_isPaused_cause", cause);
         log.logWarning("Crawl job '" + jobType + "' is paused: " + cause);
     }
 

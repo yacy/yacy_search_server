@@ -168,7 +168,8 @@ public class RobotsTxt {
                     Request request = new Request(robotsURL, null);
                     try {
                         response = this.loader.load(request, CacheStrategy.NOCACHE, null, 0);
-                    } catch (IOException e) {
+                    } catch (Throwable e) {
+                        log.info("Trying to download the robots.txt file from URL '" + robotsURL + "' failed - " + e.getMessage());
                         response = null;
                     }
                 }

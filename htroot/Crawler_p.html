@@ -11,6 +11,12 @@
 <script type="text/javascript" src="/js/Crawler.js"></script>
 </head>
 <body id="Crawler" onload="initCrawler();">
+
+<div id="api">
+<a href="/api/status_p.xml" id="apilink"><img src="/env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<span>Click on this API button to see an XML with information about the crawler status</span>
+</div>
+
 #%env/templates/header.template%#
 #%env/templates/submenuCrawlMonitor.template%#
 <h2>Crawler</h2>
@@ -150,7 +156,6 @@
 </p>
 <!-- crawl queues -->
 
-<p>See an <a href="/api/latency_p.xml">access timing</a></p>
 <!-- crawl profile list -->
 #(crawlProfilesShow)#::
 <fieldset>
