@@ -48,7 +48,9 @@ public class yacyinteractive {
         prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
 
         final boolean admin = sb.verifyAuthentication(header);
-        if (admin && sb.crawler.getActiveSize() > 0) sb.index.fulltext().commit();
+        if (admin) {
+            sb.index.fulltext().commit();
+        }
         
         final String query = (post == null) ? "" : post.get("query", "");
         final String startRecord = (post == null) ? "0" : post.get("startRecord", "");

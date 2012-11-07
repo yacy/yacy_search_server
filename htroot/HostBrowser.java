@@ -84,7 +84,7 @@ public class HostBrowser {
         }
 
         String path = post == null ? "" : post.get("path", "").trim();
-        if (admin && path.length() == 0 && sb.crawler.getActiveSize() > 0) sb.index.fulltext().commit();
+        if (admin && path.length() == 0) sb.index.fulltext().commit();
         if (post == null || env == null) {
             return prop;
         }
