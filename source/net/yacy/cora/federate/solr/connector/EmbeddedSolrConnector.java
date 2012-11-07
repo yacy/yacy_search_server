@@ -183,6 +183,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             if (q != null) Thread.currentThread().setName("solr query: q = " + q);
             QueryResponse rsp = this.server.query(params);
             if (q != null) Thread.currentThread().setName(threadname);
+            if (rsp != null) log.info(rsp.getResults().size() + " results for q=" + q);
             return rsp;
         } catch (SolrServerException e) {
             throw new IOException(e);

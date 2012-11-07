@@ -44,8 +44,8 @@ import net.yacy.server.serverSwitch;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.search.DocSlice;
 import org.apache.solr.util.FastWriter;
 
 
@@ -189,8 +189,8 @@ public class searchresult {
 
         // log result
         Object rv = response.getValues().get("response");
-        if (rv != null && rv instanceof DocSlice) {
-            AccessTracker.addToDump(q, Integer.toString(((DocSlice) rv).matches()));
+        if (rv != null && rv instanceof ResultContext) {
+            AccessTracker.addToDump(q, Integer.toString(((ResultContext) rv).docs.matches()));
         }
         return null;
     }

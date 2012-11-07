@@ -49,7 +49,7 @@ import org.apache.solr.common.params.ModifiableSolrParams;
 
 public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
-    private final static Logger log = Logger.getLogger(SolrServerConnector.class);
+    protected final static Logger log = Logger.getLogger(SolrServerConnector.class);
     
     protected SolrServer server;
     protected int commitWithinMs; // max time (in ms) before a commit will happen

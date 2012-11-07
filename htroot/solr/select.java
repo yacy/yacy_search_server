@@ -51,9 +51,9 @@ import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
+import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.response.XSLTResponseWriter;
-import org.apache.solr.search.DocSlice;
 import org.apache.solr.util.FastWriter;
 
 
@@ -200,8 +200,8 @@ public class select {
 
         // log result
         Object rv = response.getValues().get("response");
-        if (rv != null && rv instanceof DocSlice) {
-            AccessTracker.addToDump(q, Integer.toString(((DocSlice) rv).matches()));
+        if (rv != null && rv instanceof ResultContext) {
+            AccessTracker.addToDump(q, Integer.toString(((ResultContext) rv).docs.matches()));
         }
         return null;
     }
