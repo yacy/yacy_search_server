@@ -1625,7 +1625,7 @@ public final class Switchboard extends serverSwitch {
         }
         return this.crawler.clear();
     }
-
+    
     public synchronized void close() {
         this.log.logConfig("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
         MemoryTracker.stopSystemProfiling();
@@ -2124,8 +2124,10 @@ public final class Switchboard extends serverSwitch {
 
             // clean up profiles
             checkInterruption();
-            cleanProfiles();
-
+            //cleanProfiles();
+            int cleanup =  this.crawler.cleanFinishesProfiles(this.crawlQueues);
+            if (cleanup > 0) log.logInfo("cleanup removed " + cleanup + " crawl profiles");
+            
             // clean up news
             checkInterruption();
             try {

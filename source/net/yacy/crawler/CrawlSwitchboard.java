@@ -29,16 +29,22 @@ package net.yacy.crawler;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.data.CrawlQueues;
+import net.yacy.crawler.data.NoticedURL.StackType;
+import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
@@ -158,7 +164,7 @@ public final class CrawlSwitchboard {
             m = null;
         }
         if ( m == null ) {
-            return null;
+            return getPassive(profileKey);
         }
         p = new CrawlProfile(m);
         this.profilesActiveCrawlsCache.put(profileKey, p);
@@ -464,6 +470,56 @@ public final class CrawlSwitchboard {
         return hasDoneSomething;
     }
 
+    public int cleanFinishesProfiles(CrawlQueues crawlQueues) {        
+        // find all profiles that are candidates for deletion
+        Set<String> deletionCandidate = new HashSet<String>();
+        for (final byte[] handle: this.getActive()) {
+            CrawlProfile entry;
+            entry = new CrawlProfile(this.getActive(handle));
+            if (!((entry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY))
+                || (entry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE))
+                || (entry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT))
+                || (entry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT))
+                || (entry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA))
+                || (entry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA))
+                || (entry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE)))) {
+                deletionCandidate.add(ASCII.String(handle));
+            }
+        }
+        if (deletionCandidate.size() == 0) return 0;
+        
+        // iterate through all the queues and see if one of these handles appear there
+        // this is a time-consuming process, set a time-out
+        long timeout = System.currentTimeMillis() + 60000L; // one minute time
+        try {
+            for (StackType stack: StackType.values()) {
+                Iterator<Request> sei = crawlQueues.noticeURL.iterator(stack);
+                if (sei == null) continue;
+                Request r;
+                while (sei.hasNext()) {
+                    r = sei.next();
+                    deletionCandidate.remove(r.profileHandle());
+                    if (deletionCandidate.size() == 0) return 0;
+                    if (System.currentTimeMillis() > timeout) return 0; // give up; this is too large
+                }
+                if (deletionCandidate.size() == 0) return 0;
+            }
+        } catch (Throwable e) {
+            return 0;
+        }
+        
+        // all entries that are left are candidates for deletion; do that now
+        for (String h: deletionCandidate) {
+            byte[] handle = ASCII.getBytes(h);
+            final CrawlProfile p = this.getActive(handle);
+            if (p != null) {
+                this.putPassive(handle, p);
+                this.removeActive(handle);
+            }
+        }
+        return deletionCandidate.size();
+    }
+    
     public synchronized void close() {
         this.profilesActiveCrawlsCache.clear();
         this.profilesActiveCrawls.close();

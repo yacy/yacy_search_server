@@ -916,8 +916,7 @@ public final class SearchEvent {
 
             // deploy worker to get more results
             if (!anyWorkerAlive()) {
-                final int neededInclPrefetch = this.query.neededResults() + ((MemoryControl.available() > 100 * 1024 * 1024 && SNIPPET_WORKER_THREADS >= 8) ? this.query.itemsPerPage : 0);
-                deployWorker(Math.min(SNIPPET_WORKER_THREADS, this.query.itemsPerPage), neededInclPrefetch);
+                deployWorker(Math.min(SNIPPET_WORKER_THREADS, this.query.itemsPerPage), this.query.neededResults());
             }
 
             try {entry = this.result.element(item, 50);} catch (final InterruptedException e) {break;}
