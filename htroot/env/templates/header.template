@@ -31,6 +31,7 @@
       <li><a href="/IndexControlURLs_p.html" class="MenuItemLink lock">Index Administration</a></li>
       <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Filter &amp; Blacklists</a></li>
       <li><a href="/Vocabulary_p.html" class="MenuItemLink lock">Content Semantic</a></li>
+      <li><a href="/Tables_p.html?table=robots&count=100" class="MenuItemLink lock">Target Analysis</a></li>
       <li><a href="/Table_API_p.html" class="MenuItemLink lock">Process Scheduler</a></li>
     </ul>
   </li>
