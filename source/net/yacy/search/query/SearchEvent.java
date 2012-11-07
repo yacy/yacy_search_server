@@ -637,9 +637,8 @@ public final class SearchEvent {
             }
         } catch ( final InterruptedException e1 ) {
         }
-        //Log.logWarning("RWIProcess", "feedingIsFinished() = " + feedingIsFinished() + ", this.addRunning = " + this.addRunning + ", this.nodeStack.sizeQueue() = " + this.nodeStack.sizeQueue() + ", this.stack.sizeQueue() = " + this.rwiStack.sizeQueue() + ", this.doubleDomCachee.size() = " + this.doubleDomCache.size());
         if (this.rankingProcess.doubleDomCache.isEmpty()) {
-            Log.logWarning("RWIProcess", "doubleDomCache.isEmpty");
+            //Log.logWarning("RWIProcess", "doubleDomCache.isEmpty");
             return null;
         }
 
@@ -666,7 +665,7 @@ public final class SearchEvent {
             if (o.getWeight() < bestEntry.getWeight()) bestEntry = o;
         }
         if (bestEntry == null) {
-            Log.logWarning("RWIProcess", "bestEntry == null (1)");
+            //Log.logWarning("RWIProcess", "bestEntry == null (1)");
             return null;
         }
 
@@ -683,7 +682,7 @@ public final class SearchEvent {
             }
         }
         if (bestEntry == null) {
-            Log.logWarning("RWIProcess", "bestEntry == null (2)");
+            //Log.logWarning("RWIProcess", "bestEntry == null (2)");
             return null;
         }
         return this.query.getSegment().fulltext().getMetadata(bestEntry.getElement(), bestEntry.getWeight());
@@ -708,7 +707,7 @@ public final class SearchEvent {
             //System.out.println("timeleft = " + timeleft);
             final URIMetadataNode page = takeRWI(skipDoubleDom, timeleft);
             if (page == null) {
-                Log.logWarning("RWIProcess", "takeRWI returned null");
+                //Log.logWarning("RWIProcess", "takeRWI returned null");
                 return null; // all time was already wasted in takeRWI to get another element
             }
 

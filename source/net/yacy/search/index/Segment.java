@@ -365,16 +365,21 @@ public class Segment {
         
         // STORE TO SOLR
         final SolrInputDocument solrInputDoc = this.fulltext.getSolrScheme().yacy2solr(id, profile, responseHeader, document, condenser, referrerURL, language);
-        try {
-            this.fulltext.putDocument(solrInputDoc);
-        } catch ( final IOException e ) {
-            String error = "failed to send " + urlNormalform + " to solr";
-            Log.logWarning("SOLR", error + ", pausing Crawler! - " + e.getMessage());
+        tryloop: for (int i = 0; i < 10; i++) {
+            String error = "";
+            try {
+                this.fulltext.putDocument(solrInputDoc);
+                break tryloop;
+            } catch ( final IOException e ) {
+                error = "failed to send " + urlNormalform + " to solr";
+                Log.logWarning("SOLR", error + e.getMessage());
+                try {Thread.sleep(1000);} catch (InterruptedException e1) {}
+            }
+            Log.logWarning("SOLR", error + ", pausing Crawler!");
             // pause the crawler!!!
             Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, error);
             Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, error);
         }
-
         final long storageEndTime = System.currentTimeMillis();
 
         // STORE PAGE INDEX INTO WORD INDEX DB

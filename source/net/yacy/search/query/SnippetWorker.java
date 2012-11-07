@@ -89,7 +89,7 @@ public class SnippetWorker extends Thread {
                 //if (page != null) Log.logInfo("SnippetProcess", "got one page: " + page.metadata().url().toNormalform(true, false));
                 //if (page == null) page = rankedCache.takeURL(false, this.timeout - System.currentTimeMillis());
                 if (page == null) {
-                    Log.logWarning("SnippetProcess", "page == null");
+                    //Log.logWarning("SnippetProcess", "page == null");
                     break; // no more available
                 }
 
