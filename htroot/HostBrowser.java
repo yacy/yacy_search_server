@@ -211,9 +211,11 @@ public class HostBrowser {
                         if (pe.length() > 0) q.append(" AND ").append(YaCySchema.url_paths_sxt.getSolrFieldName()).append(':').append(pe);
                     }
                 } else {
-                    if (facetcount > 1000 && !post.containsKey("nepr")) q.append(" AND ").append(YaCySchema.url_paths_sxt.getSolrFieldName()).append(":[* TO *]");
+                    if (facetcount > 1000 || post.containsKey("nepr")) {
+                        q.append(" AND ").append(YaCySchema.url_paths_sxt.getSolrFieldName()).append(":[* TO *]");
+                    }
                 }
-                BlockingQueue<SolrDocument> docs = fulltext.getSolr().concurrentQuery(q.toString(), 0, 100000, 3000, 100);
+                BlockingQueue<SolrDocument> docs = fulltext.getSolr().concurrentQuery(q.toString(), 0, 100000, 10000, 100);
                 SolrDocument doc;
                 Set<String> storedDocs = new HashSet<String>();
                 Map<String, String> errorDocs = new HashMap<String, String>();
@@ -221,7 +223,7 @@ public class HostBrowser {
                 Map<String, ReversibleScoreMap<String>> outboundHosts = new HashMap<String, ReversibleScoreMap<String>>();
                 int hostsize = 0;
                 final List<byte[]> deleteIDs = new ArrayList<byte[]>();
-                long timeout = System.currentTimeMillis() + 3000;
+                long timeout = System.currentTimeMillis() + 10000;
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                     String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
                     String error = (String) doc.getFieldValue(YaCySchema.failreason_t.getSolrFieldName());
