@@ -127,6 +127,16 @@ tt, *.tt {
   font-family:Courier,Terminal,sans-serif;
 }
 
+.commit {
+  font-weight:bold;
+  color:green;
+}
+
+.pending {
+  font-weight:bold;
+  color:darkblue;
+}
+
 .error {
   font-weight:bold;
   color:red;
@@ -134,12 +144,7 @@ tt, *.tt {
 
 .info {
   font-weight:bold;
-  color:darkblue;
-}
-
-.commit {
-  font-weight:bold;
-  color:green;
+  color:olive;
 }
 
 .help {

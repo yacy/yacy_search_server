@@ -156,12 +156,12 @@ public class HostBrowser {
                 String host;
                 while (i.hasNext() && c < maxcount) {
                     host = i.next();
+                    int errors = errorscore.get(host);
                     prop.put("hosts_list_" + c + "_host", host);
-                    prop.put("hosts_list_" + c + "_count", hostscore.get(host));
+                    prop.put("hosts_list_" + c + "_count", hostscore.get(host) - errors);
                     boolean inCrawler = crawler.containsKey(host);
                     prop.put("hosts_list_" + c + "_crawler", inCrawler ? 1 : 0);
                     if (inCrawler) prop.put("hosts_list_" + c + "_crawler_pending", crawler.get(host)[0]);
-                    int errors = errorscore.get(host);
                     prop.put("hosts_list_" + c + "_errors", errors > 0 ? 1 : 0);
                     if (errors > 0) prop.put("hosts_list_" + c + "_errors_count", errors);
                     c++;
