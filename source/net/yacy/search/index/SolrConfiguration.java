@@ -742,9 +742,9 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
 
         // fields that were additionally in URIMetadataRow
         Date loadDate = new Date();
-        Date modDate = responseHeader.lastModified();
+        Date modDate = responseHeader == null ? new Date() : responseHeader.lastModified();
         if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
-        int size = (int) Math.max(document.dc_source().length(), responseHeader.getContentLength());
+        int size = (int) Math.max(document.dc_source().length(), responseHeader == null ? 0 : responseHeader.getContentLength());
         if (allAttr || contains(YaCySchema.load_date_dt)) add(doc, YaCySchema.load_date_dt, loadDate);
         if (allAttr || contains(YaCySchema.fresh_date_dt)) add(doc, YaCySchema.fresh_date_dt, new Date(loadDate.getTime() + Math.max(0, loadDate.getTime() - modDate.getTime()) / 2)); // freshdate, computed with Proxy-TTL formula
         if (allAttr || contains(YaCySchema.host_id_s)) add(doc, YaCySchema.host_id_s, document.dc_source().hosthash());

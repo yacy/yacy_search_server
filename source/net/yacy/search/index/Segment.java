@@ -359,7 +359,7 @@ public class Segment {
         final String language = votedLanguage(url, urlNormalform, document, condenser); // identification of the language
 
         // STORE URL TO LOADED-URL-DB
-        Date modDate = responseHeader.lastModified();
+        Date modDate = responseHeader == null ? new Date() : responseHeader.lastModified();
         if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
         char docType = Response.docType(document.dc_format());
         
