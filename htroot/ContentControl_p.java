@@ -24,9 +24,7 @@ public final class ContentControl_p {
 				
 				env.setConfig("contentcontrol.smwimport.targetlist",
 						post.get("ccsmwimportlist"));
-				
-				env.setConfig("contentcontrol.smwimport.defaultcategory",
-						post.get("ccsmwimportcat"));
+
 
 			}
 
@@ -35,9 +33,7 @@ public final class ContentControl_p {
 				env.setConfig("contentcontrol.enabled",
 						"on".equals(post.get("contentcontrolenabled")) ? true : false);
 				
-				env.setConfig("contentcontrol.mandatoryfilterlist",
-						post.get("contentcontrolmfl"));
-				
+			
 				env.setConfig("contentcontrol.bookmarklist",
 						post.get("contentcontrolbml"));
 
@@ -45,8 +41,6 @@ public final class ContentControl_p {
 
 		}
 		
-		prop.putHTML("ccsmwimportcat",
-				env.getConfig("contentcontrol.smwimport.defaultcategory", "yacy"));
 
 		prop.putHTML("ccsmwimportlist",
 				env.getConfig("contentcontrol.smwimport.targetlist", "contentcontrol"));
@@ -63,9 +57,6 @@ public final class ContentControl_p {
 
 		prop.put("contentcontrolenabled_checked",
 				env.getConfigBool("contentcontrol.enabled", false) ? "1" : "0");
-		
-		prop.putHTML("contentcontrolmfl",
-				env.getConfig("contentcontrol.mandatoryfilterlist", "yacy"));
 		
 		prop.putHTML("contentcontrolbml",
 				env.getConfig("contentcontrol.bookmarklist", ""));

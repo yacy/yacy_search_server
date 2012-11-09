@@ -1,5 +1,6 @@
 package net.yacy.interaction.contentcontrol;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import net.yacy.kelondro.blob.Tables;
@@ -16,15 +17,9 @@ public class ContentControlFilterUpdateThread {
 	private static FilterEngine networkfilter;
 
 	public ContentControlFilterUpdateThread(final Switchboard sb) {
-        //final long time = System.currentTimeMillis();
+
         this.sb = sb;
 
-		if (this.sb.getConfigBool("contentcontrol.smwimport.purgelistoninit",
-				false)) {
-			this.sb.tables.clear(this.sb.getConfig(
-					"contentcontrol.smwimport.targetlist", "contentcontrol"));
-
-		}
     }
 
 	public final void run() {
@@ -35,17 +30,11 @@ public class ContentControlFilterUpdateThread {
 
 			if (this.sb.getConfigBool("contentcontrol.enabled", false) == true) {
 
-				if (!this.sb
-						.getConfig("contentcontrol.mandatoryfilterlist", "")
-						.equals("")) {
+				if (this.sb.tables.bookmarks.dirty) {
 
-					if (this.sb.tables.bookmarks.dirty) {
+					networkfilter = updateFilter();
 
-						networkfilter = updateFilter();
-
-						this.sb.tables.bookmarks.dirty = false;
-
-					}
+					SMWListSyncThread.dirty = false;
 
 				}
 
@@ -54,7 +43,6 @@ public class ContentControlFilterUpdateThread {
 			this.locked = false;
 
 		}
-
 
 		return;
 	}
@@ -66,23 +54,23 @@ public class ContentControlFilterUpdateThread {
 		Switchboard sb = Switchboard.getSwitchboard();
 
 		Iterator<Tables.Row> it;
-		it = sb.tables.bookmarks.getBookmarksByTag(
-        		sb.getConfig(
-        				"contentcontrol.bookmarklist",
-        				"contentcontrol"),
-        		"^((?!sc:"
-        				+ sb
-        						.getConfig(
-        								"contentcontrol.mandatoryfilterlist",
-        								"") + ").*)$");
-        while (it.hasNext()) {
-        	Row b = it.next();
+		try {
+			it = sb.tables.iterator(sb.getConfig("contentcontrol.bookmarklist",
+					"contentcontrol"));
 
-        	if (!b.get("filter", "").equals("")) {
+			while (it.hasNext()) {
+				Row b = it.next();
 
-        		newfilter.add(b.get("filter", ""), null);
-        	}
-        }
+				if (!b.get("filter", "").equals("")) {
+
+					newfilter.add(b.get("filter", ""), null);
+				}
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		return newfilter;
 	}

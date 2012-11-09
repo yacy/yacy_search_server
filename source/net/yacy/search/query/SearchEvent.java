@@ -741,22 +741,20 @@ public final class SearchEvent {
                 continue;
             }
 
-            // content control
-            if (Switchboard.getSwitchboard().getConfigBool("contentcontrol.enabled", false) == true) {
-                // check global network filter from bookmark list
-                if (!Switchboard.getSwitchboard()
-                        .getConfig("contentcontrol.mandatoryfilterlist", "")
-                        .equals("")) {
+			// contentcontrol
+			if (Switchboard.getSwitchboard().getConfigBool(
+					"contentcontrol.enabled", false) == true) {
 
-                    FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
-                    if (f != null) {
-                        if (!f.isListed(page.url(), null)) {
-                            this.query.misses.add(page.hash());
-                            continue;
-                        }
-                    }
-                }
-            }
+				FilterEngine f = ContentControlFilterUpdateThread
+						.getNetworkFilter();
+				if (f != null) {
+					if (!f.isListed(page.url(), null)) {
+						this.query.misses.add(page.hash());
+						continue;
+					}
+				}
+
+			}
 
             final String pageurl = page.url().toNormalform(true);
             final String pageauthor = page.dc_creator();
