@@ -135,6 +135,9 @@ public class HostBrowser {
         if (post.containsKey("hosts")) {
             // generate host list
             try {
+                boolean onlyCrawling = "crawling".equals(post.get("hosts", ""));
+                boolean onlyErrors = "error".equals(post.get("hosts", ""));
+                
                 int maxcount = admin ? 2 * 3 * 2 * 5 * 7 * 2 * 3 : 360; // which makes nice matrixes for 2, 3, 4, 5, 6, 7, 8, 9 rows/colums
                 
                 // collect hosts from index
@@ -156,15 +159,22 @@ public class HostBrowser {
                 String host;
                 while (i.hasNext() && c < maxcount) {
                     host = i.next();
-                    int errors = errorscore.get(host);
                     prop.put("hosts_list_" + c + "_host", host);
-                    prop.put("hosts_list_" + c + "_count", hostscore.get(host) - errors);
                     boolean inCrawler = crawler.containsKey(host);
+                    int errors = errorscore.get(host);
+                    prop.put("hosts_list_" + c + "_count", hostscore.get(host) - errors);
                     prop.put("hosts_list_" + c + "_crawler", inCrawler ? 1 : 0);
                     if (inCrawler) prop.put("hosts_list_" + c + "_crawler_pending", crawler.get(host)[0]);
                     prop.put("hosts_list_" + c + "_errors", errors > 0 ? 1 : 0);
                     if (errors > 0) prop.put("hosts_list_" + c + "_errors_count", errors);
-                    c++;
+                    prop.put("hosts_list_" + c + "_type", inCrawler ? 2 : errors > 0 ? 1 : 0);
+                    if (onlyCrawling) {
+                        if (inCrawler) c++;
+                    } else if (onlyErrors) {
+                        if (errors > 0) c++;
+                    } else {
+                        c++;
+                    }
                 }
                 prop.put("hosts_list", c);
                 prop.put("hosts", 1);
