@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 
+import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.Classification.ContentDomain;
@@ -61,7 +62,6 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.WorkTables;
 import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
-import net.yacy.interaction.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;

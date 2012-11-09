@@ -1,4 +1,4 @@
-package net.yacy.interaction.contentcontrol;
+package net.yacy.contentcontrol;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -30,7 +30,7 @@ public class ContentControlFilterUpdateThread {
 
 			if (this.sb.getConfigBool("contentcontrol.enabled", false) == true) {
 
-				if (this.sb.tables.bookmarks.dirty) {
+				if (SMWListSyncThread.dirty) {
 
 					networkfilter = updateFilter();
 

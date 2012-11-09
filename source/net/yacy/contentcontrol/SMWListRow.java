@@ -1,4 +1,4 @@
-package net.yacy.interaction.contentcontrol;
+package net.yacy.contentcontrol;
 
 import net.yacy.kelondro.blob.Tables;
 

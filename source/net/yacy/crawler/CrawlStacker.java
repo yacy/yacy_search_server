@@ -39,6 +39,7 @@ import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
@@ -58,7 +59,6 @@ import net.yacy.crawler.retrieval.HTTPLoader;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.SMBLoader;
 import net.yacy.crawler.robots.RobotsTxt;
-import net.yacy.interaction.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.logging.Log;
