@@ -108,9 +108,15 @@ public class searchresult {
         //post.put(, post.remove("output"));//required, example: xml,xml_no_dtd
         String q = post.get(CommonParams.Q, "");
         post.put("originalQuery", q);
+        
+        // get a solr query string
+        Collection<String>[] cq = QueryParams.cleanQuery(q);
+        q = QueryParams.solrQueryString(cq[0], cq[1], sb.index.fulltext().getSolrScheme()).toString();
+        
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 5000 : 100));
         post.put("hl", "true");
+        post.put("hl.q", q);
         post.put("hl.fl", YaCySchema.h1_txt.getSolrFieldName() + "," + YaCySchema.h2_txt.getSolrFieldName() + "," + YaCySchema.text_t.getSolrFieldName());
         post.put("hl.alternateField", YaCySchema.description.getSolrFieldName());
         post.put("hl.simple.pre", "<b>");
@@ -127,10 +133,6 @@ public class searchresult {
         String access = post.remove("access");
         String entqr = post.remove("entqr");
 
-        // get a solr query string
-        Collection<String>[] cq = QueryParams.cleanQuery(q);
-        q = QueryParams.solrQueryString(cq[0], cq[1], sb.index.fulltext().getSolrScheme()).toString();
-        
         // add sites operator
         if (site != null && site.length() > 0) {
             String[] s0 = site.split(Pattern.quote("|"));

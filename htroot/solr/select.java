@@ -32,6 +32,7 @@ import net.yacy.cora.federate.solr.SolrServlet;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
+import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.JsonResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -81,6 +82,7 @@ public class select {
         RESPONSE_WRITER.put("rss", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
         RESPONSE_WRITER.put("opensearch", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
         RESPONSE_WRITER.put("yjson", new JsonResponseWriter()); //try http://localhost:8090/solr/select?wt=json&q=olympia&hl=true&hl.fl=text_t,h1,h2
+        RESPONSE_WRITER.put("gsa", new GSAResponseWriter());
     }
 
     /**
