@@ -151,9 +151,9 @@ public class SMWListSyncThread {
 							}
 
 							if (reader != null) {
-								SMWListImporter smwListImporter = null;
+								SMWListImporterFormatObsolete smwListImporter = null;
 								try {
-									smwListImporter = new SMWListImporter(
+									smwListImporter = new SMWListImporterFormatObsolete(
 											reader, 200);
 								} catch (final Exception e) {
 									// TODO: display an error message
