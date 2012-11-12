@@ -109,14 +109,14 @@
           </td>
         </tr>
         <tr valign="top" class="TableCellDark">
-          <td>Scheduled re-crawl</td>
+          <td>Document Double-Check</td>
           <td>
             <dl>
-            <dt>no&nbsp;doubles<input type="radio" name="recrawl" value="nodoubles" #(crawlingIfOlderCheck)#checked="checked"::#(/crawlingIfOlderCheck)#/></dt>
-            <dd>run this crawl once and never load any page that is already known, only the start-url may be loaded again.</dd>
-			<dt>re-load<input type="radio" name="recrawl" value="reload" #(crawlingIfOlderCheck)#::checked="checked"#(/crawlingIfOlderCheck)# /></dt>
-			<dd>run this crawl once, but treat urls that are known since<br/>
-			<select name="crawlingIfOlderNumber" id="crawlingIfOlderNumber">
+            <dt>No&nbsp;Doubles<input type="radio" name="recrawl" value="nodoubles" checked="checked"/></dt>
+            <dd>Never load any page that is already known.<br/>Only the start-url may be loaded again.</dd>
+			<dt>Re-load<input type="radio" name="recrawl" value="reload"/></dt>
+			<dd>Treat documents that are loaded
+			<select name="reloadIfOlderNumber" id="reloadIfOlderNumber">
               <option value="1">1</option><option value="2">2</option><option value="3">3</option>
               <option value="4">4</option><option value="5">5</option><option value="6">6</option>
               <option value="7" selected="selected">7</option>
@@ -124,36 +124,19 @@
               <option value="12">12</option><option value="14">14</option><option value="21">21</option>
               <option value="28">28</option><option value="30">30</option>
 			</select>
-			<select name="crawlingIfOlderUnit">
-              <option value="year"   #(crawlingIfOlderUnitYearCheck)#::selected="selected"#(/crawlingIfOlderUnitYearCheck)#>years</option>
-              <option value="month"  #(crawlingIfOlderUnitMonthCheck)#::selected="selected"#(/crawlingIfOlderUnitMonthCheck)#>months</option>
-              <option value="day"    #(crawlingIfOlderUnitDayCheck)#::selected="selected"#(/crawlingIfOlderUnitDayCheck)#>days</option>
-              <option value="hour"   #(crawlingIfOlderUnitHourCheck)#::selected="selected"#(/crawlingIfOlderUnitHourCheck)#>hours</option>
-			</select> not as double and load them again. No scheduled re-crawl.
-			</dd>
-			<dt>scheduled<input type="radio" name="recrawl" value="scheduler"/></dt>
-			<dd>after starting this crawl, repeat the crawl every<br/>
-			<select name="repeat_time">
-              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-              <option value="7" selected="selected">7</option>
-              <option value="8">8</option><option value="9">9</option><option value="10">10</option>
-              <option value="12">12</option><option value="14">14</option><option value="21">21</option>
-              <option value="28">28</option><option value="30">30</option>
-			</select>
-			<select name="repeat_unit">
-              <option value="selminutes">minutes</option>
-              <option value="selhours">hours</option>
-              <option value="seldays" selected="selected">days</option>
-            </select> automatically.
+			<select name="reloadIfOlderUnit" id="reloadIfOlderUnit">
+              <option value="year">years</option>
+              <option value="month">months</option>
+              <option value="day" selected="selected">days</option>
+              <option value="hour">hours</option>
+			</select> ago as stale and load them again. If they are younger, they are ignored.
 			</dd>
             </dl>
           </td>
           <td>
             A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,
             then the url is treated as double when you check the 'no doubles' option. A url may be loaded again when it has reached a specific age,
-            to use that check the 're-load' option. When you want that this web crawl is repeated automatically, then check the 'scheduled' option.
-            In this case the crawl is repeated after the given time and no url from the previous crawl is omitted as double.
+            to use that check the 're-load' option.
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">

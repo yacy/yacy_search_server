@@ -53,13 +53,6 @@ public class CrawlStartExpert_p {
         prop.put("ipMustnotmatch", sb.getConfig("crawlingIPMustNotMatch", CrawlProfile.MATCH_NEVER_STRING));
         prop.put("countryMustMatch", sb.getConfig("crawlingCountryMustMatch", ""));
 
-        prop.put("crawlingIfOlderCheck", "0");
-        prop.put("crawlingIfOlderUnitYearCheck", "0");
-        prop.put("crawlingIfOlderUnitMonthCheck", "0");
-        prop.put("crawlingIfOlderUnitDayCheck", "1");
-        prop.put("crawlingIfOlderUnitHourCheck", "0");
-        prop.put("crawlingIfOlderNumber", "7");
-
         final int crawlingDomFilterDepth = env.getConfigInt("crawlingDomFilterDepth", -1);
         prop.put("crawlingDomFilterCheck", (crawlingDomFilterDepth == -1) ? "0" : "1");
         prop.put("crawlingDomFilterDepth", (crawlingDomFilterDepth == -1) ? 1 : crawlingDomFilterDepth);

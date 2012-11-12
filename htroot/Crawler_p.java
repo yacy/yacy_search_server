@@ -214,35 +214,14 @@ public class Crawler_p {
 
                 // recrawl
                 final String recrawl = post.get("recrawl", "nodoubles"); // nodoubles, reload, scheduler
-                boolean crawlingIfOlderCheck = "on".equals(post.get("crawlingIfOlderCheck", "off"));
-                int crawlingIfOlderNumber = post.getInt("crawlingIfOlderNumber", -1);
-                String crawlingIfOlderUnit = post.get("crawlingIfOlderUnit","year"); // year, month, day, hour
-                int repeat_time = post.getInt("repeat_time", -1);
-                final String repeat_unit = post.get("repeat_unit", "seldays"); // selminutes, selhours, seldays
-
-                if ("scheduler".equals(recrawl) && repeat_time > 0) {
-                    // set crawlingIfOlder attributes that are appropriate for scheduled crawling
-                    crawlingIfOlderCheck = true;
-                    crawlingIfOlderNumber = "selminutes".equals(repeat_unit) ? 1 : "selhours".equals(repeat_unit) ? repeat_time / 2 : repeat_time * 12;
-                    crawlingIfOlderUnit = "hour";
-                } else if ("reload".equals(recrawl)) {
-                    repeat_time = -1;
-                    crawlingIfOlderCheck = true;
-                } else if ("nodoubles".equals(recrawl)) {
-                    repeat_time = -1;
-                    crawlingIfOlderCheck = false;
+                long crawlingIfOlder = 0;
+                if ("reload".equals(recrawl)) {
+                    crawlingIfOlder = timeParser(true, post.getInt("reloadIfOlderNumber", -1), post.get("reloadIfOlderUnit","year")); // year, month, day, hour
                 }
-                final long crawlingIfOlder = recrawlIfOlderC(crawlingIfOlderCheck, crawlingIfOlderNumber, crawlingIfOlderUnit);
                 env.setConfig("crawlingIfOlder", crawlingIfOlder);
 
                 // store this call as api call
-                if (repeat_time > 0) {
-                    // store as scheduled api call
-                    sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + ((rootURLs.size() == 0) ? post.get("crawlingFile", "") : rootURLs.iterator().next().toNormalform(true)), repeat_time, repeat_unit.substring(3));
-                } else {
-                    // store just a protocol
-                    sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + ((rootURLs.size() == 0) ? post.get("crawlingFile", "") : rootURLs.iterator().next().toNormalform(true)));
-                }
+                sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + ((rootURLs.size() == 0) ? post.get("crawlingFile", "") : rootURLs.iterator().next().toNormalform(true)));
 
                 final boolean crawlingDomMaxCheck = "on".equals(post.get("crawlingDomMaxCheck", "off"));
                 final int crawlingDomMaxPages = (crawlingDomMaxCheck) ? post.getInt("crawlingDomMaxPages", -1) : -1;
@@ -564,13 +543,14 @@ public class Crawler_p {
         return prop;
     }
 
-    private static long recrawlIfOlderC(final boolean recrawlIfOlderCheck, final int recrawlIfOlderNumber, final String crawlingIfOlderUnit) {
+    private static long timeParser(final boolean recrawlIfOlderCheck, final int number, final String unit) {
         if (!recrawlIfOlderCheck) return 0L;
-        if ("year".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 365L;
-        if ("month".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 30L;
-        if ("day".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - recrawlIfOlderNumber * 1000L * 60L * 60L * 24L;
-        if ("hour".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - recrawlIfOlderNumber * 1000L * 60L * 60L;
-        return System.currentTimeMillis() - recrawlIfOlderNumber;
+        if ("year".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L * 365L;
+        if ("month".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L * 30L;
+        if ("day".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L;
+        if ("hour".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L;
+        if ("minute".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L;
+        return 0L;
     }
 
     private static void setPerformance(final Switchboard sb, final serverObjects post) {
