@@ -71,7 +71,6 @@
         <input type="hidden" name="meanCount" value="5" />
       #(searchoptions)#
         <input type="hidden" name="resource" value="global" />
-        <input type="hidden" name="urlmaskfilter" value=".*" />
         <input type="hidden" name="prefermaskfilter" value="" />
         <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
       </fieldset>
@@ -95,10 +94,6 @@
             <input type="radio" name="resource" id="rlocal" value="local" #(local)#::checked="checked"#(/local)#/><label for="rlocal">only the local index</label>
           </td>
           #(/resource-select)#
-        </tr>
-        <tr>
-          <td><label for="urlmaskfilter">URL mask</label>:</td>
-          <td><input id="urlmaskfilter" name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#" /></td>
         </tr>
         <tr>
           <td>
@@ -189,7 +184,7 @@
           <dt>browser integration</dt>
           <dd>after searching, click-open on the default search engine in the upper right search field of your browser and select 'Add "YaCy Search.."'</dd>
           <dt>search as rss feed</dt>
-          <dd>click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an <a href="http://localhost:8090/yacysearch.rss?query=news+%2Fdate&Enter=Search&verify=cacheonly&contentdom=text&nav=hosts%2Cauthors%2Cnamespace%2Ctopics%2Cfiletype%2Cprotocol&startRecord=0&indexof=off&meanCount=5&maximumRecords=10&resource=global&urlmaskfilter=.*&prefermaskfilter=">example</a>.</dd>
+          <dd>click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an <a href="http://localhost:8090/yacysearch.rss?query=news+%2Fdate&Enter=Search&verify=cacheonly&contentdom=text&nav=hosts%2Cauthors%2Cnamespace%2Ctopics%2Cfiletype%2Cprotocol&startRecord=0&indexof=off&meanCount=5&maximumRecords=10&resource=global&prefermaskfilter=">example</a>.</dd>
           <dt>json search results</dt>
           <dd>for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'</dd>
         </dl>

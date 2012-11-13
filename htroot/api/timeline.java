@@ -27,6 +27,7 @@
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
@@ -68,7 +69,7 @@ public final class timeline {
             language = (agent == null) ? "en" : ISO639.userAgentLanguageDetection(agent);
             if (language == null) language = "en";
         }
-        final Collection<String>[] query = QueryParams.cleanQuery(querystring); // converts also umlaute
+        final List<String>[] query = QueryParams.cleanQuery(querystring); // converts also umlaute
         HandleSet q = Word.words2hashesHandles(query[0]);
 
         // tell all threads to do nothing for a specific time

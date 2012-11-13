@@ -24,6 +24,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -110,7 +111,7 @@ public class searchresult {
         post.put("originalQuery", q);
         
         // get a solr query string
-        Collection<String>[] cq = QueryParams.cleanQuery(q);
+        List<String>[] cq = QueryParams.cleanQuery(q);
         q = QueryParams.solrQueryString(cq[0], cq[1], sb.index.fulltext().getSolrScheme()).toString();
         
         post.put(CommonParams.ROWS, post.remove("num"));

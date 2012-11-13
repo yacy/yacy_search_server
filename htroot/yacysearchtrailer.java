@@ -93,7 +93,7 @@ public class yacysearchtrailer {
                     queryStringForUrl = (queryStringForUrl.substring(0, p) + queryStringForUrl.substring(p + nav.length())).trim();
                 }
                 prop.put(fileType, "nav-namespace_element_" + i + "_name", name);
-                prop.put(fileType, "nav-namespace_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, theSearch.query.urlMask.toString()).toString());
+                prop.put(fileType, "nav-namespace_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl).toString());
                 prop.put("nav-namespace_element_" + i + "_count", count);
                 prop.put("nav-namespace_element_" + i + "_nl", 1);
                 i++;
@@ -133,7 +133,7 @@ public class yacysearchtrailer {
                     prop.put(fileType, "nav-authors_element_" + i + "_modifier", "-" + nav);
                 }
                 prop.put(fileType, "nav-domains_element_" + i + "_name", name);
-                prop.put(fileType, "nav-domains_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, theSearch.query.urlMask.toString()).toString());
+                prop.put(fileType, "nav-domains_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl).toString());
                 prop.put("nav-domains_element_" + i + "_count", count);
                 prop.put("nav-domains_element_" + i + "_nl", 1);
                 i++;
@@ -172,7 +172,7 @@ public class yacysearchtrailer {
                     prop.put(fileType, "nav-authors_element_" + i + "_modifier", "-" + nav);
                 }
                 prop.put(fileType, "nav-authors_element_" + i + "_name", name);
-                prop.put(fileType, "nav-authors_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, theSearch.query.urlMask.toString()).toString());
+                prop.put(fileType, "nav-authors_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl).toString());
                 prop.put("nav-authors_element_" + i + "_count", count);
                 prop.put("nav-authors_element_" + i + "_nl", 1);
                 i++;
@@ -203,7 +203,7 @@ public class yacysearchtrailer {
                     prop.put("nav-topics_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-topics_element_" + i + "_modifier", name);
                     prop.put(fileType, "nav-topics_element_" + i + "_name", name);
-                    prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl + "+" + name, theSearch.query.urlMask.toString()).toString());
+                    prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl + "+" + name).toString());
                     prop.put("nav-topics_element_" + i + "_count", count);
                     prop.put("nav-topics_element_" + i + "_nl", 1);
                     i++;
@@ -241,7 +241,7 @@ public class yacysearchtrailer {
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", "-" + nav);
                 }
                 prop.put(fileType, "nav-protocols_element_" + i + "_name", name);
-                prop.put(fileType, "nav-protocols_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, (p >= 0 && theSearch.query.urlMask.toString().startsWith(name)) ? ".*" : theSearch.query.urlMask.toString()).toString());
+                prop.put(fileType, "nav-protocols_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl).toString());
                 prop.put("nav-protocols_element_" + i + "_count", count);
                 prop.put("nav-protocols_element_" + i + "_nl", 1);
                 i++;
@@ -280,7 +280,7 @@ public class yacysearchtrailer {
                     prop.put(fileType, "nav-filetypes_element_" + i + "_modifier", "-" + nav);
                 }
                 prop.put(fileType, "nav-filetypes_element_" + i + "_name", name);
-                prop.put(fileType, "nav-filetypes_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, (p >= 0 && theSearch.query.urlMask.toString().endsWith(name)) ? ".*" : theSearch.query.urlMask.toString()).toString());
+                prop.put(fileType, "nav-filetypes_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl).toString());
                 prop.put("nav-filetypes_element_" + i + "_count", count);
                 prop.put("nav-filetypes_element_" + i + "_nl", 1);
                 i++;
@@ -322,7 +322,7 @@ public class yacysearchtrailer {
                         prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_modifier", "-" + nav);
                     }
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_name", name);
-                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl, theSearch.query.urlMask.toString()).toString());
+                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl).toString());
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_count", count);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_nl", 1);
                     i++;

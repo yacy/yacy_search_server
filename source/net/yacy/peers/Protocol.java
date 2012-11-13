@@ -1081,7 +1081,7 @@ public final class Protocol
                 docList = rsp.getResults();
                 // no need to close this here because that sends a commit to remote solr which is not wanted here
             } catch (IOException e) {
-                Network.log.logInfo("SEARCH failed (solr), Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")", e);
+                Network.log.logInfo("SEARCH failed (solr), Peer: " +target.getName() + "/" + target.getPublicAddress() + " (" + e.getMessage() + ")", e);
                 return -1;
             }
         }

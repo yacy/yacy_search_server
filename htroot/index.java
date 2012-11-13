@@ -74,7 +74,6 @@ public class index {
         final String former = (post == null) ? "" : post.get("former", "");
         final int count = Math.min(100, (post == null) ? 10 : post.getInt("count", 10));
         final int maximumRecords = sb.getConfigInt(SwitchboardConstants.SEARCH_ITEMS, 10);
-        final String urlmaskfilter = (post == null) ? ".*" : post.get("urlmaskfilter", ".*");
         final String prefermaskfilter = (post == null) ? "" : post.get("prefermaskfilter", "");
         final String constraint = (post == null) ? "" : post.get("constraint", "");
         final String cat = (post == null) ? "href" : post.get("cat", "href");
@@ -114,7 +113,6 @@ public class index {
         prop.put("searchoptions_resource-select_global", global ? "1" : "0");
         prop.put("searchoptions_resource-select_global-disabled", indexReceiveGranted ? "0" : "1");
         prop.put("searchoptions_resource-select_local", global ? "0" : "1");
-        prop.putHTML("searchoptions_urlmaskfilter", urlmaskfilter);
         prop.put("searchoptions_prefermaskoptions", "0");
         prop.putHTML("searchoptions_prefermaskoptions_prefermaskfilter", prefermaskfilter);
         prop.put("searchoptions_indexofChecked", "");

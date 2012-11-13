@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -216,13 +217,6 @@ public class yacysearch {
 
         boolean global = post.get("resource", "local").equals("global") && sb.peers.sizeConnected() > 0;
         final boolean indexof = (post != null && post.get("indexof", "").equals("on"));
-
-        final String originalUrlMask;
-        if ( post.containsKey("urlmaskfilter") ) {
-            originalUrlMask = post.get("urlmaskfilter", ".*");
-        } else {
-            originalUrlMask = ".*";
-        }
 
         String prefermask = (post == null) ? "" : post.get("prefermaskfilter", "");
         if ( !prefermask.isEmpty() && prefermask.indexOf(".*", 0) < 0 ) {
@@ -578,7 +572,7 @@ public class yacysearch {
                 }
             }
             if ( urlmask == null || urlmask.isEmpty() ) {
-                urlmask = originalUrlMask;
+                urlmask = ".*";
             } //if no urlmask was given
 
             // read the language from the language-restrict option 'lr'
@@ -600,7 +594,7 @@ public class yacysearch {
             }
 
             // the query
-            final Collection<String>[] query = QueryParams.cleanQuery(querystring.trim()); // converts also umlaute
+            final List<String>[] query = QueryParams.cleanQuery(querystring.trim()); // converts also umlaute
 
             final int maxDistance = (querystring.indexOf('"', 0) >= 0) ? query.length - 1 : Integer.MAX_VALUE;
 
@@ -863,8 +857,7 @@ public class yacysearch {
                                     "html",
                                     0,
                                     theQuery,
-                                    suggestion,
-                                    originalUrlMask.toString()).toString());
+                                    suggestion).toString());
                             prop.put("didYouMean_suggestions_" + meanCount + "_sep", "|");
                             meanCount++;
                         } catch (ConcurrentModificationException e) {break meanCollect;}
@@ -936,12 +929,7 @@ public class yacysearch {
                     .append("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");
             } else {
                 resnav.append("<a id=\"prevpage\" href=\"");
-                resnav.append(QueryParams.navurl(
-                    "html",
-                    thispage - 1,
-                    theQuery,
-                    null,
-                    originalUrlMask).toString());
+                resnav.append(QueryParams.navurl("html", thispage - 1, theQuery, null).toString());
                 resnav
                     .append("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
             }
@@ -956,9 +944,7 @@ public class yacysearch {
                     resnav.append("\" width=\"16\" height=\"16\" />&nbsp;");
                 } else {
                     resnav.append("<a href=\"");
-                    resnav.append(QueryParams
-                        .navurl("html", i, theQuery, null, originalUrlMask)
-                        .toString());
+                    resnav.append(QueryParams.navurl("html", i, theQuery, null).toString());
                     resnav.append("\"><img src=\"env/grafics/navd");
                     resnav.append(i + 1);
                     resnav.append(".gif\" alt=\"page");
@@ -971,14 +957,8 @@ public class yacysearch {
                     .append("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" />");
             } else {
                 resnav.append("<a id=\"nextpage\" href=\"");
-                resnav.append(QueryParams.navurl(
-                    "html",
-                    thispage + 1,
-                    theQuery,
-                    null,
-                    originalUrlMask).toString());
-                resnav
-                    .append("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
+                resnav.append(QueryParams.navurl("html", thispage + 1, theQuery, null).toString());
+                resnav.append("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
             }
             final String resnavs = resnav.toString();
             prop.put("num-results_resnav", resnavs);
@@ -1035,7 +1015,6 @@ public class yacysearch {
         prop.put("count", itemsPerPage);
         prop.put("offset", startRecord);
         prop.put("resource", global ? "global" : "local");
-        prop.putHTML("urlmaskfilter", originalUrlMask);
         prop.putHTML("prefermaskfilter", prefermask);
         prop.put("indexof", (indexof) ? "on" : "off");
         prop.put("constraint", (constraint == null) ? "" : constraint.exportB64());

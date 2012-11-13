@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -114,7 +115,7 @@ public final class QueryParams {
 
     public final String queryString;
     public final HandleSet query_include_hashes, query_exclude_hashes, query_all_hashes;
-    private final Collection<String> query_include_words, query_exclude_words, query_all_words;
+    private final List<String> query_include_words, query_exclude_words, query_all_words;
     public int itemsPerPage;
     public int offset;
     public final Pattern urlMask, prefer;
@@ -183,7 +184,7 @@ public final class QueryParams {
             }
     	} else {
     		this.queryString = queryString;
-    		final Collection<String>[] cq = cleanQuery(queryString);
+    		final List<String>[] cq = cleanQuery(queryString);
             this.query_include_words = cq[0];
             this.query_exclude_words = cq[1];
             this.query_all_words = cq[2];
@@ -237,9 +238,9 @@ public final class QueryParams {
 
     public QueryParams(
         final String queryString,
-        final Collection<String> queryWords,
-        final Collection<String> excludeWords,
-        final Collection<String> fullqueryWords,
+        final List<String> queryWords,
+        final List<String> excludeWords,
+        final List<String> fullqueryWords,
         final HandleSet queryHashes,
         final HandleSet excludeHashes,
         final HandleSet fullqueryHashes,
@@ -445,11 +446,11 @@ public final class QueryParams {
     private static String seps = "'.,/&_"; static {seps += '"';}
 
     @SuppressWarnings("unchecked")
-	public static Collection<String>[] cleanQuery(String querystring) {
+	public static List<String>[] cleanQuery(String querystring) {
         // returns three sets: a query set, an exclude set and a full query set
-        final Collection<String> query_include_words = new ArrayList<String>();
-        final Collection<String> query_exclude_words = new ArrayList<String>();
-        final Collection<String> query_all_words = new ArrayList<String>();
+        final List<String> query_include_words = new ArrayList<String>();
+        final List<String> query_exclude_words = new ArrayList<String>();
+        final List<String> query_all_words = new ArrayList<String>();
 
         if ((querystring != null) && (!querystring.isEmpty())) {
 
@@ -484,7 +485,7 @@ public final class QueryParams {
                 }
             }
         }
-        return new Collection[]{query_include_words, query_exclude_words, query_all_words};
+        return new List[]{query_include_words, query_exclude_words, query_all_words};
     }
 
     public String queryString(final boolean encodeHTML) {
@@ -533,28 +534,40 @@ public final class QueryParams {
             else
                 q.append(" AND ").append(YaCySchema.host_id_s.getSolrFieldName()).append(":\"").append(this.nav_sitehash).append('\"');
         }
-        String urlMaskPattern = this.urlMask.pattern();
-        
-        // translate filetype navigation
-        int extm = urlMaskPattern.indexOf(".*\\.");
-        if (extm >= 0) {
-            String ext = urlMaskPattern.substring(extm + 4);
-            q.append(" AND ").append(YaCySchema.url_file_ext_s.getSolrFieldName()).append(':').append(ext);
-        }
-        
-        // translate protocol navigation
-        if (urlMaskPattern.startsWith("http://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("http");
-        else if (urlMaskPattern.startsWith("https://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("https");
-        else if (urlMaskPattern.startsWith("ftp://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("ftp");
-        else if (urlMaskPattern.startsWith("smb://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("smb");
-        else if (urlMaskPattern.startsWith("file://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("file");
 
         // construct query
         final SolrQuery params = new SolrQuery();
-        params.setQuery(q.toString());
         params.setStart(this.offset);
         params.setRows(this.itemsPerPage);
         params.setFacet(false);
+        
+        if (!this.urlMask_isCatchall) {
+            String urlMaskPattern = this.urlMask.pattern();
+            
+            // translate filetype navigation
+            int extm = urlMaskPattern.indexOf(".*\\.");
+            if (extm >= 0) {
+                String ext = urlMaskPattern.substring(extm + 4);
+                q.append(" AND ").append(YaCySchema.url_file_ext_s.getSolrFieldName()).append(':').append(ext);
+            }
+            
+            // translate protocol navigation
+            if (urlMaskPattern.startsWith("http://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("http");
+            else if (urlMaskPattern.startsWith("https://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("https");
+            else if (urlMaskPattern.startsWith("ftp://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("ftp");
+            else if (urlMaskPattern.startsWith("smb://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("smb");
+            else if (urlMaskPattern.startsWith("file://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("file");
+
+            // add a filter query on urls
+            // solr doesn't like slashes, backslashes or doublepoints; remove them
+            int p;
+            while ((p = urlMaskPattern.indexOf("\\")) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 2);
+            while ((p = urlMaskPattern.indexOf(':')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 1);
+            while ((p = urlMaskPattern.indexOf('/')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 1);
+            params.setFilterQueries(YaCySchema.sku.getSolrFieldName() + ":/" + urlMaskPattern + "/");
+        }
+
+        params.setQuery(q.toString());
         
         if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {
             // localtion search, no special ranking
@@ -579,9 +592,15 @@ public final class QueryParams {
         return params;
     }
     
-    public static StringBuilder solrQueryString(Collection<String> include, Collection<String> exclude, SolrConfiguration configuration) {
+    public static StringBuilder solrQueryString(List<String> include, List<String> exclude, SolrConfiguration configuration) {
         final StringBuilder q = new StringBuilder(80);
 
+        // parse special requests
+        if (include.size() == 1 && exclude.size() == 0) {
+            String w = include.get(0);
+            if (Segment.catchallString.equals(w)) return new StringBuilder("*:*");
+        }
+        
         // add text query
         int wc = 0;
         StringBuilder w = new StringBuilder(80);
@@ -628,7 +647,7 @@ public final class QueryParams {
         }
     }
 
-    public Collection<String>[] queryWords() {
+    public List<String>[] queryWords() {
         return cleanQuery(this.queryString);
     }
 
@@ -719,11 +738,9 @@ public final class QueryParams {
      * @param addToQuery
      * @return
      */
-    public static StringBuilder navurl(
-            final String ext, final int page, final QueryParams theQuery,
-            final String newQueryString, final String originalUrlMask) {
+    public static StringBuilder navurl(final String ext, final int page, final QueryParams theQuery, final String newQueryString) {
 
-        final StringBuilder sb = navurlBase(ext, theQuery, newQueryString, originalUrlMask);
+        final StringBuilder sb = navurlBase(ext, theQuery, newQueryString);
 
         sb.append(ampersand);
         sb.append("startRecord=");
@@ -732,9 +749,7 @@ public final class QueryParams {
         return sb;
     }
 
-    public static StringBuilder navurlBase(
-                    final String ext, final QueryParams theQuery,
-                    final String newQueryString, final String originalUrlMask) {
+    public static StringBuilder navurlBase(final String ext, final QueryParams theQuery, final String newQueryString) {
 
         final StringBuilder sb = new StringBuilder(120);
         sb.append("/yacysearch.");
@@ -753,10 +768,6 @@ public final class QueryParams {
         sb.append(ampersand);
         sb.append("verify=");
         sb.append(theQuery.snippetCacheStrategy == null ? "false" : theQuery.snippetCacheStrategy.toName());
-
-        sb.append(ampersand);
-        sb.append("urlmaskfilter=");
-        sb.append(originalUrlMask);
 
         sb.append(ampersand);
         sb.append("prefermaskfilter=");
