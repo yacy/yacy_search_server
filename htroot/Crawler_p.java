@@ -151,7 +151,10 @@ public class Crawler_p {
                 if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = CrawlProfile.MATCH_ALL_STRING; // avoid that all urls are filtered out if bad value was submitted
                 final boolean fullDomain = "domain".equals(post.get("range", "wide")); // special property in simple crawl start
                 final boolean subPath    = "subpath".equals(post.get("range", "wide")); // special property in simple crawl start
-                final boolean deleteold = (fullDomain || subPath || !CrawlProfile.MATCH_ALL_STRING.equals(newcrawlingMustMatch)) && post.getBoolean("deleteold");
+
+                final boolean restrictedcrawl = fullDomain || subPath || !CrawlProfile.MATCH_ALL_STRING.equals(newcrawlingMustMatch);
+                final boolean deleteold = restrictedcrawl && post.getBoolean("deleteold");
+                final boolean deleteage = restrictedcrawl && "age".equals(post.get("deleteold","off"));
                 
                 String crawlingStart0 = post.get("crawlingURL","").trim(); // the crawljob start url
                 String[] rootURLs0 = crawlingStart0.indexOf('\n') > 0 || crawlingStart0.indexOf('\r') > 0 ? crawlingStart0.split("[\\r\\n]+") : crawlingStart0.split(Pattern.quote("|"));
