@@ -1017,7 +1017,7 @@ public final class Switchboard extends serverSwitch {
                 "this is the content control import thread",
                 null,
                 new InstantBusyThread(
-                    new SMWListSyncThread(this, sb.getConfig("contentcontrol.bookmarklist", "contentcontrol"), "Category:Web Page", "/?Url/?Filter/?Article has average rating/?Category/?Modification date", sb.getConfigBool(
+                    new SMWListSyncThread(this, sb.getConfig("contentcontrol.bookmarklist", "contentcontrol"), "Category:Content Source", "/?Url/?Filter/?Category/?Modification date", sb.getConfigBool(
             				"contentcontrol.smwimport.purgelistoninit", false)),
                     "run",
                     SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT,
