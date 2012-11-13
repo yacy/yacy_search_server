@@ -40,12 +40,14 @@ import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.common.util.NamedList;
 
 public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
@@ -164,10 +166,14 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      * @throws IOException
      */
     @Override
-    public void deleteByQuery(final String querystring) throws IOException {
+    public int deleteByQuery(final String querystring) throws IOException {
         try {
             synchronized (this.server) {
+                long c0 = this.getQueryCount(querystring);
                 this.server.deleteByQuery(querystring, this.commitWithinMs);
+                this.commit();
+                long c1 = this.getQueryCount(querystring);
+                return (int) (c1 - c0);
             }
         } catch (final Throwable e) {
             throw new IOException(e);

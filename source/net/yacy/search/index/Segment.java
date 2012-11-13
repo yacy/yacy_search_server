@@ -365,16 +365,21 @@ public class Segment {
         
         // STORE TO SOLR
         final SolrInputDocument solrInputDoc = this.fulltext.getSolrScheme().yacy2solr(id, profile, responseHeader, document, condenser, referrerURL, language);
-        tryloop: for (int i = 0; i < 10; i++) {
-            String error = "";
+        String error = null;
+        tryloop: for (int i = 0; i < 20; i++) {
             try {
+                error = null;
                 this.fulltext.putDocument(solrInputDoc);
                 break tryloop;
             } catch ( final IOException e ) {
                 error = "failed to send " + urlNormalform + " to solr";
                 Log.logWarning("SOLR", error + e.getMessage());
+                if (i == 10) this.fulltext.commit();
                 try {Thread.sleep(1000);} catch (InterruptedException e1) {}
+                continue tryloop;
             }
+        }
+        if (error != null) {
             Log.logWarning("SOLR", error + ", pausing Crawler!");
             // pause the crawler!!!
             Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, error);

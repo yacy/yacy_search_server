@@ -139,8 +139,8 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
     }
 
     @Override
-    public void deleteByQuery(final String querystring) throws IOException {
-        this.solr.deleteByQuery(querystring);
+    public int deleteByQuery(final String querystring) throws IOException {
+        return this.solr.deleteByQuery(querystring);
     }
 
 	@Override

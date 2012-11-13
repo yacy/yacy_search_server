@@ -82,9 +82,10 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     /**
      * delete entries from solr according the given solr query string
      * @param id the url hash of the entry
+     * @return the number of deletions
      * @throws IOException
      */
-    public void deleteByQuery(final String querystring) throws IOException;
+    public int deleteByQuery(final String querystring) throws IOException;
 
     /**
      * check if a given id exists in solr

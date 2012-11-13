@@ -153,8 +153,13 @@ public class Crawler_p {
                 final boolean subPath    = "subpath".equals(post.get("range", "wide")); // special property in simple crawl start
 
                 final boolean restrictedcrawl = fullDomain || subPath || !CrawlProfile.MATCH_ALL_STRING.equals(newcrawlingMustMatch);
-                final boolean deleteold = restrictedcrawl && post.getBoolean("deleteold");
                 final boolean deleteage = restrictedcrawl && "age".equals(post.get("deleteold","off"));
+                Date deleteageDate = null;
+                if (deleteage) {
+                    long t = timeParser(true, post.getInt("deleteIfOlderNumber", -1), post.get("deleteIfOlderUnit","year")); // year, month, day, hour
+                    if (t > 0) deleteageDate = new Date(t);
+                }
+                final boolean deleteold = (deleteage && deleteageDate != null) || (restrictedcrawl && post.getBoolean("deleteold"));
                 
                 String crawlingStart0 = post.get("crawlingURL","").trim(); // the crawljob start url
                 String[] rootURLs0 = crawlingStart0.indexOf('\n') > 0 || crawlingStart0.indexOf('\r') > 0 ? crawlingStart0.split("[\\r\\n]+") : crawlingStart0.split(Pattern.quote("|"));
@@ -286,7 +291,10 @@ public class Crawler_p {
                     if (fullDomain) {
                         siteFilter = CrawlProfile.siteFilter(rootURLs);
                         if (deleteold) {
-                            for (DigestURI u: rootURLs) sb.index.fulltext().deleteDomain(u.hosthash(), true);
+                            for (DigestURI u: rootURLs) {
+                                int count = sb.index.fulltext().deleteDomain(u.hosthash(), deleteageDate, rootURLs.size() > 0);
+                                if (count > 0) Log.logInfo("Crawler_p", "deleted " + count + " documents for host " + u.getHost());
+                            }
                         }
                     } else if (subPath) {
                         siteFilter = CrawlProfile.subpathFilter(rootURLs);
@@ -294,7 +302,8 @@ public class Crawler_p {
                             for (DigestURI u: rootURLs) {
                                 String subpath = CrawlProfile.mustMatchSubpath(u);
                                 if (subpath.endsWith(".*")) subpath = subpath.substring(0, subpath.length() - 2);
-                                sb.index.fulltext().remove(subpath, true);
+                                int count = sb.index.fulltext().remove(subpath, deleteageDate, rootURLs.size() > 0);
+                                if (count > 0) Log.logInfo("Crawler_p", "deleted " + count + " documents for host " + u.getHost());
                             }
                         }
                     }

@@ -36,8 +36,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.solr.YaCySchema;
@@ -306,34 +308,99 @@ public final class Fulltext implements Iterable<byte[]> {
     }
 
     /**
+     * using a fragment of the url hash (6 bytes: bytes 6 to 11) it is possible to address all urls from a specific domain
+     * here such a fragment can be used to delete all these domains at once
+     * @param hosthash the hash of the host to be deleted
+     * @param freshdate either NULL or a date in the past which is the limit for deletion. Only documents older than this date are deleted
+     * @return number of deleted domains
+     * @throws IOException
+     */
+    public int deleteDomain(final String hosthash, Date freshdate, boolean concurrent) {
+        // first collect all url hashes that belong to the domain
+        assert hosthash.length() == 6;
+        final String q = YaCySchema.host_id_s.getSolrFieldName() + ":\"" + hosthash + "\"" +
+                ((freshdate != null && freshdate.before(new Date())) ? (" AND " + YaCySchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") : "");
+        final AtomicInteger count = new AtomicInteger(0);
+        Thread t = new Thread() {
+            public void run() {
+                // delete in solr
+                synchronized (Fulltext.this.solr) {
+                    try {
+                        count.addAndGet(Fulltext.this.solr.deleteByQuery(q));
+                        Fulltext.this.solr.commit();
+                    } catch (IOException e) {}
+                }
+        
+                // delete in old metadata structure
+                if (Fulltext.this.urlIndexFile != null) {
+                    final ArrayList<String> l = new ArrayList<String>();
+                    synchronized (this) {
+                        CloneableIterator<byte[]> i;
+                        try {
+                            i = Fulltext.this.urlIndexFile.keys(true, null);
+                            String hash;
+                            while (i != null && i.hasNext()) {
+                                hash = ASCII.String(i.next());
+                                if (hosthash.equals(hash.substring(6))) l.add(hash);
+                            }
+                            
+                            // then delete the urls using this list
+                            for (final String h: l) Fulltext.this.urlIndexFile.delete(ASCII.getBytes(h));
+                        } catch (IOException e) {}
+                    }
+                }
+        
+                // finally remove the line with statistics
+                if (Fulltext.this.statsDump != null) {
+                    final Iterator<HostStat> hsi = Fulltext.this.statsDump.iterator();
+                    HostStat hs;
+                    while (hsi.hasNext()) {
+                        hs = hsi.next();
+                        if (hs.hosthash.equals(hosthash)) {
+                            hsi.remove();
+                            break;
+                        }
+                    }
+                }
+            }
+        };
+        if (concurrent) t.start(); else t.run();
+        return count.get();
+    }
+
+    /**
      * remove a full subpath from the index
      * @param subpath the left path of the url; at least until the end of the host
+     * @param freshdate either NULL or a date in the past which is the limit for deletion. Only documents older than this date are deleted
      * @param concurrently if true, then the method returnes immediately and runs concurrently
      */
-    public void remove(String subpath, final boolean concurrently) {
+    public int remove(String subpath, Date freshdate, final boolean concurrently) {
         int p = subpath.substring(0, subpath.length() - 1).lastIndexOf('/');
         final String path = p > 8 ? subpath.substring(0, p + 1) : subpath;
         DigestURI uri;
-        try {uri = new DigestURI(path);} catch (MalformedURLException e) {return;}
+        try {uri = new DigestURI(path);} catch (MalformedURLException e) {return 0;}
         final String host = uri.getHost();
+        final String q = YaCySchema.host_s.getSolrFieldName() + ":" + host +
+                ((freshdate != null && freshdate.before(new Date())) ? (" AND " + YaCySchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") : "");
+        final AtomicInteger count = new AtomicInteger(0);
         Thread t = new Thread(){
             public void run() {
-                final BlockingQueue<SolrDocument> docs = getSolr().concurrentQuery(YaCySchema.host_s.getSolrFieldName() + ":" + host, 0, 1000000, 600000, -1);
+                final BlockingQueue<SolrDocument> docs = getSolr().concurrentQuery(q, 0, 1000000, 600000, -1);
                 try {
                     SolrDocument doc;
-                    boolean removed = false;
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                         String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
                         if (u.startsWith(path)) {
                             remove(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())));
-                            removed = true;
+                            count.incrementAndGet();
                         }
                     }
-                    if (removed) Fulltext.this.solr.commit();
+                    if (count.get() > 0) Fulltext.this.solr.commit();
                 } catch (InterruptedException e) {}
             }
         };
         if (concurrently) t.start(); else t.run();
+        return count.get();
     }
     
     /**
@@ -800,62 +867,5 @@ public final class Fulltext implements Iterable<byte[]> {
             this.hosthash = urlhashfragment;
             this.count = count;
         }
-    }
-
-    /**
-     * using a fragment of the url hash (6 bytes: bytes 6 to 11) it is possible to address all urls from a specific domain
-     * here such a fragment can be used to delete all these domains at once
-     * @param hosthash
-     * @return number of deleted domains
-     * @throws IOException
-     */
-    public void deleteDomain(final String hosthash, boolean concurrent) {
-        // first collect all url hashes that belong to the domain
-        assert hosthash.length() == 6;
-        
-        Thread t = new Thread() {
-            public void run() {
-                // delete in solr
-                synchronized (Fulltext.this.solr) {
-                    try {
-                        Fulltext.this.solr.deleteByQuery(YaCySchema.host_id_s.getSolrFieldName() + ":\"" + hosthash + "\"");
-                        Fulltext.this.solr.commit();
-                    } catch (IOException e) {}
-                }
-        
-                // delete in old metadata structure
-                if (Fulltext.this.urlIndexFile != null) {
-                    final ArrayList<String> l = new ArrayList<String>();
-                    synchronized (this) {
-                        CloneableIterator<byte[]> i;
-                        try {
-                            i = Fulltext.this.urlIndexFile.keys(true, null);
-                            String hash;
-                            while (i != null && i.hasNext()) {
-                                hash = ASCII.String(i.next());
-                                if (hosthash.equals(hash.substring(6))) l.add(hash);
-                            }
-                            
-                            // then delete the urls using this list
-                            for (final String h: l) Fulltext.this.urlIndexFile.delete(ASCII.getBytes(h));
-                        } catch (IOException e) {}
-                    }
-                }
-        
-                // finally remove the line with statistics
-                if (Fulltext.this.statsDump != null) {
-                    final Iterator<HostStat> hsi = Fulltext.this.statsDump.iterator();
-                    HostStat hs;
-                    while (hsi.hasNext()) {
-                        hs = hsi.next();
-                        if (hs.hosthash.equals(hosthash)) {
-                            hsi.remove();
-                            break;
-                        }
-                    }
-                }
-            }
-        };
-        if (concurrent) t.start(); else t.run();
     }
 }

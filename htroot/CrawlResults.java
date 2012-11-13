@@ -126,7 +126,7 @@ public class CrawlResults {
                 final String domain = post.get("domain", null);
                 final String hashpart = domain == null ? null : DigestURI.hosthash6(domain);
                 if (hashpart != null) {
-                    sb.index.fulltext().deleteDomain(hashpart, false);
+                    sb.index.fulltext().deleteDomain(hashpart, null, false);
                     ResultURLs.deleteDomain(tabletype, domain, hashpart);
                 }
             }
