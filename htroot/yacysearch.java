@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -78,6 +77,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryGoal;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
@@ -594,14 +594,13 @@ public class yacysearch {
             }
 
             // the query
-            final List<String>[] query = QueryParams.cleanQuery(querystring.trim()); // converts also umlaute
-
-            final int maxDistance = (querystring.indexOf('"', 0) >= 0) ? query.length - 1 : Integer.MAX_VALUE;
+            final QueryGoal qg = new QueryGoal(querystring.trim());
+            final int maxDistance = (querystring.indexOf('"', 0) >= 0) ? qg.getAllWords().size() - 1 : Integer.MAX_VALUE;
 
             // filter out stopwords
-            final SortedSet<String> filtered = SetTools.joinConstructiveByTest(query[0], Switchboard.stopwords);
+            final SortedSet<String> filtered = SetTools.joinConstructiveByTest(qg.getIncludeWords(), Switchboard.stopwords);
             if ( !filtered.isEmpty() ) {
-                SetTools.excludeDestructiveByTestSmallInLarge(query[0], Switchboard.stopwords);
+                SetTools.excludeDestructiveByTestSmallInLarge(qg.getIncludeWords(), Switchboard.stopwords);
             }
 
             // if a minus-button was hit, remove a special reference first
@@ -614,7 +613,7 @@ public class yacysearch {
 
                     // delete the index entry locally
                     final String delHash = post.get("deleteref", ""); // urlhash
-                    indexSegment.termIndex().remove(Word.words2hashesHandles(query[0]), delHash.getBytes());
+                    indexSegment.termIndex().remove(qg.getIncludeHashes(), delHash.getBytes());
 
                     // make new news message with negative voting
                     if ( !sb.isRobinsonMode() ) {
@@ -715,13 +714,7 @@ public class yacysearch {
             // do the search
             final QueryParams theQuery =
                 new QueryParams(
-                    originalquerystring,
-                    query[0],
-                    query[1],
-                    query[2],
-                    Word.words2hashesHandles(query[0]),
-                    Word.words2hashesHandles(query[1]),
-                    Word.words2hashesHandles(query[2]),
+                    qg,
                     modifier.toString().trim(),
                     maxDistance,
                     prefermask,
@@ -764,22 +757,22 @@ public class yacysearch {
             sb.intermissionAllThreads(3000);
 
             // filter out words that appear in bluelist
-            theQuery.filterOut(Switchboard.blueList);
+            theQuery.getQueryGoal().filterOut(Switchboard.blueList);
 
             // log
             Log.logInfo(
                 "LOCAL_SEARCH",
                 "INIT WORD SEARCH: "
-                    + theQuery.queryString
+                    + theQuery.getQueryGoal().getQueryString()
                     + ":"
-                    + QueryParams.hashSet2hashString(theQuery.query_include_hashes)
+                    + QueryParams.hashSet2hashString(theQuery.getQueryGoal().getIncludeHashes())
                     + " - "
                     + theQuery.neededResults()
                     + " links to be computed, "
                     + theQuery.itemsPerPage()
                     + " lines to be displayed");
             EventChannel.channels(EventChannel.LOCALSEARCH).addMessage(
-                new RSSMessage("Local Search Request", theQuery.queryString, ""));
+                new RSSMessage("Local Search Request", theQuery.getQueryGoal().getQueryString(), ""));
             final long timestamp = System.currentTimeMillis();
 
             // create a new search event
@@ -818,7 +811,7 @@ public class yacysearch {
 
             // log
             Log.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: "
-                + theQuery.queryString
+                + theQuery.getQueryGoal().getQueryString()
                 + " - "
                 + "local_rwi_available(" + theSearch.query.local_rwi_available.get() + "), "
                 + "local_rwi_stored(" + theSearch.query.local_rwi_stored.get() + "), "

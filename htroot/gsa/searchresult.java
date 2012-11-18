@@ -36,6 +36,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryGoal;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.server.serverObjects;
@@ -110,8 +111,8 @@ public class searchresult {
         post.put("originalQuery", q);
         
         // get a solr query string
-        List<String>[] cq = QueryParams.cleanQuery(q);
-        q = QueryParams.solrQueryString(cq[0], cq[1], sb.index.fulltext().getSolrScheme()).toString();
+        QueryGoal qg = new QueryGoal(q);
+        q = qg.solrQueryString(sb.index.fulltext().getSolrScheme()).toString();
         
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 5000 : 100));

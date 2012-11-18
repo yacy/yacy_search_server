@@ -151,7 +151,7 @@ public final class SearchEvent {
         this.snippets = new ConcurrentHashMap<String, String>();
             
         this.secondarySearchSuperviser =
-            (this.query.query_include_hashes.size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
+            (this.query.getQueryGoal().getIncludeHashes().size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
         if ( this.secondarySearchSuperviser != null ) {
             this.secondarySearchSuperviser.start();
         }
@@ -184,7 +184,7 @@ public final class SearchEvent {
         if (this.remote) {
             // start global searches
             final long timer = System.currentTimeMillis();
-            if (this.query.query_include_hashes.isEmpty()) {
+            if (this.query.getQueryGoal().getIncludeHashes().isEmpty()) {
                 this.primarySearchThreadsL = null;
             } else {
                 this.primarySearchThreadsL = new ArrayList<RemoteSearch>();
@@ -281,12 +281,12 @@ public final class SearchEvent {
         // only with the query minus the stopwords which had not been used for the search
         HandleSet filtered;
         try {
-            filtered = RowHandleSet.joinConstructive(query.query_include_hashes, Switchboard.stopwordHashes);
+            filtered = RowHandleSet.joinConstructive(query.getQueryGoal().getIncludeHashes(), Switchboard.stopwordHashes);
         } catch (final SpaceExceededException e) {
             Log.logException(e);
-            filtered = new RowHandleSet(query.query_include_hashes.keylen(), query.query_include_hashes.comparator(), 0);
+            filtered = new RowHandleSet(query.getQueryGoal().getIncludeHashes().keylen(), query.getQueryGoal().getIncludeHashes().comparator(), 0);
         }
-        this.snippetFetchWordHashes = query.query_include_hashes.clone();
+        this.snippetFetchWordHashes = query.getQueryGoal().getIncludeHashes().clone();
         if (filtered != null && !filtered.isEmpty()) {
             this.snippetFetchWordHashes.excludeDestructive(Switchboard.stopwordHashes);
         }
@@ -763,17 +763,17 @@ public final class SearchEvent {
             final String pagetitle = page.dc_title().toLowerCase();
 
             // check exclusion
-            if ( this.query.query_exclude_hashes != null && !this.query.query_exclude_hashes.isEmpty() &&
-                ((QueryParams.anymatch(pagetitle, this.query.query_exclude_hashes))
-                || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.query_exclude_hashes))
-                || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.query_exclude_hashes)))) {
+            if ( !this.query.getQueryGoal().getExcludeHashes().isEmpty() &&
+                ((QueryParams.anymatch(pagetitle, this.query.getQueryGoal().getExcludeHashes()))
+                || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.getQueryGoal().getExcludeHashes()))
+                || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.getQueryGoal().getExcludeHashes())))) {
                 this.query.misses.add(page.hash());
                 continue;
             }
 
             // check index-of constraint
             if ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof)) && (!(pagetitle.startsWith("index of")))) {
-                final Iterator<byte[]> wi = this.query.query_include_hashes.iterator();
+                final Iterator<byte[]> wi = this.query.getQueryGoal().getIncludeHashes().iterator();
                 while ( wi.hasNext() ) {
                     this.query.getSegment().termIndex().removeDelayed(wi.next(), page.hash());
                 }

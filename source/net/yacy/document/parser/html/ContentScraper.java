@@ -535,7 +535,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     private String recursiveParse(final char[] inlineHtml) {
-        if (inlineHtml.length < 14) return cleanLine(super.stripAll(inlineHtml));
+        if (inlineHtml.length < 14) return cleanLine(CharacterCoding.html2unicode(stripAllTags(inlineHtml)));
 
         // start a new scraper to parse links inside this text
         // parsing the content
@@ -545,7 +545,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             FileUtils.copy(new CharArrayReader(inlineHtml), writer);
         } catch (final IOException e) {
             Log.logException(e);
-            return cleanLine(super.stripAll(inlineHtml));
+            return cleanLine(CharacterCoding.html2unicode(stripAllTags(inlineHtml)));
         } finally {
             try {
                 writer.close();
@@ -557,7 +557,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
         this.images.putAll(scraper.images);
 
-        String line = cleanLine(super.stripAll(scraper.content.getChars()));
+        String line = cleanLine(CharacterCoding.html2unicode(stripAllTags(scraper.content.getChars())));
         scraper.close();
         return line;
     }

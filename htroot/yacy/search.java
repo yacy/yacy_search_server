@@ -68,6 +68,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryGoal;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
@@ -219,12 +220,9 @@ public final class search {
         if (query.isEmpty() && abstractSet != null) {
             // this is _not_ a normal search, only a request for index abstracts
             final Segment indexSegment = sb.index;
+            QueryGoal qg = new QueryGoal(abstractSet, new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0), abstractSet);
             theQuery = new QueryParams(
-                    null,
-                    null, null, null,
-                    abstractSet,
-                    new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0),
-                    abstractSet,
+                    qg,
                     modifier,
                     maxdist,
                     prefer,
@@ -251,11 +249,11 @@ public final class search {
                     header.get(RequestHeader.USER_AGENT, ""),
                     false, 0.0d, 0.0d, 0.0d
                     );
-            Network.log.logInfo("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.query_include_hashes) + " - " + theQuery.itemsPerPage() + " links");
+            Network.log.logInfo("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
 
             final long timer = System.currentTimeMillis();
             //final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
-            final TreeMap<byte[], ReferenceContainer<WordReference>> incc = indexSegment.termIndex().searchConjunction(theQuery.query_include_hashes, QueryParams.hashes2Handles(urls));
+            final TreeMap<byte[], ReferenceContainer<WordReference>> incc = indexSegment.termIndex().searchConjunction(theQuery.getQueryGoal().getIncludeHashes(), QueryParams.hashes2Handles(urls));
 
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEventType.COLLECTION, "", incc.size(), System.currentTimeMillis() - timer), false);
             if (incc != null) {
@@ -284,12 +282,9 @@ public final class search {
             RowHandleSet allHashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             try {allHashes.putAll(queryhashes);} catch (SpaceExceededException e) {}
             try {allHashes.putAll(excludehashes);} catch (SpaceExceededException e) {}
+            QueryGoal qg = new QueryGoal(queryhashes, excludehashes, allHashes);
             theQuery = new QueryParams(
-                    null,
-                    null, null, null,
-                    queryhashes,
-                    excludehashes,
-                    allHashes,
+                    qg,
                     modifier,
                     maxdist,
                     prefer,
@@ -316,8 +311,8 @@ public final class search {
                     header.get(RequestHeader.USER_AGENT, ""),
                     false, 0.0d, 0.0d, 0.0d
                     );
-            Network.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.query_include_hashes) + " - " + theQuery.itemsPerPage() + " links");
-            EventChannel.channels(EventChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.query_include_hashes), ""));
+            Network.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
+            EventChannel.channels(EventChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()), ""));
 
             // make event
             theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, null, abstracts.length() > 0, sb.loader, count, maxtime, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
@@ -433,7 +428,7 @@ public final class search {
 
         // log
         Network.log.logInfo("EXIT HASH SEARCH: " +
-                QueryParams.anonymizedQueryHashes(theQuery.query_include_hashes) + " - " + theQuery.getResultCount() + " links found, " +
+                QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.getResultCount() + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstracts, " +
                 (System.currentTimeMillis() - timestamp) + " milliseconds");

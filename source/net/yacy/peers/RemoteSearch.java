@@ -149,7 +149,7 @@ public class RemoteSearch extends Thread {
             (clusterselection == null) ?
                     DHTSelection.selectSearchTargets(
                             event.peers,
-                            event.query.query_include_hashes,
+                            event.query.getQueryGoal().getIncludeHashes(),
                             event.peers.redundancy(),
                             burstRobinsonPercent,
                             burstMultiwordPercent)
@@ -172,8 +172,8 @@ public class RemoteSearch extends Thread {
             try {
                 RemoteSearch rs = new RemoteSearch(
                     event,
-                    QueryParams.hashSet2hashString(event.query.query_include_hashes),
-                    QueryParams.hashSet2hashString(event.query.query_exclude_hashes),
+                    QueryParams.hashSet2hashString(event.query.getQueryGoal().getIncludeHashes()),
+                    QueryParams.hashSet2hashString(event.query.getQueryGoal().getExcludeHashes()),
                     event.query.modifier,
                     event.query.targetlang == null ? "" : event.query.targetlang,
                     event.query.nav_sitehash == null ? "" : event.query.nav_sitehash,

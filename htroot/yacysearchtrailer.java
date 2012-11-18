@@ -79,7 +79,7 @@ public class yacysearchtrailer {
                 count = theSearch.namespaceNavigator.get(name);
                 if (count == 0) break;
                 nav = "inurl%3A" + name;
-                queryStringForUrl = theSearch.query.queryStringForUrl();
+                queryStringForUrl = theSearch.query.getQueryGoal().queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
                 if (p < 0) {
                     pos++;
@@ -119,7 +119,7 @@ public class yacysearchtrailer {
                 count = hostNavigator.get(name);
                 if (count == 0) break;
                 nav = "site%3A" + name;
-                queryStringForUrl = theSearch.query.queryStringForUrl();
+                queryStringForUrl = theSearch.query.getQueryGoal().queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
                 if (p < 0) {
                     pos++;
@@ -158,7 +158,7 @@ public class yacysearchtrailer {
                 count = theSearch.authorNavigator.get(name);
                 if (count == 0) break;
                 nav = (name.indexOf(' ', 0) < 0) ? "author%3A" + name : "author%3A%28" + name.replace(" ", "+") + "%29";
-                queryStringForUrl = theSearch.query.queryStringForUrl();
+                queryStringForUrl = theSearch.query.getQueryGoal().queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
                 if (p < 0) {
                     pos++;
@@ -197,9 +197,9 @@ public class yacysearchtrailer {
                 name = navigatorIterator.next();
                 count = topicNavigator.get(name);
                 if (count == 0) break;
-                if (theSearch.query.queryString == null) break;
+                if (theSearch.query.getQueryGoal().getQueryString() == null) break;
                 if (name != null) {
-                    queryStringForUrl = theSearch.query.queryStringForUrl();
+                    queryStringForUrl = theSearch.query.getQueryGoal().queryStringForUrl();
                     prop.put("nav-topics_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-topics_element_" + i + "_modifier", name);
                     prop.put(fileType, "nav-topics_element_" + i + "_name", name);
@@ -227,7 +227,7 @@ public class yacysearchtrailer {
                 count = theSearch.protocolNavigator.get(name);
                 if (count == 0) break;
                 nav = "%2F" + name;
-                queryStringForUrl = theSearch.query.queryStringForUrl();
+                queryStringForUrl = theSearch.query.getQueryGoal().queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
                 if (p < 0) {
                     pos++;
@@ -266,7 +266,7 @@ public class yacysearchtrailer {
                 count = theSearch.filetypeNavigator.get(name);
                 if (count == 0) break;
                 nav = "filetype%3A" + name;
-                queryStringForUrl = theSearch.query.queryStringForUrl();
+                queryStringForUrl = theSearch.query.getQueryGoal().queryStringForUrl();
                 p = queryStringForUrl.indexOf(nav);
                 if (p < 0) {
                     pos++;
@@ -310,7 +310,7 @@ public class yacysearchtrailer {
                     count = ve.getValue().get(name);
                     if (count == 0) break;
                     nav = "%2Fvocabulary%2F" + navname + "%2F" + MultiProtocolURI.escape(Tagging.encodePrintname(name)).toString();
-                    queryStringForUrl = theSearch.query.queryStringForUrl();
+                    queryStringForUrl = theSearch.query.getQueryGoal().queryStringForUrl();
                     p = queryStringForUrl.indexOf(nav);
                     if (p < 0) {
                         queryStringForUrl += "+" + nav;

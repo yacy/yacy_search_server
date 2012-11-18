@@ -109,7 +109,7 @@ public class SecondarySearchSuperviser extends Thread {
     }
 
     private void prepareSecondarySearch() {
-        if ( this.abstractsCache == null || this.abstractsCache.size() != this.searchEvent.query.query_include_hashes.size() ) {
+        if ( this.abstractsCache == null || this.abstractsCache.size() != this.searchEvent.query.getQueryGoal().getIncludeHashes().size() ) {
             return; // secondary search not possible (yet)
         }
 
@@ -122,7 +122,7 @@ public class SecondarySearchSuperviser extends Thread {
         */
 
         // find out if there are enough references for all words that are searched
-        if ( this.abstractsCache.size() != this.searchEvent.query.query_include_hashes.size() ) {
+        if ( this.abstractsCache.size() != this.searchEvent.query.getQueryGoal().getIncludeHashes().size() ) {
             return;
         }
 

@@ -56,6 +56,7 @@ import net.yacy.peers.RemoteSearch;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
+import net.yacy.search.query.QueryGoal;
 
 public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnippet> {
 
@@ -380,7 +381,8 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
      * @param queryHashes hashes of search words
      * @return line with marked words
      */
-    public String getLineMarked(final HandleSet queryHashes) {
+    public String getLineMarked(final QueryGoal queryGoal) {
+        final HandleSet queryHashes = queryGoal.getAllHashes();
         if (this.line == null) {
             return "";
         }

@@ -25,7 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.net.MalformedURLException;
-import java.util.Collection;
+import java.util.List;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
@@ -134,10 +134,10 @@ public class yacysearchitem {
             prop.put("content_authorized", authenticated ? "1" : "0");
             final String urlhash = ASCII.String(result.hash());
             prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
-            prop.putHTML("content_authorized_bookmark_bookmarklink", "/yacysearch.html?query=" + theSearch.query.queryString.replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&order=" + crypt.simpleEncode(theSearch.query.ranking.toExternalString()) + "&resource=" + resource + "&time=3&bookmarkref=" + urlhash + "&urlmaskfilter=.*");
+            prop.putHTML("content_authorized_bookmark_bookmarklink", "/yacysearch.html?query=" + theSearch.query.getQueryGoal().getQueryString().replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&order=" + crypt.simpleEncode(theSearch.query.ranking.toExternalString()) + "&resource=" + resource + "&time=3&bookmarkref=" + urlhash + "&urlmaskfilter=.*");
             prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
-            prop.putHTML("content_authorized_recommend_deletelink", "/yacysearch.html?query=" + theSearch.query.queryString.replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&order=" + crypt.simpleEncode(theSearch.query.ranking.toExternalString()) + "&resource=" + resource + "&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
-            prop.putHTML("content_authorized_recommend_recommendlink", "/yacysearch.html?query=" + theSearch.query.queryString.replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&order=" + crypt.simpleEncode(theSearch.query.ranking.toExternalString()) + "&resource=" + resource + "&time=3&recommendref=" + urlhash + "&urlmaskfilter=.*");
+            prop.putHTML("content_authorized_recommend_deletelink", "/yacysearch.html?query=" + theSearch.query.getQueryGoal().getQueryString().replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&order=" + crypt.simpleEncode(theSearch.query.ranking.toExternalString()) + "&resource=" + resource + "&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
+            prop.putHTML("content_authorized_recommend_recommendlink", "/yacysearch.html?query=" + theSearch.query.getQueryGoal().getQueryString().replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&order=" + crypt.simpleEncode(theSearch.query.ranking.toExternalString()) + "&resource=" + resource + "&time=3&recommendref=" + urlhash + "&urlmaskfilter=.*");
             prop.put("content_authorized_urlhash", urlhash);
             final String resulthashString = urlhash;
             prop.putHTML("content_title", result.title());
@@ -206,18 +206,18 @@ public class yacysearchitem {
             prop.putHTML("content_publisher", result.publisher());
             prop.putHTML("content_creator", result.creator());// author
             prop.putHTML("content_subject", result.subject());
-            final Collection<String>[] query = theSearch.query.queryWords();
-            final StringBuilder s = new StringBuilder(query[0].size() * 20);
-            for (final String t: query[0]) {
+            final List<String> query = theSearch.query.getQueryGoal().getAllWords();
+            final StringBuilder s = new StringBuilder(query.size() * 20);
+            for (final String t: query) {
                 s.append('+').append(t);
             }
             final String words = (s.length() > 0) ? s.substring(1) : "";
             prop.putHTML("content_words", words);
             prop.putHTML("content_showParser_words", words);
-            prop.putHTML("content_former", theSearch.query.queryString);
-            prop.putHTML("content_showPictures_former", theSearch.query.queryString);
+            prop.putHTML("content_former", theSearch.query.getQueryGoal().getQueryString());
+            prop.putHTML("content_showPictures_former", theSearch.query.getQueryGoal().getQueryString());
             final TextSnippet snippet = result.textSnippet();
-            final String desc = (snippet == null) ? "" : snippet.isMarked() ? snippet.getLineRaw() : snippet.getLineMarked(theSearch.query.query_all_hashes);
+            final String desc = (snippet == null) ? "" : snippet.isMarked() ? snippet.getLineRaw() : snippet.getLineMarked(theSearch.query.getQueryGoal());
             prop.put("content_description", desc);
             prop.putXML("content_description-xml", desc);
             prop.putJSON("content_description-json", desc);

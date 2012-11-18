@@ -77,8 +77,8 @@ public abstract class AbstractScraper implements Scraper {
     @Override
     public abstract void scrapeTag1(String tagname, Properties tagopts, char[] text);
 
-    protected static String stripAllTags(final char[] s) {
-        if (!MemoryControl.request(s.length * 2, false)) return "";
+    public static String stripAllTags(final char[] s) {
+        if (s.length > 80 && !MemoryControl.request(s.length * 2, false)) return "";
         final StringBuilder r = new StringBuilder(s.length);
         int bc = 0;
         for (final char c : s) {
@@ -112,10 +112,6 @@ public abstract class AbstractScraper implements Scraper {
 
         // return result
         return sb.toString().trim();
-    }
-
-    public static String stripAll(final char[] s) {
-        return CharacterCoding.html2unicode(stripAllTags(s));
     }
 
     @Override

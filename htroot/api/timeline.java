@@ -41,6 +41,7 @@ import net.yacy.kelondro.util.ISO639;
 import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
+import net.yacy.search.query.QueryGoal;
 import net.yacy.search.query.QueryParams;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -68,8 +69,8 @@ public final class timeline {
             language = (agent == null) ? "en" : ISO639.userAgentLanguageDetection(agent);
             if (language == null) language = "en";
         }
-        final List<String>[] query = QueryParams.cleanQuery(querystring); // converts also umlaute
-        HandleSet q = Word.words2hashesHandles(query[0]);
+        final QueryGoal qg = new QueryGoal(querystring);
+        HandleSet q = qg.getIncludeHashes();
 
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(3000);
@@ -87,7 +88,7 @@ public final class timeline {
         // get the index container with the result vector
         TermSearch<WordReference> search = null;
         try {
-            search = segment.termIndex().query(q, Word.words2hashesHandles(query[1]), null, Segment.wordReferenceFactory, maxdist);
+            search = segment.termIndex().query(q, qg.getExcludeHashes(), null, Segment.wordReferenceFactory, maxdist);
         } catch (SpaceExceededException e) {
             Log.logException(e);
         }

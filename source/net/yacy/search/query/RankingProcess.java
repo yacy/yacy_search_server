@@ -222,8 +222,8 @@ public final class RankingProcess extends Thread {
                     .getSegment()
                     .termIndex()
                     .query(
-                        this.query.query_include_hashes,
-                        this.query.query_exclude_hashes,
+                        this.query.getQueryGoal().getIncludeHashes(),
+                        this.query.getQueryGoal().getExcludeHashes(),
                         null,
                         Segment.wordReferenceFactory,
                         this.query.maxDistance);
@@ -234,7 +234,7 @@ public final class RankingProcess extends Thread {
                 new ProfilingGraph.EventSearch(
                     this.query.id(true),
                     SearchEventType.JOIN,
-                    this.query.queryString,
+                    this.query.getQueryGoal().getQueryString(),
                     index.size(),
                     System.currentTimeMillis() - timer),
                 false);
@@ -488,7 +488,7 @@ public final class RankingProcess extends Thread {
             if ( word.length() > 2
                 && "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_zum_der_die_das_und_the_zur_bzw_mit_blog_wiki_aus_bei_off"
                     .indexOf(word) < 0
-                && !this.query.query_include_hashes.has(Word.word2hash(word))
+                && !this.query.getQueryGoal().getIncludeHashes().has(Word.word2hash(word))
                 && lettermatch.matcher(word).matches()
                 && !Switchboard.badwords.contains(word)
                 && !Switchboard.stopwords.contains(word) ) {

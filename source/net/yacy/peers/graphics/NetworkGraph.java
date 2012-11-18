@@ -45,7 +45,6 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.visualization.PrintTool;
@@ -157,7 +156,7 @@ public class NetworkGraph {
         */
 
         // draw in the search target
-        final Iterator<byte[]> i = event.query.query_include_hashes.iterator();
+        final Iterator<byte[]> i = event.query.getQueryGoal().getIncludeHashes().iterator();
         eventPicture.setColor(RasterPlotter.GREY);
         while (i.hasNext()) {
             byte[] wordHash = i.next();

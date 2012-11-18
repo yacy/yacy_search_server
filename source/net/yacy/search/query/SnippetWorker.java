@@ -179,7 +179,7 @@ public class SnippetWorker extends Thread {
         // apply query-in-result matching
         final HandleSet urlcomph = Word.words2hashesHandles(urlcomps);
         final HandleSet descrcomph = Word.words2hashesHandles(descrcomps);
-        final Iterator<byte[]> shi = this.snippetProcess.query.query_include_hashes.iterator();
+        final Iterator<byte[]> shi = this.snippetProcess.query.getQueryGoal().getIncludeHashes().iterator();
         byte[] queryhash;
         while (shi.hasNext()) {
             queryhash = shi.next();
@@ -252,7 +252,7 @@ public class SnippetWorker extends Thread {
                 }
                 final String reason = "no text snippet; errorCode = " + snippet.getErrorCode();
                 if (this.snippetProcess.deleteIfSnippetFail) {
-                    this.snippetProcess.workTables.failURLsRegisterMissingWord(this.snippetProcess.query.getSegment().termIndex(), page.url(), this.snippetProcess.query.query_include_hashes, reason);
+                    this.snippetProcess.workTables.failURLsRegisterMissingWord(this.snippetProcess.query.getSegment().termIndex(), page.url(), this.snippetProcess.query.getQueryGoal().getIncludeHashes(), reason);
                 }
                 SearchEvent.log.logInfo("sorted out url " + page.url().toNormalform(true) + " during search: " + reason);
                 return null;

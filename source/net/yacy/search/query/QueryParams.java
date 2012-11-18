@@ -26,15 +26,11 @@
 
 package net.yacy.search.query;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -50,7 +46,6 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
@@ -59,7 +54,6 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
-import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -71,7 +65,6 @@ import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.Seed;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.SolrConfiguration;
 import net.yacy.search.ranking.RankingProfile;
 
 public final class QueryParams {
@@ -113,9 +106,7 @@ public final class QueryParams {
     public static final Pattern catchall_pattern = Pattern.compile(".*");
     private static final Pattern matchnothing_pattern = Pattern.compile("");
 
-    public final String queryString;
-    public final HandleSet query_include_hashes, query_exclude_hashes, query_all_hashes;
-    private final List<String> query_include_words, query_exclude_words, query_all_words;
+    public final QueryGoal queryGoal;
     public int itemsPerPage;
     public int offset;
     public final Pattern urlMask, prefer;
@@ -167,31 +158,7 @@ public final class QueryParams {
             final Segment indexSegment,
             final RankingProfile ranking,
             final String userAgent) {
-        byte[] queryHash;
-    	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(queryHash = UTF8.getBytes(queryString)))) {
-            this.queryString = null;
-            this.query_include_words = null;
-            this.query_exclude_words = null;
-            this.query_all_words = null;
-            this.query_include_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-            this.query_exclude_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-            this.query_all_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-            try {
-                this.query_include_hashes.put(queryHash);
-                this.query_all_hashes.put(queryHash);
-            } catch (final SpaceExceededException e) {
-                Log.logException(e);
-            }
-    	} else {
-    		this.queryString = queryString;
-    		final List<String>[] cq = cleanQuery(queryString);
-            this.query_include_words = cq[0];
-            this.query_exclude_words = cq[1];
-            this.query_all_words = cq[2];
-    		this.query_include_hashes = Word.words2hashesHandles(cq[0]);
-    		this.query_exclude_hashes = Word.words2hashesHandles(cq[1]);
-    		this.query_all_hashes = Word.words2hashesHandles(cq[2]);
-    	}
+        this.queryGoal = new QueryGoal(queryString);
     	this.ranking = ranking;
     	this.modifier = new Modifier("");
         this.maxDistance = Integer.MAX_VALUE;
@@ -237,13 +204,7 @@ public final class QueryParams {
     }
 
     public QueryParams(
-        final String queryString,
-        final List<String> queryWords,
-        final List<String> excludeWords,
-        final List<String> fullqueryWords,
-        final HandleSet queryHashes,
-        final HandleSet excludeHashes,
-        final HandleSet fullqueryHashes,
+        final QueryGoal queryGoal,
         final String modifier,
         final int maxDistance, final String prefer, final ContentDomain contentdom,
         final String language,
@@ -264,14 +225,7 @@ public final class QueryParams {
         final String userAgent,
         final boolean filterfailurls,
         final double lat, final double lon, final double radius) {
-
-        this.queryString = queryString;
-        this.query_include_words = queryWords;
-        this.query_exclude_words = excludeWords;
-        this.query_all_words = fullqueryWords;
-        this.query_include_hashes = queryHashes;
-        this.query_exclude_hashes = excludeHashes;
-        this.query_all_hashes = fullqueryHashes;
+        this.queryGoal = queryGoal;
         this.modifier = new Modifier(modifier == null ? "" : modifier);
         this.ranking = ranking;
         this.maxDistance = maxDistance;
@@ -429,8 +383,8 @@ public final class QueryParams {
     private final boolean matchesText(final String text) {
         boolean ret = false;
         final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text, null).keySet());
-        if (!SetTools.anymatch(wordhashes, this.query_exclude_hashes)) {
-            ret = SetTools.totalInclusion(this.query_include_hashes, wordhashes);
+        if (!SetTools.anymatch(wordhashes, this.queryGoal.getExcludeHashes())) {
+            ret = SetTools.totalInclusion(this.queryGoal.getIncludeHashes(), wordhashes);
         }
         return ret;
     }
@@ -443,83 +397,21 @@ public final class QueryParams {
     	return SetTools.anymatch(wordhashes, keyhashes);
     }
 
-    private static String seps = "'.,/&_"; static {seps += '"';}
-
-    @SuppressWarnings("unchecked")
-	public static List<String>[] cleanQuery(String querystring) {
-        // returns three sets: a query set, an exclude set and a full query set
-        final List<String> query_include_words = new ArrayList<String>();
-        final List<String> query_exclude_words = new ArrayList<String>();
-        final List<String> query_all_words = new ArrayList<String>();
-
-        if ((querystring != null) && (!querystring.isEmpty())) {
-
-            // convert Umlaute
-            querystring = AbstractScraper.stripAll(querystring.toCharArray()).toLowerCase().trim();
-            int c;
-            for (int i = 0; i < seps.length(); i++) {
-                while ((c = querystring.indexOf(seps.charAt(i))) >= 0) {
-                    querystring = querystring.substring(0, c) + (((c + 1) < querystring.length()) ? (" " + querystring.substring(c + 1)) : "");
-                }
-            }
-
-            String s;
-            int l;
-            // the string is clean now, but we must generate a set out of it
-            final String[] queries = querystring.split(" ");
-            for (String quer : queries) {
-                if (quer.startsWith("-")) {
-                    String x = quer.substring(1);
-                    if (!query_exclude_words.contains(x)) query_exclude_words.add(x);
-                } else {
-                    while ((c = quer.indexOf('-')) >= 0) {
-                        s = quer.substring(0, c);
-                        l = s.length();
-                        if (l >= Condenser.wordminsize && !query_include_words.contains(s)) {query_include_words.add(s);}
-                        if (l > 0 && !query_all_words.contains(s)) {query_all_words.add(s);}
-                        quer = quer.substring(c + 1);
-                    }
-                    l = quer.length();
-                    if (l >= Condenser.wordminsize && !query_include_words.contains(quer)) {query_include_words.add(quer);}
-                    if (l > 0 && !query_all_words.contains(quer)) {query_all_words.add(quer);}
-                }
-            }
-        }
-        return new List[]{query_include_words, query_exclude_words, query_all_words};
-    }
-
     public String queryString(final boolean encodeHTML) {
         final String ret;
         if (encodeHTML){
-            ret = CharacterCoding.unicode2html(this.queryString, true);
+            ret = CharacterCoding.unicode2html(this.queryGoal.getQueryString(), true);
         } else {
-            ret = this.queryString;
+            ret = this.queryGoal.getQueryString();
         }
         return ret;
     }
 
-    private final static YaCySchema[] fields = new YaCySchema[]{
-        YaCySchema.sku,YaCySchema.title,YaCySchema.h1_txt,YaCySchema.h2_txt,
-        YaCySchema.author,YaCySchema.description,YaCySchema.keywords,YaCySchema.text_t,YaCySchema.synonyms_sxt
-    };
-    
-    private final static Map<YaCySchema,Float> boosts = new LinkedHashMap<YaCySchema,Float>();
-    static {
-        boosts.put(YaCySchema.sku, 20.0f);
-        boosts.put(YaCySchema.url_paths_sxt, 20.0f);
-        boosts.put(YaCySchema.title, 15.0f);
-        boosts.put(YaCySchema.h1_txt, 11.0f);
-        boosts.put(YaCySchema.h2_txt, 10.0f);
-        boosts.put(YaCySchema.author, 8.0f);
-        boosts.put(YaCySchema.description, 5.0f);
-        boosts.put(YaCySchema.keywords, 2.0f);
-        boosts.put(YaCySchema.text_t, 1.0f);
-    }
 
     public SolrQuery solrQuery() {
-        if (this.query_include_words == null || this.query_include_words.size() == 0) return null;
+        if (this.queryGoal.getIncludeWords().size() == 0) return null;
         // get text query
-        final StringBuilder q = solrQueryString(this.query_include_words, this.query_exclude_words, this.indexSegment.fulltext().getSolrScheme());
+        final StringBuilder q = this.queryGoal.solrQueryString(this.indexSegment.fulltext().getSolrScheme());
 
         // add constraints
         if (this.nav_sitehash == null && this.nav_sitehost == null) {
@@ -591,73 +483,10 @@ public final class QueryParams {
         Log.logInfo("Protocol", "SOLR QUERY: " + params.toString());
         return params;
     }
-    
-    public static StringBuilder solrQueryString(List<String> include, List<String> exclude, SolrConfiguration configuration) {
-        final StringBuilder q = new StringBuilder(80);
 
-        // parse special requests
-        if (include.size() == 1 && exclude.size() == 0) {
-            String w = include.get(0);
-            if (Segment.catchallString.equals(w)) return new StringBuilder("*:*");
-        }
-        
-        // add text query
-        int wc = 0;
-        StringBuilder w = new StringBuilder(80);
-        for (String s: include) {
-            if (wc > 0) w.append(" AND ");
-            w.append(s);
-            wc++;
-        }
-        for (String s: exclude){
-            if (wc > 0) w.append(" AND -");
-            w.append(s);
-            wc++;
-        }
-        if (wc > 1) {w.insert(0, '('); w.append(')');}
-        
-        // combine these queries for all relevant fields
-        wc = 0;
-        Float boost;
-        for (YaCySchema field: fields) {
-            if (configuration != null && !configuration.contains(field.getSolrFieldName())) continue;
-            if (wc > 0) q.append(" OR ");
-            q.append('(');
-            q.append(field.getSolrFieldName()).append(':').append(w);
-            boost = boosts.get(field);
-            if (boost != null) q.append('^').append(boost.toString());
-            q.append(')');
-            wc++;
-        }
-        q.insert(0, '(');
-        q.append(')');
-
-        // add filter to prevent that results come from failed urls
-        q.append(" AND -").append(YaCySchema.failreason_t.getSolrFieldName()).append(":[* TO *]");
-
-        return q;
+    public QueryGoal getQueryGoal() {
+        return this.queryGoal;
     }
-
-    public String queryStringForUrl() {
-    	try {
-            return URLEncoder.encode(this.queryString, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            Log.logException(e);
-            return this.queryString;
-        }
-    }
-
-    public List<String>[] queryWords() {
-        return cleanQuery(this.queryString);
-    }
-
-    public void filterOut(final SortedSet<String> blueList) {
-        // filter out words that appear in this set
-    	// this is applied to the queryHashes
-    	final HandleSet blues = Word.words2hashesHandles(blueList);
-    	for (final byte[] b: blues) this.query_include_hashes.remove(b);
-    }
-
 
     public final Map<MultiProtocolURI, String> separateMatches(final Map<MultiProtocolURI, String> links) {
         final Map<MultiProtocolURI, String> matcher = new HashMap<MultiProtocolURI, String>();
@@ -695,13 +524,13 @@ public final class QueryParams {
             // generate a string that identifies a search so results can be re-used in a cache
             final StringBuilder context = new StringBuilder(180);
             if (anonymized) {
-                context.append(anonymizedQueryHashes(this.query_include_hashes));
+                context.append(anonymizedQueryHashes(this.queryGoal.getIncludeHashes()));
                 context.append('-');
-                context.append(anonymizedQueryHashes(this.query_exclude_hashes));
+                context.append(anonymizedQueryHashes(this.queryGoal.getExcludeHashes()));
             } else {
-                context.append(hashSet2hashString(this.query_include_hashes));
+                context.append(hashSet2hashString(this.queryGoal.getIncludeHashes()));
                 context.append('-');
-                context.append(hashSet2hashString(this.query_exclude_hashes));
+                context.append(hashSet2hashString(this.queryGoal.getExcludeHashes()));
             }
             //context.append(asterisk);
             //context.append(this.domType);
@@ -755,7 +584,7 @@ public final class QueryParams {
         sb.append("/yacysearch.");
         sb.append(ext);
         sb.append("?query=");
-        sb.append(newQueryString == null ? theQuery.queryStringForUrl() : newQueryString);
+        sb.append(newQueryString == null ? theQuery.getQueryGoal().queryStringForUrl() : newQueryString);
 
         sb.append(ampersand);
         sb.append("maximumRecords=");
@@ -786,7 +615,7 @@ public final class QueryParams {
 
         sb.append(ampersand);
         sb.append("former=");
-        sb.append(theQuery.queryStringForUrl());
+        sb.append(theQuery.getQueryGoal().queryStringForUrl());
 
         return sb;
     }
