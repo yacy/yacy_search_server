@@ -27,20 +27,13 @@
                   Enables or disables content control.
                 </p>
               </dd>
+                             
               
-               <dt><label for="content">Mandatory default filter list (category):</label></dt>
-              <dd>
-                <input type="text" name="contentcontrolmfl" value="#[contentcontrolmfl]#" size="60" /><br/><br/>
-                <p class="help">
-                  Define a category string. If defined, all URLs will be filtered out during crawling and DHT which do not belong to this category.
-                </p>
-              </dd>
-              
-              <dt><label for="content">Use this bookmark list:</label></dt>
+              <dt><label for="content">Use this table to create filter:</label></dt>
               <dd>
                 <input type="text" name="contentcontrolbml" value="#[contentcontrolbml]#" size="60" /><br/><br/>
                 <p class="help">
-                  Define a bookmark list. Default: contentcontrol
+                  Define a table. Default: contentcontrol
                 </p>
               </dd>
               <dt></dt>
@@ -52,9 +45,9 @@
 
 
     <form id="contentcontrolExtraSettings" action="ContentControl_p.html" method="post" enctype="multipart/form-data">
-<fieldset><legend id="urlproxy">Content Control Settings</legend>
+<fieldset><legend id="urlproxy">Content Control SMW Import Settings</legend>
 <p>
-  With this settings you can define the content control settings.
+  With this settings you can define the content control import settings. You can define a SMW with the appropriate extensions. Details: <a href="https://gitorious.org/sciety/yacy-smwextension" target="_blank">yacy-smwextension on Gitorious</a> 
 </p>
 
             <dl>
@@ -63,7 +56,7 @@
               <dd>
                 <input type="checkbox" name="ccsmwimport" id="ccsmwimport" #(ccsmwimport_checked)#:: checked="checked"#(/ccsmwimport_checked)# />Enabled<br/>
                 <p class="help">
-                  Enable or disable constant background synchronisation of content control list from SMW (Semantic Mediawiki). Requires restart!
+                  Enable or disable constant background synchronization of content control list from SMW (Semantic Mediawiki). Requires restart!
                 </p>
               </dd>
               
@@ -75,19 +68,11 @@
                 </p>
               </dd>
               
-              <dt><label for="content">SMW import target bookmark list:</label></dt>
+              <dt><label for="content">SMW import target table:</label></dt>
               <dd>
                 <input type="text" name="ccsmwimportlist" value="#[ccsmwimportlist]#" size="60" /><br/><br/>
                 <p class="help">
-                  Define import target bookmark list. Default: contentcontrol
-                </p>
-              </dd>
-              
-              <dt><label for="content">SMW import default category:</label></dt>
-              <dd>
-                <input type="text" name="ccsmwimportcat" value="#[ccsmwimportcat]#" size="60" /><br/><br/>
-                <p class="help">
-                  Define default category which is added to each entry. This category can be defined as mandatory default filter list.
+                  Define import target table. Default: contentcontrol
                 </p>
               </dd>
               

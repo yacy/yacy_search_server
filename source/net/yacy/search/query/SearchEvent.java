@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 
+import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.Classification.ContentDomain;
@@ -61,7 +62,6 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.WorkTables;
 import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
-import net.yacy.interaction.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -741,22 +741,20 @@ public final class SearchEvent {
                 continue;
             }
 
-            // content control
-            if (Switchboard.getSwitchboard().getConfigBool("contentcontrol.enabled", false) == true) {
-                // check global network filter from bookmark list
-                if (!Switchboard.getSwitchboard()
-                        .getConfig("contentcontrol.mandatoryfilterlist", "")
-                        .equals("")) {
+			// contentcontrol
+			if (Switchboard.getSwitchboard().getConfigBool(
+					"contentcontrol.enabled", false) == true) {
 
-                    FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
-                    if (f != null) {
-                        if (!f.isListed(page.url(), null)) {
-                            this.query.misses.add(page.hash());
-                            continue;
-                        }
-                    }
-                }
-            }
+				FilterEngine f = ContentControlFilterUpdateThread
+						.getNetworkFilter();
+				if (f != null) {
+					if (!f.isListed(page.url(), null)) {
+						this.query.misses.add(page.hash());
+						continue;
+					}
+				}
+
+			}
 
             final String pageurl = page.url().toNormalform(true);
             final String pageauthor = page.dc_creator();
