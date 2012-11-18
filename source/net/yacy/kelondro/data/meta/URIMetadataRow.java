@@ -163,7 +163,7 @@ public class URIMetadataRow {
         this.entry.setCol(col_dt, dt.isEmpty() ? new byte[]{(byte) 't'} : new byte[]{(byte) dt.charAt(0)});
         final String flags = prop.getProperty("flags", "AAAAAA");
         this.entry.setCol(col_flags, (flags.length() > 6) ? QueryParams.empty_constraint.bytes() : (new Bitfield(4, flags)).bytes());
-        this.entry.setCol(col_lang, UTF8.getBytes(prop.getProperty("lang", "uk")));
+        this.entry.setCol(col_lang, UTF8.getBytes(prop.getProperty("lang", "")));
         this.entry.setCol(col_llocal, Integer.parseInt(prop.getProperty("llocal", "0")));
         this.entry.setCol(col_lother, Integer.parseInt(prop.getProperty("lother", "0")));
         this.entry.setCol(col_limage, Integer.parseInt(prop.getProperty("limage", "0")));
@@ -333,9 +333,9 @@ public class URIMetadataRow {
     public byte[] language() {
         byte[] b = this.entry.getColBytes(col_lang, true);
         if ((b == null || b[0] == (byte)'[') && this.metadata().url != null) {
-            String tld = this.metadata().url.getTLD();
-            if (tld.length() < 2 || tld.length() > 2) return ASCII.getBytes("en");
-            return ASCII.getBytes(tld);
+            String lang = this.metadata().url.language(); // calculate lang by TLD
+            this.entry.setCol(col_lang, UTF8.getBytes(lang)); //remember calculation
+            return ASCII.getBytes(lang);
         }
         return b;
     }
@@ -511,12 +511,20 @@ public class URIMetadataRow {
         public double lat() {
             if (this.latlon == null || this.latlon.isEmpty()) return 0.0d;
             final int p = this.latlon.indexOf(',');
-            return p < 0 ? 0.0f : Double.parseDouble(this.latlon.substring(0, p));
+            if (p < 0) {
+                return 0.0d;
+            } else { // old index entries might contain text "NaN,NaN"
+                return this.latlon.charAt(0) > '9' ? 0.0d : Double.parseDouble(this.latlon.substring(0, p));
+            }
         }
         public double lon() {
             if (this.latlon == null || this.latlon.isEmpty()) return 0.0d;
             final int p = this.latlon.indexOf(',');
-            return p < 0 ? 0.0f : Double.parseDouble(this.latlon.substring(p + 1));
+            if (p < 0) {
+                return 0.0d;
+            } else { // old index entries might contain text "NaN,NaN"
+                return this.latlon.charAt(p + 1) > '9' ? 0.0d : Double.parseDouble(this.latlon.substring(p + 1));
+            }
         }
     }
 
