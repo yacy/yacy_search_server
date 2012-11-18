@@ -409,7 +409,7 @@ public final class QueryParams {
 
 
     public SolrQuery solrQuery() {
-        if (this.queryGoal.getIncludeWords().size() == 0) return null;
+        if (this.queryGoal.getIncludeStrings().size() == 0) return null;
         // get text query
         final StringBuilder q = this.queryGoal.solrQueryString(this.indexSegment.fulltext().getSolrScheme());
 

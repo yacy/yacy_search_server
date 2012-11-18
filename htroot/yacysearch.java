@@ -595,12 +595,12 @@ public class yacysearch {
 
             // the query
             final QueryGoal qg = new QueryGoal(querystring.trim());
-            final int maxDistance = (querystring.indexOf('"', 0) >= 0) ? qg.getAllWords().size() - 1 : Integer.MAX_VALUE;
+            final int maxDistance = (querystring.indexOf('"', 0) >= 0) ? qg.getAllHashes().size() - 1 : Integer.MAX_VALUE;
 
             // filter out stopwords
-            final SortedSet<String> filtered = SetTools.joinConstructiveByTest(qg.getIncludeWords(), Switchboard.stopwords);
+            final SortedSet<String> filtered = SetTools.joinConstructiveByTest(qg.getIncludeStrings(), Switchboard.stopwords);
             if ( !filtered.isEmpty() ) {
-                SetTools.excludeDestructiveByTestSmallInLarge(qg.getIncludeWords(), Switchboard.stopwords);
+                SetTools.excludeDestructiveByTestSmallInLarge(qg.getIncludeStrings(), Switchboard.stopwords);
             }
 
             // if a minus-button was hit, remove a special reference first

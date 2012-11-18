@@ -44,76 +44,131 @@ import net.yacy.search.index.Segment;
 import net.yacy.search.index.SolrConfiguration;
 
 public class QueryGoal {
-    
-    private static String seps = "'.,/&_"; static {seps += '"';}
+
+
+    private static char space = ' ';
+    private static char sq = '\'';
+    private static char dq = '"';
+    private static String seps = ".,/&_";
     
     private String querystring;
     private HandleSet include_hashes, exclude_hashes, all_hashes;
     private final ArrayList<String> include_words, exclude_words, all_words;
+    private final ArrayList<String> include_strings, exclude_strings, all_strings;
+
 
     public QueryGoal(HandleSet include_hashes, HandleSet exclude_hashes, HandleSet all_hashes) {
         this.querystring = null;
         this.include_words = null;
         this.exclude_words = null;
         this.all_words = null;
+        this.include_strings = null;
+        this.exclude_strings = null;
+        this.all_strings = null;
         this.include_hashes = include_hashes;
         this.exclude_hashes = exclude_hashes;
         this.all_hashes = all_hashes;
     }
+
+    public QueryGoal(byte[] queryHash) {
+        assert querystring != null;
+        assert queryHash.length == 12;
+        assert Base64Order.enhancedCoder.wellformed(queryHash);
+        this.querystring = null;
+        this.include_words = new ArrayList<String>();
+        this.exclude_words = new ArrayList<String>();
+        this.all_words = new ArrayList<String>();
+        this.include_strings = new ArrayList<String>();
+        this.exclude_strings = new ArrayList<String>();
+        this.all_strings = new ArrayList<String>();
+        this.include_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+        this.exclude_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+        this.all_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+        try {
+            this.include_hashes.put(queryHash);
+            this.all_hashes.put(queryHash);
+        } catch (final SpaceExceededException e) {
+            Log.logException(e);
+        }
+        this.include_hashes = null;
+        this.exclude_hashes = null;
+        this.all_hashes = null;
+    }
+    
     public QueryGoal(String querystring) {
+        assert querystring != null;
         this.querystring = querystring;
         this.include_words = new ArrayList<String>();
         this.exclude_words = new ArrayList<String>();
         this.all_words = new ArrayList<String>();
-        byte[] queryHash;
-        if ((querystring.length() == 12) && (Base64Order.enhancedCoder.wellformed(queryHash = UTF8.getBytes(querystring)))) {
-            this.querystring = null;
-            this.include_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-            this.exclude_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-            this.all_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-            try {
-                this.include_hashes.put(queryHash);
-                this.all_hashes.put(queryHash);
-            } catch (final SpaceExceededException e) {
-                Log.logException(e);
-            }
-        } else if ((querystring != null) && (!querystring.isEmpty())) {
+        this.include_strings = new ArrayList<String>();
+        this.exclude_strings = new ArrayList<String>();
+        this.all_strings = new ArrayList<String>();
 
-            // remove funny symbols
-            querystring = CharacterCoding.html2unicode(AbstractScraper.stripAllTags(querystring.toCharArray())).toLowerCase().trim();
-            int c;
-            for (int i = 0; i < seps.length(); i++) {
-                while ((c = querystring.indexOf(seps.charAt(i))) >= 0) {
-                    querystring = querystring.substring(0, c) + (((c + 1) < querystring.length()) ? (' ' + querystring.substring(c + 1)) : "");
-                }
-            }
-
-            String s;
-            int l;
-            // the string is clean now, but we must generate a set out of it
-            final String[] queries = querystring.split(" ");
-            for (String quer : queries) {
-                if (quer.startsWith("-")) {
-                    String x = quer.substring(1);
-                    if (!exclude_words.contains(x)) exclude_words.add(x);
-                } else {
-                    while ((c = quer.indexOf('-')) >= 0) {
-                        s = quer.substring(0, c);
-                        l = s.length();
-                        if (l >= Condenser.wordminsize && !include_words.contains(s)) {include_words.add(s);}
-                        if (l > 0 && !all_words.contains(s)) {all_words.add(s);}
-                        quer = quer.substring(c + 1);
-                    }
-                    l = quer.length();
-                    if (l >= Condenser.wordminsize && !include_words.contains(quer)) {include_words.add(quer);}
-                    if (l > 0 && !all_words.contains(quer)) {all_words.add(quer);}
-                }
+        // remove funny symbols
+        querystring = CharacterCoding.html2unicode(AbstractScraper.stripAllTags(querystring.toCharArray())).toLowerCase().trim();
+        int c;
+        for (int i = 0; i < seps.length(); i++) {
+            while ((c = querystring.indexOf(seps.charAt(i))) >= 0) {
+                querystring = querystring.substring(0, c) + (((c + 1) < querystring.length()) ? (' ' + querystring.substring(c + 1)) : "");
             }
         }
-        
+
+        // parse first quoted strings
+        parseQuery(querystring, this.include_strings, this.exclude_strings, this.all_strings);
+
+        // .. end then take these strings apart to generate word lists
+        for (String s: this.include_strings) parseQuery(s, this.include_words, this.include_words, this.all_words);
+        for (String s: this.exclude_strings) parseQuery(s, this.exclude_words, this.exclude_words, this.all_words);
+
         this.include_hashes = null;
         this.exclude_hashes = null;
         this.all_hashes = null;
+    }
+
+    
+/*
+ * EBNF of a query
+ * 
+ * query      = {whitespace, phrase}, [whitespace]
+ * whitespace = space, {space}
+ * space      = ' '
+ * phrase     = ['-'], string
+ * string     = {any character without sq, dq and whitespace} | sq, {any character without sq}, sq | dq, {any character without dq}, dq
+ * sq         = '\''
+ * dq         = '"'
+ */
+    private static void parseQuery(String s, ArrayList<String> include_string, ArrayList<String> exclude_string, ArrayList<String> all_string) {
+        while (s.length() > 0) {
+            // parse query
+            int p = 0;
+            while (p < s.length() && s.charAt(p) == space) p++;
+            s = s.substring(p);
+            if (s.length() == 0) return;
+
+            // parse phrase
+            boolean inc = true;
+            if (s.charAt(0) == '-') {inc = false; s = s.substring(1);}
+            if (s.length() == 0) return;
+            
+            // parse string
+            char stop = space;
+            if (s.charAt(0) == dq) {stop = s.charAt(0); s = s.substring(1);}
+            if (s.charAt(0) == sq) {stop = s.charAt(0); s = s.substring(1);}
+            p = 0;
+            while (p < s.length() && s.charAt(p) != stop) p++;
+            String string = s.substring(0, p);
+            p++; // go behind the stop character (eats up space, sq and dq)
+            s = p < s.length() ? s.substring(p) : "";
+            if (string.length() > 0) {
+                if (!all_string.contains(string)) all_string.add(string);
+                if (inc) {
+                    if (!include_string.contains(string)) include_string.add(string);
+                } else {
+                    if (!exclude_string.contains(string)) exclude_string.add(string);
+                }
+            }
+        }
     }
 
     public String getQueryString() {
@@ -143,19 +198,19 @@ public class QueryGoal {
         if (all_hashes == null) all_hashes = Word.words2hashesHandles(all_words);
         return all_hashes;
     }
-
-    public ArrayList<String> getIncludeWords() {
-        return include_words;
+    
+    public ArrayList<String> getIncludeStrings() {
+        return include_strings;
     }
-
-    public ArrayList<String> getExcludeWords() {
-        return exclude_words;
+    
+    public ArrayList<String> getExcludeStrings() {
+        return exclude_strings;
     }
-
-    public ArrayList<String> getAllWords() {
-        return all_words;
+    
+    public ArrayList<String> getAllStrings() {
+        return all_strings;
     }
-
+    
     public void filterOut(final SortedSet<String> blueList) {
         // filter out words that appear in this set
         // this is applied to the queryHashes
@@ -185,22 +240,22 @@ public class QueryGoal {
         final StringBuilder q = new StringBuilder(80);
 
         // parse special requests
-        if (include_words.size() == 1 && exclude_words.size() == 0) {
-            String w = include_words.get(0);
+        if (include_strings.size() == 1 && exclude_strings.size() == 0) {
+            String w = include_strings.get(0);
             if (Segment.catchallString.equals(w)) return new StringBuilder("*:*");
         }
         
         // add text query
         int wc = 0;
         StringBuilder w = new StringBuilder(80);
-        for (String s: include_words) {
+        for (String s: include_strings) {
             if (wc > 0) w.append(" AND ");
-            w.append(s);
+            w.append(dq).append(s).append(dq);
             wc++;
         }
-        for (String s: exclude_words){
+        for (String s: exclude_strings){
             if (wc > 0) w.append(" AND -");
-            w.append(s);
+            w.append(dq).append(s).append(dq);
             wc++;
         }
         if (wc > 1) {w.insert(0, '('); w.append(')');}
