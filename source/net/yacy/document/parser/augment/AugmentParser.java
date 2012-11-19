@@ -63,7 +63,7 @@ public class AugmentParser extends AbstractParser implements Parser {
         }
     }
 */
-    private void parseAndAugment(Document origDoc, DigestURI url, String mimeType, String charset) {
+    private void parseAndAugment(Document origDoc, DigestURI url, @SuppressWarnings("unused") String mimeType, @SuppressWarnings("unused") String charset) {
 
         Iterator<net.yacy.kelondro.blob.Tables.Row> it;
         try {

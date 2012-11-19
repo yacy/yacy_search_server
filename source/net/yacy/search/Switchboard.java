@@ -2126,7 +2126,7 @@ public final class Switchboard extends serverSwitch {
             // clean up profiles
             checkInterruption();
             //cleanProfiles();
-            int cleanup =  this.crawler.cleanFinishesProfiles(this.crawlQueues);
+            int cleanup =  this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) ? 0 : this.crawler.cleanFinishesProfiles(this.crawlQueues);
             if (cleanup > 0) log.logInfo("cleanup removed " + cleanup + " crawl profiles");
             
             // clean up news

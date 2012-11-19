@@ -133,9 +133,9 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
 	@Override
-	public SolrDocument get(String id) throws IOException {
+	public SolrDocument get(String id, final String ... fields) throws IOException {
 		for (final SolrConnector connector: this.connectors) {
-			SolrDocument doc = connector.get(id);
+			SolrDocument doc = connector.get(id, fields);
 			if (doc != null) return doc;
         }
         return null;
@@ -172,7 +172,7 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
      * @throws IOException
      */
     @Override
-    public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException {
+    public SolrDocumentList query(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
         final SolrDocumentList list = new SolrDocumentList();
         List<Thread> t = new ArrayList<Thread>();
         for (final SolrConnector connector: this.connectors) {
@@ -180,7 +180,7 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
                 @Override
                 public void run() {
                     try {
-                        final SolrDocumentList l = connector.query(querystring, offset, count);
+                        final SolrDocumentList l = connector.query(querystring, offset, count, fields);
                         for (final SolrDocument d: l) {
                             list.add(d);
                         }
@@ -228,10 +228,10 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
     @Override
-    public Map<String, ReversibleScoreMap<String>> getFacets(String query, String[] fields, int maxresults) throws IOException {
+    public Map<String, ReversibleScoreMap<String>> getFacets(String query, int maxresults, final String ... fields) throws IOException {
         Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>();
         for (final SolrConnector connector: this.connectors) {
-            Map<String, ReversibleScoreMap<String>> peer = connector.getFacets(query, fields, maxresults);        
+            Map<String, ReversibleScoreMap<String>> peer = connector.getFacets(query, maxresults, fields);        
             innerloop: for (Map.Entry<String, ReversibleScoreMap<String>> facet: facets.entrySet()) {
                 ReversibleScoreMap<String> peerfacet = peer.remove(facet.getKey());
                 if (peerfacet == null) continue innerloop;

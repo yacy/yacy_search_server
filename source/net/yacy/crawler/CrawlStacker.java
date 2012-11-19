@@ -60,7 +60,6 @@ import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.SMBLoader;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.peers.SeedDB;
@@ -448,8 +447,8 @@ public final class CrawlStacker {
 
         // check if the url is double registered
         final String dbocc = this.nextQueue.urlExists(url.hash()); // returns the name of the queue if entry exists
-        final URIMetadataNode oldEntry = this.indexSegment.fulltext().getMetadata(url.hash());
-        if (oldEntry == null) {
+        final Date oldDate = this.indexSegment.fulltext().getLoadDate(ASCII.String(url.hash()));
+        if (oldDate == null) {
             if (dbocc != null) {
                 // do double-check
                 if (dbocc.equals("errors")) {
@@ -459,11 +458,11 @@ public final class CrawlStacker {
                 return "double in: " + dbocc;
             }
         } else {
-            final boolean recrawl = profile.recrawlIfOlder() > oldEntry.loaddate().getTime();
+            final boolean recrawl = profile.recrawlIfOlder() > oldDate.getTime();
             if (recrawl) {
                 if (this.log.isInfo())
                     this.log.logInfo("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
-                        ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000 / 60 / 24) + " days ago.");
+                        ((System.currentTimeMillis() - oldDate.getTime()) / 60000 / 60 / 24) + " days ago.");
             } else {
                 if (dbocc == null) {
                     return "double in: LURL-DB";

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 
@@ -40,14 +41,12 @@ import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
-import org.apache.solr.common.util.NamedList;
 
 public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
@@ -203,6 +202,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         if (this.server == null) return;
         try {
             synchronized (this.server) {
+                //this.server.deleteById((String) solrdoc.getFieldValue(YaCySchema.id.getSolrFieldName()));
                 this.server.add(solrdoc, this.commitWithinMs);
                 //this.server.commit();
             }
@@ -215,9 +215,12 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
         ArrayList<SolrInputDocument> l = new ArrayList<SolrInputDocument>();
-        for (SolrInputDocument d: solrdocs) l.add(d);
         try {
             synchronized (this.server) {
+                for (SolrInputDocument d: solrdocs) {
+                    //this.server.deleteById((String) d.getFieldValue(YaCySchema.id.getSolrFieldName()));
+                    l.add(d);
+                }
                 this.server.add(l, this.commitWithinMs);
                 //this.server.commit();
             }
@@ -234,7 +237,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      * @throws IOException
      */
     @Override
-    public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException {
+    public SolrDocumentList query(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
         // construct query
         final SolrQuery params = new SolrQuery();
         params.setQuery(querystring);
@@ -243,6 +246,8 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         params.setFacet(false);
         //params.addSortField( "price", SolrQuery.ORDER.asc );
 
+        if (fields.length > 0) params.setFields(fields);
+        
         // query the server
         QueryResponse rsp = query(params);
         final SolrDocumentList docs = rsp.getResults();
@@ -263,6 +268,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         params.setRows(0);
         params.setStart(0);
         params.setFacet(false);
+        params.setFields(YaCySchema.id.getSolrFieldName());
 
         // query the server
         QueryResponse rsp = query(params);
@@ -278,8 +284,9 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      * @return a map with key = facet field name, value = an ordered map of field values for that field
      * @throws IOException
      */
-    public Map<String, ReversibleScoreMap<String>> getFacets(String query, String[] fields, int maxresults) throws IOException {
+    public Map<String, ReversibleScoreMap<String>> getFacets(String query, int maxresults, final String ... fields) throws IOException {
         // construct query
+        assert fields.length > 0;
         final SolrQuery params = new SolrQuery();
         params.setQuery(query);
         params.setRows(0);
@@ -287,6 +294,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         params.setFacet(true);
         params.setFacetLimit(maxresults);
         params.setFacetSort(FacetParams.FACET_SORT_COUNT);
+        params.setFields(fields);
         for (String field: fields) params.addFacetField(field);
         
         // query the server
@@ -315,7 +323,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      * @throws IOException
      */
     @Override
-    public SolrDocument get(final String id) throws IOException {
+    public SolrDocument get(final String id, final String ... fields) throws IOException {
     	assert id.length() == 12;
         // construct query
     	char[] q = new char[17];
@@ -325,6 +333,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         query.setQuery(new String(q));
         query.setRows(1);
         query.setStart(0);
+        if (fields.length > 0) query.setFields(fields);
 
         // query the server
         try {

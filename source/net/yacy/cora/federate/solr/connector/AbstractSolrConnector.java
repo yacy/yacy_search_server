@@ -45,14 +45,14 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     public final static SolrQuery catchallQuery = new SolrQuery();
     static {
         catchallQuery.setQuery("*:*");
-        catchallQuery.setFields(YaCySchema.id.name());
+        catchallQuery.setFields(YaCySchema.id.getSolrFieldName());
         catchallQuery.setRows(1);
         catchallQuery.setStart(0);
     }
     public final static SolrQuery catchSuccessQuery = new SolrQuery();
     static {
         catchSuccessQuery.setQuery("-" + YaCySchema.failreason_t.name() + ":[* TO *]");
-        catchSuccessQuery.setFields(YaCySchema.id.name());
+        catchSuccessQuery.setFields(YaCySchema.id.getSolrFieldName());
         catchSuccessQuery.setRows(1);
         catchSuccessQuery.setStart(0);
     }
@@ -61,7 +61,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     @Override
     public boolean exists(final String id) throws IOException {
         try {
-            final SolrDocument doc = get(id);
+            final SolrDocument doc = get(id, YaCySchema.id.getSolrFieldName());
             return doc != null;
         } catch (final Throwable e) {
             log.warn(e);
@@ -81,7 +81,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
      * @return a blocking queue which is terminated  with AbstractSolrConnector.POISON_DOCUMENT as last element
      */
     @Override
-    public BlockingQueue<SolrDocument> concurrentQuery(final String querystring, final int offset, final int maxcount, final long maxtime, final int buffersize) {
+    public BlockingQueue<SolrDocument> concurrentQuery(final String querystring, final int offset, final int maxcount, final long maxtime, final int buffersize, final String ... fields) {
         final BlockingQueue<SolrDocument> queue = buffersize <= 0 ? new LinkedBlockingQueue<SolrDocument>() : new ArrayBlockingQueue<SolrDocument>(buffersize);
         final long endtime = System.currentTimeMillis() + maxtime;
         final Thread t = new Thread() {
@@ -90,7 +90,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                 int o = offset;
                 while (System.currentTimeMillis() < endtime) {
                     try {
-                        SolrDocumentList sdl = query(querystring, o, pagesize);
+                        SolrDocumentList sdl = query(querystring, o, pagesize, fields);
                         for (SolrDocument d: sdl) {
                             try {queue.put(d);} catch (InterruptedException e) {break;}
                         }
@@ -119,7 +119,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                 int o = offset;
                 while (System.currentTimeMillis() < endtime) {
                     try {
-                        SolrDocumentList sdl = query(querystring, o, pagesize);
+                        SolrDocumentList sdl = query(querystring, o, pagesize, YaCySchema.id.getSolrFieldName());
                         for (SolrDocument d: sdl) {
                             try {queue.put((String) d.getFieldValue(YaCySchema.id.getSolrFieldName()));} catch (InterruptedException e) {break;}
                         }

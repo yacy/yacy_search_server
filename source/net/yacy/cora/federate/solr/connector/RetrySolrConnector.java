@@ -145,11 +145,11 @@ public class RetrySolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
 	@Override
-	public SolrDocument get(String id) throws IOException {
+	public SolrDocument get(final String id, final String ... fields) throws IOException {
 		final long t = System.currentTimeMillis() + this.retryMaxTime;
         Throwable ee = null;
         while (System.currentTimeMillis() < t) try {
-            return this.solrConnector.get(id);
+            return this.solrConnector.get(id, fields);
         } catch (final Throwable e) {
             ee = e;
             try {Thread.sleep(10);} catch (final InterruptedException e1) {}
@@ -180,11 +180,11 @@ public class RetrySolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
     @Override
-    public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException {
+    public SolrDocumentList query(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
         final long t = System.currentTimeMillis() + this.retryMaxTime;
         Throwable ee = null;
         while (System.currentTimeMillis() < t) try {
-            return this.solrConnector.query(querystring, offset, count);
+            return this.solrConnector.query(querystring, offset, count, fields);
         } catch (final Throwable e) {
             ee = e;
             try {Thread.sleep(10);} catch (final InterruptedException e1) {}
@@ -195,7 +195,7 @@ public class RetrySolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
     @Override
-    public QueryResponse query(ModifiableSolrParams query) throws IOException, SolrException {
+    public QueryResponse query(final ModifiableSolrParams query) throws IOException, SolrException {
         final long t = System.currentTimeMillis() + this.retryMaxTime;
         Throwable ee = null;
         while (System.currentTimeMillis() < t) try {
@@ -225,11 +225,11 @@ public class RetrySolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
     @Override
-    public Map<String, ReversibleScoreMap<String>> getFacets(String query, String[] fields, int maxresults) throws IOException {
+    public Map<String, ReversibleScoreMap<String>> getFacets(final String query, final int maxresults, final String ... fields) throws IOException {
         final long t = System.currentTimeMillis() + this.retryMaxTime;
         Throwable ee = null;
         while (System.currentTimeMillis() < t) try {
-            return this.solrConnector.getFacets(query, fields, maxresults);
+            return this.solrConnector.getFacets(query, maxresults, fields);
         } catch (final Throwable e) {
             ee = e;
             try {Thread.sleep(10);} catch (final InterruptedException e1) {}

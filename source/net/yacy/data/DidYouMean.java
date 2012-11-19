@@ -134,8 +134,7 @@ public class DidYouMean {
      * @return
      */
     public SortedSet<StringBuilder> getSuggestions(final long timeout, final int preSortSelection) {
-        if (this.word.length() < MinimumInputWordLength)
-         {
+        if (this.word.length() < MinimumInputWordLength) {
             return this.resultSet; // return nothing if input is too short
         }
         final long startTime = System.currentTimeMillis();

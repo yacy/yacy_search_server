@@ -53,7 +53,9 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class HostBrowser {
-
+    
+    final static long TIMEOUT = 10000L;
+    
     public static enum StoreType {
         LINK, INDEX, ERROR;
     }
@@ -141,7 +143,7 @@ public class HostBrowser {
                 int maxcount = admin ? 2 * 3 * 2 * 5 * 7 * 2 * 3 : 360; // which makes nice matrixes for 2, 3, 4, 5, 6, 7, 8, 9 rows/colums
                 
                 // collect hosts from index
-                ReversibleScoreMap<String> hostscore = fulltext.getSolr().getFacets("*:*", new String[]{YaCySchema.host_s.getSolrFieldName()}, maxcount).get(YaCySchema.host_s.getSolrFieldName());
+                ReversibleScoreMap<String> hostscore = fulltext.getSolr().getFacets("*:*", maxcount, YaCySchema.host_s.getSolrFieldName()).get(YaCySchema.host_s.getSolrFieldName());
                 if (hostscore == null) hostscore = new ClusteredScoreMap<String>();
                 
                 // collect hosts from crawler
@@ -151,7 +153,7 @@ public class HostBrowser {
                 }
                 
                 // collect the errorurls
-                ReversibleScoreMap<String> errorscore = admin ? fulltext.getSolr().getFacets(YaCySchema.failreason_t.getSolrFieldName() + ":[* TO *]", new String[]{YaCySchema.host_s.getSolrFieldName()}, maxcount).get(YaCySchema.host_s.getSolrFieldName()) : null;
+                ReversibleScoreMap<String> errorscore = admin ? fulltext.getSolr().getFacets(YaCySchema.failreason_t.getSolrFieldName() + ":[* TO *]", maxcount, YaCySchema.host_s.getSolrFieldName()).get(YaCySchema.host_s.getSolrFieldName()) : null;
                 if (errorscore == null) errorscore = new ClusteredScoreMap<String>();
                 
                 int c = 0;
@@ -225,7 +227,15 @@ public class HostBrowser {
                         q.append(" AND ").append(YaCySchema.url_paths_sxt.getSolrFieldName()).append(":[* TO *]");
                     }
                 }
-                BlockingQueue<SolrDocument> docs = fulltext.getSolr().concurrentQuery(q.toString(), 0, 100000, 10000, 100);
+                BlockingQueue<SolrDocument> docs = fulltext.getSolr().concurrentQuery(q.toString(), 0, 100000, TIMEOUT, 100,
+                        YaCySchema.id.getSolrFieldName(),
+                        YaCySchema.sku.getSolrFieldName(),
+                        YaCySchema.failreason_t.getSolrFieldName(),
+                        YaCySchema.inboundlinks_protocol_sxt.getSolrFieldName(),
+                        YaCySchema.inboundlinks_urlstub_txt.getSolrFieldName(),
+                        YaCySchema.outboundlinks_protocol_sxt.getSolrFieldName(),
+                        YaCySchema.outboundlinks_urlstub_txt.getSolrFieldName()
+                        );
                 SolrDocument doc;
                 Set<String> storedDocs = new HashSet<String>();
                 Map<String, String> errorDocs = new HashMap<String, String>();
@@ -233,19 +243,20 @@ public class HostBrowser {
                 Map<String, ReversibleScoreMap<String>> outboundHosts = new HashMap<String, ReversibleScoreMap<String>>();
                 int hostsize = 0;
                 final List<byte[]> deleteIDs = new ArrayList<byte[]>();
-                long timeout = System.currentTimeMillis() + 10000;
+                long timeout = System.currentTimeMillis() + TIMEOUT;
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                     String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
                     String error = (String) doc.getFieldValue(YaCySchema.failreason_t.getSolrFieldName());
                     if (u.startsWith(path)) {
                         if (delete) {
-                            deleteIDs.add(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.name())));
+                            deleteIDs.add(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())));
                         } else {
                             if (error == null) storedDocs.add(u); else if (admin) errorDocs.put(u, error);
                         }
                     } else if (complete) {
                         if (error == null) storedDocs.add(u); else if (admin) errorDocs.put(u, error);
                     }
+                    if ((complete || u.startsWith(path)) && !storedDocs.contains(u)) inboundLinks.add(u); // add the current link
                     if (error == null) {
                         hostsize++;
                         // collect inboundlinks to browse the host

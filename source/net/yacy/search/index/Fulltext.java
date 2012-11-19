@@ -42,6 +42,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
@@ -213,6 +214,21 @@ public final class Fulltext implements Iterable<byte[]> {
         this.forcedCommitTime = System.currentTimeMillis(); // set the exact time
     }
 
+    public Date getLoadDate(final String urlHash) {
+        if (urlHash == null) return null;
+        SolrDocument doc;
+        try {
+            doc = this.solr.get(urlHash, YaCySchema.load_date_dt.getSolrFieldName());
+        } catch (IOException e) {
+            return null;
+        }
+        if (doc == null) return null;
+        Date x = (Date) doc.getFieldValue(YaCySchema.load_date_dt.getSolrFieldName());
+        if (x == null) return new Date(0);
+        Date now = new Date();
+        return x.after(now) ? now : x;
+    }
+    
     /**
      * generates an plasmaLURLEntry using the url hash
      * if the url cannot be found, this returns null
@@ -259,7 +275,7 @@ public final class Fulltext implements Iterable<byte[]> {
     }
 
     public void putDocument(final SolrInputDocument doc) throws IOException {
-        String id = (String) doc.getFieldValue(YaCySchema.id.name());
+        String id = (String) doc.getFieldValue(YaCySchema.id.getSolrFieldName());
         byte[] idb = ASCII.getBytes(id);
         try {
         	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
@@ -385,7 +401,7 @@ public final class Fulltext implements Iterable<byte[]> {
         final AtomicInteger count = new AtomicInteger(0);
         Thread t = new Thread(){
             public void run() {
-                final BlockingQueue<SolrDocument> docs = getSolr().concurrentQuery(q, 0, 1000000, 600000, -1);
+                final BlockingQueue<SolrDocument> docs = getSolr().concurrentQuery(q, 0, 1000000, 600000, -1, YaCySchema.id.getSolrFieldName(), YaCySchema.sku.getSolrFieldName());
                 try {
                     SolrDocument doc;
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
@@ -464,7 +480,7 @@ public final class Fulltext implements Iterable<byte[]> {
 
     public String failReason(final String urlHash) throws IOException {
         if (urlHash == null) return null;
-        SolrDocument doc = this.solr.get(urlHash);
+        SolrDocument doc = this.solr.get(urlHash, YaCySchema.failreason_t.getSolrFieldName());
         if (doc == null) return null;
         String reason = (String) doc.getFieldValue(YaCySchema.failreason_t.getSolrFieldName());
         return reason == null ? null : reason.length() == 0 ? null : reason;

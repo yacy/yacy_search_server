@@ -44,7 +44,7 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
     private final SolrConnector solr;
     private int commitWithinMs;
 
-    public MultipleSolrConnector(final String url, int connections) throws IOException {
+    public MultipleSolrConnector(final String url, final int connections) throws IOException {
         this.solr = new RemoteSolrConnector(url);
         this.queue = new ArrayBlockingQueue<SolrInputDocument>(1000);
         this.worker = new AddWorker[connections];
@@ -91,7 +91,7 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
      * @param c the maximum waiting time after a solr command until it is transported to the server
      */
     @Override
-    public void setCommitWithinMs(int c) {
+    public void setCommitWithinMs(final int c) {
         this.commitWithinMs = c;
         this.solr.setCommitWithinMs(c);
         for (AddWorker w: this.worker) w.solr.setCommitWithinMs(c);
@@ -129,12 +129,12 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
     }
 
     @Override
-    public void delete(String id) throws IOException {
+    public void delete(final String id) throws IOException {
         this.solr.delete(id);
     }
 
     @Override
-    public void delete(List<String> ids) throws IOException {
+    public void delete(final List<String> ids) throws IOException {
         this.solr.delete(ids);
     }
 
@@ -144,8 +144,8 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
     }
 
 	@Override
-	public SolrDocument get(String id) throws IOException {
-		return this.solr.get(id);
+	public SolrDocument get(final String id, final String ... fields) throws IOException {
+		return this.solr.get(id, fields);
 	}
 
     @Override
@@ -169,12 +169,12 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
     }
 
     @Override
-    public SolrDocumentList query(String querystring, int offset, int count) throws IOException {
-        return this.solr.query(querystring, offset, count);
+    public SolrDocumentList query(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
+        return this.solr.query(querystring, offset, count, fields);
     }
 
     @Override
-    public QueryResponse query(ModifiableSolrParams query) throws IOException, SolrException {
+    public QueryResponse query(final ModifiableSolrParams query) throws IOException, SolrException {
         return this.solr.query(query);
     }
 
@@ -184,8 +184,8 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
     }
 
     @Override
-    public Map<String, ReversibleScoreMap<String>> getFacets(String query, String[] fields, int maxresults) throws IOException {
-        return this.solr.getFacets(query, fields, maxresults);
+    public Map<String, ReversibleScoreMap<String>> getFacets(final String query, final int maxresults, final String ... fields) throws IOException {
+        return this.solr.getFacets(query, maxresults, fields);
     }
 
     @Override

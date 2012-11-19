@@ -107,10 +107,11 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     /**
      * get a document from solr by given id
      * @param id
+     * @param fields list of fields
      * @return one result or null if no result exists
      * @throws IOException
      */
-    public SolrDocument get(final String id) throws IOException;
+    public SolrDocument get(final String id, final String ... fields) throws IOException;
 
     /**
      * get a query result from solr
@@ -122,10 +123,13 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     /**
      * get a query result from solr
      * to get all results set the query String to "*:*"
-     * @param querystring
+     * @param querystring the solr query string
+     * @param offset the first result offset
+     * @param count number of wanted results
+     * @param fields list of fields
      * @throws IOException
      */
-    public SolrDocumentList query(final String querystring, final int offset, final int count) throws IOException, SolrException;
+    public SolrDocumentList query(final String querystring, final int offset, final int count, final String ... fields) throws IOException, SolrException;
 
     /**
      * get the number of results when this query is done.
@@ -138,12 +142,12 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     /**
      * get facets of the index: a list of lists with values that are most common in a specific field
      * @param query a query which is performed to get the facets
-     * @param fields the field names which are selected as facet
      * @param maxresults the maximum size of the resulting maps
+     * @param fields the field names which are selected as facet
      * @return a map with key = facet field name, value = an ordered map of field values for that field
      * @throws IOException
      */
-    public Map<String, ReversibleScoreMap<String>> getFacets(String query, String[] fields, int maxresults) throws IOException;
+    public Map<String, ReversibleScoreMap<String>> getFacets(String query, int maxresults, final String ... fields) throws IOException;
     
     /**
      * Get a query result from solr as a stream of documents.
@@ -154,9 +158,10 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @param maxcount the maximum number of results
      * @param maxtime the maximum time in milliseconds
      * @param buffersize the size of an ArrayBlockingQueue; if <= 0 then a LinkedBlockingQueue is used
+     * @param fields list of fields
      * @return a blocking queue which is terminated  with AbstractSolrConnector.POISON_DOCUMENT as last element
      */
-    public BlockingQueue<SolrDocument> concurrentQuery(final String querystring, final int offset, final int maxcount, final long maxtime, final int buffersize);
+    public BlockingQueue<SolrDocument> concurrentQuery(final String querystring, final int offset, final int maxcount, final long maxtime, final int buffersize, final String ... fields);
 
     /**
      * get a document id result stream from a solr query.

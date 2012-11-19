@@ -513,18 +513,16 @@ public class URIMetadataRow {
             final int p = this.latlon.indexOf(',');
             if (p < 0) {
                 return 0.0d;
-            } else { // old index entries might contain text "NaN,NaN"
-                return this.latlon.charAt(0) > '9' ? 0.0d : Double.parseDouble(this.latlon.substring(0, p));
             }
+            return this.latlon.charAt(0) > '9' ? 0.0d : Double.parseDouble(this.latlon.substring(0, p));
         }
         public double lon() {
             if (this.latlon == null || this.latlon.isEmpty()) return 0.0d;
             final int p = this.latlon.indexOf(',');
             if (p < 0) {
                 return 0.0d;
-            } else { // old index entries might contain text "NaN,NaN"
-                return this.latlon.charAt(p + 1) > '9' ? 0.0d : Double.parseDouble(this.latlon.substring(p + 1));
             }
+            return this.latlon.charAt(p + 1) > '9' ? 0.0d : Double.parseDouble(this.latlon.substring(p + 1));
         }
     }
 
