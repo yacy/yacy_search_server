@@ -433,7 +433,7 @@ public class URIMetadataNode {
 
     private int getInt(YaCySchema field) {
         assert !field.isMultiValued();
-        assert field.getType() == SolrType.integer;
+        assert field.getType() == SolrType.num_integer;
         Object x = this.doc.getFieldValue(field.getSolrFieldName());
         if (x == null) return 0;
         if (x instanceof Integer) return ((Integer) x).intValue();
@@ -480,7 +480,7 @@ public class URIMetadataNode {
     @SuppressWarnings("unchecked")
     private ArrayList<Integer> getIntList(YaCySchema field) {
         assert field.isMultiValued();
-        assert field.getType() == SolrType.integer;
+        assert field.getType() == SolrType.num_integer;
         Object r = this.doc.getFieldValue(field.getSolrFieldName());
         if (r == null) return new ArrayList<Integer>(0);
         if (r instanceof ArrayList) {

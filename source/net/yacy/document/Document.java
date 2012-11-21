@@ -53,9 +53,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.DCTerms;
 import net.yacy.cora.lod.vocabulary.Owl;

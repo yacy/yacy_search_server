@@ -202,7 +202,7 @@ public class Segment {
     public int getQueryCount(String word) {
         if (word == null || word.indexOf(':') >= 0 || word.indexOf(' ') >= 0 || word.indexOf('/') >= 0) return 0;
         int count = this.termIndex == null ? 0 : this.termIndex.count(Word.word2hash(word));
-        try {count += this.fulltext.getSolr().getQueryCount(YaCySchema.text_t.name() + ':' + word);} catch (IOException e) {}
+        try {count += this.fulltext.getSolr().getQueryCount(YaCySchema.text_t.getSolrFieldName() + ':' + word);} catch (IOException e) {}
         return count;
     }
 
@@ -363,8 +363,28 @@ public class Segment {
         if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
         char docType = Response.docType(document.dc_format());
         
-        // STORE TO SOLR
+        // CREATE SOLR DOCUMENT
         final SolrInputDocument solrInputDoc = this.fulltext.getSolrScheme().yacy2solr(id, profile, responseHeader, document, condenser, referrerURL, language);
+        
+        // FIND OUT IF THIS IS A DOUBLE DOCUMENT
+        for (YaCySchema[] checkfields: new YaCySchema[][]{
+                {YaCySchema.exact_signature_l, YaCySchema.exact_signature_unique_b},
+                {YaCySchema.fuzzy_signature_l, YaCySchema.fuzzy_signature_unique_b}}) {
+            YaCySchema hashfield = checkfields[0];
+            YaCySchema uniquefield = checkfields[1];
+            if (this.fulltext.getSolrScheme().contains(hashfield) && this.fulltext.getSolrScheme().contains(uniquefield)) {
+                // lookup the document with the same signature
+                long signature = ((Long) solrInputDoc.getField(hashfield.getSolrFieldName()).getValue()).longValue();
+                try {
+                    if (this.fulltext.getSolr().exists(hashfield.getSolrFieldName(), Long.toString(signature))) {
+                        // change unique attribut in content
+                        solrInputDoc.setField(uniquefield.getSolrFieldName(), false);
+                    }
+                } catch (IOException e) {}
+            }
+        }
+        
+        // STORE TO SOLR
         String error = null;
         tryloop: for (int i = 0; i < 20; i++) {
             try {

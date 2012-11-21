@@ -32,6 +32,21 @@ host_id_s
 ## the md5 of the raw source (mandatory field)
 md5_s
 
+## the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of text_t
+exact_signature_l
+
+## flag shows if exact_signature_l is unique at the time of document creation, used for double-check during search
+exact_signature_unique_b
+
+## 64 bit of the Lookup3Signature from EnhancedTextProfileSignature of text_t
+fuzzy_signature_l
+
+## intermediate data produced in EnhancedTextProfileSignature: a list of word frequencies
+#fuzzy_signature_text_t
+    
+## flag shows if fuzzy_signature_l is unique at the time of document creation, used for double-check during search
+fuzzy_signature_unique_b
+
 ## the size of the raw source (mandatory field)
 size_i
 

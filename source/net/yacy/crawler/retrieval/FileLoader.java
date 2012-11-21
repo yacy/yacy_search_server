@@ -31,8 +31,8 @@ import java.util.Date;
 import java.util.List;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;

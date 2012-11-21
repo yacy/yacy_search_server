@@ -37,9 +37,13 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
+import org.apache.solr.common.params.MapSolrParams;
+import org.apache.solr.update.processor.Lookup3Signature;
+
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.WordCache;
-import net.yacy.cora.document.Classification.ContentDomain;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
+import net.yacy.cora.document.analysis.EnhancedTextProfileSignature;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.language.synonyms.SynonymLibrary;
 import net.yacy.cora.lod.vocabulary.Tagging;
@@ -71,6 +75,8 @@ public final class Condenser {
     private final Map<String, Word> words; // a string (the words) to (indexWord) - relation
     private final Map<String, Set<Tagging.Metatag>> tags = new HashMap<String, Set<Tagging.Metatag>>(); // a set of tags, discovered from Autotagging
     private final Set<String> synonyms; // a set of synonyms to the words
+    private long fuzzy_signature = 0, exact_signature = 0; // signatures for double-check detection
+    private String fuzzy_signature_text = null; // signatures for double-check detection
     
     public int RESULT_NUMB_WORDS = -1;
     public int RESULT_DIFF_WORDS = -1;
@@ -84,7 +90,7 @@ public final class Condenser {
             final boolean indexText,
             final boolean indexMedia,
             final WordCache meaningLib,
-            final SynonymLibrary synonyms,
+            final SynonymLibrary synlib,
             final boolean doAutotagging
             ) {
         Thread.currentThread().setName("condenser-" + document.dc_identifier()); // for debugging
@@ -209,14 +215,48 @@ public final class Condenser {
         if (!this.tags.isEmpty()) {
             document.addMetatags(this.tags);
         }
+
+        if (synlib != null) {
+            for (String word: this.words.keySet()) {
+                Set<String> syms = synlib.getSynonyms(word);
+                if (syms != null) this.synonyms.addAll(syms);
+            }
+        }
+        String text = document.getTextString();
         
         // create the synonyms set
         if (synonyms != null) {
             for (String word: this.words.keySet()) {
-                Set<String> syms = synonyms.getSynonyms(word);
+                Set<String> syms = synlib.getSynonyms(word);
                 if (syms != null) this.synonyms.addAll(syms);
             }
         }
+        
+        // create hashes for duplicate detection
+        // check dups with http://localhost:8090/solr/select?q=*:*&start=0&rows=3&fl=sku,fuzzy_signature_text_t,fuzzy_signature_l,fuzzy_signature_unique_b
+        EnhancedTextProfileSignature fuzzySignatureFactory = new EnhancedTextProfileSignature();
+        Map<String,String> sp = new HashMap<String,String>();
+        sp.put("quantRate", "0.5"); // for minTokenLen = 2 the value should not be below 0.24; for minTokenLen = 3 the value must be not below 0.5!
+        sp.put("minTokenLen", "3");
+        fuzzySignatureFactory.init(new MapSolrParams(sp));
+        fuzzySignatureFactory.add(text);
+        byte[] fuzzy_signature_hash = fuzzySignatureFactory.getSignature();
+        long l = 0; for (int i = 0; i < 8; i++) l = (l << 8) + (fuzzy_signature_hash[i] & 0xff);
+        this.fuzzy_signature = l;
+        this.fuzzy_signature_text = fuzzySignatureFactory.getSignatureText().toString();
+        Lookup3Signature exactSignatureFactory = new Lookup3Signature();
+        exactSignatureFactory.add(text);
+        byte[] exact_signature_hash = exactSignatureFactory.getSignature();
+        l = 0; for (int i = 0; i < 8; i++) l = (l << 8) + (exact_signature_hash[i] & 0xff);
+        this.exact_signature = l;
+    }
+
+    public Condenser(final String text, final WordCache meaningLib, boolean doAutotagging) {
+        this.languageIdentificator = null; // we don't need that here
+        // analysis = new Properties();
+        this.words = new TreeMap<String, Word>();
+        this.synonyms = new HashSet<String>();
+        createCondensement(text, meaningLib, doAutotagging);
     }
 
     private void insertTextToWords(
@@ -250,14 +290,6 @@ public final class Condenser {
         }
     }
 
-    public Condenser(final String text, final WordCache meaningLib, boolean doAutotagging) {
-        this.languageIdentificator = null; // we don't need that here
-        // analysis = new Properties();
-        this.words = new TreeMap<String, Word>();
-        this.synonyms = new HashSet<String>();
-        createCondensement(text, meaningLib, doAutotagging);
-    }
-
     public int excludeWords(final SortedSet<String> stopwords) {
         // subtracts the given stopwords from the word list
         // the word list shrinkes. This returns the number of shrinked words
@@ -277,6 +309,18 @@ public final class Condenser {
         return l;
     }
 
+    public long fuzzySignature() {
+        return this.fuzzy_signature;
+    }
+
+    public String fuzzySignatureText() {
+        return this.fuzzy_signature_text;
+    }
+    
+    public long exactSignature() {
+        return this.exact_signature;
+    }
+    
     public String language() {
         return this.languageIdentificator.getLanguage();
     }

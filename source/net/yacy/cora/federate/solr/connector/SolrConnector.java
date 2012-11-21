@@ -88,12 +88,13 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public int deleteByQuery(final String querystring) throws IOException;
 
     /**
-     * check if a given id exists in solr
-     * @param id
+     * check if a given key exists in solr at the field fieldName
+     * @param fieldName
+     * @param key
      * @return true if any entry in solr exists
      * @throws IOException
      */
-    public boolean exists(final String id) throws IOException;
+    public boolean exists(final String fieldName, final String key) throws IOException;
 
     /**
      * add a solr input document
@@ -105,13 +106,13 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException;
 
     /**
-     * get a document from solr by given id
-     * @param id
+     * get a document from solr by given key for the id-field
+     * @param key
      * @param fields list of fields
      * @return one result or null if no result exists
      * @throws IOException
      */
-    public SolrDocument get(final String id, final String ... fields) throws IOException;
+    public SolrDocument getById(final String key, final String ... fields) throws IOException;
 
     /**
      * get a query result from solr

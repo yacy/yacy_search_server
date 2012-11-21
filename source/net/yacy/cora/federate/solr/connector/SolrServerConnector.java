@@ -316,20 +316,14 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
 
     private final char[] queryIDTemplate = "id:\"            \"".toCharArray();
 
-    /**
-     * get a document from solr by given id
-     * @param id
-     * @return one result or null if no result exists
-     * @throws IOException
-     */
     @Override
-    public SolrDocument get(final String id, final String ... fields) throws IOException {
-    	assert id.length() == 12;
+    public SolrDocument getById(final String key, final String ... fields) throws IOException {
+        final SolrQuery query = new SolrQuery();
+    	assert key.length() == 12;
         // construct query
     	char[] q = new char[17];
     	System.arraycopy(this.queryIDTemplate, 0, q, 0, 17);
-    	System.arraycopy(id.toCharArray(), 0, q, 4, 12);
-        final SolrQuery query = new SolrQuery();
+    	System.arraycopy(key.toCharArray(), 0, q, 4, 12);
         query.setQuery(new String(q));
         query.setRows(1);
         query.setStart(0);

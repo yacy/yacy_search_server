@@ -130,11 +130,11 @@ public class RetrySolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
     @Override
-    public boolean exists(final String id) throws IOException {
+    public boolean exists(final String fieldName, final String key) throws IOException {
         final long t = System.currentTimeMillis() + this.retryMaxTime;
         Throwable ee = null;
         while (System.currentTimeMillis() < t) try {
-            return this.solrConnector.exists(id);
+            return this.solrConnector.exists(fieldName, key);
         } catch (final Throwable e) {
             ee = e;
             try {Thread.sleep(10);} catch (final InterruptedException e1) {}
@@ -144,12 +144,12 @@ public class RetrySolrConnector extends AbstractSolrConnector implements SolrCon
         return false;
     }
 
-	@Override
-	public SolrDocument get(final String id, final String ... fields) throws IOException {
-		final long t = System.currentTimeMillis() + this.retryMaxTime;
+    @Override
+    public SolrDocument getById(final String key, final String ... fields) throws IOException {
+        final long t = System.currentTimeMillis() + this.retryMaxTime;
         Throwable ee = null;
         while (System.currentTimeMillis() < t) try {
-            return this.solrConnector.get(id, fields);
+            return this.solrConnector.getById(key, fields);
         } catch (final Throwable e) {
             ee = e;
             try {Thread.sleep(10);} catch (final InterruptedException e1) {}
@@ -157,7 +157,7 @@ public class RetrySolrConnector extends AbstractSolrConnector implements SolrCon
         }
         if (ee != null) throw (ee instanceof IOException) ? (IOException) ee : new IOException(ee.getMessage());
         return null;
-	}
+    }
 
     @Override
     public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {

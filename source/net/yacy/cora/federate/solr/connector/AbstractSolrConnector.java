@@ -51,18 +51,23 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     }
     public final static SolrQuery catchSuccessQuery = new SolrQuery();
     static {
-        catchSuccessQuery.setQuery("-" + YaCySchema.failreason_t.name() + ":[* TO *]");
+        catchSuccessQuery.setQuery("-" + YaCySchema.failreason_t.getSolrFieldName() + ":[* TO *]");
         catchSuccessQuery.setFields(YaCySchema.id.getSolrFieldName());
         catchSuccessQuery.setRows(1);
         catchSuccessQuery.setStart(0);
     }
     private final static int pagesize = 100;
-    
+
     @Override
-    public boolean exists(final String id) throws IOException {
+    public boolean exists(final String fieldName, final String key) throws IOException {
+        if (fieldName == null) return false;
         try {
-            final SolrDocument doc = get(id, YaCySchema.id.getSolrFieldName());
-            return doc != null;
+            if (fieldName.equals(YaCySchema.id.getSolrFieldName())) {
+                final SolrDocument doc = getById(key, fieldName);
+                return doc != null;
+            }
+            long count = getQueryCount(fieldName + ":\"" + key + "\"");
+            return count > 0;
         } catch (final Throwable e) {
             log.warn(e);
             return false;

@@ -57,22 +57,49 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
 
     private SolrConnector solr0;
     private SolrConnector solr1;
-    private final ARC<String, Object> hitCache, missCache;
+    private int hitCacheMax, missCacheMax, partitions;
+    private final Map<String, HitMissCache> hitMissCache;
     private final ARC<String, SolrDocument> documentCache;
-    public long hitCache_Hit = 0, hitCache_Miss = 0, hitCache_Insert = 0; // for statistics only; do not write
-    public long missCache_Hit = 0, missCache_Miss = 0, missCache_Insert = 0; // for statistics only; do not write
     public long documentCache_Hit = 0, documentCache_Miss = 0, documentCache_Insert = 0; // for statistics only; do not write
 
+    
+    public static class HitMissCache {
+
+        public final ARC<String, Object> hitCache, missCache;
+        public long hitCache_Hit = 0, hitCache_Miss = 0, hitCache_Insert = 0; // for statistics only; do not write
+        public long missCache_Hit = 0, missCache_Miss = 0, missCache_Insert = 0; // for statistics only; do not write
+        
+        public HitMissCache(int hitCacheMax, int missCacheMax, int partitions) {
+            this.hitCache = new ConcurrentARC<String, Object>(hitCacheMax, partitions);
+            this.missCache = new ConcurrentARC<String, Object>(missCacheMax, partitions);
+        }
+        
+        public void clearCache() {
+            this.hitCache.clear();
+            this.missCache.clear();
+        }
+    }
 
     public MirrorSolrConnector(int hitCacheMax, int missCacheMax, int docCacheMax) {
         this.solr0 = null;
         this.solr1 = null;
-        int partitions = Runtime.getRuntime().availableProcessors() * 2;
-        this.hitCache = new ConcurrentARC<String, Object>(hitCacheMax, partitions);
-        this.missCache = new ConcurrentARC<String, Object>(missCacheMax, partitions);
-        this.documentCache = new ConcurrentARC<String, SolrDocument>(docCacheMax, partitions);
+        this.hitCacheMax = hitCacheMax;
+        this.missCacheMax = missCacheMax;
+        this.partitions = Runtime.getRuntime().availableProcessors() * 2;
+        this.hitMissCache = new HashMap<String, HitMissCache>();
+        this.documentCache = new ConcurrentARC<String, SolrDocument>(docCacheMax, this.partitions);
     }
 
+
+    public HitMissCache getCache(String field) {
+        HitMissCache c = this.hitMissCache.get(field);
+        if (c == null) {
+            c =  new HitMissCache(this.hitCacheMax, this.missCacheMax, this.partitions);
+            this.hitMissCache.put(field, c);
+        }
+        return c;
+    }
+    
     public boolean isConnected0() {
         return this.solr0 != null;
     }
@@ -110,8 +137,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     public void clearCache() {
-        this.hitCache.clear();
-        this.missCache.clear();
+        for (HitMissCache c: hitMissCache.values()) c.clearCache();
         this.documentCache.clear();
     }
 
@@ -163,9 +189,10 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     @Override
     public void delete(final String id) throws IOException {
         this.documentCache.remove(id);
-        this.hitCache.remove(id);
-        this.missCache.put(id, EXIST);
-        this.missCache_Insert++;
+        HitMissCache c = getCache("id");
+        c.hitCache.remove(id);
+        c.missCache.put(id, EXIST);
+        c.missCache_Insert++;
         if (this.solr0 != null) this.solr0.delete(id);
         if (this.solr1 != null) this.solr1.delete(id);
     }
@@ -179,9 +206,10 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     public void delete(final List<String> ids) throws IOException {
         for (String id: ids) {
             this.documentCache.remove(id);
-            this.hitCache.remove(id);
-            this.missCache.put(id, EXIST);
-            this.missCache_Insert++;
+            HitMissCache c = getCache("id");
+            c.hitCache.remove(id);
+            c.missCache.put(id, EXIST);
+            c.missCache_Insert++;
         }
         if (this.solr0 != null) this.solr0.delete(ids);
         if (this.solr1 != null) this.solr1.delete(ids);
@@ -196,74 +224,63 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         return count;
     }
 
-    /**
-     * check if a given id exists in solr
-     * @param id
-     * @return true if any entry in solr exists
-     * @throws IOException
-     */
     @Override
-    public boolean exists(final String id) throws IOException {
-        if (this.hitCache.containsKey(id)) {
-            this.hitCache_Hit++;
-        	return true;
-        }
-        this.hitCache_Miss++;
-        if (this.documentCache.containsKey(id)) {
-            this.documentCache_Hit++;
-        	return true;
-        }
-        this.documentCache_Miss++;
-        if (this.missCache.containsKey(id)) {
-            this.missCache_Hit++;
-        	return false;
-        }
-        this.missCache_Miss++;
-        if ((solr0 != null && solr0.exists(id)) || (solr1 != null && solr1.exists(id))) {
-            this.missCache.remove(id);
-            this.hitCache.put(id, EXIST);
-            this.hitCache_Insert++;
+    public boolean exists(final String fieldName, final String key) throws IOException {
+        HitMissCache c = getCache(fieldName);
+        if (c.hitCache.containsKey(key)) {
+            c.hitCache_Hit++;
             return true;
         }
-        this.missCache.put(id, EXIST);
-        this.missCache_Insert++;
+        c.hitCache_Miss++;
+        if (this.documentCache.containsKey(key)) {
+            this.documentCache_Hit++;
+            return true;
+        }
+        this.documentCache_Miss++;
+        if (c.missCache.containsKey(key)) {
+            c.missCache_Hit++;
+            return false;
+        }
+        c.missCache_Miss++;
+        if ((solr0 != null && solr0.exists(fieldName, key)) || (solr1 != null && solr1.exists(fieldName, key))) {
+            c.missCache.remove(key);
+            c.hitCache.put(key, EXIST);
+            c.hitCache_Insert++;
+            return true;
+        }
+        c.missCache.put(key, EXIST);
+        c.missCache_Insert++;
         return false;
     }
-
+    
     @Override
-    public SolrDocument get(final String id, final String ... fields) throws IOException {
-        SolrDocument doc = fields.length == 0 ? this.documentCache.get(id) : null;
+    public SolrDocument getById(final String key, final String ... fields) throws IOException {
+        SolrDocument doc = fields.length == 0 ? this.documentCache.get(key) : null;
         if (doc != null) {
             this.documentCache_Hit++;
         	return doc;
         }
         documentCache_Miss++;
-        if (this.missCache.containsKey(id)) {
-            this.missCache_Hit++;
+        HitMissCache c = this.getCache(YaCySchema.id.getSolrFieldName());
+        if (c.missCache.containsKey(key)) {
+            c.missCache_Hit++;
         	return null;
         }
-        missCache_Miss++;
-        if ((solr0 != null && ((doc = solr0.get(id, fields)) != null)) || (solr1 != null && ((doc = solr1.get(id, fields)) != null))) {
-            this.missCache.remove(id);
-            this.hitCache.put(id, EXIST);
-            this.hitCache_Insert++;
-            if (fields.length == 0) {this.documentCache.put(id, doc); this.documentCache_Insert++;}
+        c.missCache_Miss++;
+        if ((solr0 != null && ((doc = solr0.getById(key, fields)) != null)) || (solr1 != null && ((doc = solr1.getById(key, fields)) != null))) {
+            addToCache(doc, fields.length == 0);
             return doc;
         }
         // check if there is a autocommit problem
-        if (this.hitCache.containsKey(id)) {
+        if (c.hitCache.containsKey(key)) {
             // the document should be there, therefore make a commit and check again
             this.commit();
-            if ((solr0 != null && ((doc = solr0.get(id, fields)) != null)) || (solr1 != null && ((doc = solr1.get(id, fields)) != null))) {
-                this.missCache.remove(id);
-                this.hitCache.put(id, EXIST);
-                this.hitCache_Insert++;
-                if (fields.length == 0) {this.documentCache.put(id, doc); this.documentCache_Insert++;}
-                return doc;
+            if ((solr0 != null && ((doc = solr0.getById(key, fields)) != null)) || (solr1 != null && ((doc = solr1.getById(key, fields)) != null))) {
+                addToCache(doc, fields.length == 0);
             }
         }
-        this.missCache.put(id, EXIST);
-        this.missCache_Insert++;
+        c.missCache.put(key, EXIST);
+        c.missCache_Insert++;
         return null;
     }
 
@@ -277,11 +294,10 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         String id = (String) solrdoc.getFieldValue(YaCySchema.id.getSolrFieldName());
         assert id != null;
         if (id == null) return;
-        this.missCache.remove(id);
-        this.documentCache.put(id, ClientUtils.toSolrDocument(solrdoc));
+        SolrDocument doc = ClientUtils.toSolrDocument(solrdoc);
+        addToCache(doc, true);
+        this.documentCache.put(id, doc);
         this.documentCache_Insert++;
-        this.hitCache.put(id, EXIST);
-        this.hitCache_Insert++;
         if (this.solr0 != null) this.solr0.add(solrdoc);
         if (this.solr1 != null) this.solr1.add(solrdoc);
     }
@@ -302,19 +318,19 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         if (this.solr0 == null && this.solr1 == null) return new SolrDocumentList();
         if (offset == 0 && count == 1 && querystring.startsWith("id:")) {
             final SolrDocumentList list = new SolrDocumentList();
-            SolrDocument doc = get(querystring.charAt(3) == '"' ? querystring.substring(4, querystring.length() - 1) : querystring.substring(3), fields);
+            SolrDocument doc = getById(querystring.charAt(3) == '"' ? querystring.substring(4, querystring.length() - 1) : querystring.substring(3), fields);
             list.add(doc);
             // no addToCache(list) here because that was already handlet in get();
             return list;
         }
         if (this.solr0 != null && this.solr1 == null) {
             SolrDocumentList list = this.solr0.query(querystring, offset, count, fields);
-            if (fields.length == 0) addToCache(list);
+            addToCache(list, fields.length == 0);
             return list;
         }
         if (this.solr1 != null && this.solr0 == null) {
             SolrDocumentList list = this.solr1.query(querystring, offset, count, fields);
-            if (fields.length == 0) addToCache(list);
+            addToCache(list, fields.length == 0);
             return list;
         }
 
@@ -338,7 +354,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         for (final SolrDocument d: l) list.add(d);
 
         // add caching
-        if (fields.length == 0) addToCache(list);
+        addToCache(list, fields.length == 0);
         return list;
     }
 
@@ -441,33 +457,51 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         return facets0;
     }
     
-    private void addToCache(SolrDocumentList list) {
+    private void addToCache(SolrDocumentList list, boolean doccache) {
         if (MemoryControl.shortStatus()) clearCache();
         for (final SolrDocument solrdoc: list) {
-            String id = (String) solrdoc.getFieldValue(YaCySchema.id.getSolrFieldName());
-            if (id != null) {
-                this.hitCache.put(id, EXIST);
-                hitCache_Insert++;
-                this.documentCache.put(id, solrdoc);
-                documentCache_Insert++;
-            }
+            addToCache(solrdoc, doccache);
         }
     }
+
+    private void addToCache(SolrDocument doc, boolean doccach) {
+        for (Map.Entry<String, HitMissCache> e: this.hitMissCache.entrySet()) {
+            Object keyo = doc.getFieldValue(e.getKey());
+            String key = null;
+            if (keyo instanceof String) key = (String) keyo;
+            if (keyo instanceof Integer) key = ((Integer) keyo).toString();
+            if (keyo instanceof Long) key = ((Long) keyo).toString();
+            if (key != null) {
+                HitMissCache c = e.getValue();
+                c.missCache.remove(key);
+                c.hitCache.put(key, EXIST);
+                c.hitCache_Insert++;
+            }
+        }
+        if (doccach) {
+            this.documentCache.put((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName()), doc);
+            this.documentCache_Insert++;
+        }
+    }
+    
 
     @Override
     public long getSize() {
         long s = 0;
         if (this.solr0 != null) s += this.solr0.getSize();
         if (this.solr1 != null) s += this.solr1.getSize();
-        return Math.max(this.documentCache.size(), Math.max(this.hitCache.size(), s));
+        HitMissCache c = getCache("id");
+        return Math.max(this.documentCache.size(), Math.max(c.hitCache.size(), s));
     }
 
 	public int nameCacheHitSize() {
-		return this.hitCache.size();
+        HitMissCache c = getCache("id");
+		return c.hitCache.size();
 	}
 
 	public int nameCacheMissSize() {
-		return this.missCache.size();
+        HitMissCache c = getCache("id");
+		return c.missCache.size();
 	}
 
 	public int nameCacheDocumentSize() {

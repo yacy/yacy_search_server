@@ -83,13 +83,13 @@ import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.contentcontrol.SMWListSyncThread;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.WordCache;
+import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.ShardSelection;
 import net.yacy.cora.federate.solr.connector.ShardSolrConnector;
@@ -392,7 +392,7 @@ public final class Switchboard extends serverSwitch {
         solrScheme.fill(backupScheme, true);
         // switch on some fields which are necessary for ranking and faceting
         for (YaCySchema field: new YaCySchema[]{
-                YaCySchema.host_s,
+                YaCySchema.host_s, YaCySchema.load_date_dt,
                 YaCySchema.url_file_ext_s, YaCySchema.last_modified,                        // needed for media search and /date operator
                 YaCySchema.url_paths_sxt, YaCySchema.host_organization_s,                   // needed to search in the url
                 YaCySchema.inboundlinks_protocol_sxt, YaCySchema.inboundlinks_urlstub_txt,  // needed for HostBrowser

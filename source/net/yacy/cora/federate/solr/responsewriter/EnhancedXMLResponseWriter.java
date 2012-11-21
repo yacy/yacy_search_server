@@ -185,15 +185,15 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
             writeTag(writer, "str", name, value, true);
         } else if (typeName.equals(SolrType.bool.printName())) {
             writeTag(writer, "bool", name, "F".equals(value) ? "false" : "true", true);
-        } else if (typeName.equals(SolrType.integer.printName())) {
+        } else if (typeName.equals(SolrType.num_integer.printName())) {
             writeTag(writer, "int", name, value, true);
-        } else if (typeName.equals(SolrType.tlong.printName())) {
+        } else if (typeName.equals(SolrType.num_long.printName())) {
             writeTag(writer, "long", name, value, true);
         } else if (typeName.equals(SolrType.date.printName())) {
             writeTag(writer, "date", name, DateField.formatExternal(new Date(Long.parseLong(value))), true);
-        } else if (typeName.equals(SolrType.tfloat.printName())) {
+        } else if (typeName.equals(SolrType.num_float.printName())) {
             writeTag(writer, "float", name, value, true);
-        } else if (typeName.equals(SolrType.tdouble.printName())) {
+        } else if (typeName.equals(SolrType.num_double.printName())) {
             writeTag(writer, "double", name, value, true);
         }
     }

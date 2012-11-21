@@ -18,7 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.document;
+package net.yacy.cora.document.analysis;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -27,6 +27,8 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+
+import net.yacy.cora.document.MultiProtocolURI;
 
 public class Classification {
 
@@ -140,7 +142,7 @@ public class Classification {
         return ctrlExtSet.contains(ctrlExt.trim().toLowerCase());
     }
 
-    protected static ContentDomain getContentDomain(final String ext) {
+    public static ContentDomain getContentDomain(final String ext) {
         if (isTextExtension(ext)) return ContentDomain.TEXT;
         if (isImageExtension(ext)) return ContentDomain.IMAGE;
         if (isAudioExtension(ext)) return ContentDomain.AUDIO;

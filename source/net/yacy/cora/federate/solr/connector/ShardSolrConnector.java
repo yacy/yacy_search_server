@@ -125,21 +125,21 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
      * @throws IOException
      */
     @Override
-    public boolean exists(final String id) throws IOException {
+    public boolean exists(final String fieldName, final String key) throws IOException {
         for (final SolrConnector connector: this.connectors) {
-            if (connector.exists(id)) return true;
+            if (connector.exists(fieldName, key)) return true;
         }
         return false;
     }
 
-	@Override
-	public SolrDocument get(String id, final String ... fields) throws IOException {
-		for (final SolrConnector connector: this.connectors) {
-			SolrDocument doc = connector.get(id, fields);
-			if (doc != null) return doc;
+    @Override
+    public SolrDocument getById(final String key, final String ... fields) throws IOException {
+        for (final SolrConnector connector: this.connectors) {
+            SolrDocument doc = connector.getById(key, fields);
+            if (doc != null) return doc;
         }
         return null;
-	}
+    }
 
     /**
      * add a Solr document

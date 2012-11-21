@@ -30,6 +30,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.MirrorSolrConnector;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
@@ -204,15 +205,16 @@ public class PerformanceMemory_p {
 
         // other caching structures
         final MirrorSolrConnector solr = (MirrorSolrConnector) Switchboard.getSwitchboard().index.fulltext().getSolr();
+        final MirrorSolrConnector.HitMissCache hitMissCache = solr.getCache(YaCySchema.id.getSolrFieldName());
         prop.putNum("solrcacheHit.size", solr.nameCacheHitSize());
-        prop.putNum("solrcacheHit.Hit", solr.hitCache_Hit);
-        prop.putNum("solrcacheHit.Miss", solr.hitCache_Miss);
-        prop.putNum("solrcacheHit.Insert", solr.hitCache_Insert);
+        prop.putNum("solrcacheHit.Hit", hitMissCache.hitCache_Hit);
+        prop.putNum("solrcacheHit.Miss", hitMissCache.hitCache_Miss);
+        prop.putNum("solrcacheHit.Insert", hitMissCache.hitCache_Insert);
         
         prop.putNum("solrcacheMiss.size", solr.nameCacheMissSize());
-        prop.putNum("solrcacheMiss.Hit", solr.missCache_Hit);
-        prop.putNum("solrcacheMiss.Miss", solr.missCache_Miss);
-        prop.putNum("solrcacheMiss.Insert", solr.missCache_Insert);
+        prop.putNum("solrcacheMiss.Hit", hitMissCache.missCache_Hit);
+        prop.putNum("solrcacheMiss.Miss", hitMissCache.missCache_Miss);
+        prop.putNum("solrcacheMiss.Insert", hitMissCache.missCache_Insert);
         
         prop.putNum("solrcacheDocument.size", solr.nameCacheDocumentSize());
         prop.putNum("solrcacheDocument.Hit", solr.documentCache_Hit);

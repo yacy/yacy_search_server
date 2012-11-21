@@ -143,10 +143,10 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
         return this.solr.deleteByQuery(querystring);
     }
 
-	@Override
-	public SolrDocument get(final String id, final String ... fields) throws IOException {
-		return this.solr.get(id, fields);
-	}
+    @Override
+    public SolrDocument getById(final String key, final String ... fields) throws IOException {
+        return this.solr.getById(key, fields);
+    }
 
     @Override
     public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {

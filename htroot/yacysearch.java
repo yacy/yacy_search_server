@@ -41,8 +41,8 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Classification;
-import net.yacy.cora.document.Classification.ContentDomain;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;

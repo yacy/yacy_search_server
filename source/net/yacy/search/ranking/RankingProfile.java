@@ -30,8 +30,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import net.yacy.cora.document.Classification;
-import net.yacy.cora.document.Classification.ContentDomain;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.logging.Log;
 

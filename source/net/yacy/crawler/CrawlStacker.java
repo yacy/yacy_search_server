@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Classification.ContentDomain;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;

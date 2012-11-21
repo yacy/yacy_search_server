@@ -28,12 +28,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedSet;
 
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.document.Condenser;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.word.Word;

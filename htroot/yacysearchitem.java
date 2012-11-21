@@ -29,8 +29,8 @@ import java.util.List;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Classification;
-import net.yacy.cora.document.Classification.ContentDomain;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;

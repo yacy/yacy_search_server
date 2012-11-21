@@ -23,8 +23,8 @@ package net.yacy.search.query;
 import java.util.Iterator;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;

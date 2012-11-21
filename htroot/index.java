@@ -29,8 +29,8 @@
 // if the shell's current path is HTROOT
 
 
-import net.yacy.cora.document.Classification;
-import net.yacy.cora.document.Classification.ContentDomain;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;

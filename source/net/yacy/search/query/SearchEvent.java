@@ -41,8 +41,8 @@ import com.hp.hpl.jena.rdf.model.Resource;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Classification;
-import net.yacy.cora.document.Classification.ContentDomain;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.federate.yacy.Distribution;

@@ -42,7 +42,6 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
@@ -208,7 +207,7 @@ public final class Fulltext implements Iterable<byte[]> {
     }
     
     public void commit() {
-        if (this.forcedCommitTime + forcedCommitTimeout < System.currentTimeMillis()) return;
+        if (this.forcedCommitTime + forcedCommitTimeout > System.currentTimeMillis()) return;
         this.forcedCommitTime = Long.MAX_VALUE - forcedCommitTimeout; // set the time high to prevent that other processes get to this point meanwhile
         this.solr.commit();
         this.forcedCommitTime = System.currentTimeMillis(); // set the exact time
@@ -218,7 +217,7 @@ public final class Fulltext implements Iterable<byte[]> {
         if (urlHash == null) return null;
         SolrDocument doc;
         try {
-            doc = this.solr.get(urlHash, YaCySchema.load_date_dt.getSolrFieldName());
+            doc = this.solr.getById(urlHash, YaCySchema.load_date_dt.getSolrFieldName());
         } catch (IOException e) {
             return null;
         }
@@ -249,7 +248,7 @@ public final class Fulltext implements Iterable<byte[]> {
 
         // get the metadata from Solr
         try {
-            SolrDocument doc = this.solr.get(ASCII.String(urlHash));
+            SolrDocument doc = this.solr.getById(ASCII.String(urlHash));
             if (doc != null) {
             	if (this.urlIndexFile != null) this.urlIndexFile.remove(urlHash);
             	return new URIMetadataNode(doc, wre, weight);
@@ -279,7 +278,7 @@ public final class Fulltext implements Iterable<byte[]> {
         byte[] idb = ASCII.getBytes(id);
         try {
         	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-        	SolrDocument sd = this.solr.get(id);
+        	SolrDocument sd = this.solr.getById(id, YaCySchema.last_modified.getSolrFieldName());
         	Date now = new Date();
         	Date sdDate = sd == null ? null : URIMetadataNode.getDate(sd, YaCySchema.last_modified);
         	if (sdDate == null || sdDate.after(now)) sdDate = now;
@@ -307,7 +306,7 @@ public final class Fulltext implements Iterable<byte[]> {
         String id = ASCII.String(idb);
         try {
         	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-            SolrDocument sd = this.solr.get(id);
+            SolrDocument sd = this.solr.getById(id);
             if (sd == null || (new URIMetadataNode(sd)).isOlder(row)) {
                 if (this.solrScheme.contains(YaCySchema.ip_s)) {
                     // ip_s needs a dns lookup which causes blockings during search here
@@ -471,7 +470,7 @@ public final class Fulltext implements Iterable<byte[]> {
         if (urlHash == null) return false;
         if (this.urlIndexFile != null && this.urlIndexFile.has(urlHash)) return true;
         try {
-            if (this.solr.exists(ASCII.String(urlHash))) return true;
+            if (this.solr.exists(YaCySchema.id.getSolrFieldName(), ASCII.String(urlHash))) return true;
         } catch (final Throwable e) {
             Log.logException(e);
         }
@@ -480,7 +479,7 @@ public final class Fulltext implements Iterable<byte[]> {
 
     public String failReason(final String urlHash) throws IOException {
         if (urlHash == null) return null;
-        SolrDocument doc = this.solr.get(urlHash, YaCySchema.failreason_t.getSolrFieldName());
+        SolrDocument doc = this.solr.getById(urlHash, YaCySchema.failreason_t.getSolrFieldName());
         if (doc == null) return null;
         String reason = (String) doc.getFieldValue(YaCySchema.failreason_t.getSolrFieldName());
         return reason == null ? null : reason.length() == 0 ? null : reason;

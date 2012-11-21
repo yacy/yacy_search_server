@@ -37,8 +37,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Classification;
-import net.yacy.cora.document.Classification.ContentDomain;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.Domains;

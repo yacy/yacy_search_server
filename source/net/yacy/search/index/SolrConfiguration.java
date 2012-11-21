@@ -139,13 +139,18 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if ((isEmpty() || contains(key)) && (!this.lazy || value != 0)) key.add(doc, value);
     }
 
+    private void add(final SolrInputDocument doc, final YaCySchema key, final long value) {
+        assert !key.isMultiValued();
+        if ((isEmpty() || contains(key)) && (!this.lazy || value != 0)) key.add(doc, value);
+    }
+
     private void add(final SolrInputDocument doc, final YaCySchema key, final boolean value) {
         assert !key.isMultiValued();
         if (isEmpty() || contains(key)) key.add(doc, value);
     }
 
     protected static Date getDate(SolrInputDocument doc, final YaCySchema key) {
-        Date x = (Date) doc.getFieldValue(key.name());
+        Date x = (Date) doc.getFieldValue(key.getSolrFieldName());
         Date now = new Date();
         return (x == null) ? new Date(0) : x.after(now) ? now : x;
     }
@@ -384,6 +389,11 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             List<String> synonyms = condenser.synonyms();
             add(doc, YaCySchema.synonyms_sxt, synonyms);
         }
+        add(doc, YaCySchema.exact_signature_l, condenser.exactSignature());
+        add(doc, YaCySchema.exact_signature_unique_b, true); // this must be corrected afterwards!
+        add(doc, YaCySchema.fuzzy_signature_l, condenser.fuzzySignature());
+        add(doc, YaCySchema.fuzzy_signature_text_t, condenser.fuzzySignatureText());
+        add(doc, YaCySchema.fuzzy_signature_unique_b, true); // this must be corrected afterwards!
 
         // path elements of link
         if (allAttr || contains(YaCySchema.url_paths_sxt)) add(doc, YaCySchema.url_paths_sxt, digestURI.getPaths());

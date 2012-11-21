@@ -30,9 +30,9 @@ import java.util.Date;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
