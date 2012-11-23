@@ -227,13 +227,26 @@ public final class Fulltext implements Iterable<byte[]> {
         Date now = new Date();
         return x.after(now) ? now : x;
     }
+
+    public DigestURI getURL(final byte[] urlHash) {
+        if (urlHash == null) return null;
+        SolrDocument doc;
+        try {
+            doc = this.solr.getById(ASCII.String(urlHash), YaCySchema.sku.getSolrFieldName());
+        } catch (IOException e) {
+            return null;
+        }
+        if (doc == null) return null;
+        String x = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
+        if (x == null) return null;
+        try {
+            DigestURI uri = new DigestURI(x, urlHash);
+            return uri;
+        } catch (MalformedURLException e) {
+            return null;
+        }
+    }
     
-    /**
-     * generates an plasmaLURLEntry using the url hash
-     * if the url cannot be found, this returns null
-     * @param obrwi
-     * @return
-     */
     public URIMetadataNode getMetadata(WordReference wre, long weight) {
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
         return getMetadata(wre.urlhash(), wre, weight);
@@ -243,7 +256,7 @@ public final class Fulltext implements Iterable<byte[]> {
         if (urlHash == null) return null;
         return getMetadata(urlHash, null, 0);
     }
-
+    
     private URIMetadataNode getMetadata(final byte[] urlHash, WordReference wre, long weight) {
 
         // get the metadata from Solr
@@ -519,9 +532,37 @@ public final class Fulltext implements Iterable<byte[]> {
                 true);
     }
 
+    public CloneableIterator<DigestURI> urls() {
+        // enumerates entry elements
+        final Iterator<byte[]> ids = iterator();
+        return new CloneableIterator<DigestURI>() {
+            @Override
+            public CloneableIterator<DigestURI> clone(final Object secondHash) {
+                return this;
+            }
+            @Override
+            public final boolean hasNext() {
+                return ids.hasNext();
+            }
+            @Override
+            public final DigestURI next() {
+                byte[] id = ids.next();
+                if (id == null) return null;
+                return getURL(id);
+            }
+            @Override
+            public final void remove() {
+                ids.remove();
+            }
+            @Override
+            public void close() {
+            }
+        };
+    }
+
     public CloneableIterator<URIMetadataNode> entries() {
         // enumerates entry elements
-    	final Iterator<byte[]> ids = iterator();
+        final Iterator<byte[]> ids = iterator();
         return new CloneableIterator<URIMetadataNode>() {
             @Override
             public CloneableIterator<URIMetadataNode> clone(final Object secondHash) {
@@ -783,15 +824,15 @@ public final class Fulltext implements Iterable<byte[]> {
         // collect hashes from all domains
 
         // fetch urls from the database to determine the host in clear text
-        URIMetadataNode urlref;
+        DigestURI url;
         if (count < 0 || count > domainSamples.size()) count = domainSamples.size();
         this.statsDump = new ArrayList<HostStat>();
         final TreeSet<String> set = new TreeSet<String>();
         for (final URLHashCounter hs: domainSamples.values()) {
             if (hs == null) continue;
-            urlref = this.getMetadata(hs.urlhashb);
-            if (urlref == null || urlref.url() == null || urlref.url().getHost() == null) continue;
-            set.add(urlref.url().getHost());
+            url = this.getURL(hs.urlhashb);
+            if (url == null || url.getHost() == null) continue;
+            set.add(url.getHost());
             count--;
             if (count == 0) break;
         }
@@ -820,7 +861,6 @@ public final class Fulltext implements Iterable<byte[]> {
      */
     public Map<String, HostStat> domainHashResolver(final Map<String, URLHashCounter> domainSamples) {
         final HashMap<String, HostStat> hostMap = new HashMap<String, HostStat>();
-        URIMetadataNode urlref;
 
         final ScoreMap<String> hosthashScore = new ConcurrentScoreMap<String>();
         for (final Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
@@ -828,8 +868,7 @@ public final class Fulltext implements Iterable<byte[]> {
         }
         DigestURI url;
         for (final Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
-            urlref = this.getMetadata(e.getValue().urlhashb);
-            url = urlref.url();
+            url = this.getURL(e.getValue().urlhashb);
             hostMap.put(e.getKey(), new HostStat(url.getHost(), url.getPort(), e.getKey(), hosthashScore.get(e.getKey())));
         }
         return hostMap;
@@ -841,7 +880,6 @@ public final class Fulltext implements Iterable<byte[]> {
 
         // fetch urls from the database to determine the host in clear text
         final Iterator<String> j = domainScore.keys(false); // iterate urlhash-examples in reverse order (biggest first)
-        URIMetadataNode urlref;
         String urlhash;
         count += 10; // make some more to prevent that we have to do this again after deletions too soon.
         if (count < 0 || domainScore.sizeSmaller(count)) count = domainScore.size();
@@ -850,10 +888,9 @@ public final class Fulltext implements Iterable<byte[]> {
         while (j.hasNext()) {
             urlhash = j.next();
             if (urlhash == null) continue;
-            urlref = this.getMetadata(ASCII.getBytes(urlhash));
-            if (urlref == null || urlref.url() == null || urlref.url().getHost() == null) continue;
+            url = this.getURL(ASCII.getBytes(urlhash));
+            if (url == null || url.getHost() == null) continue;
             if (this.statsDump == null) return new ArrayList<HostStat>().iterator(); // some other operation has destroyed the object
-            url = urlref.url();
             this.statsDump.add(new HostStat(url.getHost(), url.getPort(), urlhash.substring(6), domainScore.get(urlhash)));
             count--;
             if (count == 0) break;

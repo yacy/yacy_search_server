@@ -51,7 +51,7 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
-import net.yacy.kelondro.data.meta.URIMetadataNode;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -411,7 +411,7 @@ public final class RankingProcess extends Thread {
         final ScoreMap<String> result = new ConcurrentScoreMap<String>();
 
         final Iterator<String> domhashs = this.hostHashNavigator.keys(false);
-        URIMetadataNode row;
+        DigestURI url;
         byte[] urlhash;
         String hosthash, hostname;
         if ( this.hostHashResolver != null ) {
@@ -421,8 +421,8 @@ public final class RankingProcess extends Thread {
                     continue;
                 }
                 urlhash = this.hostHashResolver.get(hosthash);
-                row = urlhash == null ? null : this.query.getSegment().fulltext().getMetadata(urlhash);
-                hostname = row == null ? null : row.url().getHost();
+                url = urlhash == null ? null : this.query.getSegment().fulltext().getURL(urlhash);
+                hostname = url == null ? null : url.getHost();
                 if ( hostname != null ) {
                     result.set(hostname, this.hostHashNavigator.get(hosthash));
                 }

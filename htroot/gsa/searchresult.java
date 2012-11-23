@@ -115,7 +115,7 @@ public class searchresult {
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 5000 : 100));
         post.put("defType", "edismax");
-        post.put("bq", YaCySchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^200.0"); // a bost query that moves double content to the back
+        post.put("bq", YaCySchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^100000.0"); // a bost query that moves double content to the back
         post.put(CommonParams.FL,
                 YaCySchema.content_type.getSolrFieldName() + ',' +
                 YaCySchema.id.getSolrFieldName() + ',' +

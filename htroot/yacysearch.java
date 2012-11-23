@@ -677,12 +677,12 @@ public class yacysearch {
                     return prop;
                 }
                 final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
-                final URIMetadataNode urlentry = indexSegment.fulltext().getMetadata(UTF8.getBytes(bookmarkHash));
-                if ( urlentry != null ) {
+                final DigestURI url = indexSegment.fulltext().getURL(UTF8.getBytes(bookmarkHash));
+                if ( url != null ) {
                     try {
                         sb.tables.bookmarks.createBookmark(
                             sb.loader,
-                            urlentry.url(),
+                            url,
                             YMarkTables.USER_ADMIN,
                             true,
                             "searchresult",

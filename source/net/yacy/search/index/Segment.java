@@ -58,7 +58,6 @@ import net.yacy.document.Parser;
 import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.citation.CitationReferenceFactory;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
@@ -235,7 +234,7 @@ public class Segment {
                         return null;
                     }
                     if (id == null || id == AbstractSolrConnector.POISON_ID) return null;
-                    DigestURI u = Segment.this.fulltext.getMetadata(ASCII.getBytes(id)).url();
+                    DigestURI u = Segment.this.fulltext.getURL(ASCII.getBytes(id));
                     if (u.toNormalform(true).startsWith(urlstub)) return u;
                 }
             }
@@ -508,13 +507,12 @@ public class Segment {
 
         if (urlhash == null) return 0;
         // determine the url string
-        final URIMetadataNode entry = fulltext().getMetadata(urlhash);
-        if (entry == null) return 0;
-        if (entry.url() == null) return 0;
+        final DigestURI url = fulltext().getURL(urlhash);
+        if (url == null) return 0;
 
         try {
             // parse the resource
-            final Document document = Document.mergeDocuments(entry.url(), null, loader.loadDocuments(loader.request(entry.url(), true, false), cacheStrategy, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay));
+            final Document document = Document.mergeDocuments(url, null, loader.loadDocuments(loader.request(url, true, false), cacheStrategy, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay));
             if (document == null) {
                 // delete just the url entry
                 fulltext().remove(urlhash);

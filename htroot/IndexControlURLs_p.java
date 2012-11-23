@@ -175,11 +175,11 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            final URIMetadataNode entry = segment.fulltext().getMetadata(ASCII.getBytes(urlhash));
-            if (entry == null) {
+            final DigestURI url = segment.fulltext().getURL(ASCII.getBytes(urlhash));
+            if (url == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
-                urlstring = entry.url().toNormalform(true);
+                urlstring = url.toNormalform(true);
                 prop.put("urlstring", "");
                 sb.urlRemove(segment, urlhash.getBytes());
                 prop.putHTML("result", "Removed URL " + urlstring);
@@ -233,9 +233,9 @@ public class IndexControlURLs_p {
 
         // generate list
         if (post.containsKey("urlhashsimilar")) {
-            final Iterator<URIMetadataNode> entryIt = new RotateIterator<URIMetadataNode>(segment.fulltext().entries(), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), (int) segment.RWICount());
+            final Iterator<DigestURI> entryIt = new RotateIterator<DigestURI>(segment.fulltext().urls(), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), (int) segment.RWICount());
 			final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
-			URIMetadataNode entry;
+			DigestURI entry;
 			int i = 0, rows = 0, cols = 0;
 			prop.put("urlhashsimilar", "1");
 			while (entryIt.hasNext() && i < 256) {

@@ -1521,16 +1521,10 @@ public final class Switchboard extends serverSwitch {
     }
 
     public DigestURI getURL(final byte[] urlhash) {
-        if ( urlhash == null ) {
-            return null;
-        }
-        if ( urlhash.length == 0 ) {
-            return null;
-        }
-        final URIMetadataNode le = this.index.fulltext().getMetadata(urlhash);
-        if ( le != null ) {
-            return le.url();
-        }
+        if (urlhash == null) return null;
+        if (urlhash.length == 0) return null;
+        final DigestURI url = this.index.fulltext().getURL(urlhash);
+        if (url != null) return url;
         return this.crawlQueues.getURL(urlhash);
     }
 

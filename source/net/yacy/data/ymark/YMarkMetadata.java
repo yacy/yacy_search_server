@@ -82,7 +82,7 @@ public class YMarkMetadata {
 	public YMarkMetadata(final byte[] urlHash, final Segment indexSegment) {
 		this.document = null;
 		this.indexSegment = indexSegment;
-		this.uri = this.indexSegment.fulltext().getMetadata(urlHash).url();
+		this.uri = this.indexSegment.fulltext().getURL(urlHash);
 	}
 
 	public YMarkMetadata(final Document document) {

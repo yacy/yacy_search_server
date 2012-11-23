@@ -378,10 +378,9 @@ public class IndexControlRWIs_p {
                             } catch ( final SpaceExceededException e ) {
                                 Log.logException(e);
                             }
-                            final URIMetadataNode e = segment.fulltext().getMetadata(b);
+                            url = segment.fulltext().getURL(b);
                             segment.fulltext().remove(b);
-                            if ( e != null ) {
-                                url = e.url();
+                            if ( url != null ) {
                                 pw.println(url.getHost() + "/" + url.getFile());
                                 for ( final String supportedBlacklistType : supportedBlacklistTypes ) {
                                     if ( ListManager.listSetContains(
@@ -413,10 +412,9 @@ public class IndexControlRWIs_p {
                             } catch ( final SpaceExceededException e ) {
                                 Log.logException(e);
                             }
-                            final URIMetadataNode e = segment.fulltext().getMetadata(b);
+                            url = segment.fulltext().getURL(b);
                             segment.fulltext().remove(b);
-                            if ( e != null ) {
-                                url = e.url();
+                            if ( url != null ) {
                                 pw.println(url.getHost() + "/.*");
                                 for ( final BlacklistType supportedBlacklistType : BlacklistType.values() ) {
                                     if ( ListManager.listSetContains(
