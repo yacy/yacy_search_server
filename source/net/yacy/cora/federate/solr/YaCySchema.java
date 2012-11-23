@@ -27,7 +27,7 @@ import java.util.List;
 import org.apache.solr.common.SolrInputDocument;
 
 public enum YaCySchema implements Schema {
-
+    
     // mandatory
     id(SolrType.string, true, true, false, "primary key of document, the URL hash **mandatory field**"),
     sku(SolrType.text_en_splitting_tight, true, true, false, true, "url of document"),
@@ -44,6 +44,7 @@ public enum YaCySchema implements Schema {
     size_i(SolrType.num_integer, true, true, false, "the size of the raw source"),// int size();
     process_s(SolrType.string, true, true, false, "index creation comment"),
     failreason_t(SolrType.text_general, true, true, false, "fail reason if a page was not loaded. if the page was loaded then this field is empty"),
+    failtype_s(SolrType.string, true, true, false, "fail type if a page was not loaded. This field is either empty, 'excl' or 'fail'"),
     httpstatus_i(SolrType.num_integer, true, true, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
     httpstatus_redirect_s(SolrType.num_integer, true, true, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
 
@@ -192,7 +193,7 @@ public enum YaCySchema implements Schema {
     ext_tracker_val(SolrType.num_integer, true, true, true, "number of attribute counts in ext_tracker_txt"),
     ext_title_txt(SolrType.text_general, true, true, true, "names matching title expressions"),
     ext_title_val(SolrType.num_integer, true, true, true, "number of matching title expressions");
-
+    
     private String solrFieldName = null; // solr field name in custom solr schema, defaults to solcell schema field name (= same as this.name() )
     private final SolrType type;
     private final boolean indexed, stored;

@@ -42,6 +42,7 @@ import java.util.Set;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.solr.FailType;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.yacy.ConfigurationSet;
 import net.yacy.cora.protocol.Domains;
@@ -822,7 +823,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
      * @param httpstatus
      * @throws IOException
      */
-    public SolrInputDocument err(final DigestURI digestURI, final String failReason, final int httpstatus) throws IOException {
+    public SolrInputDocument err(final DigestURI digestURI, final String failReason, final FailType failType, final int httpstatus) throws IOException {
         final SolrInputDocument solrdoc = new SolrInputDocument();
         add(solrdoc, YaCySchema.id, ASCII.String(digestURI.hash()));
         add(solrdoc, YaCySchema.sku, digestURI.toNormalform(true));
@@ -836,6 +837,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         
         // fail reason and status
         if (contains(YaCySchema.failreason_t)) add(solrdoc, YaCySchema.failreason_t, failReason);
+        if (contains(YaCySchema.failtype_s)) add(solrdoc, YaCySchema.failtype_s, failType.name());
         if (contains(YaCySchema.httpstatus_i)) add(solrdoc, YaCySchema.httpstatus_i, httpstatus);
         return solrdoc;
     }

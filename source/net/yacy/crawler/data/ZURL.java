@@ -38,6 +38,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.solr.FailType;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
@@ -63,16 +64,18 @@ public class ZURL implements Iterable<ZURL.Entry> {
     public enum FailCategory {
         // TEMPORARY categories are such failure cases that should be tried again
         // FINAL categories are such failure cases that are final and should not be tried again
-        TEMPORARY_NETWORK_FAILURE(true), // an entity could not been loaded
-        FINAL_PROCESS_CONTEXT(false),    // because of a processing context we do not want that url again (i.e. remote crawling)
-        FINAL_LOAD_CONTEXT(false),       // the crawler configuration does not want to load the entity
-        FINAL_ROBOTS_RULE(true),         // a remote server denies indexing or loading
-        FINAL_REDIRECT_RULE(true);       // the remote server redirects this page, thus disallowing reading of content
+        TEMPORARY_NETWORK_FAILURE(true, FailType.fail), // an entity could not been loaded
+        FINAL_PROCESS_CONTEXT(false, FailType.excl),    // because of a processing context we do not want that url again (i.e. remote crawling)
+        FINAL_LOAD_CONTEXT(false, FailType.excl),       // the crawler configuration does not want to load the entity
+        FINAL_ROBOTS_RULE(true, FailType.excl),         // a remote server denies indexing or loading
+        FINAL_REDIRECT_RULE(true, FailType.excl);       // the remote server redirects this page, thus disallowing reading of content
 
         public final boolean store;
+        public final FailType failType;
 
-        private FailCategory(boolean store) {
+        private FailCategory(boolean store, FailType failType) {
             this.store = store;
+            this.failType = failType;
         }
     }
 
@@ -180,7 +183,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         if (this.solrConnector != null && failCategory.store) {
             // send the error to solr
             try {
-                SolrInputDocument errorDoc = this.solrConfiguration.err(bentry.url(), failCategory.name() + " " + reason, httpcode);
+                SolrInputDocument errorDoc = this.solrConfiguration.err(bentry.url(), failCategory.name() + " " + reason, failCategory.failType, httpcode);
                 this.solrConnector.add(errorDoc);
             } catch (final IOException e) {
                 Log.logWarning("SOLR", "failed to send error " + bentry.url().toNormalform(true) + " to solr: " + e.getMessage());
