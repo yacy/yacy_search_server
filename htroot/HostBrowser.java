@@ -36,6 +36,7 @@ import org.apache.solr.common.SolrDocument;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.solr.FailType;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
@@ -57,7 +58,7 @@ public class HostBrowser {
     final static long TIMEOUT = 10000L;
     
     public static enum StoreType {
-        LINK, INDEX, ERROR;
+        LINK, INDEX, EXCLUDED, FAILED;
     }
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
@@ -153,8 +154,10 @@ public class HostBrowser {
                 }
                 
                 // collect the errorurls
-                ReversibleScoreMap<String> errorscore = admin ? fulltext.getSolr().getFacets(YaCySchema.failreason_t.getSolrFieldName() + ":[* TO *]", maxcount, YaCySchema.host_s.getSolrFieldName()).get(YaCySchema.host_s.getSolrFieldName()) : null;
-                if (errorscore == null) errorscore = new ClusteredScoreMap<String>();
+                Map<String, ReversibleScoreMap<String>> exclfacets = admin ? fulltext.getSolr().getFacets(YaCySchema.failtype_s.getSolrFieldName() + ":" + FailType.excl.name(), maxcount, YaCySchema.host_s.getSolrFieldName()) : null;
+                ReversibleScoreMap<String> exclscore = exclfacets == null ? new ClusteredScoreMap<String>() : exclfacets.get(YaCySchema.host_s.getSolrFieldName());
+                Map<String, ReversibleScoreMap<String>> failfacets = admin ? fulltext.getSolr().getFacets(YaCySchema.failtype_s.getSolrFieldName() + ":" + FailType.fail.name(), maxcount, YaCySchema.host_s.getSolrFieldName()) : null;
+                ReversibleScoreMap<String> failscore = failfacets == null ? new ClusteredScoreMap<String>() : failfacets.get(YaCySchema.host_s.getSolrFieldName());
                 
                 int c = 0;
                 Iterator<String> i = hostscore.keys(false);
@@ -163,12 +166,17 @@ public class HostBrowser {
                     host = i.next();
                     prop.put("hosts_list_" + c + "_host", host);
                     boolean inCrawler = crawler.containsKey(host);
-                    int errors = errorscore.get(host);
+                    int exclcount = exclscore.get(host);
+                    int failcount = failscore.get(host);
+                    int errors = exclcount + failcount;
                     prop.put("hosts_list_" + c + "_count", hostscore.get(host) - errors);
                     prop.put("hosts_list_" + c + "_crawler", inCrawler ? 1 : 0);
                     if (inCrawler) prop.put("hosts_list_" + c + "_crawler_pending", crawler.get(host)[0]);
                     prop.put("hosts_list_" + c + "_errors", errors > 0 ? 1 : 0);
-                    if (errors > 0) prop.put("hosts_list_" + c + "_errors_count", errors);
+                    if (errors > 0) {
+                        prop.put("hosts_list_" + c + "_errors_exclcount", exclcount);
+                        prop.put("hosts_list_" + c + "_errors_failcount", failcount);
+                    }
                     prop.put("hosts_list_" + c + "_type", inCrawler ? 2 : errors > 0 ? 1 : 0);
                     if (onlyCrawling) {
                         if (inCrawler) c++;
@@ -231,6 +239,7 @@ public class HostBrowser {
                         YaCySchema.id.getSolrFieldName(),
                         YaCySchema.sku.getSolrFieldName(),
                         YaCySchema.failreason_t.getSolrFieldName(),
+                        YaCySchema.failtype_s.getSolrFieldName(),
                         YaCySchema.inboundlinks_protocol_sxt.getSolrFieldName(),
                         YaCySchema.inboundlinks_urlstub_txt.getSolrFieldName(),
                         YaCySchema.outboundlinks_protocol_sxt.getSolrFieldName(),
@@ -238,7 +247,7 @@ public class HostBrowser {
                         );
                 SolrDocument doc;
                 Set<String> storedDocs = new HashSet<String>();
-                Map<String, String> errorDocs = new HashMap<String, String>();
+                Map<String, FailType> errorDocs = new HashMap<String, FailType>();
                 Set<String> inboundLinks = new HashSet<String>();
                 Map<String, ReversibleScoreMap<String>> outboundHosts = new HashMap<String, ReversibleScoreMap<String>>();
                 int hostsize = 0;
@@ -246,7 +255,8 @@ public class HostBrowser {
                 long timeout = System.currentTimeMillis() + TIMEOUT;
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                     String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
-                    String error = (String) doc.getFieldValue(YaCySchema.failreason_t.getSolrFieldName());
+                    String errortype = (String) doc.getFieldValue(YaCySchema.failtype_s.getSolrFieldName());
+                    FailType error = errortype == null ? null : FailType.valueOf(errortype);  
                     if (u.startsWith(path)) {
                         if (delete) {
                             deleteIDs.add(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())));
@@ -298,7 +308,7 @@ public class HostBrowser {
                 // now combine all lists into one
                 Map<String, StoreType> files = new HashMap<String, StoreType>();
                 for (String u: storedDocs) files.put(u, StoreType.INDEX);
-                for (String u: errorDocs.keySet()) files.put(u, StoreType.ERROR);
+                for (Map.Entry<String, FailType> e: errorDocs.entrySet()) files.put(e.getKey(), e.getValue() == FailType.fail ? StoreType.FAILED : StoreType.EXCLUDED);
                 for (String u: inboundLinks) if (!storedDocs.contains(u)) files.put(u, StoreType.LINK);
                 for (String u: loadingLinks) if (u.startsWith(path) && !storedDocs.contains(u)) files.put(u, StoreType.LINK);
                 Log.logInfo("HostBrowser", "collected " + files.size() + " urls for path " + path);
@@ -343,22 +353,11 @@ public class HostBrowser {
                 
                 int maxcount = 1000;
                 int c = 0;
+                // first list only folders
+                int filecounter = 0;
                 for (Map.Entry<String, Object> entry: list.entrySet()) {
-                    if (entry.getValue() instanceof StoreType) {
-                        // this is a file
-                        prop.put("files_list_" + c + "_type", 0);
-                        prop.put("files_list_" + c + "_type_url", entry.getKey());
-                        StoreType type = (StoreType) entry.getValue();
-                        try {uri = new DigestURI(entry.getKey());} catch (MalformedURLException e) {uri = null;}
-                        boolean loading = load.equals(entry.getKey()) || (uri != null && sb.crawlQueues.urlExists(uri.hash()) != null);
-                        //String failr = fulltext.failReason(ASCII.String(uri.hash()));
-                        prop.put("files_list_" + c + "_type_stored", type == StoreType.INDEX ? 1 : loading ? 2 : type == StoreType.ERROR ? 3 : 0 /*linked*/);
-                        prop.put("files_list_" + c + "_type_stored_load", loadRight ? 1 : 0);
-                        if (type == StoreType.ERROR) prop.put("files_list_" + c + "_type_stored_error", errorDocs.get(entry.getKey()));
-                        if (loadRight) {
-                            prop.put("files_list_" + c + "_type_stored_load_url", entry.getKey());
-                            prop.put("files_list_" + c + "_type_stored_load_path", path);
-                        }
+                    if ((entry.getValue() instanceof StoreType)) {
+                        filecounter++;
                     } else {
                         // this is a folder
                         prop.put("files_list_" + c + "_type", 1);
@@ -367,14 +366,41 @@ public class HostBrowser {
                         int stored = ((int[]) entry.getValue())[1];
                         int crawler = ((int[]) entry.getValue())[2];
                         int error = ((int[]) entry.getValue())[3];
-                        prop.put("files_list_" + c + "_type_count", stored + " stored / " + linked + " linked" + (crawler > 0 ? (" / " + crawler + " pending") : "") + (error > 0 ? (" / " + error + " errors") : ""));
+                        prop.put("files_list_" + c + "_type_stored", stored);
+                        prop.put("files_list_" + c + "_type_linked", linked);
+                        prop.put("files_list_" + c + "_type_pendingVisible", crawler > 0 ? 1 : 0);
+                        prop.put("files_list_" + c + "_type_pending", crawler);
+                        prop.put("files_list_" + c + "_type_excludedVisible", 0);
+                        prop.put("files_list_" + c + "_type_excluded", 0);
+                        prop.put("files_list_" + c + "_type_failedVisible", error > 0 ? 1 : 0);
+                        prop.put("files_list_" + c + "_type_failed", error);
+                        if (++c >= maxcount) break;
                     }
-                    if (++c >= maxcount) break;
+                }
+                // then list files
+                for (Map.Entry<String, Object> entry: list.entrySet()) {
+                    if (entry.getValue() instanceof StoreType) {
+                        // this is a file
+                        prop.put("files_list_" + c + "_type", 0);
+                        prop.put("files_list_" + c + "_type_url", entry.getKey());
+                        StoreType type = (StoreType) entry.getValue();
+                        try {uri = new DigestURI(entry.getKey());} catch (MalformedURLException e) {uri = null;}
+                        boolean loading = load.equals(entry.getKey()) || (uri != null && sb.crawlQueues.urlExists(uri.hash()) != null);
+                        prop.put("files_list_" + c + "_type_stored", type == StoreType.INDEX ? 1 : (type == StoreType.EXCLUDED || type == StoreType.FAILED) ? 3 : loading ? 2 : 0 /*linked*/);
+                        prop.put("files_list_" + c + "_type_stored_load", loadRight ? 1 : 0);
+                        if (type == StoreType.EXCLUDED || type == StoreType.FAILED) prop.put("files_list_" + c + "_type_stored_error", errorDocs.get(entry.getKey()).name());
+                        if (loadRight) {
+                            prop.put("files_list_" + c + "_type_stored_load_url", entry.getKey());
+                            prop.put("files_list_" + c + "_type_stored_load_path", path);
+                        }
+                        if (++c >= maxcount) break;
+                    }
                 }
                 prop.put("files_list", c);
                 prop.putHTML("files_path", path);
                 prop.put("files_hostsize", hostsize);
-                prop.put("files_subpathsize", storedDocs.size());
+                prop.put("files_subpathloadsize", storedDocs.size());
+                prop.put("files_subpathdetectedsize", filecounter - storedDocs.size());
                 prop.put("files", 1);
 
                 // generate inbound-links table
