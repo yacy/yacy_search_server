@@ -504,8 +504,9 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
     }
 
     public synchronized List<Row.Entry> top(int count) {
+        if (count > this.chunkcount) count = this.chunkcount;
         final ArrayList<Row.Entry> list = new ArrayList<Row.Entry>();
-        if (this.chunkcount == 0) return list;
+        if (this.chunkcount == 0 || count == 0) return list;
         Row.Entry entry;
         int cursor = this.chunkcount - 1;
         while (count > 0 && cursor >= 0) {
@@ -513,6 +514,22 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
             list.add(entry);
             count--;
             cursor--;
+        }
+        return list;
+    }
+    
+    public synchronized List<Row.Entry> random(int count) {
+        if (count > this.chunkcount) count = this.chunkcount;
+        final ArrayList<Row.Entry> list = new ArrayList<Row.Entry>();
+        if (this.chunkcount == 0 || count == 0) return list;
+        Row.Entry entry;
+        int cursor = 0;
+        int stepsize = this.chunkcount / count;
+        while (count > 0 && cursor < this.chunkcount) {
+            entry = get(cursor, true);
+            list.add(entry);
+            count--;
+            cursor += stepsize;
         }
         return list;
     }

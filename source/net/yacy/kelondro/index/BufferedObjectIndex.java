@@ -231,6 +231,18 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
     }
 
     @Override
+    public List<Row.Entry> random(final int count) throws IOException {
+        final List<Row.Entry> list = new ArrayList<Row.Entry>();
+        synchronized (this.backend) {
+            List<Row.Entry> list0 = this.buffer.random(count);
+            list.addAll(list0);
+            list0 = this.backend.random(count - list.size());
+            list.addAll(list0);
+        }
+        return list;
+    }
+
+    @Override
     public Entry removeOne() throws IOException {
         synchronized (this.backend) {
             if (!this.buffer.isEmpty()) {

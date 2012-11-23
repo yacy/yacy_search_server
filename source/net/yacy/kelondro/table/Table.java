@@ -833,8 +833,9 @@ public class Table implements Index, Iterable<Row.Entry> {
 
     @Override
     public List<Row.Entry> top(int count) throws IOException {
+        if (count > this.size()) count = this.size();
         final ArrayList<Row.Entry> list = new ArrayList<Row.Entry>();
-        if ((this.file == null) || (this.index == null)) return list;
+        if (this.file == null || this.index == null || this.size() == 0 || count == 0) return list;
         long i = this.file.size() - 1;
         while (count > 0 && i >= 0) {
             final byte[] b = new byte[this.rowdef.objectsize];
@@ -842,6 +843,23 @@ public class Table implements Index, Iterable<Row.Entry> {
             list.add(this.rowdef.newEntry(b));
             i--;
             count--;
+        }
+        return list;
+    }
+
+    @Override
+    public List<Row.Entry> random(int count) throws IOException {
+        if (count > this.size()) count = this.size();
+        final ArrayList<Row.Entry> list = new ArrayList<Row.Entry>();
+        if (this.file == null || this.index == null || this.size() == 0 || count == 0) return list;
+        long cursor = 0;
+        int stepsize = this.size() / count;
+        while (count > 0 && cursor < this.size()) {
+            final byte[] b = new byte[this.rowdef.objectsize];
+            this.file.get(cursor, b, 0);
+            list.add(this.rowdef.newEntry(b));
+            count--;
+            cursor += stepsize;
         }
         return list;
     }

@@ -43,7 +43,6 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
-import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.storage.HandleSet;
@@ -481,6 +480,7 @@ public class Balancer {
             	rest = rest + 1000 * loops;
             	loops = 0;
             }
+            Thread.currentThread().setName("Balancer waiting for " +crawlEntry.url().getHost() + ": " + sleeptime + " milliseconds");
             synchronized(this) {
                 // must be synchronized here to avoid 'takeover' moves from other threads which then idle the same time which would not be enough
                 if (rest > 0) {try {this.wait(rest);} catch (final InterruptedException e) {}}
@@ -618,20 +618,16 @@ public class Balancer {
     	this.lastDomainStackFill = System.currentTimeMillis();
     	//final HandleSet handles = this.urlFileIndex.keysFromBuffer(objectIndexBufferSize / 2);
         //final CloneableIterator<byte[]> i = handles.keys(true, null);
-        final CloneableIterator<byte[]> i = this.urlFileIndex.keys(true, null);
-        byte[] handle;
         String host;
         Request request;
         int count = 0;
         long timeout = System.currentTimeMillis() + 5000;
-    	while (i.hasNext()) {
-    	    handle = i.next();
-    	    final Row.Entry entry = this.urlFileIndex.get(handle, false);
+    	for (Row.Entry entry: this.urlFileIndex.random(10000)) {
     	    if (entry == null) continue;
     	    request = new Request(entry);
     	    host = request.url().getHost();
     		try {
-                pushHashToDomainStacks(host, request.url().hosthash(), handle);
+                pushHashToDomainStacks(host, request.url().hosthash(), entry.getPrimaryKeyBytes());
             } catch (final SpaceExceededException e) {
                 break;
             }

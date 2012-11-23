@@ -508,6 +508,26 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     }
 
     @Override
+    public List<Row.Entry> random(final int count) throws IOException {
+        final Iterator<Index> i = this.tables.values().iterator();
+        Index table, maxtable = null;
+        int maxcount = -1;
+        while (i.hasNext()) {
+            table = i.next();
+            if (table.size() > maxcount) {
+                maxtable = table;
+                maxcount = table.size();
+            }
+        }
+        if (maxtable == null) {
+            return null;
+        }
+        synchronized (this) { // avoid concurrent IO from different methods
+            return maxtable.random(count);
+        }
+    }
+
+    @Override
     public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         final List<CloneableIterator<byte[]>> c = new ArrayList<CloneableIterator<byte[]>>(this.tables.size());
         final Iterator<Index> i = this.tables.values().iterator();

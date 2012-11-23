@@ -301,6 +301,16 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
         list.addAll(list0);
         return list;
     }
+    
+    @Override
+    public synchronized List<Row.Entry> random(final int count) throws IOException {
+        final List<Row.Entry> list = new ArrayList<Row.Entry>();
+        List<Row.Entry> list0 = this.index1.random(count);
+        list.addAll(list0);
+        list0 = this.index0.random(count - list.size());
+        list.addAll(list0);
+        return list;
+    }
 
     @Override
     public long mem() {

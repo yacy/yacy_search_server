@@ -312,6 +312,11 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
     }
 
     @Override
+    public List<Row.Entry> random(final int count) throws IOException {
+        return null;
+    }
+
+    @Override
     public CloneableIterator<Row.Entry> rows(final boolean up, final byte[] startKey) throws IOException {
         // Objects are of type kelondroRow.Entry
         return null;

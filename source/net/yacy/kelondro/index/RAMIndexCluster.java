@@ -284,6 +284,25 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
     }
 
     @Override
+    public List<Row.Entry> random(final int count) {
+        final List<Row.Entry> list = new ArrayList<Row.Entry>();
+        synchronized (this.cluster) {
+            for (final RAMIndex element : this.cluster) {
+                if (element != null) {
+                    try {
+                        final List<Row.Entry> list0 = element.random(count - list.size());
+                        list.addAll(list0);
+                    } catch (final IOException e) {
+                        continue;
+                    }
+                }
+                if (list.size() >= count) return list;
+            }
+        }
+        return list;
+    }
+
+    @Override
     public final Entry replace(final Entry row) throws SpaceExceededException {
         final int i = indexFor(row);
         assert i >= 0 : "i = " + i;

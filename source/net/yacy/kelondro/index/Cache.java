@@ -586,6 +586,11 @@ public final class Cache implements Index, Iterable<Row.Entry> {
     }
 
     @Override
+    public synchronized List<Row.Entry> random(final int count) throws IOException {
+        return this.index.random(count);
+    }
+
+    @Override
     public final synchronized Row row() {
         return this.index.row();
     }
