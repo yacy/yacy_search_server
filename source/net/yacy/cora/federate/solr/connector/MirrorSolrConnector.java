@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.federate.solr.YaCySchema;
@@ -86,7 +87,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         this.hitCacheMax = hitCacheMax;
         this.missCacheMax = missCacheMax;
         this.partitions = Runtime.getRuntime().availableProcessors() * 2;
-        this.hitMissCache = new HashMap<String, HitMissCache>();
+        this.hitMissCache = new ConcurrentHashMap<String, HitMissCache>();
         this.documentCache = new ConcurrentARC<String, SolrDocument>(docCacheMax, this.partitions);
     }
 

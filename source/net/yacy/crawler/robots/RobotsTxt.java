@@ -236,6 +236,7 @@ public class RobotsTxt {
 
     public void ensureExist(final MultiProtocolURI theURL, final Set<String> thisAgents, boolean concurrent) {
         final String urlHostPort = getHostPort(theURL);
+        if (urlHostPort == null) return;
         final BEncodedHeap robotsTable;
         try {
             robotsTable = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
@@ -371,6 +372,7 @@ public class RobotsTxt {
     static final String getHostPort(final MultiProtocolURI theURL) {
         final int port = getPort(theURL);
         String host = theURL.getHost();
+        if (host == null) return null;
         StringBuilder sb = new StringBuilder(host.length() + 6);
         sb.append(host).append(':').append(Integer.toString(port));
         return sb.toString();

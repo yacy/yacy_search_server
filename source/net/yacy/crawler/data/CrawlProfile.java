@@ -490,6 +490,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
 
     public static String mustMatchFilterFullDomain(final MultiProtocolURI uri) {
         String host = uri.getHost();
+        if (host == null) return uri.getProtocol() + ".*";
         if (host.startsWith("www.")) host = host.substring(4);
         String protocol = uri.getProtocol();
         if ("http".equals(protocol) || "https".equals(protocol)) protocol = "https?+";
