@@ -215,29 +215,23 @@ public final class Fulltext implements Iterable<byte[]> {
 
     public Date getLoadDate(final String urlHash) {
         if (urlHash == null) return null;
-        SolrDocument doc;
+        Date x;
         try {
-            doc = this.solr.getById(urlHash, YaCySchema.load_date_dt.getSolrFieldName());
+            x = (Date) this.solr.getFieldById(urlHash, YaCySchema.load_date_dt.getSolrFieldName());
         } catch (IOException e) {
             return null;
         }
-        if (doc == null) return null;
-        Date x = (Date) doc.getFieldValue(YaCySchema.load_date_dt.getSolrFieldName());
-        if (x == null) return new Date(0);
-        Date now = new Date();
-        return x.after(now) ? now : x;
+        return x;
     }
 
     public DigestURI getURL(final byte[] urlHash) {
         if (urlHash == null) return null;
-        SolrDocument doc;
+        String x;
         try {
-            doc = this.solr.getById(ASCII.String(urlHash), YaCySchema.sku.getSolrFieldName());
+            x = (String) this.solr.getFieldById(ASCII.String(urlHash), YaCySchema.sku.getSolrFieldName());
         } catch (IOException e) {
             return null;
         }
-        if (doc == null) return null;
-        String x = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
         if (x == null) return null;
         try {
             DigestURI uri = new DigestURI(x, urlHash);
@@ -291,13 +285,9 @@ public final class Fulltext implements Iterable<byte[]> {
         byte[] idb = ASCII.getBytes(id);
         try {
         	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-        	SolrDocument sd = this.solr.getById(id, YaCySchema.last_modified.getSolrFieldName());
-        	Date now = new Date();
-        	Date sdDate = sd == null ? null : URIMetadataNode.getDate(sd, YaCySchema.last_modified);
-        	if (sdDate == null || sdDate.after(now)) sdDate = now;
-        	Date docDate = SolrConfiguration.getDate(doc, YaCySchema.last_modified);
-        	if (docDate.after(now)) docDate = now;
-        	if (sd == null || sdDate.before(docDate)) {
+        	Date sdDate = (Date) this.solr.getFieldById(id, YaCySchema.last_modified.getSolrFieldName());
+        	Date docDate = null;
+        	if (sdDate == null || (docDate = SolrConfiguration.getDate(doc, YaCySchema.last_modified)) == null || sdDate.before(docDate)) {
                 if (this.solrScheme.contains(YaCySchema.ip_s)) {
                     // ip_s needs a dns lookup which causes blockings during search here
                     this.solr.add(doc);
@@ -492,9 +482,8 @@ public final class Fulltext implements Iterable<byte[]> {
 
     public String failReason(final String urlHash) throws IOException {
         if (urlHash == null) return null;
-        SolrDocument doc = this.solr.getById(urlHash, YaCySchema.failreason_t.getSolrFieldName());
-        if (doc == null) return null;
-        String reason = (String) doc.getFieldValue(YaCySchema.failreason_t.getSolrFieldName());
+        String reason = (String) this.solr.getFieldById(urlHash, YaCySchema.failreason_t.getSolrFieldName());
+        if (reason == null) return null;
         return reason == null ? null : reason.length() == 0 ? null : reason;
     }
 

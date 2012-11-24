@@ -383,8 +383,13 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         }
         if (allAttr || contains(YaCySchema.text_t)) add(doc, YaCySchema.text_t, content);
         if (allAttr || contains(YaCySchema.wordcount_i)) {
-            final int contentwc = content.split(" ").length;
-            add(doc, YaCySchema.wordcount_i, contentwc);
+            if (content.length() == 0) {
+                add(doc, YaCySchema.wordcount_i, 0);
+            } else {
+                int contentwc = 1;
+                for (int i = content.length() - 1; i >= 0; i--) if (content.charAt(i) == ' ') contentwc++;
+                add(doc, YaCySchema.wordcount_i, contentwc);
+            }
         }
         if (allAttr || contains(YaCySchema.synonyms_sxt)) {
             List<String> synonyms = condenser.synonyms();

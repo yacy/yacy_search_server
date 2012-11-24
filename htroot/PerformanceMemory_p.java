@@ -205,7 +205,7 @@ public class PerformanceMemory_p {
 
         // other caching structures
         final MirrorSolrConnector solr = (MirrorSolrConnector) Switchboard.getSwitchboard().index.fulltext().getSolr();
-        final MirrorSolrConnector.HitMissCache hitMissCache = solr.getCache(YaCySchema.id.getSolrFieldName());
+        final MirrorSolrConnector.HitMissCache hitMissCache = solr.getHitMissCache(YaCySchema.id.getSolrFieldName());
         prop.putNum("solrcacheHit.size", solr.nameCacheHitSize());
         prop.putNum("solrcacheHit.Hit", hitMissCache.hitCache_Hit);
         prop.putNum("solrcacheHit.Miss", hitMissCache.hitCache_Miss);

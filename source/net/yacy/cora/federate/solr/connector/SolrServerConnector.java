@@ -109,6 +109,14 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
 
     @Override
     public long getSize() {
+        /*
+        if (this.server instanceof EmbeddedSolrServer) {
+            EmbeddedSolrServer ess = (EmbeddedSolrServer) this.server;
+            CoreContainer coreContainer = ess.getCoreContainer();
+            String coreName = coreContainer.getDefaultCoreName();
+            SolrCore core = coreContainer.getCore(coreName);
+        }
+        */
         try {
             final QueryResponse rsp = query(AbstractSolrConnector.catchSuccessQuery);
             if (rsp == null) return 0;
@@ -190,7 +198,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         try {
             synchronized (this.server) {
                 this.server.request(up);
-                this.server.commit();
+                //this.server.commit();
             }
         } catch (final Throwable e) {
             throw new IOException(e);
@@ -204,11 +212,20 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             synchronized (this.server) {
                 //this.server.deleteById((String) solrdoc.getFieldValue(YaCySchema.id.getSolrFieldName()));
                 this.server.add(solrdoc, this.commitWithinMs);
-                //this.server.commit();
             }
         } catch (SolrServerException e) {
-            log.warn(e.getMessage() + " DOC=" + solrdoc.toString());
-            throw new IOException(e);
+            // ok try this again and delete the document in advance
+            try {
+                this.server.deleteById((String) solrdoc.getFieldValue(YaCySchema.id.getSolrFieldName()));
+            } catch (SolrServerException e1) {}
+            try {
+                synchronized (this.server) {
+                    this.server.add(solrdoc, this.commitWithinMs);
+                }
+            } catch (SolrServerException ee) {
+                log.warn(e.getMessage() + " DOC=" + solrdoc.toString());
+                throw new IOException(ee);
+            }
         }
     }
 
@@ -315,7 +332,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     abstract public QueryResponse query(ModifiableSolrParams params) throws IOException;
 
     private final char[] queryIDTemplate = "id:\"            \"".toCharArray();
-
+    
     @Override
     public SolrDocument getById(final String key, final String ... fields) throws IOException {
         final SolrQuery query = new SolrQuery();

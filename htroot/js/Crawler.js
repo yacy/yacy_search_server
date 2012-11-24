@@ -74,7 +74,7 @@ function handleStatus(){
 	
 	var ppmSpan = document.getElementById("ppmSpan");
 	removeAllChildren(ppmSpan);
-	for(i = 0; i < ppm / 10; i++){
+	for(i = 0; i < ppm / 25; i++){
 		img=document.createElement("img");
 		img.setAttribute("src", BAR_IMG1);
 		ppmSpan.appendChild(img);

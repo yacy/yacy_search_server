@@ -144,6 +144,11 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
     }
 
     @Override
+    public Object getFieldById(final String key, final String field) throws IOException {
+        return this.solr.getFieldById(key, field);
+    }
+
+    @Override
     public SolrDocument getById(final String key, final String ... fields) throws IOException {
         return this.solr.getById(key, fields);
     }

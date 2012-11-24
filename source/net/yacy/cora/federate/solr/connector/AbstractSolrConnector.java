@@ -73,6 +73,13 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             return false;
         }
     }
+
+    @Override
+    public Object getFieldById(final String key, final String field) throws IOException {
+        SolrDocument doc = getById(key, field);
+        if (doc == null) return null;
+        return doc.getFieldValue(field);
+    }
     
     /**
      * Get a query result from solr as a stream of documents.

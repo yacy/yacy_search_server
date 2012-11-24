@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.federate.solr.YaCySchema;
@@ -59,6 +60,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     private SolrConnector solr1;
     private int hitCacheMax, missCacheMax, partitions;
     private final Map<String, HitMissCache> hitMissCache;
+    private final Map<String, ARC<String, Object>> fieldCache; // a map from a field name to a id-key/value object cache
     private final ARC<String, SolrDocument> documentCache;
     public long documentCache_Hit = 0, documentCache_Miss = 0, documentCache_Insert = 0; // for statistics only; do not write
 
@@ -86,16 +88,26 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         this.hitCacheMax = hitCacheMax;
         this.missCacheMax = missCacheMax;
         this.partitions = Runtime.getRuntime().availableProcessors() * 2;
-        this.hitMissCache = new HashMap<String, HitMissCache>();
+        this.hitMissCache = new ConcurrentHashMap<String, HitMissCache>();
+        this.fieldCache = new ConcurrentHashMap<String, ARC<String, Object>>();
         this.documentCache = new ConcurrentARC<String, SolrDocument>(docCacheMax, this.partitions);
     }
 
 
-    public HitMissCache getCache(String field) {
+    public HitMissCache getHitMissCache(String field) {
         HitMissCache c = this.hitMissCache.get(field);
         if (c == null) {
             c =  new HitMissCache(this.hitCacheMax, this.missCacheMax, this.partitions);
             this.hitMissCache.put(field, c);
+        }
+        return c;
+    }
+    
+    public ARC<String, Object> getFieldCache(String field) {
+        ARC<String, Object> c = this.fieldCache.get(field);
+        if (c == null) {
+            c =  new ConcurrentARC<String, Object>(this.hitCacheMax, this.partitions);
+            this.fieldCache.put(field, c);
         }
         return c;
     }
@@ -137,7 +149,8 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     public void clearCache() {
-        for (HitMissCache c: hitMissCache.values()) c.clearCache();
+        for (HitMissCache c: this.hitMissCache.values()) c.clearCache();
+        for (ARC<String, Object> c: this.fieldCache.values()) c.clear();
         this.documentCache.clear();
     }
 
@@ -189,7 +202,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     @Override
     public void delete(final String id) throws IOException {
         this.documentCache.remove(id);
-        HitMissCache c = getCache("id");
+        HitMissCache c = getHitMissCache("id");
         c.hitCache.remove(id);
         c.missCache.put(id, EXIST);
         c.missCache_Insert++;
@@ -206,7 +219,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     public void delete(final List<String> ids) throws IOException {
         for (String id: ids) {
             this.documentCache.remove(id);
-            HitMissCache c = getCache("id");
+            HitMissCache c = getHitMissCache("id");
             c.hitCache.remove(id);
             c.missCache.put(id, EXIST);
             c.missCache_Insert++;
@@ -226,7 +239,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
 
     @Override
     public boolean exists(final String fieldName, final String key) throws IOException {
-        HitMissCache c = getCache(fieldName);
+        HitMissCache c = getHitMissCache(fieldName);
         if (c.hitCache.containsKey(key)) {
             c.hitCache_Hit++;
             return true;
@@ -252,16 +265,32 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         c.missCache_Insert++;
         return false;
     }
+
+    @Override
+    public Object getFieldById(final String key, final String field) throws IOException {
+        // try to get this from this cache
+        ARC<String, Object> c = getFieldCache(field);
+        Object o = c.get(key);
+        if (o != null) return o;
+        
+        // load the document
+        o = super.getFieldById(key, field);
+
+        // use result to fill the cache
+        if (o == null) return null;
+        c.put(key, o);
+        return o;
+    }
     
     @Override
     public SolrDocument getById(final String key, final String ... fields) throws IOException {
-        SolrDocument doc = fields.length == 0 ? this.documentCache.get(key) : null;
+        SolrDocument doc = this.documentCache.get(key);
         if (doc != null) {
             this.documentCache_Hit++;
         	return doc;
         }
         documentCache_Miss++;
-        HitMissCache c = this.getCache(YaCySchema.id.getSolrFieldName());
+        HitMissCache c = this.getHitMissCache(YaCySchema.id.getSolrFieldName());
         if (c.missCache.containsKey(key)) {
             c.missCache_Hit++;
         	return null;
@@ -277,6 +306,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
             this.commit();
             if ((solr0 != null && ((doc = solr0.getById(key, fields)) != null)) || (solr1 != null && ((doc = solr1.getById(key, fields)) != null))) {
                 addToCache(doc, fields.length == 0);
+                return doc;
             }
         }
         c.missCache.put(key, EXIST);
@@ -467,6 +497,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     private void addToCache(SolrDocument doc, boolean doccach) {
         for (Map.Entry<String, HitMissCache> e: this.hitMissCache.entrySet()) {
             Object keyo = doc.getFieldValue(e.getKey());
+            if (keyo == null) continue;
             String key = null;
             if (keyo instanceof String) key = (String) keyo;
             if (keyo instanceof Integer) key = ((Integer) keyo).toString();
@@ -478,29 +509,37 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
                 c.hitCache_Insert++;
             }
         }
+
+        String id = (String) doc.getFieldValue(YaCySchema.id.getSolrFieldName());
+        if (id != null) {
+        for (Map.Entry<String, ARC<String, Object>> e: this.fieldCache.entrySet()) {
+            Object keyo = doc.getFieldValue(e.getKey());
+            if (keyo != null) e.getValue().put(id, keyo);
+        }
+
         if (doccach) {
-            this.documentCache.put((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName()), doc);
+            this.documentCache.put(id, doc);
             this.documentCache_Insert++;
+        }
         }
     }
     
-
     @Override
     public long getSize() {
         long s = 0;
         if (this.solr0 != null) s += this.solr0.getSize();
         if (this.solr1 != null) s += this.solr1.getSize();
-        HitMissCache c = getCache("id");
+        HitMissCache c = getHitMissCache("id");
         return Math.max(this.documentCache.size(), Math.max(c.hitCache.size(), s));
     }
 
 	public int nameCacheHitSize() {
-        HitMissCache c = getCache("id");
+        HitMissCache c = getHitMissCache("id");
 		return c.hitCache.size();
 	}
 
 	public int nameCacheMissSize() {
-        HitMissCache c = getCache("id");
+        HitMissCache c = getHitMissCache("id");
 		return c.missCache.size();
 	}
 
