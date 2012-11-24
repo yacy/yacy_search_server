@@ -55,8 +55,8 @@
 	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.6.4.jar"/>
-	<classpathentry kind="lib" path="lib/apache-solr-core-4.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/apache-solr-solrj-4.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/apache-solr-core-4.0.0.jar" sourcepath="/Users/admin/Development/sourcecode/apache-solr-4.0.0-src/src/java"/>
+	<classpathentry kind="lib" path="lib/apache-solr-solrj-4.0.0.jar" sourcepath="/Users/admin/Development/sourcecode/apache-solr-4.0.0-src/src/java"/>
 	<classpathentry kind="lib" path="lib/lucene-analyzers-common-4.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-analyzers-phonetic-4.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-core-4.0.0.jar"/>
