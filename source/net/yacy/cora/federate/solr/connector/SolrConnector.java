@@ -21,7 +21,6 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -103,8 +102,6 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @throws SolrException
      */
     public void add(final SolrInputDocument solrdoc) throws IOException, SolrException;
-    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException;
-
     /**
      * get a field value from solr by given key for the id-field and a field name
      * @param key

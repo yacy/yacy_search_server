@@ -21,7 +21,6 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -172,11 +171,6 @@ public class RetrySolrConnector extends AbstractSolrConnector implements SolrCon
             continue;
         }
         if (ee != null) throw (ee instanceof IOException) ? (IOException) ee : new IOException(ee.getMessage());
-    }
-
-    @Override
-    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
-        for (SolrInputDocument d: solrdocs) add(d);
     }
 
     @Override

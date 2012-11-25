@@ -21,7 +21,6 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -159,17 +158,6 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
             this.queue.put(solrdoc);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
-        for (SolrInputDocument d: solrdocs) {
-            try {
-                this.queue.put(d);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 

@@ -21,7 +21,6 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -330,11 +329,6 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         this.documentCache_Insert++;
         if (this.solr0 != null) this.solr0.add(solrdoc);
         if (this.solr1 != null) this.solr1.add(solrdoc);
-    }
-
-    @Override
-    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
-        for (SolrInputDocument solrdoc: solrdocs) add(solrdoc);
     }
 
     /**

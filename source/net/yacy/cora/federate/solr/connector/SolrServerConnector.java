@@ -22,8 +22,6 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +35,9 @@ import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
+import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -47,6 +47,18 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.core.CoreContainer;
+import org.apache.solr.core.SolrCore;
+import org.apache.solr.handler.component.QueryComponent;
+import org.apache.solr.handler.component.ResponseBuilder;
+import org.apache.solr.handler.component.SearchComponent;
+import org.apache.solr.handler.component.SearchHandler;
+import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.request.SolrRequestHandler;
+import org.apache.solr.request.SolrRequestInfo;
+import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.servlet.SolrRequestParsers;
 
 public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
@@ -107,8 +119,52 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         }
     }
 
+    private static final SolrRequestParsers _parser = new SolrRequestParsers(null);
+
     @Override
     public long getSize() {
+        String threadname = Thread.currentThread().getName();
+        Thread.currentThread().setName("solr query: size");
+        if (this.server instanceof EmbeddedSolrServer) {
+            EmbeddedSolrServer ess = (EmbeddedSolrServer) this.server;
+            CoreContainer coreContainer = ess.getCoreContainer();
+            String coreName = coreContainer.getDefaultCoreName();
+            SolrCore core = coreContainer.getCore(coreName);
+            if (core == null) throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "No such core: " + coreName);
+
+            try {
+                SolrParams params = AbstractSolrConnector.catchSuccessQuery;
+                QueryRequest request = new QueryRequest(AbstractSolrConnector.catchSuccessQuery);
+                SolrQueryRequest req = _parser.buildRequestFrom(core, params, request.getContentStreams());
+                String path = "/select"; 
+                req.getContext().put("path", path);
+                SolrQueryResponse rsp = new SolrQueryResponse();
+                SolrRequestInfo.setRequestInfo(new SolrRequestInfo(req, rsp));
+                SolrRequestHandler handler = core.getRequestHandler(path);
+                SearchHandler sh = (SearchHandler) handler;
+                List<SearchComponent> components = sh.getComponents();
+                ResponseBuilder rb = new ResponseBuilder(req, rsp, components);
+                QueryComponent qc = (QueryComponent) components.get(0);
+                qc.prepare(rb);
+                qc.process(rb);
+                qc.finishStage(rb);
+                int hits = rb.getResults().docList.matches();
+                if (req != null) req.close();
+                core.close();
+                SolrRequestInfo.clearRequestInfo();
+                Thread.currentThread().setName(threadname);
+                return hits;
+            } catch (final Throwable e) {
+                log.warn(e);
+                Thread.currentThread().setName(threadname);
+                return 0;
+            }
+        }
+        Thread.currentThread().setName(threadname);
+        return getSize0();
+    }
+
+    public long getSize0() {
         /*
         if (this.server instanceof EmbeddedSolrServer) {
             EmbeddedSolrServer ess = (EmbeddedSolrServer) this.server;
@@ -213,37 +269,20 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 //this.server.deleteById((String) solrdoc.getFieldValue(YaCySchema.id.getSolrFieldName()));
                 this.server.add(solrdoc, this.commitWithinMs);
             }
-        } catch (SolrServerException e) {
-            // ok try this again and delete the document in advance
+        } catch (Throwable e) {
+            // catches "version conflict for": try this again and delete the document in advance
             try {
                 this.server.deleteById((String) solrdoc.getFieldValue(YaCySchema.id.getSolrFieldName()));
+                //this.server.commit();
             } catch (SolrServerException e1) {}
             try {
                 synchronized (this.server) {
                     this.server.add(solrdoc, this.commitWithinMs);
                 }
-            } catch (SolrServerException ee) {
+            } catch (Throwable ee) {
                 log.warn(e.getMessage() + " DOC=" + solrdoc.toString());
                 throw new IOException(ee);
             }
-        }
-    }
-
-    @Override
-    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
-        ArrayList<SolrInputDocument> l = new ArrayList<SolrInputDocument>();
-        try {
-            synchronized (this.server) {
-                for (SolrInputDocument d: solrdocs) {
-                    //this.server.deleteById((String) d.getFieldValue(YaCySchema.id.getSolrFieldName()));
-                    l.add(d);
-                }
-                this.server.add(l, this.commitWithinMs);
-                //this.server.commit();
-            }
-        } catch (SolrServerException e) {
-            log.warn(e.getMessage() + " DOC=" + solrdocs.toString());
-            throw new IOException(e);
         }
     }
 

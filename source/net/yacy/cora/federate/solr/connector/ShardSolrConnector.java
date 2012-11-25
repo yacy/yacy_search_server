@@ -151,11 +151,6 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
         this.connectors.get(this.sharding.select(solrdoc)).add(solrdoc);
     }
 
-    @Override
-    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
-        for (SolrInputDocument d: solrdocs) this.connectors.get(this.sharding.select(d)).add(d);
-    }
-
     /**
      * add a collection of Solr documents
      * @param docs
