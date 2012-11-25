@@ -49,6 +49,7 @@ import net.yacy.document.Document;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.NewsPool;
@@ -87,7 +88,8 @@ public class Crawler_p {
         prop.put("forwardToCrawlStart", "0");
 
         prop.put("info", "0");
-
+        boolean debug = (post != null && post.containsKey("debug"));
+        
         if (post != null) {
             String c = post.toString();
             if (c.length() < 1000) Log.logInfo("Crawl Start", c);
@@ -520,13 +522,20 @@ public class Crawler_p {
             profile = sb.crawler.getActive(h);
         	if (CrawlProfile.ignoreNames.contains(profile.name())) continue;
             profile.putProfileEntry("crawlProfilesShow_list_", prop, true, dark, count, domlistlength);
+            prop.put("crawlProfilesShow_list_" + count + "_debug", debug ? 1 : 0);
+            if (debug) {
+                RowHandleSet urlhashes = sb.crawler.getURLHashes(h);
+                prop.put("crawlProfilesShow_list_" + count + "_debug_count", urlhashes == null ? "unknown" : Integer.toString(urlhashes.size()));
+            }
             if (profile.urlMustMatchPattern() == CrawlProfile.MATCH_ALL_PATTERN) {
                 hosts = hosts + "," + profile.name();
             }
             dark = !dark;
             count++;
         }
+        prop.put("crawlProfilesShow_debug", debug ? 1 : 0);
         prop.put("crawlProfilesShow_list", count);
+        prop.put("crawlProfilesShow_count", count);
         prop.put("crawlProfilesShow", count == 0 ? 0 : 1);
 
         if (count > 0) {

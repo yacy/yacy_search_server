@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
@@ -46,7 +47,9 @@ import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.blob.MapHeap;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
@@ -75,6 +78,7 @@ public final class CrawlSwitchboard {
     private MapHeap profilesActiveCrawls;
     private final MapHeap profilesPassiveCrawls;
     private final Map<byte[], CrawlProfile> profilesActiveCrawlsCache; //TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
+    private final Map<String, RowHandleSet> profilesActiveCrawlsCounter;
     public CrawlProfile defaultProxyProfile;
     public CrawlProfile defaultRemoteProfile;
     public CrawlProfile defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
@@ -91,8 +95,8 @@ public final class CrawlSwitchboard {
             System.exit(0);
         }
         this.log = log;
-        this.profilesActiveCrawlsCache =
-            Collections.synchronizedMap(new TreeMap<byte[], CrawlProfile>(Base64Order.enhancedCoder));
+        this.profilesActiveCrawlsCache = Collections.synchronizedMap(new TreeMap<byte[], CrawlProfile>(Base64Order.enhancedCoder));
+        this.profilesActiveCrawlsCounter = new ConcurrentHashMap<String, RowHandleSet>();
 
         // make crawl profiles database and default profiles
         this.queuesRoot = queuesRoot;
@@ -229,6 +233,11 @@ public final class CrawlSwitchboard {
         this.profilesPassiveCrawls.put(profileKey, profile);
     }
 
+    public RowHandleSet getURLHashes(final byte[] profileKey) {
+        return this.profilesActiveCrawlsCounter.get(ASCII.String(profileKey));
+    }
+    
+    
     private void initActiveCrawlProfiles() {
         // generate new default entry for proxy crawling
         this.defaultProxyProfile =
@@ -470,7 +479,10 @@ public final class CrawlSwitchboard {
         return hasDoneSomething;
     }
 
-    public int cleanFinishesProfiles(CrawlQueues crawlQueues) {        
+    public int cleanFinishesProfiles(CrawlQueues crawlQueues) {
+        // clear the counter cache
+        this.profilesActiveCrawlsCounter.clear();        
+        
         // find all profiles that are candidates for deletion
         Set<String> deletionCandidate = new HashSet<String>();
         for (final byte[] handle: this.getActive()) {
@@ -498,7 +510,11 @@ public final class CrawlSwitchboard {
                 Request r;
                 while (sei.hasNext()) {
                     r = sei.next();
-                    deletionCandidate.remove(r.profileHandle());
+                    String handle = r.profileHandle();
+                    RowHandleSet us = this.profilesActiveCrawlsCounter.get(handle);
+                    if (us == null) {us =  new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0); this.profilesActiveCrawlsCounter.put(handle, us);}
+                    us.put(r.url().hash());
+                    deletionCandidate.remove(handle);
                     if (deletionCandidate.size() == 0) return 0;
                     if (System.currentTimeMillis() > timeout) return 0; // give up; this is too large
                 }
