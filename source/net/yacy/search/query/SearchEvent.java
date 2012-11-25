@@ -154,8 +154,18 @@ public final class SearchEvent {
         
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
-        this.authorNavigator = new ConcurrentScoreMap<String>();
-        this.namespaceNavigator = new ConcurrentScoreMap<String>();
+        // prepare configured search navigation
+        final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "");
+        if (navcfg.contains("authors")) {
+            this.authorNavigator = new ConcurrentScoreMap<String>();
+        } else {
+            this.authorNavigator = null;
+        }
+        if (navcfg.contains("namespace")) {
+            this.namespaceNavigator = new ConcurrentScoreMap<String>();
+        } else {
+            this.namespaceNavigator = null;
+        }
         this.protocolNavigator = new ConcurrentScoreMap<String>();
         this.filetypeNavigator = new ConcurrentScoreMap<String>();
         this.snippets = new ConcurrentHashMap<String, String>();
@@ -469,13 +479,16 @@ public final class SearchEvent {
         // collect navigation information
         ReversibleScoreMap<String> fcts = facets.get(YaCySchema.host_s.getSolrFieldName());
         if (fcts != null) this.rankingProcess.hostNavigator.inc(fcts);
-        
-        fcts = facets.get(YaCySchema.url_file_ext_s.getSolrFieldName());
-        if (fcts != null) this.filetypeNavigator.inc(fcts);
-        
-        fcts = facets.get(YaCySchema.url_protocol_s.getSolrFieldName());
-        if (fcts != null) this.protocolNavigator.inc(fcts);
-        
+
+        if (this.filetypeNavigator != null) {
+            fcts = facets.get(YaCySchema.url_file_ext_s.getSolrFieldName());
+            if (fcts != null) this.filetypeNavigator.inc(fcts);
+        }
+
+        if (this.protocolNavigator != null) {
+            fcts = facets.get(YaCySchema.url_protocol_s.getSolrFieldName());
+            if (fcts != null) this.protocolNavigator.inc(fcts);
+        }
         //fcts = facets.get(YaCySchema.author.getSolrFieldName());
         //if (fcts != null) this.authorNavigator.inc(fcts);
         
@@ -823,7 +836,7 @@ public final class SearchEvent {
                 }
 
                 // add author to the author navigator
-                this.authorNavigator.inc(pageauthor);
+                if (this.authorNavigator != null) this.authorNavigator.inc(pageauthor);
             } else if ( this.query.authorhash != null ) {
                 this.query.misses.add(page.hash());
                 continue;
@@ -838,13 +851,15 @@ public final class SearchEvent {
             // from here: collect navigation information
 
             // namespace navigation
-            String pagepath = page.url().getPath();
-            if ( (p = pagepath.indexOf(':')) >= 0 ) {
-                pagepath = pagepath.substring(0, p);
-                p = pagepath.lastIndexOf('/');
-                if ( p >= 0 ) {
-                    pagepath = pagepath.substring(p + 1);
-                    this.namespaceNavigator.inc(pagepath);
+            if (this.namespaceNavigator != null) {
+                String pagepath = page.url().getPath();
+                if ((p = pagepath.indexOf(':')) >= 0) {
+                    pagepath = pagepath.substring(0, p);
+                    p = pagepath.lastIndexOf('/');
+                    if (p >= 0) {
+                        pagepath = pagepath.substring(p + 1);
+                        this.namespaceNavigator.inc(pagepath);
+                    }
                 }
             }
 
