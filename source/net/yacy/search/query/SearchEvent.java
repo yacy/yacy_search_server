@@ -26,6 +26,7 @@
 
 package net.yacy.search.query;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -40,6 +41,7 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
@@ -83,6 +85,14 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.snippet.ResultEntry;
 
 public final class SearchEvent {
+    
+    private static long noRobinsonLocalRWISearch = 0;
+    static {
+        try {
+            noRobinsonLocalRWISearch = GenericFormatter.FORMAT_SHORT_DAY.parse("20121107").getTime();
+        } catch (ParseException e) {
+        }
+    }
     
     public static Log log = new Log("SEARCH");
 
@@ -179,7 +189,10 @@ public final class SearchEvent {
         this.localsearch = RemoteSearch.solrRemoteSearch(this, 100, null /*this peer*/, Switchboard.urlBlacklist);
 
         // start a local RWI search concurrently
-        this.rankingProcess.start();
+        if (this.remote || this.peers.mySeed().getBirthdate() < noRobinsonLocalRWISearch) {
+            // we start the local search only if this peer is doing a remote search or when it is doing a local search and the peer is old
+            this.rankingProcess.start();
+        }
 
         if (this.remote) {
             // start global searches
