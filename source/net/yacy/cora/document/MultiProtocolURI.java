@@ -69,11 +69,6 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     public  static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
     private static final Pattern backPathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
-    private static final Pattern patternQuestion = Pattern.compile("\\?");
-    private static final Pattern patternDot = Pattern.compile("\\.");
-    private static final Pattern patternSlash = Pattern.compile("/");
-    private static final Pattern patternBackSlash = Pattern.compile("\\\\");
-    private static final Pattern patternAmp = Pattern.compile("&");
     private static final Pattern patternMail = Pattern.compile("^[a-z]+:.*?");
     //private static final Pattern patternSpace = Pattern.compile("%20");
 
@@ -143,7 +138,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             url = "http:" + url;
         }
         if (url.startsWith("\\\\")) {
-            url = "smb://" + patternBackSlash.matcher(url.substring(2)).replaceAll("/");
+            url = "smb://" + CommonPattern.BACKSLASH.matcher(url.substring(2)).replaceAll("/");
         }
 
         if (url.length() > 1 && url.charAt(1) == ':') {
@@ -241,7 +236,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
         // handle international domains
         if (!Punycode.isBasic(this.host)) try {
-            final String[] domainParts = patternDot.split(this.host, 0);
+            final String[] domainParts = CommonPattern.DOT.split(this.host, 0);
             final StringBuilder buffer = new StringBuilder(80);
             // encode each domain-part separately
             for(int i = 0; i < domainParts.length; i++) {
@@ -383,7 +378,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     private static final String resolveBackpath(final String path) {
         String p = path;
         if (p.isEmpty() || p.charAt(0) != '/') { p = "/" + p; }
-        final Matcher qm = patternQuestion.matcher(p); // do not resolve backpaths in the post values
+        final Matcher qm = CommonPattern.QUESTION.matcher(p); // do not resolve backpaths in the post values
         final int end = qm.find() ? qm.start() : p.length();
         final Matcher matcher = backPathPattern.matcher(p);
         while (matcher.find()) {
@@ -409,7 +404,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     private void escapePath() {
-        final String[] pathp = patternSlash.split(this.path, -1);
+        final String[] pathp = CommonPattern.SLASH.split(this.path, -1);
         final StringBuilder ptmp = new StringBuilder(this.path.length() + 10);
         for (final String element : pathp) {
             ptmp.append('/');
@@ -423,7 +418,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     private void escapeSearchpart() {
-        final String[] questp = patternAmp.split(this.searchpart, -1);
+        final String[] questp = CommonPattern.AMP.split(this.searchpart, -1);
         final StringBuilder qtmp = new StringBuilder(this.searchpart.length() + 10);
         for (final String element : questp) {
             if (element.indexOf('=') != -1) {

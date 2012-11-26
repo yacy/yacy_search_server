@@ -39,6 +39,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
@@ -155,7 +156,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(STORE_HTCACHE,    storeHTCache);
         put(REMOTE_INDEXING,  remoteIndexing);
         put(CACHE_STRAGEGY,   cacheStrategy.toString());
-        put(COLLECTIONS,      collections.trim().replaceAll(" ", ""));
+        put(COLLECTIONS,      CommonPattern.SPACE.matcher(collections.trim()).replaceAll(""));
     }
 
     /**

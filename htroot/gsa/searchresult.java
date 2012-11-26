@@ -24,7 +24,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.YaCySchema;
@@ -32,6 +31,7 @@ import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
@@ -145,7 +145,7 @@ public class searchresult {
 
         // add sites operator
         if (site != null && site.length() > 0) {
-            String[] s0 = Pattern.compile(Pattern.quote("|")).split(site, 0);
+            String[] s0 = CommonPattern.VERTICALBAR.split(site);
             ArrayList<String> sites = new ArrayList<String>(2);
             for (String s: s0) {
                 s = s.trim().toLowerCase();

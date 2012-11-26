@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import net.yacy.cora.util.CommonPattern;
+
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -78,7 +80,7 @@ public class YaCySearchClient {
                     .append("/yacysearch.rss?verify=false&startRecord=")
                     .append(YaCySearchClient.this.offset)
                     .append("&maximumRecords=10&resource=local&query=")
-                    .append(YaCySearchClient.this.query.replaceAll(" ", "+")).toString();
+                    .append(CommonPattern.SPACE.matcher(YaCySearchClient.this.query).replaceAll("+")).toString();
             try { url = new URL(u); } catch (MalformedURLException e) { throw new IOException (e); }
             try { doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url.openStream()); }
             catch (ParserConfigurationException e) { throw new IOException (e); }

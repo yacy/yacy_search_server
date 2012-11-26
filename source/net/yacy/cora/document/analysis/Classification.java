@@ -25,11 +25,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashSet;
 import java.util.Map.Entry;
-import java.util.regex.Pattern;
 import java.util.Properties;
 import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.util.CommonPattern;
 
 public class Classification {
 
@@ -105,7 +105,7 @@ public class Classification {
 
     private static void addSet(Set<String> set, final String extString) {
         if ((extString == null) || (extString.isEmpty())) return;
-        for (String s: Pattern.compile(",").split(extString, 0)) set.add(s.toLowerCase().trim());
+        for (String s: CommonPattern.COMMA.split(extString, 0)) set.add(s.toLowerCase().trim());
     }
 
     public static boolean isTextExtension(String textExt) {

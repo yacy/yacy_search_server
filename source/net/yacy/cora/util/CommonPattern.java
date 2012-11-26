@@ -43,9 +43,13 @@ public class CommonPattern {
     public final static Pattern SEMICOLON   = Pattern.compile(";");
     public final static Pattern DOUBLEPOINT = Pattern.compile(":");
     public final static Pattern SLASH       = Pattern.compile("/");
+    public final static Pattern BACKSLASH   = Pattern.compile("\\\\");
+    public final static Pattern QUESTION    = Pattern.compile("\\?");
     public final static Pattern AMP         = Pattern.compile("&");
     public final static Pattern PLUS        = Pattern.compile(Pattern.quote("+"));
     public final static Pattern DOT         = Pattern.compile("\\.");
     public final static Pattern NEWLINE     = Pattern.compile("\n");
+    public final static Pattern VERTICALBAR = Pattern.compile(Pattern.quote("|"));
+    public final static Pattern UNDERSCORE  = Pattern.compile("_");
     
 }

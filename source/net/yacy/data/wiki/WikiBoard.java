@@ -40,6 +40,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.logging.Log;
@@ -140,7 +141,7 @@ public class WikiBoard {
      * @return normalized and webalized version.
      */
     public static String webalize(final String key) {
-        return (key != null) ? normalize(key).replaceAll(" ", "%20") : "null";
+        return (key != null) ? CommonPattern.SPACE.matcher(normalize(key)).replaceAll("%20") : "null";
     }
 
     /**

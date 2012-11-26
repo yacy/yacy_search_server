@@ -38,6 +38,7 @@ import net.yacy.cora.document.WordCache.Dictionary;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.geo.Locations;
 import net.yacy.cora.storage.Files;
+import net.yacy.cora.util.CommonPattern;
 
 public class Tagging {
 
@@ -588,20 +589,17 @@ public class Tagging {
 	    }
 	}
 
-    private final static Pattern PATTERN_UL = Pattern.compile("_");
-    private final static Pattern PATTERN_SP = Pattern.compile(" ");
-
     public static final String encodePrintname(String printname) {
-        return PATTERN_SP.matcher(printname).replaceAll("_");
+        return CommonPattern.SPACE.matcher(printname).replaceAll("_");
     }
 
     public static final String decodeMaskname(String maskname) {
-        return PATTERN_UL.matcher(maskname).replaceAll(" ");
+        return CommonPattern.UNDERSCORE.matcher(maskname).replaceAll(" ");
     }
 
     public static String cleanTagFromAutotagging(final String tagString) {
         if (tagString == null || tagString.isEmpty()) return "";
-        String[] tags = PATTERN_SP.split(tagString);
+        String[] tags = CommonPattern.SPACE.split(tagString);
         StringBuilder sb = new StringBuilder(tagString.length());
         for (String tag : tags) {
             if (tag.length() > 0) {
