@@ -216,12 +216,10 @@ public class GSAResponseWriter implements QueryResponseWriter {
             int id = iterator.nextDoc();
             Document doc = searcher.doc(id, SOLR_FIELDS);
             List<IndexableField> fields = doc.getFields();
-            int fieldc = fields.size();
 
             // pre-scan the fields to get the mime-type            
             String mime = "";
-            for (int j = 0; j < fieldc; j++) {
-                IndexableField value = fields.get(j);
+            for (IndexableField value: fields) {
                 String fieldName = value.name();
                 if (YaCySchema.content_type.getSolrFieldName().equals(fieldName)) {
                     mime = value.stringValue();
@@ -235,8 +233,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
             String description = "";
             int size = 0;
             boolean title_written = false; // the solr index may contain several; we take only the first which should be the visible tag in <title></title>
-            for (int j = 0; j < fieldc; j++) {
-                IndexableField value = fields.get(j);
+            for (IndexableField value: fields) {
                 String fieldName = value.name();
 
                 // apply generic matching rule
@@ -284,6 +281,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
                     size = value.stringValue() != null && value.stringValue().length() > 0 ? Integer.parseInt(value.stringValue()) : -1;
                     continue;
                 }
+                //System.out.println("superfluous field: " + fieldName + ": " + value.stringValue()); // this can be avoided setting the enableLazyFieldLoading = false in solrconfig.xml
             }
             // compute snippet from texts
             List<String> snippet = urlhash == null ? null : snippets.get(urlhash);
