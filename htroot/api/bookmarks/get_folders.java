@@ -1,6 +1,7 @@
 
 
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.BookmarkHelper;
@@ -51,12 +52,12 @@ public class get_folders {
 
     	// loop through folderList
     	it = BookmarkHelper.getFolderList(root, sb.bookmarksDB.getTagIterator(isAdmin));
-    	int n = root.split("/").length;
+    	int n = Pattern.compile("/").split(root, 0).length;
     	if (n == 0) n = 1;
     	int count = 0;
     	while (it.hasNext()) {
     		final String folder = it.next();
-    		foldername = folder.split("/");
+    		foldername = Pattern.compile("/").split(folder, 0);
     		if (foldername.length == n+1) {
 	    		prop.put("folders_"+count+"_foldername", foldername[n]);
 	    		prop.put("folders_"+count+"_expanded", "false");

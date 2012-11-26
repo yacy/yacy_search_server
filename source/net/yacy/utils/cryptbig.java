@@ -58,6 +58,7 @@ import javax.crypto.spec.PBEParameterSpec;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.kelondro.logging.Log;
 
 
@@ -187,7 +188,7 @@ public class cryptbig {
             final Set<?> keys = provider.keySet();
             for (Object name : keys) {
                 String key = (String) name;
-                key = key.split(" ")[0];
+                key = CommonPattern.SPACE.split(key)[0];
                 if (key.startsWith(serviceType + ".")) {
                     result.add(key.substring(serviceType.length() + 1));
                 } else if (key.startsWith("Alg.Alias." + serviceType + ".")) {

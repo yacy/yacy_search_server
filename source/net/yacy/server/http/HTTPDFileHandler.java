@@ -101,6 +101,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.data.UserDB;
 import net.yacy.document.parser.htmlParser;
@@ -792,9 +793,7 @@ public final class HTTPDFileHandler {
                         int indexOfDelimiter = processOutput.indexOf("\n\n", 0);
                         final String[] cgiHeader;
                         if (indexOfDelimiter > -1) {
-                            cgiHeader =
-                                    processOutput.substring(
-                                            0, indexOfDelimiter).split("\n");
+                            cgiHeader = CommonPattern.NEWLINE.split(processOutput.substring(0, indexOfDelimiter));
                         } else {
                             cgiHeader = new String[0];
                         }
@@ -1166,7 +1165,7 @@ public final class HTTPDFileHandler {
                             final String rangeHeaderVal = requestHeader.get(HeaderFramework.RANGE).trim();
                             if (rangeHeaderVal.startsWith("bytes=")) {
                                 final String rangesVal = rangeHeaderVal.substring("bytes=".length());
-                                final String[] ranges = rangesVal.split(",");
+                                final String[] ranges = CommonPattern.COMMA.split(rangesVal);
                                 if ((ranges.length == 1)&&(ranges[0].endsWith("-"))) {
                                     rangeStartOffset = NumberTools.parseIntDecSubstring(ranges[0], 0, ranges[0].length() - 1);
                                     statusCode = 206;
@@ -1302,7 +1301,7 @@ public final class HTTPDFileHandler {
         try {
             line = br.readLine();
             if (line.startsWith("#!")) {
-                ret.addAll(Arrays.asList(line.substring(2).split(" ")));
+                ret.addAll(Arrays.asList(CommonPattern.SPACE.split(line.substring(2))));
             }
             ret.add(targetFile.getAbsolutePath());
         } catch (IOException e) {
@@ -1457,7 +1456,7 @@ public final class HTTPDFileHandler {
         boolean ret = false;
 
         if (suffixList != null && name != null) {
-            final String[] suffixes = suffixList.split(",");
+            final String[] suffixes = CommonPattern.COMMA.split(suffixList);
             find:
             for (int i = 0; i < suffixes.length; i++) {
                 if (name.endsWith("." + suffixes[i].trim())) {

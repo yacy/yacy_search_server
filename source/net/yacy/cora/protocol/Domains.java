@@ -56,6 +56,7 @@ import net.yacy.cora.plugin.ClassProvider;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.KeyList;
+import net.yacy.cora.util.CommonPattern;
 
 import com.google.common.net.InetAddresses;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
@@ -661,7 +662,7 @@ public class Domains {
     }
 
     public static List<Pattern> makePatterns(final String patternList) throws PatternSyntaxException {
-    	final String[] entries = (patternList != null) ? patternList.split(",") : new String[0];
+    	final String[] entries = (patternList != null) ? CommonPattern.COMMA.split(patternList) : new String[0];
     	final List<Pattern> patterns = new ArrayList<Pattern>(entries.length);
     	for (final String entry : entries) {
             patterns.add(Pattern.compile(entry.trim()));
@@ -826,14 +827,13 @@ public class Domains {
         try {globalHosts.clear();} catch (IOException e) {}
     }
     
-    private final static Pattern dotPattern = Pattern.compile("\\.");
 
     public static final InetAddress parseInetAddress(String ip) {
         if (ip == null || ip.length() < 8) return null;
         ip = ip.trim();
         if (ip.charAt(0) == '[' && ip.charAt(ip.length() - 1) == ']') ip = ip.substring(1, ip.length() - 1);
         if (isLocalhost(ip)) ip = "127.0.0.1"; // normalize to IPv4 here since that is the way to calculate the InetAddress
-        final String[] ips = dotPattern.split(ip);
+        final String[] ips = CommonPattern.DOT.split(ip);
         if (ips.length != 4) return null;
         final byte[] ipb = new byte[4];
         try {

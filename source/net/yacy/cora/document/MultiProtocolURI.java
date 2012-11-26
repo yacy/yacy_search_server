@@ -53,6 +53,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.CommonPattern;
 
 /**
  * MultiProtocolURI provides a URL object for multiple protocols like http, https, ftp, smb and file
@@ -729,7 +730,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     public String[] getPaths() {
-        return this.path == null ? null : this.path.charAt(0) == '/' ? this.path.substring(1).split("/") : this.path.split("/");
+        return this.path == null ? null : this.path.charAt(0) == '/' ? CommonPattern.SLASH.split(this.path.substring(1)) : CommonPattern.SLASH.split(this.path);
     }
 
     /**
@@ -805,7 +806,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     public Map<String, String> getSearchpartMap() {
         if (this.searchpart == null) return null;
         this.searchpart = this.searchpart.replaceAll("&amp;", "&");
-        String[] parts = this.searchpart.split("&");
+        String[] parts = CommonPattern.AMP.split(this.searchpart);
         Map<String, String> map = new LinkedHashMap<String, String>();
         for (String part: parts) {
             int p = part.indexOf('=');
@@ -846,7 +847,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         while ((p = t.indexOf("  ",0)) >= 0) t = t.substring(0, p) + t.substring(p + 1);
 
         // split the string into tokens and add all camel-case splitting
-        final String[] u = t.split(" ");
+        final String[] u = CommonPattern.SPACE.split(t);
         final Map<String, Object> token = new LinkedHashMap<String, Object>();
         for (final String r: u) {
             token.putAll(parseCamelCase(r));

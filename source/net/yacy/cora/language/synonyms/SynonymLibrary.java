@@ -32,6 +32,7 @@ import java.util.concurrent.BlockingQueue;
 import org.apache.log4j.Logger;
 
 import net.yacy.cora.storage.Files;
+import net.yacy.cora.util.CommonPattern;
 
 /**
  * Stemming library: reads stemming files and creates a mapping from words to synonyms
@@ -59,7 +60,7 @@ public class SynonymLibrary {
                     if (line.length() == 0 || line.charAt(0) == '#') continue;
                     if (line.charAt(line.length() - 1) == '}') line = line.substring(0, line.length() - 1);
                     if (line.charAt(0) == '{') line = line.substring(1);
-                    String[] words = line.split(",");
+                    String[] words = CommonPattern.COMMA.split(line);
                     Set<String> synonyms = new HashSet<String>();
                     Set<String> keys = new HashSet<String>();
                     for (String s: words) {

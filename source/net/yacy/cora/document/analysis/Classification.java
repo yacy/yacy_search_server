@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import java.util.Properties;
 import java.util.Set;
 
@@ -104,7 +105,7 @@ public class Classification {
 
     private static void addSet(Set<String> set, final String extString) {
         if ((extString == null) || (extString.isEmpty())) return;
-        for (String s: extString.split(",")) set.add(s.toLowerCase().trim());
+        for (String s: Pattern.compile(",").split(extString, 0)) set.add(s.toLowerCase().trim());
     }
 
     public static boolean isTextExtension(String textExt) {

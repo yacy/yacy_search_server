@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 
@@ -105,7 +106,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
         public String sort = null, action = null, direction = null, mode = null, format = null;
         public Sort(String d) {
             this.sort = d;
-            String[] s = d.split(":");
+            String[] s = CommonPattern.DOUBLEPOINT.split(d);
             if (s.length < 1) return;
             this.action = s[0]; // date
             this.direction = s.length > 1 ? s[1] : "D"; // A or D
@@ -309,7 +310,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
     }
 
     public static String highlight(String text, String query) {
-        String[] q = query.trim().toLowerCase().replaceAll(Pattern.quote("+"), " ").split(" ");
+        String[] q = CommonPattern.SPACE.split(CommonPattern.PLUS.matcher(query.trim().toLowerCase()).replaceAll(" "));
         for (String s: q) {
             int p = text.toLowerCase().indexOf(s.toLowerCase());
             if (p < 0) continue;

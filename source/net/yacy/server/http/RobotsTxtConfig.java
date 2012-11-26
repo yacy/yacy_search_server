@@ -28,6 +28,7 @@
 
 package net.yacy.server.http;
 
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverSwitch;
 
@@ -86,7 +87,7 @@ public final class RobotsTxtConfig {
     public static RobotsTxtConfig init(final serverSwitch env) {
         final String cfg = env.getConfig(SwitchboardConstants.ROBOTS_TXT, SwitchboardConstants.ROBOTS_TXT_DEFAULT);
         if (cfg == null) return new RobotsTxtConfig();
-        return new RobotsTxtConfig(cfg.split(","));
+        return new RobotsTxtConfig(CommonPattern.COMMA.split(cfg));
     }
     
     @Override

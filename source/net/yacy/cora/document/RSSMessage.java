@@ -38,6 +38,7 @@ import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.cora.lod.vocabulary.Geo;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.util.CommonPattern;
 
 public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMessage> {
 
@@ -179,9 +180,9 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     @Override
     public String[] getSubject() {
         final String subject = Token.subject.valueFrom(this.map, "");
-        if (subject.indexOf(',') >= 0) return subject.split(",");
-        if (subject.indexOf(';') >= 0) return subject.split(";");
-        return subject.split(" ");
+        if (subject.indexOf(',') >= 0) return CommonPattern.COMMA.split(subject);
+        if (subject.indexOf(';') >= 0) return CommonPattern.SEMICOLON.split(subject);
+        return CommonPattern.SPACE.split(subject);
     }
 
     @Override

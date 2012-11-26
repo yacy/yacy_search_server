@@ -38,6 +38,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteArray;
 
@@ -81,7 +82,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
      * @return list of host hashes without separation
      */
     public static String hosthashes(final String hostlist) {
-        String[] hs = hostlist.split(",");
+        String[] hs = CommonPattern.COMMA.split(hostlist);
         StringBuilder sb = new StringBuilder(hostlist.length());
         for (String h: hs) {
             if (h == null) continue;

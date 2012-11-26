@@ -42,6 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.NumberTools;
 
 
@@ -423,7 +424,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         final String mimeType = mime();
         if (mimeType == null) return null;
 
-        final String[] parts = mimeType.split(";");
+        final String[] parts = CommonPattern.SEMICOLON.split(mimeType);
         if (parts == null || parts.length <= 1) return null;
 
         for (int i=1; i < parts.length; i++) {

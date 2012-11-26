@@ -48,6 +48,7 @@ import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
@@ -360,7 +361,7 @@ public final class RankingProcess extends Thread {
                 for (Map.Entry<String, String> v: this.taggingPredicates.entrySet()) {
                     Iterator<RDFNode> ni = JenaTripleStore.getObjects(resource, v.getValue());
                     while (ni.hasNext()) {
-                        String[] tags = ni.next().toString().split(",");
+                        String[] tags = CommonPattern.COMMA.split(ni.next().toString());
                         for (String tag: tags) {
                             ScoreMap<String> voc = this.vocabularyNavigator.get(v.getKey());
                             if (voc == null) {

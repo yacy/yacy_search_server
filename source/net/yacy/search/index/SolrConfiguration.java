@@ -48,6 +48,7 @@ import net.yacy.cora.federate.yacy.ConfigurationSet;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
@@ -223,7 +224,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             add(doc, YaCySchema.title_chars_val, cv);
         }
         if (allAttr || contains(YaCySchema.title_words_val)) {
-            Integer[] cv = new Integer[]{new Integer(title.split(" ").length)};
+            Integer[] cv = new Integer[]{new Integer(CommonPattern.SPACE.split(title).length)};
             add(doc, YaCySchema.title_words_val, cv);
         }
 
@@ -235,7 +236,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             add(doc, YaCySchema.description_chars_val, cv);
         }
         if (allAttr || contains(YaCySchema.description_words_val)) {
-            Integer[] cv = new Integer[]{new Integer(description.split(" ").length)};
+            Integer[] cv = new Integer[]{new Integer(CommonPattern.SPACE.split(description).length)};
             add(doc, YaCySchema.description_words_val, cv);
         }
 
@@ -353,13 +354,13 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         }
         if (allAttr || contains(YaCySchema.title_words_val)) {
             ArrayList<Integer> cv = new ArrayList<Integer>(titles.size());
-            for (String s: titles) cv.add(new Integer(s.split(" ").length));
+            for (String s: titles) cv.add(new Integer(CommonPattern.SPACE.split(s).length));
             add(doc, YaCySchema.title_words_val, cv);
         }
 
         String description = document.dc_description();
         List<String> descriptions = new ArrayList<String>();
-        for (String s: description.split("\n")) descriptions.add(s);
+        for (String s: CommonPattern.NEWLINE.split(description)) descriptions.add(s);
         if (allAttr || contains(YaCySchema.description)) add(doc, YaCySchema.description, description);
         if (allAttr || contains(YaCySchema.description_count_i)) add(doc, YaCySchema.description_count_i, descriptions.size());
         if (allAttr || contains(YaCySchema.description_chars_val)) {
@@ -369,7 +370,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         }
         if (allAttr || contains(YaCySchema.description_words_val)) {
             ArrayList<Integer> cv = new ArrayList<Integer>(descriptions.size());
-            for (String s: descriptions) cv.add(new Integer(s.split(" ").length));
+            for (String s: descriptions) cv.add(new Integer(CommonPattern.SPACE.split(s).length));
             add(doc, YaCySchema.description_words_val, cv);
         }
 
@@ -680,7 +681,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             inboundlinksRel.add(rel.length() > 0 ? rel : "");
             inboundlinksText.add(text.length() > 0 ? text : "");
             inboundlinksTextChars.add(text.length() > 0 ? text.length() : 0);
-            inboundlinksTextWords.add(text.length() > 0 ? text.split(" ").length : 0);
+            inboundlinksTextWords.add(text.length() > 0 ? CommonPattern.SPACE.split(text).length : 0);
             inboundlinksTag.add(
                 "<a href=\"" + url.toNormalform(false) + "\"" +
                 (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +
@@ -728,7 +729,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             outboundlinksRel.add(rel.length() > 0 ? rel : "");
             outboundlinksText.add(text.length() > 0 ? text : "");
             outboundlinksTextChars.add(text.length() > 0 ? text.length() : 0);
-            outboundlinksTextWords.add(text.length() > 0 ? text.split(" ").length : 0);
+            outboundlinksTextWords.add(text.length() > 0 ? CommonPattern.SPACE.split(text).length : 0);
             outboundlinksTag.add(
                 "<a href=\"" + url.toNormalform(false) + "\"" +
                 (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +

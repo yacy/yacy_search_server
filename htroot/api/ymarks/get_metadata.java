@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.EnumMap;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.UserDB;
@@ -91,7 +92,7 @@ public class get_metadata {
 	}
 
 	public static int putTags(final String tagString, final String var) {
-        final String list[] = tagString.split(YMarkUtil.TAGS_SEPARATOR);
+        final String list[] = Pattern.compile(YMarkUtil.TAGS_SEPARATOR).split(tagString, 0);
         int count = 0;
         for (final String element : list) {
             final String tag = element;
