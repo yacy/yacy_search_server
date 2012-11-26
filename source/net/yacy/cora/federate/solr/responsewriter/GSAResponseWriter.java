@@ -83,9 +83,10 @@ public class GSAResponseWriter implements QueryResponseWriter {
 
     // pre-select a set of YaCy schema fields for the solr searcher which should cause a better caching
     private static final YaCySchema[] extrafields = new YaCySchema[]{
-        YaCySchema.id, YaCySchema.title, YaCySchema.description, YaCySchema.text_t,
-        YaCySchema.h1_txt, YaCySchema.h2_txt, YaCySchema.h3_txt, YaCySchema.h4_txt, YaCySchema.h5_txt, YaCySchema.h6_txt,
-        };
+        YaCySchema.id, YaCySchema.sku, YaCySchema.title, YaCySchema.description,
+        YaCySchema.last_modified, YaCySchema.load_date_dt, YaCySchema.size_i, YaCySchema.language_s
+    };
+    
     private static final Set<String> SOLR_FIELDS = new HashSet<String>();
     static {
         field2tag.put(YaCySchema.language_s.getSolrFieldName(), GSAToken.LANG.name());
@@ -275,17 +276,6 @@ public class GSAResponseWriter implements QueryResponseWriter {
                 if (YaCySchema.load_date_dt.getSolrFieldName().equals(fieldName)) {
                     Date d = new Date(Long.parseLong(value.stringValue()));
                     OpensearchResponseWriter.solitaireTag(writer, GSAToken.CRAWLDATE.name(), HeaderFramework.formatRFC1123(d));
-                    //texts.add(value.stringValue());
-                    continue;
-                }
-                if (YaCySchema.text_t.getSolrFieldName().equals(fieldName)) {
-                    //texts.add(value.stringValue());
-                    continue;
-                }
-                if (YaCySchema.h1_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h2_txt.getSolrFieldName().equals(fieldName) ||
-                    YaCySchema.h3_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h4_txt.getSolrFieldName().equals(fieldName) ||
-                    YaCySchema.h5_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h6_txt.getSolrFieldName().equals(fieldName)) {
-                    // because these are multi-valued fields, there can be several of each
                     //texts.add(value.stringValue());
                     continue;
                 }

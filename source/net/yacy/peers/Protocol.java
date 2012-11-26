@@ -1030,6 +1030,7 @@ public final class Protocol
             final SearchEvent event,
             final int offset,
             final int count,
+            boolean getFacets,
             final Seed target,
             final Blacklist blacklist) {
 
@@ -1044,11 +1045,13 @@ public final class Protocol
         solrQuery.setRows(count);
         
         // set facet query attributes
-        if (event.query.facetfields.length > 0) {
+        if (getFacets && event.query.facetfields.length > 0) {
             solrQuery.setFacet(true);
             solrQuery.setFacetLimit(event.query.maxfacets);
             solrQuery.setFacetSort(FacetParams.FACET_SORT_COUNT);
             for (String field: event.query.facetfields) solrQuery.addFacetField(field);
+        } else {
+            solrQuery.setFacet(false);
         }
         
         // set highlightning query attributes

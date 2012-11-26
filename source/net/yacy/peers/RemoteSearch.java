@@ -253,36 +253,40 @@ public class RemoteSearch extends Thread {
                     final Seed targetPeer,
                     final Blacklist blacklist) {
 
-
         // check own peer status
         if (event.peers.mySeed() == null || event.peers.mySeed().getPublicAddress() == null) { return null; }
-
         // prepare seed targets and threads
         if (targetPeer != null && targetPeer.hash != null && event.preselectedPeerHashes != null) targetPeer.setAlternativeAddress(event.preselectedPeerHashes.get(ASCII.getBytes(targetPeer.hash)));
         Thread solr = new Thread() {
             @Override
             public void run() {
-                event.rankingProcess.oneFeederStarted();
-                try {
-                    int urls = Protocol.solrQuery(
-                                    event,
-                                    0,
-                                    count,
-                                    targetPeer,
-                                    blacklist);
-                    if (urls >= 0) {
-                        // urls is an array of url hashes. this is only used for log output
-                        event.peers.mySeed().incRI(urls);
-                        event.peers.mySeed().incRU(urls);
-                    } else {
-                        if (targetPeer != null) {
-                            Network.log.logInfo("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
+                int tmpoffset = 0;
+                int tmpcount = 10;
+                while (tmpoffset + tmpcount <= count) {
+                    try {
+                        event.rankingProcess.oneFeederStarted();
+                        int urls = Protocol.solrQuery(
+                                        event,
+                                        tmpoffset,
+                                        tmpcount,
+                                        tmpoffset == 0,
+                                        targetPeer,
+                                        blacklist);
+                        if (urls >= 0) {
+                            // urls is an array of url hashes. this is only used for log output
+                            event.peers.mySeed().incRI(urls);
+                            event.peers.mySeed().incRU(urls);
+                        } else {
+                            if (targetPeer != null) {
+                                Network.log.logInfo("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
+                            }
                         }
+                    } catch (final Exception e) {
+                        Log.logException(e);
+                    } finally {
+                        event.rankingProcess.oneFeederTerminated();
                     }
-                } catch (final Exception e) {
-                    Log.logException(e);
-                } finally {
-                    event.rankingProcess.oneFeederTerminated();
+                    tmpoffset += tmpcount;
                 }
             }
         };

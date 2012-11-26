@@ -878,7 +878,12 @@ public final class SearchEvent {
     }
 
     public ResultEntry oneResult(final int item, final long timeout) {
-        if (this.localsearch != null && this.localsearch.isAlive()) try {this.localsearch.join();} catch (InterruptedException e) {}
+        // if there is not yet a worker alive, start one
+        if (!anyWorkerAlive()) {
+            deployWorker(Math.min(SNIPPET_WORKER_THREADS, this.query.itemsPerPage), this.query.neededResults());
+        }
+        // wait until local data is there
+        while (this.localsearch != null && this.localsearch.isAlive() && this.result.sizeAvailable() < item) try {this.localsearch.join(10);} catch (InterruptedException e) {}
         // check if we already retrieved this item
         // (happens if a search pages is accessed a second time)
         final long finishTime = System.currentTimeMillis() + timeout;

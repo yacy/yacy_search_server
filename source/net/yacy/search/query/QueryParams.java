@@ -430,7 +430,7 @@ public final class QueryParams {
         // construct query
         final SolrQuery params = new SolrQuery();
         params.setParam("defType", "edismax");
-        params.setParam("bq", YaCySchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^100000.0"); // a bost query that moves double content to the back
+        params.setParam("bq", YaCySchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^100000.0"); // a boost query that moves double content to the back
         params.setStart(this.offset);
         params.setRows(this.itemsPerPage);
         params.setFacet(false);

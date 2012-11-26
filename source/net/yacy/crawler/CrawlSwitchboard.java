@@ -513,7 +513,7 @@ public final class CrawlSwitchboard {
                     String handle = r.profileHandle();
                     RowHandleSet us = this.profilesActiveCrawlsCounter.get(handle);
                     if (us == null) {us =  new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0); this.profilesActiveCrawlsCounter.put(handle, us);}
-                    us.put(r.url().hash());
+                    if (us.size() < 100) us.put(r.url().hash()); // store the hash, but not too many
                     deletionCandidate.remove(handle);
                     if (deletionCandidate.size() == 0) return 0;
                     if (System.currentTimeMillis() > timeout) return 0; // give up; this is too large

@@ -115,7 +115,7 @@ public class searchresult {
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 5000 : 100));
         post.put("defType", "edismax");
-        post.put("bq", YaCySchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^100000.0"); // a bost query that moves double content to the back
+        post.put("bq", YaCySchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^100000.0"); // a boost query that moves double content to the back
         post.put(CommonParams.FL,
                 YaCySchema.content_type.getSolrFieldName() + ',' +
                 YaCySchema.id.getSolrFieldName() + ',' +
@@ -145,7 +145,7 @@ public class searchresult {
 
         // add sites operator
         if (site != null && site.length() > 0) {
-            String[] s0 = site.split(Pattern.quote("|"));
+            String[] s0 = Pattern.compile(Pattern.quote("|")).split(site, 0);
             ArrayList<String> sites = new ArrayList<String>(2);
             for (String s: s0) {
                 s = s.trim().toLowerCase();
