@@ -265,8 +265,8 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
         if (this.server == null) return;
         try {
+            if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
             synchronized (this.server) {
-                //this.server.deleteById((String) solrdoc.getFieldValue(YaCySchema.id.getSolrFieldName()));
                 this.server.add(solrdoc, this.commitWithinMs);
             }
         } catch (Throwable e) {
