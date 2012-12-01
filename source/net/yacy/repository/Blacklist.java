@@ -283,12 +283,13 @@ public class Blacklist {
             throw new IllegalArgumentException("path may not be null");
         }
 
-        final String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
+        String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
         final Map<String, List<Pattern>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
 
         // avoid PatternSyntaxException e
         final String h = ((!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
-
+        if (!p.isEmpty() && p.charAt(0) == '*') p = "." + p;
+        
         List<Pattern> hostList;
         if (!(blacklistMap.containsKey(h) && ((hostList = blacklistMap.get(h)) != null))) {
             blacklistMap.put(h, (hostList = new ArrayList<Pattern>()));
