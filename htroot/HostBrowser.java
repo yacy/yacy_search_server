@@ -81,6 +81,12 @@ public class HostBrowser {
         prop.put("files", 0);
         prop.put("admin", 0);
 
+        if (admin) { // show top nav to admins
+            prop.put("topmenu",1);
+        } else { // for other respect setting in Search Design Configuration
+            prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
+        }
+        
         if (!searchAllowed) {
             prop.put("result", "You are not allowed to use this page. Please ask an administrator for permission.");
             return prop;

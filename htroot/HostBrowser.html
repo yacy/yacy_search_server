@@ -58,7 +58,17 @@ function updatepage(str) {
 <script type="text/javascript" src="/js/sorttable.js"></script>
   </head>
   <body id="IndexControl">
+    #(topmenu)#
+    #%env/templates/portalheader.template%#
+    <div class="SubMenu">
+      <ul class="SubMenu">
+      <li style="width:15%;"><a class="MenuItemLink" href="/index.html"><img src="env/grafics/navsl.gif" height="10px"  style="padding-right:10px" align="baseline"/>back to start page</a></li>
+      </ul>
+    </div>
+    #%env/templates/embeddedheader.template%#
+    ::
     #%env/templates/simpleheader.template%#
+    #(/topmenu)#
     <h2>Host Browser</h2>
     <p>Browse the index of #[ucount]# documents. Enter a host or an URL for a file list or view a list of <a href="/HostBrowser.html?hosts=">all hosts</a>, <a href="/HostBrowser.html?hosts=crawling">only hosts with urls pending in the crawler</a> or <a href="/HostBrowser.html?hosts=error">only with load errors</a>.</p>
     <form action="HostBrowser.html" id="searchform" method="get" onkeyup="xmlhttpPost(); return false;">
