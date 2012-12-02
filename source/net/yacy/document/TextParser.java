@@ -279,6 +279,8 @@ public final class TextParser {
 
         Document[] docs = null;
         final Map<Parser, Parser.Failure> failedParser = new HashMap<Parser, Parser.Failure>();
+        String origName = Thread.currentThread().getName();
+        Thread.currentThread().setName("parsing + " + location.toString()); // set a name to get the address in Thread Dump
         for (final Parser parser: parsers) {
             if (MemoryControl.request(sourceArray.length * 6, false)) {
             	ByteArrayInputStream bis;
@@ -306,6 +308,7 @@ public final class TextParser {
                 if (docs != null) break;
             }
         }
+        Thread.currentThread().setName(origName);
 
         if (docs == null) {
             if (failedParser.isEmpty()) {
