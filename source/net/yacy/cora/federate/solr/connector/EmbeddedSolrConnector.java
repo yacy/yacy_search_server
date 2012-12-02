@@ -144,7 +144,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         req.getContext().put("webapp", CONTEXT);
         return req;
     }
-
+    
     public SolrQueryResponse query(SolrQueryRequest req) throws SolrException {
         final long startTime = System.currentTimeMillis();
 

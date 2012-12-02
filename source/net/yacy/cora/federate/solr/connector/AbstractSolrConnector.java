@@ -62,10 +62,6 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     public boolean exists(final String fieldName, final String key) throws IOException {
         if (fieldName == null) return false;
         try {
-            if (fieldName.equals(YaCySchema.id.getSolrFieldName())) {
-                final SolrDocument doc = getById(key, fieldName);
-                return doc != null;
-            }
             long count = getQueryCount(fieldName + ":\"" + key + "\"");
             return count > 0;
         } catch (final Throwable e) {
@@ -73,7 +69,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             return false;
         }
     }
-
+    
     @Override
     public Object getFieldById(final String key, final String field) throws IOException {
         SolrDocument doc = getById(key, field);

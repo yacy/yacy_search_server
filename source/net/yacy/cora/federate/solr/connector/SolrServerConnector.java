@@ -324,7 +324,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         params.setRows(0);
         params.setStart(0);
         params.setFacet(false);
-        params.setFields(YaCySchema.id.getSolrFieldName());
+        //params.setFields(YaCySchema.id.getSolrFieldName());
 
         // query the server
         QueryResponse rsp = query(params);
