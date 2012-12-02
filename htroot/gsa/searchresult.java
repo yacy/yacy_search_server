@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.solr.Boost;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
@@ -34,6 +35,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryGoal;
 import net.yacy.search.query.SearchEvent;
@@ -99,6 +101,9 @@ public class searchresult {
         Log.logInfo("GSA Query", post.toString());
         sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
 
+        // update the boost values
+        Boost.RANKING.update(sb.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_BOOST, ""));
+        
         // rename post fields according to result style
         //post.put(CommonParams.Q, post.remove("q")); // same as solr
         //post.put(CommonParams.START, post.remove("start")); // same as solr
@@ -115,7 +120,8 @@ public class searchresult {
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 5000 : 100));
         post.put("defType", "edismax");
-        post.put("bq", YaCySchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^100000.0"); // a boost query that moves double content to the back
+        float f = Boost.RANKING.get(YaCySchema.fuzzy_signature_unique_b);
+        post.put("bq", YaCySchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^" + Float.toString(f)); // a boost query that moves double content to the back
         post.put(CommonParams.FL,
                 YaCySchema.content_type.getSolrFieldName() + ',' +
                 YaCySchema.id.getSolrFieldName() + ',' +

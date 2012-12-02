@@ -90,6 +90,7 @@ import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.WordCache;
 import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.federate.solr.Boost;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.ShardSelection;
 import net.yacy.cora.federate.solr.connector.ShardSolrConnector;
@@ -401,6 +402,9 @@ public final class Switchboard extends serverSwitch {
             ConfigurationSet.Entry entry = solrScheme.get(field.name()); entry.setEnable(true); solrScheme.put(field.name(), entry);
         }
         solrScheme.commit();
+        Boost.RANKING.update(this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_BOOST, "")); // must be called every time the boosts change
+        Boost.RANKING.setMinTokenLen(this.getConfigInt(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_MINLENGTH, 3));
+        Boost.RANKING.setQuantRate(this.getConfigFloat(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_QUANTRATE, 0.5f));
         
         // initialize index
         ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
@@ -1529,9 +1533,9 @@ public final class Switchboard extends serverSwitch {
     }
 
     public RankingProfile getRanking() {
-        return (getConfig("rankingProfile", "").isEmpty())
+        return (getConfig(SwitchboardConstants.SEARCH_RANKING_RWI_PROFILE, "").isEmpty())
             ? new RankingProfile(Classification.ContentDomain.TEXT)
-            : new RankingProfile("", crypt.simpleDecode(this.getConfig("rankingProfile", "")));
+            : new RankingProfile("", crypt.simpleDecode(this.getConfig(SwitchboardConstants.SEARCH_RANKING_RWI_PROFILE, "")));
     }
 
     /**

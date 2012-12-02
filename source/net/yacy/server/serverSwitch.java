@@ -264,7 +264,7 @@ public class serverSwitch
      * @param dflt default value which will be used in case parameter can not be found or if it is invalid
      * @return value if the parameter or default value
      */
-    public double getConfigFloat(final String key, final float dflt) {
+    public float getConfigFloat(final String key, final float dflt) {
         try {
             return Float.parseFloat(getConfig(key, Float.toString(dflt)));
         } catch ( final NumberFormatException e ) {

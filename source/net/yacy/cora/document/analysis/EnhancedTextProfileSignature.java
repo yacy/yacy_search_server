@@ -57,7 +57,7 @@ import org.apache.solr.update.processor.Lookup3Signature;
 public class EnhancedTextProfileSignature extends Lookup3Signature {
 
   private float quantRate = 0.01f;
-  private float minTokenLen = 2;
+  private int   minTokenLen = 2;
   private StringBuilder evalText = new StringBuilder(120); // start with some capacity, makes it much faster.
 
   @Override

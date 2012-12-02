@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedSet;
 
+import net.yacy.cora.federate.solr.Boost;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
@@ -221,19 +222,6 @@ public class QueryGoal {
         YaCySchema.author,YaCySchema.description,YaCySchema.keywords,YaCySchema.text_t,YaCySchema.synonyms_sxt
     };
     
-    private final static Map<YaCySchema,Float> boosts = new LinkedHashMap<YaCySchema,Float>();
-    static {
-        boosts.put(YaCySchema.sku, 20.0f);
-        boosts.put(YaCySchema.url_paths_sxt, 20.0f);
-        boosts.put(YaCySchema.title, 15.0f);
-        boosts.put(YaCySchema.h1_txt, 11.0f);
-        boosts.put(YaCySchema.h2_txt, 10.0f);
-        boosts.put(YaCySchema.author, 8.0f);
-        boosts.put(YaCySchema.description, 5.0f);
-        boosts.put(YaCySchema.keywords, 2.0f);
-        boosts.put(YaCySchema.text_t, 1.0f);
-    }
-    
     public StringBuilder solrQueryString(SolrConfiguration configuration) {
         final StringBuilder q = new StringBuilder(80);
 
@@ -266,7 +254,7 @@ public class QueryGoal {
             if (wc > 0) q.append(" OR ");
             q.append('(');
             q.append(field.getSolrFieldName()).append(':').append(w);
-            boost = boosts.get(field);
+            boost = Boost.RANKING.get(field);
             if (boost != null) q.append('^').append(boost.toString());
             q.append(')');
             wc++;

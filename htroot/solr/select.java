@@ -142,7 +142,7 @@ public class select {
         if (post == null) return null;
         Log.logInfo("SOLR Query", post.toString());
         sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
-
+        
         // rename post fields according to result style
         if (!post.containsKey(CommonParams.Q)) post.put(CommonParams.Q, post.remove("query")); // sru patch
         String q = post.get(CommonParams.Q, "");

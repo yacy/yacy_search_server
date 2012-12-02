@@ -943,7 +943,10 @@ WikiAccess = admin
 # we will support different search profiles
 # this is currently only a single default profile
 # If this profile setting is empty, a hard-coded profile from plasmaSearchRanking is used
-rankingProfile =
+search.ranking.rwi.profile =
+search.ranking.solr.boost.tmp=
+search.ranking.solr.doubledetection.minlength=3
+search.ranking.solr.doubledetection.quantrate=0.5f
 
 #optional extern thumbnail program.
 #the program must accept the invocation PROGRAM http://url /path/to/filename

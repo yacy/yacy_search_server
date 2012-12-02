@@ -77,7 +77,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         super();
         this.lazy = false;
     }
-
+    
     /**
      * initialize the scheme with a given configuration file
      * the configuration file simply contains a list of lines with keywords
@@ -86,6 +86,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
      */
     public SolrConfiguration(final File configurationFile, boolean lazy) {
         super(configurationFile);
+        this.lazy = lazy;
         // check consistency: compare with YaCyField enum
         if (this.isEmpty()) return;
         Iterator<Entry> it = this.entryIterator();
@@ -104,7 +105,6 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         		Log.logWarning("SolrScheme", " solr scheme file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
         	}
         }
-        this.lazy = lazy;
     }
 
     public boolean contains(YaCySchema field) {

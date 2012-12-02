@@ -341,10 +341,5 @@ public enum YaCySchema implements Schema {
         doc.setField(this.getSolrFieldName(), value);
     }
 
-    public final void add(final SolrInputDocument doc, final String value, final float boost) {
-        assert !this.isMultiValued();
-        doc.setField(this.getSolrFieldName(), value, boost);
-    }
-
 }
 

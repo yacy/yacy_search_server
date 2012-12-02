@@ -45,6 +45,7 @@ import net.yacy.cora.document.WordCache;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.analysis.EnhancedTextProfileSignature;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.federate.solr.Boost;
 import net.yacy.cora.language.synonyms.SynonymLibrary;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.document.language.Identificator;
@@ -236,8 +237,8 @@ public final class Condenser {
         // check dups with http://localhost:8090/solr/select?q=*:*&start=0&rows=3&fl=sku,fuzzy_signature_text_t,fuzzy_signature_l,fuzzy_signature_unique_b
         EnhancedTextProfileSignature fuzzySignatureFactory = new EnhancedTextProfileSignature();
         Map<String,String> sp = new HashMap<String,String>();
-        sp.put("quantRate", "0.5"); // for minTokenLen = 2 the value should not be below 0.24; for minTokenLen = 3 the value must be not below 0.5!
-        sp.put("minTokenLen", "3");
+        sp.put("quantRate", Float.toString(Boost.RANKING.getQuantRate())); // for minTokenLen = 2 the value should not be below 0.24; for minTokenLen = 3 the value must be not below 0.5!
+        sp.put("minTokenLen", Integer.toString(Boost.RANKING.getMinTokenLen()));
         fuzzySignatureFactory.init(new MapSolrParams(sp));
         fuzzySignatureFactory.add(text);
         byte[] fuzzy_signature_hash = fuzzySignatureFactory.getSignature();

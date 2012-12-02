@@ -46,6 +46,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.federate.solr.Boost;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
@@ -430,7 +431,8 @@ public final class QueryParams {
         // construct query
         final SolrQuery params = new SolrQuery();
         params.setParam("defType", "edismax");
-        params.setParam("bq", YaCySchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^100000.0"); // a boost query that moves double content to the back
+        float f = Boost.RANKING.get(YaCySchema.fuzzy_signature_unique_b);
+        params.setParam("bq", YaCySchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^" + Float.toString(f)); // a boost query that moves double content to the back
         params.setStart(this.offset);
         params.setRows(this.itemsPerPage);
         params.setFacet(false);

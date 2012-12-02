@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.server.serverObjects;
@@ -159,7 +160,7 @@ public class Ranking_p {
 
         if (post.containsKey("EnterRanking")) {
             final RankingProfile ranking = new RankingProfile("local", post.toString());
-            sb.setConfig("rankingProfile", crypt.simpleEncode(ranking.toExternalString()));
+            sb.setConfig(SwitchboardConstants.SEARCH_RANKING_RWI_PROFILE, crypt.simpleEncode(ranking.toExternalString()));
             final serverObjects prop = defaultValues();
             //prop.putAll(ranking.toExternalMap("local"));
             putRanking(prop, ranking, "local");
@@ -167,7 +168,7 @@ public class Ranking_p {
         }
 
         if (post.containsKey("ResetRanking")) {
-            sb.setConfig("rankingProfile", "");
+            sb.setConfig(SwitchboardConstants.SEARCH_RANKING_RWI_PROFILE, "");
             final RankingProfile ranking = new RankingProfile(Classification.ContentDomain.TEXT);
             final serverObjects prop = defaultValues();
             //prop.putAll(ranking.toExternalMap("local"));
