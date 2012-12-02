@@ -24,7 +24,7 @@
 	});
 	</script>
   </head>
-  <body id="Ranking_p">
+  <body id="RankingRWI_p">
     #%env/templates/header.template%#
     #%env/templates/submenuSearchConfiguration.template%#
     <h2>Ranking Configuration</h2>
@@ -33,7 +33,7 @@
     The attributes are first normalized over all search results and then the normalized attribut is multiplied with the ranking coefficient computed from this list.
     The ranking coefficient grows exponentially with the ranking levels given in the following table. If you increase a single value by one, then the strength of the parameter doubles.
     </p>
-    <form class="dsearch" action="Ranking_p.html" method="post" enctype="multipart/form-data">
+    <form class="dsearch" action="RankingRWI_p.html" method="post" enctype="multipart/form-data">
       <fieldset>
         <legend>Pre-Ranking</legend>
         <dl>#{attrPre}# 

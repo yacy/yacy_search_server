@@ -39,7 +39,7 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.crypt;
 
-public class Ranking_p {
+public class RankingRWI_p {
 
 	private static final int maxRankingRange = 16;
 
