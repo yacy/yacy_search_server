@@ -345,7 +345,7 @@ url_file_ext_s
 #url_parameter_value_sxt
 
 ## number of all characters in the url == length of sku field
-#url_chars_i
+url_chars_i
 
 ## host of the url, string
 host_s
