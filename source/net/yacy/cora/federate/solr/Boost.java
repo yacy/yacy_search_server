@@ -42,6 +42,10 @@ public class Boost extends LinkedHashMap<YaCySchema, Float> {
     
     private Boost() {
         super();
+        this.initDefaults();
+    }
+
+    public void initDefaults() {
         put(YaCySchema.sku, 20.0f);
         put(YaCySchema.url_paths_sxt, 20.0f);
         put(YaCySchema.title, 15.0f);
@@ -53,7 +57,6 @@ public class Boost extends LinkedHashMap<YaCySchema, Float> {
         put(YaCySchema.text_t, 1.0f);
         put(YaCySchema.fuzzy_signature_unique_b, 100000.0f);  // must be very high to move double results to end of list
     }
-
    
     /**
      * override the get method to return 1.0f for each non-resolvable object
