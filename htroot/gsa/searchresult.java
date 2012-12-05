@@ -102,7 +102,7 @@ public class searchresult {
         sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
 
         // update the boost values
-        Boost.RANKING.update(sb.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_BOOST, ""));
+        Boost.RANKING.updateBoosts(sb.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_BOOST, ""));
         
         // rename post fields according to result style
         //post.put(CommonParams.Q, post.remove("q")); // same as solr

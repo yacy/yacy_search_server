@@ -24,8 +24,6 @@ package net.yacy.search.query;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.SortedSet;
 
 import net.yacy.cora.federate.solr.Boost;
@@ -216,11 +214,6 @@ public class QueryGoal {
         final HandleSet blues = Word.words2hashesHandles(blueList);
         for (final byte[] b: blues) this.include_hashes.remove(b);
     }
-
-    private final static YaCySchema[] fields = new YaCySchema[]{
-        YaCySchema.sku,YaCySchema.title,YaCySchema.h1_txt,YaCySchema.h2_txt,
-        YaCySchema.author,YaCySchema.description,YaCySchema.keywords,YaCySchema.text_t,YaCySchema.synonyms_sxt
-    };
     
     public StringBuilder solrQueryString(SolrConfiguration configuration) {
         final StringBuilder q = new StringBuilder(80);
@@ -249,7 +242,7 @@ public class QueryGoal {
         // combine these queries for all relevant fields
         wc = 0;
         Float boost;
-        for (YaCySchema field: fields) {
+        for (YaCySchema field: Boost.GOAL_FIELDS) {
             if (configuration != null && !configuration.contains(field.getSolrFieldName())) continue;
             if (wc > 0) q.append(" OR ");
             q.append('(');

@@ -402,7 +402,7 @@ public final class Switchboard extends serverSwitch {
             ConfigurationSet.Entry entry = solrScheme.get(field.name()); entry.setEnable(true); solrScheme.put(field.name(), entry);
         }
         solrScheme.commit();
-        Boost.RANKING.update(this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_BOOST, "")); // must be called every time the boosts change
+        Boost.RANKING.updateBoosts(this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_BOOST, "")); // must be called every time the boosts change
         Boost.RANKING.setMinTokenLen(this.getConfigInt(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_MINLENGTH, 3));
         Boost.RANKING.setQuantRate(this.getConfigFloat(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_QUANTRATE, 0.5f));
         

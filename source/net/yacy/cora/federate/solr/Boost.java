@@ -35,6 +35,19 @@ public class Boost extends LinkedHashMap<YaCySchema, Float> {
     private static final long serialVersionUID = 5248172257724571603L;
 
     public final static Boost RANKING = new Boost();
+
+    public final static YaCySchema[] GOAL_FIELDS = new YaCySchema[]{
+        YaCySchema.sku,
+        YaCySchema.url_paths_sxt,
+        YaCySchema.title,
+        YaCySchema.h1_txt,
+        YaCySchema.h2_txt,
+        YaCySchema.author,
+        YaCySchema.description,
+        YaCySchema.keywords,
+        YaCySchema.text_t,
+        YaCySchema.synonyms_sxt
+    };
     
     // for minTokenLen = 2 the quantRate value should not be below 0.24; for minTokenLen = 3 the quantRate value must be not below 0.5!
     private float quantRate = 0.5f; // to be filled with search.ranking.solr.doubledetection.quantrate
@@ -55,6 +68,9 @@ public class Boost extends LinkedHashMap<YaCySchema, Float> {
         put(YaCySchema.description, 5.0f);
         put(YaCySchema.keywords, 2.0f);
         put(YaCySchema.text_t, 1.0f);
+        put(YaCySchema.synonyms_sxt, 0.9f);
+        
+        // boosts on non-goal fields which are used for a special ranking order
         put(YaCySchema.fuzzy_signature_unique_b, 100000.0f);  // must be very high to move double results to end of list
     }
    
@@ -73,7 +89,7 @@ public class Boost extends LinkedHashMap<YaCySchema, Float> {
      * This should be called with the field in search.ranking.solr.boost
      * @param boostDef the definition string
      */
-    public void update(String boostDef) {
+    public void updateBoosts(String boostDef) {
         // call i.e. with "sku^20.0f,url_paths_sxt^20.0f,title^15.0f,h1_txt^11.0f,h2_txt^10.0f,author^8.0f,description^5.0f,keywords^2.0f,text_t^1.0f,fuzzy_signature_unique_b^100000.0f"
         if (boostDef == null || boostDef.length() == 0) return;
         String[] bf = CommonPattern.COMMA.split(boostDef);
