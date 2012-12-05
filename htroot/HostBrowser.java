@@ -234,7 +234,7 @@ public class HostBrowser {
                 q.append(YaCySchema.host_s.getSolrFieldName()).append(':').append(host);
                 if (pathparts.length > 0 && pathparts[0].length() > 0) {
                     for (String pe: pathparts) {
-                        if (pe.length() > 0) q.append(" AND ").append(YaCySchema.url_paths_sxt.getSolrFieldName()).append(':').append(pe);
+                        if (pe.length() > 0) q.append(" AND ").append(YaCySchema.url_paths_sxt.getSolrFieldName()).append(":\"").append(pe).append('\"');
                     }
                 } else {
                     if (facetcount > 1000 || post.containsKey("nepr")) {
