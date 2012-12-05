@@ -28,6 +28,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.federate.solr.SolrServlet;
 import net.yacy.cora.federate.solr.YaCySchema;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 
 import org.apache.solr.client.solrj.SolrServerException;
@@ -145,10 +146,10 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
 
     @Override
     public synchronized void close() {
-        this.commit();
-        super.close();
-        this.defaultCore.close();
-        this.cores.shutdown();
+        try {this.commit();} catch (Throwable e) {Log.logException(e);}
+        try {super.close();} catch (Throwable e) {Log.logException(e);}
+        try {this.defaultCore.close();} catch (Throwable e) {Log.logException(e);}
+        try {this.cores.shutdown();} catch (Throwable e) {Log.logException(e);}
     }
 
     public SolrQueryRequest request(final SolrParams params) {
