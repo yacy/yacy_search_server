@@ -60,6 +60,8 @@ import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.repository.Blacklist.BlacklistType;
+import net.yacy.search.Switchboard;
 
 public class Balancer {
 
@@ -424,35 +426,24 @@ public class Balancer {
     		    byte[] nexthash = getbest(robots);
     		    if (nexthash == null) return null;
 
-		        // check minimumDelta and if necessary force a sleep
-		        //final int s = urlFileIndex.size();
 		        Row.Entry rowEntry = (nexthash == null) ? null : this.urlFileIndex.remove(nexthash);
-		        if (rowEntry == null) {
-		            //System.out.println("*** rowEntry=null, nexthash=" + UTF8.String(nexthash));
-		        	rowEntry = this.urlFileIndex.removeOne();
-		        	if (rowEntry == null) {
-		        	    nexthash = null;
-		        	} else {
-		        	    nexthash = rowEntry.getPrimaryKeyBytes();
-		        	    //System.out.println("*** rowEntry.getPrimaryKeyBytes()=" + UTF8.String(nexthash));
-		        	}
+		        if (rowEntry == null) continue;
+		        
+                crawlEntry = new Request(rowEntry);
+                //Log.logInfo("Balancer", "fetched next url: " + crawlEntry.url().toNormalform(true, false));
 
+		        // check blacklist (again) because the user may have created blacklist entries after the queue has been filled
+		        if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, crawlEntry.url())) {
+		            Log.logFine("CRAWLER", "URL '" + crawlEntry.url() + "' is in blacklist.");
+		            continue;
 		        }
-		        if (rowEntry == null) {
-		        	Log.logWarning("Balancer", "removeOne() failed - size = " + size());
-		        	return null;
-		        }
-		        //assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
-
-		        crawlEntry = new Request(rowEntry);
-		        //Log.logInfo("Balancer", "fetched next url: " + crawlEntry.url().toNormalform(true, false));
 
 		        // at this point we must check if the crawlEntry has relevance because the crawl profile still exists
 		        // if not: return null. A calling method must handle the null value and try again
 		        profileEntry = cs.getActive(UTF8.getBytes(crawlEntry.profileHandle()));
 		        if (profileEntry == null) {
 		        	Log.logWarning("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
-		        	return null;
+		        	continue;
 		        }
 		        // depending on the caching policy we need sleep time to avoid DoS-like situations
 		        sleeptime = getDomainSleepTime(robots, profileEntry, crawlEntry.url());
@@ -557,7 +548,7 @@ public class Balancer {
                     failoverCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(entry.getKey(), urlhash), w);
                 }
         	}
-        	Log.logInfo("Balancer", "*** getbest: created new nextZeroCandidates-list, size = " + nextZeroCandidates.size() + ", domainStacks.size = " + this.domainStacks.size());
+        	//Log.logInfo("Balancer", "*** getbest: created new nextZeroCandidates-list, size = " + nextZeroCandidates.size() + ", domainStacks.size = " + this.domainStacks.size());
             
         	if (!nextZeroCandidates.isEmpty()) {
                 // take some of the nextZeroCandidates and put the best into the zeroWaitingCandidates
@@ -566,7 +557,7 @@ public class Balancer {
                 while (k.hasNext() && pick-- > 0) {
                     this.zeroWaitingCandidates.add(k.next());
                 }
-                Log.logInfo("Balancer", "*** getbest: created new zeroWaitingCandidates-list, size = " + zeroWaitingCandidates.size() + ", domainStacks.size = " + this.domainStacks.size());
+                //Log.logInfo("Balancer", "*** getbest: created new zeroWaitingCandidates-list, size = " + zeroWaitingCandidates.size() + ", domainStacks.size = " + this.domainStacks.size());
                 
                 return pickFromZeroWaiting();
         	}
@@ -582,12 +573,12 @@ public class Balancer {
                     besthost = hosthash.getKey();
                     besturlhash = hosthash.getValue();
                     removeHashFromDomainStacks(besthost, besturlhash);
-                    Log.logInfo("Balancer", "*** getbest: no zero waiting candidates, besthost = " + besthost);
+                    //Log.logInfo("Balancer", "*** getbest: no zero waiting candidates, besthost = " + besthost);
                     return besturlhash;
                 }
             }
         	
-            Log.logInfo("Balancer", "*** getbest: besturlhash == null");
+            //Log.logInfo("Balancer", "*** getbest: besturlhash == null");
             return null; // this should never happen
         }
     }
@@ -603,11 +594,11 @@ public class Balancer {
             host = z.getKey(); if (host == null) continue;
             hash = z.getValue(); if (hash == null) continue;
             removeHashFromDomainStacks(host, hash);
-            Log.logInfo("Balancer", "*** getbest: picked a random from the zero-waiting stack: " + host + ", zeroWaitingCandidates.size = " + this.zeroWaitingCandidates.size());
+            Log.logInfo("Balancer", "// getbest: picked a random from the zero-waiting stack: " + host + ", zeroWaitingCandidates.size = " + this.zeroWaitingCandidates.size());
             return hash;
         }
 
-        Log.logInfo("Balancer", "*** getbest: picking from zero-waiting stack failed!" + " zeroWaitingCandidates.size = " + this.zeroWaitingCandidates.size());
+        //Log.logInfo("Balancer", "*** getbest: picking from zero-waiting stack failed!" + " zeroWaitingCandidates.size = " + this.zeroWaitingCandidates.size());
         this.zeroWaitingCandidates.clear();
         return null;
     }
