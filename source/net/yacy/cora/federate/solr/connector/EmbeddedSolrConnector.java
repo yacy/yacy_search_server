@@ -28,6 +28,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.federate.solr.SolrServlet;
 import net.yacy.cora.federate.solr.YaCySchema;
+import net.yacy.kelondro.util.MemoryControl;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
@@ -58,9 +59,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     public static final String CONTEXT = "/solr";
     private final static String[] confFiles = {"solrconfig.xml", "schema.xml", "stopwords.txt", "synonyms.txt", "protwords.txt", "currency.xml", "elevate.xml", "xslt/example.xsl", "xslt/json.xsl", "lang/"};
 
-    private final CoreContainer cores;
+    private CoreContainer cores;
     private final String defaultCoreName;
-    private final SolrCore defaultCore;
+    private SolrCore defaultCore;
     
     private final SearchHandler requestHandler;
     private final File storagePath;
@@ -97,6 +98,11 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
 
         try {
             this.cores = new CoreContainer(storagePath.getAbsolutePath(), new File(solr_config, "solr.xml"));
+            if (this.cores == null) {
+                // try again
+                System.gc();
+                this.cores = new CoreContainer(storagePath.getAbsolutePath(), new File(solr_config, "solr.xml"));
+            }
         } catch (ParserConfigurationException e) {
             throw new IOException(e.getMessage(), e);
         } catch (SAXException e) {
@@ -104,6 +110,14 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         }
         this.defaultCoreName = this.cores.getDefaultCoreName();
         this.defaultCore = this.cores.getCore(this.defaultCoreName); // should be "collection1"
+        if (this.defaultCore == null) {
+            // try again
+            System.gc();
+            this.defaultCore = this.cores.getCore(this.defaultCoreName); // should be "collection1"
+        }
+        if (this.defaultCore == null) {
+            throw new IOException("cannot get the default core; available = " + MemoryControl.available() + ", free = " + MemoryControl.free());
+        }
         final NamedList<Object> config = new NamedList<Object>();
         this.requestHandler = new SearchHandler();
         this.requestHandler.init(config);

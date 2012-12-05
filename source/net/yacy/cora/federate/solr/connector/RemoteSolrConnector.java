@@ -170,7 +170,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
             if (q != null) Thread.currentThread().setName(threadname);
             return response;
         } catch (SolrServerException e) {
-            throw new IOException(e);
+            throw new IOException(e.getMessage());
         } catch (Throwable e) {
             throw new IOException("Error executing query", e);
         }
