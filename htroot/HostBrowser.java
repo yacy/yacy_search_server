@@ -42,6 +42,7 @@ import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -315,8 +316,8 @@ public class HostBrowser {
                 Map<String, StoreType> files = new HashMap<String, StoreType>();
                 for (String u: storedDocs) files.put(u, StoreType.INDEX);
                 for (Map.Entry<String, FailType> e: errorDocs.entrySet()) files.put(e.getKey(), e.getValue() == FailType.fail ? StoreType.FAILED : StoreType.EXCLUDED);
-                for (String u: inboundLinks) if (!storedDocs.contains(u)) files.put(u, StoreType.LINK);
-                for (String u: loadingLinks) if (u.startsWith(path) && !storedDocs.contains(u)) files.put(u, StoreType.LINK);
+                for (String u: inboundLinks) if (!files.containsKey(u)) files.put(u, StoreType.LINK);
+                for (String u: loadingLinks) if (u.startsWith(path) && !files.containsKey(u)) files.put(u, StoreType.LINK);
                 Log.logInfo("HostBrowser", "collected " + files.size() + " urls for path " + path);
 
                 // distinguish files and folders
@@ -391,15 +392,28 @@ public class HostBrowser {
                         prop.put("files_list_" + c + "_type_url", entry.getKey());
                         StoreType type = (StoreType) entry.getValue();
                         try {uri = new DigestURI(entry.getKey());} catch (MalformedURLException e) {uri = null;}
-                        boolean loading = load.equals(entry.getKey()) || (uri != null && sb.crawlQueues.urlExists(uri.hash()) != null);
-                        prop.put("files_list_" + c + "_type_stored", type == StoreType.INDEX ? 1 : (type == StoreType.EXCLUDED || type == StoreType.FAILED) ? 3 : loading ? 2 : 0 /*linked*/);
-                        prop.put("files_list_" + c + "_type_stored_load", loadRight ? 1 : 0);
-                        if (type == StoreType.EXCLUDED || type == StoreType.FAILED) prop.put("files_list_" + c + "_type_stored_error", errorDocs.get(entry.getKey()).name());
-                        if (loadRight) {
-                            prop.put("files_list_" + c + "_type_stored_load_url", entry.getKey());
-                            prop.put("files_list_" + c + "_type_stored_load_path", path);
+                        HarvestProcess process = uri == null ? null : sb.crawlQueues.urlExists(uri.hash());
+                        boolean loading = load.equals(entry.getKey()) || (process != null && process != HarvestProcess.ERRORS);
+                        boolean error =  process == HarvestProcess.ERRORS || type == StoreType.EXCLUDED || type == StoreType.FAILED;
+                        boolean dc = type != StoreType.INDEX && !error && !loading && list.containsKey(entry.getKey() + "/");
+                        if (!dc) {
+                            prop.put("files_list_" + c + "_type_stored", type == StoreType.INDEX ? 1 : error ? 3 : loading ? 2 : 0 /*linked*/);
+                            prop.put("files_list_" + c + "_type_stored_load", loadRight ? 1 : 0);
+                            if (error) {
+                                FailType failType = errorDocs.get(entry.getKey());
+                                if (failType == null) {
+                                    // maybe this is only in the errorURL
+                                    prop.put("files_list_" + c + "_type_stored_error", process == HarvestProcess.ERRORS ? sb.crawlQueues.errorURL.get(uri.hash()).anycause() : "unknown error");
+                                } else {
+                                    prop.put("files_list_" + c + "_type_stored_error", failType == FailType.excl ? "excluded from indexing" : "load fail");
+                                }
+                            }
+                            if (loadRight) {
+                                prop.put("files_list_" + c + "_type_stored_load_url", entry.getKey());
+                                prop.put("files_list_" + c + "_type_stored_load_path", path);
+                            }
+                            if (++c >= maxcount) break;
                         }
-                        if (++c >= maxcount) break;
                     }
                 }
                 prop.put("files_list", c);

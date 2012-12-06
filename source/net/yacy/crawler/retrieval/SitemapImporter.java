@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import java.util.Date;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.document.parser.sitemapParser;
 import net.yacy.document.parser.sitemapParser.URLEntry;
@@ -81,8 +82,8 @@ public class SitemapImporter extends Thread {
         // check if the url is known and needs to be recrawled
         Date lastMod = entry.lastmod(null);
         if (lastMod != null) {
-            final String dbocc = this.sb.urlExists(nexturlhash);
-            if ((dbocc != null) && (dbocc.equalsIgnoreCase("loaded"))) {
+            final HarvestProcess dbocc = this.sb.urlExists(nexturlhash);
+            if (dbocc != null && dbocc == HarvestProcess.LOADED) {
                 // the url was already loaded. we need to check the date
                 final URIMetadataNode oldEntry = this.sb.index.fulltext().getMetadata(nexturlhash);
                 if (oldEntry != null) {

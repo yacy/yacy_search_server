@@ -34,6 +34,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.Latency;
 import net.yacy.crawler.data.ZURL.FailCategory;
@@ -170,10 +171,10 @@ public final class HTTPLoader {
                     }
 
                     // check if the url was already indexed
-                    final String dbname = this.sb.urlExists(redirectionUrl.hash());
+                    final HarvestProcess dbname = this.sb.urlExists(redirectionUrl.hash());
                     if (dbname != null) { // customer request
                         this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "redirection to double content", statusCode);
-                        throw new IOException("CRAWLER Redirection of URL=" + requestURLString + " ignored. The url appears already in db " + dbname);
+                        throw new IOException("CRAWLER Redirection of URL=" + requestURLString + " ignored. The url appears already in db " + dbname.toString());
                     }
 
                     // retry crawling with new url

@@ -74,7 +74,7 @@ function updatepage(str) {
     <form action="HostBrowser.html" id="searchform" method="get" onkeyup="xmlhttpPost(); return false;">
     <fieldset class="yacys">
       Host/URL: 
-      <input id="search" type="text" name="path" value="#[path]#" size="40" maxlength="250" />
+      <input id="search" type="text" name="path" value="#[path]#" size="80" maxlength="250" />
       <input type="submit" name="list" value="Browse Host" class="submitready" style="width:240px;"/>
       #(delete)#::<input type="submit" name="delete" value="Delete Subpath" class="submitready" style="width:240px;" onclick="return confirm('Confirm Deletion')"/>#(/delete)#
       <br />
@@ -125,12 +125,12 @@ function updatepage(str) {
         #(type)#<!--file-->
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
           <td align="center"><div id="info"><a href="/ViewFile.html?url=#[url]#"><img src="/env/grafics/doc.gif"/></a><span>Show Metadata</span></div></td>
-          <td align="left" nowrap class=#(stored)#"listingem"::"listing"#(/stored)#>#[url]#&nbsp;<a href="#[url]#"><img src="/env/grafics/link.gif"/></a></td>
+          <td align="left" nowrap class=#(stored)#"listingem"::"listing"#(/stored)#>#[url]#&nbsp;<a href="#[url]#" target="_blank"><img src="/env/grafics/link.gif"/></a></td>
           #(stored)#
           #(load)#<td align="left" colspan="5" nowrap class="listingem">link, detected from context</td>::<td align="left" colspan="5" nowrap class="listingnok"><a href="/HostBrowser.html?load=#[url]#&path=#[path]#">load &amp; index</a>#(/load)#</td>::
           <td align="left" colspan="5" nowrap class="listingok">indexed</td>::
  		  <td align="left" colspan="5" nowrap class="pending">loading</td>::
- 		  <td align="left" colspan="5" nowrap class="listingnok">load fail: #[error]#</td>
+ 		  <td align="left" colspan="5" nowrap class="listingnok">#[error]#</td>
           #(/stored)#
         </tr>::<!--folder-->
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">

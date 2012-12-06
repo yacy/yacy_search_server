@@ -446,16 +446,16 @@ public final class CrawlStacker {
         }
 
         // check if the url is double registered
-        final String dbocc = this.nextQueue.urlExists(url.hash()); // returns the name of the queue if entry exists
+        final HarvestProcess dbocc = this.nextQueue.urlExists(url.hash()); // returns the name of the queue if entry exists
         final Date oldDate = this.indexSegment.fulltext().getLoadDate(ASCII.String(url.hash()));
         if (oldDate == null) {
             if (dbocc != null) {
                 // do double-check
-                if (dbocc.equals("errors")) {
+                if (dbocc == HarvestProcess.ERRORS) {
                     final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
                     return "double in: errors (" + errorEntry.anycause() + ")";
                 }
-                return "double in: " + dbocc;
+                return "double in: " + dbocc.toString();
             }
         } else {
             final boolean recrawl = profile.recrawlIfOlder() > oldDate.getTime();
@@ -467,12 +467,12 @@ public final class CrawlStacker {
                 if (dbocc == null) {
                     return "double in: LURL-DB";
                 }
-                if (this.log.isInfo()) this.log.logInfo("URL '" + urlstring + "' is double registered in '" + dbocc + "'. " + "Stack processing time:");
-                if (dbocc.equals("errors")) {
+                if (this.log.isInfo()) this.log.logInfo("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "'. " + "Stack processing time:");
+                if (dbocc == HarvestProcess.ERRORS) {
                     final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
                     return "double in: errors (" + errorEntry.anycause() + ")";
                 }
-                return "double in: " + dbocc;
+                return "double in: " + dbocc.toString();
             }
         }
 

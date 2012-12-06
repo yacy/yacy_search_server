@@ -114,6 +114,7 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.CrawlStacker;
 import net.yacy.crawler.CrawlSwitchboard;
+import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlQueues;
@@ -1510,11 +1511,11 @@ public final class Switchboard extends serverSwitch {
         return false;
     }
 
-    public String urlExists(final byte[] hash) {
+    public HarvestProcess urlExists(final byte[] hash) {
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,
         // if it not exists, null is returned
-        if (this.index.exists(hash)) return "loaded";
+        if (this.index.exists(hash)) return HarvestProcess.LOADED;
         return this.crawlQueues.urlExists(hash);
     }
 

@@ -42,6 +42,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ConnectionInfo;
+import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.crawler.retrieval.Request;
@@ -142,19 +143,19 @@ public class CrawlQueues {
      * @param hash
      * @return if the hash exists, the name of the database is returned, otherwise null is returned
      */
-    public String urlExists(final byte[] hash) {
+    public HarvestProcess urlExists(final byte[] hash) {
         if (this.delegatedURL.exists(hash)) {
-            return "delegated";
+            return HarvestProcess.DELEGATED;
         }
         if (this.errorURL.exists(hash)) {
-            return "errors";
+            return HarvestProcess.ERRORS;
         }
         if (this.noticeURL.existsInStack(hash)) {
-            return "crawler";
+            return HarvestProcess.CRAWLER;
         }
         for (final Loader worker: this.workers.values()) {
             if (Base64Order.enhancedCoder.equal(worker.request.url().hash(), hash)) {
-                return "worker";
+                return HarvestProcess.WORKER;
             }
         }
         return null;
