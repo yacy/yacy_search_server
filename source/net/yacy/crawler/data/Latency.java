@@ -27,6 +27,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
@@ -178,7 +180,8 @@ public class Latency {
         if (host == null) return Integer.MIN_VALUE; // no delay if host is new; use Integer because there is a cast to int somewhere
 
         // find the minimum waiting time based on the network domain (local or global)
-        int waiting = (url.isLocal()) ? minimumLocalDelta : minimumGlobalDelta;
+        boolean local = url.isLocal();
+        int waiting = (local) ? minimumLocalDelta : minimumGlobalDelta;
 
         // for CGI accesses, we double the minimum time
         // mostly there is a database access in the background
@@ -186,12 +189,10 @@ public class Latency {
         if (url.isCGI()) waiting = waiting * 2;
 
         // if we have accessed the domain many times, get slower (the flux factor)
-        waiting += host.flux(waiting);
+        if (!local) waiting += host.flux(waiting);
 
         // use the access latency as rule how fast we can access the server
-        // this applies also to localhost, but differently, because it is not necessary to
-        // consider so many external accesses
-        waiting = Math.max(waiting, host.average() * 3 / 2);
+        if (!local) waiting = Math.max(waiting, host.average() * 3 / 2);
 
         // the time since last access to the domain is the basis of the remaining calculation
         final int timeSinceLastAccess = (int) (System.currentTimeMillis() - host.lastacc());
@@ -248,9 +249,9 @@ public class Latency {
     }
 
     public static final class Host {
-        private long timeacc;
-        private long lastacc;
-        private int count;
+        private AtomicLong timeacc;
+        private AtomicLong lastacc;
+        private AtomicInteger count;
         private final String host;
         private long robotsMinDelay;
         private Host(final String host, final long time) {
@@ -258,27 +259,34 @@ public class Latency {
         }
         private Host(final String host, final long time, long robotsMinDelay) {
             this.host = host;
-            this.timeacc = time;
-            this.count = 1;
-            this.lastacc = System.currentTimeMillis();
+            this.timeacc = new AtomicLong(time);
+            this.count = new AtomicInteger(1);
+            this.lastacc = new AtomicLong(System.currentTimeMillis());
             this.robotsMinDelay = robotsMinDelay;
         }
         private void update(final long time) {
-            this.lastacc = System.currentTimeMillis();
-            this.timeacc += Math.min(30000, time);
-            this.count++;
+            if (this.count.get() > 100) {
+                synchronized(this) {
+                    // faster adoption to new values
+                    this.timeacc.set(this.timeacc.get() / this.count.get());
+                    this.count.set(1);
+                }
+            }
+            this.lastacc.set(System.currentTimeMillis());
+            this.timeacc.addAndGet(Math.min(30000, time));
+            this.count.incrementAndGet();
         }
         private void update() {
-            this.lastacc = System.currentTimeMillis();
+            this.lastacc.set(System.currentTimeMillis());
         }
         public int count() {
-            return this.count;
+            return this.count.get();
         }
         public int average() {
-            return (int) (this.timeacc / this.count);
+            return (int) (this.timeacc.get() / this.count.get());
         }
         public long lastacc() {
-            return this.lastacc;
+            return this.lastacc.get();
         }
         public String host() {
             return this.host;
@@ -287,7 +295,7 @@ public class Latency {
             return this.robotsMinDelay;
         }
         public int flux(final int range) {
-            return this.count >= 10000 ? range * Math.min(5000, this.count) / 10000 : range / (10000 - this.count);
+            return this.count.get() >= 10000 ? range * Math.min(5000, this.count.get()) / 10000 : range / (10000 - this.count.get());
         }
     }
 
