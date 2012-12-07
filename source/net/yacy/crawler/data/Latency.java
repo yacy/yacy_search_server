@@ -78,8 +78,6 @@ public class Latency {
             h = new Host(host, DEFAULT_AVERAGE, robotsCrawlDelay);
             if (map.size() > 1000 || MemoryControl.shortStatus()) map.clear();
             map.put(hosthash, h);
-        } else {
-            h.update();
         }
     }
 
