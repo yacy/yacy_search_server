@@ -37,6 +37,7 @@ public class RankingSolr_p {
 
         // clean up all search events
         SearchEventCache.cleanupEvents(true);
+        sb.index.fulltext().clearCache(); // every time the ranking is changed we need to remove old orderings
 
         if (post != null && post.containsKey("EnterDoublecheck")) {
             Boost.RANKING.setMinTokenLen(post.getInt("minTokenLen", 3));
