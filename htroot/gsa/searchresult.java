@@ -107,19 +107,18 @@ public class searchresult {
         // rename post fields according to result style
         //post.put(CommonParams.Q, post.remove("q")); // same as solr
         //post.put(CommonParams.START, post.remove("start")); // same as solr
-        //post.put(, post.remove("site"));//required, example: col1|col2
         //post.put(, post.remove("client"));//required, example: myfrontend
         //post.put(, post.remove("output"));//required, example: xml,xml_no_dtd
-        String q = post.get(CommonParams.Q, "");
-        post.put("originalQuery", q);
+        String originalQuery = post.get(CommonParams.Q, "");
+        post.put("originalQuery", originalQuery);
         
         // get a solr query string
-        QueryGoal qg = new QueryGoal(q);
-        q = qg.solrQueryString(sb.index.fulltext().getSolrScheme()).toString();
-        
+        QueryGoal qg = new QueryGoal(originalQuery);
+        StringBuilder solrQ = qg.solrQueryString(sb.index.fulltext().getSolrScheme());
+        post.put("defType", "edismax");
+        post.put(CommonParams.Q, solrQ.toString());
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 5000 : 100));
-        post.put("defType", "edismax");
         float f = Boost.RANKING.get(YaCySchema.fuzzy_signature_unique_b);
         post.put("bq", YaCySchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^" + Float.toString(f)); // a boost query that moves double content to the back
         post.put(CommonParams.FL,
@@ -132,7 +131,7 @@ public class searchresult {
                 YaCySchema.last_modified.getSolrFieldName() + ',' +
                 YaCySchema.size_i.getSolrFieldName());
         post.put("hl", "true");
-        post.put("hl.q", q);
+        post.put("hl.q", originalQuery);
         post.put("hl.fl", YaCySchema.h1_txt.getSolrFieldName() + "," + YaCySchema.h2_txt.getSolrFieldName() + "," + YaCySchema.text_t.getSolrFieldName());
         post.put("hl.alternateField", YaCySchema.description.getSolrFieldName());
         post.put("hl.simple.pre", "<b>");
@@ -145,7 +144,7 @@ public class searchresult {
         } else {
             post.put(CommonParams.SORT, sorts);
         }
-        String site = post.remove("site");
+        String site = post.remove("site"); // example: col1|col2
         String access = post.remove("access");
         String entqr = post.remove("entqr");
 
@@ -157,18 +156,17 @@ public class searchresult {
                 s = s.trim().toLowerCase();
                 if (s.length() > 0) sites.add(s);
             }
+            StringBuilder fq = new StringBuilder(20);
             if (sites.size() > 1) {
-                q += " AND (" + YaCySchema.collection_sxt.getSolrFieldName() + ":" + sites.get(0);
+                fq.append(YaCySchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(0));
                 for (int i = 1; i < sites.size(); i++) {
-                    q += " OR " + YaCySchema.collection_sxt.getSolrFieldName() + ":" + sites.get(i);
+                    fq.append(" OR ").append(YaCySchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(i));
                 }
-                q += ")";
             } else if (sites.size() == 1) {
-                q += " AND " + YaCySchema.collection_sxt.getSolrFieldName() + ":" + sites.get(0);
+                fq.append(YaCySchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(0));
             }
-            post.put(CommonParams.Q, q);
+            post.put(CommonParams.FQ, fq.toString());
         }
-        post.put(CommonParams.Q, q);
         
         // get the embedded connector
         EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.fulltext().getLocalSolr();
@@ -208,7 +206,7 @@ public class searchresult {
         // log result
         Object rv = response.getValues().get("response");
         if (rv != null && rv instanceof ResultContext) {
-            AccessTracker.addToDump(q, Integer.toString(((ResultContext) rv).docs.matches()));
+            AccessTracker.addToDump(originalQuery, Integer.toString(((ResultContext) rv).docs.matches()));
         }
         return null;
     }
