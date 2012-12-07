@@ -33,7 +33,6 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.yacy.ConfigurationSet.Entry;
 import net.yacy.cora.storage.Files;
 
@@ -162,14 +161,9 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
         try {
             if (modified) {
                 commit();
-                try {
-                    YaCySchema f = YaCySchema.valueOf(key);
-                    f.setSolrFieldName(entry.getValue());
-                } catch (IllegalArgumentException e) {}
             }
 
-        } catch (final IOException e) {
-        }
+        } catch (final IOException e) {}
         return modified;
     }
 
@@ -201,8 +195,11 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
         if (this.file == null) return;
         // create a temporary bak file, use it as template to preserve user comments
         File bakfile = new File (this.file.getAbsolutePath() + ".bak");
-        Files.copy (this.file, bakfile);
-
+        try {
+            Files.copy(this.file, bakfile);
+        } catch (final IOException e) {
+            this.file.createNewFile();
+        }
         @SuppressWarnings("unchecked")
         TreeMap<String,Entry> tclone = (TreeMap<String,Entry>) this.clone(); // clone to write appended entries
 
@@ -240,7 +237,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
                     if (e != null) {
                         writer.write (e.toString());
                         tclone.remove(key); // remove written entries from clone
-                    } else {writer.write(sorig); }
+                    }
                     writer.write("\n");
                 } else {
                     writer.write(sorig+"\n");
