@@ -301,9 +301,9 @@ public class GSAResponseWriter implements QueryResponseWriter {
         writer.write("<PARAM name=\"");
         writer.write(tagname);
         writer.write("\" value=\"");
-        XML.escapeCharData(value, writer);
+        XML.escapeAttributeValue(value, writer);
         writer.write("\" original_value=\"");
-        writer.write(value);
+        XML.escapeAttributeValue(value, writer);
         writer.write("\"/>"); writer.write(lb);
     }
 
