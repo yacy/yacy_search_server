@@ -72,9 +72,10 @@ public final class HTTPLoader {
     }
 
     public Response load(final Request entry, final int maxFileSize, final BlacklistType blacklistType) throws IOException {
+        Latency.updateBeforeLoad(entry.url());
         final long start = System.currentTimeMillis();
         final Response doc = load(entry, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize, blacklistType);
-        if (!doc.fromCache()) Latency.updateAfterLoad(entry.url(), System.currentTimeMillis() - start);
+        Latency.updateAfterLoad(entry.url(), System.currentTimeMillis() - start);
         return doc;
     }
 

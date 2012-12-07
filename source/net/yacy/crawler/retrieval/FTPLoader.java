@@ -69,6 +69,8 @@ public class FTPLoader {
      */
     public Response load(final Request request, final boolean acceptOnlyParseable) throws IOException {
 
+        Latency.updateBeforeLoad(request.url());
+        
         final long start = System.currentTimeMillis();
         final DigestURI entryUrl = request.url();
         final String fullPath = getPath(entryUrl);

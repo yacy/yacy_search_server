@@ -46,25 +46,6 @@ public class Latency {
     private static final ConcurrentHashMap<String, Host> map = new ConcurrentHashMap<String, Host>();
 
     /**
-     * update the latency entry after a host was accessed to load a file
-     * @param url
-     * @param time the time to load the file in milliseconds
-     */
-    public static void updateAfterLoad(final DigestURI url, final long time) {
-        final String host = url.getHost();
-        if (host == null) return;
-        String hosthash = url.hosthash();
-        Host h = map.get(hosthash);
-        if (h == null) {
-            h = new Host(host, time);
-            if (map.size() > 1000 || MemoryControl.shortStatus()) map.clear();
-            map.put(hosthash, h);
-        } else {
-            h.update(time);
-        }
-    }
-
-    /**
      * update the latency entry after a host was selected for queueing into the loader
      * @param url
      * @param robotsCrawlDelay the crawl-delay given by the robots; 0 if not exist
@@ -78,6 +59,44 @@ public class Latency {
             h = new Host(host, DEFAULT_AVERAGE, robotsCrawlDelay);
             if (map.size() > 1000 || MemoryControl.shortStatus()) map.clear();
             map.put(hosthash, h);
+        }
+    }
+
+    /**
+     * update the latency entry before a host is accessed
+     * @param url
+     * @param time the time to load the file in milliseconds
+     */
+    public static void updateBeforeLoad(final DigestURI url) {
+        final String host = url.getHost();
+        if (host == null) return;
+        String hosthash = url.hosthash();
+        Host h = map.get(hosthash);
+        if (h == null) {
+            h = new Host(host, 500, 0);
+            if (map.size() > 1000 || MemoryControl.shortStatus()) map.clear();
+            map.put(hosthash, h);
+        } else {
+            h.update();
+        }
+    }
+
+    /**
+     * update the latency entry after a host was accessed to load a file
+     * @param url
+     * @param time the time to load the file in milliseconds
+     */
+    public static void updateAfterLoad(final DigestURI url, final long time) {
+        final String host = url.getHost();
+        if (host == null) return;
+        String hosthash = url.hosthash();
+        Host h = map.get(hosthash);
+        if (h == null) {
+            h = new Host(host, time, 0);
+            if (map.size() > 1000 || MemoryControl.shortStatus()) map.clear();
+            map.put(hosthash, h);
+        } else {
+            h.update(time);
         }
     }
 
@@ -252,9 +271,6 @@ public class Latency {
         private AtomicInteger count;
         private final String host;
         private long robotsMinDelay;
-        private Host(final String host, final long time) {
-            this(host, time, 0);
-        }
         private Host(final String host, final long time, long robotsMinDelay) {
             this.host = host;
             this.timeacc = new AtomicLong(time);
