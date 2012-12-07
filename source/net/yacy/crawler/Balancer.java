@@ -607,8 +607,7 @@ public class Balancer {
     	if (!this.domainStacks.isEmpty() && System.currentTimeMillis() - this.lastDomainStackFill < 60000L) return;
     	this.domainStacks.clear();
     	this.lastDomainStackFill = System.currentTimeMillis();
-    	//final HandleSet handles = this.urlFileIndex.keysFromBuffer(objectIndexBufferSize / 2);
-        //final CloneableIterator<byte[]> i = handles.keys(true, null);
+    	final HandleSet blackhandles = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 10);
         String host;
         Request request;
         int count = 0;
@@ -616,6 +615,14 @@ public class Balancer {
     	for (Row.Entry entry: this.urlFileIndex.random(10000)) {
     	    if (entry == null) continue;
     	    request = new Request(entry);
+    	    
+            // check blacklist (again) because the user may have created blacklist entries after the queue has been filled
+            if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, request.url())) {
+                Log.logFine("CRAWLER", "URL '" + request.url() + "' is in blacklist.");
+                try {blackhandles.put(entry.getPrimaryKeyBytes());} catch (SpaceExceededException e) {}
+                continue;
+            }
+    	    
     	    host = request.url().getHost();
     		try {
                 pushHashToDomainStacks(host, request.url().hosthash(), entry.getPrimaryKeyBytes());
@@ -625,7 +632,11 @@ public class Balancer {
             count++;
             if (this.domainStacks.size() >= 1000 || count >= 100000 || System.currentTimeMillis() > timeout) break;
     	}
-    	Log.logInfo("BALANCER", "re-fill of domain stacks; fileIndex.size() = " + this.urlFileIndex.size() + ", domainStacks.size = " + this.domainStacks.size() + ", collection time = " + (System.currentTimeMillis() - this.lastDomainStackFill) + " ms");
+    	
+    	// if we collected blacklist entries then delete them now
+    	for (byte[] blackhandle: blackhandles) this.urlFileIndex.remove(blackhandle);
+    	
+    	Log.logInfo("BALANCER", "re-fill of domain stacks; fileIndex.size() = " + this.urlFileIndex.size() + ", domainStacks.size = " + this.domainStacks.size() + ", blackhandles = " + blackhandles.size() + ", collection time = " + (System.currentTimeMillis() - this.lastDomainStackFill) + " ms");
         this.domStackInitSize = this.domainStacks.size();
     }
 
