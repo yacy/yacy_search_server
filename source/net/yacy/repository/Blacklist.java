@@ -215,7 +215,7 @@ public class Blacklist {
                 loadedPathsPattern = new ArrayList<Pattern>();
                 for (String a: loadedPaths) {
                     if (a.equals("*")) {
-                        loadedPathsPattern.add(Pattern.compile(".*"));
+                        loadedPathsPattern.add(Pattern.compile("(?i).*"));
                         continue;
                     }
                     if (a.indexOf("?*",0) > 0) {
@@ -223,7 +223,7 @@ public class Blacklist {
                         Log.logWarning("Blacklist", "ignored blacklist path to prevent 'Dangling meta character' exception: " + a);
                         continue;
                     }
-                    loadedPathsPattern.add(Pattern.compile(a));
+                    loadedPathsPattern.add(Pattern.compile("(?i)" + a)); // add case insesitive regex
                 }
 
                 // create new entry if host mask unknown, otherwise merge
@@ -295,7 +295,7 @@ public class Blacklist {
             blacklistMap.put(h, (hostList = new ArrayList<Pattern>()));
         }
 
-        hostList.add(Pattern.compile(p));
+        hostList.add(Pattern.compile("(?i)" + p)); // add case insesitive regex
     }
 
     public int blacklistCacheSize() {

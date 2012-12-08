@@ -70,18 +70,36 @@ public class BlacklistTest_p {
             if(testurl != null) {
                 prop.putHTML("url",testurl.toString());
                 prop.putHTML("testlist_url",testurl.toString());
-                if(Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, testurl))
-                        prop.put("testlist_listedincrawler", "1");
-                if(Switchboard.urlBlacklist.isListed(BlacklistType.DHT, testurl))
-                        prop.put("testlist_listedindht", "1");
-                if(Switchboard.urlBlacklist.isListed(BlacklistType.NEWS, testurl))
-                        prop.put("testlist_listedinnews", "1");
-                if(Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, testurl))
-                        prop.put("testlist_listedinproxy", "1");
-                if(Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, testurl))
-                        prop.put("testlist_listedinsearch", "1");
-                if(Switchboard.urlBlacklist.isListed(BlacklistType.SURFTIPS, testurl))
-                        prop.put("testlist_listedinsurftips", "1");
+                boolean isblocked = false;
+
+                if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, testurl)) {
+                    prop.put("testlist_listedincrawler", "1");
+                    isblocked = true;
+                }
+                if (Switchboard.urlBlacklist.isListed(BlacklistType.DHT, testurl)) {
+                    prop.put("testlist_listedindht", "1");
+                    isblocked = true;
+                }
+                if (Switchboard.urlBlacklist.isListed(BlacklistType.NEWS, testurl)) {
+                    prop.put("testlist_listedinnews", "1");
+                    isblocked = true;
+                }
+                if (Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, testurl)) {
+                    prop.put("testlist_listedinproxy", "1");
+                    isblocked = true;
+                }
+                if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, testurl)) {
+                    prop.put("testlist_listedinsearch", "1");
+                    isblocked = true;
+                }
+                if (Switchboard.urlBlacklist.isListed(BlacklistType.SURFTIPS, testurl)) {
+                    prop.put("testlist_listedinsurftips", "1");
+                    isblocked = true;
+                }
+
+                if (!isblocked) {
+                    prop.put("testlist_isnotblocked", "1");
+                }
             }
             else {
                 prop.putHTML("url",urlstring);
