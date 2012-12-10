@@ -333,7 +333,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         String host = null;
         if ((host = digestURI.getHost()) != null) {
             String dnc = Domains.getDNC(host);
-            String subdomOrga = host.substring(0, host.length() - dnc.length() - 1);
+            String subdomOrga = host.length() - dnc.length() <= 0 ? "" : host.substring(0, host.length() - dnc.length() - 1);
             int p = subdomOrga.lastIndexOf('.');
             String subdom = (p < 0) ? "" : subdomOrga.substring(0, p);
             String orga = (p < 0) ? subdomOrga : subdomOrga.substring(p + 1);

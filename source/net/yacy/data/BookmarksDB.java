@@ -513,7 +513,7 @@ public class BookmarksDB {
         }
 
         public Bookmark(final String url) throws MalformedURLException {
-            this(new DigestURI((!url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")) ? "http://" + url : url));
+            this(new DigestURI((url.indexOf("://") < 0) ? "http://" + url : url));
         }
 
         public Bookmark(final Map<String, String> map) throws MalformedURLException {
