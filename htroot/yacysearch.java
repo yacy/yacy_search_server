@@ -115,7 +115,7 @@ public class yacysearch {
         
         // get query
         final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
-        String querystring = originalquerystring.replace('+', ' ').replace('*', ' ').trim();
+        String querystring = originalquerystring.replace('+', ' ').trim();
         CacheStrategy snippetFetchStrategy = (post == null) ? null : CacheStrategy.parse(post.get("verify", "cacheonly"));
         if (authenticated && originalquerystring.length() == 0) sb.index.fulltext().commit();
         
@@ -356,6 +356,9 @@ public class yacysearch {
             final RankingProfile ranking = sb.getRanking();
             final StringBuilder modifier = new StringBuilder(20);
 
+            if ("*".equals(querystring)) {
+                querystring = Segment.catchallString;
+            }
             if ( querystring.indexOf("/near", 0) >= 0 ) {
                 querystring = querystring.replace("/near", "");
                 ranking.allZero(); // switch off all attributes
