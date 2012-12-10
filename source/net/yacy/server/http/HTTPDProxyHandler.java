@@ -77,6 +77,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
+import net.yacy.cora.protocol.http.ProxySettings.Protocol;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
@@ -1245,7 +1246,7 @@ public final class HTTPDProxyHandler {
         }
 
         // possibly branch into PROXY-PROXY connection
-        if (ProxySettings.use && ProxySettings.use4ssl) {
+        if (ProxySettings.useForHost(host, Protocol.HTTPS)) {
         	final HTTPClient remoteProxy = setupHttpClient(requestHeader, host);
 
             try {

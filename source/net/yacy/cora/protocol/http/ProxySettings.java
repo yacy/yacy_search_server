@@ -41,25 +41,26 @@ public final class ProxySettings {
     // Dummy value to associate with an Object in the backing Map
     private static final Object PRESENT = new Object();
     
-    public static       boolean     use = false, use4YaCy = false, use4ssl = false;
+    public static enum Protocol {
+        HTTP, HTTPS, YACY
+    }
+    
+    private static       boolean     use = false, use4YaCy = false, use4ssl = false;
     public static       String      host = null, user = "", password = "";
     public static       int         port = 0;
     public static       String[]    noProxy  = null;
     public static final Map<String, Object> allowProxy    = new ConcurrentHashMap<String, Object>();
     public static final Map<String, Object> disallowProxy = new ConcurrentHashMap<String, Object>();
-    
-//    /**
-//     * produce a HostConfiguration (apache object) with the proxy access information included
-//     * @param apacheHttpClient
-//     * @return a host configuration with proxy config if the proxy shall be used; a cloned configuration otherwise
-//     */
-//    public static HostConfiguration getProxyHostConfig(HttpClient apacheHttpClient) {
-//        final HostConfiguration hostConfig;
-//        if (!use) return null;
-//        hostConfig = new HostConfiguration(apacheHttpClient.getHostConfiguration());
-//        hostConfig.setProxy(host, port);
-//        return hostConfig;
-//    }
+
+    public static void setProxyUse4HTTP(boolean use4http0) {
+        use = use4http0;
+    }
+    public static void setProxyUse4HTTPS(boolean use4https0) {
+        use4ssl = use4https0;
+    }
+    public static void setProxyUse4YaCy(boolean use4YaCy0) {
+        use4YaCy = use4YaCy0;
+    }
     
     /**
      * 
@@ -82,8 +83,11 @@ public final class ProxySettings {
      * @param host
      * @return true, if the proxy shall be used for the given host
      */
-    public static boolean useForHost(final String host) {
-        if (!use) return false;
+    public static boolean useForHost(final String host, Protocol protocol) {
+        assert protocol != null;
+        if (protocol == Protocol.HTTP && !use) return false;
+        if (protocol == Protocol.HTTPS && !use4ssl) return false;
+        if (protocol == Protocol.YACY && !use4YaCy) return false;
         if (allowProxy.containsKey(host)) return true;
         if (disallowProxy.containsKey(host)) return false;
         for (String pattern: noProxy) {

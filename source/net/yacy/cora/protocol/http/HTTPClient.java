@@ -49,6 +49,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.http.ProxySettings.Protocol;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -342,7 +343,7 @@ public class HTTPClient {
         final String urix = url.toNormalform(true);
         final HttpGet httpGet = new HttpGet(urix);
         if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-        return getContentBytes(httpGet, maxBytes);
+        return getContentBytes(httpGet, url.getHost(), maxBytes);
     }
 
     /**
@@ -359,7 +360,7 @@ public class HTTPClient {
         final HttpGet httpGet = new HttpGet(url.toNormalform(true));
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         this.currentRequest = httpGet;
-        execute(httpGet);
+        execute(httpGet, url.getHost());
     }
 
     /**
@@ -373,7 +374,7 @@ public class HTTPClient {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpHead httpHead = new HttpHead(url.toNormalform(true));
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-    	execute(httpHead);
+    	execute(httpHead, url.getHost());
     	finish();
     	ConnectionInfo.removeConnection(httpHead.hashCode());
     	return this.httpResponse;
@@ -401,7 +402,7 @@ public class HTTPClient {
     	this.upbytes = length;
     	httpPost.setEntity(inputStreamEntity);
     	this.currentRequest = httpPost;
-    	execute(httpPost);
+    	execute(httpPost, host);
     }
 
     /**
@@ -445,7 +446,7 @@ public class HTTPClient {
             httpPost.setEntity(multipartEntity);
         }
 
-        return getContentBytes(httpPost, Integer.MAX_VALUE);
+        return getContentBytes(httpPost, url.getHost(), Integer.MAX_VALUE);
     }
 
     /**
@@ -468,7 +469,7 @@ public class HTTPClient {
         // statistics
         this.upbytes = length;
         httpPost.setEntity(inputStreamEntity);
-        return getContentBytes(httpPost, Integer.MAX_VALUE);
+        return getContentBytes(httpPost, host, Integer.MAX_VALUE);
     }
 
 	/**
@@ -557,9 +558,9 @@ public class HTTPClient {
         }
     }
 
-    private byte[] getContentBytes(final HttpUriRequest httpUriRequest, final int maxBytes) throws IOException {
+    private byte[] getContentBytes(final HttpUriRequest httpUriRequest, String host, final int maxBytes) throws IOException {
     	try {
-            execute(httpUriRequest);
+            execute(httpUriRequest, host);
             if (this.httpResponse == null) return null;
             // get the response body
             final HttpEntity httpEntity = this.httpResponse.getEntity();
@@ -579,11 +580,11 @@ public class HTTPClient {
         }
     }
 
-    private void execute(final HttpUriRequest httpUriRequest) throws IOException {
+    private void execute(final HttpUriRequest httpUriRequest, String host) throws IOException {
     	final HttpContext httpContext = new BasicHttpContext();
     	setHeaders(httpUriRequest);
     	setParams(httpUriRequest.getParams());
-    	setProxy(httpUriRequest.getParams());
+    	setProxy(httpUriRequest.getParams(), host);
     	// statistics
     	storeConnectionInfo(httpUriRequest);
     	// execute the method; some asserts confirm that that the request can be send with Content-Length and is therefore not terminated by EOF
@@ -656,8 +657,8 @@ public class HTTPClient {
     		httpParams.setParameter(HTTP.TARGET_HOST, this.host);
     }
 
-    private static void setProxy(final HttpParams httpParams) {
-    	if (ProxySettings.use)
+    private static void setProxy(final HttpParams httpParams, String host) {
+    	if (ProxySettings.useForHost(host, Protocol.HTTP))
     		ConnRouteParams.setDefaultProxy(httpParams, ProxySettings.getProxyHost());
     	// TODO find a better way for this
     	ProxySettings.setProxyCreds((DefaultHttpClient) httpClient);

@@ -3549,22 +3549,13 @@ public final class Switchboard extends serverSwitch {
         } catch ( final NumberFormatException e ) {
             port = 3128;
         }
+        
         // create new config
-        ProxySettings.use4ssl = true;
-        ProxySettings.use4YaCy = true;
         ProxySettings.port = port;
         ProxySettings.host = host;
-        ProxySettings.use = ((ProxySettings.host != null) && (ProxySettings.host.length() > 0));
-
-        // determining if remote proxy usage is enabled
-        ProxySettings.use = getConfigBool("remoteProxyUse", false);
-
-        // determining if remote proxy should be used for yacy -> yacy communication
-        ProxySettings.use4YaCy = getConfig("remoteProxyUse4Yacy", "true").equalsIgnoreCase("true");
-
-        // determining if remote proxy should be used for ssl connections
-        ProxySettings.use4ssl = getConfig("remoteProxyUse4SSL", "true").equalsIgnoreCase("true");
-
+        ProxySettings.setProxyUse4HTTP(ProxySettings.host != null && ProxySettings.host.length() > 0 && getConfigBool("remoteProxyUse", false));
+        ProxySettings.setProxyUse4YaCy(getConfig("remoteProxyUse4Yacy", "true").equalsIgnoreCase("true"));
+        ProxySettings.setProxyUse4HTTPS(getConfig("remoteProxyUse4SSL", "true").equalsIgnoreCase("true"));
         ProxySettings.user = getConfig("remoteProxyUser", "").trim();
         ProxySettings.password = getConfig("remoteProxyPwd", "").trim();
 
