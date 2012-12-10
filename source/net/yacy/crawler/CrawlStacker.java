@@ -362,7 +362,7 @@ public final class CrawlStacker {
 
         // check availability of parser and maxfilesize
         String warning = null;
-        if (entry.size() > maxFileSize ||
+        if ((maxFileSize >= 0 && entry.size() > maxFileSize) ||
             entry.url().getContentDomain() == ContentDomain.APP  ||
             entry.url().getContentDomain() == ContentDomain.IMAGE  ||
             entry.url().getContentDomain() == ContentDomain.AUDIO  ||

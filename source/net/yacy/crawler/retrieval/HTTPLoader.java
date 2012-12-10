@@ -197,7 +197,7 @@ public final class HTTPLoader {
             ByteCount.addAccountCount(ByteCount.CRAWLER, contentLength);
 
             // check length again in case it was not possible to get the length before loading
-            if (maxFileSize > 0 && contentLength > maxFileSize) {
+            if (maxFileSize >= 0 && contentLength > maxFileSize) {
             	this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "file size limit exceeded", statusCode);
             	throw new IOException("REJECTED URL " + request.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)");
             }

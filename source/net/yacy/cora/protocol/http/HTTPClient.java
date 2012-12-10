@@ -565,7 +565,7 @@ public class HTTPClient {
             // get the response body
             final HttpEntity httpEntity = this.httpResponse.getEntity();
             if (httpEntity != null) {
-                if (getStatusCode() == 200 && httpEntity.getContentLength() < maxBytes) {
+                if (getStatusCode() == 200 && (maxBytes < 0 || httpEntity.getContentLength() < maxBytes)) {
                     return getByteArray(httpEntity, maxBytes);
                 }
                 // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
@@ -615,7 +615,7 @@ public class HTTPClient {
             return null;
         }
         try {
-            int i = Math.min(maxBytes, (int)entity.getContentLength());
+            int i = maxBytes < 0 ?  (int)entity.getContentLength() : Math.min(maxBytes, (int)entity.getContentLength());
             if (i < 0) {
                 i = 4096;
             }
@@ -624,7 +624,7 @@ public class HTTPClient {
             int l, sum = 0;
             while((l = instream.read(tmp)) != -1) {
             	sum += l;
-            	if (sum > maxBytes) throw new IOException("Download exceeded maximum value of " + maxBytes + " bytes");
+            	if (maxBytes >= 0 && sum > maxBytes) throw new IOException("Download exceeded maximum value of " + maxBytes + " bytes");
                 buffer.append(tmp, 0, l);
             }
             return buffer.toByteArray();

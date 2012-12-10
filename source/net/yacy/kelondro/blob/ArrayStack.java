@@ -787,7 +787,7 @@ public class ArrayStack implements BLOB {
         else if (bi.location.length() > this.fileSizeLimit)
             System.out.println("bi.location.length() > this.maxsize");
         */
-        if ((bi == null) || (System.currentTimeMillis() - bi.creation.getTime() > this.fileAgeLimit) || (bi.location.length() > this.fileSizeLimit)) {
+        if ((bi == null) || (System.currentTimeMillis() - bi.creation.getTime() > this.fileAgeLimit) || (bi.location.length() > this.fileSizeLimit && this.fileSizeLimit >= 0)) {
             // add a new blob to the array
             bi = new blobItem(this.buffersize);
             this.blobs.add(bi);
