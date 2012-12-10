@@ -421,7 +421,7 @@ public final class TemplateEngine {
                         }
                         final PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
                         structure.append(ASCII.getBytes("<fileinclude file=\"")).append(filename).append(close_tagn);
-                        structure.append(writeTemplate(pis2, out, pattern, dflt, prefix));
+                        structure.append(writeTemplate(pis2, out, pattern, dflt, new byte[0])); //clear pattern prefix for include
                         structure.append(ASCII.getBytes("</fileinclude>\n"));
                     }
                 }
