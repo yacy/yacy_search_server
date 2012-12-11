@@ -345,7 +345,7 @@ public final class Fulltext implements Iterable<byte[]> {
                 synchronized (Fulltext.this.solr) {
                     try {
                         count.addAndGet(Fulltext.this.solr.deleteByQuery(q));
-                        Fulltext.this.solr.commit();
+                        if (count.get() > 0) Fulltext.this.solr.commit();
                     } catch (IOException e) {}
                 }
         
@@ -392,13 +392,11 @@ public final class Fulltext implements Iterable<byte[]> {
      * @param freshdate either NULL or a date in the past which is the limit for deletion. Only documents older than this date are deleted
      * @param concurrently if true, then the method returnes immediately and runs concurrently
      */
-    public int remove(String subpath, Date freshdate, final boolean concurrently) {
-        int p = subpath.substring(0, subpath.length() - 1).lastIndexOf('/');
-        final String path = p > 8 ? subpath.substring(0, p + 1) : subpath;
+    public int remove(final String basepath, Date freshdate, final boolean concurrently) {
         DigestURI uri;
-        try {uri = new DigestURI(path);} catch (MalformedURLException e) {return 0;}
+        try {uri = new DigestURI(basepath);} catch (MalformedURLException e) {return 0;}
         final String host = uri.getHost();
-        final String q = YaCySchema.host_s.getSolrFieldName() + ":" + host +
+        final String q = YaCySchema.host_s.getSolrFieldName() + ":\"" + host + "\"" +
                 ((freshdate != null && freshdate.before(new Date())) ? (" AND " + YaCySchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") : "");
         final AtomicInteger count = new AtomicInteger(0);
         Thread t = new Thread(){
@@ -408,7 +406,7 @@ public final class Fulltext implements Iterable<byte[]> {
                     SolrDocument doc;
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                         String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
-                        if (u.startsWith(path)) {
+                        if (u.startsWith(basepath)) {
                             remove(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())));
                             count.incrementAndGet();
                         }

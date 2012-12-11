@@ -294,7 +294,7 @@ public class Crawler_p {
                         siteFilter = CrawlProfile.siteFilter(rootURLs);
                         if (deleteold) {
                             for (DigestURI u: rootURLs) {
-                                int count = sb.index.fulltext().deleteDomain(u.hosthash(), deleteageDate, rootURLs.size() > 0);
+                                int count = sb.index.fulltext().deleteDomain(u.hosthash(), deleteageDate, rootURLs.size() > 1);
                                 if (count > 0) Log.logInfo("Crawler_p", "deleted " + count + " documents for host " + u.getHost());
                             }
                         }
@@ -302,9 +302,9 @@ public class Crawler_p {
                         siteFilter = CrawlProfile.subpathFilter(rootURLs);
                         if (deleteold) {
                             for (DigestURI u: rootURLs) {
-                                String subpath = CrawlProfile.mustMatchSubpath(u);
-                                if (subpath.endsWith(".*")) subpath = subpath.substring(0, subpath.length() - 2);
-                                int count = sb.index.fulltext().remove(subpath, deleteageDate, rootURLs.size() > 0);
+                                String basepath = u.toNormalform(true);
+                                if (!basepath.endsWith("/")) {int p = basepath.lastIndexOf("/"); if (p > 0) basepath = basepath.substring(0, p + 1);}
+                                int count = sb.index.fulltext().remove(basepath, deleteageDate, rootURLs.size() > 1);
                                 if (count > 0) Log.logInfo("Crawler_p", "deleted " + count + " documents for host " + u.getHost());
                             }
                         }
