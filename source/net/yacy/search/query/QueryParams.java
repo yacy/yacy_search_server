@@ -153,13 +153,13 @@ public final class QueryParams {
     public final SortedSet<byte[]> misses; // url hashes that had been sorted out because of constraints in postranking
 
     public QueryParams(
-            final String queryString,
+            final String query_original, final String query_words,
             final int itemsPerPage,
             final Bitfield constraint,
             final Segment indexSegment,
             final RankingProfile ranking,
             final String userAgent) {
-        this.queryGoal = new QueryGoal(queryString);
+        this.queryGoal = new QueryGoal(query_original, query_words);
     	this.ranking = ranking;
     	this.modifier = new Modifier("");
         this.maxDistance = Integer.MAX_VALUE;
@@ -398,17 +398,6 @@ public final class QueryParams {
     	return SetTools.anymatch(wordhashes, keyhashes);
     }
 
-    public String queryString(final boolean encodeHTML) {
-        final String ret;
-        if (encodeHTML){
-            ret = CharacterCoding.unicode2html(this.queryGoal.getQueryString(), true);
-        } else {
-            ret = this.queryGoal.getQueryString();
-        }
-        return ret;
-    }
-
-
     public SolrQuery solrQuery() {
         if (this.queryGoal.getIncludeStrings().size() == 0) return null;
         // get text query
@@ -588,7 +577,7 @@ public final class QueryParams {
         sb.append("/yacysearch.");
         sb.append(ext);
         sb.append("?query=");
-        sb.append(newQueryString == null ? theQuery.getQueryGoal().queryStringForUrl() : newQueryString);
+        sb.append(newQueryString == null ? theQuery.getQueryGoal().getOriginalQueryString(true) : newQueryString);
 
         sb.append(ampersand);
         sb.append("maximumRecords=");
@@ -619,7 +608,7 @@ public final class QueryParams {
 
         sb.append(ampersand);
         sb.append("former=");
-        sb.append(theQuery.getQueryGoal().queryStringForUrl());
+        sb.append(theQuery.getQueryGoal().getOriginalQueryString(true));
 
         return sb;
     }

@@ -3321,7 +3321,7 @@ public final class Switchboard extends serverSwitch {
         new Thread() {
             @Override
             public void run() {
-                String queryString = searchEvent.query.queryString(true);
+                String queryString = searchEvent.query.getQueryGoal().getOriginalQueryString(false);
                 Thread.currentThread().setName("Switchboard.heuristicRSS:" + queryString);
                 final int meta = queryString.indexOf("heuristic:", 0);
                 if ( meta >= 0 ) {

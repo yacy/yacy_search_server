@@ -28,15 +28,10 @@ import java.util.SortedSet;
 
 import net.yacy.cora.federate.solr.Boost;
 import net.yacy.cora.federate.solr.YaCySchema;
-import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
-import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.data.word.WordReferenceRow;
-import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.SolrConfiguration;
 
@@ -48,14 +43,15 @@ public class QueryGoal {
     private static char dq = '"';
     private static String seps = ".,/&_";
     
-    private String querystring;
+    private String query_original, query_words;
     private HandleSet include_hashes, exclude_hashes, all_hashes;
     private final ArrayList<String> include_words, exclude_words, all_words;
     private final ArrayList<String> include_strings, exclude_strings, all_strings;
 
 
     public QueryGoal(HandleSet include_hashes, HandleSet exclude_hashes, HandleSet all_hashes) {
-        this.querystring = null;
+        this.query_original = null;
+        this.query_words = null;
         this.include_words = null;
         this.exclude_words = null;
         this.all_words = null;
@@ -66,35 +62,12 @@ public class QueryGoal {
         this.exclude_hashes = exclude_hashes;
         this.all_hashes = all_hashes;
     }
-
-    public QueryGoal(byte[] queryHash) {
-        assert querystring != null;
-        assert queryHash.length == 12;
-        assert Base64Order.enhancedCoder.wellformed(queryHash);
-        this.querystring = null;
-        this.include_words = new ArrayList<String>();
-        this.exclude_words = new ArrayList<String>();
-        this.all_words = new ArrayList<String>();
-        this.include_strings = new ArrayList<String>();
-        this.exclude_strings = new ArrayList<String>();
-        this.all_strings = new ArrayList<String>();
-        this.include_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-        this.exclude_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-        this.all_hashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-        try {
-            this.include_hashes.put(queryHash);
-            this.all_hashes.put(queryHash);
-        } catch (final SpaceExceededException e) {
-            Log.logException(e);
-        }
-        this.include_hashes = null;
-        this.exclude_hashes = null;
-        this.all_hashes = null;
-    }
     
-    public QueryGoal(String querystring) {
-        assert querystring != null;
-        this.querystring = querystring;
+    public QueryGoal(String query_original, String query_words) {
+        assert query_original != null;
+        assert query_words != null;
+        this.query_original = query_original;
+        this.query_words = query_words;
         this.include_words = new ArrayList<String>();
         this.exclude_words = new ArrayList<String>();
         this.all_words = new ArrayList<String>();
@@ -103,16 +76,16 @@ public class QueryGoal {
         this.all_strings = new ArrayList<String>();
 
         // remove funny symbols
-        querystring = CharacterCoding.html2unicode(AbstractScraper.stripAllTags(querystring.toCharArray())).toLowerCase().trim();
+        this.query_words = CharacterCoding.html2unicode(AbstractScraper.stripAllTags(this.query_words.toCharArray())).toLowerCase().trim();
         int c;
         for (int i = 0; i < seps.length(); i++) {
-            while ((c = querystring.indexOf(seps.charAt(i))) >= 0) {
-                querystring = querystring.substring(0, c) + (((c + 1) < querystring.length()) ? (' ' + querystring.substring(c + 1)) : "");
+            while ((c = this.query_words.indexOf(seps.charAt(i))) >= 0) {
+                this.query_words = this.query_words.substring(0, c) + (((c + 1) < this.query_words.length()) ? (' ' + this.query_words.substring(c + 1)) : "");
             }
         }
 
         // parse first quoted strings
-        parseQuery(querystring, this.include_strings, this.exclude_strings, this.all_strings);
+        parseQuery(this.query_words, this.include_strings, this.exclude_strings, this.all_strings);
 
         // .. end then take these strings apart to generate word lists
         for (String s: this.include_strings) parseQuery(s, this.include_words, this.include_words, this.all_words);
@@ -168,17 +141,31 @@ public class QueryGoal {
         }
     }
 
-    public String getQueryString() {
-        return this.querystring;
-    }
-
-    public String queryStringForUrl() {
-        try {
-            return URLEncoder.encode(this.querystring, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            Log.logException(e);
-            return this.querystring;
+    public String getOriginalQueryString(final boolean encodeHTML) {
+        String ret;
+        if (encodeHTML){
+            try {
+                ret = URLEncoder.encode(this.query_original, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                ret = this.query_original;
+            }
+        } else {
+            ret = this.query_original;
         }
+        return ret;
+    }
+    public String getWordQueryString(final boolean encodeHTML) {
+        String ret;
+        if (encodeHTML){
+            try {
+                ret = URLEncoder.encode(this.query_words, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                ret = this.query_words;
+            }
+        } else {
+            ret = this.query_words;
+        }
+        return ret;
     }
     
     public HandleSet getIncludeHashes() {

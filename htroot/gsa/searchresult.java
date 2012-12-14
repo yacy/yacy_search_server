@@ -113,7 +113,7 @@ public class searchresult {
         post.put("originalQuery", originalQuery);
         
         // get a solr query string
-        QueryGoal qg = new QueryGoal(originalQuery);
+        QueryGoal qg = new QueryGoal(originalQuery, originalQuery);
         StringBuilder solrQ = qg.solrQueryString(sb.index.fulltext().getSolrScheme());
         post.put("defType", "edismax");
         post.put(CommonParams.Q, solrQ.toString());

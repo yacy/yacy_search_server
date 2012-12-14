@@ -356,8 +356,9 @@ public class yacysearch {
             final RankingProfile ranking = sb.getRanking();
             final StringBuilder modifier = new StringBuilder(20);
 
-            if ("*".equals(querystring)) {
-                querystring = Segment.catchallString;
+            int stp = querystring.indexOf('*');
+            if (stp >= 0) {
+                querystring = querystring.substring(0, stp) + Segment.catchallString + querystring.substring(stp + 1);
             }
             if ( querystring.indexOf("/near", 0) >= 0 ) {
                 querystring = querystring.replace("/near", "");
@@ -597,7 +598,7 @@ public class yacysearch {
             }
 
             // the query
-            final QueryGoal qg = new QueryGoal(querystring.trim());
+            final QueryGoal qg = new QueryGoal(originalquerystring, querystring.trim());
             final int maxDistance = (querystring.indexOf('"', 0) >= 0) ? qg.getAllHashes().size() - 1 : Integer.MAX_VALUE;
 
             // filter out stopwords
@@ -766,7 +767,7 @@ public class yacysearch {
             Log.logInfo(
                 "LOCAL_SEARCH",
                 "INIT WORD SEARCH: "
-                    + theQuery.getQueryGoal().getQueryString()
+                    + theQuery.getQueryGoal().getOriginalQueryString(false)
                     + ":"
                     + QueryParams.hashSet2hashString(theQuery.getQueryGoal().getIncludeHashes())
                     + " - "
@@ -775,7 +776,7 @@ public class yacysearch {
                     + theQuery.itemsPerPage()
                     + " lines to be displayed");
             EventChannel.channels(EventChannel.LOCALSEARCH).addMessage(
-                new RSSMessage("Local Search Request", theQuery.getQueryGoal().getQueryString(), ""));
+                new RSSMessage("Local Search Request", theQuery.getQueryGoal().getOriginalQueryString(false), ""));
             final long timestamp = System.currentTimeMillis();
 
             // create a new search event
@@ -814,7 +815,7 @@ public class yacysearch {
 
             // log
             Log.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: "
-                + theQuery.getQueryGoal().getQueryString()
+                + theQuery.getQueryGoal().getOriginalQueryString(false)
                 + " - "
                 + "local_rwi_available(" + theSearch.query.local_rwi_available.get() + "), "
                 + "local_rwi_stored(" + theSearch.query.local_rwi_stored.get() + "), "

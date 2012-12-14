@@ -1034,7 +1034,7 @@ public final class Protocol
             final Seed target,
             final Blacklist blacklist) {
 
-        if (event.query.getQueryGoal().getQueryString() == null || event.query.getQueryGoal().getQueryString().length() == 0) {
+        if (event.query.getQueryGoal().getOriginalQueryString(false) == null || event.query.getQueryGoal().getOriginalQueryString(false).length() == 0) {
             return -1; // we cannot query solr only with word hashes, there is no clear text string
         }
         event.addExpectedRemoteReferences(count);

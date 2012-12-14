@@ -649,7 +649,8 @@ public class IndexControlRWIs_p {
         final byte[] keyhash,
         final Bitfield filter) {
         
-        final QueryParams query = new QueryParams(ASCII.String(keyhash), -1, filter, segment, sb.getRanking(), "IndexControlRWIs_p");
+        String khw = ASCII.String(keyhash);
+        final QueryParams query = new QueryParams(khw, khw, -1, filter, segment, sb.getRanking(), "IndexControlRWIs_p");
         final SearchEvent theSearch = SearchEventCache.getEvent(query, sb.peers, sb.tables, null, false, sb.loader, Integer.MAX_VALUE, Long.MAX_VALUE, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
         //theSearch.rankingProcess.run();
         RankingProcess ranked = theSearch.rankingProcess;

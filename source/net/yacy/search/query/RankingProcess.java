@@ -235,7 +235,7 @@ public final class RankingProcess extends Thread {
                 new ProfilingGraph.EventSearch(
                     this.query.id(true),
                     SearchEventType.JOIN,
-                    this.query.getQueryGoal().getQueryString(),
+                    this.query.getQueryGoal().getOriginalQueryString(false),
                     index.size(),
                     System.currentTimeMillis() - timer),
                 false);
