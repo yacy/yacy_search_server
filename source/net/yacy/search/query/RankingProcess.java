@@ -52,7 +52,6 @@ import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -90,8 +89,6 @@ public final class RankingProcess extends Thread {
     protected final ReferenceOrder order;
     protected final HandleSet urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     protected final ScoreMap<String> hostNavigator = new ConcurrentScoreMap<String>(); // a counter for the appearance of host names
-    protected final ScoreMap<String> hostHashNavigator; // a counter for the appearance of the host hash (this can be filled during classic remote search)
-    protected final Map<String, byte[]> hostHashResolver; // a mapping from a host hash (6 bytes) to the full url hash of one of these urls that have the host hash
     protected final Map<String, String> taggingPredicates; // a map from tagging vocabulary names to tagging predicate uris
     protected final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
     private boolean remote;
@@ -118,8 +115,6 @@ public final class RankingProcess extends Thread {
         this.receivedRemoteReferences = new AtomicInteger(0);
         this.order = new ReferenceOrder(this.query.ranking, UTF8.getBytes(this.query.targetlang));
         this.urlhashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
-        this.hostHashNavigator = new ConcurrentScoreMap<String>();
-        this.hostHashResolver = new ConcurrentHashMap<String, byte[]>();
         this.vocabularyNavigator = new ConcurrentHashMap<String, ScoreMap<String>>();
         this.taggingPredicates = new HashMap<String, String>();
         for (Tagging t: LibraryProvider.autotagging.getVocabularies()) {
@@ -341,8 +336,8 @@ public final class RankingProcess extends Thread {
                 }
 
                 // collect host navigation information (even if we have only one; this is to provide a switch-off button)
-                this.hostHashNavigator.inc(hosthash);
-                this.hostHashResolver.put(hosthash, iEntry.urlhash());
+                //this.hostHashNavigator.inc(hosthash);
+                //this.hostHashResolver.put(hosthash, iEntry.urlhash());
 
                 // check vocabulary constraint
                 String subject = YaCyMetadata.hashURI(iEntry.urlhash());
@@ -409,37 +404,7 @@ public final class RankingProcess extends Thread {
     }
 
     public ScoreMap<String> getHostNavigator() {
-        final ScoreMap<String> result = new ConcurrentScoreMap<String>();
-
-        final Iterator<String> domhashs = this.hostHashNavigator.keys(false);
-        DigestURI url;
-        byte[] urlhash;
-        String hosthash, hostname;
-        if ( this.hostHashResolver != null ) {
-            while ( domhashs.hasNext() && result.sizeSmaller(30) ) {
-                hosthash = domhashs.next();
-                if ( hosthash == null ) {
-                    continue;
-                }
-                urlhash = this.hostHashResolver.get(hosthash);
-                url = urlhash == null ? null : this.query.getSegment().fulltext().getURL(urlhash);
-                hostname = url == null ? null : url.getHost();
-                if ( hostname != null ) {
-                    result.set(hostname, this.hostHashNavigator.get(hosthash));
-                }
-            }
-        }
-
-        // add only navigation hosts which have more than one entry
-        Iterator<String> i = this.hostNavigator.keys(false);
-        while (i.hasNext()) {
-            String h = i.next();
-            int c = this.hostNavigator.get(h);
-            if (c <= 0) break;
-            result.inc(h, c);
-        }
-        
-        return result;
+        return this.hostNavigator;
     }
 
     public Map<String,ScoreMap<String>> getVocabularyNavigators() {

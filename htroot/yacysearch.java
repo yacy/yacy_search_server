@@ -445,9 +445,9 @@ public class yacysearch {
                 }
                 if ( !ft.isEmpty() ) {
                     if ( urlmask == null ) {
-                        urlmask = ".*\\." + ft;
+                        urlmask = ".*\\." + ft + "(\\?.*)?";
                     } else {
-                        urlmask = urlmask + ".*\\." + ft;
+                        urlmask = urlmask + ".*\\." + ft + "(\\?.*)?";
                     }
                 }
                 modifier.append("filetype:").append(ft).append(' ');

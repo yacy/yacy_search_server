@@ -878,11 +878,6 @@ public final class Protocol
     }
 
     private static class SearchResult {
-        public String version; // version : application version of responder
-        public String uptime; // uptime : uptime in seconds of responder
-        public String fwhop; // hops (depth) of forwards that had been performed to construct this result
-        public String fwsrc; // peers that helped to construct this result
-        public String fwrec; // peers that would have helped to construct this result (recommendations)
         public int urlcount; // number of returned LURL's for this search
         public int joincount; //
         public Map<byte[], Integer> indexcount; //
@@ -991,9 +986,6 @@ public final class Protocol
             } catch ( final NumberFormatException e ) {
                 throw new IOException("wrong output format for count: " + e.getMessage());
             }
-            this.fwhop = resultMap.get("fwhop");
-            this.fwsrc = resultMap.get("fwsrc");
-            this.fwrec = resultMap.get("fwrec");
             // scan the result map for entries with special prefix
             this.indexcount = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
             this.indexabstract = new TreeMap<byte[], String>(Base64Order.enhancedCoder);

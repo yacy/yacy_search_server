@@ -96,10 +96,6 @@ public final class search {
         prop.put("links", "");
         prop.put("indexcount", "");
         prop.put("indexabstract", "");
-        prop.put("fwhop", ""); // hops (depth) of forwards that had been performed to construct this result
-        prop.put("fwsrc", ""); // peers that helped to construct this result
-        prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
-
 
         if (post == null || env == null) return prop;
         if (!Protocol.authentifyRequest(post, env)) return prop;
