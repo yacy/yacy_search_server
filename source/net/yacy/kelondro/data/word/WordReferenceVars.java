@@ -55,7 +55,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 	 */
 	public static final WordReferenceVars poison = new WordReferenceVars();
 	private static int cores = Runtime.getRuntime().availableProcessors();
-	protected static final byte[] default_language = UTF8.getBytes("uk");
+	protected static final byte[] default_language = UTF8.getBytes("en");
 
     private final Bitfield flags;
     private long lastModified;
