@@ -212,7 +212,8 @@ public class PerformanceQueues_p {
             prop.put("table_" + c + "_busysleep", busysleep);
             prop.put("table_" + c + "_memprereq", memprereq / 1024);
             // disallow setting of memprereq for indexer to prevent db from throwing OOMs
-            prop.put("table_" + c + "_disabled", /*(threadName.endsWith("_indexing")) ? 1 :*/ "0");
+            // prop.put("table_" + c + "_disabled", /*(threadName.endsWith("_indexing")) ? 1 :*/ "0");
+            prop.put("table_" + c + "_disabled", threadName.equals("10_httpd") ? "1" : "0" ); // httpd hardcoded defaults
             prop.put("table_" + c + "_recommendation", threadName.endsWith("_indexing") ? "1" : "0");
             prop.putNum("table_" + c + "_recommendation_value", threadName.endsWith("_indexing") ? (indexSegment.termIndex().minMem() / 1024) : 0);
             c++;
