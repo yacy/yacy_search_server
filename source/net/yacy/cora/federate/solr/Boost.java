@@ -46,7 +46,8 @@ public class Boost extends LinkedHashMap<YaCySchema, Float> {
         YaCySchema.description,
         YaCySchema.keywords,
         YaCySchema.text_t,
-        YaCySchema.synonyms_sxt
+        YaCySchema.synonyms_sxt,
+        YaCySchema.references_i
     };
     
     // for minTokenLen = 2 the quantRate value should not be below 0.24; for minTokenLen = 3 the quantRate value must be not below 0.5!
@@ -118,4 +119,20 @@ public class Boost extends LinkedHashMap<YaCySchema, Float> {
         return minTokenLen;
     }
 
+    /**
+     * produce a string that can be added as a 'boost query' at the bq-attribute
+     * @return
+     */
+    public String getBoostQuery() {
+        return YaCySchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^" + Float.toString(this.get(YaCySchema.fuzzy_signature_unique_b));
+    }
+    
+    /**
+     * produce a boost function
+     * @return
+     */
+    public String getBoostFunction() {
+        return "div(add(1,references_i),pow(add(1,inboundlinkscount_i),1.6))^0.4";
+    }
+    
 }

@@ -47,6 +47,7 @@ public enum YaCySchema implements Schema {
     failtype_s(SolrType.string, true, true, false, "fail type if a page was not loaded. This field is either empty, 'excl' or 'fail'"),
     httpstatus_i(SolrType.num_integer, true, true, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
     httpstatus_redirect_s(SolrType.num_integer, true, true, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
+    references_i(SolrType.num_integer, true, true, false, "number of unique http references; used for ranking"),
 
     // optional but recommended, part of index distribution
     load_date_dt(SolrType.date, true, true, false, "time when resource was loaded"),

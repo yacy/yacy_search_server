@@ -65,6 +65,9 @@ httpstatus_i
 ## redirect url if the error code is 299 < httpstatus_i < 310
 #httpstatus_redirect_s
 
+## number of unique http references; used for ranking
+references_i
+
 ### optional but highly recommended values, part of the index distribution process
 
 ## time when resource was loaded

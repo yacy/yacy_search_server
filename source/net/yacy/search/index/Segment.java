@@ -383,6 +383,13 @@ public class Segment {
             }
         }
         
+        // ENRICH DOCUMENT WITH RANKING INFORMATION
+        if (this.urlCitationIndex != null && this.fulltext.getSolrScheme().contains(YaCySchema.references_i)) {
+            int references = this.urlCitationIndex.count(url.hash());
+            if (references > 0) solrInputDoc.setField(YaCySchema.references_i.getSolrFieldName(), references);
+        }
+        
+        
         // STORE TO SOLR
         String error = null;
         tryloop: for (int i = 0; i < 20; i++) {

@@ -119,8 +119,8 @@ public class searchresult {
         post.put(CommonParams.Q, solrQ.toString());
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 5000 : 100));
-        float f = Boost.RANKING.get(YaCySchema.fuzzy_signature_unique_b);
-        post.put("bq", YaCySchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^" + Float.toString(f)); // a boost query that moves double content to the back
+        post.put("bq", Boost.RANKING.getBoostQuery()); // a boost query that moves double content to the back
+        post.put("bf", Boost.RANKING.getBoostFunction()); // a boost function extension
         post.put(CommonParams.FL,
                 YaCySchema.content_type.getSolrFieldName() + ',' +
                 YaCySchema.id.getSolrFieldName() + ',' +

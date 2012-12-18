@@ -428,8 +428,8 @@ public final class QueryParams {
         // construct query
         final SolrQuery params = new SolrQuery();
         params.setParam("defType", "edismax");
-        float f = Boost.RANKING.get(YaCySchema.fuzzy_signature_unique_b);
-        params.setParam("bq", YaCySchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^" + Float.toString(f)); // a boost query that moves double content to the back
+        params.setParam("bq", Boost.RANKING.getBoostQuery()); // a boost query that moves double content to the back
+        params.setParam("bf", Boost.RANKING.getBoostFunction()); // a boost function extension
         params.setStart(this.offset);
         params.setRows(this.itemsPerPage);
         params.setFacet(false);
