@@ -60,10 +60,17 @@ function preparepage(str) {
   var firstChannel = rsp.channels[0];
   searchresult = firstChannel.items;
   totalResults = firstChannel.totalResults.replace(/[,.]/,"");
-//  var startIndex = firstChannel.startIndex;
-//  var itemsPerPage = firstChannel.itemsPerPage;
   topics = navget(firstChannel.navigation, "topics");
+  filetypefacet = navget(firstChannel.navigation, "filetypes");
+  
   filetypes = {};
+  if (filetypefacet) {
+    var elements = filetypefacet.elements;
+    for (var fc = 0; fc < elements.length; fc++) {
+	    filetypes[elements[fc].name] = elements[fc].count;
+    }
+  }
+
   script = "";
   if (query.length >= 13 && query.substring(query.length - 13, query.length - 3) == " filetype:") {
     modifier = query.substring(query.length - 12);
@@ -140,17 +147,6 @@ function resultNavigation() {
       }
   }
 
-  // add topic navigation
-  /*
-  if (topics && topics.length > 0) {
-    var topwords = "";
-    for (var i = 0; i < topics.elements.length; i++) {
-        topwords += "<a href=\"/yacyinteractive.html?query=" + query + "+" + topics.elements[i].name + "&startRecord=" + startRecord + "&maximumRecords=" + maximumRecords + "\">" + topics.elements[i].name + "</a> ";
-        if (i > 10) break;
-    }
-    html += "&nbsp;&nbsp;&nbsp;topwords: " + topwords;
-  }
-  */
   return html;
 }
 
@@ -200,14 +196,6 @@ function resultLine(type, item, linenumber) {
   if (pd.substring(pd.length - 5) == " 2010") pd = pd.substring(0, pd.length - 5);
     
   // update navigation
-  if (item.link && item.link.length > 4) {
-    ext = item.link.substring(item.link.length - 4);
-    if (ext.charAt(0) == "." && ext.charAt(3) != "/") {
-      ext = ext.substring(1).toLowerCase();
-      var count = filetypes[ext];
-      if (count) filetypes[ext]++; else filetypes[ext] = 1;
-    }
-  }
   for (var key in filetypes) {
     if (query.indexOf("filetype:" + key) >= 0) delete filetypes[key];
   }
