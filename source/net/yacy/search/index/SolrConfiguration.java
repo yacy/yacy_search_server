@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
@@ -306,6 +307,8 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
 
+    private final Pattern rootPattern = Pattern.compile("/|/index.htm(l?)|/index.php");
+    
     protected SolrInputDocument yacy2solr(final String id, final CrawlProfile profile, final ResponseHeader responseHeader, final Document document, Condenser condenser, DigestURI referrerURL, String language) {
         // we use the SolrCell design as index scheme
         final SolrInputDocument doc = new SolrInputDocument();
@@ -313,8 +316,15 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         boolean allAttr = this.isEmpty();
         add(doc, YaCySchema.id, id);
         if (allAttr || contains(YaCySchema.failreason_t)) add(doc, YaCySchema.failreason_t, ""); // overwrite a possible fail reason (in case that there was a fail reason before)
-        String us = digestURI.toNormalform(true);
-        add(doc, YaCySchema.sku, us);
+        String docurl = digestURI.toNormalform(true);
+        add(doc, YaCySchema.sku, docurl);
+
+        if (allAttr || contains(YaCySchema.clickdepth_i)) {
+            String path = digestURI.getPath();
+            boolean fronturl = path.length() == 0 || rootPattern.matcher(path).matches();
+            add(doc, YaCySchema.clickdepth_i, fronturl ? 0 : -1);
+        }
+        
         if (allAttr || contains(YaCySchema.ip_s)) {
             final InetAddress address = digestURI.getInetAddress();
             if (address != null) add(doc, YaCySchema.ip_s, address.getHostAddress());
@@ -329,7 +339,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             if (allAttr || contains(YaCySchema.url_parameter_key_sxt)) add(doc, YaCySchema.url_parameter_key_sxt, searchpart.keySet().toArray(new String[searchpart.size()]));
             if (allAttr || contains(YaCySchema.url_parameter_value_sxt)) add(doc, YaCySchema.url_parameter_value_sxt,  searchpart.values().toArray(new String[searchpart.size()]));
         }
-        if (allAttr || contains(YaCySchema.url_chars_i)) add(doc, YaCySchema.url_chars_i, us.length());
+        if (allAttr || contains(YaCySchema.url_chars_i)) add(doc, YaCySchema.url_chars_i, docurl.length());
         String host = null;
         if ((host = digestURI.getHost()) != null) {
             String dnc = Domains.getDNC(host);
@@ -543,13 +553,13 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 final String[] css_url = new String[csss.size()];
                 c = 0;
                 for (final Map.Entry<MultiProtocolURI, String> entry: csss.entrySet()) {
-                    final String url = entry.getKey().toNormalform(false);
-                    inboundLinks.remove(url);
-                    outboundLinks.remove(url);
+                    final String cssurl = entry.getKey().toNormalform(false);
+                    inboundLinks.remove(cssurl);
+                    outboundLinks.remove(cssurl);
                     css_tag[c] =
                         "<link rel=\"stylesheet\" type=\"text/css\" media=\"" + entry.getValue() + "\"" +
-                        " href=\""+ url + "\" />";
-                    css_url[c] = url;
+                        " href=\""+ cssurl + "\" />";
+                    css_url[c] = cssurl;
                     c++;
                 }
                 add(doc, YaCySchema.csscount_i, css_tag.length);
@@ -562,10 +572,10 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 final Set<MultiProtocolURI> scriptss = html.getScript();
                 final String[] scripts = new String[scriptss.size()];
                 c = 0;
-                for (final MultiProtocolURI url: scriptss) {
-                    inboundLinks.remove(url);
-                    outboundLinks.remove(url);
-                    scripts[c++] = url.toNormalform(false);
+                for (final MultiProtocolURI u: scriptss) {
+                    inboundLinks.remove(u);
+                    outboundLinks.remove(u);
+                    scripts[c++] = u.toNormalform(false);
                 }
                 add(doc, YaCySchema.scriptscount_i, scripts.length);
                 if (scripts.length > 0) add(doc, YaCySchema.scripts_txt, scripts);
@@ -576,10 +586,10 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 final Set<MultiProtocolURI> framess = html.getFrames();
                 final String[] frames = new String[framess.size()];
                 c = 0;
-                for (final MultiProtocolURI url: framess) {
-                    inboundLinks.remove(url);
-                    outboundLinks.remove(url);
-                    frames[c++] = url.toNormalform(false);
+                for (final MultiProtocolURI u: framess) {
+                    inboundLinks.remove(u);
+                    outboundLinks.remove(u);
+                    frames[c++] = u.toNormalform(false);
                 }
                 add(doc, YaCySchema.framesscount_i, frames.length);
                 if (frames.length > 0) add(doc, YaCySchema.frames_txt, frames);
@@ -590,10 +600,10 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 final Set<MultiProtocolURI> iframess = html.getIFrames();
                 final String[] iframes = new String[iframess.size()];
                 c = 0;
-                for (final MultiProtocolURI url: iframess) {
-                    inboundLinks.remove(url);
-                    outboundLinks.remove(url);
-                    iframes[c++] = url.toNormalform(false);
+                for (final MultiProtocolURI u: iframess) {
+                    inboundLinks.remove(u);
+                    outboundLinks.remove(u);
+                    iframes[c++] = u.toNormalform(false);
                 }
                 add(doc, YaCySchema.iframesscount_i, iframes.length);
                 if (iframes.length > 0) add(doc, YaCySchema.iframes_txt, iframes);
@@ -667,13 +677,13 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         final List<Integer> inboundlinksTextChars = new ArrayList<Integer>(inboundLinks.size());
         final List<Integer> inboundlinksTextWords = new ArrayList<Integer>(inboundLinks.size());
         final List<String> inboundlinksAltTag = new ArrayList<String>(inboundLinks.size());
-        for (final MultiProtocolURI url: inboundLinks) {
-            final Properties p = alllinks.get(url);
+        for (final MultiProtocolURI u: inboundLinks) {
+            final Properties p = alllinks.get(u);
             if (p == null) continue;
             final String name = p.getProperty("name", ""); // the name attribute
             final String rel = p.getProperty("rel", "");   // the rel-attribute
             final String text = p.getProperty("text", ""); // the text between the <a></a> tag
-            final String urls = url.toNormalform(false);
+            final String urls = u.toNormalform(false);
             final int pr = urls.indexOf("://",0);
             inboundlinksURLProtocol.add(urls.substring(0, pr));
             inboundlinksURLStub.add(urls.substring(pr + 3));
@@ -683,12 +693,12 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             inboundlinksTextChars.add(text.length() > 0 ? text.length() : 0);
             inboundlinksTextWords.add(text.length() > 0 ? CommonPattern.SPACE.split(text).length : 0);
             inboundlinksTag.add(
-                "<a href=\"" + url.toNormalform(false) + "\"" +
+                "<a href=\"" + u.toNormalform(false) + "\"" +
                 (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +
                 (name.length() > 0 ? " name=\"" + name + "\"" : "") +
                 ">" +
                 ((text.length() > 0) ? text : "") + "</a>");
-            ImageEntry ientry = images.get(url);
+            ImageEntry ientry = images.get(u);
             inboundlinksAltTag.add(ientry == null ? "" : ientry.alt());
             c++;
         }
@@ -715,13 +725,13 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         final List<Integer> outboundlinksTextWords = new ArrayList<Integer>(outboundLinks.size());
         final List<String> outboundlinksText = new ArrayList<String>(outboundLinks.size());
         final List<String> outboundlinksAltTag = new ArrayList<String>(outboundLinks.size());
-        for (final MultiProtocolURI url: outboundLinks) {
-            final Properties p = alllinks.get(url);
+        for (final MultiProtocolURI u: outboundLinks) {
+            final Properties p = alllinks.get(u);
             if (p == null) continue;
             final String name = p.getProperty("name", ""); // the name attribute
             final String rel = p.getProperty("rel", "");   // the rel-attribute
             final String text = p.getProperty("text", ""); // the text between the <a></a> tag
-            final String urls = url.toNormalform(false);
+            final String urls = u.toNormalform(false);
             final int pr = urls.indexOf("://",0);
             outboundlinksURLProtocol.add(urls.substring(0, pr));
             outboundlinksURLStub.add(urls.substring(pr + 3));
@@ -731,12 +741,12 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             outboundlinksTextChars.add(text.length() > 0 ? text.length() : 0);
             outboundlinksTextWords.add(text.length() > 0 ? CommonPattern.SPACE.split(text).length : 0);
             outboundlinksTag.add(
-                "<a href=\"" + url.toNormalform(false) + "\"" +
+                "<a href=\"" + u.toNormalform(false) + "\"" +
                 (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +
                 (name.length() > 0 ? " name=\"" + name + "\"" : "") +
                 ">" +
                 ((text.length() > 0) ? text : "") + "</a>");
-            ImageEntry ientry = images.get(url);
+            ImageEntry ientry = images.get(u);
             inboundlinksAltTag.add(ientry == null ? "" : ientry.alt());
             c++;
         }

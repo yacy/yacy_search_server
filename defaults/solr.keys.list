@@ -68,6 +68,9 @@ httpstatus_i
 ## number of unique http references; used for ranking
 references_i
 
+## depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url
+clickdepth_i
+
 ### optional but highly recommended values, part of the index distribution process
 
 ## time when resource was loaded
