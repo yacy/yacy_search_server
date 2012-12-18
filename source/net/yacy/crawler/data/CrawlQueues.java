@@ -66,10 +66,10 @@ public class CrawlQueues {
     private static final String ERROR_DB_FILENAME = "urlError4.db";
     private static final String DELEGATED_DB_FILENAME = "urlDelegated4.db";
 
-    protected Switchboard sb;
-    protected Log log;
-    protected Map<Integer, Loader> workers; // mapping from url hash to Worker thread object
-    private   final ArrayList<String> remoteCrawlProviderHashes;
+    private Switchboard sb;
+    private Log log;
+    private Map<Integer, Loader> workers; // mapping from url hash to Worker thread object
+    private final ArrayList<String> remoteCrawlProviderHashes;
 
     public  NoticedURL noticeURL;
     public  ZURL errorURL, delegatedURL;
@@ -119,10 +119,8 @@ public class CrawlQueues {
 
     public void clear() {
         // wait for all workers to finish
-        for (final Loader w: this.workers.values()) {
-            w.interrupt();
-        }
-        // TODO: wait some more time until all threads are finished
+        for (final Loader w: this.workers.values()) w.interrupt();
+        for (final Loader w: this.workers.values()) try {w.join(10);} catch (InterruptedException e1) {}
         this.workers.clear();
         this.remoteCrawlProviderHashes.clear();
         this.noticeURL.clear();
@@ -192,7 +190,7 @@ public class CrawlQueues {
         return null;
     }
 
-    public void cleanup() {
+    private void cleanup() {
         // wait for all workers to finish
         final int timeout = (int) this.sb.getConfigLong("crawler.clientTimeout", 10000);
         for (final Loader w: this.workers.values()) {
@@ -613,13 +611,13 @@ public class CrawlQueues {
         return this.workers.size();
     }
 
-    protected final class Loader extends Thread {
+    private final class Loader extends Thread {
 
-        protected Request request;
+        private Request request;
         private final Integer code;
         private final long start;
 
-        public Loader(final Request entry) {
+        private Loader(final Request entry) {
             this.start = System.currentTimeMillis();
             this.request = entry;
             this.request.setStatus("worker-initialized", WorkflowJob.STATUS_INITIATED);
@@ -627,7 +625,7 @@ public class CrawlQueues {
             this.setPriority(Thread.MIN_PRIORITY); // http requests from the crawler should not cause that other functions work worse
         }
 
-        public long age() {
+        private long age() {
             return System.currentTimeMillis() - this.start;
         }
 
@@ -702,11 +700,9 @@ public class CrawlQueues {
                         FailCategory.TEMPORARY_NETWORK_FAILURE,
                         e.getMessage() + " - in worker", -1);
                 Log.logException(e);
-//                Client.initConnectionManager();
                 this.request.setStatus("worker-exception", WorkflowJob.STATUS_FINISHED);
             } finally {
-                final Loader w = CrawlQueues.this.workers.remove(this.code);
-                assert w != null;
+                CrawlQueues.this.workers.remove(this.code);
             }
         }
     }

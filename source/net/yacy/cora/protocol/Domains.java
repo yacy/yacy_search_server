@@ -73,7 +73,8 @@ public class Domains {
     private static Method InetAddressLocatorGetLocaleInetAddressMethod;
     private static final Set<String> ccSLD_TLD = new HashSet<String>();
     private static final String PRESENT = "";
-    private static final String LOCAL_PATTERNS = "10\\..*,127\\..*,172\\.(1[6-9]|2[0-9]|3[0-1])\\..*,169\\.254\\..*,192\\.168\\..*,localhost";
+    private static final Pattern LOCAL_PATTERNS = Pattern.compile("(10\\..*)|(127\\..*)|(172\\.(1[6-9]|2[0-9]|3[0-1])\\..*)|(169\\.254\\..*)|(192\\.168\\..*)|(localhost)|(\\[?\\:\\:1/.*)|(\\[?fc.*)|(\\[?fd.*)|(\\[?(fe80|0)\\:0\\:0\\:0\\:0\\:0\\:0\\:1.*)");
+    
     private static final int MAX_NAME_CACHE_HIT_SIZE = 100000;
     private static final int MAX_NAME_CACHE_MISS_SIZE = 100000;
     private static final int CONCURRENCY_LEVEL = Runtime.getRuntime().availableProcessors() + 1;
@@ -83,7 +84,6 @@ public class Domains {
     private static final ARC<String, String> NAME_CACHE_MISS = new ConcurrentARC<String, String>(MAX_NAME_CACHE_MISS_SIZE, CONCURRENCY_LEVEL);
     private static final ConcurrentHashMap<String, Object> LOOKUP_SYNC = new ConcurrentHashMap<String, Object>(100, 0.75f, Runtime.getRuntime().availableProcessors() * 2);
     private static       List<Pattern> nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList<Pattern>());
-    private static final List<Pattern> INTRANET_PATTERNS = makePatterns(LOCAL_PATTERNS);
     public static long cacheHit_Hit = 0, cacheHit_Miss = 0, cacheHit_Insert = 0; // for statistics only; do not write
     public static long cacheMiss_Hit = 0, cacheMiss_Miss = 0, cacheMiss_Insert = 0; // for statistics only; do not write
 
@@ -832,9 +832,9 @@ public class Domains {
         if (ip == null || ip.length() < 8) return null;
         ip = ip.trim();
         if (ip.charAt(0) == '[' && ip.charAt(ip.length() - 1) == ']') ip = ip.substring(1, ip.length() - 1);
-        if (isLocalhost(ip)) ip = "127.0.0.1"; // normalize to IPv4 here since that is the way to calculate the InetAddress
+        if ("localhost".equals(ip)) ip = "127.0.0.1"; // normalize to IPv4 here since that is the way to calculate the InetAddress
         final String[] ips = CommonPattern.DOT.split(ip);
-        if (ips.length != 4) return null;
+        if (ips.length != 4) return null; // TODO: parse IPv6 addresses
         final byte[] ipb = new byte[4];
         try {
             ipb[0] = (byte) Integer.parseInt(ips[0]);
@@ -989,8 +989,7 @@ public class Domains {
         final Set<InetAddress> list = new HashSet<InetAddress>();
         if (localHostAddresses.isEmpty()) return list; // give up
         for (final InetAddress a: localHostAddresses) {
-            if (((0Xff & a.getAddress()[0]) == 127) ||
-                    (!matchesList(a.getHostAddress(), INTRANET_PATTERNS))) continue;
+            if ((0Xff & a.getAddress()[0]) == 127 || LOCAL_PATTERNS.matcher(a.getHostAddress()).matches()) continue;
             list.add(a);
         }
         return list;
@@ -1051,13 +1050,7 @@ public class Domains {
      */
     public static boolean isLocalhost(final String host) {
         return (noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
-                "127.0.0.1".equals(host) ||
-                "localhost".equals(host) ||
-                host.startsWith("0:0:0:0:0:0:0:1") || host.startsWith("[0:0:0:0:0:0:0:1]") ||
-                host.startsWith("fe80:0:0:0:0:0:0:1") || host.startsWith("[fe80:0:0:0:0:0:0:1]") || // used by my mac as localhost
-                host.startsWith("::1/") || host.startsWith("[::1/") ||
-                "::1".equals(host) || "[::1]".equals(host)
-                );
+                (host != null && LOCAL_PATTERNS.matcher(host).matches()));
     }
 
     /**
@@ -1077,10 +1070,12 @@ public class Domains {
             host == null ||
             host.isEmpty()) return true;
 
-        // FIXME IPv4 only
         // check local ip addresses
-        if (matchesList(host, INTRANET_PATTERNS)) return true;
         if (isLocalhost(host)) return true;
+        if (hostaddress != null && (
+                isLocalhost(hostaddress.getHostAddress()) ||
+                isLocal(hostaddress)
+            )) return true;
 
         // check if there are other local IP addresses that are not in
         // the standard IP range
@@ -1107,10 +1102,9 @@ public class Domains {
             localp = noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
             a == null ||
             a.isAnyLocalAddress() ||
-            a.isLinkLocalAddress() |
+            a.isLinkLocalAddress() ||
             a.isLoopbackAddress() ||
-            a.isSiteLocalAddress() ||
-            isLocal(a.getHostAddress(), a, false);
+            a.isSiteLocalAddress();
         return localp;
     }
 
@@ -1148,7 +1142,7 @@ public class Domains {
     public static Locale getLocale(final InetAddress address) {
         if (InetAddressLocatorGetLocaleInetAddressMethod == null) return null;
         if (address == null) return null;
-        if (isLocal(address)) return null;
+        if (isLocal(address.getHostAddress(), address, false)) return null;
         try {
             return (Locale) InetAddressLocatorGetLocaleInetAddressMethod.invoke(null, new Object[]{address});
         } catch (final IllegalArgumentException e) {
