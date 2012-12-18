@@ -293,7 +293,7 @@ public class yacysearchtrailer {
         }
 
         // vocabulary navigators
-        final Map<String, ScoreMap<String>> vocabularyNavigators = theSearch.rankingProcess.getVocabularyNavigators();
+        final Map<String, ScoreMap<String>> vocabularyNavigators = theSearch.vocabularyNavigator;
         if (vocabularyNavigators != null && !vocabularyNavigators.isEmpty()) {
             int navvoccount = 0;
             vocnav: for (Map.Entry<String, ScoreMap<String>> ve: vocabularyNavigators.entrySet()) {

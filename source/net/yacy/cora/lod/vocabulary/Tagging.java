@@ -34,7 +34,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.WordCache.Dictionary;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.geo.Locations;
 import net.yacy.cora.storage.Files;
@@ -66,7 +65,7 @@ public class Tagging {
             this.objectlink = objectlink;
         }
 
-        public SOTuple(String[] synonyms, String objectlink) {
+        private SOTuple(String[] synonyms, String objectlink) {
             StringBuilder sb = new StringBuilder(synonyms.length * 10);
             for (String s: synonyms) sb.append(',').append(s);
             this.synonyms = sb.substring(1);
@@ -87,7 +86,7 @@ public class Tagging {
 
     }
 
-    public Tagging(String name) {
+    private Tagging(String name) {
         this.navigatorName = name;
         this.synonym2term = new ConcurrentHashMap<String, String>();
         this.term2synonym = new ConcurrentHashMap<String, String>();
@@ -188,18 +187,7 @@ public class Tagging {
         }
     }
 
-    public Tagging(String name, Dictionary dictionary) {
-        this(name);
-        Set<StringBuilder> words = dictionary.getWords();
-        String s;
-        for (StringBuilder word: words) {
-            s = word.toString();
-            this.synonym2term.put(s.toLowerCase(), s);
-            this.term2synonym.put(s, s.toLowerCase());
-        }
-    }
-
-    public void init() throws IOException {
+    private void init() throws IOException {
         if (this.propFile == null) return;
         this.synonym2term.clear();
         this.term2synonym.clear();
@@ -378,7 +366,7 @@ public class Tagging {
         init();
     }
 
-    public Map<String, Set<String>> reconstructionSets() {
+    private Map<String, Set<String>> reconstructionSets() {
         Map<String, Set<String>> r = new TreeMap<String, Set<String>>();
         for (Map.Entry<String, String> e: this.term2synonym.entrySet()) {
             Set<String> s = r.get(e.getKey());
@@ -399,7 +387,7 @@ public class Tagging {
         return r;
     }
 
-    public Map<String, SOTuple> reconstructionLists() {
+    private Map<String, SOTuple> reconstructionLists() {
         Map<String, Set<String>> r = reconstructionSets();
         Map<String, SOTuple> map = new TreeMap<String, SOTuple>();
         for (Map.Entry<String, Set<String>> e: r.entrySet()) {
@@ -511,10 +499,6 @@ public class Tagging {
         return new Metatag(word);
     }
 
-    public Set<String> getSynonyms(String term) {
-    	return this.synonym2synonyms.get(term);
-    }
-
     public Set<String> tags() {
         return this.synonym2term.keySet();
     }
@@ -556,7 +540,7 @@ public class Tagging {
 
 	public class Metatag {
 	    private final String object;
-	    public Metatag(String object) {
+	    private Metatag(String object) {
 	        this.object = object;
 	    }
 

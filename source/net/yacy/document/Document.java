@@ -56,11 +56,7 @@ import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.analysis.Classification;
-import net.yacy.cora.lod.JenaTripleStore;
-import net.yacy.cora.lod.vocabulary.DCTerms;
-import net.yacy.cora.lod.vocabulary.Owl;
 import net.yacy.cora.lod.vocabulary.Tagging;
-import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
@@ -96,6 +92,7 @@ public class Document {
     private final boolean indexingDenied;
     private final double lon, lat;
     private final Object parserObject; // the source object that was used to create the Document
+    private final Map<String, Set<String>> generic_facets; // a map from vocabulary names to the set of tags for that vocabulary which apply for this document
 
     public Document(final DigestURI location, final String mimeType, final String charset,
                     final Object parserObject,
@@ -138,6 +135,7 @@ public class Document {
         this.languages = languages;
         this.indexingDenied = indexingDenied;
         this.text = text == null ? "" : text;
+        this.generic_facets = new HashMap<String, Set<String>>();
     }
 
     public Object getParserObject() {
@@ -152,6 +150,10 @@ public class Document {
     	return this.source.getFileExtension();
     }
 
+    public Map<String, Set<String>> getGenericFacets() {
+        return this.generic_facets;
+    }
+    
     /**
      * compute a set of languages that this document contains
      * the language is not computed using a statistical analysis of the content, only from given metadata that came with the document
@@ -202,9 +204,7 @@ dc_rights
         if (title != null) this.titles.add(title);
     }
 
-    public void addTitle(final String title) {
-        if (title != null) this.titles.add(title);
-    }
+    
 
     public String dc_creator() {
         return (this.creator == null) ? "" : this.creator.toString();
@@ -229,26 +229,31 @@ dc_rights
      * These keywords will appear in dc_subject
      * @param tags
      */
-    public void addMetatags(Map<String, Set<Tagging.Metatag>> tags) {
-        String subject = YaCyMetadata.hashURI(this.source.hash());
+    protected void addMetatags(Map<String, Set<Tagging.Metatag>> tags) {
+        //String subject = YaCyMetadata.hashURI(this.source.hash());
         //for (String s: this.keywords) {
         //    tags.remove(s);
         //}
         for (Map.Entry<String, Set<Tagging.Metatag>> e: tags.entrySet()) {
             Tagging vocabulary = LibraryProvider.autotagging.getVocabulary(e.getKey());
             if (vocabulary == null) continue;
-            String objectspace = vocabulary.getObjectspace();
-            StringBuilder sb = new StringBuilder(e.getValue().size() * 20);
+            //String objectspace = vocabulary.getObjectspace();
+            //StringBuilder sb = new StringBuilder(e.getValue().size() * 20);
+            Set<String> objects = new HashSet<String>();
             for (Tagging.Metatag s: e.getValue()) {
-                sb.append(',').append(s.getObject());
+                objects.add(s.getObject());
+                //sb.append(',').append(s.getObject());
+                /*
                 String objectlink = vocabulary.getObjectlink(s.getObject());
                 if ((objectspace != null && objectspace.length() > 0) || (objectlink != null && objectlink.length() > 0)) {
                     JenaTripleStore.addTriple(subject, DCTerms.references.getPredicate(), objectlink == null || objectlink.isEmpty() ? objectspace + s.getObject() + "#" + s.getObject() : objectlink + "#" + s.getObject());
                 }
+                */
             }
             // put to triplestore
-            JenaTripleStore.addTriple(subject, vocabulary.getPredicate(), sb.substring(1));
-            JenaTripleStore.addTriple(subject, Owl.SameAs.getPredicate(), this.source.toNormalform(true));
+            //JenaTripleStore.addTriple(subject, Owl.SameAs.getPredicate(), this.source.toNormalform(true));
+            //JenaTripleStore.addTriple(subject, vocabulary.getPredicate(), sb.substring(1)); // superfluous with the generic_facets
+            this.generic_facets.put(vocabulary.getName(), objects);
         }
     }
 
@@ -580,7 +585,7 @@ dc_rights
         return v;
     }
 
-    public static Map<MultiProtocolURI, String> allReflinks(final Collection<?> links) {
+    private static Map<MultiProtocolURI, String> allReflinks(final Collection<?> links) {
         // links is either a Set of Strings (with urls) or
         // htmlFilterImageEntries
         // we find all links that are part of a reference inside a url

@@ -60,14 +60,12 @@ public class JenaTripleStore {
 
 	public static ConcurrentHashMap<String, Model> privatestorage = null;
 
-	public static String file;
-
 	public static void load(String filename) throws IOException {
 		if (filename.endsWith(".nt")) LoadNTriples(filename);
 		else loadRDF(filename);
 	}
 
-	public static void loadRDF(String fileNameOrUri) throws IOException {
+	private static void loadRDF(String fileNameOrUri) throws IOException {
 		Model tmp  = ModelFactory.createDefaultModel();
 		log.info("Loading from " + fileNameOrUri);
         InputStream is = FileManager.get().open(fileNameOrUri);
@@ -81,7 +79,7 @@ public class JenaTripleStore {
 	    }
 	}
 
-	public static void LoadNTriples(String fileNameOrUri) throws IOException {
+	private static void LoadNTriples(String fileNameOrUri) throws IOException {
 	    log.info("Loading N-Triples from " + fileNameOrUri);
 	    InputStream is = FileManager.get().open(fileNameOrUri);
 	    LoadNTriples(is);
@@ -111,11 +109,11 @@ public class JenaTripleStore {
         }
 	}
 
-	public static void saveFile(String filename) {
+	private static void saveFile(String filename) {
 		saveFile(filename, model);
 	}
 
-	public static void saveFile(String filename, Model model) {
+	private static void saveFile(String filename, Model model) {
         File f = new File(filename);
         File ftmp = new File(filename + "." + System.currentTimeMillis());
 	    if (model.isEmpty() && !f.exists()) {
@@ -154,7 +152,7 @@ public class JenaTripleStore {
 	 * @param uri
 	 * @return
 	 */
-	public static Resource getResource(String uri) {
+	private static Resource getResource(String uri) {
 	    return model.getResource(uri);
 	}
 
@@ -174,7 +172,7 @@ public class JenaTripleStore {
     	addTriple (subject, predicate, object, model);
     }
 
-    public static void addTriple(String subject, String predicate, String object, Model model) {
+    private static void addTriple(String subject, String predicate, String object, Model model) {
         Resource r = model.getResource(subject);
         Property pr = model.getProperty(predicate);
         r.addProperty(pr, object);
@@ -209,7 +207,7 @@ public class JenaTripleStore {
 	    return null;
     }
 
-    public static Iterator<RDFNode> getObjects(final Resource r, final String predicate) {
+    private static Iterator<RDFNode> getObjects(final Resource r, final String predicate) {
     	return getObjects(r, predicate, model);
     }
 
@@ -309,7 +307,7 @@ public class JenaTripleStore {
 		}
 	}
 
-	public static void savePrivateStores() {
+	private static void savePrivateStores() {
         Switchboard switchboard = Switchboard.getSwitchboard();
 		log.info("Saving user triplestores");
 		if (privatestorage == null) return;

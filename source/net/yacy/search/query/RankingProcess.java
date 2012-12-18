@@ -40,15 +40,12 @@ import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
-import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.Tagging;
-import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.cora.storage.HandleSet;
-import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
@@ -68,9 +65,6 @@ import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.snippet.ResultEntry;
 
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-
 public final class RankingProcess extends Thread {
 
     protected static final int max_results_preparation = 3000, max_results_preparation_special = -1; // -1 means 'no limit'
@@ -89,8 +83,7 @@ public final class RankingProcess extends Thread {
     protected final ReferenceOrder order;
     protected final HandleSet urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     protected final ScoreMap<String> hostNavigator = new ConcurrentScoreMap<String>(); // a counter for the appearance of host names
-    protected final Map<String, String> taggingPredicates; // a map from tagging vocabulary names to tagging predicate uris
-    protected final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
+    private final Map<String, String> taggingPredicates; // a map from tagging vocabulary names to tagging predicate uris
     private boolean remote;
     
     protected RankingProcess(final QueryParams query, boolean remote) {
@@ -115,7 +108,6 @@ public final class RankingProcess extends Thread {
         this.receivedRemoteReferences = new AtomicInteger(0);
         this.order = new ReferenceOrder(this.query.ranking, UTF8.getBytes(this.query.targetlang));
         this.urlhashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
-        this.vocabularyNavigator = new ConcurrentHashMap<String, ScoreMap<String>>();
         this.taggingPredicates = new HashMap<String, String>();
         for (Tagging t: LibraryProvider.autotagging.getVocabularies()) {
             this.taggingPredicates.put(t.getName(), t.getPredicate());
@@ -340,6 +332,7 @@ public final class RankingProcess extends Thread {
                 //this.hostHashResolver.put(hosthash, iEntry.urlhash());
 
                 // check vocabulary constraint
+                /*
                 String subject = YaCyMetadata.hashURI(iEntry.urlhash());
                 Resource resource = JenaTripleStore.getResource(subject);
                 if (this.query.metatags != null && !this.query.metatags.isEmpty()) {
@@ -351,8 +344,9 @@ public final class RankingProcess extends Thread {
                         if (tags.indexOf(metatag.getObject()) < 0) continue pollloop;
                     }
                 }
-
+                */
                 // add navigators using the triplestore
+                /*
                 for (Map.Entry<String, String> v: this.taggingPredicates.entrySet()) {
                     Iterator<RDFNode> ni = JenaTripleStore.getObjects(resource, v.getValue());
                     while (ni.hasNext()) {
@@ -367,7 +361,8 @@ public final class RankingProcess extends Thread {
                         }
                     }
                 }
-
+                 */
+                
                 // finally extend the double-check and insert result to stack
                 this.urlhashes.putUnique(iEntry.urlhash());
                 rankingtryloop: while (true) {
@@ -405,10 +400,6 @@ public final class RankingProcess extends Thread {
 
     public ScoreMap<String> getHostNavigator() {
         return this.hostNavigator;
-    }
-
-    public Map<String,ScoreMap<String>> getVocabularyNavigators() {
-        return this.vocabularyNavigator;
     }
 
     public ScoreMap<String> getTopicNavigator(final int count) {

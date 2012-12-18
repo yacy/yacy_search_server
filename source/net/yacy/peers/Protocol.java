@@ -748,7 +748,7 @@ public final class Protocol
         return result.urlcount;
     }
 
-    public static void remoteSearchProcess(
+    private static void remoteSearchProcess(
         final SearchEvent event,
         final int count,
         final long time,
@@ -1037,7 +1037,7 @@ public final class Protocol
         solrQuery.setRows(count);
         
         // set facet query attributes
-        if (getFacets && event.query.facetfields.length > 0) {
+        if (getFacets && event.query.facetfields.size() > 0) {
             solrQuery.setFacet(true);
             solrQuery.setFacetLimit(event.query.maxfacets);
             solrQuery.setFacetSort(FacetParams.FACET_SORT_COUNT);
@@ -1082,7 +1082,7 @@ public final class Protocol
         }
 
         // evaluate facets
-        Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>(event.query.facetfields.length);
+        Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>(event.query.facetfields.size());
         for (String field: event.query.facetfields) {
             FacetField facet = rsp.getFacetField(field);
             ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);

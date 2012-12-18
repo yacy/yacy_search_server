@@ -37,9 +37,6 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
@@ -48,9 +45,7 @@ import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.federate.yacy.Distribution;
-import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.Tagging;
-import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
@@ -60,11 +55,11 @@ import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.Element;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.cora.storage.HandleSet;
-import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.WorkTables;
 import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
+import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -121,13 +116,14 @@ public final class SearchEvent {
     public final ScoreMap<String> namespaceNavigator; // a counter for name spaces
     public final ScoreMap<String> protocolNavigator; // a counter for protocol types
     public final ScoreMap<String> filetypeNavigator; // a counter for file types
+    public final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
     protected final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack;
     protected final WeakPriorityBlockingQueue<ResultEntry>  result;
     protected final LoaderDispatcher                        loader;
     protected final HandleSet                               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     protected final boolean                                 deleteIfSnippetFail;
     private   SnippetWorker[]                               workerThreads;
-    protected long                                          urlRetrievalAllTime;
+    private long                                            urlRetrievalAllTime;
     protected long                                          snippetComputationAllTime;
     protected ConcurrentHashMap<String, String> snippets;
     private final boolean remote;
@@ -169,6 +165,8 @@ public final class SearchEvent {
         }
         this.protocolNavigator = new ConcurrentScoreMap<String>();
         this.filetypeNavigator = new ConcurrentScoreMap<String>();
+        this.vocabularyNavigator = new ConcurrentHashMap<String, ScoreMap<String>>();
+        
         this.snippets = new ConcurrentHashMap<String, String>();
             
         this.secondarySearchSuperviser =
@@ -493,6 +491,20 @@ public final class SearchEvent {
         //fcts = facets.get(YaCySchema.author.getSolrFieldName());
         //if (fcts != null) this.authorNavigator.inc(fcts);
         
+        // get the vocabulary navigation
+        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) {
+            fcts = facets.get(YaCySchema.VOCABULARY_PREFIX + v.getName() + YaCySchema.VOCABULARY_SUFFIX);
+            if (fcts != null) {
+                ScoreMap<String> vocNav = this.vocabularyNavigator.get(v.getName());
+                if (vocNav == null) {
+                    vocNav = new ConcurrentScoreMap<String>();
+                    this.vocabularyNavigator.put(v.getName(), vocNav);
+                }
+                vocNav.inc(fcts);
+            }
+        }
+        
+        
         // apply all constraints
         try {
             pollloop: for (URIMetadataNode iEntry: index) {
@@ -539,6 +551,7 @@ public final class SearchEvent {
                 }
 
                 // check vocabulary constraint
+                /*
                 String subject = YaCyMetadata.hashURI(iEntry.hash());
                 Resource resource = JenaTripleStore.getResource(subject);
                 if (this.query.metatags != null && !this.query.metatags.isEmpty()) {
@@ -550,8 +563,9 @@ public final class SearchEvent {
                         if (tags.indexOf(metatag.getObject()) < 0) continue pollloop;
                     }
                 }
-
+                */
                 // add navigators using the triplestore
+                /*
                 for (Map.Entry<String, String> v: this.rankingProcess.taggingPredicates.entrySet()) {
                     Iterator<RDFNode> ni = JenaTripleStore.getObjects(resource, v.getValue());
                     while (ni.hasNext()) {
@@ -566,6 +580,7 @@ public final class SearchEvent {
                         }
                     }
                 }
+                */
 
                 // finally extend the double-check and insert result to stack
                 this.rankingProcess.urlhashes.putUnique(iEntry.hash());

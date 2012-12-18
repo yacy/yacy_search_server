@@ -777,6 +777,16 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.videolinkscount_i)) add(doc, YaCySchema.videolinkscount_i, document.getVideolinks().size());
         if (allAttr || contains(YaCySchema.applinkscount_i)) add(doc, YaCySchema.applinkscount_i, document.getApplinks().size());
 
+        // write generic navigation
+        // there are no pre-defined solr fields for navigation because the vocabulary is generic
+        // we use dynamically allocated solr fields for this.
+        // It must be a multi-value string/token field, therefore we use _sxt extensions for the field names
+        for (Map.Entry<String, Set<String>> facet: document.getGenericFacets().entrySet()) {
+            String facetName = facet.getKey();
+            Set<String> facetValues = facet.getValue();
+            doc.setField(YaCySchema.VOCABULARY_PREFIX + facetName + YaCySchema.VOCABULARY_SUFFIX, facetValues.toArray(new String[facetValues.size()]));
+        }
+        
         return doc;
     }
 

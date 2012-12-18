@@ -193,6 +193,9 @@ public enum YaCySchema implements Schema {
     ext_tracker_val(SolrType.num_integer, true, true, true, "number of attribute counts in ext_tracker_txt"),
     ext_title_txt(SolrType.text_general, true, true, true, "names matching title expressions"),
     ext_title_val(SolrType.num_integer, true, true, true, "number of matching title expressions");
+
+    public final static String VOCABULARY_PREFIX = "vocabulary_";
+    public final static String VOCABULARY_SUFFIX = "_sxt";
     
     private String solrFieldName = null; // solr field name in custom solr schema, defaults to solcell schema field name (= same as this.name() )
     private final SolrType type;

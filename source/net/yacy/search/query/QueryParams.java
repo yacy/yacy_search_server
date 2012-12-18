@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -55,7 +56,7 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
-import net.yacy.document.parser.html.CharacterCoding;
+import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -107,7 +108,7 @@ public final class QueryParams {
     public static final Pattern catchall_pattern = Pattern.compile(".*");
     private static final Pattern matchnothing_pattern = Pattern.compile("");
 
-    public final QueryGoal queryGoal;
+    private final QueryGoal queryGoal;
     public int itemsPerPage;
     public int offset;
     public final Pattern urlMask, prefer;
@@ -124,7 +125,7 @@ public final class QueryParams {
     public final RankingProfile ranking;
     private final Segment indexSegment;
     public final String clienthost; // this is the client host that starts the query, not a site operator
-    public final String nav_sitehost; // this is a domain name which is used to navigate to that host
+    private final String nav_sitehost; // this is a domain name which is used to navigate to that host
     public final String nav_sitehash; // this is a domain hash, 6 bytes long or null
     protected final Set<String> siteexcludes; // set of domain hashes that are excluded if not included by sitehash
     public final String authorhash;
@@ -132,14 +133,14 @@ public final class QueryParams {
     public Seed remotepeer;
     public final long starttime; // the time when the query started, how long it should take and the time when the timeout is reached (milliseconds)
     protected final long maxtime;
-    protected final long timeout;
+    private final long timeout;
     // values that are set after a search:
     public int transmitcount; // number of results that had been shown to the user
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
     public final String userAgent;
     protected boolean filterfailurls;
     protected double lat, lon, radius;
-    public String[] facetfields;
+    public List<String> facetfields;
     public int maxfacets;
     
     // the following values are filled during the search process as statistics for the search
@@ -200,7 +201,8 @@ public final class QueryParams {
         this.remote_available    = new AtomicInteger(0); // the number of result contributions from all the remote peers
         this.remote_peerCount    = new AtomicInteger(0); // the number of remote peers that have contributed
         this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
-        this.facetfields = defaultfacetfields;
+        this.facetfields = new ArrayList<String>(); for (String f: defaultfacetfields) facetfields.add(f);
+        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(YaCySchema.VOCABULARY_PREFIX + v.getName() + YaCySchema.VOCABULARY_SUFFIX);
         this.maxfacets = defaultmaxfacets;
     }
 
@@ -279,7 +281,8 @@ public final class QueryParams {
         this.remote_available    = new AtomicInteger(0); // the number of result contributions from all the remote peers
         this.remote_peerCount    = new AtomicInteger(0); // the number of remote peers that have contributed
         this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
-        this.facetfields = defaultfacetfields;
+        this.facetfields = new ArrayList<String>(); for (String f: defaultfacetfields) facetfields.add(f);
+        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(YaCySchema.VOCABULARY_PREFIX + v.getName() + YaCySchema.VOCABULARY_SUFFIX);
         this.maxfacets = defaultmaxfacets;
     }
 
@@ -417,6 +420,11 @@ public final class QueryParams {
                 q.append(" AND ").append(YaCySchema.host_id_s.getSolrFieldName()).append(":\"").append(this.nav_sitehash).append('\"');
         }
 
+        // add vocabulary facets
+        for (Tagging.Metatag tag: this.metatags) {
+            q.append(" AND ").append(YaCySchema.VOCABULARY_PREFIX).append(tag.getVocabularyName()).append(YaCySchema.VOCABULARY_SUFFIX).append(":\"").append(tag.getObject()).append('\"');
+        }
+        
         // construct query
         final SolrQuery params = new SolrQuery();
         params.setParam("defType", "edismax");

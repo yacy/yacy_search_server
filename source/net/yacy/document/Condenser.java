@@ -252,7 +252,7 @@ public final class Condenser {
         this.exact_signature = l;
     }
 
-    public Condenser(final String text, final WordCache meaningLib, boolean doAutotagging) {
+    private Condenser(final String text, final WordCache meaningLib, boolean doAutotagging) {
         this.languageIdentificator = null; // we don't need that here
         // analysis = new Properties();
         this.words = new TreeMap<String, Word>();
@@ -372,10 +372,11 @@ public final class Condenser {
 	            		//System.out.println("Testing: " + testterm);
 		                tag = LibraryProvider.autotagging.getTagFromTerm(testterm);
 		                if (tag != null) {
-		                    Set<Tagging.Metatag> tagset = this.tags.get(tag.getVocabularyName());
+		                    String navigatorName = tag.getVocabularyName();
+		                    Set<Tagging.Metatag> tagset = this.tags.get(navigatorName);
 		                    if (tagset == null) {
 		                        tagset = new HashSet<Tagging.Metatag>();
-		                        this.tags.put(tag.getVocabularyName(), tagset);
+		                        this.tags.put(navigatorName, tagset);
 		                    }
 	                        tagset.add(tag);
 		                }
