@@ -1970,6 +1970,7 @@ public class FTPClient {
     // protocoll socket commands
 
     private void send(final String buf) throws IOException {
+        if (this.clientOutput == null) return;
         byte[] b = buf.getBytes("UTF-8");
         this.clientOutput.write(b, 0, b.length);
         this.clientOutput.write('\r');

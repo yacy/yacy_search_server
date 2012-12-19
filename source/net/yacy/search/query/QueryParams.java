@@ -463,7 +463,7 @@ public final class QueryParams {
             while ((p = urlMaskPattern.indexOf(':')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 1);
             while ((p = urlMaskPattern.indexOf('/')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 1);
             while ((p = urlMaskPattern.indexOf('\\')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 2);
-            //fq.append(" AND ").append(YaCySchema.sku.getSolrFieldName() + ":/" + urlMaskPattern + "/");
+            fq.append(" AND ").append(YaCySchema.sku.getSolrFieldName() + ":/" + urlMaskPattern + "/");
         }
         
         if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {

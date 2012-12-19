@@ -107,7 +107,7 @@ public class yacysearchtrailer {
         }
 
         // host navigators
-        final ScoreMap<String> hostNavigator = theSearch.rankingProcess.getHostNavigator();
+        final ScoreMap<String> hostNavigator = theSearch.hostNavigator;
         if (hostNavigator == null || hostNavigator.isEmpty()) {
             prop.put("nav-domains", 0);
         } else {

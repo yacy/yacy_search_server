@@ -62,7 +62,6 @@ import net.yacy.document.LargeNumberCache;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceVars;
@@ -113,6 +112,7 @@ public final class SearchEvent {
     private byte[] IAmaxcounthash, IAneardhthash;
     private final Thread localsearch;
     private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences; // counter for referenced that had been sorted out for other reasons
+    public final ScoreMap<String> hostNavigator; // a counter for the appearance of host names
     public final ScoreMap<String> authorNavigator; // a counter for the appearances of authors
     public final ScoreMap<String> namespaceNavigator; // a counter for name spaces
     public final ScoreMap<String> protocolNavigator; // a counter for protocol types
@@ -164,6 +164,7 @@ public final class SearchEvent {
         } else {
             this.namespaceNavigator = null;
         }
+        this.hostNavigator = new ConcurrentScoreMap<String>();
         this.protocolNavigator = new ConcurrentScoreMap<String>();
         this.filetypeNavigator = new ConcurrentScoreMap<String>();
         this.vocabularyNavigator = new ConcurrentHashMap<String, ScoreMap<String>>();
@@ -478,7 +479,7 @@ public final class SearchEvent {
 
         // collect navigation information
         ReversibleScoreMap<String> fcts = facets.get(YaCySchema.host_s.getSolrFieldName());
-        if (fcts != null) this.rankingProcess.hostNavigator.inc(fcts);
+        if (fcts != null) this.hostNavigator.inc(fcts);
 
         if (this.filetypeNavigator != null) {
             fcts = facets.get(YaCySchema.url_file_ext_s.getSolrFieldName());
@@ -563,38 +564,6 @@ public final class SearchEvent {
                     // filter out all domains that do not match with the site constraint
                     if (!hosthash.equals(this.query.nav_sitehash)) continue pollloop;
                 }
-
-                // check vocabulary constraint
-                /*
-                String subject = YaCyMetadata.hashURI(iEntry.hash());
-                Resource resource = JenaTripleStore.getResource(subject);
-                if (this.query.metatags != null && !this.query.metatags.isEmpty()) {
-                    // all metatags must appear in the tags list
-                    for (Tagging.Metatag metatag: this.query.metatags) {
-                        Iterator<RDFNode> ni = JenaTripleStore.getObjects(resource, metatag.getPredicate());
-                        if (!ni.hasNext()) continue pollloop;
-                        String tags = ni.next().toString();
-                        if (tags.indexOf(metatag.getObject()) < 0) continue pollloop;
-                    }
-                }
-                */
-                // add navigators using the triplestore
-                /*
-                for (Map.Entry<String, String> v: this.rankingProcess.taggingPredicates.entrySet()) {
-                    Iterator<RDFNode> ni = JenaTripleStore.getObjects(resource, v.getValue());
-                    while (ni.hasNext()) {
-                        String[] tags = CommonPattern.COMMA.split(ni.next().toString());
-                        for (String tag: tags) {
-                            ScoreMap<String> voc = this.rankingProcess.vocabularyNavigator.get(v.getKey());
-                            if (voc == null) {
-                                voc = new ConcurrentScoreMap<String>();
-                                this.rankingProcess.vocabularyNavigator.put(v.getKey(), voc);
-                            }
-                            voc.inc(tag);
-                        }
-                    }
-                }
-                */
 
                 // finally extend the double-check and insert result to stack
                 this.rankingProcess.urlhashes.putUnique(iEntry.hash());
@@ -894,7 +863,12 @@ public final class SearchEvent {
             deployWorker(Math.min(SNIPPET_WORKER_THREADS, this.query.itemsPerPage), this.query.neededResults());
         }
         // wait until local data is there
-        while (this.localsearch != null && this.localsearch.isAlive() && this.result.sizeAvailable() < item) try {this.localsearch.join(10);} catch (InterruptedException e) {}
+        while (this.localsearch != null && this.localsearch.isAlive() && this.result.sizeAvailable() < item) try {
+            if (!anyWorkerAlive()) {
+                deployWorker(Math.min(SNIPPET_WORKER_THREADS, this.query.itemsPerPage), this.query.neededResults());
+            }
+            this.localsearch.join(10);
+        } catch (InterruptedException e) {}
         // check if we already retrieved this item
         // (happens if a search pages is accessed a second time)
         final long finishTime = System.currentTimeMillis() + timeout;

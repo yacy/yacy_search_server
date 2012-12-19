@@ -82,7 +82,6 @@ public final class RankingProcess extends Thread {
     protected final AtomicInteger receivedRemoteReferences;
     protected final ReferenceOrder order;
     protected final HandleSet urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
-    protected final ScoreMap<String> hostNavigator = new ConcurrentScoreMap<String>(); // a counter for the appearance of host names
     private final Map<String, String> taggingPredicates; // a map from tagging vocabulary names to tagging predicate uris
     private boolean remote;
     
@@ -361,11 +360,7 @@ public final class RankingProcess extends Thread {
         // this is only available if execQuery() was called before
         return this.localSearchInclusion;
     }
-
-    public ScoreMap<String> getHostNavigator() {
-        return this.hostNavigator;
-    }
-
+    
     public ScoreMap<String> getTopicNavigator(final int count) {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
@@ -420,14 +415,10 @@ public final class RankingProcess extends Thread {
 
     protected void addTopics(final ResultEntry resultEntry) {
         // take out relevant information for reference computation
-        if ( (resultEntry.url() == null) || (resultEntry.title() == null) ) {
-            return;
-        }
-        //final String[] urlcomps = htmlFilterContentScraper.urlComps(resultEntry.url().toNormalform(true, true)); // word components of the url
+        if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;
         final String[] descrcomps = MultiProtocolURI.splitpattern.split(resultEntry.title().toLowerCase()); // words in the description
 
         // add references
-        //addTopic(urlcomps);
         addTopic(descrcomps);
     }
 

@@ -230,7 +230,7 @@ public final class LoaderDispatcher {
                 }
 
                 // now the cacheStrategy must be CACHE_STRATEGY_IFFRESH, that means we should do a proxy freshness test
-                assert cacheStrategy == CacheStrategy.IFFRESH : "cacheStrategy = " + cacheStrategy;
+                //assert cacheStrategy == CacheStrategy.IFFRESH : "cacheStrategy = " + cacheStrategy;
                 if (response.isFreshForProxy()) {
                     final byte[] content = Cache.getContent(url.hash());
                     if (content != null) {
