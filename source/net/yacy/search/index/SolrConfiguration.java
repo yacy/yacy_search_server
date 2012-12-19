@@ -384,7 +384,11 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             add(doc, YaCySchema.description_words_val, cv);
         }
 
-        if (allAttr || contains(YaCySchema.author)) add(doc, YaCySchema.author, document.dc_creator());
+        if (allAttr || contains(YaCySchema.author)) {
+            String author = document.dc_creator();
+            if (author == null || author.length() == 0) author = document.dc_publisher();
+            add(doc, YaCySchema.author, author);
+        }
         if (allAttr || contains(YaCySchema.content_type)) add(doc, YaCySchema.content_type, new String[]{document.dc_format()});
         if (allAttr || contains(YaCySchema.last_modified)) add(doc, YaCySchema.last_modified, responseHeader == null ? new Date() : responseHeader.lastModified());
         if (allAttr || contains(YaCySchema.keywords)) add(doc, YaCySchema.keywords, document.dc_subject(' '));
