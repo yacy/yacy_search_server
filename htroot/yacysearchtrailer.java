@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
@@ -222,10 +223,12 @@ public class yacysearchtrailer {
             navigatorIterator = theSearch.protocolNavigator.keys(false);
             int i = 0, p, pos = 0, neg = 0;
             String nav, queryStringForUrl;
+            boolean visible = false;
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.protocolNavigator.get(name);
                 if (count == 0) break;
+                visible = visible || "ftp,smb".indexOf(name) >= 0;
                 nav = "%2F" + name;
                 queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
                 p = queryStringForUrl.indexOf(nav);
@@ -247,7 +250,7 @@ public class yacysearchtrailer {
                 i++;
             }
             prop.put("nav-protocols_element", i);
-            prop.put("nav-protocols_activate", neg > 0 ? 1 : 0); // by default off
+            prop.put("nav-protocols_activate", neg > 0 || visible ? 1 : 0); // by default off
             i--;
             prop.put("nav-protocols_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0) prop.put("nav-protocols", 0); // this navigation is not useful
@@ -261,10 +264,12 @@ public class yacysearchtrailer {
             navigatorIterator = theSearch.filetypeNavigator.keys(false);
             int i = 0, p, pos = 0, neg = 0;
             String nav, queryStringForUrl;
+            boolean visible = false;
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.filetypeNavigator.get(name);
                 if (count == 0) break;
+                visible = visible || Classification.isMediaExtension(name) || "pdf,doc,docx".indexOf(name) >= 0;
                 nav = "filetype%3A" + name;
                 queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
                 p = queryStringForUrl.indexOf(nav);
@@ -286,7 +291,7 @@ public class yacysearchtrailer {
                 i++;
             }
             prop.put("nav-filetypes_element", i);
-            prop.put("nav-filetypes_activate", neg > 0 ? 1 : 0); // by default off
+            prop.put("nav-filetypes_activate", neg > 0 || visible ? 1 : 0); // by default off
             i--;
             prop.put("nav-filetypes_element_" + i + "_nl", 0);
             if (pos == 1 && neg == 0) prop.put("nav-filetypes", 0); // this navigation is not useful

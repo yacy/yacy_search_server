@@ -60,6 +60,7 @@ import net.yacy.data.WorkTables;
 import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.document.LibraryProvider;
+import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -481,7 +482,15 @@ public final class SearchEvent {
 
         if (this.filetypeNavigator != null) {
             fcts = facets.get(YaCySchema.url_file_ext_s.getSolrFieldName());
-            if (fcts != null) this.filetypeNavigator.inc(fcts);
+            if (fcts != null) {
+                // remove all filetypes that we don't know
+                Iterator<String> i = fcts.iterator();
+                while (i.hasNext()) {
+                    String ext = i.next();
+                    if (TextParser.supportsExtension(ext) != null && !Classification.isAnyKnownExtension(ext)) i.remove();
+                }
+                this.filetypeNavigator.inc(fcts);
+            }
         }
 
         if (this.authorNavigator != null) {
