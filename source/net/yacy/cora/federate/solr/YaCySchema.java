@@ -64,6 +64,7 @@ public enum YaCySchema implements Schema {
     coordinate_p(SolrType.location, true, true, false, "point in degrees of latitude,longitude as declared in WSG84"),
     ip_s(SolrType.string, true, true, false, "ip of host of url (after DNS lookup)"),
     author(SolrType.text_general, true, true, false, "content of author-tag"),
+    author_s(SolrType.string, true, true, false, "content of author-tag as copy-field from author. This is used for facet generation"),
     description(SolrType.text_general, true, true, false, "content of description-tag"),
     keywords(SolrType.text_general, true, true, false, "content of keywords tag; words are separated by space"),
     charset_s(SolrType.string, true, true, false, "character encoding"),

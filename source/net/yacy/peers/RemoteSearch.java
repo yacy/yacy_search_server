@@ -43,7 +43,7 @@ public class RemoteSearch extends Thread {
     private static final ThreadGroup ysThreadGroup = new ThreadGroup("yacySearchThreadGroup");
 
     final private SearchEvent event;
-    final private String wordhashes, excludehashes, sitehash, authorhash, contentdom;
+    final private String wordhashes, excludehashes, sitehash, author, contentdom;
     final private int partitions;
     final private SecondarySearchSuperviser secondarySearchSuperviser;
     final private Blacklist blacklist;
@@ -61,7 +61,7 @@ public class RemoteSearch extends Thread {
               final QueryParams.Modifier modifier,
               final String language,
               final String sitehash,
-              final String authorhash,
+              final String author,
               final String contentdom,
               final int count,
               final long time,
@@ -77,7 +77,7 @@ public class RemoteSearch extends Thread {
         this.modifier = modifier;
         this.language = language;
         this.sitehash = sitehash;
-        this.authorhash = authorhash;
+        this.author = author;
         this.contentdom = contentdom;
         this.partitions = partitions;
         this.secondarySearchSuperviser = secondarySearchSuperviser;
@@ -100,7 +100,7 @@ public class RemoteSearch extends Thread {
                         this.modifier.getModifier(),
                         this.language,
                         this.sitehash,
-                        this.authorhash,
+                        this.author,
                         this.contentdom,
                         this.count,
                         this.time,
@@ -177,7 +177,7 @@ public class RemoteSearch extends Thread {
                     event.query.modifier,
                     event.query.targetlang == null ? "" : event.query.targetlang,
                     event.query.nav_sitehash == null ? "" : event.query.nav_sitehash,
-                    event.query.authorhash == null ? "" : event.query.authorhash,
+                    event.query.author == null ? "" : event.query.author,
                     event.query.contentdom == null ? "all" : event.query.contentdom.toString(),
                     count,
                     time,

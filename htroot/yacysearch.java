@@ -531,11 +531,10 @@ public class yacysearch {
             }
 
             final int authori = querystring.indexOf("author:", 0);
-            String authorhash = null;
+            String author = null;
             if ( authori >= 0 ) {
                 // check if the author was given with single quotes or without
                 final boolean quotes = (querystring.charAt(authori + 7) == '(');
-                String author;
                 if ( quotes ) {
                     int ftb = querystring.indexOf(')', authori + 8);
                     if ( ftb == -1 ) {
@@ -553,7 +552,6 @@ public class yacysearch {
                     querystring = querystring.replace("author:" + author, "");
                     modifier.append("author:").append(author).append(' ');
                 }
-                authorhash = ASCII.String(Word.word2hash(author));
             }
 
             final int tld = querystring.indexOf("tld:", 0);
@@ -738,7 +736,7 @@ public class yacysearch {
                     sitehash,
                     sitehost,
                     DigestURI.hosthashess(sb.getConfig("search.excludehosth", "")),
-                    authorhash,
+                    author,
                     DigestURI.TLD_any_zone_filter,
                     client,
                     authenticated,

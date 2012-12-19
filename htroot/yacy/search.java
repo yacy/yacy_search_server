@@ -117,7 +117,7 @@ public final class search {
         final String  contentdom = post.get("contentdom", "all");
         final String  filter = post.get("filter", ".*"); // a filter on the url
         String  sitehash = post.get("sitehash", ""); if (sitehash.isEmpty()) sitehash = null;
-        String  authorhash = post.get("authorhash", ""); if (authorhash.isEmpty()) authorhash = null;
+        String  author = post.get("author", ""); if (author.isEmpty()) author = null;
         String  language = post.get("language", "");
         if (language == null || language.isEmpty() || !ISO639.exists(language)) {
             // take language from the user agent
@@ -236,7 +236,7 @@ public final class search {
                     sitehash,
                     null,
                     null,
-                    authorhash,
+                    author,
                     DigestURI.TLD_any_zone_filter,
                     client,
                     false,
@@ -298,7 +298,7 @@ public final class search {
                     sitehash,
                     null,
                     null,
-                    authorhash,
+                    author,
                     DigestURI.TLD_any_zone_filter,
                     client,
                     false,

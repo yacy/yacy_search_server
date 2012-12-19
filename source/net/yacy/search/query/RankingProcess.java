@@ -327,42 +327,6 @@ public final class RankingProcess extends Thread {
                     if (!hosthash.equals(this.query.nav_sitehash)) continue pollloop;
                 }
 
-                // collect host navigation information (even if we have only one; this is to provide a switch-off button)
-                //this.hostHashNavigator.inc(hosthash);
-                //this.hostHashResolver.put(hosthash, iEntry.urlhash());
-
-                // check vocabulary constraint
-                /*
-                String subject = YaCyMetadata.hashURI(iEntry.urlhash());
-                Resource resource = JenaTripleStore.getResource(subject);
-                if (this.query.metatags != null && !this.query.metatags.isEmpty()) {
-                    // all metatags must appear in the tags list
-                    for (Tagging.Metatag metatag: this.query.metatags) {
-                        Iterator<RDFNode> ni = JenaTripleStore.getObjects(resource, metatag.getPredicate());
-                        if (!ni.hasNext()) continue pollloop;
-                        String tags = ni.next().toString();
-                        if (tags.indexOf(metatag.getObject()) < 0) continue pollloop;
-                    }
-                }
-                */
-                // add navigators using the triplestore
-                /*
-                for (Map.Entry<String, String> v: this.taggingPredicates.entrySet()) {
-                    Iterator<RDFNode> ni = JenaTripleStore.getObjects(resource, v.getValue());
-                    while (ni.hasNext()) {
-                        String[] tags = CommonPattern.COMMA.split(ni.next().toString());
-                        for (String tag: tags) {
-                            ScoreMap<String> voc = this.vocabularyNavigator.get(v.getKey());
-                            if (voc == null) {
-                                voc = new ConcurrentScoreMap<String>();
-                                this.vocabularyNavigator.put(v.getKey(), voc);
-                            }
-                            voc.inc(tag);
-                        }
-                    }
-                }
-                 */
-                
                 // finally extend the double-check and insert result to stack
                 this.urlhashes.putUnique(iEntry.urlhash());
                 rankingtryloop: while (true) {

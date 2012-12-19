@@ -87,7 +87,7 @@ public final class QueryParams {
         YaCySchema.host_s.getSolrFieldName(),
         YaCySchema.url_protocol_s.getSolrFieldName(),
         YaCySchema.url_file_ext_s.getSolrFieldName(),
-        YaCySchema.author.getSolrFieldName()};
+        YaCySchema.author_s.getSolrFieldName()};
     
     private static final int defaultmaxfacets = 30;
     
@@ -128,7 +128,7 @@ public final class QueryParams {
     private final String nav_sitehost; // this is a domain name which is used to navigate to that host
     public final String nav_sitehash; // this is a domain hash, 6 bytes long or null
     protected final Set<String> siteexcludes; // set of domain hashes that are excluded if not included by sitehash
-    public final String authorhash;
+    public final String author;
     public final Modifier modifier;
     public Seed remotepeer;
     public final long starttime; // the time when the query started, how long it should take and the time when the timeout is reached (milliseconds)
@@ -181,7 +181,7 @@ public final class QueryParams {
         this.nav_sitehash = null;
         this.nav_sitehost = null;
         this.siteexcludes = null;
-        this.authorhash = null;
+        this.author = null;
         this.remotepeer = null;
         this.starttime = Long.valueOf(System.currentTimeMillis());
         this.maxtime = 10000;
@@ -219,7 +219,7 @@ public final class QueryParams {
         final String nav_sitehash,
         final String nav_sitehost,
         final Set<String> siteexcludes,
-        final String authorhash,
+        final String author,
         final int domainzone,
         final String host,
         final boolean specialRights,
@@ -257,7 +257,7 @@ public final class QueryParams {
         this.nav_sitehash = nav_sitehash; assert nav_sitehash == null || nav_sitehash.length() == 6;
         this.nav_sitehost = nav_sitehost;
         this.siteexcludes = siteexcludes != null && siteexcludes.isEmpty() ? null: siteexcludes;
-        this.authorhash = authorhash; assert authorhash == null || !authorhash.isEmpty();
+        this.author = author; assert author == null || !author.isEmpty();
         this.snippetCacheStrategy = snippetCacheStrategy;
         this.clienthost = host;
         this.remotepeer = null;
@@ -406,8 +406,14 @@ public final class QueryParams {
         // construct query
         final SolrQuery params = new SolrQuery();
         params.setQuery(this.queryGoal.solrQueryString(this.indexSegment.fulltext().getSolrScheme()).toString());
+        params.setParam("defType", "edismax");
+        params.setParam("bq", Boost.RANKING.getBoostQuery()); // a boost query that moves double content to the back
+        params.setParam("bf", Boost.RANKING.getBoostFunction()); // a boost function extension
+        params.setStart(this.offset);
+        params.setRows(this.itemsPerPage);
+        params.setFacet(false);
         
-        // add constraints
+        // add site facets
         final StringBuilder fq = new StringBuilder();
         if (this.nav_sitehash == null && this.nav_sitehost == null) {
             if (this.siteexcludes != null) {
@@ -427,12 +433,10 @@ public final class QueryParams {
             fq.append(" AND ").append(YaCySchema.VOCABULARY_PREFIX).append(tag.getVocabularyName()).append(YaCySchema.VOCABULARY_SUFFIX).append(":\"").append(tag.getObject()).append('\"');
         }
         
-        params.setParam("defType", "edismax");
-        params.setParam("bq", Boost.RANKING.getBoostQuery()); // a boost query that moves double content to the back
-        params.setParam("bf", Boost.RANKING.getBoostFunction()); // a boost function extension
-        params.setStart(this.offset);
-        params.setRows(this.itemsPerPage);
-        params.setFacet(false);
+        // add author facets
+        if (this.author != null && this.author.length() > 0) {
+            fq.append(" AND ").append(YaCySchema.author_s.getSolrFieldName()).append(":\"").append(this.author).append('\"');
+        }
         
         if (!this.urlMask_isCatchall) {
             String urlMaskPattern = this.urlMask.pattern();
@@ -544,7 +548,7 @@ public final class QueryParams {
             context.append(Base64Order.enhancedCoder.encodeString(this.urlMask.toString())).append(asterisk);
             context.append(this.nav_sitehash).append(asterisk);
             context.append(this.siteexcludes).append(asterisk);
-            context.append(this.authorhash).append(asterisk);
+            context.append(this.author).append(asterisk);
             context.append(this.targetlang).append(asterisk);
             context.append(this.constraint).append(asterisk);
             context.append(this.maxDistance).append(asterisk);

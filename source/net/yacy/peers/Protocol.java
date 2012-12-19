@@ -603,7 +603,7 @@ public final class Protocol
         final String modifier,
         final String language,
         final String sitehash,
-        final String authorhash,
+        final String author,
         final String contentdom,
         final int count,
         final long time,
@@ -641,7 +641,7 @@ public final class Protocol
                     modifier,
                     language,
                     sitehash,
-                    authorhash,
+                    author,
                     contentdom,
                     count,
                     time,
@@ -895,7 +895,7 @@ public final class Protocol
             final String modifier,
             final String language,
             final String sitehash,
-            final String authorhash,
+            final String author,
             final String contentdom,
             final int count,
             final long time,
@@ -944,7 +944,7 @@ public final class Protocol
             parts.put("modifier", UTF8.StringBody(modifier));
             parts.put("language", UTF8.StringBody(language));
             parts.put("sitehash", UTF8.StringBody(sitehash));
-            parts.put("authorhash", UTF8.StringBody(authorhash));
+            parts.put("author", UTF8.StringBody(author));
             parts.put("contentdom", UTF8.StringBody(contentdom));
             parts.put("ttl", UTF8.StringBody("0"));
             parts.put("maxdist", UTF8.StringBody(Integer.toString(maxDistance)));

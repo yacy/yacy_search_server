@@ -484,6 +484,11 @@ public final class SearchEvent {
             if (fcts != null) this.filetypeNavigator.inc(fcts);
         }
 
+        if (this.authorNavigator != null) {
+            fcts = facets.get(YaCySchema.author_s.getSolrFieldName());
+            if (fcts != null) this.authorNavigator.inc(fcts);
+        }
+
         if (this.protocolNavigator != null) {
             fcts = facets.get(YaCySchema.url_protocol_s.getSolrFieldName());
             if (fcts != null) this.protocolNavigator.inc(fcts);
@@ -837,25 +842,6 @@ public final class SearchEvent {
                     this.query.misses.add(page.hash());
                     continue;
                 }
-            }
-
-            // evaluate information of metadata for navigation
-            // author navigation:
-            if ( pageauthor != null && pageauthor.length() > 0 ) {
-                // add author to the author navigator
-                final String authorhash = ASCII.String(Word.word2hash(pageauthor));
-
-                // check if we already are filtering for authors
-                if ( this.query.authorhash != null && !this.query.authorhash.equals(authorhash) ) {
-                    this.query.misses.add(page.hash());
-                    continue;
-                }
-
-                // add author to the author navigator
-                if (this.authorNavigator != null) this.authorNavigator.inc(pageauthor);
-            } else if ( this.query.authorhash != null ) {
-                this.query.misses.add(page.hash());
-                continue;
             }
 
             // check Scanner
