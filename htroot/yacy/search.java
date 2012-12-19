@@ -228,7 +228,7 @@ public final class search {
                     null, // no snippet computation
                     count,
                     0,
-                    filter,
+                    filter, null, null, null,
                     QueryParams.Searchdom.LOCAL,
                     -1,
                     null,
@@ -290,7 +290,7 @@ public final class search {
                     null, // no snippet computation
                     count,
                     0,
-                    filter,
+                    filter, null, null, null,
                     QueryParams.Searchdom.LOCAL,
                     -1,
                     constraint,

@@ -501,7 +501,15 @@ public final class SearchEvent {
 
         if (this.protocolNavigator != null) {
             fcts = facets.get(YaCySchema.url_protocol_s.getSolrFieldName());
-            if (fcts != null) this.protocolNavigator.inc(fcts);
+            if (fcts != null) {
+                // remove all protocols that we don't know
+                Iterator<String> i = fcts.iterator();
+                while (i.hasNext()) {
+                    String protocol = i.next();
+                    if ("http,https,smb,ftp,file".indexOf(protocol) < 0) i.remove();
+                }
+                this.protocolNavigator.inc(fcts);
+            }
         }
         //fcts = facets.get(YaCySchema.author.getSolrFieldName());
         //if (fcts != null) this.authorNavigator.inc(fcts);

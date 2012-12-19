@@ -346,6 +346,9 @@ public class yacysearch {
 
         if ( !block && (post == null || post.get("cat", "href").equals("href")) ) {
             String urlmask = null;
+            String protocol = null;
+            String tld = null;
+            String ext = null;
 
             // check available memory and clean up if necessary
             if ( !MemoryControl.request(8000000L, false) ) {
@@ -374,27 +377,27 @@ public class yacysearch {
             }
             if ( querystring.indexOf("/https", 0) >= 0 ) {
                 querystring = querystring.replace("/https", "");
-                urlmask = "https://.*";
+                protocol = "https";
                 modifier.append("/https ");
             } else if ( querystring.indexOf("/http", 0) >= 0 ) {
                 querystring = querystring.replace("/http", "");
-                urlmask = "http://.*";
+                protocol = "http";
                 modifier.append("/http ");
             }
             if ( querystring.indexOf("/ftp", 0) >= 0 ) {
                 querystring = querystring.replace("/ftp", "");
-                urlmask = "ftp://.*";
+                protocol = "ftp";
                 modifier.append("/ftp ");
             }
             if ( querystring.indexOf("/smb", 0) >= 0 ) {
                 querystring = querystring.replace("/smb", "");
-                urlmask = "smb://.*";
+                protocol = "smb";
                 modifier.append("/smb ");
             }
 
             if ( querystring.indexOf("/file", 0) >= 0 ) {
                 querystring = querystring.replace("/file", "");
-                urlmask = "file://.*";
+                protocol = "file";
                 modifier.append("/file ");
             }
 
@@ -438,19 +441,13 @@ public class yacysearch {
                 if ( ftb == -1 ) {
                     ftb = querystring.length();
                 }
-                String ft = querystring.substring(filetype + 9, ftb);
-                querystring = querystring.replace("filetype:" + ft, "");
-                while ( !ft.isEmpty() && ft.charAt(0) == '.' ) {
-                    ft = ft.substring(1);
+                ext = querystring.substring(filetype + 9, ftb);
+                querystring = querystring.replace("filetype:" + ext, "");
+                while ( !ext.isEmpty() && ext.charAt(0) == '.' ) {
+                    ext = ext.substring(1);
                 }
-                if ( !ft.isEmpty() ) {
-                    if ( urlmask == null ) {
-                        urlmask = ".*\\." + ft + "(\\?.*)?";
-                    } else {
-                        urlmask = urlmask + ".*\\." + ft + "(\\?.*)?";
-                    }
-                }
-                modifier.append("filetype:").append(ft).append(' ');
+                modifier.append("filetype:").append(ext).append(' ');
+                if (ext.isEmpty()) ext = null;
             }
 
             int voc = 0;
@@ -537,9 +534,7 @@ public class yacysearch {
                 final boolean quotes = (querystring.charAt(authori + 7) == '(');
                 if ( quotes ) {
                     int ftb = querystring.indexOf(')', authori + 8);
-                    if ( ftb == -1 ) {
-                        ftb = querystring.length() + 1;
-                    }
+                    if (ftb == -1) ftb = querystring.length() + 1;
                     author = querystring.substring(authori + 8, ftb);
                     querystring = querystring.replace("author:(" + author + ")", "");
                     modifier.append("author:(").append(author).append(") ");
@@ -554,28 +549,19 @@ public class yacysearch {
                 }
             }
 
-            final int tld = querystring.indexOf("tld:", 0);
-            if ( tld >= 0 ) {
-                int ftb = querystring.indexOf(' ', tld);
-                if ( ftb == -1 ) {
-                    ftb = querystring.length();
+            final int tldp = querystring.indexOf("tld:", 0);
+            if (tldp >= 0) {
+                int ftb = querystring.indexOf(' ', tldp);
+                if (ftb == -1) ftb = querystring.length();
+                tld = querystring.substring(tldp + 4, ftb);
+                querystring = querystring.replace("tld:" + tld, "");
+                modifier.append("tld:").append(tld).append(' ');
+                while ( tld.length() > 0 && tld.charAt(0) == '.' ) {
+                    tld = tld.substring(1);
                 }
-                String domain = querystring.substring(tld + 4, ftb);
-                querystring = querystring.replace("tld:" + domain, "");
-                modifier.append("tld:").append(domain).append(' ');
-                while ( domain.length() > 0 && domain.charAt(0) == '.' ) {
-                    domain = domain.substring(1);
-                }
-                if ( domain.indexOf('.', 0) < 0 ) {
-                    domain = "\\." + domain;
-                } // is tld
-                if ( domain.length() > 0 ) {
-                    urlmask = "[a-zA-Z]*://[^/]*" + domain + "/.*" + ((urlmask != null) ? urlmask : "");
-                }
+                if (tld.length() == 0) tld = null;
             }
-            if ( urlmask == null || urlmask.isEmpty() ) {
-                urlmask = ".*";
-            } //if no urlmask was given
+            if (urlmask == null || urlmask.isEmpty()) urlmask = ".*"; //if no urlmask was given
 
             // read the language from the language-restrict option 'lr'
             // if no one is given, use the user agent or the system language as default
@@ -726,7 +712,7 @@ public class yacysearch {
                     snippetFetchStrategy,
                     itemsPerPage,
                     startRecord,
-                    urlmask,
+                    urlmask, protocol, tld, ext,
                     clustersearch && global ? QueryParams.Searchdom.CLUSTER : (global && indexReceiveGranted
                         ? QueryParams.Searchdom.GLOBAL
                         : QueryParams.Searchdom.LOCAL),

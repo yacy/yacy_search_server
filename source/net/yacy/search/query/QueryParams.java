@@ -112,6 +112,7 @@ public final class QueryParams {
     public int itemsPerPage;
     public int offset;
     public final Pattern urlMask, prefer;
+    public final String protocol, tld, ext;
     final boolean urlMask_isCatchall;
     public final Classification.ContentDomain contentdom;
     public final String targetlang;
@@ -166,6 +167,9 @@ public final class QueryParams {
         this.maxDistance = Integer.MAX_VALUE;
         this.urlMask = catchall_pattern;
         this.urlMask_isCatchall = true;
+        this.protocol = null;
+        this.tld = null;
+        this.ext = null;
         this.prefer = matchnothing_pattern;
         this.contentdom = ContentDomain.ALL;
         this.itemsPerPage = itemsPerPage;
@@ -213,7 +217,8 @@ public final class QueryParams {
         final String language,
         final Collection<Tagging.Metatag> metatags,
         final CacheStrategy snippetCacheStrategy,
-        final int itemsPerPage, final int offset, final String urlMask,
+        final int itemsPerPage, final int offset,
+        final String urlMask, final String protocol, final String tld, final String ext,
         final Searchdom domType, final int domMaxTargets,
         final Bitfield constraint, final boolean allofconstraint,
         final String nav_sitehash,
@@ -241,6 +246,9 @@ public final class QueryParams {
             throw new IllegalArgumentException("Not a valid regular expression: " + urlMask, ex);
         }
         this.urlMask_isCatchall = this.urlMask.toString().equals(catchall_pattern.toString());
+        this.protocol = protocol;
+        this.tld = tld;
+        this.ext = ext;
         try {
             this.prefer = Pattern.compile(prefer);
         } catch (final PatternSyntaxException ex) {
@@ -438,26 +446,22 @@ public final class QueryParams {
             fq.append(" AND ").append(YaCySchema.author_s.getSolrFieldName()).append(":\"").append(this.author).append('\"');
         }
         
+        if (this.protocol != null) {
+            fq.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append(this.protocol);
+        }
+        
+        if (this.tld != null) {
+            fq.append(" AND ").append(YaCySchema.host_dnc_s.getSolrFieldName()).append(":\"").append(this.tld).append('\"');
+        }
+        
+        if (this.ext != null) {
+            fq.append(" AND ").append(YaCySchema.url_file_ext_s.getSolrFieldName()).append(":\"").append(this.ext).append('\"');
+        }
+        
         if (!this.urlMask_isCatchall) {
+            // add a filter query on urls
             String urlMaskPattern = this.urlMask.pattern();
             
-            // translate filetype navigation
-            int extm = urlMaskPattern.indexOf(".*\\.");
-            if (extm >= 0) {
-                String ext = urlMaskPattern.substring(extm + 4);
-                int k = ext.indexOf('(');
-                if (k > 0) ext = ext.substring(0, k);
-                fq.append(" AND ").append(YaCySchema.url_file_ext_s.getSolrFieldName()).append(":\"").append(ext).append('\"');
-            }
-            
-            // translate protocol navigation
-            if (urlMaskPattern.startsWith("http://.*")) fq.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("http");
-            else if (urlMaskPattern.startsWith("https://.*")) fq.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("https");
-            else if (urlMaskPattern.startsWith("ftp://.*")) fq.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("ftp");
-            else if (urlMaskPattern.startsWith("smb://.*")) fq.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("smb");
-            else if (urlMaskPattern.startsWith("file://.*")) fq.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("file");
-
-            // add a filter query on urls
             // solr doesn't like slashes, backslashes or doublepoints; remove them // urlmask = ".*\\." + ft + "(\\?.*)?";
             int p;
             while ((p = urlMaskPattern.indexOf(':')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 1);

@@ -931,6 +931,11 @@ public final class Protocol
                 keyBody.writeTo(baos);
                 key = baos.toString();
             }
+            
+            String filter = event.query.urlMask.pattern().toString();
+            if (event.query.tld != null) filter = ".*" + event.query.tld + ".*" + filter;
+            if (event.query.protocol != null) filter = ".*" + event.query.protocol + ".*" + filter;
+            if (event.query.ext != null) filter = filter + ".*" + event.query.ext + ".*";
             parts.put("myseed", UTF8.StringBody((event.peers.mySeed() == null) ? "" : event.peers.mySeed().genSeedStr(key)));
             parts.put("count", UTF8.StringBody(Integer.toString(Math.max(10, count))));
             parts.put("time", UTF8.StringBody(Long.toString(Math.max(3000, time))));
@@ -940,7 +945,7 @@ public final class Protocol
             parts.put("duetime", UTF8.StringBody("1000"));
             parts.put("urls", UTF8.StringBody(urlhashes));
             parts.put("prefer", UTF8.StringBody(event.query.prefer.pattern()));
-            parts.put("filter", UTF8.StringBody(event.query.urlMask.pattern()));
+            parts.put("filter", UTF8.StringBody(filter));
             parts.put("modifier", UTF8.StringBody(modifier));
             parts.put("language", UTF8.StringBody(language));
             parts.put("sitehash", UTF8.StringBody(sitehash));
