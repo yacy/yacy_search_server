@@ -403,30 +403,30 @@ public final class QueryParams {
 
     public SolrQuery solrQuery() {
         if (this.queryGoal.getIncludeStrings().size() == 0) return null;
-        // get text query
-        final StringBuilder q = this.queryGoal.solrQueryString(this.indexSegment.fulltext().getSolrScheme());
-
+        // construct query
+        final SolrQuery params = new SolrQuery();
+        params.setQuery(this.queryGoal.solrQueryString(this.indexSegment.fulltext().getSolrScheme()).toString());
+        
         // add constraints
+        final StringBuilder fq = new StringBuilder();
         if (this.nav_sitehash == null && this.nav_sitehost == null) {
             if (this.siteexcludes != null) {
                 for (String ex: this.siteexcludes) {
-                    q.append(" -").append(YaCySchema.host_id_s.getSolrFieldName()).append(':').append(ex);
+                    fq.append(" AND -").append(YaCySchema.host_id_s.getSolrFieldName()).append(':').append(ex);
                 }
             }
         } else {
             if (this.nav_sitehost != null)
-                q.append(" AND ").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.nav_sitehost).append('\"');
+                fq.append(" AND ").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.nav_sitehost).append('\"');
             else
-                q.append(" AND ").append(YaCySchema.host_id_s.getSolrFieldName()).append(":\"").append(this.nav_sitehash).append('\"');
+                fq.append(" AND ").append(YaCySchema.host_id_s.getSolrFieldName()).append(":\"").append(this.nav_sitehash).append('\"');
         }
 
         // add vocabulary facets
         for (Tagging.Metatag tag: this.metatags) {
-            q.append(" AND ").append(YaCySchema.VOCABULARY_PREFIX).append(tag.getVocabularyName()).append(YaCySchema.VOCABULARY_SUFFIX).append(":\"").append(tag.getObject()).append('\"');
+            fq.append(" AND ").append(YaCySchema.VOCABULARY_PREFIX).append(tag.getVocabularyName()).append(YaCySchema.VOCABULARY_SUFFIX).append(":\"").append(tag.getObject()).append('\"');
         }
         
-        // construct query
-        final SolrQuery params = new SolrQuery();
         params.setParam("defType", "edismax");
         params.setParam("bq", Boost.RANKING.getBoostQuery()); // a boost query that moves double content to the back
         params.setParam("bf", Boost.RANKING.getBoostFunction()); // a boost function extension
@@ -441,26 +441,26 @@ public final class QueryParams {
             int extm = urlMaskPattern.indexOf(".*\\.");
             if (extm >= 0) {
                 String ext = urlMaskPattern.substring(extm + 4);
-                q.append(" AND ").append(YaCySchema.url_file_ext_s.getSolrFieldName()).append(':').append(ext);
+                int k = ext.indexOf('(');
+                if (k > 0) ext = ext.substring(0, k);
+                fq.append(" AND ").append(YaCySchema.url_file_ext_s.getSolrFieldName()).append(':').append(ext);
             }
             
             // translate protocol navigation
-            if (urlMaskPattern.startsWith("http://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("http");
-            else if (urlMaskPattern.startsWith("https://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("https");
-            else if (urlMaskPattern.startsWith("ftp://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("ftp");
-            else if (urlMaskPattern.startsWith("smb://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("smb");
-            else if (urlMaskPattern.startsWith("file://.*")) q.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("file");
+            if (urlMaskPattern.startsWith("http://.*")) fq.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("http");
+            else if (urlMaskPattern.startsWith("https://.*")) fq.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("https");
+            else if (urlMaskPattern.startsWith("ftp://.*")) fq.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("ftp");
+            else if (urlMaskPattern.startsWith("smb://.*")) fq.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("smb");
+            else if (urlMaskPattern.startsWith("file://.*")) fq.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append("file");
 
             // add a filter query on urls
-            // solr doesn't like slashes, backslashes or doublepoints; remove them
+            // solr doesn't like slashes, backslashes or doublepoints; remove them // urlmask = ".*\\." + ft + "(\\?.*)?";
             int p;
-            while ((p = urlMaskPattern.indexOf("\\")) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 2);
             while ((p = urlMaskPattern.indexOf(':')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 1);
             while ((p = urlMaskPattern.indexOf('/')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 1);
-            params.setFilterQueries(YaCySchema.sku.getSolrFieldName() + ":/" + urlMaskPattern + "/");
+            while ((p = urlMaskPattern.indexOf('\\')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 2);
+            fq.append(" AND ").append(YaCySchema.sku.getSolrFieldName() + ":/" + urlMaskPattern + "/");
         }
-
-        params.setQuery(q.toString());
         
         if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {
             // localtion search, no special ranking
@@ -470,7 +470,7 @@ public final class QueryParams {
             //params.set("sfield", YaCySchema.coordinate_p.name());
             //params.set("pt", Double.toString(this.lat) + "," + Double.toString(this.lon));
             //params.set("d", GeoLocation.degreeToKm(this.radius));
-            params.setFilterQueries("{!bbox sfield=" + YaCySchema.coordinate_p.getSolrFieldName() + " pt=" + Double.toString(this.lat) + "," + Double.toString(this.lon) + " d=" + GeoLocation.degreeToKm(this.radius) + "}");
+            fq.append(" AND ").append("{!bbox sfield=" + YaCySchema.coordinate_p.getSolrFieldName() + " pt=" + Double.toString(this.lat) + "," + Double.toString(this.lon) + " d=" + GeoLocation.degreeToKm(this.radius) + "}");
             //params.setRows(Integer.MAX_VALUE);
         } else {
             // set ranking
@@ -479,6 +479,7 @@ public final class QueryParams {
                 params.setSortField(YaCySchema.last_modified.getSolrFieldName(), ORDER.desc);
             }
         }
+        if (fq.length() > 0) params.setFilterQueries(fq.substring(5));
         
         // prepare result
         Log.logInfo("Protocol", "SOLR QUERY: " + params.toString());

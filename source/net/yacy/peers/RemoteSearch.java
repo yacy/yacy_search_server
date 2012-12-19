@@ -262,7 +262,7 @@ public class RemoteSearch extends Thread {
             public void run() {
                 int tmpoffset = 0;
                 int tmpcount = 10;
-                while (tmpoffset + tmpcount <= count) {
+                while (tmpoffset + tmpcount <= count && tmpcount > 0) {
                     try {
                         event.rankingProcess.oneFeederStarted();
                         int urls = Protocol.solrQuery(
@@ -287,6 +287,7 @@ public class RemoteSearch extends Thread {
                         event.rankingProcess.oneFeederTerminated();
                     }
                     tmpoffset += tmpcount;
+                    tmpcount = count - tmpoffset; // increase the tmpcount to get to all results in less time
                 }
             }
         };
