@@ -339,10 +339,12 @@ public final class Switchboard extends serverSwitch {
         this.workPath.mkdirs();
         // if default work files exist, copy them (don't overwrite existing!)
         File defaultWorkPath = new File("defaults/data/work");
-        for (String fs: defaultWorkPath.list()) {
-            File wf = new File(this.workPath, fs);
-            if (!wf.exists()) {
-                Files.copy(new File(defaultWorkPath, fs), wf);
+        if (defaultWorkPath.list() != null) {
+            for (String fs : defaultWorkPath.list()) {
+                File wf = new File(this.workPath, fs);
+                if (!wf.exists()) {
+                    Files.copy(new File(defaultWorkPath, fs), wf);
+                }
             }
         }
         
