@@ -115,7 +115,6 @@ import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.cora.storage.HandleSet;
-import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.CrawlStacker;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.HarvestProcess;
@@ -338,6 +337,15 @@ public final class Switchboard extends serverSwitch {
         this.log.logConfig("HTDOCS Path:    " + this.htDocsPath.toString());
         this.workPath = getDataPath(SwitchboardConstants.WORK_PATH, SwitchboardConstants.WORK_PATH_DEFAULT);
         this.workPath.mkdirs();
+        // if default work files exist, copy them (don't overwrite existing!)
+        File defaultWorkPath = new File("defaults/data/work");
+        for (String fs: defaultWorkPath.list()) {
+            File wf = new File(this.workPath, fs);
+            if (!wf.exists()) {
+                Files.copy(new File(defaultWorkPath, fs), wf);
+            }
+        }
+        
         this.log.logConfig("Work Path:    " + this.workPath.toString());
         this.dictionariesPath =
             getDataPath(
