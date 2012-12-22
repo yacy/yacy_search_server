@@ -93,7 +93,10 @@ public class Table_API_p {
                     }
     
                     if (post.containsKey("event_kind_" + current_pk)  ) {
-                        row.put(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, post.get("event_kind_" + current_pk, "off"));
+                        if ("off".equals(action = post.get("event_kind_" + current_pk, "off"))) {
+                            row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, "");
+                        }
+                        row.put(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, action);
                     }
     
                     if (post.containsKey("event_action_" + current_pk)  ) {

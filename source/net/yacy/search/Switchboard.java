@@ -2266,6 +2266,7 @@ public final class Switchboard extends serverSwitch {
                             pks.add(UTF8.String(row.getPK()));
                             if ("once".equals(kind)) {
                                 row.put(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
+                                row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, "");
                                 sb.tables.update(WorkTables.TABLE_API_NAME, row);
                             }
                         }

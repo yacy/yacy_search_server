@@ -292,6 +292,7 @@ public class WorkTables extends Tables {
     public static void calculateAPIScheduler(Tables.Data row, boolean update) {
         Date date = row.containsKey(WorkTables.TABLE_API_COL_DATE) ? row.get(WorkTables.TABLE_API_COL_DATE, (Date) null) : null;
         date = update ? row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, date) : row.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, date);
+        if (date == null) return;
         long d = date.getTime();
         
         final String kind = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
@@ -313,7 +314,10 @@ public class WorkTables extends Tables {
                 SimpleDateFormat dateFormat  = new SimpleDateFormat("yyyyMMddHHmm");
                 d = dateFormat.parse(dateFormat.format(new Date()).substring(0, 8) + action).getTime();
                 if (d < System.currentTimeMillis()) d += day;
-            } catch (ParseException e) {}
+            } catch (ParseException e) {} else {
+                row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, "");
+                return;
+            }
         }
         row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, new Date(d));
     }
