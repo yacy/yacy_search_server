@@ -53,10 +53,14 @@ import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -273,6 +277,7 @@ public final class Switchboard extends serverSwitch {
 
     private final Semaphore shutdownSync = new Semaphore(0);
     private boolean terminate = false;
+    private boolean startupAction = true; // this is set to false after the first event
     private static Switchboard sb;
     public HashMap<String, Object[]> crawlJobsStatus = new HashMap<String, Object[]>();
 
@@ -1062,6 +1067,14 @@ public final class Switchboard extends serverSwitch {
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
 
         this.trail = new LinkedBlockingQueue<String>();
+        
+        // finally start jobs which shall be started after start-up
+        new Thread() {
+            public void run() {
+                try {Thread.sleep(10000);} catch (InterruptedException e) {} // we must wait until the httpd comes up
+                execAPIActions(); // trigger startup actions
+            }
+        }.start();
 
         this.log.logConfig("Finished Switchboard Initialization");
     }
@@ -1992,27 +2005,19 @@ public final class Switchboard extends serverSwitch {
                         insert = true;
                     }
                     if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT) ) {
-                        selentry.put(
-                                CrawlProfile.RECRAWL_IF_OLDER,
-                                Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE)));
+                        selentry.put(CrawlProfile.RECRAWL_IF_OLDER, Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE)));
                         insert = true;
                     }
                     if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT) ) {
-                        selentry.put(
-                                CrawlProfile.RECRAWL_IF_OLDER,
-                                Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE)));
+                        selentry.put(CrawlProfile.RECRAWL_IF_OLDER, Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE)));
                         insert = true;
                     }
                     if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ) {
-                        selentry.put(
-                                CrawlProfile.RECRAWL_IF_OLDER,
-                                Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE)));
+                        selentry.put(CrawlProfile.RECRAWL_IF_OLDER, Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE)));
                         insert = true;
                     }
                     if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA) ) {
-                        selentry.put(
-                                CrawlProfile.RECRAWL_IF_OLDER,
-                                Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE)));
+                        selentry.put(CrawlProfile.RECRAWL_IF_OLDER, Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE)));
                         insert = true;
                     }
                     if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE) ) {
@@ -2027,58 +2032,7 @@ public final class Switchboard extends serverSwitch {
                 Log.logException(e);
             }
 
-            // execute scheduled API actions
-            Tables.Row row;
-            final List<String> pks = new ArrayList<String>();
-            final Date now = new Date();
-            try {
-                final Iterator<Tables.Row> plainIterator = this.tables.iterator(WorkTables.TABLE_API_NAME);
-                final Iterator<Tables.Row> mapIterator =
-                    this.tables
-                        .orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE_RECORDING)
-                        .iterator();
-                while ( mapIterator.hasNext() ) {
-                    row = mapIterator.next();
-                    if ( row == null ) {
-                        continue;
-                    }
-                    final Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
-                    if ( date_next_exec == null ) {
-                        continue;
-                    }
-                    if ( date_next_exec.after(now) ) {
-                        continue;
-                    }
-                    pks.add(UTF8.String(row.getPK()));
-                }
-            } catch ( final IOException e ) {
-                Log.logException(e);
-            }
-            for ( final String pk : pks ) {
-                try {
-                    row = this.tables.select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
-                    WorkTables.calculateAPIScheduler(row, true); // calculate next update time
-                    this.tables.update(WorkTables.TABLE_API_NAME, row);
-                } catch ( final IOException e ) {
-                    Log.logException(e);
-                    continue;
-                } catch ( final SpaceExceededException e ) {
-                    Log.logException(e);
-                    continue;
-                }
-            }
-            final Map<String, Integer> callResult =
-                this.tables.execAPICalls(
-                    "localhost",
-                    (int) getConfigLong("port", 8090),
-                    getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""),
-                    pks);
-            for ( final Map.Entry<String, Integer> call : callResult.entrySet() ) {
-                this.log.logInfo("Scheduler executed api call, response "
-                    + call.getValue()
-                    + ": "
-                    + call.getKey());
-            }
+            execAPIActions();
 
             // close unused connections
             ConnectionInfo.cleanUp();
@@ -2266,6 +2220,72 @@ public final class Switchboard extends serverSwitch {
         }
     }
 
+    private void execAPIActions() {
+
+        // execute scheduled API actions
+        Tables.Row row;
+        final Collection<String> pks = new LinkedHashSet<String>();
+        final Date now = new Date();
+        
+        try {
+            final Iterator<Tables.Row> plainIterator = this.tables.iterator(WorkTables.TABLE_API_NAME);
+            final Iterator<Tables.Row> mapIterator = this.tables.orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE_RECORDING).iterator();
+            while (mapIterator.hasNext()) {
+                row = mapIterator.next();
+                if (row == null) continue;
+                
+                // select api calls according to scheduler settings
+                final Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
+                if (date_next_exec != null && now.after(date_next_exec)) pks.add(UTF8.String(row.getPK()));
+                
+                // select api calls according to event settings
+                final String kind = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
+                if (!"off".equals(kind)) {
+                    String action = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, "startup");
+                    if ("startup".equals(action)) {
+                        if (startupAction) {
+                            pks.add(UTF8.String(row.getPK()));
+                            if ("once".equals(kind)) {
+                                row.put(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
+                                sb.tables.update(WorkTables.TABLE_API_NAME, row);
+                            }
+                        }
+                    } else try {
+                        SimpleDateFormat dateFormat  = new SimpleDateFormat("yyyyMMddHHmm");
+                        long d = dateFormat.parse(dateFormat.format(new Date()).substring(0, 8) + action).getTime();
+                        long cycle = getThread(SwitchboardConstants.CLEANUP).getBusySleep();
+                        if (d < System.currentTimeMillis() && System.currentTimeMillis() - d < cycle) {
+                            pks.add(UTF8.String(row.getPK()));
+                            if ("once".equals(kind)) {
+                                row.put(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
+                                sb.tables.update(WorkTables.TABLE_API_NAME, row);
+                            }
+                        }
+                    } catch (ParseException e) {}
+                }
+            }
+        } catch (final IOException e) {
+            Log.logException(e);
+        }
+        for (final String pk : pks) {
+            try {
+                row = this.tables.select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
+                WorkTables.calculateAPIScheduler(row, true); // calculate next update time
+                this.tables.update(WorkTables.TABLE_API_NAME, row);
+            } catch ( final Throwable e ) {
+                Log.logException(e);
+                continue;
+            }
+        }
+        startupAction = false;
+        
+        // execute api calls
+        final Map<String, Integer> callResult = this.tables.execAPICalls("localhost", (int) getConfigLong("port", 8090), getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""), pks);
+        for ( final Map.Entry<String, Integer> call : callResult.entrySet() ) {
+            this.log.logInfo("Scheduler executed api call, response " + call.getValue() + ": " + call.getKey());
+        }
+    }
+    
     /**
      * With this function the crawling process can be paused
      *

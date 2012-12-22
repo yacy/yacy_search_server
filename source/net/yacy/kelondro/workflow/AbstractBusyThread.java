@@ -65,9 +65,17 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
         return idlePause;
     }
     
+    public final long getIdleSleep() {
+        return idlePause;
+    }
+    
     public final long setBusySleep(final long milliseconds) {
         // sets a sleep time for pauses between two jobs
         busyPause = Math.min(this.maxBusySleep, Math.max(this.minBusySleep, milliseconds));
+        return busyPause;
+    }
+    
+    public final long getBusySleep() {
         return busyPause;
     }
     

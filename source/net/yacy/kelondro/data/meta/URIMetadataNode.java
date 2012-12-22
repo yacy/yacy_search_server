@@ -58,6 +58,16 @@ import org.apache.solr.common.SolrInputDocument;
  */
 public class URIMetadataNode {
 
+    public static YaCySchema[] fieldList = new YaCySchema[]{
+        YaCySchema.audiolinkscount_i, YaCySchema.author, YaCySchema.collection_sxt, YaCySchema.content_type,
+        YaCySchema.coordinate_p, YaCySchema.description, YaCySchema.fresh_date_dt, YaCySchema.host_id_s, YaCySchema.id,
+        YaCySchema.imagescount_i, YaCySchema.inboundlinks_protocol_sxt, YaCySchema.inboundlinks_urlstub_txt,
+        YaCySchema.inboundlinkscount_i, YaCySchema.keywords, YaCySchema.language_s, YaCySchema.last_modified, YaCySchema.load_date_dt,
+        YaCySchema.md5_s, YaCySchema.outboundlinks_protocol_sxt, YaCySchema.outboundlinks_urlstub_txt,
+        YaCySchema.outboundlinkscount_i, YaCySchema.publisher_t, YaCySchema.referrer_id_txt, YaCySchema.size_i, YaCySchema.sku,
+        YaCySchema.text_t, YaCySchema.title, YaCySchema.title_words_val, YaCySchema.url_chars_i,
+        YaCySchema.videolinkscount_i, YaCySchema.videolinkscount_i, YaCySchema.wordcount_i};
+    
     private byte[] hash = null;
     private String urlRaw = null, keywords = null;
     private DigestURI url = null;

@@ -41,12 +41,24 @@ public interface BusyThread extends WorkflowThread {
     public long setIdleSleep(long milliseconds);
 
     /**
+     * gets the sleep time for pauses between two jobs if the job returns false (idle)
+     * @return milliseconds
+     */
+    public long getIdleSleep();
+    
+    /**
      * sets a sleep time for pauses between two jobs if the job returns true (busy)
      * @param milliseconds
      * @return
      */
     public long setBusySleep(long milliseconds);
- 
+
+    /**
+     * gets the sleep time for pauses between two jobs if the job returns true (busy)
+     * @return milliseconds
+     */
+    public long getBusySleep();
+    
     /**
      * sets minimum required amount of memory for the job execution
      * @param freeBytes

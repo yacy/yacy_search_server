@@ -138,7 +138,9 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
         if (timeString == null || timeString.isEmpty()) { return new Date(); }
         if (UTCOffset == null || UTCOffset.isEmpty()) { return new Date(); }
         try {
-            return new Date(this.dateFormat.parse(timeString).getTime() - UTCDiff() + UTCDiff(UTCOffset));
+            synchronized (this.dateFormat) {
+                return new Date(this.dateFormat.parse(timeString).getTime() - UTCDiff() + UTCDiff(UTCOffset));
+            }
         } catch (final Throwable e) {
             //serverLog.logFinest("parseUniversalDate", e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
             return new Date();

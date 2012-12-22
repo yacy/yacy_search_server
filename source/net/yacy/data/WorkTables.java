@@ -28,11 +28,14 @@ package net.yacy.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -70,7 +73,9 @@ public class WorkTables extends Tables {
     public final static String TABLE_API_COL_APICALL_PK = "apicall_pk"; // the primary key for the table entry of that api call (not really a database field, only a name in the apicall)
     public final static String TABLE_API_COL_APICALL_COUNT = "apicall_count"; // counts how often the API was called (starts with 1)
     public final static String TABLE_API_COL_APICALL_SCHEDULE_TIME = "apicall_schedule_time"; // factor for SCHEULE_UNIT time units
-    public final static String TABLE_API_COL_APICALL_SCHEDULE_UNIT= "apicall_schedule_unit"; // may be 'minutes', 'hours', 'days'
+    public final static String TABLE_API_COL_APICALL_SCHEDULE_UNIT = "apicall_schedule_unit"; // may be 'minutes', 'hours', 'days'
+    public final static String TABLE_API_COL_APICALL_EVENT_KIND = "apicall_event_kind"; // 
+    public final static String TABLE_API_COL_APICALL_EVENT_ACTION = "apicall_event_action"; // 
 
     public final static String TABLE_ROBOTS_NAME = "robots";
 
@@ -277,26 +282,40 @@ public class WorkTables extends Tables {
         return m.values().iterator().next().intValue();
     }
 
+    final static long hour = 1000L * 60L * 60L;
+    final static long day = hour * 24L;
+    
     /**
      * calculate the execution time in a api call table based on given scheduling time and last execution time
      * @param row the database row in the api table
-     * @param update if true then the next execution time is based on the latest computed execution time; othervise it is based on the last execution time
+     * @param update if true then the next execution time is based on the latest computed execution time; otherwise it is based on the last execution time
      */
     public static void calculateAPIScheduler(Tables.Data row, boolean update) {
         Date date = row.containsKey(WorkTables.TABLE_API_COL_DATE) ? row.get(WorkTables.TABLE_API_COL_DATE, (Date) null) : null;
         date = update ? row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, date) : row.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, date);
-        int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 1);
-        if (time <= 0) {
-            row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, "");
-            return;
-        }
-        String unit = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "days");
         long d = date.getTime();
-        if (unit.equals("minutes")) d += 60000L * Math.max(10, time);
-        if (unit.equals("hours"))   d += 60000L * 60L * time;
-        if (unit.equals("days"))    d += 60000L * 60L * 24L * time;
-        if (d < System.currentTimeMillis()) d = System.currentTimeMillis() + 600000L;
-        d -= d % 60000; // remove seconds
+        
+        final String kind = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
+        if ("off".equals(kind)) {
+            int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 1);
+            if (time <= 0) {
+                row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, "");
+                return;
+            }
+            String unit = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "days");
+            if (unit.equals("minutes")) d += 60000L * Math.max(10, time);
+            if (unit.equals("hours"))   d += 60000L * 60L * time;
+            if (unit.equals("days"))    d += 60000L * 60L * 24L * time;
+            if (d < System.currentTimeMillis()) d = System.currentTimeMillis() + 600000L;
+            d -= d % 60000; // remove seconds
+        } else {
+            String action = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, "startup");
+            if (!"startup".equals(action)) try {
+                SimpleDateFormat dateFormat  = new SimpleDateFormat("yyyyMMddHHmm");
+                d = dateFormat.parse(dateFormat.format(new Date()).substring(0, 8) + action).getTime();
+                if (d < System.currentTimeMillis()) d += day;
+            } catch (ParseException e) {}
+        }
         row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, new Date(d));
     }
 
