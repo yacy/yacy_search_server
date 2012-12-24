@@ -53,6 +53,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.operation.yacySeedUploadFile;
@@ -778,6 +779,12 @@ public class Network
                     throw new MalformedURLException("Unsupported protocol.");
                 }
                 seedURL = new DigestURI(seedURLStr);
+                final String host = seedURL.getHost();
+                if (Domains.isLocalhost(host)) { // check seedlist reacheable
+                    final String errorMsg = "seedURL in localhost rejected (localhost can't be reached from outside)";
+                    log.logWarning("SaveSeedList: " + errorMsg);
+                    return errorMsg;
+                }
             } catch ( final MalformedURLException e ) {
                 final String errorMsg =
                     "Malformed seed file URL '"
