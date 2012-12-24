@@ -167,7 +167,7 @@ public final class Settings_p {
             final String[] configOptions = theUploader.getConfigurationOptions();
             if (configOptions != null) {
                 for (int i=0; i<configOptions.length; i++) {
-                    prop.put("seedUploadMethods_" +count+ "_" + configOptions[i], env.getConfig(configOptions[i], ""));
+                    prop.put(configOptions[i], env.getConfig(configOptions[i], ""));
                     // prop.put("seedUpload" + uploaderName,1);
                 }
             }
