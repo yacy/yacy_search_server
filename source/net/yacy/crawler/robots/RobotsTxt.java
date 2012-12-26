@@ -235,6 +235,7 @@ public class RobotsTxt {
     }
 
     public void ensureExist(final MultiProtocolURI theURL, final Set<String> thisAgents, boolean concurrent) {
+        if (theURL.isLocal()) return;
         final String urlHostPort = getHostPort(theURL);
         if (urlHostPort == null) return;
         final BEncodedHeap robotsTable;

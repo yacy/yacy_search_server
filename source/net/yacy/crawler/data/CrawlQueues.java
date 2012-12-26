@@ -148,9 +148,9 @@ public class CrawlQueues {
         if (this.errorURL.exists(hash)) {
             return HarvestProcess.ERRORS;
         }
-        if (this.noticeURL.existsInStack(hash)) {
-            return HarvestProcess.CRAWLER;
-        }
+        //if (this.noticeURL.existsInStack(hash)) {
+        //    return HarvestProcess.CRAWLER;
+        //} // this is disabled because it prevents propert crawling of smb shares. The cause is unknown
         for (final Loader worker: this.workers.values()) {
             if (Base64Order.enhancedCoder.equal(worker.request.url().hash(), hash)) {
                 return HarvestProcess.WORKER;

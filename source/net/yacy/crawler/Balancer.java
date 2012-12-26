@@ -68,6 +68,7 @@ public class Balancer {
     private static final String indexSuffix           = "A.db";
     private static final int    EcoFSBufferSize       = 1000;
     private static final int    objectIndexBufferSize = 1000;
+    private static final int    MAX_DOUBLE_PUSH_CHECK = 100000;
 
     // class variables filled with external values
     private final File                 cacheStacksPath;
@@ -274,7 +275,7 @@ public class Balancer {
             if (this.double_push_check.has(hash)) return "double occurrence in double_push_check";
             if (this.urlFileIndex.has(hash)) return "double occurrence in urlFileIndex";
 
-            if (this.double_push_check.size() > 10000 || MemoryControl.shortStatus()) this.double_push_check.clear();
+            if (this.double_push_check.size() > MAX_DOUBLE_PUSH_CHECK || MemoryControl.shortStatus()) this.double_push_check.clear();
             this.double_push_check.put(hash);
 
             // add to index

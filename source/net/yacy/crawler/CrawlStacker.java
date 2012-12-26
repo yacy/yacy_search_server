@@ -465,14 +465,14 @@ public final class CrawlStacker {
                         ((System.currentTimeMillis() - oldDate.getTime()) / 60000 / 60 / 24) + " days ago.");
             } else {
                 if (dbocc == null) {
-                    return "double in: LURL-DB";
+                    return "double in: LURL-DB, oldDate = " + oldDate.toString();
                 }
                 if (this.log.isInfo()) this.log.logInfo("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "'. " + "Stack processing time:");
                 if (dbocc == HarvestProcess.ERRORS) {
                     final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
-                    return "double in: errors (" + errorEntry.anycause() + ")";
+                    return "double in: errors (" + errorEntry.anycause() + "), oldDate = " + oldDate.toString();
                 }
-                return "double in: " + dbocc.toString();
+                return "double in: " + dbocc.toString() + ", oldDate = " + oldDate.toString();
             }
         }
 
