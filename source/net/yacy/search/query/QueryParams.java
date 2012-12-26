@@ -111,9 +111,11 @@ public final class QueryParams {
     private final QueryGoal queryGoal;
     public int itemsPerPage;
     public int offset;
-    public final Pattern urlMask, prefer;
+    public Pattern urlMask;
+
+    public final Pattern prefer;
     public final String protocol, tld, ext;
-    final boolean urlMask_isCatchall;
+    boolean urlMask_isCatchall;
     public final Classification.ContentDomain contentdom;
     public final String targetlang;
     protected final Collection<Tagging.Metatag> metatags;
@@ -246,6 +248,20 @@ public final class QueryParams {
             throw new IllegalArgumentException("Not a valid regular expression: " + urlMask, ex);
         }
         this.urlMask_isCatchall = this.urlMask.toString().equals(catchall_pattern.toString());
+        if (this.urlMask_isCatchall) {
+            if (protocol != null) {
+                this.urlMask = Pattern.compile(protocol + ".*");
+                this.urlMask_isCatchall = false;
+            }
+            if (tld != null) {
+                this.urlMask = Pattern.compile(".*" + tld + ".*");
+                this.urlMask_isCatchall = false;
+            }
+            if (ext != null) {
+                this.urlMask = Pattern.compile(".*" + ext + ".*");
+                this.urlMask_isCatchall = false;
+            }
+        }
         this.protocol = protocol;
         this.tld = tld;
         this.ext = ext;
