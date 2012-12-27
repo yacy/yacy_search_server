@@ -488,7 +488,10 @@ public final class SearchEvent {
                 Iterator<String> i = fcts.iterator();
                 while (i.hasNext()) {
                     String ext = i.next();
-                    if (TextParser.supportsExtension(ext) != null && !Classification.isAnyKnownExtension(ext)) i.remove();
+                    if (TextParser.supportsExtension(ext) != null && !Classification.isAnyKnownExtension(ext)) {
+                        //Log.logInfo("SearchEvent", "removed unknown externsion " + ext + " from navigation.");
+                        i.remove();
+                    }
                 }
                 this.filetypeNavigator.inc(fcts);
             }
