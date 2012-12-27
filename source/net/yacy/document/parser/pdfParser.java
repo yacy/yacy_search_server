@@ -33,16 +33,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.document.AbstractParser;
-import net.yacy.document.Document;
-import net.yacy.document.Parser;
-import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.io.CharBuffer;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.MemoryControl;
-
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.exceptions.CryptographyException;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -52,6 +42,16 @@ import org.apache.pdfbox.pdmodel.encryption.BadSecurityHandlerException;
 import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.util.PDFTextStripper;
+
+import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.document.AbstractParser;
+import net.yacy.document.Document;
+import net.yacy.document.Parser;
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.io.CharBuffer;
+import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
 
 
 public class pdfParser extends AbstractParser implements Parser {
