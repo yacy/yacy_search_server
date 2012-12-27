@@ -463,7 +463,7 @@ public final class SwitchboardConstants {
      * ranking
      */
     public static final String SEARCH_RANKING_RWI_PROFILE = "search.ranking.rwi.profile"; // old rwi rankingProfile ranking
-    public static final String SEARCH_RANKING_SOLR_BOOST  = "search.ranking.solr.boost.tmp"; // temporary until we know best default values
+    public static final String SEARCH_RANKING_SOLR_BOOST  = "search.ranking.solr.boost.tmp2"; // temporary until we know best default values
     public static final String SEARCH_RANKING_SOLR_DOUBLEDETECTION_MINLENGTH = "search.ranking.solr.doubledetection.minlength";
     public static final String SEARCH_RANKING_SOLR_DOUBLEDETECTION_QUANTRATE = "search.ranking.solr.doubledetection.quantrate";
     

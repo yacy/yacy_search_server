@@ -944,7 +944,7 @@ WikiAccess = admin
 # this is currently only a single default profile
 # If this profile setting is empty, a hard-coded profile from plasmaSearchRanking is used
 search.ranking.rwi.profile =
-search.ranking.solr.boost.tmp=
+search.ranking.solr.boost.tmp2=
 search.ranking.solr.doubledetection.minlength=3
 search.ranking.solr.doubledetection.quantrate=0.5f
 
