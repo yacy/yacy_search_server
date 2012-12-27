@@ -131,6 +131,7 @@ public class yacysearchitem {
             prop.put("content_showPictures", sb.getConfigBool("search.result.show.pictures", true) ? 1 : 0);
             prop.put("content_showCache", sb.getConfigBool("search.result.show.cache", true) ? 1 : 0);
             prop.put("content_showProxy", sb.getConfigBool("search.result.show.proxy", true) ? 1 : 0);
+            prop.put("content_showHostBrowser", sb.getConfigBool("search.result.show.hostbrowser", true) ? 1 : 0);
             prop.put("content_showTags", sb.getConfigBool("search.result.show.tags", false) ? 1 : 0);
             prop.put("content_authorized", authenticated ? "1" : "0");
             final String urlhash = ASCII.String(result.hash());
@@ -190,6 +191,7 @@ public class yacysearchitem {
             prop.put("content_showMetadata_urlhash", resulthashString);
             prop.put("content_showCache_link", resultUrlstring);
             prop.put("content_showProxy_link", resultUrlstring);
+            prop.put("content_showHostBrowser_link", resultUrlstring);
             prop.put("content_showParser_urlhash", resulthashString);
             prop.put("content_showTags_urlhash", resulthashString);
             prop.put("content_urlhexhash", Seed.b64Hash2hexHash(resulthashString));

@@ -226,6 +226,7 @@ public class HostBrowser {
                 DigestURI uri = new DigestURI(path);
                 String host = uri.getHost();
                 prop.putHTML("outbound_host", host);
+                if (admin) prop.putHTML("outbound_admin_host", host); //used for WebStructurePicture_p link
                 prop.putHTML("inbound_host", host);
                 String hosthash = ASCII.String(uri.hash(), 6, 6);
                 String[] pathparts = uri.getPaths();

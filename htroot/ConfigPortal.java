@@ -96,6 +96,7 @@ public class ConfigPortal {
                 sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures"));
                 sb.setConfig("search.result.show.cache", post.getBoolean("search.result.show.cache"));
                 sb.setConfig("search.result.show.proxy", post.getBoolean("search.result.show.proxy"));
+                sb.setConfig("search.result.show.hostbrowser", post.getBoolean("search.result.show.hostbrowser"));
                 sb.setConfig("search.result.show.tags", post.getBoolean("search.result.show.tags"));
 
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, post.get("search.verify", "ifexist"));
@@ -144,6 +145,7 @@ public class ConfigPortal {
                 sb.setConfig("search.result.show.pictures", false);
                 sb.setConfig("search.result.show.cache", true);
                 sb.setConfig("search.result.show.proxy", false);
+                sb.setConfig("search.result.show.hostbrowser", true);
                 sb.setConfig("search.result.show.tags", false);
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "iffresh");
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "true");
@@ -178,6 +180,7 @@ public class ConfigPortal {
         prop.put("search.result.show.pictures", sb.getConfigBool("search.result.show.pictures", false) ? 1 : 0);
         prop.put("search.result.show.cache", sb.getConfigBool("search.result.show.cache", false) ? 1 : 0);
         prop.put("search.result.show.proxy", sb.getConfigBool("search.result.show.proxy", false) ? 1 : 0);
+        prop.put("search.result.show.hostbrowser", sb.getConfigBool("search.result.show.hostbrowser", false) ? 1 : 0);
         prop.put("search.result.show.tags", sb.getConfigBool("search.result.show.tags", false) ? 1 : 0);
 
         prop.put("search.navigation.hosts", sb.getConfig("search.navigation", "").indexOf("hosts",0) >= 0 ? 1 : 0);
