@@ -40,7 +40,6 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.RSSMessage;
@@ -61,7 +60,6 @@ import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.Formatter;
@@ -116,7 +114,7 @@ public class yacysearch {
         // get query
         final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
         String querystring = originalquerystring.replace('+', ' ').trim();
-        CacheStrategy snippetFetchStrategy = (post == null) ? null : CacheStrategy.parse(post.get("verify", "cacheonly"));
+        CacheStrategy snippetFetchStrategy = (post == null) ? null : CacheStrategy.parse(post.get("verify", sb.getConfig("search.verify", "")));
         if (authenticated && originalquerystring.length() == 0) sb.index.fulltext().commit();
         
         final servletProperties prop = new servletProperties();

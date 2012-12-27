@@ -66,7 +66,7 @@ public enum CacheStrategy {
     }
 
     public static CacheStrategy parse(final String name) {
-        if (name == null) return null;
+        if (name == null || name.length() == 0) return null;
         if (name.equals("nocache")) return NOCACHE;
         if (name.equals("iffresh")) return IFFRESH;
         if (name.equals("ifexist")) return IFEXIST;

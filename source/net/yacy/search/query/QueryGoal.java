@@ -24,6 +24,7 @@ package net.yacy.search.query;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.SortedSet;
 
 import net.yacy.cora.federate.solr.Boost;
@@ -229,7 +230,9 @@ public class QueryGoal {
         // combine these queries for all relevant fields
         wc = 0;
         Float boost;
-        for (YaCySchema field: Boost.GOAL_FIELDS) {
+        for (Map.Entry<YaCySchema,Float> entry: Boost.RANKING.entrySet()) {
+            YaCySchema field = entry.getKey();
+            if (entry.getValue().floatValue() < 0.0f) continue;
             if (configuration != null && !configuration.contains(field.getSolrFieldName())) continue;
             if (wc > 0) q.append(" OR ");
             q.append('(');
