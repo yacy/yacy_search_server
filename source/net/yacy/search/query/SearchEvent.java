@@ -834,7 +834,7 @@ public final class SearchEvent {
             }
 
             // check Scanner
-            if ( !Scanner.acceptURL(page.url()) ) {
+            if (this.query.filterscannerfail && !Scanner.acceptURL(page.url())) {
                 this.query.misses.add(page.hash());
                 continue;
             }

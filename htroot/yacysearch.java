@@ -730,6 +730,7 @@ public class yacysearch {
                     sb.getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, false)
                         && sb.getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false)
                         && sb.peers.mySeed().getFlagAcceptRemoteIndex(),
+                    false,
                     lat, lon, rad);
             EventTracker.delete(EventTracker.EClass.SEARCH);
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(

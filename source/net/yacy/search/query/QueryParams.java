@@ -141,7 +141,7 @@ public final class QueryParams {
     public int transmitcount; // number of results that had been shown to the user
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
     public final String userAgent;
-    protected boolean filterfailurls;
+    protected boolean filterfailurls, filterscannerfail;
     protected double lat, lon, radius;
     public List<String> facetfields;
     public int maxfacets;
@@ -196,6 +196,7 @@ public final class QueryParams {
         this.userAgent = userAgent;
         this.transmitcount = 0;
         this.filterfailurls = false;
+        this.filterscannerfail = false;
         this.lat = 0.0d;
         this.lon = 0.0d;
         this.radius = 0.0d;
@@ -234,6 +235,7 @@ public final class QueryParams {
         final RankingProfile ranking,
         final String userAgent,
         final boolean filterfailurls,
+        final boolean filterscannerfail,
         final double lat, final double lon, final double radius) {
         this.queryGoal = queryGoal;
         this.modifier = new Modifier(modifier == null ? "" : modifier);
@@ -292,6 +294,7 @@ public final class QueryParams {
         this.userAgent = userAgent;
         this.transmitcount = 0;
         this.filterfailurls = filterfailurls;
+        this.filterscannerfail = filterscannerfail;
         // we normalize here the location and radius because that should cause a better caching
         // and as surplus it will increase privacy
         this.lat = Math.floor(lat * this.kmNormal) / this.kmNormal;

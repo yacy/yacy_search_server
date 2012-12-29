@@ -243,7 +243,7 @@ public final class search {
                     indexSegment,
                     rankingProfile,
                     header.get(RequestHeader.USER_AGENT, ""),
-                    false, 0.0d, 0.0d, 0.0d
+                    false, false, 0.0d, 0.0d, 0.0d
                     );
             Network.log.logInfo("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
 
@@ -305,7 +305,7 @@ public final class search {
                     sb.index,
                     rankingProfile,
                     header.get(RequestHeader.USER_AGENT, ""),
-                    false, 0.0d, 0.0d, 0.0d
+                    false, false, 0.0d, 0.0d, 0.0d
                     );
             Network.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
             EventChannel.channels(EventChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()), ""));
