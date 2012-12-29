@@ -44,6 +44,7 @@ import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.opensearch.OpenSearchConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.lod.vocabulary.Tagging;
@@ -792,6 +793,9 @@ public class yacysearch {
                 }
                 if ( (heuristicTwitter >= 0 || sb.getConfigBool("heuristic.twitter", false)) && authenticated ) {
                     sb.heuristicRSS("http://search.twitter.com/search.rss?rpp=50&q=$", theSearch, "twitter");
+                }
+                if (sb.getConfigBool("heuristic.opensearch", false) && authenticated) {
+                    OpenSearchConnector.query(sb, theSearch);
                 }
             }
 
