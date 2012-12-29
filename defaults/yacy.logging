@@ -85,6 +85,6 @@ org.apache.solr.handler.enabled = FALSE
 org.apache.solr.update.enabled = TRUE
 org.apache.solr.update.level = INFO
 org.apache.solr.core.enabled = TRUE
-org.apache.solr.core.level = INFO
+org.apache.solr.core.level = WARNING
 javax.management.mbeanserver.level = INFO
 javax.management.mbeanserver.enabled = FALSE
