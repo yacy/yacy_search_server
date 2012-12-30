@@ -163,7 +163,8 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         return this.urlentry.size();
     }
     public int referencesCount() {
-    	return this.indexSegment.urlCitation().count(this.urlentry.hash());
+        // urlCitationIndex index might be null (= configuration option)
+    	return this.indexSegment.urlCitation() != null ? this.indexSegment.urlCitation().count(this.urlentry.hash()) : 0;
     }
     public int llocal() {
     	return this.urlentry.llocal();

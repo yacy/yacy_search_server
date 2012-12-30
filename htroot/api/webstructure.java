@@ -141,10 +141,10 @@ public class webstructure {
             	IndexCell<CitationReference> citationReferences = sb.index.urlCitation();
             	ReferenceContainer<CitationReference> citations = null;
             	// citationReferences.count(urlhash) would give to the number of references good for ranking
-            	try {
-					citations = citationReferences.get(urlhash, null);
-				} catch (IOException e) {
-				}
+                try {
+                    citations = citationReferences != null ? citationReferences.get(urlhash, null) : null;
+                } catch (IOException e) {
+                }
             	if (citations != null) {
                     prop.put("citations_count", 1);
                     prop.put("citations_documents", 1);
