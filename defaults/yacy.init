@@ -1020,6 +1020,7 @@ heuristic.blekko = false
 heuristic.twitter = false
 heuristic.searchresults = false
 heuristic.searchresults.crawlglobal = false
+heuristic.opensearch = false
 
 # colours for generic design
 color_background = #FFFFFF

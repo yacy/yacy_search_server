@@ -44,6 +44,8 @@ import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
+
+import net.yacy.cora.federate.opensearch.OpenSearchConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.lod.vocabulary.Tagging;
@@ -794,6 +796,9 @@ public class yacysearch {
                 if ( (heuristicTwitter >= 0 || sb.getConfigBool("heuristic.twitter", false)) && authenticated ) {
                     sb.heuristicRSS("http://search.twitter.com/search.rss?rpp=50&q=$", theSearch, "twitter");
                 }
+                if (sb.getConfigBool("heuristic.opensearch", false) && authenticated) {
+                    OpenSearchConnector.query(sb, theSearch);
+                }
             }
 
             // log
@@ -986,8 +991,7 @@ public class yacysearch {
                 hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
             }
             prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
-            prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.png");
-            prop.put("thisaddress", hostName);
+            prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
         }
 
         prop.put("searchagain", global ? "1" : "0");

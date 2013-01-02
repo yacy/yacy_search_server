@@ -97,6 +97,66 @@
     </fieldset>
     </form>
 
+    <fieldset>
+      <form id="HeuristicFormOpenSearch" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+        <legend>
+          <input type="checkbox" name="opensearch_check" id="opensearch" onclick="window.location.href='ConfigHeuristics_p.html?#(opensearch.checked)#opensearch_on=::opensearch_off=#(/opensearch.checked)#'" value="opensearch"#(opensearch.checked)#:: checked="checked"#(/opensearch.checked)# />
+          <label for="opensearch">opensearch load external search result list from active systems below</label>
+        </legend>
+        <p>
+        When using this heuristic, then every search request line is used for a call to listed opensearch systems until enough results to fill the current search page are available.
+        20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.
+        To find out more about OpenSearch see <a href="http://www.opensearch.org" target="_blank">OpenSearch.org</a>
+        </p>
+      </form>
+
+    <form action="ConfigHeuristics_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <div>
+      <b>Available/Active Opensearch System</b>
+      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td>Active</td>
+        <td>Title</td>
+        <td>Comment</td>
+        <td>Url <small>(format opensearch <a href="http://www.opensearch.org/Specifications/OpenSearch/1.1#OpenSearch_URL_template_syntax" target="_blank">Url template syntax</a>)</small></td>
+        <td>delete</td>
+      </tr>
+      #{osdcfg}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td align="center"><input type="checkbox" name="ossys_#[title]#" value="checked" #(checked)#::checked="checked"#(/checked)#/></td>
+        <td align="left"><b><a href="#[urlhostlink]#" target="_blank">#[title]#</b></a> </td>
+        <td align="left">#[comment]#</td>
+        <td align="left"><input type="text" name="ossys_url_#[title]#" value="#[url]#" size="70"/></td>
+        <td align="center"><input type="checkbox" name="ossys_del_#[title]#" value="checked" #(delchecked)#::checked="checked"#(/delchecked)#/></td>
+      </tr>
+      #{/osdcfg}#
+      <tr>
+        <td><small>new</small></td>
+        <td><input type="text" name="ossys_newtitle"/></td>
+        <td><input type="text" name="ossys_newcomment"/></td>
+        <td><input type="text" name="ossys_newurl" size="70"/></td>
+        <td><input type="submit" name="addnewosd" value="add"/></td>
+      </tr>
+      </table>
+      </div>
+      <div>
+        <input type="submit" name="setopensearch" value="Save" class="submitready"/>
+        <span style="color:red">#[osderrmsg]#</span>
+      </div>
+      <br>
+      <div>
+        <div style="float:right">
+        <input type="submit" name="discoverosd" id="discoverosd" value="discover from index" class="submitready" onclick="return confirm('start background task, depending on index size this may run a long time')"/>
+        </div>
+        With the button "discover from index" you can search within the metadata of your local index to find systems which support the Opensearch specification.
+        The task is started in the background. It may take some minutes before new entries appear (after refreshing the page).
+        Alternatively you may <a href="?copydefaultosdconfig=">copy &amp; paste a example config file</a> located in <i>defaults/heuristicopensearch.conf</i> to the DATA/SETTINGS directory.
+        For the discover function the field <i>outboundlinks_tag_txt</i> (and <i>inboundlinks_tag_txt</i>) has to be switched on in the <a href="IndexFederated_p.html">Solr Schema</a>.
+        #{osdsolrfieldswitch}#<input type="submit" name="switchsolrfieldson" value="switch Solr fields on" class="submitready" onclick="return confirm('modify Solr Schema')"/>#{/osdsolrfieldswitch}#
+      </div>
+    </form>
+    </fieldset>
+
     #%env/templates/footer.template%#
   </body>
 </html>
