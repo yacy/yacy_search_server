@@ -114,7 +114,6 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
             final Bitfield flags,  // attributes to the url and to the word according the url
             final double   termfrequency
     ) {
-        if (language == null || language.length != 2) language = default_language;
         //final int mddct = MicroDate.microDateDays(updatetime);
         this.flags = flags;
         //this.freshUntil = Math.max(0, mddlm + (mddct - mddlm) * 2);

@@ -231,12 +231,6 @@ public class Response {
         return docDate;
     }
 
-    public String language() {
-        // please avoid this method if a condenser document is available, because the condenser has a built-in language detection
-        // this here is only a guess using the TLD
-        return url().language();
-    }
-
     public CrawlProfile profile() {
         return this.profile;
     }

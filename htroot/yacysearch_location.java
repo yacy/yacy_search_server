@@ -127,7 +127,7 @@ public class yacysearch_location {
 
             prop.put("kml_date822", HeaderFramework.formatRFC1123(new Date()));
             prop.put("kml_promoteSearchPageGreeting", promoteSearchPageGreeting);
-            prop.put("kml_rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
+            prop.put("kml_rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.png");
             prop.put("kml_searchBaseURL", "http://" + hostName + "/yacysearch_location.rss");
             prop.putXML("kml_rss_query", originalquerystring);
             prop.put("kml_rss_queryenc", originalquerystring.replace(' ', '+'));

@@ -8,20 +8,20 @@
     #%env/templates/header.template%#
     #%env/templates/submenuSearchConfiguration.template%#
     <h2>Solr Ranking Configuration</h2>
-    <p>These are ranking attributes for Solr. This ranking applies for internal and remote Solr acess.</p>
+    <p>These are ranking attributes for Solr. This ranking applies for internal and remote Solr access.</p>
     <form class="dsearch" action="RankingSolr_p.html" method="post" enctype="multipart/form-data">      
       <fieldset>
         <legend>Solr Double Content Detection</legend><p>Double-Content detection is done using a ranking on a 'unique'-Field, named 'fuzzy_signature_unique_b'.
       This field is set during parsing and is influenced by two attributes for the <a href="http://lucene.apache.org/solr/api-4_0_0-BETA/org/apache/solr/update/processor/TextProfileSignature.html">TextProfileSignature</a> class.</p>
         <dl>
           <dt style="width:260px"><label for="minTokenLen">minTokenLen</label></dt>
-          <dd style="width:360px; float:left; display:inline;" id="minTokenLen">
-            <input name="minTokenLen" id="minTokenLen" type="text" align="right" size="10" value="#[minTokenLen]#"><br/>
+          <dd style="width:360px; float:left; display:inline;" id="dd_minTokenLen">
+            <input name="minTokenLen" id="minTokenLen" type="text" align="right" size="10" value="#[minTokenLen]#" /><br />
             This is the minimum length of a word which shall be considered as element of the signature. Should be either 2 or 3.
           </dd>
           <dt style="width:260px"><label for="quantRate">quantRate</label></dt>
-          <dd style="width:360px; float:left; display:inline;" id="quantRate">
-            <input name="quantRate" id="quantRate" type="text" align="right" size="10" value="#[quantRate]#"><br/>
+          <dd style="width:360px; float:left; display:inline;" id="dd_quantRate">
+            <input name="quantRate" id="quantRate" type="text" align="right" size="10" value="#[quantRate]#" /><br />
             The quantRate is a measurement for the number of words that take part in a signature computation. The higher the number, the less
             words are used for the signature.
             For minTokenLen = 2 the quantRate value should not be below 0.24; for minTokenLen = 3 the quantRate value must be not below 0.5.
@@ -38,9 +38,9 @@
       <fieldset>
         <legend>Solr Boosts</legend>
         <dl>#{boosts}# 
-          <dt style="width:260px"><label for="#[field]#">#[field]#</label></dt>
+          <dt style="width:260px"><label for="boost_#[field]#">#[field]#</label></dt>
           <dd style="width:360px; float:left; display:inline;" id="boost_dd_#[field]#">
-            <input name="boost_#[field]#" id="boost_#[field]#" type="text" align="right" size="10" value="#[boost]#">
+            <input name="boost_#[field]#" id="boost_#[field]#" type="text" align="right" size="10" value="#[boost]#" />
           </dd>#{/boosts}#
           <dt style="width:260px"></dt>
           <dd style="width:360px; float:left; display:inline;">

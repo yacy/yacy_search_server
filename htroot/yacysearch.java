@@ -986,7 +986,7 @@ public class yacysearch {
                 hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
             }
             prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
-            prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
+            prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.png");
             prop.put("thisaddress", hostName);
         }
 

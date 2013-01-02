@@ -653,7 +653,6 @@ public class Blacklist_p {
             int pos = newEntry.indexOf('/',0);
             if (pos < 0) {
                 // add default empty path pattern
-                pos = newEntry.length();
                 newEntry = newEntry + "/.*";
             }
 

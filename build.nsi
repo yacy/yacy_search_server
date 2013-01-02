@@ -166,7 +166,7 @@ Section "YaCy"
     	nsExec::Exec 'attrib +I "$INSTDIR"'
 	nsExec::Exec 'attrib +I "$INSTDIR\*" /S /D'
     
-	File /r "RELEASE\MAIN\*"
+	File /r /x *.sh "RELEASE\MAIN\*"
 
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DisplayName" "YaCy"
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString" '"$INSTDIR\uninstall.exe"'
