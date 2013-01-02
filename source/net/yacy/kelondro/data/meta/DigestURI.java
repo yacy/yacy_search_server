@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
@@ -279,10 +280,18 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
 
     private static final char rootURLFlag0 = subdomPortPath("", 80, "");
     private static final char rootURLFlag1 = subdomPortPath("www", 80, "");
+    private static final char rootURLFlag2 = subdomPortPath("", 21, "");
+    private static final char rootURLFlag3 = subdomPortPath("ftp", 21, "");
+
+    public final Pattern rootPattern = Pattern.compile("/|/index.htm(l?)|/index.php");
+    
+    public final boolean probablyRootURL() {
+        return this.path.length() == 0 || rootPattern.matcher(this.path).matches() || probablyRootURL(this.hash);
+    }
 
     public static final boolean probablyRootURL(final byte[] urlHash) {
-    	final char c = (char) urlHash[5];
-        return c == rootURLFlag0 || c == rootURLFlag1;
+        final char c = (char) urlHash[5];
+        return c == rootURLFlag0 || c == rootURLFlag1 || c == rootURLFlag2 || c == rootURLFlag3;
     }
 
     private static final String hosthash5(final String protocol, final String host, final int port) {

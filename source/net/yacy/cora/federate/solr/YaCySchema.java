@@ -42,14 +42,14 @@ public enum YaCySchema implements Schema {
     fuzzy_signature_text_t(SolrType.text_general, true, true, false, "intermediate data produced in EnhancedTextProfileSignature: a list of word frequencies"),
     fuzzy_signature_unique_b(SolrType.bool, true, true, false, "flag shows if fuzzy_signature_l is unique at the time of document creation, used for double-check during search"),
     size_i(SolrType.num_integer, true, true, false, "the size of the raw source"),// int size();
-    process_s(SolrType.string, true, true, false, "index creation comment"),
     failreason_t(SolrType.text_general, true, true, false, "fail reason if a page was not loaded. if the page was loaded then this field is empty"),
     failtype_s(SolrType.string, true, true, false, "fail type if a page was not loaded. This field is either empty, 'excl' or 'fail'"),
     httpstatus_i(SolrType.num_integer, true, true, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
     httpstatus_redirect_s(SolrType.num_integer, true, true, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
     references_i(SolrType.num_integer, true, true, false, "number of unique http references; used for ranking"),
     clickdepth_i(SolrType.num_integer, true, true, false, "depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url"),
-
+    process_sxt(SolrType.string, true, true, true, "needed (post-)processing steps on this metadata set"),
+    
     // optional but recommended, part of index distribution
     load_date_dt(SolrType.date, true, true, false, "time when resource was loaded"),
     fresh_date_dt(SolrType.date, true, true, false, "date until resource shall be considered as fresh"),

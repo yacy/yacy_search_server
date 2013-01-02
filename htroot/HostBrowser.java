@@ -47,6 +47,8 @@ import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.graphics.WebStructureGraph.StructureEntry;
 import net.yacy.search.Switchboard;
@@ -251,13 +253,15 @@ public class HostBrowser {
                         YaCySchema.inboundlinks_protocol_sxt.getSolrFieldName(),
                         YaCySchema.inboundlinks_urlstub_txt.getSolrFieldName(),
                         YaCySchema.outboundlinks_protocol_sxt.getSolrFieldName(),
-                        YaCySchema.outboundlinks_urlstub_txt.getSolrFieldName()
+                        YaCySchema.outboundlinks_urlstub_txt.getSolrFieldName(),
+                        YaCySchema.clickdepth_i.getSolrFieldName()
                         );
                 SolrDocument doc;
                 Set<String> storedDocs = new HashSet<String>();
                 Map<String, FailType> errorDocs = new HashMap<String, FailType>();
                 Set<String> inboundLinks = new HashSet<String>();
                 Map<String, ReversibleScoreMap<String>> outboundHosts = new HashMap<String, ReversibleScoreMap<String>>();
+                RowHandleMap clickdepth = new RowHandleMap(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 1, 100, "clickdepth");
                 int hostsize = 0;
                 final List<byte[]> deleteIDs = new ArrayList<byte[]>();
                 long timeout = System.currentTimeMillis() + TIMEOUT;
@@ -265,6 +269,8 @@ public class HostBrowser {
                     String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
                     String errortype = (String) doc.getFieldValue(YaCySchema.failtype_s.getSolrFieldName());
                     FailType error = errortype == null ? null : FailType.valueOf(errortype);  
+                    Integer cd = (Integer) doc.getFieldValue(YaCySchema.clickdepth_i.getSolrFieldName());
+                    if (cd != null) clickdepth.add(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())), cd.intValue());
                     if (u.startsWith(path)) {
                         if (delete) {
                             deleteIDs.add(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())));
@@ -399,6 +405,10 @@ public class HostBrowser {
                         boolean dc = type != StoreType.INDEX && !error && !loading && list.containsKey(entry.getKey() + "/");
                         if (!dc) {
                             prop.put("files_list_" + c + "_type_stored", type == StoreType.INDEX ? 1 : error ? 3 : loading ? 2 : 0 /*linked*/);
+                            if (type == StoreType.INDEX) {
+                                long cd = clickdepth.get(uri.hash());
+                                prop.put("files_list_" + c + "_type_stored_comment", cd >= 0 ? "clickdepth = " + cd : "");
+                            }
                             prop.put("files_list_" + c + "_type_stored_load", loadRight ? 1 : 0);
                             if (error) {
                                 FailType failType = errorDocs.get(entry.getKey());

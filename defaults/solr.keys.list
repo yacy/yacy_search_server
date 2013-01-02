@@ -50,9 +50,6 @@ fuzzy_signature_unique_b
 ## the size of the raw source (mandatory field)
 size_i
 
-## index creation comment (mandatory field)
-process_s
-
 ## fail reason if a page was not loaded. if the page was loaded then this field is empty, text (mandatory field)
 failreason_t
 
@@ -70,6 +67,10 @@ references_i
 
 ## depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url
 clickdepth_i
+
+## needed (post-)processing steps on this metadata set
+process_sxt
+
 
 ### optional but highly recommended values, part of the index distribution process
 

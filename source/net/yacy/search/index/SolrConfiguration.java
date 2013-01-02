@@ -34,32 +34,39 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.FailType;
+import net.yacy.cora.federate.solr.ProcessType;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.yacy.ConfigurationSet;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
+import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.rwi.IndexCell;
+import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.Bitfield;
+import net.yacy.kelondro.util.ByteBuffer;
 
 import org.apache.solr.common.SolrInputDocument;
 
@@ -306,23 +313,40 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     	text = text.trim();
     	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
-
-    private final Pattern rootPattern = Pattern.compile("/|/index.htm(l?)|/index.php");
     
-    protected SolrInputDocument yacy2solr(final String id, final CrawlProfile profile, final ResponseHeader responseHeader, final Document document, Condenser condenser, DigestURI referrerURL, String language) {
+    protected SolrInputDocument yacy2solr(
+            final String id, final CrawlProfile profile, final ResponseHeader responseHeader,
+            final Document document, Condenser condenser, DigestURI referrerURL, String language,
+            IndexCell<CitationReference> citations) {
         // we use the SolrCell design as index scheme
         final SolrInputDocument doc = new SolrInputDocument();
         final DigestURI digestURI = DigestURI.toDigestURI(document.dc_source());
         boolean allAttr = this.isEmpty();
+        
+        Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
+        
         add(doc, YaCySchema.id, id);
         if (allAttr || contains(YaCySchema.failreason_t)) add(doc, YaCySchema.failreason_t, ""); // overwrite a possible fail reason (in case that there was a fail reason before)
         String docurl = digestURI.toNormalform(true);
         add(doc, YaCySchema.sku, docurl);
 
         if (allAttr || contains(YaCySchema.clickdepth_i)) {
-            String path = digestURI.getPath();
-            boolean fronturl = path.length() == 0 || rootPattern.matcher(path).matches();
-            add(doc, YaCySchema.clickdepth_i, fronturl ? 0 : -1);
+            boolean fronturl = digestURI.probablyRootURL();
+            if (fronturl) {
+                add(doc, YaCySchema.clickdepth_i, 0);
+            } else {
+                // search the citations for references
+                int clickdepth = -1;
+                try {
+                    clickdepth = getClickDepth(citations, digestURI.hash());
+                } catch (IOException e) {
+                    add(doc, YaCySchema.clickdepth_i, -1);
+                }
+                add(doc, YaCySchema.clickdepth_i, clickdepth);
+                if (clickdepth < 0 || clickdepth > 1) {
+                    processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
+                }
+            }
         }
         
         if (allAttr || contains(YaCySchema.ip_s)) {
@@ -800,10 +824,71 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             Set<String> facetValues = facet.getValue();
             doc.setField(YaCySchema.VOCABULARY_PREFIX + facetName + YaCySchema.VOCABULARY_SUFFIX, facetValues.toArray(new String[facetValues.size()]));
         }
-        
+
+        if (allAttr || contains(YaCySchema.process_sxt)) {
+            List<String> p = new ArrayList<String>();
+            for (ProcessType t: processTypes) p.add(t.name());
+            add(doc, YaCySchema.process_sxt, p);
+        }
         return doc;
     }
 
+    /**
+     * compute the click level using the citation reference database
+     * @param citations the citation database
+     * @param searchhash the hash of the url to be checked
+     * @return the clickdepth level or -1 if the root url cannot be found or a recursion limit is reached
+     * @throws IOException
+     */
+    private int getClickDepth(final IndexCell<CitationReference> citations, byte[] searchhash) throws IOException {
+
+        RowHandleSet ignore = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100); // a set of urlhashes to be ignored. This is generated from all hashes that are seen during recursion to prevent enless loops
+        RowHandleSet levelhashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 1); // all hashes of a clickdepth. The first call contains the target hash only and therefore just one entry
+        try {levelhashes.put(searchhash);} catch (SpaceExceededException e) {throw new IOException(e);}
+        int leveldepth = 0; // the recursion depth and therefore the result depth-1. Shall be 0 for the first call
+        final byte[] hosthash = new byte[6]; // the host of the url to be checked
+        System.arraycopy(searchhash, 6, hosthash, 0, 6);
+        
+        long timeout = System.currentTimeMillis() + 10000;
+        for (int maxdepth = 0; maxdepth < 10 && System.currentTimeMillis() < timeout; maxdepth++) {
+            
+            RowHandleSet checknext = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
+            
+            // loop over all hashes at this clickdepth; the first call to this loop should contain only one hash and a leveldepth = 0
+            checkloop: for (byte[] urlhash: levelhashes) {
+    
+                // get all the citations for this url and iterate
+                ReferenceContainer<CitationReference> references = citations.get(urlhash, null);
+                if (references == null || references.size() == 0) continue checkloop; // don't know
+                Iterator<CitationReference> i = references.entries();
+                nextloop: while (i.hasNext()) {
+                    CitationReference ref = i.next();
+                    if (ref == null) continue nextloop;
+                    byte[] u = ref.urlhash();
+                    
+                    // check ignore
+                    if (ignore.has(u)) continue nextloop;
+                    
+                    // check if this is from the same host
+                    if (!ByteBuffer.equals(u, 6, hosthash, 0, 6)) continue nextloop;
+                    
+                    // check if the url is a root url
+                    if (DigestURI.probablyRootURL(u)) {
+                        return leveldepth + 1;
+                    }
+                    
+                    // step to next depth level
+                    try {checknext.put(u);} catch (SpaceExceededException e) {}
+                    try {ignore.put(u);} catch (SpaceExceededException e) {}
+                }
+            }
+            leveldepth++;
+            levelhashes = checknext;
+        
+        }
+        return -1;
+    }
+    
     /**
      * this method compresses a list of protocol names to an indexed list.
      * To do this, all 'http' entries are removed and considered as default.

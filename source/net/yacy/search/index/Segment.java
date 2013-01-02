@@ -363,7 +363,7 @@ public class Segment {
         char docType = Response.docType(document.dc_format());
         
         // CREATE SOLR DOCUMENT
-        final SolrInputDocument solrInputDoc = this.fulltext.getSolrScheme().yacy2solr(id, profile, responseHeader, document, condenser, referrerURL, language);
+        final SolrInputDocument solrInputDoc = this.fulltext.getSolrScheme().yacy2solr(id, profile, responseHeader, document, condenser, referrerURL, language, urlCitationIndex);
         
         // FIND OUT IF THIS IS A DOUBLE DOCUMENT
         for (YaCySchema[] checkfields: new YaCySchema[][]{

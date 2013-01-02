@@ -226,6 +226,12 @@ public final class ByteBuffer extends OutputStream {
         return true;
     }
 
+    public static boolean equals(final byte[] b0, final int off0, final byte[] b1, final int off1, final int length) {
+        if (b0.length - off0 < length || b1.length - off1 < length) return false;
+        for (int i = 0; i < length; i++) if (b0[off0 + i] != b1[off1 + i]) return false;
+        return true;
+    }
+
     public void writeTo(final OutputStream dest) throws IOException {
     	dest.write(this.buffer, this.offset, this.length);
         dest.flush();
