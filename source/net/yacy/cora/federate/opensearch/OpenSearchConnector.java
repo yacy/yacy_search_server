@@ -19,11 +19,14 @@
  */
 package net.yacy.cora.federate.opensearch;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
@@ -151,9 +154,8 @@ public class OpenSearchConnector {
                 Log.logWarning("OpenSearchConnector.add", "config file write error");
             }
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -194,9 +196,8 @@ public class OpenSearchConnector {
             if (numfound == 0) {
                 Log.logInfo("OpenSearchConnector.Discover", "no results found, abort discover job");
                 return false;
-            } else {
-                Log.logInfo("OpenSearchConnector.Discover", "start checking " + Long.toString(numfound) + " found index results");
             }
+            Log.logInfo("OpenSearchConnector.Discover", "start checking " + Long.toString(numfound) + " found index results");
         } catch (IOException ex) {
             Log.logException(ex);
             return false;
