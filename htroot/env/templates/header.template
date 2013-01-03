@@ -15,12 +15,13 @@
       <li><a href="/gsa/search?q=www&size=3" class="MenuItemLink">Embedded GSA API</a></li>
       <!--<li><a href="/yacy/ui/" accesskey="s" class="MenuItemLink">Rich Client Search</a></li>-->
       <li><a href="/compare_yacy.html?display=1" class="MenuItemLink">Compare Search</a></li>
+      <li><a href="/ViewFile.html" class="MenuItemLink">URL Viewer</a></li>
     </ul>
   <li class="menugroup" id="menugroupGlobalIndex">
     <h3>Search Design</h3>
     <ul class="menu">
-      <li><a href="/ConfigPortal.html" class="MenuItemLink">Integrated Search Configuration</a></li>
       <li><a href="/ConfigLiveSearch.html" class="MenuItemLink">Search Integration into External Sites</a></li>
+      <li><a href="/ConfigPortal.html" class="MenuItemLink">Integrated Search Configuration</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupCrawlerControl">
