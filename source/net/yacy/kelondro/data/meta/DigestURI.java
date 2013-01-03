@@ -40,6 +40,7 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteArray;
 
@@ -278,20 +279,29 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(sb.toString())).charAt(0);
     }
 
-    private static final char rootURLFlag0 = subdomPortPath("", 80, "");
-    private static final char rootURLFlag1 = subdomPortPath("www", 80, "");
-    private static final char rootURLFlag2 = subdomPortPath("", 21, "");
-    private static final char rootURLFlag3 = subdomPortPath("ftp", 21, "");
-
-    public final Pattern rootPattern = Pattern.compile("/|/index.htm(l?)|/index.php");
+    public final Pattern rootPattern = Pattern.compile("/|/index.htm(l?)|/index.php|/home.htm(l?)|/home.php|/default.htm(l?)|/default.php");
     
     public final boolean probablyRootURL() {
-        return this.path.length() == 0 || rootPattern.matcher(this.path).matches() || probablyRootURL(this.hash);
+        return this.path.length() <= 1 || rootPattern.matcher(this.path).matches();
     }
-
-    public static final boolean probablyRootURL(final byte[] urlHash) {
-        final char c = (char) urlHash[5];
-        return c == rootURLFlag0 || c == rootURLFlag1 || c == rootURLFlag2 || c == rootURLFlag3;
+    
+    public RowHandleSet getPossibleRootHashes() {
+        RowHandleSet rootCandidates = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 10);
+        String rootStub = this.getProtocol() + "://" + this.getHost();
+        try {
+            rootCandidates.put(new DigestURI(rootStub).hash());
+            rootCandidates.put(new DigestURI(rootStub + "/").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/index.htm").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/index.html").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/index.php").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/home.htm").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/home.html").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/home.php").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/default.htm").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/default.html").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/default.php").hash());
+        } catch (Throwable e) {}
+        return rootCandidates;
     }
 
     private static final String hosthash5(final String protocol, final String host, final int port) {

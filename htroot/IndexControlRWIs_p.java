@@ -541,8 +541,7 @@ public class IndexControlRWIs_p {
                             + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_creator)) ? "appears in author, " : "")
                             + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_subject)) ? "appears in subject, " : "")
                             + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_description)) ? "appears in description, " : "")
-                            + ((entry.word().flags().get(WordReferenceRow.flag_app_emphasized)) ? "appears emphasized, " : "")
-                            + ((DigestURI.probablyRootURL(entry.word().urlhash())) ? "probably root url" : ""));
+                            + ((entry.word().flags().get(WordReferenceRow.flag_app_emphasized)) ? "appears emphasized, " : ""));
                 if ( Switchboard.urlBlacklist.isListed(BlacklistType.DHT, url) ) {
                     prop.put("genUrlList_urlList_" + i + "_urlExists_urlhxChecked", "1");
                 }

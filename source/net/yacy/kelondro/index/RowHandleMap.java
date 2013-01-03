@@ -267,7 +267,7 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
     @Override
     public final long add(final byte[] key, final long a) throws SpaceExceededException {
         assert key != null;
-        assert a > 0; // it does not make sense to add 0. If this occurres, it is a performance issue
+        assert a >= 0; // it does not make sense to add 0. If this occurres, it is a performance issue
         synchronized (this.index) {
             final Row.Entry indexentry = this.index.get(key, true);
             if (indexentry == null) {

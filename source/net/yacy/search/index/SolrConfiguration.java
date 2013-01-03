@@ -330,15 +330,16 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         String docurl = digestURI.toNormalform(true);
         add(doc, YaCySchema.sku, docurl);
 
-        if (allAttr || contains(YaCySchema.clickdepth_i)) {
-            boolean fronturl = digestURI.probablyRootURL();
-            if (fronturl) {
+        if ((allAttr || contains(YaCySchema.clickdepth_i)) && citations != null) {
+            if (digestURI.probablyRootURL()) {
+                boolean lc = this.lazy; this.lazy = false;
                 add(doc, YaCySchema.clickdepth_i, 0);
+                this.lazy = lc;
             } else {
                 // search the citations for references
                 int clickdepth = -1;
                 try {
-                    clickdepth = getClickDepth(citations, digestURI.hash());
+                    clickdepth = getClickDepth(citations, digestURI);
                 } catch (IOException e) {
                     add(doc, YaCySchema.clickdepth_i, -1);
                 }
@@ -840,8 +841,11 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
      * @return the clickdepth level or -1 if the root url cannot be found or a recursion limit is reached
      * @throws IOException
      */
-    private int getClickDepth(final IndexCell<CitationReference> citations, byte[] searchhash) throws IOException {
+    private static int getClickDepth(final IndexCell<CitationReference> citations, final DigestURI url) throws IOException {
 
+        final byte[] searchhash = url.hash();
+        RowHandleSet rootCandidates = url.getPossibleRootHashes();
+        
         RowHandleSet ignore = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100); // a set of urlhashes to be ignored. This is generated from all hashes that are seen during recursion to prevent enless loops
         RowHandleSet levelhashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 1); // all hashes of a clickdepth. The first call contains the target hash only and therefore just one entry
         try {levelhashes.put(searchhash);} catch (SpaceExceededException e) {throw new IOException(e);}
@@ -873,7 +877,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                     if (!ByteBuffer.equals(u, 6, hosthash, 0, 6)) continue nextloop;
                     
                     // check if the url is a root url
-                    if (DigestURI.probablyRootURL(u)) {
+                    if (rootCandidates.has(u)) {
                         return leveldepth + 1;
                     }
                     
