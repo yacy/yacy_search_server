@@ -174,16 +174,22 @@ public final class Fulltext implements Iterable<byte[]> {
         this.solr.clearCache();
     }
 
-    public void clear() throws IOException {
+    public void clearURLIndex() throws IOException {
         if (this.exportthread != null) this.exportthread.interrupt();
         if (this.urlIndexFile == null) {
             SplitTable.delete(this.location, this.tablename);
         } else {
             this.urlIndexFile.clear();
         }
-        this.solr.clear();
-        // the remote solr is not cleared here because that shall be done separately
         this.statsDump = null;
+    }
+
+    public void clearLocalSolr() throws IOException {
+        this.solr.clear0();
+    }
+
+    public void clearRemoteSolr() throws IOException {
+        this.solr.clear1();
     }
 
     public int size() {

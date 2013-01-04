@@ -183,6 +183,24 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     /**
+     * delete everything in the local solr index
+     * @throws IOException
+     */
+    public void clear0() throws IOException {
+        this.clearCache();
+        if (this.solr0 != null) this.solr0.clear();
+    }
+
+    /**
+     * delete everything in the remote solr index
+     * @throws IOException
+     */
+    public void clear1() throws IOException {
+        this.clearCache();
+        if (this.solr1 != null) this.solr1.clear();
+    }
+
+    /**
      * delete everything in the solr index
      * @throws IOException
      */

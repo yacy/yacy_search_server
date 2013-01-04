@@ -45,6 +45,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.MergeIterator;
 import net.yacy.search.EventTracker;
+import net.yacy.search.Switchboard;
 
 
 /*
@@ -537,6 +538,9 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         this.removeDelayedURLs.clear();
         this.ram.clear();
         this.array.clear();
+        if (Switchboard.getSwitchboard() != null &&
+                Switchboard.getSwitchboard().peers != null &&
+                Switchboard.getSwitchboard().peers.mySeed() != null) Switchboard.getSwitchboard().peers.mySeed().resetCounters();
     }
 
     /**
@@ -557,9 +561,18 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         this.array.close();
     }
 
+    public boolean isEmpty() {
+        if (this.ram.size() > 0) return false;
+        for (int s: this.array.sizes()) if (s > 0) return false;
+        return true;
+    }
+
     @Override
     public int size() {
         throw new UnsupportedOperationException("an accumulated size of index entries would not reflect the real number of words, which cannot be computed easily");
+        //int size = this.ram.size();
+        //for (int s: this.array.sizes()) size += s;
+        //return size;
     }
 
     private int[] sizes() {

@@ -244,14 +244,13 @@ public class Segment {
     public void clear() {
         try {
             if (this.termIndex != null) this.termIndex.clear();
-            if (this.fulltext != null) this.fulltext.clear();
+            if (this.fulltext != null) this.fulltext.clearURLIndex();
+            if (this.fulltext != null) this.fulltext.clearLocalSolr();
+            if (this.fulltext != null) this.fulltext.clearRemoteSolr();
             if (this.urlCitationIndex != null) this.urlCitationIndex.clear();
         } catch (final IOException e) {
             Log.logException(e);
         }
-        if (Switchboard.getSwitchboard() != null &&
-            Switchboard.getSwitchboard().peers != null &&
-            Switchboard.getSwitchboard().peers.mySeed() != null) Switchboard.getSwitchboard().peers.mySeed().resetCounters();
     }
 
     public File getLocation() {

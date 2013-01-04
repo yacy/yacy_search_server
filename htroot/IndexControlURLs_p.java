@@ -79,8 +79,10 @@ public class IndexControlURLs_p {
         List<File> dumpFiles =  segment.fulltext().dumpFiles();
         prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
         prop.put("cleanup", post == null ? 1 : 0);
-        prop.put("cleanup_solr", sb.index.fulltext().connectedRemoteSolr() ? 1 : 0);
-
+        prop.put("cleanup_solr", segment.fulltext().connectedRemoteSolr() ? 1 : 0);
+        prop.put("cleanup_rwi", segment.termIndex() != null && !segment.termIndex().isEmpty() ? 1 : 0);
+        prop.put("cleanup_citation", segment.urlCitation() != null && !segment.urlCitation().isEmpty() ? 1 : 0);
+        
         // show export messages
         final Fulltext.Export export = segment.fulltext().export();
         if ((export != null) && (export.isAlive())) {
@@ -140,14 +142,17 @@ public class IndexControlURLs_p {
         // delete everything
         if ( post.containsKey("deletecomplete") ) {
             if ( post.get("deleteIndex", "").equals("on") ) {
-                segment.clear();
+                try {segment.fulltext().clearURLIndex();} catch (IOException e) {}
+                try {segment.fulltext().clearLocalSolr();} catch (IOException e) {}
             }
             if ( post.get("deleteRemoteSolr", "").equals("on")) {
-                try {
-                    sb.index.fulltext().getSolr().clear();
-                } catch ( final Exception e ) {
-                    Log.logException(e);
-                }
+                try {segment.fulltext().clearRemoteSolr();} catch (IOException e) {}
+            }
+            if ( post.get("deleteRWI", "").equals("on")) {
+                if (segment.termIndex() != null) try {segment.termIndex().clear();} catch (IOException e) {}
+            }
+            if ( post.get("deleteCitation", "").equals("on")) {
+                if (segment.urlCitation() != null) try {segment.urlCitation().clear();} catch (IOException e) {}
             }
             if ( post.get("deleteCrawlQueues", "").equals("on") ) {
                 sb.crawlQueues.clear();
