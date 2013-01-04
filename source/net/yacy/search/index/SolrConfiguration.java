@@ -841,7 +841,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
      * @return the clickdepth level or -1 if the root url cannot be found or a recursion limit is reached
      * @throws IOException
      */
-    private static int getClickDepth(final IndexCell<CitationReference> citations, final DigestURI url) throws IOException {
+    public static int getClickDepth(final IndexCell<CitationReference> citations, final DigestURI url) throws IOException {
 
         final byte[] searchhash = url.hash();
         RowHandleSet rootCandidates = url.getPossibleRootHashes();

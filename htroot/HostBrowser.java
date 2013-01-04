@@ -270,7 +270,7 @@ public class HostBrowser {
                     String errortype = (String) doc.getFieldValue(YaCySchema.failtype_s.getSolrFieldName());
                     FailType error = errortype == null ? null : FailType.valueOf(errortype);  
                     Integer cd = (Integer) doc.getFieldValue(YaCySchema.clickdepth_i.getSolrFieldName());
-                    if (cd != null) clickdepth.add(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())), cd.intValue());
+                    if (cd != null && cd.intValue() >= 0) clickdepth.add(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())), cd.intValue());
                     if (u.startsWith(path)) {
                         if (delete) {
                             deleteIDs.add(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())));

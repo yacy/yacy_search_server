@@ -69,6 +69,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -81,6 +82,8 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.solr.client.solrj.util.ClientUtils;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
@@ -95,7 +98,9 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.WordCache;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.federate.solr.Boost;
+import net.yacy.cora.federate.solr.ProcessType;
 import net.yacy.cora.federate.solr.YaCySchema;
+import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.ShardSelection;
 import net.yacy.cora.federate.solr.connector.ShardSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
@@ -2223,6 +2228,47 @@ public final class Switchboard extends serverSwitch {
                 JenaTripleStore.saveAll();
             }
 
+            // if no crawl is running and processing is activated:
+            // execute the (post-) processing steps for all entries that have a process tag assigned
+            if (this.crawlQueues.coreCrawlJobSize() == 0 && index.fulltext().getSolrScheme().contains(YaCySchema.process_sxt)) {
+                // that means we must search for those entries.
+                index.fulltext().getSolr().commit(); // make sure that we have latest information that can be found
+                BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery(YaCySchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 1000, 60000, 10);
+                SolrDocument doc;
+                int proccount_clickdepth = 0;
+                int proccount_clickdepthchange = 0;
+                while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+                    // for each to-be-processed entry work on the process tag
+                    Collection<Object> proctags = doc.getFieldValues(YaCySchema.process_sxt.getSolrFieldName());
+                    for (Object tag: proctags) {
+                        String tagname = (String) tag;
+                        ProcessType tagtype = ProcessType.valueOf(tagname);
+                        
+                        // switch over tag types
+                        if (tagtype == ProcessType.CLICKDEPTH) {
+                            //proctags.remove(tag);
+                            if (index.fulltext().getSolrScheme().contains(YaCySchema.clickdepth_i)) {
+                                DigestURI url;
+                                try {
+                                    Integer oldclickdepth = (Integer) doc.getFieldValue(YaCySchema.clickdepth_i.getSolrFieldName());
+                                    url = new DigestURI((String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())));
+                                    int clickdepth = SolrConfiguration.getClickDepth(index.urlCitation(), url);
+                                    if (oldclickdepth == null || oldclickdepth.intValue() != clickdepth) proccount_clickdepthchange++;
+                                    SolrInputDocument sid = ClientUtils.toSolrInputDocument(doc);
+                                    sid.setField(YaCySchema.clickdepth_i.getSolrFieldName(), clickdepth);
+                                    sid.removeField(YaCySchema.process_sxt.getSolrFieldName());
+                                    index.fulltext().getSolr().add(sid);
+                                    proccount_clickdepth++;
+                                } catch (Throwable e) {
+                                    Log.logException(e);
+                                }
+                            }
+                        }
+                    }
+                }
+                log.logInfo("cleanup_processing: re-calculated " + proccount_clickdepth + " new clickdepth values, " + proccount_clickdepthchange + " values changed.");
+            }
+            
             return true;
         } catch ( final InterruptedException e ) {
             this.log.logInfo("cleanupJob: Shutdown detected");
