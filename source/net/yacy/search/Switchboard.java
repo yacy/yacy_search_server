@@ -2230,13 +2230,14 @@ public final class Switchboard extends serverSwitch {
 
             // if no crawl is running and processing is activated:
             // execute the (post-) processing steps for all entries that have a process tag assigned
-            if (this.crawlQueues.coreCrawlJobSize() == 0 && index.fulltext().getSolrScheme().contains(YaCySchema.process_sxt)) {
+            if (this.crawlQueues.coreCrawlJobSize() == 0 && index.connectedCitation() && index.fulltext().getSolrScheme().contains(YaCySchema.process_sxt)) {
                 // that means we must search for those entries.
                 index.fulltext().getSolr().commit(); // make sure that we have latest information that can be found
                 BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery(YaCySchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 1000, 60000, 10);
                 SolrDocument doc;
                 int proccount_clickdepth = 0;
                 int proccount_clickdepthchange = 0;
+                int proccount_referencechange = 0;
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                     // for each to-be-processed entry work on the process tag
                     Collection<Object> proctags = doc.getFieldValues(YaCySchema.process_sxt.getSolrFieldName());
@@ -2250,13 +2251,28 @@ public final class Switchboard extends serverSwitch {
                             if (index.fulltext().getSolrScheme().contains(YaCySchema.clickdepth_i)) {
                                 DigestURI url;
                                 try {
+                                    // get new click depth and compare with old
                                     Integer oldclickdepth = (Integer) doc.getFieldValue(YaCySchema.clickdepth_i.getSolrFieldName());
                                     url = new DigestURI((String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())));
                                     int clickdepth = SolrConfiguration.getClickDepth(index.urlCitation(), url);
                                     if (oldclickdepth == null || oldclickdepth.intValue() != clickdepth) proccount_clickdepthchange++;
                                     SolrInputDocument sid = ClientUtils.toSolrInputDocument(doc);
                                     sid.setField(YaCySchema.clickdepth_i.getSolrFieldName(), clickdepth);
+                                    
+                                    // refresh the link count; it's 'cheap' to do this here
+                                    if (index.fulltext().getSolrScheme().contains(YaCySchema.references_i)) {
+                                        Integer oldreferences = (Integer) doc.getFieldValue(YaCySchema.references_i.getSolrFieldName());
+                                        int references = index.urlCitation().count(url.hash());
+                                        if (references > 0) {
+                                            if (oldreferences == null || oldreferences.intValue() != references) proccount_referencechange++;
+                                            sid.setField(YaCySchema.references_i.getSolrFieldName(), references);
+                                        }
+                                    }
+                                    
+                                    // remove the processing tag
                                     sid.removeField(YaCySchema.process_sxt.getSolrFieldName());
+                                    
+                                    // send back to index
                                     index.fulltext().getSolr().add(sid);
                                     proccount_clickdepth++;
                                 } catch (Throwable e) {
@@ -2266,7 +2282,7 @@ public final class Switchboard extends serverSwitch {
                         }
                     }
                 }
-                log.logInfo("cleanup_processing: re-calculated " + proccount_clickdepth + " new clickdepth values, " + proccount_clickdepthchange + " values changed.");
+                log.logInfo("cleanup_processing: re-calculated " + proccount_clickdepth + " new clickdepth values, " + proccount_clickdepthchange + " clickdepth values changed, " + proccount_referencechange + " reference-count values changed.");
             }
             
             return true;
