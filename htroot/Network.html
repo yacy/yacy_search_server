@@ -184,24 +184,26 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     <table border="0" cellpadding="2" cellspacing="1" width="1024">
       <tr class="TableHeader">
         <td rowspan="5" class="TableHeader" width="10%">Network</td>
-        <td colspan="#(active-switch)#2::3::4::5#(/active-switch)#" width="22%">Online Peers</td>
+        <td colspan="#(active-switch)#2::3::4::5::6#(/active-switch)#" width="22%">Online Peers</td>
         <td rowspan="2" width="22%">Number of<br/>Documents</td>
         <td rowspan="2" width="22%">Indexing Speed:<br/>Pages Per Minute (PPM)</td>
         <td rowspan="2" width="22%">Query Frequency:<br/>Queries Per Hour (QPH)</td>
       </tr>
       <tr class="TableHeader">
         #(active-switch)#::
-        <td>Today</td>::
-        <td>Last&nbsp;Week</td><td>Today</td>::
-        <td>Last&nbsp;Month</td><td>Last&nbsp;Week</td><td>Today</td>
+        <td>Last Hour</td>::
+        <td>Today</td><td>Last Hour</td>::
+        <td>Last&nbsp;Week</td><td>Today</td><td>Last Hour</td>::
+        <td>Last&nbsp;Month</td><td>Last&nbsp;Week</td><td>Today</td><td>Last Hour</td>
         #(/active-switch)#
         <td colspan="2">Now</td>
       </tr>
       <tr class="TableCellDark">
         #(active-switch)#::
-        <td align="right" rowspan="3">#[last-day]#</td>::
-        <td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td>::
-        <td align="right" rowspan="3">#[last-month]#</td><td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td>
+        <td align="right" rowspan="3">#[last-hour]#</td>::
+        <td align="right" rowspan="3">#[last-day]#</td><td align="right" rowspan="3">#[last-hour]#</td>::
+        <td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td><td align="right" rowspan="3">#[last-hour]#</td>::
+        <td align="right" rowspan="3">#[last-month]#</td><td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td><td align="right" rowspan="3">#[last-hour]#</td>
         #(/active-switch)#
         <td align="left">Active</td>
         <td align="right">#[active-count]#</td>
