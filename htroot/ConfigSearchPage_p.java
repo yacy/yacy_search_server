@@ -25,10 +25,16 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Date;
+import java.util.Properties;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.WorkTables;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -84,23 +90,45 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.navigation", nav);
             }
             if (post.containsKey("searchpage_default")) {
-                sb.setConfig("publicTopmenu", true);
-                sb.setConfig("search.navigation", "hosts,authors,namespace,topics");
-                sb.setConfig("search.options", true);
-                sb.setConfig("search.text", true);
-                sb.setConfig("search.image", true);
-                sb.setConfig("search.audio", false);
-                sb.setConfig("search.video", false);
-                sb.setConfig("search.app", false);
-                sb.setConfig("search.result.show.date", true);
-                sb.setConfig("search.result.show.size", false);
-                sb.setConfig("search.result.show.metadata", false);
-                sb.setConfig("search.result.show.parser", false);
-                sb.setConfig("search.result.show.pictures", false);
-                sb.setConfig("search.result.show.cache", true);
-                sb.setConfig("search.result.show.proxy", false);
-                sb.setConfig("search.result.show.hostbrowser", true);
-                sb.setConfig("search.result.show.tags", false);
+                // load defaults from defaults/yacy.init file
+                final Properties config = new Properties();
+                final String mes = "ConfigSearchPage_p";
+                FileInputStream fis = null;
+                try {
+                    fis = new FileInputStream(new File(sb.appPath, "defaults/yacy.init"));
+                    config.load(fis);
+                } catch (final FileNotFoundException e) {
+                    Log.logSevere(mes, "could not find configuration file.");
+                    return prop;
+                } catch (final IOException e) {
+                    Log.logSevere(mes, "could not read configuration file.");
+                    return prop;
+                } finally {
+                    if (fis != null) {
+                        try {
+                            fis.close();
+                        } catch (final IOException e) {
+                            Log.logException(e);
+                        }
+                    }
+                }
+                sb.setConfig("publicTopmenu", config.getProperty("publicTopmenu","true"));
+                sb.setConfig("search.navigation", config.getProperty("search.navigation","hosts,authors,namespace,topics"));
+                sb.setConfig("search.options", config.getProperty("search.options","true"));
+                sb.setConfig("search.text", config.getProperty("search.text","true"));
+                sb.setConfig("search.image", config.getProperty("search.image","true"));
+                sb.setConfig("search.audio", config.getProperty("search.audio","false"));
+                sb.setConfig("search.video", config.getProperty("search.video","false"));
+                sb.setConfig("search.app", config.getProperty("search.app","false"));
+                sb.setConfig("search.result.show.date", config.getProperty("search.result.show.date","true"));
+                sb.setConfig("search.result.show.size", config.getProperty("search.result.show.size","false"));
+                sb.setConfig("search.result.show.metadata", config.getProperty("search.result.show.metadata","false"));
+                sb.setConfig("search.result.show.parser", config.getProperty("search.result.show.parser","false"));
+                sb.setConfig("search.result.show.pictures", config.getProperty("search.result.show.pictures","false"));
+                sb.setConfig("search.result.show.cache", config.getProperty("search.result.show.cache","true"));
+                sb.setConfig("search.result.show.proxy", config.getProperty("search.result.show.proxy","false"));
+                sb.setConfig("search.result.show.hostbrowser", config.getProperty("search.result.show.hostbrowser","true"));
+                sb.setConfig("search.result.show.tags", config.getProperty("search.result.show.tags","false"));
             }
         }
 

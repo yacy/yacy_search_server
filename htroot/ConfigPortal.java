@@ -25,9 +25,15 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -118,41 +124,63 @@ public class ConfigPortal {
                 if (nav.endsWith(",")) nav = nav.substring(0, nav.length() - 1); sb.setConfig("search.navigation", nav);
             }
             if (post.containsKey("searchpage_default")) {
-                sb.setConfig(SwitchboardConstants.GREETING, "P2P Web Search");
-                sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, "http://yacy.net");
-                sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, "/env/grafics/YaCyLogo_120ppi.png");
-                sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, "/env/grafics/YaCyLogo_60ppi.png");
-                sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "Status.html");
-                sb.setConfig(SwitchboardConstants.INDEX_FORWARD, "");
+                // load defaults from defaults/yacy.init file
+                final Properties config = new Properties();
+                final String mes = "ConfigPortal";
+                FileInputStream fis = null;
+                try {
+                    fis = new FileInputStream(new File(sb.appPath, "defaults/yacy.init"));
+                    config.load(fis);
+                } catch (final FileNotFoundException e) {
+                    Log.logSevere(mes, "could not find configuration file.");
+                    return prop;
+                } catch (final IOException e) {
+                    Log.logSevere(mes, "could not read configuration file.");
+                    return prop;
+                } finally {
+                    if (fis != null) {
+                        try {
+                            fis.close();
+                        } catch (final IOException e) {
+                            Log.logException(e);
+                        }
+                    }
+                }
+                sb.setConfig(SwitchboardConstants.GREETING, config.getProperty(SwitchboardConstants.GREETING,"P2P Web Search"));
+                sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, config.getProperty(SwitchboardConstants.GREETING_HOMEPAGE,"http://yacy.net"));
+                sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, config.getProperty(SwitchboardConstants.GREETING_LARGE_IMAGE,"/env/grafics/YaCyLogo_120ppi.png"));
+                sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, config.getProperty(SwitchboardConstants.GREETING_SMALL_IMAGE,"/env/grafics/YaCyLogo_60ppi.png"));
+                sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, config.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE,"Status.html"));
+                sb.setConfig(SwitchboardConstants.INDEX_FORWARD, config.getProperty(SwitchboardConstants.INDEX_FORWARD,""));
                 HTTPDFileHandler.indexForward = "";
-                sb.setConfig(SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
-                sb.setConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL, "_self");
-                sb.setConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
-                sb.setConfig("publicTopmenu", true);
-                sb.setConfig("publicSearchpage", true);
-                sb.setConfig("search.navigation", "hosts,authors,namespace,topics");
-                sb.setConfig("search.options", true);
-                sb.setConfig("interaction.userlogon.enabled", false);
-                sb.setConfig("search.text", true);
-                sb.setConfig("search.image", true);
-                sb.setConfig("search.audio", false);
-                sb.setConfig("search.video", false);
-                sb.setConfig("search.app", false);
-                sb.setConfig("search.result.show.date", true);
-                sb.setConfig("search.result.show.size", false);
-                sb.setConfig("search.result.show.metadata", false);
-                sb.setConfig("search.result.show.parser", false);
-                sb.setConfig("search.result.show.pictures", false);
-                sb.setConfig("search.result.show.cache", true);
-                sb.setConfig("search.result.show.proxy", false);
-                sb.setConfig("search.result.show.hostbrowser", true);
-                sb.setConfig("search.result.show.tags", false);
-                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "iffresh");
-                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "true");
-                sb.setConfig("about.headline", "");
-                sb.setConfig("about.body", "");
-                sb.setConfig("search.excludehosts", "");
-                sb.setConfig("search.excludehosth", "");
+                sb.setConfig(SwitchboardConstants.SEARCH_TARGET_DEFAULT, config.getProperty(SwitchboardConstants.SEARCH_TARGET_DEFAULT,"_self"));
+                sb.setConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL, config.getProperty(SwitchboardConstants.SEARCH_TARGET_SPECIAL,"_self"));
+                sb.setConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, config.getProperty(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN,""));
+                sb.setConfig("publicTopmenu", config.getProperty("publicTopmenu","true"));
+                sb.setConfig("publicSearchpage", config.getProperty("publicSearchpage","true"));
+                sb.setConfig("search.navigation", config.getProperty("search.navigation","hosts,authors,namespace,topics"));
+                sb.setConfig("search.options", config.getProperty("search.options","true"));
+                sb.setConfig("interaction.userlogon.enabled", config.getProperty("interaction.userlogon.enabled","false"));
+                sb.setConfig("search.text", config.getProperty("search.text","true"));
+                sb.setConfig("search.image", config.getProperty("search.image","true"));
+                sb.setConfig("search.audio", config.getProperty("search.audio","false"));
+                sb.setConfig("search.video", config.getProperty("search.video","false"));
+                sb.setConfig("search.app", config.getProperty("search.app","false"));
+                sb.setConfig("search.result.show.date", config.getProperty("search.result.show.date","true"));
+                sb.setConfig("search.result.show.size", config.getProperty("search.result.show.size","false"));
+                sb.setConfig("search.result.show.metadata", config.getProperty("search.result.show.metadata","false"));
+                sb.setConfig("search.result.show.parser", config.getProperty("search.result.show.parser","false"));
+                sb.setConfig("search.result.show.pictures", config.getProperty("search.result.show.pictures","false"));
+                sb.setConfig("search.result.show.cache", config.getProperty("search.result.show.cache","true"));
+                sb.setConfig("search.result.show.proxy", config.getProperty("search.result.show.proxy","false"));
+                sb.setConfig("search.result.show.hostbrowser", config.getProperty("search.result.show.hostbrowser","true"));
+                sb.setConfig("search.result.show.tags", config.getProperty("search.result.show.tags","false"));
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, config.getProperty(SwitchboardConstants.SEARCH_VERIFY,"iffresh"));
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, config.getProperty(SwitchboardConstants.SEARCH_VERIFY_DELETE,"true"));
+                sb.setConfig("about.headline", config.getProperty("about.headline",""));
+                sb.setConfig("about.body", config.getProperty("about.body",""));
+                sb.setConfig("search.excludehosts", config.getProperty("search.excludehosts",""));
+                sb.setConfig("search.excludehosth", config.getProperty("search.excludehosth",""));
             }
         }
 
