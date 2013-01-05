@@ -186,7 +186,7 @@ public class yacysearchtrailer {
         }
 
         // topics navigator
-        final ScoreMap<String> topicNavigator = theSearch.rankingProcess.getTopicNavigator(MAX_TOPWORDS);
+        final ScoreMap<String> topicNavigator = theSearch.getTopicNavigator(MAX_TOPWORDS);
         if (topicNavigator == null || topicNavigator.isEmpty()) {
             prop.put("nav-topics", "0");
         } else {

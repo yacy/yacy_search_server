@@ -361,7 +361,7 @@ public final class RankingProcess extends Thread {
         return this.localSearchInclusion;
     }
     
-    public ScoreMap<String> getTopicNavigator(final int count) {
+    public ScoreMap<String> getTopics(final int count) {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
         final ScoreMap<String> result = new ConcurrentScoreMap<String>();

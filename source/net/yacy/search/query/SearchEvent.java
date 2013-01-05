@@ -89,12 +89,13 @@ public final class SearchEvent {
         } catch (ParseException e) {
         }
     }
-    
+
     public static Log log = new Log("SEARCH");
 
     private static final long maxWaitPerResult = 30;
     public static final int SNIPPET_MAX_LENGTH = 220;
     private final static int SNIPPET_WORKER_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
+    private static final int MAX_TOPWORDS = 12; // default count of words for topicnavigagtor
 
     private long eventTime;
     public QueryParams query;
@@ -118,6 +119,7 @@ public final class SearchEvent {
     public final ScoreMap<String> protocolNavigator; // a counter for protocol types
     public final ScoreMap<String> filetypeNavigator; // a counter for file types
     public final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
+    private final int topicNavigatorCount; // if 0 no topicNavigator, holds expected number of terms for the topicNavigator
     protected final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack;
     protected final WeakPriorityBlockingQueue<ResultEntry>  result;
     protected final LoaderDispatcher                        loader;
@@ -164,9 +166,26 @@ public final class SearchEvent {
         } else {
             this.namespaceNavigator = null;
         }
-        this.hostNavigator = new ConcurrentScoreMap<String>();
-        this.protocolNavigator = new ConcurrentScoreMap<String>();
-        this.filetypeNavigator = new ConcurrentScoreMap<String>();
+        if (navcfg.contains("hosts")) {
+            this.hostNavigator = new ConcurrentScoreMap<String>();
+        } else {
+            this.hostNavigator = null;
+        }
+        if (navcfg.contains("protocol")) {
+            this.protocolNavigator = new ConcurrentScoreMap<String>();
+        } else {
+            this.protocolNavigator = null;
+        }
+        if (navcfg.contains("filetype")) {
+            this.filetypeNavigator = new ConcurrentScoreMap<String>();
+        } else {
+            this.filetypeNavigator = null;
+        }
+        if (navcfg.contains("topics")) {
+            topicNavigatorCount = MAX_TOPWORDS;
+        } else
+            topicNavigatorCount = 0;
+
         this.vocabularyNavigator = new ConcurrentHashMap<String, ScoreMap<String>>();
         
         this.snippets = new ConcurrentHashMap<String, String>();
@@ -478,8 +497,11 @@ public final class SearchEvent {
         timer = System.currentTimeMillis();
 
         // collect navigation information
-        ReversibleScoreMap<String> fcts = facets.get(YaCySchema.host_s.getSolrFieldName());
-        if (fcts != null) this.hostNavigator.inc(fcts);
+        ReversibleScoreMap<String> fcts;
+        if (this.hostNavigator != null) {
+            fcts = facets.get(YaCySchema.host_s.getSolrFieldName());
+            if (fcts != null) this.hostNavigator.inc(fcts);
+        }
 
         if (this.filetypeNavigator != null) {
             fcts = facets.get(YaCySchema.url_file_ext_s.getSolrFieldName());
@@ -514,8 +536,6 @@ public final class SearchEvent {
                 this.protocolNavigator.inc(fcts);
             }
         }
-        //fcts = facets.get(YaCySchema.author.getSolrFieldName());
-        //if (fcts != null) this.authorNavigator.inc(fcts);
         
         // get the vocabulary navigation
         for (Tagging v: LibraryProvider.autotagging.getVocabularies()) {
@@ -866,6 +886,18 @@ public final class SearchEvent {
 
     public long getSnippetComputationTime() {
         return this.snippetComputationAllTime;
+    }
+/**
+ * get topic navigator terms from rankig process
+ * @param count number of requestd words
+ *      0 = get default number of words otherwise get 
+ * @return 
+ */
+    public ScoreMap<String> getTopicNavigator(final int count ) {
+        if (this.topicNavigatorCount > 0 && count >= 0) { //topicNavigatorCount set during init, 0=no nav
+            return this.rankingProcess.getTopics(count != 0 ? count : this.topicNavigatorCount);
+        }
+        return null;
     }
 
     public ResultEntry oneResult(final int item, final long timeout) {
