@@ -104,6 +104,12 @@ public final class Fulltext implements Iterable<byte[]> {
     	if (this.urlIndexFile != null) return;
         this.tablename = tablename;
     	this.urlIndexFile = new SplitTable(this.location, tablename, URIMetadataRow.rowdef, useTailCache, exceed134217727);
+        // SplitTable always returns != null, even if no file exists.
+        // as old UrlDb should be null if not exist, check and close if empty
+        // TODO: check if a SplitTable.open() returning null or error status on not existing file is preferable
+        if (this.urlIndexFile.isEmpty()) {
+            disconnectUrlDb();
+        }
     }
 
     public void disconnectUrlDb() {
@@ -193,8 +199,7 @@ public final class Fulltext implements Iterable<byte[]> {
     }
 
     public int size() {
-        int size = 0;
-        size += this.urlIndexFile == null ? 0 : this.urlIndexFile.size();
+        int size = this.urlIndexFile == null ? 0 : this.urlIndexFile.size();
         size += this.solr.getSize();
         return size;
     }
