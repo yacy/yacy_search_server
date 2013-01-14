@@ -226,7 +226,7 @@ public class URIMetadataRow {
         s.appendLF();
         if (dc_publisher.length() > 80) s.append(dc_publisher, 0, 80); else s.append(dc_publisher);
         s.appendLF();
-        if (lon == 0.0f && lat == 0.0f) s.appendLF(); else s.append(Double.toString(lat)).append(',').append(Double.toString(lon)).appendLF();
+        if (lon == 0.0 && lat == 0.0) s.appendLF(); else s.append(Double.toString(lat)).append(',').append(Double.toString(lon)).appendLF();
         String s0 = s.toString();
         s.close();
 		return UTF8.getBytes(s0);
@@ -514,7 +514,11 @@ public class URIMetadataRow {
             if (p < 0) {
                 return 0.0d;
             }
-            return this.latlon.charAt(0) > '9' ? 0.0d : Double.parseDouble(this.latlon.substring(0, p));
+            try {
+                return this.latlon.charAt(0) > '9' ? 0.0d : Double.parseDouble(this.latlon.substring(0, p));
+            } catch (NumberFormatException e) {
+                return 0.0d;
+            }
         }
         public double lon() {
             if (this.latlon == null || this.latlon.isEmpty()) return 0.0d;
@@ -522,7 +526,11 @@ public class URIMetadataRow {
             if (p < 0) {
                 return 0.0d;
             }
-            return this.latlon.charAt(p + 1) > '9' ? 0.0d : Double.parseDouble(this.latlon.substring(p + 1));
+            try {
+                return this.latlon.charAt(p + 1) > '9' ? 0.0d : Double.parseDouble(this.latlon.substring(p + 1));
+            } catch (NumberFormatException e) {
+                return 0.0d;
+            }
         }
     }
 

@@ -225,6 +225,10 @@ public class IndexFederated_p {
         prop.put("solr.indexing.sharding", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, "modulo-host-md5"));
         prop.put("solr.indexing.schemefile", schemename);
 
+        if ((sb.index.fulltext().connectedURLDb())) {
+            prop.put("migrateUrlDbtoSolr", 1);
+        } else  prop.put("migrateUrlDbtoSolr", 0);
+
         // return rewrite properties
         return prop;
     }

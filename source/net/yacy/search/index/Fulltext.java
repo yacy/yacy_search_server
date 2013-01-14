@@ -100,6 +100,28 @@ public final class Fulltext implements Iterable<byte[]> {
         this.forcedCommitTime = 0;
     }
 
+    /**
+     * @deprecated
+     * used only for migration
+     * @return the connected URLDb
+
+     */
+    @Deprecated
+    public Index getURLDb() {
+        return this.urlIndexFile;
+    }
+
+    /**
+     * true if old metadata index URLDb is connected.
+     * used only for migration
+     * @deprecated
+     * current and future versions use Solr for metadata
+     */
+    @Deprecated
+    public boolean connectedURLDb() {
+        return this.urlIndexFile != null;
+    }
+
     protected void connectUrlDb(final String tablename, final boolean useTailCache, final boolean exceed134217727) {
     	if (this.urlIndexFile != null) return;
         this.tablename = tablename;

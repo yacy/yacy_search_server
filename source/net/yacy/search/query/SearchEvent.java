@@ -836,7 +836,7 @@ public final class SearchEvent {
             }
 
             // check location constraint
-            if ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_haslocation)) && (page.lat() == 0.0f || page.lon() == 0.0f)) {
+            if ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_haslocation)) && (page.lat() == 0.0 || page.lon() == 0.0)) {
                 this.query.misses.add(page.hash());
                 continue;
             }

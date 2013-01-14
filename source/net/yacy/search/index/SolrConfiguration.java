@@ -274,7 +274,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.charset_s)) add(doc, YaCySchema.charset_s, "UTF8");
 
         // coordinates
-        if (md.lat() != 0.0f && md.lon() != 0.0f) {
+        if (md.lat() != 0.0 && md.lon() != 0.0) {
             if (allAttr || contains(YaCySchema.coordinate_p)) add(doc, YaCySchema.coordinate_p, Double.toString(md.lat()) + "," + Double.toString(md.lon()));
         }
         if (allAttr || contains(YaCySchema.httpstatus_i)) add(doc, YaCySchema.httpstatus_i, 200);
@@ -794,7 +794,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.charset_s)) add(doc, YaCySchema.charset_s, document.getCharset());
 
         // coordinates
-        if (document.lat() != 0.0f && document.lon() != 0.0f) {
+        if (document.lat() != 0.0 && document.lon() != 0.0) {
             if (allAttr || contains(YaCySchema.coordinate_p)) add(doc, YaCySchema.coordinate_p, Double.toString(document.lat()) + "," + Double.toString(document.lon()));
         }
         if (allAttr || contains(YaCySchema.httpstatus_i)) add(doc, YaCySchema.httpstatus_i, responseHeader == null ? 200 : responseHeader.getStatusCode());
