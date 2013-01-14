@@ -45,6 +45,7 @@ import net.yacy.server.serverSwitch;
 
 public class IndexFederated_p {
 
+    @SuppressWarnings("deprecation")
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
