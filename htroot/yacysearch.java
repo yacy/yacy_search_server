@@ -349,6 +349,7 @@ public class yacysearch {
             String protocol = null;
             String tld = null;
             String ext = null;
+            String inlink = null;
 
             // check available memory and clean up if necessary
             if ( !MemoryControl.request(8000000L, false) ) {
@@ -421,18 +422,29 @@ public class yacysearch {
                 modifier.append("/language/").append(language).append(' ');
             }
 
-            final int inurl = querystring.indexOf("inurl:", 0);
-            if ( inurl >= 0 ) {
-                int ftb = querystring.indexOf(' ', inurl);
+            final int inurlp = querystring.indexOf("inurl:", 0);
+            if ( inurlp >= 0 ) {
+                int ftb = querystring.indexOf(' ', inurlp);
                 if ( ftb == -1 ) {
                     ftb = querystring.length();
                 }
-                final String urlstr = querystring.substring(inurl + 6, ftb);
+                final String urlstr = querystring.substring(inurlp + 6, ftb);
                 querystring = querystring.replace("inurl:" + urlstr, "");
                 if ( !urlstr.isEmpty() ) {
                     urlmask = urlmask == null ? ".*" + urlstr + ".*" : urlmask + urlstr + ".*";
                 }
                 modifier.append("inurl:").append(urlstr).append(' ');
+            }
+
+            final int inlinkp = querystring.indexOf("inlink:", 0);
+            if ( inlinkp >= 0 ) {
+                int ftb = querystring.indexOf(' ', inlinkp);
+                if ( ftb == -1 ) {
+                    ftb = querystring.length();
+                }
+                inlink = querystring.substring(inlinkp + 7, ftb);
+                querystring = querystring.replace("inlink:" + inlink, "");
+                modifier.append("inlink:").append(inlink).append(' ');
             }
 
             final int filetype = querystring.indexOf("filetype:", 0);
@@ -712,7 +724,7 @@ public class yacysearch {
                     snippetFetchStrategy,
                     itemsPerPage,
                     startRecord,
-                    urlmask, protocol, tld, ext,
+                    urlmask, protocol, tld, ext, inlink,
                     clustersearch && global ? QueryParams.Searchdom.CLUSTER : (global && indexReceiveGranted
                         ? QueryParams.Searchdom.GLOBAL
                         : QueryParams.Searchdom.LOCAL),

@@ -114,7 +114,7 @@ public final class QueryParams {
     public Pattern urlMask;
 
     public final Pattern prefer;
-    public final String protocol, tld, ext;
+    public final String protocol, tld, ext, inlink;
     boolean urlMask_isCatchall;
     public final Classification.ContentDomain contentdom;
     public final String targetlang;
@@ -172,6 +172,7 @@ public final class QueryParams {
         this.protocol = null;
         this.tld = null;
         this.ext = null;
+        this.inlink = null;
         this.prefer = matchnothing_pattern;
         this.contentdom = ContentDomain.ALL;
         this.itemsPerPage = itemsPerPage;
@@ -221,7 +222,7 @@ public final class QueryParams {
         final Collection<Tagging.Metatag> metatags,
         final CacheStrategy snippetCacheStrategy,
         final int itemsPerPage, final int offset,
-        final String urlMask, final String protocol, final String tld, final String ext,
+        final String urlMask, final String protocol, final String tld, final String ext, final String inlink,
         final Searchdom domType, final int domMaxTargets,
         final Bitfield constraint, final boolean allofconstraint,
         final String nav_sitehash,
@@ -267,6 +268,7 @@ public final class QueryParams {
         this.protocol = protocol;
         this.tld = tld;
         this.ext = ext;
+        this.inlink = inlink;
         try {
             this.prefer = Pattern.compile(prefer);
         } catch (final PatternSyntaxException ex) {
@@ -477,6 +479,10 @@ public final class QueryParams {
             fq.append(" AND ").append(YaCySchema.url_file_ext_s.getSolrFieldName()).append(":\"").append(this.ext).append('\"');
         }
         
+        if (this.inlink != null) {
+            fq.append(" AND ").append(YaCySchema.outboundlinks_urlstub_txt.getSolrFieldName()).append(":\"").append(this.inlink).append('\"');
+        }
+        
         if (!this.urlMask_isCatchall) {
             // add a filter query on urls
             String urlMaskPattern = this.urlMask.pattern();
@@ -576,6 +582,10 @@ public final class QueryParams {
             context.append(this.constraint).append(asterisk);
             context.append(this.maxDistance).append(asterisk);
             context.append(this.modifier.s).append(asterisk);
+            context.append(this.protocol).append(asterisk);
+            context.append(this.tld).append(asterisk);
+            context.append(this.ext).append(asterisk);
+            context.append(this.inlink).append(asterisk);
             context.append(this.lat).append(asterisk).append(this.lon).append(asterisk).append(this.radius).append(asterisk);
             context.append(this.snippetCacheStrategy == null ? "null" : this.snippetCacheStrategy.name());
             String result = context.toString();
