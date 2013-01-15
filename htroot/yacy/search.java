@@ -364,7 +364,7 @@ public final class search {
 
             // prepare reference hints
             final long timer = System.currentTimeMillis();
-            final ScoreMap<String> topicNavigator = theSearch.rankingProcess.getTopics(5);
+            final ScoreMap<String> topicNavigator = theSearch.rankingProcess.getTopics(5, 100);
             final StringBuilder refstr = new StringBuilder(6000);
             final Iterator<String> navigatorIterator = topicNavigator.keys(false);
             int i = 0;

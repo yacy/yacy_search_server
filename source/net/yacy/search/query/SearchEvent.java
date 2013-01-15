@@ -895,7 +895,7 @@ public final class SearchEvent {
  */
     public ScoreMap<String> getTopicNavigator(final int count ) {
         if (this.topicNavigatorCount > 0 && count >= 0) { //topicNavigatorCount set during init, 0=no nav
-            return this.rankingProcess.getTopics(count != 0 ? count : this.topicNavigatorCount);
+            return this.rankingProcess.getTopics(count != 0 ? count : this.topicNavigatorCount, 500);
         }
         return null;
     }

@@ -361,7 +361,7 @@ public final class RankingProcess extends Thread {
         return this.localSearchInclusion;
     }
     
-    public ScoreMap<String> getTopics(final int count) {
+    public ScoreMap<String> getTopics(final int maxcount, final long maxtime) {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
         final ScoreMap<String> result = new ConcurrentScoreMap<String>();
@@ -373,7 +373,8 @@ public final class RankingProcess extends Thread {
         String word;
         int c;
         float q, min = Float.MAX_VALUE, max = Float.MIN_VALUE;
-        int ic = count;
+        int ic = maxcount;
+        long timeout = System.currentTimeMillis() + maxtime;
         while ( ic-- > 0 && i.hasNext() ) {
             word = i.next();
             if ( word == null ) {
@@ -386,10 +387,11 @@ public final class RankingProcess extends Thread {
                 max = Math.max(max, q);
                 counts.put(word, q);
             }
+            if (System.currentTimeMillis() > timeout) break;
         }
         if ( max > min ) {
             for ( final Map.Entry<String, Float> ce : counts.entrySet() ) {
-                result.set(ce.getKey(), (int) (((double) count) * (ce.getValue() - min) / (max - min)));
+                result.set(ce.getKey(), (int) (((double) maxcount) * (ce.getValue() - min) / (max - min)));
             }
         }
         return this.ref;
