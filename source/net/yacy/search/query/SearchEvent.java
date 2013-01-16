@@ -276,29 +276,24 @@ public final class SearchEvent {
                 long mindhtdistance = Long.MAX_VALUE, l;
                 byte[] wordhash;
                 assert this.rankingProcess.searchContainerMap() != null;
-                for ( final Map.Entry<byte[], ReferenceContainer<WordReference>> entry : this.rankingProcess
-                    .searchContainerMap()
-                    .entrySet() ) {
-                    wordhash = entry.getKey();
-                    final ReferenceContainer<WordReference> container = entry.getValue();
-                    assert (Base64Order.enhancedCoder.equal(container.getTermHash(), wordhash)) : "container.getTermHash() = "
-                        + ASCII.String(container.getTermHash())
-                        + ", wordhash = "
-                        + ASCII.String(wordhash);
-                    if ( container.size() > maxcount ) {
-                        this.IAmaxcounthash = wordhash;
-                        maxcount = container.size();
+                if (this.rankingProcess.searchContainerMap() != null) {
+                    for (final Map.Entry<byte[], ReferenceContainer<WordReference>> entry : this.rankingProcess.searchContainerMap().entrySet()) {
+                        wordhash = entry.getKey();
+                        final ReferenceContainer<WordReference> container = entry.getValue();
+                        assert (Base64Order.enhancedCoder.equal(container.getTermHash(), wordhash)) : "container.getTermHash() = " + ASCII.String(container.getTermHash()) + ", wordhash = " + ASCII.String(wordhash);
+                        if ( container.size() > maxcount ) {
+                            this.IAmaxcounthash = wordhash;
+                            maxcount = container.size();
+                        }
+                        l = Distribution.horizontalDHTDistance(wordhash, ASCII.getBytes(peers.mySeed().hash));
+                        if ( l < mindhtdistance ) {
+                            // calculate the word hash that is closest to our dht position
+                            mindhtdistance = l;
+                            this.IAneardhthash = wordhash;
+                        }
+                        this.IACount.put(wordhash, LargeNumberCache.valueOf(container.size()));
+                        this.IAResults.put(wordhash, WordReferenceFactory.compressIndex(container, null, 1000).toString());
                     }
-                    l = Distribution.horizontalDHTDistance(wordhash, ASCII.getBytes(peers.mySeed().hash));
-                    if ( l < mindhtdistance ) {
-                        // calculate the word hash that is closest to our dht position
-                        mindhtdistance = l;
-                        this.IAneardhthash = wordhash;
-                    }
-                    this.IACount.put(wordhash, LargeNumberCache.valueOf(container.size()));
-                    this.IAResults.put(wordhash, WordReferenceFactory
-                        .compressIndex(container, null, 1000)
-                        .toString());
                 }
                 EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ABSTRACTS, "", this.rankingProcess.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
             } else {
@@ -500,7 +495,9 @@ public final class SearchEvent {
         ReversibleScoreMap<String> fcts;
         if (this.hostNavigator != null) {
             fcts = facets.get(YaCySchema.host_s.getSolrFieldName());
-            if (fcts != null) this.hostNavigator.inc(fcts);
+            if (fcts != null) {
+                this.hostNavigator.inc(fcts);
+            }
         }
 
         if (this.filetypeNavigator != null) {
@@ -511,7 +508,7 @@ public final class SearchEvent {
                 while (i.hasNext()) {
                     String ext = i.next();
                     if (TextParser.supportsExtension(ext) != null && !Classification.isAnyKnownExtension(ext)) {
-                        //Log.logInfo("SearchEvent", "removed unknown externsion " + ext + " from navigation.");
+                        //Log.logInfo("SearchEvent", "removed unknown extension " + ext + " from navigation.");
                         i.remove();
                     }
                 }
