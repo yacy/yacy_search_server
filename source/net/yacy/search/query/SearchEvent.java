@@ -496,7 +496,13 @@ public final class SearchEvent {
         if (this.hostNavigator != null) {
             fcts = facets.get(YaCySchema.host_s.getSolrFieldName());
             if (fcts != null) {
-                this.hostNavigator.inc(fcts);
+                for (String host: fcts) {
+                    int hc = fcts.get(host);
+                    if (hc == 0) continue;
+                    if (host.startsWith("www.")) host = host.substring(4);
+                    this.hostNavigator.inc(host, hc);
+                }
+                //this.hostNavigator.inc(fcts);
             }
         }
 

@@ -1093,7 +1093,11 @@ public final class Protocol
             ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
             List<Count> values = facet == null ? null : facet.getValues();
             if (values == null) continue;
-            for (Count ff: values) result.set(ff.getName(), (int) ff.getCount());
+            for (Count ff: values) {
+                int c = (int) ff.getCount();
+                if (c == 0) continue;
+                result.set(ff.getName(), c);
+            }
             facets.put(field, result);
         }
         

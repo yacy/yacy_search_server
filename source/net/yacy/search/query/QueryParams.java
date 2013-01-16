@@ -451,9 +451,16 @@ public final class QueryParams {
                 }
             }
         } else {
-            if (this.nav_sitehost != null)
-                fq.append(" AND ").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.nav_sitehost).append('\"');
-            else
+            if (this.nav_sitehost != null) {
+                // consider to search for hosts with 'www'-prefix, if not already part of the host name
+                if (this.nav_sitehost.startsWith("www.")) {
+                    fq.append(" AND (").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.nav_sitehost.substring(4)).append('\"');
+                    fq.append(" OR ").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.nav_sitehost).append("\")");
+                } else {
+                    fq.append(" AND (").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.nav_sitehost).append('\"');
+                    fq.append(" OR ").append(YaCySchema.host_s.getSolrFieldName()).append(":\"www.").append(this.nav_sitehost).append("\")");
+                }
+            } else
                 fq.append(" AND ").append(YaCySchema.host_id_s.getSolrFieldName()).append(":\"").append(this.nav_sitehash).append('\"');
         }
 
