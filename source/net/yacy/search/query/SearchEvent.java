@@ -295,7 +295,7 @@ public final class SearchEvent {
                         this.IAResults.put(wordhash, WordReferenceFactory.compressIndex(container, null, 1000).toString());
                     }
                 }
-                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ABSTRACTS, "", this.rankingProcess.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
+                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ABSTRACTS, "", this.rankingProcess.searchContainerMap() == null ? 0 : this.rankingProcess.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
             } else {
                 // give process time to accumulate a certain amount of data
                 // before a reading process wants to get results from it
