@@ -670,7 +670,7 @@ public class HTTPClient {
     	//assert thost != null : "uri = " + httpUriRequest.getURI().toString();
     	ConnectionInfo.addConnection(new ConnectionInfo(
     			httpUriRequest.getURI().getScheme(),
-    			port == 80 ? thost : thost + ":" + port,
+    			port == -1 ? thost : thost + ":" + port,
     			httpUriRequest.getMethod() + " " + httpUriRequest.getURI().getPath(),
     			httpUriRequest.hashCode(),
     			System.currentTimeMillis(),
