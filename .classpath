@@ -34,9 +34,9 @@
 	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/geronimo-stax-api_1.0_spec-1.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/wstx-asl-3.2.7.jar"/>
-	<classpathentry kind="lib" path="lib/httpcore-4.2.2.jar" sourcepath="/Volumes/Raptor/Data/sourcecode/httpcore/src/main/java"/>
-	<classpathentry kind="lib" path="lib/httpclient-4.2.2.jar" sourcepath="/Volumes/Raptor/Data/sourcecode/httpclient/src/main/java"/>
-	<classpathentry kind="lib" path="lib/httpmime-4.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.2.3.jar" sourcepath="/Volumes/Raptor/Data/sourcecode/httpcore/src/main/java"/>
+	<classpathentry kind="lib" path="lib/httpclient-4.2.3.jar" sourcepath="/Volumes/Raptor/Data/sourcecode/httpclient/src/main/java"/>
+	<classpathentry kind="lib" path="lib/httpmime-4.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-compress-1.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/guava-r05.jar"/>
