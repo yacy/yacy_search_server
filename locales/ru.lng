@@ -373,7 +373,7 @@ Error saving the skin.==Ошибка сохранения файла скина.
 #---------------------------
 Access Configuration==Конфигурация доступа
 Basic Configuration==Основная конфигурация
-Your YaCy Peer needs some basic information to operate properly==Ваш YaCy пир нуждается в некоторой информации для правильной работы
+Your YaCy Peer needs some basic information to operate properly==Ваш узел YaCy нуждается в некоторой информации для правильной работы
 Select a language for the interface==Выберите язык интерфейса
 Use Case: what do you want to do with YaCy:==Вариант использования: что вы хотите сделать с YaCy:
 Community-based web search==Групповой веб-поиск
@@ -387,14 +387,14 @@ Intranet Indexing==Интранет индексирование
 Create a search portal for your intranet or web pages or your \(shared\) file system.==Портал для интрасети или общественные веб-сайты или их (распределенной) файловой системы.
 URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==URL-адреса могут быть использованы с HTTP / HTTPS / FTP и локальное имя домена или IP-адрес, или URL формы 
 or smb:==или smb:
-Your peer name has not been customized; please set your own peer name==Ваше имя пира не должно меняться, пожалуйста, установите ваше собственное имя пира
-You may change your peer name==Вы можете поменять имя пира
-Peer Name:==Имя пира:
-Your peer cannot be reached from outside==Ваш пир недоступен извне
+Your peer name has not been customized; please set your own peer name==Вы не указали имя узла. Пожалуйста назовите свой узел
+You may change your peer name==Вы можете поменять имя узла
+Peer Name:==Имя узла:
+Your peer cannot be reached from outside==Ваш узел недоступен извне
 which is not fatal, but would be good for the YaCy network==это не критично, но это не хорошо для сети YaCy
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==пожалуйста откройте настройки Вашего брендмауэра и/или настройки виртуального сервера на Вашем роуторе для открытия подключений на этот порт
-Your peer can be reached by other peers==Ваш пир доступен с других пиров
-Peer Port:==Порт пира:
+Your peer can be reached by other peers==Ваш узел доступен с других узлов
+Peer Port:==Порт узла:
 Configure your router for YaCy:==Настройте ваш роутер для YaCy:
 Configuration was not successful. This may take a moment.==Настройки не были применены. Попробуйте через некоторое время .
 Set Configuration==Установка настроек
@@ -404,13 +404,13 @@ just <==только <
 start an uncensored search==начать не централизованный поиск
 start your own crawl</a> and contribute to the global index, or create your own private web index==начать свой собственное сканирование(crawl) </> и внести вклад в глобальный индекс, или создать свой собственный веб-индекс
 set a personal peer profile</a> \(optional settings\)==установите персональный профиль пира</a> \(дополнительные настройки\)
-monitor at the network page</a> what the other peers are doing==страница мониторинга сети </> что другие пиры делают 
-Your Peer name is a default name; please set an individual peer name.==Ваше имя пира является по умолчанию, пожалуйста установите другое имя пира.
+monitor at the network page</a> what the other peers are doing==страница мониторинга сети </> что делают другие узлы 
+Your Peer name is a default name; please set an individual peer name.==Ваше имя узла является именем по умолчанию, пожалуйста установите другое имя узла.
 You did not set a user name and/or a password.==Вы не установили имя пользователя и / или пароль .
 Some pages are protected by passwords.==Некоторые страницы защищены паролем .
 You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Вы должны установить пароль в меню <a  href="ConfigAccounts_p.html"> Учетные записи </>, чтобы защитить YaCy пир. </p >::
-You did not open a port in your firewall or your router does not forward the server port to your peer.==Вы не открыли порт в фаерволе или ваш роутер не перенаправляет запросы на порт  сервера
-This is needed if you want to fully participate in the YaCy network.==Это необходимо, если вы хотите полноценно участвовать в YaCy сети.
+You did not open a port in your firewall or your router does not forward the server port to your peer.==Вы не открыли порт на фаерволе или ваш роутер не перенаправляет запросы на порт  сервера
+This is needed if you want to fully participate in the YaCy network.==Это необходимо, если вы хотите полноценно участвовать в сети YaCy.
 You can also use your peer without opening it, but this is not recomended.==Вы можете использовать без открытия порта, но это не рекомендуется.
 #-----------------------------
 #File: ConfigHeuristics_p.html
@@ -3096,7 +3096,7 @@ This search result can also be retrieved as RSS/<a href="http://www.opensearch.o
 The query format is similar to <a href="http://www.loc.gov/standards/sru/">SRU</a>.==Das Abfrageformat ist so ähnlich wie <a href="http://www.loc.gov/standards/sru/">SRU</a>.
 Click the API icon to see an example call to the search rss API.==Klicken Sie auf den API Button, um ein Beispiel zu sehen, wie das Such-RSS-API aufgerufen werden kann.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
-Did you mean:==Meinten Sie vielleicht:
+Did you mean:==Возможно вы имели ввиду:
 "Search"=="Поиск"
 'Search'=='Поиск'
 "search again"=="Искать ещё"
@@ -3107,20 +3107,20 @@ Audio==Аудио
 Video==Видео
 Applications==Приложения
 The following words are stop-words and had been excluded from the search:==Следующие слова стоп-слов и были исключены из поиска:
-No Results.==Нет результата.
-length of search words must be at least 3 characters==Длина искуемого слова должно быть не менее 3 символов
+No Results.==Нет результатов.
+length of search words must be at least 3 characters==Длина искомого слова должно быть не менее 3 символов
 > of==> из
 g> local,==g> локально,
 #g> remote),==g> удаленно),
 > from==> из
-remote YaCy peers.==удаленных YaCy пиров.
+remote YaCy peers.==удаленных узлов YaCy.
 #-----------------------------
 #File: yacysearchitem.html
 #---------------------------
 "bookmark"=="закладка"
 "recommend"=="рекомендовать"
 "delete"=="удалить"
-Pictures==Картинка
+Pictures==Картинки
 #-----------------------------
 #File: yacysearchtrailer.html
 #---------------------------
@@ -3163,18 +3163,18 @@ Web Search==Веб поиск
 File Search==Поиск файла
 Search&nbsp;&amp;&nbsp;Browse==Поиск&nbsp;&amp;&nbsp;Обзор
 Search Page==Страница поиска
-Rich Client Search==Богатый Поиск Клиента
+#Rich Client Search==Богатый Поиск Клиента
 Interactive local Search==Интерактивный локальный поиск
-Compare Search==Сравнить поиск
-Ranking Config==Ranking Einstellungen
+Compare Search==Сравнить поиски
+Ranking Config==Настройка ранжирования
 Host Browser==Host Обзор
 >Surftips==>Советы
-Local Peer Wiki==Локальный Wiki
+Local Peer Wiki==Локальная Wiki
 >Bookmarks==>Закладки
 >Help==>Помощь
 ### INDEX CONTROL ###
 Index&nbsp;Production==Индексирование
-Index&nbsp;Control==Index&nbsp;Kontrolle
+Index&nbsp;Control==Контроль&nbsp;индексации
 Index Creation==Создание индекса
 Crawler Monitor==Монитор сканирования
 Crawl Results==Результат сканирования
@@ -3184,14 +3184,14 @@ Index Administration==Администрирование индекса
 Filter &amp; Blacklists==Фильтр &amp; Черный список
 ### SEARCH INTEGRATION ###
 Search Integration==Настройка поисковика
-Search Portals==Such Portale
-Customization==Anpassungen
+Search Portals==Поисковые порталы
+Customization==Кастомизация
 ### MONITORING ###
 Monitoring==Мониторинг
 Network Access==Доступ к сети
-YaCy Network==YaCy сеть
+YaCy Network==Сеть YaCy
 Web Visualization==Веб визуализация
-Access Tracker==Zugriffe
+Access Tracker==Монитор Доступа
 #Server Log==Server Log
 >Messages==>Сообщения
 #>Terminal==>Terminal
@@ -3211,9 +3211,9 @@ Deutsches Forum==Форум на Немецком
 English Forum==Форум на Английском
 YaCy Project Wiki==Wiki сайт проекта YaCy
 # Development Change Log==Entwicklung Änderungshistorie
-amp;language=en==amp;язык=de
-Development Change Log==Entwicklung Changelog
-Peer Statistics::YaCy Statistics==Peer Statistiken::YaCy Statistiken
+amp;language=en==amp;язык=ru
+#Development Change Log==Development Change Log 
+#Peer Statistics::YaCy Statistics==Peer Statistics::YaCy Statistics
 #-----------------------------
 #File: env/templates/simpleheader.template
 #---------------------------
@@ -3225,15 +3225,15 @@ Help / YaCy Wiki==Помощь / YaCy Wiki
 #-----------------------------
 #File: env/templates/submenuAccessTracker.template
 #---------------------------
-Access Tracker==Zugriffe
-Server Access==Server-Zugriff
-Overview==Überblick
-#Details==Details
-Connections</a>==Verbindungen</a>
-Local Search==Lokale Suche
+Access Tracker==Монитор Доступа
+Server Access=Доступ к серверу
+Overview==Обзор
+Details==Подробно
+Connections</a>==Соединения</a>
+Local Search==Локальный поиск
 #Log==Log
 #Host Tracker==Host Tracker
-Remote&nbsp;Search==Remote Suche
+Remote&nbsp;Search==Удаленный&nbsp;поиск
 #-----------------------------
 #File: env/templates/submenuBlacklist.template
 #---------------------------
@@ -3264,8 +3264,8 @@ Advanced Properties==Расширенные настройки
 #File: env/templates/submenuContentIntegration.template
 #---------------------------
 External Content Integration==Интеграция внешнего контента
-Import phpBB3 forum==Импорт phpBB3 форум
-Import Mediawiki dumps==Импорт Mediawiki дамп
+Import phpBB3 forum==Импорт форума phpBB3
+Import Mediawiki dumps==Импорт дампа Mediawiki
 Import OAI-PMH Sources==Импорт OAI-PMH источника
 #-----------------------------
 #File: env/templates/submenuCookie.template
@@ -3390,68 +3390,67 @@ Password</label>==Пароль</label>
 #-----------------------------
 #File: proxymsg/error.html
 #---------------------------
-YaCy: Error Message==YaCy: Fehlermeldung
-request:==Anfrage:
-unspecified error==unspezifizierter Fehler
-not-yet-assigned error==noch nicht vergebener Fehler
-You don't have an active internet connection. Please go online.==Sie haben keine aktive Internetverbindung. Bitte gehen Sie online.
-Could not load resource. The file is not available.==Datei konnte nicht geladen werden. Die Datei ist nicht vorhanden.
-Exception occurred==Dieser Fehler trat auf 
-Generated \#\[date\]\# by==Erstellt am #[date]# von
+YaCy: Error Message==YaCy: Сообщение об ошибкеequest:==запрос:
+unspecified error==неизвестная ошибка
+not-yet-assigned error==пока-не-назначенная-ошибка
+You don't have an active internet connection. Please go online.==У вас нет активного соединения с интернет. Пожалуйста выйдите онлайн.
+Could not load resource. The file is not available.==Не могу загрузить ресурс. Файл недоступен.
+Exception occurred==Произошло исключение
+Generated \#\[date\]\# by==Сгенерировано: #[date]# 
 #-----------------------------
 #File: proxymsg/proxylimits.inc
 #---------------------------
-Your Account is disabled for surfing.==Ihr Account ist deaktivert zum surfen.
-Your Timelimit \(\#\[timelimit\]\# Minutes per Day\) is reached.==Ihr Zeitlimit (#[timelimit]# Minuten am Tag) wurde erreicht. 
+Your Account is disabled for surfing.==Вашему аккаунту запрешен просмотр.
+Your Timelimit \(\#\[timelimit\]\# Minutes per Day\) is reached.==Ваш временной лимит (#[timelimit]# минут в день) исчерпан. 
 #-----------------------------
 #File: proxymsg/unknownHost.inc
 #---------------------------
 The server==Сервер
 could not be found.==не найден.
-Did you mean:==Meinten Sie vielleicht:
+Did you mean:==Вы имели ввиду:
 #-----------------------------
 #File: www/welcome.html
 #---------------------------
-YaCy: Default Page for Individual Peer Content==YACY: Standardseite für eigene Peer-Inhalte
-Individual&nbsp;Web&nbsp;Page==eigene Webseite
-Welcome to your own web page<br />in the <strong>YaCy Network==Willkommen auf Ihrer eigenen Webseite<br />im <strong>YaCy-Netzwerk
-THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==DIES IST EINE DEMONSTRATIONSSEITE FÜR IHREN EIGENEN WEB SERVER!
-PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
-&lt;YaCy-application-home&gt;<strong>\#\[wwwpath\]\#</strong>==&lt;YaCy-Programmpfad&gt;<strong>#[wwwpath]#</strong> ABLEGEN.
+YaCy: Default Page for Individual Peer Content==YaCy: Страница по умолчанию для контента узла
+#Individual&nbsp;Web&nbsp;Page==eigene Webseite
+#Welcome to your own web page<br />in the <strong>YaCy Network==Willkommen auf Ihrer eigenen Webseite<br />im <strong>YaCy-Netzwerk
+#THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==DIES IST EINE DEMONSTRATIONSSEITE FÜR IHREN EIGENEN WEB SERVER!
+#PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
+#&lt;YaCy-application-home&gt;<strong>\#\[wwwpath\]\#</strong>==&lt;YaCy-Programmpfad&gt;<strong>#[wwwpath]#</strong> ABLEGEN.
 #-----------------------------
 #File: js/Crawler.js
 #---------------------------
-"Continue this queue"=="Diese Queue weiter abarbeiten"
-"Pause this queue"=="Diese Queue anhalten"
+"Continue this queue"=="Запустить эту очередь"
+"Pause this queue"=="Приостановить эту очередь"
 #-----------------------------
 #File: js/yacyinteractive.js
 #---------------------------
 >total results==>всего в результате
-&nbsp;topwords:==&nbsp;Topwörter:
+#&nbsp;topwords:==&nbsp;Topwörter:
 >Name==>Имя
 >Size==>Размер
 >Date==>Дата
 #-----------------------------
 #File: yacy/ui/js/jquery-flexigrid.js
 #---------------------------
-'Displaying \{from\} to \{to\} of \{total}\ items'=='Zeige {from} bis {to} von {total} Elementen'
-'Processing, please wait ...'=='In Bearbeitung. Bitte warten ...'
-'No items'=='Keine Elemente'
+'Displaying \{from\} to \{to\} of \{total}\ items'=='Показываю {from} от {to} из {total} элементов'
+'Processing, please wait ...'=='Обработка, ждитее ...'
+'No items'=='Нет обьектов'
 #-----------------------------
 #File: yacy/ui/js/jquery-ui-1.7.2.min.js
 #---------------------------
-Loading&#8230;==Lade&#8230;
+#Loading&#8230;==Загрузка&#8230;
 #-----------------------------
 #File: yacy/ui/js/jquery.ui.all.min.js
 #---------------------------
-Loading&#8230;==Lade&#8230;
+#Loading&#8230;==Lade&#8230;
 #-----------------------------
 #File: yacy/ui/index.html
 #---------------------------
-About YaCy-UI==Über YaCy-UI
-Admin Console==Admin Konsole
-"Bookmarks"=="Lesezeichen"
->Bookmarks==>Lesezeichen
+About YaCy-UI==О YaCy
+Admin Console==Консоль управления
+"Bookmarks"=="Закладки"
+>Bookmarks==>Закладки
 #Server Log==Server Log
 #-----------------------------
 #File: yacy/ui/yacyui-admin.html
@@ -3459,10 +3458,10 @@ Admin Console==Admin Konsole
 Peer Control==Peer
 "Login"=="Login"
 #Login==Anmelden
-Themes==Aussehen
-Messages==Nachrichten
-Re-Start==Neustart
-Shutdown==Beenden
+Themes==Темы
+Messages==Сообщения
+Re-Start==Рестарт
+Shutdown==Выключение
 Web Indexing==Web Indexierung
 Crawl Start==Crawl starten
 Monitoring==Überwachung
