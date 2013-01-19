@@ -2601,8 +2601,8 @@ Latest public version is==Die neueste stabile Version ist
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie können eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten:
 #"Update YaCy"=="Update YaCy"
 Install YaCy==Установка YaCy
-You are running a server in senior mode and you support the global internet index,==Сервер запущен в старшем режиме и Вы поддерживаете глобальный индекс Интернет,
-which you can also <a href="index.html">search yourself</a>.==которые вы также можете <a href="index.html">найти себя</a>.
+You are running a server in senior mode and you support the global internet index,==Ваш узел в senior-режиме и Вы поддерживаете глобальный индекс Интернет,
+which you can also <a href="index.html">search yourself</a>.==который вы также можете <a href="index.html">использовать для своего поиска</a>.
 You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch laden,
 where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
 Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite_p.html">here</a>==Ваш индексатор веб сайтов простаивает. Вы можете начать сканирование сайта <a href="CrawlStartSite_p.html">по ссылке</a>
@@ -2662,10 +2662,10 @@ Max:==Максимально:
 Loader Queue==Загружено запросов
 paused==на паузе
 >Queues<==>Запросы<
-Local Crawl==Локальный сканер
-Remote triggered Crawl==Удаленный сканер
-Pre-Queueing==Vor-Pufferung
-Seed server==Скорость сервера
+Local Crawl==Локальный обход
+Remote triggered Crawl==Удаленный обход
+Pre-Queueing==Предварителньая очередь
+#Seed server==Seed server
 Configure==Настройка
 Enabled: Updating to server==Включено: Обновление на сервер:
 Last upload: #\[lastUpload\]# ago.==Последная передача: #\[lastUpload\]#
@@ -2673,24 +2673,24 @@ Enabled: Updating to file==Включено: Обновление до файл�
 #-----------------------------
 #File: Steering.html
 #---------------------------
-Steering</title>==Steuerung</title>
-Checking peer status...==Überprüfe Peer Status ...
-Peer is online again, forwarding to status page...==Peer ist wieder online. Weiterleitung auf Status Seite ...
-Peer is not online yet, will check again in a few seconds...==Peer ist noch nicht online. Nächste Prüfung in wenigen Sekunden ...
-No action submitted==Keine Aktion übermittelt
-Go back to the <a href="Settings_p.html">Settings</a> page==Zurück zur Seite mit den <a href="Settings_p.html">Erweiterten Einstellungen</a>
-Your system is not protected by a password==Ihr System wird nicht von einem Passwort geschützt
-Please go to the <a href="/ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Bitte legen Sie ein Administrator Passwort auf der Seite <a href="/ConfigAccounts_p.html">Benutzerverwaltung</a> fest.
+#Steering</title>==Steuerung</title>
+Checking peer status...==Проверка статуса узла...
+#Peer is online again, forwarding to status page...==Peer ist wieder online. Weiterleitung auf Status Seite ...
+Peer is not online yet, will check again in a few seconds...==Узел пока не онлайн, проверю через несколько секунд ...
+#No action submitted==Keine Aktion übermittelt
+#Go back to the <a href="Settings_p.html">Settings</a> page==Zurück zur Seite mit den <a href="Settings_p.html">Erweiterten Einstellungen</a>
+#Your system is not protected by a password==Ihr System wird nicht von einem Passwort geschützt
+#Please go to the <a href="/ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Bitte legen Sie ein Administrator Passwort auf der Seite <a href="/ConfigAccounts_p.html">Benutzerverwaltung</a> fest.
 You don't have the correct access right to perform this task.==Sie haben nicht die Erlaubnis diese Anwendung auszuführen.
-Please log in.==Bitte melden Sie sich an.
-You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie können nun zurück auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie weitere Änderungen vornehmen wollen.
-See you soon!==Bis bald!
+Please log in.== Пожалкйста авторизуйтесь.
+#You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie können nun zurück auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie weitere Änderungen vornehmen wollen.
+See you soon!==До встречи!
 Just a moment, please!==Einen Moment bitte!
-Application will terminate after working off all scheduled tasks.==YaCy Proxy wird beendet, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
-Then YaCy will restart.==Dann wird YaCy neu gestartet.
-If you can't reach YaCy's interface after 5 minutes restart failed.==Wenn Sie nach 5 Minuten nicht auf das YaCy Interface zugreifen können, dann ist der Neustart fehlgeschlagen.
-Installing release==Installiere Release
-YaCy will be restarted after installation==YaCy wird nach der Installation neugestartet
+#Application will terminate after working off all scheduled tasks.==YaCy Proxy wird beendet, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
+Then YaCy will restart.==А затем YaCy перезагрузится
+#If you can't reach YaCy's interface after 5 minutes restart failed.==Wenn Sie nach 5 Minuten nicht auf das YaCy Interface zugreifen können, dann ist der Neustart fehlgeschlagen.
+Installing release==Устанавливаю релиз
+#YaCy will be restarted after installation==YaCy wird nach der Installation neugestartet
 #-----------------------------
 #File: Supporter.html
 #---------------------------
@@ -2707,26 +2707,26 @@ provided by YaCy peers with an URL in their profile. This shows only URLs from p
 #-----------------------------
 #File: Surftips.html
 #---------------------------
-Surftips</title>==Surftipps</title>
-Surftips</h2>==Surftipps</h2>
-Surftips are switched off==Surftipps sind ausgeschaltet
-title="bookmark"==title="Lesezeichen"
-alt="Add to bookmarks"==alt="Zu den Lesezeichen hinzufügen"
-title="positive vote"==title="Positive Bewertung"
-alt="Give positive vote"==alt="Link positiv bewerten"
-title="negative vote"==title="Negative Bewertung"
-alt="Give negative vote"==alt="Link negativ bewerten"
-YaCy Supporters<==YaCy Unterstützer<
->a list of home pages of yacy users<==>Eine Liste von Homepages von YaCy Nutzern<
-provided by YaCy peers using public bookmarks, link votes and crawl start points==automatisch erzeugt durch öffentliche Lesezeichen, Link-Bewertungen und Crawl-Startpunkte anderer YaCy-Peers
-"Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="Bitte geben Sie zu Ihrer Linkempfehlung einen Kommentar ein. (Ihre Stimme wird auch ohne Kommentar angenommen.)"
-"authentication required"=="Autorisierung erforderlich"
-Hide surftips for users without autorization==Verberge Surftipps für Benutzer ohne Autorisierung
-Show surftips to everyone==Zeige Surftipps allen Benutzern
+#Surftips</title>==Surftipps</title>
+#Surftips</h2>==Surftipps</h2>
+#Surftips are switched off==Surftipps sind ausgeschaltet
+#title="bookmark"==title="закладка"
+#alt="Add to bookmarks"==alt="Zu den Lesezeichen hinzufügen"
+#title="positive vote"==title="Positive Bewertung"
+#alt="Give positive vote"==alt="Link positiv bewerten"
+#title="negative vote"==title="Negative Bewertung"
+#alt="Give negative vote"==alt="Link negativ bewerten"
+#YaCy Supporters<==YaCy Unterstützer<
+#>a list of home pages of yacy users<==>Eine Liste von Homepages von YaCy Nutzern<
+#provided by YaCy peers using public bookmarks, link votes and crawl start points==automatisch erzeugt durch öffentliche Lesezeichen, Link-Bewertungen und Crawl-Startpunkte anderer YaCy-Peers
+#"Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="Bitte geben Sie zu Ihrer Linkempfehlung einen Kommentar ein. (Ihre Stimme wird auch ohne Kommentar angenommen.)"
+#"authentication required"=="Autorisierung erforderlich"
+#Hide surftips for users without autorization==Verberge Surftipps für Benutzer ohne Autorisierung
+#Show surftips to everyone==Zeige Surftipps allen Benutzern
 #-----------------------------
 #File: Table_API_p.html
 #---------------------------
-: Peer Steering==: Управление пира
+: Peer Steering==: Управление узлом
 Steering of API Actions<==Руководство по действиям API<
 This table shows actions that had been issued on the YaCy interface==Эта таблица показывает какие действия были выполнены на YaCy интерфейсе,
 to change the configuration or to request crawl actions.==для изменения настроек или подачи запроса на выполнение сканирования.
@@ -3448,7 +3448,7 @@ YaCy: Default Page for Individual Peer Content==YaCy: Страница по ум
 #File: yacy/ui/index.html
 #---------------------------
 About YaCy-UI==О YaCy
-Admin Console==Консоль управления
+Admin Console==Консоль администратора
 "Bookmarks"=="Закладки"
 >Bookmarks==>Закладки
 #Server Log==Server Log
@@ -3466,14 +3466,14 @@ Web Indexing==Web Indexierung
 Crawl Start==Crawl starten
 Monitoring==Überwachung
 YaCy Network==YaCy Netzwerk
->Settings==>Einstellungen
-"Basic Settings"=="Eingangskonfiguration"
-\tBasic==Basis
-Accounts==Konten
+>Settings==>Настройки
+"Basic Settings"=="Базовые настройки"
+\tBasic==Базовые
+Accounts==Аккаунты
 "Network"=="Netzwerk"
 \tNetwork==Netzwerk
-"Advanced Settings"=="Erweiterte Einstellungen"
-\tAdvanced==Erweitert
+"Advanced Settings"=="Расширенные настройки"
+\tAdvanced==Расширенные
 "Update Settings"=="System Aktualisierung"
 \tUpdate==Aktualisierung
 >YaCy Project==>YaCy Projekt
