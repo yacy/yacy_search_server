@@ -107,7 +107,7 @@ domain.net\/fullpath<==domain.net/полный путь<
 a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a> \(slow\)==полный <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">регулярное выражение</a> \(медленный\)
 #was removed from blacklist==был удален из черного списка
 #was added to the blacklist==был добавлен в черный список
-Activate this list for==Активировать этот лист для
+Activate this list for==Использовать этот список для
 Show entries:==Показать ввод:
 Entries per page:==Записи на страницу:
 "Go"=="Вперед"
@@ -117,7 +117,7 @@ proxy==прокси
 #-----------------------------
 #File: BlacklistCleaner_p.html
 #---------------------------
-Blacklist Cleaner==Черный список чист
+Blacklist Cleaner==Чистка черного списка
 Here you can remove or edit illegal or double blacklist-entries.==Здесь вы можете удалить или редактировать ошибочные или двойные записи.
 Check list==Лист проверки
 "Check"=="Проверка"
@@ -164,9 +164,9 @@ Test list:==Список тестов:
 "Test"=="Тест"
 The tested URL was==Проверенный URL был
 It is blocked for the following cases:==Это блокируется в следующих случаях:
-#Crawling==Crawling
-#DHT==DHT
-#News==Новости
+Crawling==Crawling
+DHT==DHT
+News==Новости
 Proxy==Прокси
 Search==Поиск
 Surftips==Советы
@@ -696,40 +696,40 @@ You can use <==Вы можете использовать <
 #-----------------------------
 #File: ConfigProperties_p.html
 #---------------------------
-Advanced Config==Erweiterte Einstellungen
-Here are all configuration options from YaCy.==Hier sind alle Konfigurationseinstellungen von YaCy.
-You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie können alles ändern, bedenken Sie aber, dass einige Änderungen einen Neustart von YaCy erfordern und andere Änderungen YaCy ganz zum Absturz bringen können.
+Advanced Config==Расширенная конфигурация
+Here are all configuration options from YaCy.==Тут находятся все конфигурационные опции YaCy.
+You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Вы можете менять любые опции но некоторые из них требуют перезапуска YaCy, или даже могут, при использовании неправильных значений, вызвать падение.
 For explanation please look into defaults/yacy.init==Eine Erklärung finden Sie in der Datei defaults/yacy.init
-"Save"=="Speichern"
+"Save"=="Сохранить"
 #-----------------------------
 #File: ConfigRobotsTxt_p.html
 #---------------------------
-Exclude Web-Spiders==Web-Spider ausschließen
+Exclude Web-Spiders==Блокировать пауков
 Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==Hier können Sie eine robots.txt für alle Webcrawler die das Webinterface Ihres Peers indexieren wollen, erstellen.
 is a volunteer agreement most search-engines \(including YaCy\) follow.==ist ein freiwilliger Standard den die meisten Suchmaschinen (inkl. YaCy) befolgen.
 It disallows crawlers to access webpages or even entire domains.==Er kann Crawlern den Zugriff auf Webseiten oder sogar ganze Domains verbieten.
-Deny access to==Verbiete die Erfassung
-Entire Peer==des ganzen Peers
-Status page==der Statusseite
-Network pages==der Netzwerkseiten
-Surftips==der Surftipps
-News pages==der News-Seiten
-Blog==des Blogs
-Wiki=des Wikis
-Public bookmarks==der öffentlichen Lesezeichen
-Home Page==der Home-Page
-File Share==des File-Shares
-"Save restrictions"=="Beschränkungen speichern"
+Deny access to==Закрыть доступ к 
+Entire Peer=Узлу целиком
+Status page==Странице статуса
+Network pages==Network pages
+Surftips==Surftips
+News pages==Страницам новостей
+Blog==Блогу
+Wiki=Вики
+Public bookmarks==Публичным закладкам
+Home Page==Домашнией странице
+File Share==File Share
+"Save restrictions"=="Сохранить ограничения"
 #-----------------------------
 #File: ConfigSearchBox.html
 #---------------------------
-Integration of a Search Box==Integration einer Suchbox
+Integration of a Search Box==Интеграция Search Box
 We give information how to integrate a search box on any web page that==Hier finden Sie Informationen dazu wie man eine Suchbox auf jeder Webseite einsetzen kann das
 calls the normal YaCy search window.==ein normales YaCy Suchfenster aufruft.
-Simply use the following code:==Verwenden Sie einfach den folgenden Code:
-  MySearch==  Meine Suche
-"Search"=="Suchen"
-This would look like:==Das sieht dann so aus:
+Simply use the following code:==Просто используете следующий код:
+  MySearch==  МоиПоиск
+"Search"=="Поиск"
+This would look like:==Это будет выглядет как:
 This does not use a style sheet file to make the integration into another web page with a different style sheet easier.==Da hier keine Stylesheet Datei verwendet wird, gestaltet sich die Integration in andere Webseiten mit einem anderen Stylesheet einfacher.
 You would need to change the following items:==Sie müssen dazu die folgenden Einträge ändern:
 Replace the given colors \#eeeeee \(box background\) and \#cccccc \(box border\)==Ersetzen sie die vorgegebenen Farben #eeeeee (Hintergrund der Box) and #cccccc (Boxenrand)
@@ -2487,91 +2487,91 @@ value="Submit"==value="speichern"
 YaCy \'\#\[clientname\]\#\': Settings Acknowledge==YaCy '#[clientname]#': Einstellung Verarbeitung
 Settings Receipt:==Einstellungen angenommen:
 No information has been submitted==Es wurden keine Informationen übertragen.
-Error with submitted information.==Es gab einen Fehler bei der Übertragung der Informationen.
-Nothing changed.</p>==Nichts wurde verändert.</p>
-The user name must be given.==Der User Name muss angegeben werden
-Your request cannot be processed.==Ihre Anfrage konnte nicht bearbeitet werden.
-The password redundancy check failed. You have probably misstyped your password.==Die Passwortüberprüfung schlug fehl. Sie haben sich wahrscheinlich vertippt.
-Shutting down.</strong><br />Application will terminate after working off all crawling tasks.==Runterfahren</strong><br />Die Anwendung wird geschlossen, nachdem alle Crawls abgearbeitet wurden.
-Your administration account setting has been made.==Ihre Administrator Account Einstellungen wurden gespeichert.
-Your new administration account name is \#\[user\]\#. The password has been accepted.<br />If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das Passwort wurde akzeptiert.<br />Wenn Sie zurück zu den Einstellungen gehen wollen, müssen Sie sich neu einloggen.
-Your proxy access setting has been changed.==Die Proxy Zugangs Einstellungen wurden geändert.
-Your proxy account check has been disabled, since you did not supply a password.==Ihr Proxy Account Test wurde deaktiviert, weil sie kein Passwort eingegeben haben.
-The new proxy IP filter is set to==Der neue Proxy IP-Filter ist
-The proxy port is:==Der Proxy Port ist:
-Port rebinding will be done in a few seconds.==Die Port Neubindung wird in wenigen Sekunden abgeschlossen sein.
-You can reach your YaCy server under the new location==Sie können Ihren YaCy Server unter folgender neuer Adresse erreichen:
-Your proxy access setting has been changed.==Ihre Proxy Zugangs Einstellung wurden geändert.
-Your server access filter is now set to==Ihr Proxy Zugangs Filter ist nun gesetzt auf
-Auto pop-up of the Status page is now <strong>disabled</strong>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>deaktiviert.</strong>
-Auto pop-up of the Status page is now <strong>enabled</strong>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>aktiviert.</strong>
-You are now permanently <strong>online</strong>.==Sie sind nun im <strong>permanenten Online Modus</strong>.
-After a short while you should see the effect on the====Nach kurzer Zeit können Sie die Änderungen auf der
-status</a> page.==Status-Seite</a> sehen.
-The Peer Name is:==Der Name dieses Peers ist:
-Your static Ip\(or DynDns\) is:==Ihre statische IP(oder DynDns) ist:
-Seed Settings changed.\#\(success\)\#::You are now a principal peer.==Seed Einstellungen wurden geändert.#(success)#::Sie sind nun ein Principal Peer.
-Seed Settings changed, but something is wrong.==Seed Einstellungen wurden geändert, aber etwas stimmt nicht.
-Seed Uploading was deactivated automatically.==Seed Upload wurde automatisch deaktiviert.
-Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zurück und modifizieren Sie die Daten.
-The remote-proxy setting has been changed==Die remote-proxy Einstellungen wurden geändert.
-The new setting is effective immediately, you don't need to re-start.==Die neuen Einstellungen wirken sofort. Sie brauchen den Peer nicht neu zu starten.
-The submitted peer name is already used by another peer. Please choose a different name.</strong> The Peer name has not been changed.==Der eingegebene Peername wird bereits von einem anderen Peer benutzt. Bitte wählen Sie einen anderen Namen.</strong> Der Peername wurde nicht geändert.
-Your Peer Language is:==Ihre Peer Sprache ist:
-The submitted peer name is not well-formed. Please choose a different name.</strong> The Peer name has not been changed.
-Peer names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and must not be longer than 80 characters.
+#Error with submitted information.==Es gab einen Fehler bei der Übertragung der Informationen.
+#Nothing changed.</p>==Nichts wurde verändert.</p>
+#The user name must be given.==Der User Name muss angegeben werden
+#Your request cannot be processed.==Ihre Anfrage konnte nicht bearbeitet werden.
+#The password redundancy check failed. You have probably misstyped your password.==Die Passwortüberprüfung schlug fehl. Sie haben sich wahrscheinlich vertippt.
+#Shutting down.</strong><br />Application will terminate after working off all crawling tasks.==Runterfahren</strong><br />Die Anwendung wird geschlossen, nachdem alle Crawls abgearbeitet wurden.
+#Your administration account setting has been made.==Ihre Administrator Account Einstellungen wurden gespeichert.
+#Your new administration account name is \#\[user\]\#. The password has been accepted.<br />If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das Passwort wurde akzeptiert.<br />Wenn Sie zurück zu den Einstellungen gehen wollen, müssen Sie sich neu einloggen.
+#Your proxy access setting has been changed.==Die Proxy Zugangs Einstellungen wurden geändert.
+#Your proxy account check has been disabled, since you did not supply a password.==Ihr Proxy Account Test wurde deaktiviert, weil sie kein Passwort eingegeben haben.
+#The new proxy IP filter is set to==Der neue Proxy IP-Filter ist
+#The proxy port is:==Der Proxy Port ist:
+#Port rebinding will be done in a few seconds.==Die Port Neubindung wird in wenigen Sekunden abgeschlossen sein.
+#You can reach your YaCy server under the new location==Sie können Ihren YaCy Server unter folgender neuer Adresse erreichen:
+#Your proxy access setting has been changed.==Ihre Proxy Zugangs Einstellung wurden geändert.
+#Your server access filter is now set to==Ihr Proxy Zugangs Filter ist nun gesetzt auf
+#Auto pop-up of the Status page is now <strong>disabled</strong>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>deaktiviert.</strong>
+#Auto pop-up of the Status page is now <strong>enabled</strong>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>aktiviert.</strong>
+#You are now permanently <strong>online</strong>.==Sie sind nun im <strong>permanenten Online Modus</strong>.
+#After a short while you should see the effect on the====Nach kurzer Zeit können Sie die Änderungen auf der
+#status</a> page.==Status-Seite</a> sehen.
+#The Peer Name is:==Der Name dieses Peers ist:
+#Your static Ip\(or DynDns\) is:==Ihre statische IP(oder DynDns) ist:
+#Seed Settings changed.\#\(success\)\#::You are now a principal peer.==Seed Einstellungen wurden geändert.#(success)#::Sie sind nun ein Principal Peer.
+#Seed Settings changed, but something is wrong.==Seed Einstellungen wurden geändert, aber etwas stimmt nicht.
+#Seed Uploading was deactivated automatically.==Seed Upload wurde automatisch deaktiviert.
+#Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zurück und modifizieren Sie die Daten.
+#The remote-proxy setting has been changed==Die remote-proxy Einstellungen wurden geändert.
+#The new setting is effective immediately, you don't need to re-start.==Die neuen Einstellungen wirken sofort. Sie brauchen den Peer nicht neu zu starten.
+#The submitted peer name is already used by another peer. Please choose a different name.</strong> The Peer name has not been changed.==Der eingegebene Peername wird bereits von einem anderen Peer benutzt. Bitte wählen Sie einen anderen Namen.</strong> Der Peername wurde nicht geändert.
+#Your Peer Language is:==Ihre Peer Sprache ist:
+#The submitted peer name is not well-formed. Please choose a different name.</strong> The Peer name has not been changed.
+#Peer names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and must not be longer than 80 characters.
 #The new parser settings where changed successfully.==Die neuen Parser Einstellungen wurden erfolgreich gespeichert.
-Parsing of the following mime-types was enabled:
-Seed Upload method was changed successfully.==Seed Upload Methode wurde erfolgreich geändert.
-You are now a principal peer.==Sie sind nun ein Principal Peer.
-Seed Upload Method:==Seed Upload Methode:
-Seed File URL:==Seed Datei URL:
-Your proxy networking settings have been changed.==Ihre Proxy Netzwerk Einstellungen wurden geändert.
-Transparent Proxy Support is:==Durchsichtige Proxy Unterstützung ist:
-Connection Keep-Alive Support is:==Verbindung aufrecht erhalten Unterstützung ist:
-Your message forwarding settings have been changed.==Ihre Nachrichten Weiterleitungseinstellungen haben sich geändert.
-Message Forwarding Support is:==Nachrichten Weiterleitungs Unterstützung:
-Message Forwarding Command:==Nachrichten Weiterleitungskommando:
-Recipient Address:==Empfänger Adresse:
-Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zurück und modifizieren Sie die Daten.
-You are now <strong>event-based online</strong>.==Sie sind nun im  <strong>aktivitätsbasierten Modus</strong>.
-After a short while you should see the effect on the==Nach kurzer Zeit können Sie die Änderungen auf der
-You are now in <strong>Cache Mode</strong>.==Sie sind nun im <strong>Cache Modus</strong>.
-Only Proxy-cache ist available in this mode.==Nur der Proxy Cache ist in diesem Modus verfügbar.
-After a short while you should see the effect on the==Nach kurzer Zeit können Sie die Änderungen auf der
-You can now go back to the==Sie können nun zurück zu den
-Settings</a> page if you want to make more changes.==Einstellungen</a> gehen, um weitere Änderungen vorzunehmen.
-You can reach your YaCy server under the new location==Dieser YaCy-Peer kann nun unter seiner neuen Adresse erreicht werden:
+#Parsing of the following mime-types was enabled:
+#Seed Upload method was changed successfully.==Seed Upload Methode wurde erfolgreich geändert.
+#You are now a principal peer.==Sie sind nun ein Principal Peer.
+#Seed Upload Method:==Seed Upload Methode:
+#Seed File URL:==Seed Datei URL:
+#Your proxy networking settings have been changed.==Ihre Proxy Netzwerk Einstellungen wurden geändert.
+#Transparent Proxy Support is:==Durchsichtige Proxy Unterstützung ist:
+#Connection Keep-Alive Support is:==Verbindung aufrecht erhalten Unterstützung ist:
+#Your message forwarding settings have been changed.==Ihre Nachrichten Weiterleitungseinstellungen haben sich geändert.
+#Message Forwarding Support is:==Nachrichten Weiterleitungs Unterstützung:
+#Message Forwarding Command:==Nachrichten Weiterleitungskommando:
+#Recipient Address:==Empfänger Adresse:
+#Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zurück und modifizieren Sie die Daten.
+#You are now <strong>event-based online</strong>.==Sie sind nun im  <strong>aktivitätsbasierten Modus</strong>.
+#After a short while you should see the effect on the==Nach kurzer Zeit können Sie die Änderungen auf der
+#You are now in <strong>Cache Mode</strong>.==Sie sind nun im <strong>Cache Modus</strong>.
+#Only Proxy-cache ist available in this mode.==Nur der Proxy Cache ist in diesem Modus verfügbar.
+#After a short while you should see the effect on the==Nach kurzer Zeit können Sie die Änderungen auf der
+#You can now go back to the==Sie können nun zurück zu den
+#Settings</a> page if you want to make more changes.==Einstellungen</a> gehen, um weitere Änderungen vorzunehmen.
+#You can reach your YaCy server under the new location==Dieser YaCy-Peer kann nun unter seiner neuen Adresse erreicht werden:
 #-----------------------------
 #File: Settings_MessageForwarding.inc
 #---------------------------
-Message Forwarding==Nachrichten Weiterleitung
-With this settings you can activate or deactivate forwarding of yacy-messages via email.==Mit diesen Einstellungen können Sie die Weiterleitung von YaCy-Nachrichten per E-Mail aktivieren oder deaktivieren.
-Enable message forwarding==Aktiviere Nachrichten Weiterleitung
-Enabling/Disabling message forwarding via email.==Aktivieren/Deaktivieren der Nachrichten Weiterleitung per E-Mail.
-Forwarding Command==Weiterleitungskommando
-The command-line program that should be used to forward the message.<br />==Das Kommandozeilenprogramm, das verwendet werden soll um die Nachricht weiterzuleiten.<br />
-Forwarding To==Weiterleiten An
-The recipient email-address.<br />==Die E-Mail Adresse des Empfängers.<br />
-e.g.:==z.B.:
-"Submit"=="Speichern"
-Changes will take effect immediately.==Änderungen sind sofort wirksam.
+#Message Forwarding==Nachrichten Weiterleitung
+#With this settings you can activate or deactivate forwarding of yacy-messages via email.==Mit diesen Einstellungen können Sie die Weiterleitung von YaCy-Nachrichten per E-Mail aktivieren oder deaktivieren.
+#Enable message forwarding==Aktiviere Nachrichten Weiterleitung
+#Enabling/Disabling message forwarding via email.==Aktivieren/Deaktivieren der Nachrichten Weiterleitung per E-Mail.
+#Forwarding Command==Weiterleitungskommando
+#The command-line program that should be used to forward the message.<br />==Das Kommandozeilenprogramm, das verwendet werden soll um die Nachricht weiterzuleiten.<br />
+#Forwarding To==Weiterleiten An
+#The recipient email-address.<br />==Die E-Mail Adresse des Empfängers.<br />
+#e.g.:==z.B.:
+#"Submit"=="Speichern"
+#Changes will take effect immediately.==Änderungen sind sofort wirksam.
 #-----------------------------
 #File: sharedBlacklist_p.html
 #---------------------------
-Shared Blacklist==Freigegebene Blacklist
-Add Items to Blacklist==Hinzufügen von Daten zur Blacklist
-Unable to store the items into the blacklist file:==Es war nicht möglich in folgender Blacklist Datei die Daten zu speichern:
+#Shared Blacklist==Freigegebene Blacklist
+#Add Items to Blacklist==Hinzufügen von Daten zur Blacklist
+#Unable to store the items into the blacklist file:==Es war nicht möglich in folgender Blacklist Datei die Daten zu speichern:
 #File Error! Wrong Path?==Datei Fehler! Falscher Pfad?
-YaCy-Peer &quot;<span class="settingsValue">\#\[name\]\#</span>&quot; not found.==YaCy Peer YaCy-Peer &quot;<span class="settingsValue">#[name]#</span>&quot; nicht gefunden.
-not found or empty list.==nicht gefunden oder leere Liste.
-Wrong Invocation! Please invoke with==Falscher Aufruf! Bitte nur so aufrufen
-Blacklist source:==Blacklist Quelle:
-Blacklist target:==Blacklist Ziel:
-Blacklist item==Blacklist Eintrag
-"select all"=="alle auswählen"
-"deselect all"=="alle abwählen"
-value="add"==value="hinzufügen"
+#YaCy-Peer &quot;<span class="settingsValue">\#\[name\]\#</span>&quot; not found.==YaCy Peer YaCy-Peer &quot;<span class="settingsValue">#[name]#</span>&quot; nicht gefunden.
+#not found or empty list.==nicht gefunden oder leere Liste.
+#Wrong Invocation! Please invoke with==Falscher Aufruf! Bitte nur so aufrufen
+#Blacklist source:==Blacklist Quelle:
+#Blacklist target:==Blacklist Ziel:
+#Blacklist item==Blacklist Eintrag
+#"select all"=="alle auswählen"
+#"deselect all"=="alle abwählen"
+#value="add"==value="hinzufügen"
 #-----------------------------
 #File: Status.html
 #---------------------------
@@ -2623,7 +2623,7 @@ password-protected==Пароль используется
 Unrestricted access from localhost==Неограниченный доступ с локального хоста
 Address</dt>==Адрес</dt>
 Host==Хост
-peer address not assigned==Peer Adresse nicht zugewiesen
+#peer address not assigned==Peer Adresse nicht zugewiesen
 Public Address:==Публичный адрес:
 YaCy Address:==YaCy адрес:
 #Peer Host==Peer Host
@@ -2632,19 +2632,19 @@ broken==повреждено
 connected==подключено
 Remote Proxy==Прокси сервер
 not used==не используется
-Used for YaCy -> YaCy communication:==Использовано для YaCy -> YaCy коммуникаций:
+Used for YaCy -> YaCy communication:==Используется для YaCy -> YaCy коммуникаций:
 WARNING:==WARNUNG:
-You do this on your own risk.==Sie verwenden diese Einstellung auf Ihr eigenes Risiko.
-If you do this without YaCy running on a desktop-pc or without Java 6 installed, this will possibly break startup.==Wenn Sie diese Option verwenden, ohne dass YaCy auf einem Desktop PC läuft, oder ohne installiertes Java 6, wird YaCy vermutlich nicht mehr starten.
-In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf==In dem Fall müssen Sie die Konfiguration manuell in der folgenden Konfigurationsdatei ändern DATA/SETTINGS/yacy.conf
->Experimental<==>Experimentell<
+#You do this on your own risk.==Sie verwenden diese Einstellung auf Ihr eigenes Risiko.
+#If you do this without YaCy running on a desktop-pc or without Java 6 installed, this will possibly break startup.==Wenn Sie diese Option verwenden, ohne dass YaCy auf einem Desktop PC läuft, oder ohne installiertes Java 6, wird YaCy vermutlich nicht mehr starten.
+#In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf==In dem Fall müssen Sie die Konfiguration manuell in der folgenden Konfigurationsdatei ändern DATA/SETTINGS/yacy.conf
+#>Experimental<==>Experimental<
 Yes==Да
 No==Нет
-Auto-popup on start-up==Вслывающие сообщения при запуске
+Auto-popup on start-up==Открывать при старте
 Disabled==Отключено
-Enable\]==Включено]
-Enabled <a==Статус: <a
-Disable\]==Отключено]
+Enable\]==Включить]
+Enabled <a==Включено: <a
+Disable\]==Отключить]
 Tray-Icon==Иконка в трее
 Memory Usage==Использование памяти
 free:==Свободно:
@@ -2658,7 +2658,7 @@ Crawler:==Сканер сайтов:
 Incoming Connections==Входящих соединений:
 Active:==Активно:
 Max:==Максимально:
-#Indexing Queue==Indexier Puffer
+Indexing Queue==Очередь индексации
 Loader Queue==Загружено запросов
 paused==на паузе
 >Queues<==>Запросы<
@@ -3167,9 +3167,9 @@ Search Page==Страница поиска
 Interactive local Search==Интерактивный локальный поиск
 Compare Search==Сравнить поиски
 Ranking Config==Настройка ранжирования
-Host Browser==Host Обзор
+Host Browser==Просмотр хостов
 >Surftips==>Советы
-Local Peer Wiki==Локальная Wiki
+Local Peer Wiki==Локальная вики
 >Bookmarks==>Закладки
 >Help==>Помощь
 ### INDEX CONTROL ###
@@ -3190,11 +3190,11 @@ Customization==Кастомизация
 Monitoring==Мониторинг
 Network Access==Доступ к сети
 YaCy Network==Сеть YaCy
-Web Visualization==Веб визуализация
+Web Visualization==Визуализация паутины
 Access Tracker==Монитор Доступа
-#Server Log==Server Log
+Server Log==Server Log
 >Messages==>Сообщения
-#>Terminal==>Terminal
+>Terminal==>Терминал
 "New Messages"=="Новые сообщения"
 ### PEER CONTROL
 Peer Control==Управление пиром
@@ -3210,10 +3210,10 @@ Project Home==Домашная страница
 Deutsches Forum==Форум на Немецком
 English Forum==Форум на Английском
 YaCy Project Wiki==Wiki сайт проекта YaCy
-# Development Change Log==Entwicklung Änderungshistorie
+# Development Change Log==Development Change Log
 amp;language=en==amp;язык=ru
-#Development Change Log==Development Change Log 
-#Peer Statistics::YaCy Statistics==Peer Statistics::YaCy Statistics
+Development Change Log==Development Change Log 
+Peer Statistics::YaCy Statistics==Peer Statistics::YaCy Statistics
 #-----------------------------
 #File: env/templates/simpleheader.template
 #---------------------------
@@ -3231,8 +3231,8 @@ Overview==Обзор
 Details==Подробно
 Connections</a>==Соединения</a>
 Local Search==Локальный поиск
-#Log==Log
-#Host Tracker==Host Tracker
+Log==Log
+Host Tracker==Host Tracker
 Remote&nbsp;Search==Удаленный&nbsp;поиск
 #-----------------------------
 #File: env/templates/submenuBlacklist.template
