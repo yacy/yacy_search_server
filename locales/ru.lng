@@ -729,7 +729,7 @@ calls the normal YaCy search window.==ein normales YaCy Suchfenster aufruft.
 Simply use the following code:==Просто используете следующий код:
   MySearch==  МоиПоиск
 "Search"=="Поиск"
-This would look like:==Это будет выглядет как:
+This would look like:==Это будет выглядеть как:
 This does not use a style sheet file to make the integration into another web page with a different style sheet easier.==Da hier keine Stylesheet Datei verwendet wird, gestaltet sich die Integration in andere Webseiten mit einem anderen Stylesheet einfacher.
 You would need to change the following items:==Sie müssen dazu die folgenden Einträge ändern:
 Replace the given colors \#eeeeee \(box background\) and \#cccccc \(box border\)==Ersetzen sie die vorgegebenen Farben #eeeeee (Hintergrund der Box) and #cccccc (Boxenrand)
