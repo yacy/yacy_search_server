@@ -138,6 +138,9 @@ then
     JAVA_ARGS="$JAVA_ARGS -XX:+UseLargePages"
 fi
 
+#turn on MMap for Solr if OS is a 64bit OS
+if [ -n "`uname -m | grep 64`" ]; then JAVA_ARGS="$JAVA_ARGS -Dsolr.directoryFactory=solr.MMapDirectoryFactory"; fi
+
 if [ ! -f $CONFIGFILE -a -f DATA/SETTINGS/httpProxy.conf ]
 then
 	# old config if new does not exist
