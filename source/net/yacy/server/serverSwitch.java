@@ -83,9 +83,7 @@ public class serverSwitch
         // file name of the config file
         this.dataPath = dataPath;
         this.appPath = appPath;
-        this.configComment =
-            "This is an automatically generated file, updated by serverAbstractSwitch and initialized by "
-                + initPath;
+        this.configComment = "This is an automatically generated file, updated by serverAbstractSwitch and initialized by " + initPath;
         final File initFile = new File(appPath, initPath);
         this.configFile = new File(dataPath, configPath); // propertiesFile(config);
         this.firstInit = !this.configFile.exists(); // this is true if the application was started for the first time
@@ -98,20 +96,7 @@ public class serverSwitch
         } else {
             initProps = new ConcurrentHashMap<String, String>();
         }
-
-        // if 'pro'-version is selected, overload standard settings with 'pro'-settings
-        Iterator<String> i;
-        String prop;
-
-        // delete the 'pro' init settings
-        i = initProps.keySet().iterator();
-        while ( i.hasNext() ) {
-            prop = i.next();
-            if ( prop.endsWith("__pro") ) {
-                i.remove();
-            }
-        }
-
+        
         // load config's from last save
         if ( this.configFile.exists() ) {
             this.configProps = FileUtils.loadMap(this.configFile);
@@ -122,7 +107,7 @@ public class serverSwitch
         // remove all values from config that do not appear in init
         this.configRemoved = new ConcurrentHashMap<String, String>();
         synchronized ( this.configProps ) {
-            i = this.configProps.keySet().iterator();
+            Iterator<String> i = this.configProps.keySet().iterator();
             String key;
             while ( i.hasNext() ) {
                 key = i.next();
@@ -132,17 +117,12 @@ public class serverSwitch
                 }
             }
 
-            // doing a config settings migration
-            //HashMap migratedSettings = migrateSwitchConfigSettings((HashMap) removedProps);
-            //if (migratedSettings != null) configProps.putAll(migratedSettings);
-
             // merge new props from init to config
             // this is necessary for migration, when new properties are attached
             initProps.putAll(this.configProps);
             this.configProps = initProps;
 
-            // save result; this may initially create a config file after
-            // initialization
+            // save result; this may initially create a config file after initialization
             saveConfig();
         }
 

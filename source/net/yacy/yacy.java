@@ -195,16 +195,9 @@ public final class yacy {
             	lock = channel.tryLock(); // lock yacy.running
             } catch (final Exception e) { }
 
-            final String oldconf = "DATA/SETTINGS/httpProxy.conf".replace("/", File.separator);
-            final String newconf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
-            final File oldconffile = new File(dataHome, oldconf);
-            if (oldconffile.exists()) {
-            	final File newconfFile = new File(dataHome, newconf);
-                if(!oldconffile.renameTo(newconfFile))
-                    Log.logSevere("STARTUP", "WARNING: the file " + oldconffile + " can not be renamed to "+ newconfFile +"!");
-            }
+            final String conf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
             try {
-                sb = new Switchboard(dataHome, appHome, "defaults/yacy.init".replace("/", File.separator), newconf);
+                sb = new Switchboard(dataHome, appHome, "defaults/yacy.init".replace("/", File.separator), conf);
             } catch (final RuntimeException e) {
                 Log.logSevere("STARTUP", "YaCy cannot start: " + e.getMessage(), e);
                 System.exit(-1);
