@@ -750,18 +750,18 @@ no&nbsp;automated installation on development environments==без автома�
 "Install Release"=="Установить версию"
 "Delete Release"=="Удалить версию"
 Automatic Update==Автоматическое обновление
-check for new releases, download if available and restart with downloaded release==проверить наличие новых релизов, скачать если таковые имеются и перезапустить на новый релиз
-"Check \+ Download \+ Install Release Now"=="Проверить, загрузить и установить новый релиз сейчас"
-Download of release \#\[downloadedRelease\]\# finished. Restart Initiated.== Der Download von Version #[downloadedRelease]# ist beendet. Ein Neustart ist eingeleitet.
-No more recent release found.==Kein neuere Version gefunden.
-Release will be installed. Please wait.==Das Release wird installiert. Bitte warten.
-You installed YaCy with a package manager.==Sie haben YaCy mit einer Paketverwaltung oder Installer installiert.
-To update YaCy, use the package manager:==Um YaCy auf den neuesten Stand zu bringen, verwenden Sie den Paketmanager.
-Omitting update because this is a development environment.==Update ausgelassen weil dies ein Entwicklersystem ist.
-Omitting update because download of release \#\[downloadedRelease\]\# failed.==Update ausgelassen weil der Download von Version #[downloadedRelease]# fehlschlug.
+check for new releases, download if available and restart with downloaded release==проверить наличие новых версий, скачать если таковые имеются и перезапустить на новый релиз
+"Check \+ Download \+ Install Release Now"=="Проверить, загрузить и установить новую версию сейчас"
+Download of release \#\[downloadedRelease\]\# finished. Restart Initiated.== Загрузка версии #[downloadedRelease]# завершена. Ухожу на перезагрузку.
+No more recent release found.==Более новой версии не обнаружено.
+Release will be installed. Please wait.==Идет установка новой версии. Пожалуйста подождите.
+You installed YaCy with a package manager.==Вы установили YaCy через менеджер пакетов.
+To update YaCy, use the package manager:==Для обновления YaCy используете менеджер пакетов.
+Omitting update because this is a development environment.==Пропускаю обновление потому что это режим разработки.
+Omitting update because download of release \#\[downloadedRelease\]\# failed.==Пропускаю обновление потому что загрузка версии #[downloadedRelease]# не была успешной.
 Automated System Update==Система автоматического обновления
 manual update==Ручное обновление
-no automatic look-up, updates can be made manually using this interface \(see options above\)==нет автоматического обновления. Обновления можно сделать вручную на этой странице (см. настройки выше).
+no automatic look-up, updates can be made manually using this interface \(see options above\)==нет автоматического обновления. Обновление можно сделать вручную на этой странице (см. настройки выше).
 automatic update==Автоматическое обновление
 updates are made within fixed cycles:==обновления выполняются в установленные циклы:
 Time between lookup==Время между проверками
@@ -770,7 +770,7 @@ Release blacklist==Черный список релизов
 regex on release number strings==список регулярных выражений с номерами выпусков
 Release type==Тип релиза
 only main releases==только финальные релизы
-any release including developer releases==любые версии, включая релизы для разработчиков
+any release including developer releases==любые версии, включая версии для разработчиков
 Signed autoupdate:==Подписанные автообновления:
 only accept signed files==принимать только подписанные файлы
 "Submit"=="Применить"
@@ -783,8 +783,8 @@ Last Deploy==Последние обновления
 #-----------------------------
 #File: Connections_p.html
 #---------------------------
-Connection Tracking==Verbindungsstatus
-Incoming Connections==Eingehende Verbindungen
+Connection Tracking==Отслеживание соединенией
+Incoming Connections==Входящие соединения
 Showing \#\[numActiveRunning\]\# active, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==Es werden #[numActiveRunning]# aktive und #[numActivePending]# wartende Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt.
 Protocol</td>==Protokoll</td>
 Duration==Dauer
