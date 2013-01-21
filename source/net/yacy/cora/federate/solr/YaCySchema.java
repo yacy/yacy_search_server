@@ -30,10 +30,11 @@ public enum YaCySchema implements Schema {
     
     // mandatory
     id(SolrType.string, true, true, false, "primary key of document, the URL hash **mandatory field**"),
-    sku(SolrType.text_en_splitting_tight, true, true, false, true, "url of document"),
+    sku(SolrType.text_en_splitting_tight, true, true, false, true, "url of document"), // a 'sku' is a stock-keeping unit, a unique identifier and a default field in unmodified solr.
     last_modified(SolrType.date, true, true, false, "last-modified from http header"),
     content_type(SolrType.string, true, true, true, "mime-type of document"),
     title(SolrType.text_general, true, true, true, "content of title tag"),
+    title_unique_b(SolrType.bool, true, true, false, "flag shows if title is unique in the whole index; if yes and another document appears with same title, the unique-flag is set to false"),
     host_id_s(SolrType.string, true, true, false, "id of the host, a 6-byte hash that is part of the document id"),// String hosthash();
     md5_s(SolrType.string, true, true, false, "the md5 of the raw source"),// String md5();
     exact_signature_l(SolrType.num_long, true, true, false, "the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of text_t"),
@@ -66,6 +67,7 @@ public enum YaCySchema implements Schema {
     author(SolrType.text_general, true, true, false, "content of author-tag"),
     author_s(SolrType.string, true, true, false, "content of author-tag as copy-field from author. This is used for facet generation"),
     description(SolrType.text_general, true, true, false, "content of description-tag"),
+    description_unique_b(SolrType.bool, true, true, false, "flag shows if description is unique in the whole index; if yes and another document appears with same description, the unique-flag is set to false"),
     keywords(SolrType.text_general, true, true, false, "content of keywords tag; words are separated by space"),
     charset_s(SolrType.string, true, true, false, "character encoding"),
     wordcount_i(SolrType.num_integer, true, true, false, "number of words in visible area"),
@@ -130,6 +132,7 @@ public enum YaCySchema implements Schema {
     images_withalt_i(SolrType.num_integer, true, true, false, "number of image links with alt tag"),
     htags_i(SolrType.num_integer, true, true, false, "binary pattern for the existance of h1..h6 headlines"),
     canonical_t(SolrType.text_general, true, true, false, "url inside the canonical link element"),
+    canonical_equal_sku_b(SolrType.bool, true, true, false, "flag shows if the url in canonical_t is equal to sku"),
     refresh_s(SolrType.string, true, true, false, "link from the url property inside the refresh link element"),
     li_txt(SolrType.text_general, true, true, true, "all texts in <li> tags"),
     licount_i(SolrType.num_integer, true, true, false, "number of <li> tags"),

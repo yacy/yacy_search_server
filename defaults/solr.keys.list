@@ -26,6 +26,9 @@ content_type
 ## content of title tag, text (mandatory field)
 title
 
+## flag shows if title is unique in the whole index; if yes and another document appears with same title, the unique-flag is set to false, boolean
+#title_unique_b
+
 ## id of the host, a 6-byte hash that is part of the document id (mandatory field)
 host_id_s
 
@@ -112,6 +115,9 @@ author
 
 ## content of description-tag, text
 description
+
+## flag shows if description is unique in the whole index; if yes and another document appears with same description, the unique-flag is set to false, boolean
+#description_unique_b
 
 ## content of keywords tag; words are separated by space
 keywords
@@ -281,6 +287,9 @@ outboundlinks_urlstub_txt
 
 ## url inside the canonical link element, string
 #canonical_t
+
+## flag shows if the url in canonical_t is equal to sku, boolean
+#canonical_equal_sku_b
 
 ## link from the url property inside the refresh link element, string
 #refresh_s
