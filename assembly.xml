@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+              
+    <id>bindistribution</id>
+  
+    <formats>
+        <format>tar.gz</format>
+
+    </formats>
+
+    
+    <baseDirectory>YaCy</baseDirectory>
+
+    <fileSets>
+        <fileSet>
+            <directory>addon</directory>
+            <outputDirectory>addon</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>bin</directory>
+            <outputDirectory>bin</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>defaults</directory>
+            <outputDirectory>defaults</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>dictionaries</directory>
+            <outputDirectory>dictionaries</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>htroot</directory>
+            <outputDirectory>htroot</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>langstats</directory>
+            <outputDirectory>langstats</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>locales</directory>
+            <outputDirectory>locales</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>ranking</directory>
+            <outputDirectory>ranking</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>skins</directory>
+            <outputDirectory>skins</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>vocabularies</directory>
+            <outputDirectory>vocabularies</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}</directory>
+            <includes>
+                <include>*.bat</include>
+                <include>*.sh</include>
+                <include>yacy.*</include>
+                <include>readme.txt</include>
+                <include>gpl.txt</include>
+                <include>lgpl21.txt</include>
+                <include>AUTHORS</include>
+                <include>COPYRIGHT</include>
+                <include>NOTICE</include>
+            </includes>
+            <outputDirectory>.</outputDirectory>
+        </fileSet>
+    </fileSets>
+    
+    <dependencySets>
+        <dependencySet>
+            <unpack>false</unpack>
+            <scope>runtime</scope>
+            <outputDirectory>lib</outputDirectory>
+        </dependencySet>        
+    </dependencySets>
+
+</assembly>

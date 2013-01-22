@@ -1,0 +1,110 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>net.yacy</groupId>
+    <artifactId>GitRevTask</artifactId>
+    <version>1.3</version>
+    <packaging>jar</packaging>
+    <description>YaCy - version tool</description>
+    <name>YaCy</name>
+    <url>http://www.yacy.net</url>
+
+    <scm>
+        <connection>scm:git:https://git.gitorious.org/yacy/rc1.git</connection>
+        <url>https://gitorious.org/yacy</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>Michael Peter Christen</name>
+        </developer>
+    </developers>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    
+    <build>
+        <sourceDirectory>GitRevTask</sourceDirectory>
+
+
+        <plugins>
+                
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>          
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <id>1</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                    <shortRevisionLength>5</shortRevisionLength>
+                    <revisionOnScmFailure>9000</revisionOnScmFailure>
+                    <!-- creates a string e.g. 20130131-1fd45 -->
+                    <format>{0,date,yyyyMMdd}-{1}</format>
+                    <items>
+                        <item>timestamp</item>
+                        <item>scmVersion</item>
+                    </items>
+                </configuration>
+            </plugin>
+
+   
+
+            <!-- exec:exec goal to provide start YaCy by Maven (just to have it for cases were the ide not provides a run command) -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+
+                <configuration>   
+                    <classpathScope>runtime</classpathScope>
+                    <executable>java</executable>                    
+                    <arguments>
+                        <argument>-classpath</argument>
+                        <classpath/>
+                    </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>1.2.0.201112221803-r</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.8.3</version>
+        </dependency>
+    </dependencies>
+</project>

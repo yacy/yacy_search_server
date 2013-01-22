@@ -1,7 +1,10 @@
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -89,13 +92,42 @@ public class GitRevTask extends org.apache.tools.ant.Task {
             log("Property '" + this.dateprop + "' set to '" + commitDate + "'", Project.MSG_VERBOSE);
         }
 	}
-	
-	public static void main(String[] args) {
-		GitRevTask gitRevTask = new GitRevTask();
-		gitRevTask.setRepoPath("/home/sgaebel/git/yacy.rc1");
-		gitRevTask.setRevprop("baseRevisionNr");
-		gitRevTask.setDateprop("DSTAMP");
-		
-		gitRevTask.execute();
-	}
+
+        /** use: GitRevTask.jar pathtoGitRepro  outputfile
+         * optional parameter
+         * 1st parameter = path to Git repository (default ..)
+         * 2nd parameter = ouputfile (default gitbuild.properties)
+         * */
+    public static void main(String[] args) {
+        GitRevTask gitRevTask = new GitRevTask();
+        if (args.length == 0) {
+            gitRevTask.setRepoPath(".."); // path to root of git repository
+        } else {
+            gitRevTask.setRepoPath(args[0]);
+        }
+        gitRevTask.setRevprop("baseRevisionNr");
+        gitRevTask.setDateprop("DSTAMP");
+
+        Project p = new Project();
+        gitRevTask.setProject(p);
+        gitRevTask.execute();
+        String version = gitRevTask.getProject().getProperty("baseRevisionNr");
+        String commitDate = gitRevTask.getProject().getProperty("DSTAMP");
+
+        File f;
+        if (args.length > 1) {
+            f = new File (args[1]);
+        } else {
+            f = new File("gitbuildnumber.properties");
+        }
+        try {
+            f.createNewFile();
+            FileWriter w = new FileWriter(f);
+            
+            w.append("releaseNr=" + version + "\n");
+            w.append("DSTAMP=" + commitDate + "\n");
+            w.close();
+
+        } catch (IOException ex) {}
+    }
 }
