@@ -390,7 +390,7 @@ Error saving the skin.==Fehler beim Speichern des Skins.
 #---------------------------
 Access Configuration==Zugangseinstellungen
 Basic Configuration==Eingangskonfiguration
-Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer benötigt einige Grundinformationen um korrekt zu funktionieren
+Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer benötigt einige Grundinformationen, um korrekt zu funktionieren
 Select a language for the interface==Wählen Sie eine Sprache für das Interface
 Use Case: what do you want to do with YaCy:==Anwendungsfall: Was Sie mit YaCy tun wollen:
 Community-based web search==Gemeinschafts-basierte Web Suche
@@ -1181,6 +1181,46 @@ You are using the administration interface of your own search engine==Sie benutz
 You can create your own search index with YaCy==Sie können mit YaCy Ihren eigenen Suchindex erstellen
 To learn how to do that, watch one of the demonstration videos below==Bitte sehen Sie als Anleitung eine Demonstration (2. Video unten in deutscher Sprache)
 
+#-----------------------------
+
+#File: HostBrowser.html
+#---------------------------
+#Host Browser==Host Browser
+Browse the index of \#\[ucount\]\# documents.==Durchsuchen Sie den Index von #[ucount]# Dokumenten.
+Enter a host or an URL for a file list or view a list of==Geben Sie einen Host oder eine URL an, um eine Liste mit Dateien zu bekommen. Oder sehen Sie eine Liste mit
+>all hosts<==>allen Hosts<
+>only hosts with urls pending in the crawler<==>nur Hosts mit wartenden URLs im Crawler<
+> or <==> oder <
+>only with load errors<==>nur Ladefehlern<
+#Host/URL:==Host/URL:
+"Browse Host"=="Host Durchsuchen"
+"Delete Subpath"=="Teilpfad Löschen"
+Confirm Deletion==Löschen Bestätigen
+>Host List<==>Host Liste<
+Count Colors:==Legende der farbigen Zahlen:
+Documents without Errors==Dokumente mit Fehlern
+Pending in Crawler==Warten im Crawler
+Load Errors \(exclusion/failure\)==Ladefehler (Ausschluss/Fehler)
+Browser for \#\[path\]\#==Browser für #[path]#
+documents stored for host: \#\[hostsize\]\#==Gespeicherte Dokumente für Host: #[hostsize]#
+documents stored for subpath: \#\[subpathloadsize\]\#==Gespeicherte Dokumente für Teilpfad: #[subpathloadsize]#
+unloaded documents detected in subpath: \#\[subpathdetectedsize\]\#==Entladene Dokumente erkannt im Teilpfad: #[subpathdetectedsize]#
+>Path<==>Pfad<
+>stored<==>gespeichert<
+>linked<==>verlinkt<
+>pending<==>wartend<
+>excluded<==>ausgeschlossen<
+>failed<==>fehlgeschlagen<
+Show Metadata==Metadaten anzeigen
+link, detected from context==Link, erkannt aus Kontext
+load &amp; index==Laden &amp; Indexieren
+>indexed<==>indexiert<
+>loading<==>ladend<
+Outbound Links, outgoing from \#\[host\]\# - Host List==Ausgehende Links, ausgehend von #[host]# - Host Liste
+Inbound Links, incoming to \#\[host\]\# - Host List==Eingehende Links, eingehend auf #[host]# - Host Liste
+browse \#\[host\]\#==Durchsuche #[host]#
+\#\[count\]\# URLs==#[count]# URL(s)
+Administration Options==Administration Optionen
 #-----------------------------
 
 #File: index.html
@@ -2960,6 +3000,8 @@ New Password is empty.==Das neue Passwort ist leer.
 YaCy \'\#\[clientname\]\#\': View URL Content==YaCy '#[clientname]#': Zeige URL Inhalte
 View URL Content==Zeige URL Inhalte
 >Get URL Viewer<==>URL Betrachter<
+"Show Metadata"=="Metadaten anzeigen"
+"Browse Host"=="Host durchsuchen"
 >URL Metadata<==>URL Metadaten<
 #URL==URL
 #Hash==Hash
@@ -3016,6 +3058,7 @@ Comment==Kommentar
 View this profile as==Zeige dieses Profil als 
 > or==> oder
 #vCard==vCard
+You can edit your profile <a href="/ConfigProfile_p.html">here</a>==Sie können Ihr Profil <a href="/ConfigProfile_p.html">hier</a> bearbeiten.
 #-----------------------------
 
 #File: Crawler_p.html
@@ -3319,8 +3362,9 @@ Peer Statistics::YaCy Statistics==Peer Statistiken::YaCy Statistiken
 #---------------------------
 #Administration<==Administration<
 >Web Search<==>Web Suche<
->Search Network<==>Suche Netzwerk<
-Peer Owner Profile==Impressum dieses Peers
+>File Search<==>Datei Suche<
+>HostBrowser<==>Host Browser<
+>About Us<==>Impressum dieses Peers<
 Help / YaCy Wiki==Hilfe / YaCy Wiki
 #-----------------------------
 
