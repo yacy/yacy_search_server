@@ -73,10 +73,10 @@ This is a list of searches that had been requested from remote peer search inter
 #---------------------------
 Blacklist Administration==Управление черными списками
 Used Blacklist engine:==Используемый черный список:
-This function provides an URL filter to the proxy; any blacklisted URL is blocked==Эта функция позволяет фильтровать URL перед прокси-сервером.
-from being loaded. You can define several blacklists and activate them separately.==загрузку. Вы можете задать несколько черных списков и активировать их по отдельности .
-You may also provide your blacklist to other peers by sharing them; in return you may==Вы также можете обменяться своим черным списком с другими узлами.
-collect blacklist entries from other peers.==собирать черный список с других узлов.
+This function provides an URL filter to the proxy; any blacklisted URL is blocked==Эта функция представляет собой URL-фильтр для прокси-сервера; адреса в черном списке не
+from being loaded. You can define several blacklists and activate them separately.==загружаются. Вы можете задать несколько черных списков и активировать их по отдельности.
+You may also provide your blacklist to other peers by sharing them; in return you may==Вы также можете открыть доступ к вашему черному списку другим узлам; или
+collect blacklist entries from other peers.==загружать шаблоны из черных списков других узлов.
 Active list:==Активный список
 No blacklist selected==Не выбран черный список
 Select list:==Выбранный список:
@@ -118,7 +118,7 @@ proxy==прокси
 #File: BlacklistCleaner_p.html
 #---------------------------
 Blacklist Cleaner==Чистка черного списка
-Here you can remove or edit illegal or double blacklist-entries.==Здесь вы можете удалить или редактировать ошибочные или двойные записи.
+Here you can remove or edit illegal or double blacklist-entries.==Здесь вы можете удалить или отредактировать ошибочные или двойные записи.
 Check list==Лист проверки
 "Check"=="Проверка"
 Allow regular expressions in host part of blacklist entries.==Разрешить регулярные выражения в черном списке.
@@ -163,7 +163,7 @@ Used Blacklist engine:==Использовать черный список
 Test list:==Тест списка:
 "Test"=="Тест"
 The tested URL was==Проверенный URL был
-It is blocked for the following cases:==Это блокируется в следующих случаях:
+It is blocked for the following cases:==Он блокируется в следующих случаях:
 Crawling==Crawling
 DHT==DHT
 News==Новости
@@ -3207,9 +3207,9 @@ Confirm Shutdown==Подтвердить выключение
 ### THE PROJECT ###
 The Project==Проект
 Project Home==Домашная страница
-Deutsches Forum==Форум на Немецком
-English Forum==Форум на Английском
-YaCy Project Wiki==Wiki сайт проекта YaCy
+Deutsches Forum==Форум на немецком
+English Forum==Форум на английском
+YaCy Project Wiki==Wiki‐сайт проекта YaCy
 # Development Change Log==Development Change Log
 amp;language=en==amp;язык=ru
 Development Change Log==Development Change Log 
