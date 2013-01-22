@@ -59,7 +59,7 @@ public class ConfigHTCache_p {
             }
 
             // proxyCacheSize
-            final int newProxyCacheSize = Math.max(post.getInt("maxCacheSize", 64), 4);
+            final int newProxyCacheSize = Math.max(post.getInt("maxCacheSize", 64), 0);
             env.setConfig(SwitchboardConstants.PROXY_CACHE_SIZE, newProxyCacheSize);
             Cache.setMaxCacheSize(newProxyCacheSize * 1024L * 1024L);
         }

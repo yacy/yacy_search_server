@@ -104,7 +104,7 @@ domain.net\/fullpath<==domain.net/полный путь<
 \*.sub.domain.net\/\*<==*.sub.domain.net/*<
 #sub.domain.\*\/\*<==sub.domain.*/*<
 #domain.\*\/\*<==domain.*/*<
-a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a> \(slow\)==полный <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">регулярное выражение</a> \(медленный\)
+a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a> \(slow\)==полное <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">регулярное выражение</a> \(медленно\)
 #was removed from blacklist==был удален из черного списка
 #was added to the blacklist==был добавлен в черный список
 Activate this list for==Использовать этот список для
@@ -160,7 +160,7 @@ This file will not contain any additional information==Этот файл не б
 #---------------------------
 Blacklist Test==Проверка черного списка
 Used Blacklist engine:==Использовать черный список
-Test list:==Список тестов:
+Test list:==Тест списка:
 "Test"=="Тест"
 The tested URL was==Проверенный URL был
 It is blocked for the following cases:==Это блокируется в следующих случаях:
@@ -3218,7 +3218,7 @@ Peer Statistics::YaCy Statistics==Peer Statistics::YaCy Statistics
 #File: env/templates/simpleheader.template
 #---------------------------
 Administration<==Администрирование<
->Web Search<==>Веб поиск<
+>Web Search<==>Веб‐поиск<
 >Search Network<==>Поиск сети<
 Peer Owner Profile==Профиль владельца пира
 Help / YaCy Wiki==Помощь / YaCy Wiki
@@ -3258,7 +3258,7 @@ System Update==Обновление системы
 Advanced Settings==Расширенные настройки
 Parser Configuration==Конфигурация обработки
 Local robots.txt==Локальный robots.txt
-Web Cache==Веб кэш
+Web Cache==Веб‐кэш
 Advanced Properties==Расширенные настройки
 #-----------------------------
 #File: env/templates/submenuContentIntegration.template

@@ -212,6 +212,7 @@ public class Scanner extends Thread {
         Service uri;
         try {
             while ((uri = this.scanqueue.take()) != POISONSERVICE) {
+                Thread.currentThread().setName("Scanner Start Loop; now: " + uri.getHostName()); // good for debugging
                 while (this.runner.size() >= this.runnerCount) {
                     /*for (Runner r: runner.keySet()) {
                         if (r.age() > 3000) synchronized(r) { r.interrupt(); }
@@ -251,6 +252,7 @@ public class Scanner extends Thread {
         @Override
         public void run() {
             try {
+                Thread.currentThread().setName("Scanner.Runner: Ping to " + this.service.getInetAddress().getHostAddress() + ":" + this.service.getProtocol().port); // good for debugging
                 if (TimeoutRequest.ping(this.service.getInetAddress().getHostAddress(), this.service.getProtocol().port, Scanner.this.timeout)) {
                     Access access = this.service.getProtocol() == Protocol.http || this.service.getProtocol() == Protocol.https ? Access.granted : Access.unknown;
                     Scanner.this.services.put(this.service, access);
