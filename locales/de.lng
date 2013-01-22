@@ -1935,7 +1935,9 @@ Name==Name
 Address==Adresse
 Hash==Hash
 Type==Typ
-Release/<br/>SVN==YaCy Version/<br/>SVN
+Release<==YaCy Version<
+#>PPM<==>PPM<
+#>QPH<==>QPH<
 Last<br/>Seen==Zuletzt<br/>online
 Location==Ort
 >URLs for<br/>Remote<br/>Crawl<==>URLs zum<br/>Remote<br/>Crawlen<
@@ -2028,10 +2030,10 @@ this peer==Ihr Peer
 #File: News.html
 #---------------------------
 Overview==Überblick
-Incoming&nbsp;News==eingehende News
-Processed&nbsp;News==gelesene News
-Outgoing&nbsp;News==ausgehende News
-Published&nbsp;News==veröffentlichte News
+Incoming&nbsp;News==Eingehende News
+Processed&nbsp;News==Gelesene News
+Outgoing&nbsp;News==Ausgehende News
+Published&nbsp;News==Veröffentlichte News
 This is the YaCyNews system \(currently under testing\).==Dies ist das YaCy News-System (zur Zeit noch im Test).
 The news service is controlled by several entry points:==Dieser News Service wird von folgenden Punkten initiiert:
 A crawl start with activated remote indexing will automatically create a news entry.==Wird ein neuer Crawl mit aktivierter Remote-Crawling-Funktion gestartet, dann wird automatisch ein News-Eintrag erstellt.
@@ -2050,7 +2052,7 @@ You can process these news with a button on the page to remove their appearance 
 you can stop the broadcast if you want.==Sie können die Weiterverteilung stoppen, wenn Sie wollen.
 <strong>Published News \(\#\[pusize\]\#\)</strong>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.==<strong>Veröffentlichte News (#[pusize]#)</strong>: Ihre News, die genügend verbreitet oder aus der Verbreitungsliste gelöscht wurden.
 Originator==Initiator
-Created==Geschaffen
+Created==Erstellt
 Category==Kategorie
 Received==Empfangen
 Distributed==Verteilt
@@ -2193,9 +2195,6 @@ Changes take effect immediately==Änderungen werden sofort wirksam
 Cache Settings:==Cache Einstellungen:
 #RAM Cache==RAM Cache
 <td>Description==<td>Beschreibung
-URLs in RAM buffer:==URLs im RAM Puffer:
-This is the size of the URL write buffer. Its purpose is to buffer incoming URLs==Dies ist die Größe des URL Schreibpuffers. Seine Aufgabe ist es die eingehenden URLs zu puffern
-in case of search result transmission and during DHT transfer.==im Falle von Suchergebnisübertragung und während des DHT Transfers.
 Words in RAM cache:==Wörter im RAM-Cache
 This is the current size of the word caches.==Dies ist die momentane Größe des Wort-Caches.
 The indexing cache speeds up the indexing process, the DHT cache holds indexes temporary for approval.==Der Indexing Cache beschleunigt den Indexier Prozess, der DHT Cache enthält temporäre Indizes zum Bestätigen.
@@ -2224,10 +2223,10 @@ delta times are ensured.==Zeitdifferenzen eingehalten.
 >local \(intranet\) crawls<==>Lokale (Intranet) Crawls<
 >global \(internet\) crawls<==>Globale (Internet) Crawls<
 "Enter New Parameters"=="Neue Parameter Setzen"
-Thread Pool Settings:==Threadpool Einstellungen:
+Thread Pool Settings:==Threadpool-Einstellungen:
 maximum Active==max. aktiv
 current Active==derzeit aktiv
-Enter new Threadpool Configuration==neue Threadpoolkonfiguration eintragen
+Enter new Threadpool Configuration==Neue Threadpool-Konfiguration eintragen
 #-----------------------------
 
 #File: PerformanceConcurrency_p.html
@@ -2402,19 +2401,11 @@ Advanced Settings==Erweiterte Einstellungen
 If you want to restore all settings to the default values,==Wenn Sie alle Einstellungen auf die ursprünglichen Werte zurücksetzen wollen,
 but <strong>forgot your administration password</strong>, you must stop the proxy,==aber Ihr <strong>Administatorpasswort vergessen haben</strong>, müssen Sie YaCy stoppen,
 delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder and start YaCy again.==die Datei 'DATA/SETTINGS/yacy.conf' im YaCy Hauptordner löschen und YaCy neu starten.
-#Performance Settings of Queues and Processes==Performanceeinstellungen für Puffer und Prozesse
 Performance Settings of Busy Queues==Performanceeinstellungen für Puffer und Prozesse
-Performance of Concurrent Processes==Performance der gleichzeitig laufenden Prozesse
-Performance Settings for Memory==Performanceeinstellungen für Speicher
-Performance Settings of Search Sequence==Performanceeinstellungen des Suchablaufs
-### --- Those 3 items are removed in latest SVN BEGIN
 Viewer and administration for database tables==Administration der Datenbank Tabellen
-Viewer for Peer-News==Einstellungen Peer Nachrichten
 Viewer for Cookies in Proxy==Einstellung Cookie Überwachung
-### --- Those 3 items are removed in latest SVN END
 Server Access Settings==Server Zugangs-Einstellungen
 Proxy Access Settings==Proxy Zugangs-Einstellungen
-#Content Parser Settings==Inhalt Parser Einstellungen
 Crawler Settings==Crawler Einstellungen
 HTTP Networking==HTTP Netzwerk
 #Remote Proxy \(optional\)==Remote Proxy (optional)
@@ -2611,7 +2602,7 @@ Shutting down.</strong><br />Application will terminate after working off all cr
 Your administration account setting has been made.==Ihre Administrator Account Einstellungen wurden gespeichert.
 Your new administration account name is \#\[user\]\#. The password has been accepted.<br />If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das Passwort wurde akzeptiert.<br />Wenn Sie zurück zu den Einstellungen gehen wollen, müssen Sie sich neu einloggen.
 Your proxy access setting has been changed.==Die Proxy Zugangs Einstellungen wurden geändert.
-Your proxy account check has been disabled, since you did not supply a password.==Ihr Proxy Account Test wurde deaktiviert, weil sie kein Passwort eingegeben haben.
+Your proxy account check has been disabled.==Ihr Proxy Account Test wurde deaktiviert.
 The new proxy IP filter is set to==Der neue Proxy IP-Filter ist
 The proxy port is:==Der Proxy Port ist:
 Port rebinding will be done in a few seconds.==Die Port Neubindung wird in wenigen Sekunden abgeschlossen sein.
@@ -2706,7 +2697,7 @@ A possible reason is that you are behind a firewall, NAT or Router.==Ein möglic
 But you can <a href="index.html">search the internet</a> using the other peers'==Trotzdem können Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index
 global index on your own search page.==der anderen Peers von Ihrer Suchseite aus benutzen.
 "bad"=="schlecht"
-"idea"="idee"
+"idea"="Idee"
 "good"="gut"
 "Follow YaCy on Twitter"=="Folge YaCy auf Twitter"
 We encourage you to open your firewall for the port you configured \(usually: 8090\),==Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8090) in Ihrer Firewall zu öffnen,
@@ -2725,6 +2716,9 @@ You have a principal peer because you publish your seed-list to a public accessi
 where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
 Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite_p.html">here</a>==Ihr Webseiten Indexierer ist untätig. Sie können <a href="CrawlStartSite_p.html">hier</a> einen Web Crawl starten
 Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.==Ihr Webseiten Indexierer ist beschäftigt. Sie können Ihren Web Crawl <a href="Crawler_p.html">hier</a> kontrollieren
+If you need professional support, please write to==Wenn Sie professionellen Support benötigen, schreiben Sie bitte an
+For community support, please visit our==Für Unterstützung aus der Community, besuchen Sie unser
+>forum<==>Forum<
 #-----------------------------
 
 #File: Status_p.inc
@@ -2753,7 +2747,7 @@ not used==nicht benutzt
 Used for YaCy -> YaCy communication:==Benutzt zur YaCy -> YaCy Kommunikation:
 WARNING:==WARNUNG:
 You do this on your own risk.==Sie verwenden diese Einstellung auf Ihr eigenes Risiko.
-If you do this without YaCy running on a desktop-pc or without Java 6 installed, this will possibly break startup.==Wenn Sie diese Option verwenden, ohne dass YaCy auf einem Desktop PC läuft, oder ohne installiertes Java 6, wird YaCy vermutlich nicht mehr starten.
+If you do this without YaCy running on a desktop-pc, this will possibly break startup.==Wenn Sie diese Option verwenden ohne dass YaCy auf einem Desktop PC läuft, wird YaCy vermutlich nicht mehr starten.
 In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf==In dem Fall müssen Sie die Konfiguration manuell in der folgenden Konfigurationsdatei ändern DATA/SETTINGS/yacy.conf
 >Experimental<==>Experimentell<
 Yes==Ja
@@ -2846,7 +2840,10 @@ Show surftips to everyone==Zeige Surftipps allen Benutzern
 #File: Table_API_p.html
 #---------------------------
 : Peer Steering==: Peer Steuerung
-Steering of API Actions<==Steuerung der API Aktionen<
+The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
+Click the API icon to see the XML.==Klicken Sie auf das API Symbol, um das XML anzeigen zu lassen.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+>Process Scheduler<==>Prozess Planer<
 This table shows actions that had been issued on the YaCy interface==Diese Tabelle zeigt Aktionen, die auf dem YaCy Interface ausgelöst wurden, 
 to change the configuration or to request crawl actions.==um Konfigurationen zu ändern oder Crawl Aktionen anzufordern.
 These recorded actions can be used to repeat specific actions and to send them==Diese aufgezeichneten Aktionen können dazu verwendet werden, bestimmte Aktionen wiederholt auszuführen und um sie
@@ -2864,10 +2861,42 @@ Call<br/>Count<==Aufruf<br/>Zähler<
 Recording<==Aufzeichnungs<
 Last&nbsp;Exec==Letzte&nbsp;Ausführung
 Next&nbsp;Exec==Nächste&nbsp;Ausführung
+#>URL<==>URL<
+>Event Trigger<==>Ereignis Auslöser<
+>Scheduler<==>Planer<
+>no event<==>kein Ereignis<
+>activate event<==>Ereignis aktivieren<
 >Scheduler<==>Geplante Ausführung<
-#>URL<==>URL
 >no repetition<==>keine Wiederholung<
 >activate scheduler<==>Ausführung planen<
+>off<==>ausschalten<
+>run once<==>einmalig ausführen<
+>run regular<==>geplant ausführen<
+>after start-up<==>nach dem Start<
+at 00:00h==um 00:00 Uhr
+at 01:00h==um 01:00 Uhr
+at 02:00h==um 02:00 Uhr
+at 03:00h==um 03:00 Uhr
+at 04:00h==um 04:00 Uhr
+at 05:00h==um 05:00 Uhr
+at 06:00h==um 06:00 Uhr
+at 07:00h==um 07:00 Uhr
+at 08:00h==um 08:00 Uhr
+at 09:00h==um 09:00 Uhr
+at 10:00h==um 10:00 Uhr
+at 11:00h==um 11:00 Uhr
+at 12:00h==um 12:00 Uhr
+at 13:00h==um 13:00 Uhr
+at 14:00h==um 14:00 Uhr
+at 15:00h==um 15:00 Uhr
+at 16:00h==um 16:00 Uhr
+at 17:00h==um 17:00 Uhr
+at 18:00h==um 18:00 Uhr
+at 19:00h==um 19:00 Uhr
+at 20:00h==um 20:00 Uhr
+at 21:00h==um 21:00 Uhr
+at 22:00h==um 22:00 Uhr
+at 23:00h==um 23:00 Uhr
 "Execute Selected Actions"=="Führe ausgewählte Aktionen aus"
 "Delete Selected Actions"=="Lösche ausgewählte Aktionen"
 >Result of API execution==>Ergebnis der API Ausführung
@@ -3123,8 +3152,9 @@ With a GET-property 'about' you get only reference relations about the host that
 With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==Mit der GET Eigenschaft 'latest' können Sie eine Liste der Referenzen abrufen, die während der aktuellen Laufzeit von YaCy berechnet wurden. Und mit jedem Aufruf nur ein Update der jeweils bis dahin neuen Referenzen.
 Click the API icon to see the XML file.==Klicken Sie auf die API Sprechblase, um die XML Datei anzusehen.
 To see a list of all APIs, please visit the <a href=\"http://www.yacy-websuche.de/wiki/index.php/Dev:API\">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
-
 Web Structure==Netz Struktur
+>Host List<==>Host Liste<
+\#\[count\]\# outlinks==#[count]# ausgehende Links
 host<==Host<
 depth<==Tiefe<
 nodes<==Knoten<
@@ -3133,10 +3163,12 @@ size<==Größe<
 >Background<==>Hintergrund<
 #>Text<==>Text<
 >Line<==>Linie<
->Dot<==>Punkt<
+>Pivot Dot<==>Achspunkt<
+>Other Dot<==>Anderer Punkt<
 >Dot-end<==>Punktende<
 >Color <==>Farbe <
 "change"=="Ändern"
+"WebStructurePicture"=="WebStrukturBild"
 #-----------------------------
 
 #File: Wiki.html
@@ -3237,19 +3269,31 @@ This search result can also be retrieved as RSS/<a href="http://www.opensearch.o
 The query format is similar to <a href="http://www.loc.gov/standards/sru/">SRU</a>.==Das Abfrageformat ist so ähnlich wie <a href="http://www.loc.gov/standards/sru/">SRU</a>.
 Click the API icon to see an example call to the search rss API.==Klicken Sie auf den API Button, um ein Beispiel zu sehen, wie das Such-RSS-API aufgerufen werden kann.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
-Did you mean:==Meinten Sie vielleicht:
 "Search"=="Suchen"
 'Search'=='Suchen'
 "search again"=="Erneut suchen" 
-more options==Mehr Optionen
 #Text==Text
 Images==Bilder
 #Audio==Audio
 Video==Videos
 Applications==Anwendungen
+more options==Mehr Optionen
+Illegal URL mask:==Ungültige URL Maske:
+\(not a valid regular expression\), mask ignored.==(Kein gültiger regulärer Ausdruck), Maske wurde ignoriert.
+Illegal prefer mask:==Ungültige bevorzugte Maske:
+Did you mean:==Meinten Sie vielleicht:
 The following words are stop-words and had been excluded from the search:==Folgende Wörter sind Stopwords und wurden von der Suche ausgeschlossen:
 No Results.==Keine Ergebnisse.
-length of search words must be at least 3 characters==Die Länge der Suchbegriffe muss mindestens 3 Zeichen betragen
+length of search words must be at least 2 characters==Die Länge der Suchbegriffe muss mindestens 2 Zeichen betragen
+Searching the web with this peer is disabled for unauthorized users. Please==Die Websuche auf diesem Peer ist für nicht angemeldete Benutzer deaktiviert. Bitte
+>log in<==>loggen Sie sich<
+as administrator to use the search function==als Administrator ein, um die Suchfunktion nutzen zu können.
+Location -- click on map to enlarge==Ort -- Auf die Karte klicken, um zu vergrößern
+Map \(c\) by <==Karte &copy; <
+#>OpenStreetMap<==>OpenStreetMap<
+and contributors, CC-BY-SA==und Mitwirkenden, CC-BY-SA Lizenz
+>Media<==>Medium<
+#>URL<==>URL<
 > of==> aus 
 g> local,==g> lokal,
 #g> remote),==g> remote),
@@ -3303,58 +3347,55 @@ Table Viewer==Tabellen Betrachter
 #File: env/templates/header.template
 #---------------------------
 YaCy - Distributed Search Engine==YaCy - Verteilte Suchmaschine
-### SEARCH & BROWSE ###
->Search==>Suche
+### SEARCH INTERFACES ###
+Search Interfaces==Suchschnittstellen
 Web Search==Web-Suche
 File Search==Datei-Suche
-Search&nbsp;&amp;&nbsp;Browse==Suchen&nbsp;&amp;&nbsp;Surfen
-Search Page==Suchseite
+Host Browser==Host-Browser
+# Location Search is currently commented out
+Location Search==Ortssuche
+#Embedded Solr API==Embedded Solr API
+#Embedded GSA API==Embedded GSA API
+# Rich Client Search is currently commented out
 Rich Client Search==Rich Client Suche
-Interactive local Search==Interaktive lokale Suche
 Compare Search==Vergleichs-Suche
-Ranking Config==Ranking Einstellungen
->Surftips==>Surftipps
-Local Peer Wiki==Lokales Wiki
->Bookmarks==>Lesezeichen
->Help==>Hilfe
+URL Viewer==URL Betrachter
+### SEARCH DESIGN ###
+Search Design==Suchmaskendesign
+Search Integration into External Sites==Integration Suche in Externe Seiten
+Integrated Search Configuration==Konfiguration der Integrierten Suche
 ### INDEX CONTROL ###
 Index&nbsp;Production==Indexerzeugung
-Index&nbsp;Control==Index&nbsp;Kontrolle
-Index Creation==Indexerzeugung
-Crawler Monitor==Crawler Überwachung
-Crawl Results==Crawl Ergebnisse
+#Crawler / Harvester==Crawler / Harvester
+Creation Monitor==Crawler Überwachung
 Index Administration==Indexverwaltung
 Filter &amp; Blacklists==Filter &amp; Sperrlisten
-### SEARCH INTEGRATION ###
-Search Integration==Suchintegration
-Search Portals==Such Portale
-Customization==Anpassungen
+Content Semantic==Inhalt Semantik
+Target Analysis==Ziel Analyse
+Process Scheduler==Prozess Planer
 ### MONITORING ###
-Monitoring==Kontrolle
+Monitoring==Überwachung
 YaCy Network==YaCy Netzwerk
 Web Visualization==Internet Visualisierung
-Access Tracker==Zugriffe
-#Server Log==Server Log
->Messages==>Nachrichten
+Network Access==Netzwerkzugriff
+Computation==Server Log
 #>Terminal==>Terminal
-"New Messages"=="Neue Nachrichten"
-### PEER CONTROL
+>Bookmarks==>Lesezeichen
+### PEER CONTROL ###
 Peer Control==Peer Kontrolle
 Admin Console==Admin Konsole
->API Action Steering<==>API Aktionen Steuerung<
 Confirm Restart==Bestätige Neustart
 Re-Start</a>==Neustarten</a>
 Confirm Shutdown==Bestätige Herunterfahren
 >Shutdown==>Herunterfahren
-### THE PROJECT ###
-The Project==Das Projekt
+### THE YACY PROJECT ###
+The YaCy Project==Das YaCy Projekt
 Project Home==Projektseite
-#Deutsches Forum==Deutsches Forum
-English Forum==Englisches Forum
-YaCy Project Wiki==YaCy Projekt Wiki
-# Development Change Log==Entwicklung Änderungshistorie
-amp;language=en==amp;language=de
-Development Change Log==Entwicklung Changelog
+#Tutorials<==Tutorials<
+Forum/Discussion<==Forum/Diskussion<
+#Project Wiki<==Project Wiki<
+#Git Repository==Git Repository
+#Bugtracker<==Bugtracker<
 Peer Statistics::YaCy Statistics==Peer Statistiken::YaCy Statistiken
 #-----------------------------
 
