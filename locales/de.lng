@@ -3240,6 +3240,9 @@ pagename==Seitenname
 description\]\]==Beschreibung]]
 This tag creates links to other pages of the wiki.==Dieser Tag erzeugt einen Link zu einer anderen Seite im Wiki.
 This tag displays an image, it can be aligned left, right or center.==Dieser Tag fügt ein Bild ein, es kann links (left), rechts (right) oder mittig (center) ausgerichtet werden.
+This tag displays a Youtube video with the id specified and fixed width 425 pixels and height 350 pixels.==Dieser Tag fügt ein Youtube Video mit der angegeben id und einer fixen Höhe von 425 Pixeln und einer fixen Breite von 350 Pixeln ein.
+i.e. use==z.B. wird mit
+to embedd this video:==dieses Video eingebunden:
 These tags create a table, whereas the first marks the beginning of the table, the second starts==Diese Tags erstellen eine Tabelle, wobei der erste den Anfang der Tabelle markiert, der zweite beginnt 
 a new line, the third and fourth each create a new cell in the line. The last displayed tag==eine neue Zeile, der dritte und vierte erzeugen eine neue Zelle in der Zeile. Der zuletzt dargestellte Tag
 closes the table.==schließt die Tabelle.
