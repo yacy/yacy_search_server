@@ -114,6 +114,8 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     private static final String WIKI_CLOSE_PRE_ESCAPED = "&lt;/pre&gt;";
     private static final String WIKI_HR_LINE = "----";
     private static final String WIKI_IMAGE = "Image:";
+    private static final String WIKI_VIDEO_YOUTUBE = "Youtube:";
+    private static final String WIKI_VIDEO_VIMEO = "Vimeo:";
     private static final String WIKI_OPEN_PRE_ESCAPED = "&lt;pre&gt;";
 
     private static final char ASTERISK = '*';
@@ -131,6 +133,8 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     private static final int LEN_WIKI_OPEN_LINK = WIKI_OPEN_LINK.length();
     private static final int LEN_WIKI_CLOSE_LINK = WIKI_CLOSE_LINK.length();
     private static final int LEN_WIKI_IMAGE = WIKI_IMAGE.length();
+    private static final int LEN_WIKI_VIDEO_YOUTUBE = WIKI_VIDEO_YOUTUBE.length();
+    private static final int LEN_WIKI_VIDEO_VIMEO = WIKI_VIDEO_VIMEO.length();
     private static final int LEN_WIKI_OPEN_EXTERNAL_LINK = WIKI_OPEN_EXTERNAL_LINK.length();
     private static final int LEN_WIKI_CLOSE_EXTERNAL_LINK = WIKI_CLOSE_EXTERNAL_LINK.length();
     private static final int LEN_WIKI_HR_LINE = WIKI_HR_LINE.length();
@@ -636,6 +640,16 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 }
 
                 line = line.substring(0, positionOfOpeningTag) + "<img src=\"" + kl + "\"" + align + alt + ">" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_LINK);
+            }            
+            // this is the part of the code that is responsible for Youtube video links supporting only the video ID as parameter
+            else if (kl.startsWith(WIKI_VIDEO_YOUTUBE)) {
+            	kl = kl.substring(LEN_WIKI_VIDEO_YOUTUBE);
+            	line = line.substring(0, positionOfOpeningTag) + "" + "<object width=\"425\" height=\"350\"><param name=\"movie\" value=\"http://www.youtube.com/v/" + kl + "\"></param><param name=\"wmode\" value=\"transparent\"></param><embed src=\"http://www.youtube.com/v/" + kl + "\" type=\"application/x-shockwave-flash\" wmode=\"transparent\" width=\"425\" height=\"350\"></embed></object>";            			
+            }
+            // this is the part of the code that is responsible for Vimeo video links supporting only the video ID as parameter
+            else if (kl.startsWith(WIKI_VIDEO_VIMEO)) {
+            	kl = kl.substring(LEN_WIKI_VIDEO_VIMEO);
+            	line = line.substring(0, positionOfOpeningTag) + "" + "<iframe src=\"http://player.vimeo.com/video/" + kl + "\" width=\"425\" height=\"350\" frameborder=\"0\" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>";            			
             }
             // if it's no image, it might be an internal link
             else {

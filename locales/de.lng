@@ -3240,13 +3240,16 @@ pagename==Seitenname
 description\]\]==Beschreibung]]
 This tag creates links to other pages of the wiki.==Dieser Tag erzeugt einen Link zu einer anderen Seite im Wiki.
 This tag displays an image, it can be aligned left, right or center.==Dieser Tag fügt ein Bild ein, es kann links (left), rechts (right) oder mittig (center) ausgerichtet werden.
+This tag displays a Youtube or Vimeo video with the id specified and fixed width 425 pixels and height 350 pixels.==Dieser Tag fügt ein Youtube oder Vimeo Video mit der angegeben id und einer fixen Höhe von 425 Pixeln und einer fixen Breite von 350 Pixeln ein.
+i.e. use==z.B. wird mit
+to embed this video:==dieses Video eingebunden:
 These tags create a table, whereas the first marks the beginning of the table, the second starts==Diese Tags erstellen eine Tabelle, wobei der erste den Anfang der Tabelle markiert, der zweite beginnt 
 a new line, the third and fourth each create a new cell in the line. The last displayed tag==eine neue Zeile, der dritte und vierte erzeugen eine neue Zelle in der Zeile. Der zuletzt dargestellte Tag
 closes the table.==schließt die Tabelle.
 #The escape tags will cause all tags in the text between the starting and the closing tag to not be treated as wiki-code.==Durch diesen Tag wird der Text, der zwischen den Klammern steht, nicht interpretiert und unformatiert als normaler Text ausgegeben.
 A text between these tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.==Ein Text zwischen diesen Tags wird alle Leerzeichen und Zeilenumbrüche beinhalten. Gut geeignet für ASCII-Kunst und Programm Code.
 If a line starts with a space, it will be displayed in a non-proportional font.==Wenn eine Zeile mit einem Leerzeichen anfängt, wird diese als nicht-proportionale Schriftart dargestellt.
-url description==URL Beschreibung
+url description==url Beschreibung
 This tag creates links to external websites.==Dieser Tag erstellt einen Link zu einer externen Internetseite.
 alt text==alt Beschreibung
 #-----------------------------
