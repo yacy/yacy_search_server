@@ -73,8 +73,16 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
     @Override
-    public void commit() {
-        for (final SolrConnector connector: this.connectors) connector.commit();
+    public void commit(boolean softCommit) {
+        for (final SolrConnector connector: this.connectors) connector.commit(softCommit);
+    }
+
+    /**
+     * force an explicit merge of segments
+     * @param maxSegments the maximum number of segments. Set to 1 for maximum optimization
+     */
+    public void optimize(int maxSegments) {
+        for (final SolrConnector connector: this.connectors) connector.optimize(maxSegments);
     }
 
     @Override

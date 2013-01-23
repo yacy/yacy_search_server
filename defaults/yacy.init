@@ -1056,7 +1056,7 @@ color_searchurlhover = #008000
 # - to check whats in solr after indexing, open http://localhost:8983/solr/admin/
 federated.service.solr.indexing.enabled = false
 federated.service.solr.indexing.url = http://127.0.0.1:8983/solr
-federated.service.solr.indexing.commitWithinMs = 180000
+federated.service.solr.indexing.commitWithinMs = -1
 federated.service.solr.indexing.sharding = MODULO_HOST_MD5
 federated.service.solr.indexing.schemefile = solr.keys.default.list
 # the lazy attribute causes that fields containing "" or 0 are not added and not written

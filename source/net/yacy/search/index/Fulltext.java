@@ -77,8 +77,6 @@ public final class Fulltext implements Iterable<byte[]> {
     private static final String SOLR_PATH = "solr_40"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
     private static final String SOLR_OLD_PATH[] = new String[]{"solr_36"};
     
-    private static final long forcedCommitTimeout = 3000; // wait this time until a next forced commit is executed
-    
     // class objects
 	private final File                location;
     private       Index               urlIndexFile;
@@ -87,7 +85,6 @@ public final class Fulltext implements Iterable<byte[]> {
     private       ArrayList<HostStat> statsDump;
     private final MirrorSolrConnector solr;
     private final SolrConfiguration   solrScheme;
-    private long                forcedCommitTime;
 
     protected Fulltext(final File path, final SolrConfiguration solrScheme) {
         this.location = path;
@@ -97,7 +94,6 @@ public final class Fulltext implements Iterable<byte[]> {
         this.statsDump = null;
         this.solr = new MirrorSolrConnector(10000, 10000, 100);
         this.solrScheme = solrScheme;
-        this.forcedCommitTime = 0;
     }
 
     /**
@@ -158,7 +154,7 @@ public final class Fulltext implements Iterable<byte[]> {
             if (oldLocation.exists()) oldLocation.renameTo(solrLocation);
         }
         EmbeddedSolrConnector esc = new EmbeddedSolrConnector(solrLocation, new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"));
-        esc.setCommitWithinMs(commitWithin);
+        if (commitWithin >= 0) esc.setCommitWithinMs(commitWithin);
         Version luceneVersion = esc.getConfig().getLuceneVersion("luceneMatchVersion");
         String lvn = luceneVersion.name();
         int p = lvn.indexOf('_');
@@ -239,11 +235,8 @@ public final class Fulltext implements Iterable<byte[]> {
         return this.solr.getCommitWithinMs();
     }
     
-    public void commit() {
-        if (this.forcedCommitTime + forcedCommitTimeout > System.currentTimeMillis()) return;
-        this.forcedCommitTime = Long.MAX_VALUE - forcedCommitTimeout; // set the time high to prevent that other processes get to this point meanwhile
-        this.solr.commit();
-        this.forcedCommitTime = System.currentTimeMillis(); // set the exact time
+    public void commit(boolean softCommit) {
+        this.solr.commit(softCommit);
     }
 
     public Date getLoadDate(final String urlHash) {
@@ -378,7 +371,7 @@ public final class Fulltext implements Iterable<byte[]> {
                 synchronized (Fulltext.this.solr) {
                     try {
                         count.addAndGet(Fulltext.this.solr.deleteByQuery(q));
-                        if (count.get() > 0) Fulltext.this.solr.commit();
+                        if (count.get() > 0) Fulltext.this.solr.commit(true);
                     } catch (IOException e) {}
                 }
         
@@ -444,7 +437,7 @@ public final class Fulltext implements Iterable<byte[]> {
                             count.incrementAndGet();
                         }
                     }
-                    if (count.get() > 0) Fulltext.this.solr.commit();
+                    if (count.get() > 0) Fulltext.this.solr.commit(true);
                 } catch (InterruptedException e) {}
             }
         };
@@ -466,7 +459,7 @@ public final class Fulltext implements Iterable<byte[]> {
                         for (byte[] urlHash: deleteIDs) {
                             Fulltext.this.solr.delete(ASCII.String(urlHash));
                         }
-                        Fulltext.this.solr.commit();
+                        Fulltext.this.solr.commit(true);
                     }
                 } catch (final Throwable e) {
                     Log.logException(e);

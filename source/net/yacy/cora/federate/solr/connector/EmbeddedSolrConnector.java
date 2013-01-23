@@ -146,7 +146,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
 
     @Override
     public synchronized void close() {
-        try {this.commit();} catch (Throwable e) {Log.logException(e);}
+        try {this.commit(false);} catch (Throwable e) {Log.logException(e);}
         try {super.close();} catch (Throwable e) {Log.logException(e);}
         try {this.defaultCore.close();} catch (Throwable e) {Log.logException(e);}
         try {this.cores.shutdown();} catch (Throwable e) {Log.logException(e);}
@@ -213,7 +213,6 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         storage.mkdirs();
         try {
             EmbeddedSolrConnector solr = new EmbeddedSolrConnector(storage, solr_config);
-            solr.setCommitWithinMs(100);
             SolrInputDocument doc = new SolrInputDocument();
             doc.addField(YaCySchema.id.name(), "ABCD0000abcd");
             doc.addField(YaCySchema.title.name(), "Lorem ipsum");

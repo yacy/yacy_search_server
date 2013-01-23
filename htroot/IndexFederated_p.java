@@ -77,7 +77,7 @@ public class IndexFederated_p {
             final boolean previous_core_fulltext = sb.index.fulltext().connectedLocalSolr() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, false);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_FULLTEXT, post_core_fulltext);
 
-            final int commitWithinMs = post.getInt("solr.indexing.commitWithinMs", env.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000));
+            final int commitWithinMs = post.getInt("solr.indexing.commitWithinMs", env.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, -1));
             if (previous_core_fulltext && !post_core_fulltext) {
                 // switch off
                 sb.index.fulltext().disconnectLocalSolr();

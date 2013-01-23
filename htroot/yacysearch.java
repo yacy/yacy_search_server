@@ -117,7 +117,6 @@ public class yacysearch {
         final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
         String querystring = originalquerystring.replace('+', ' ').trim();
         CacheStrategy snippetFetchStrategy = (post == null) ? null : CacheStrategy.parse(post.get("verify", sb.getConfig("search.verify", "")));
-        if (authenticated && originalquerystring.length() == 0) sb.index.fulltext().commit();
         
         final servletProperties prop = new servletProperties();
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);

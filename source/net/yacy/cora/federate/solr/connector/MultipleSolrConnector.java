@@ -47,7 +47,7 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
         this.solr = new RemoteSolrConnector(url);
         this.queue = new ArrayBlockingQueue<SolrInputDocument>(1000);
         this.worker = new AddWorker[connections];
-        this.commitWithinMs = 180000;
+        this.commitWithinMs = -1;
         for (int i = 0; i < connections; i++) {
             this.worker[i] = new AddWorker(url);
             this.worker[i].start();
@@ -58,7 +58,7 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
         private final SolrConnector solr;
         public AddWorker(final String url) throws IOException {
             this.solr = new RemoteSolrConnector(url);
-            this.solr.setCommitWithinMs(MultipleSolrConnector.this.commitWithinMs);
+            if (MultipleSolrConnector.this.commitWithinMs >= 0 ) this.solr.setCommitWithinMs(MultipleSolrConnector.this.commitWithinMs);
         }
         @Override
         public void run() {
@@ -97,8 +97,16 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
     }
 
     @Override
-    public void commit() {
-        this.solr.commit();
+    public void commit(boolean softCommit) {
+        this.solr.commit(softCommit);
+    }
+
+    /**
+     * force an explicit merge of segments
+     * @param maxSegments the maximum number of segments. Set to 1 for maximum optimization
+     */
+    public void optimize(int maxSegments) {
+        this.solr.optimize(maxSegments);
     }
     
     @Override

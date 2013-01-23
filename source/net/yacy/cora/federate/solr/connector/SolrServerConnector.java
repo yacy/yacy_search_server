@@ -91,6 +91,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
 
     /**
      * set the solr autocommit delay
+     * when doing continuous inserts, don't set this value because it would cause continuous commits
      * @param c the maximum waiting time after a solr command until it is transported to the server
      */
     @Override
@@ -99,9 +100,21 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     }
 
     @Override
-    public synchronized void commit() {
+    public synchronized void commit(final boolean softCommit) {
         try {
-            this.server.commit();
+            this.server.commit(true, true, softCommit);
+        } catch (SolrServerException e) {
+        } catch (IOException e) {
+        }
+    }
+
+    /**
+     * force an explicit merge of segments
+     * @param maxSegments the maximum number of segments. Set to 1 for maximum optimization
+     */
+    public void optimize(int maxSegments) {
+        try {
+            this.server.optimize(true, true, maxSegments);
         } catch (SolrServerException e) {
         } catch (IOException e) {
         }
@@ -110,7 +123,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public synchronized void close() {
         try {
-            if (this.server != null) synchronized (this.server) {this.server.commit();}
+            if (this.server != null) synchronized (this.server) {this.server.commit(true, true, false);}
             this.server = null;
         } catch (SolrServerException e) {
             log.warn(e);
@@ -194,7 +207,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         try {
             synchronized (this.server) {
                 this.server.deleteByQuery("*:*");
-                this.server.commit();
+                this.server.commit(true, true, false);
             }
         } catch (final Throwable e) {
             throw new IOException(e);
@@ -234,7 +247,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             synchronized (this.server) {
                 long c0 = this.getQueryCount(querystring);
                 this.server.deleteByQuery(querystring, this.commitWithinMs);
-                this.commit();
+                this.commit(true);
                 long c1 = this.getQueryCount(querystring);
                 return (int) (c1 - c0);
             }
@@ -254,7 +267,6 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         try {
             synchronized (this.server) {
                 this.server.request(up);
-                //this.server.commit();
             }
         } catch (final Throwable e) {
             throw new IOException(e);
@@ -273,7 +285,6 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             // catches "version conflict for": try this again and delete the document in advance
             try {
                 this.server.deleteById((String) solrdoc.getFieldValue(YaCySchema.id.getSolrFieldName()));
-                //this.server.commit();
             } catch (SolrServerException e1) {}
             try {
                 synchronized (this.server) {

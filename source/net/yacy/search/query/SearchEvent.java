@@ -210,6 +210,9 @@ public final class SearchEvent {
                     .getFlagAcceptRemoteIndex()));
         final long start = System.currentTimeMillis();
 
+        // do a soft commit for fresh results
+        query.getSegment().fulltext().commit(true);
+        
         // prepare a local RWI search
         // initialize a ranking process that is the target for data
         // that is generated concurrently from local and global search threads

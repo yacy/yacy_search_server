@@ -61,10 +61,6 @@ public class index {
                 return prop;
             }
         }
-
-        if (authorizedAccess) {
-            sb.index.fulltext().commit(); // call this only as superuser to prevent that this can be misused for DoS
-        }
         
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean focus  = (post == null) ? true : post.get("focus", "1").equals("1");

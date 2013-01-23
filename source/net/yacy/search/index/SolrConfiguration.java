@@ -645,6 +645,10 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                     inboundLinks.remove(canonical);
                     outboundLinks.remove(canonical);
                     add(doc, YaCySchema.canonical_t, canonical.toNormalform(false));
+                    // set a flag if this is equal to sku
+                    if (contains(YaCySchema.canonical_equal_sku_b) && canonical.equals(docurl)) {
+                        add(doc, YaCySchema.canonical_equal_sku_b, true);
+                    }
                 }
             }
 

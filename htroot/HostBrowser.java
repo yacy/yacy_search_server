@@ -96,7 +96,7 @@ public class HostBrowser {
         }
 
         String path = post == null ? "" : post.get("path", "").trim();
-        if (admin && path.length() == 0) sb.index.fulltext().commit();
+        sb.index.fulltext().commit(true);
         if (post == null || env == null) {
             return prop;
         }

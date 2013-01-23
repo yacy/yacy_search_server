@@ -59,8 +59,16 @@ public class RetrySolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
     @Override
-    public void commit() {
-        this.solrConnector.commit();
+    public void commit(boolean softCommit) {
+        this.solrConnector.commit(softCommit);
+    }
+
+    /**
+     * force an explicit merge of segments
+     * @param maxSegments the maximum number of segments. Set to 1 for maximum optimization
+     */
+    public void optimize(int maxSegments) {
+        this.solrConnector.optimize(maxSegments);
     }
 
     @Override

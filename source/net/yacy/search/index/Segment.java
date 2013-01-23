@@ -35,6 +35,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.solr.client.solrj.util.ClientUtils;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.document.ASCII;
@@ -68,6 +71,7 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ISO639;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -347,6 +351,21 @@ public class Segment {
             ) {
         final long startTime = System.currentTimeMillis();
 
+        // DO A SOFT/HARD COMMIT IF NEEDED
+        if (MemoryControl.shortStatus()) {
+            // do a 'hard' commit to flush index caches
+            this.fulltext.getSolr().commit(false);
+        } else {
+            if (
+                (this.fulltext.getSolrScheme().contains(YaCySchema.exact_signature_l) && this.fulltext.getSolrScheme().contains(YaCySchema.exact_signature_unique_b)) ||
+                (this.fulltext.getSolrScheme().contains(YaCySchema.fuzzy_signature_l) && this.fulltext.getSolrScheme().contains(YaCySchema.fuzzy_signature_unique_b)) ||
+                this.fulltext.getSolrScheme().contains(YaCySchema.title_unique_b) ||
+                this.fulltext.getSolrScheme().contains(YaCySchema.description_unique_b)
+               ) {
+                this.fulltext.getSolr().commit(true); // make sure that we have latest information for the postprocessing steps
+            }
+        }
+        
         // CREATE INDEX
 
         // load some document metadata
@@ -368,15 +387,47 @@ public class Segment {
         for (YaCySchema[] checkfields: new YaCySchema[][]{
                 {YaCySchema.exact_signature_l, YaCySchema.exact_signature_unique_b},
                 {YaCySchema.fuzzy_signature_l, YaCySchema.fuzzy_signature_unique_b}}) {
-            YaCySchema hashfield = checkfields[0];
+            YaCySchema checkfield = checkfields[0];
             YaCySchema uniquefield = checkfields[1];
-            if (this.fulltext.getSolrScheme().contains(hashfield) && this.fulltext.getSolrScheme().contains(uniquefield)) {
+            if (this.fulltext.getSolrScheme().contains(checkfield) && this.fulltext.getSolrScheme().contains(uniquefield)) {
                 // lookup the document with the same signature
-                long signature = ((Long) solrInputDoc.getField(hashfield.getSolrFieldName()).getValue()).longValue();
+                long signature = ((Long) solrInputDoc.getField(checkfield.getSolrFieldName()).getValue()).longValue();
                 try {
-                    if (this.fulltext.getSolr().exists(hashfield.getSolrFieldName(), Long.toString(signature))) {
+                    if (this.fulltext.getSolr().exists(checkfield.getSolrFieldName(), Long.toString(signature))) {
                         // change unique attribut in content
                         solrInputDoc.setField(uniquefield.getSolrFieldName(), false);
+                    }
+                } catch (IOException e) {}
+            }
+        }
+        
+        // CHECK IF TITLE AND DESCRIPTION IS UNIQUE (this is by default not switched on)
+        uniquecheck: for (YaCySchema[] checkfields: new YaCySchema[][]{
+                {YaCySchema.title, YaCySchema.title_unique_b},
+                {YaCySchema.description, YaCySchema.description_unique_b}}) {
+            YaCySchema checkfield = checkfields[0];
+            YaCySchema uniquefield = checkfields[1];
+            if (this.fulltext.getSolrScheme().contains(checkfield) && this.fulltext.getSolrScheme().contains(uniquefield)) {
+                // lookup in the index for the same title
+                String checkstring = checkfield == YaCySchema.title ? document.dc_title() : document.dc_description();
+                if (checkstring.length() == 0) {
+                    solrInputDoc.setField(uniquefield.getSolrFieldName(), false);
+                    continue uniquecheck;
+                }
+                checkstring = ClientUtils.escapeQueryChars("\"" + checkstring + "\"");
+                try {
+                    if (this.fulltext.getSolr().exists(checkfield.getSolrFieldName(), checkstring)) {
+                        // switch unique attribute in new document
+                        solrInputDoc.setField(uniquefield.getSolrFieldName(), false);
+                        // switch attribute also in all existing documents (which should be exactly only one!)
+                        SolrDocumentList docs = this.fulltext.getSolr().query(checkfield.getSolrFieldName() + ":" + checkstring + " AND " + uniquefield.getSolrFieldName() + ":true", 0, 1000, YaCySchema.id.getSolrFieldName());
+                        for (SolrDocument doc: docs) {
+                            SolrInputDocument sid = ClientUtils.toSolrInputDocument(doc);
+                            sid.setField(uniquefield.getSolrFieldName(), false);
+                            this.fulltext.getSolr().add(sid);
+                        }
+                    } else {
+                        solrInputDoc.setField(uniquefield.getSolrFieldName(), true);
                     }
                 } catch (IOException e) {}
             }
@@ -388,7 +439,6 @@ public class Segment {
             if (references > 0) solrInputDoc.setField(YaCySchema.references_i.getSolrFieldName(), references);
         }
         
-        
         // STORE TO SOLR
         String error = null;
         tryloop: for (int i = 0; i < 20; i++) {
@@ -399,7 +449,7 @@ public class Segment {
             } catch ( final IOException e ) {
                 error = "failed to send " + urlNormalform + " to solr";
                 Log.logWarning("SOLR", error + e.getMessage());
-                if (i == 10) this.fulltext.commit();
+                if (i == 10) this.fulltext.commit(false);
                 try {Thread.sleep(1000);} catch (InterruptedException e1) {}
                 continue tryloop;
             }

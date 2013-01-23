@@ -51,7 +51,13 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     /**
      * force a commit
      */
-    public void commit();
+    public void commit(boolean softCommit);
+
+    /**
+     * force an explicit merge of segments
+     * @param maxSegments the maximum number of segments. Set to 1 for maximum optimization
+     */
+    public void optimize(int maxSegments);
     
     /**
      * close the server connection

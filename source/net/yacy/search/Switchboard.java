@@ -431,7 +431,7 @@ public final class Switchboard extends serverSwitch {
         ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
         final File segmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
         this.index = new Segment(this.log, new File(segmentsPath, "default"), solrScheme);
-        final int connectWithinMs = this.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000);
+        final int connectWithinMs = this.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, -1);
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true)) {
@@ -1288,7 +1288,7 @@ public final class Switchboard extends serverSwitch {
                 this.useTailCache,
                 this.exceed134217727);
             this.index = new Segment(this.log, new File(new File(new File(indexPrimaryPath, networkName), "SEGMENTS"), "default"), solrScheme);
-            final int connectWithinMs = this.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000);
+            final int connectWithinMs = this.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, -1);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true)) {
@@ -1306,7 +1306,7 @@ public final class Switchboard extends serverSwitch {
                                     solrurls,
                                     ShardSelection.Method.MODULO_HOST_MD5,
                                     10000, true);
-                    solr.setCommitWithinMs(connectWithinMs);
+                    if (connectWithinMs >= 0) solr.setCommitWithinMs(connectWithinMs);
                     this.index.fulltext().connectRemoteSolr(solr);
                 } catch ( final IOException e ) {
                     Log.logException(e);
@@ -2232,7 +2232,7 @@ public final class Switchboard extends serverSwitch {
             // execute the (post-) processing steps for all entries that have a process tag assigned
             if (this.crawlQueues.coreCrawlJobSize() == 0 && index.connectedCitation() && index.fulltext().getSolrScheme().contains(YaCySchema.process_sxt)) {
                 // that means we must search for those entries.
-                index.fulltext().getSolr().commit(); // make sure that we have latest information that can be found
+                index.fulltext().getSolr().commit(true); // make sure that we have latest information that can be found
                 BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery(YaCySchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 1000, 60000, 10);
                 SolrDocument doc;
                 int proccount_clickdepth = 0;

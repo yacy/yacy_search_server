@@ -371,7 +371,7 @@ public class Crawler_p {
                     try {
                         sb.crawlQueues.errorURL.removeHost(ASCII.getBytes(hosthash));
                         sb.index.fulltext().getSolr().deleteByQuery(YaCySchema.host_id_s.getSolrFieldName() + ":\"" + hosthash + "\" AND " + YaCySchema.failreason_t.getSolrFieldName() + ":[* TO *]");
-                        sb.index.fulltext().commit();
+                        sb.index.fulltext().commit(true);
                     } catch (IOException e) {Log.logException(e);}
                 }
                 

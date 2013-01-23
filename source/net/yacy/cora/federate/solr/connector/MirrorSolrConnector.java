@@ -171,9 +171,18 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     @Override
-    public void commit() {
-        if (this.solr0 != null) this.solr0.commit();
-        if (this.solr1 != null) this.solr1.commit();
+    public void commit(boolean softCommit) {
+        if (this.solr0 != null) this.solr0.commit(softCommit);
+        if (this.solr1 != null) this.solr1.commit(softCommit);
+    }
+
+    /**
+     * force an explicit merge of segments
+     * @param maxSegments the maximum number of segments. Set to 1 for maximum optimization
+     */
+    public void optimize(int maxSegments) {
+        if (this.solr0 != null) this.solr0.optimize(maxSegments);
+        if (this.solr1 != null) this.solr1.optimize(maxSegments);
     }
     
     @Override
@@ -320,7 +329,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         // check if there is a autocommit problem
         if (c.hitCache.containsKey(key)) {
             // the document should be there, therefore make a commit and check again
-            this.commit();
+            this.commit(true);
             if ((solr0 != null && ((doc = solr0.getById(key, fields)) != null)) || (solr1 != null && ((doc = solr1.getById(key, fields)) != null))) {
                 addToCache(doc, fields.length == 0);
                 return doc;

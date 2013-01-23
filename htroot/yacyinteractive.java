@@ -47,11 +47,6 @@ public class yacyinteractive {
         prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
         prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
 
-        final boolean admin = sb.verifyAuthentication(header);
-        if (admin) {
-            sb.index.fulltext().commit();
-        }
-        
         final String query = (post == null) ? "" : post.get("query", "");
         final String startRecord = (post == null) ? "0" : post.get("startRecord", "");
         final String maximumRecords = (post == null) ? "10" : post.get("maximumRecords", "");

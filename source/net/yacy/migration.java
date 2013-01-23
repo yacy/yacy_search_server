@@ -319,7 +319,7 @@ public class migration {
                             }
                             Log.logInfo("migrateUrldbtoSolr", Integer.toString(i) + " entries left (convert next chunk of 1000 entries)");
                         }
-                        ft.commit();
+                        ft.commit(true);
 
                     } catch (IOException ex) {
                         Log.logInfo("migrateUrldbtoSolr", "error reading old urldb index");
