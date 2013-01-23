@@ -33,7 +33,7 @@ Access Tracker==Zugriffe
 Server Access Overview==Обзор доступа к серверу
 This is a list of \#\[num\]\# requests to the local http server within the last hour.==Это список запросов #[num]# на локальный сервер http в течение последнего часа.
 This is a list of requests to the local http server within the last hour.==Это список запросов на локальный http сервер в течение часа.
-Showing \#\[num\]\# requests.==Показать #[num]# запросы.
+Showing \#\[num\]\# requests.==Показать #[num]# запросов.
 #>Host<==>Хост<
 >Path<==>Путь<
 Date<==Дата<
@@ -286,8 +286,8 @@ Public Queue==Публичная Очередь
 #File: compare_yacy.html
 #---------------------------
 Websearch Comparison==Сравнение веб-поиска
-Left Search Engine==Левый поисковый
-Right Search Engine==Правый поисковый
+Left Search Engine==Левый поиск
+Right Search Engine==Правый поиск
 Query==Запрос
 "Compare"=="Сравнить"
 Search Result==Результат поиска
@@ -307,10 +307,10 @@ Admin Account==Admin, учетная запись
 Access from localhost without account==Для доступа с localhost не требуются права
 Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==Доступ к узлу со своего компьютера \ (localhost access\) разрешен. Нет необходимости настраивать управление учетной записи.
 Access only with qualified account==Доступ только с квалифицированной учетной записи
-You need this only if you want a remote access to your peer.==Это нужно только если вам нужен доступ к пирам.
+You need this only if you want a remote access to your peer.==Это нужно только если вам нужен удаленный доступ к вашему узлу
 Peer User:==Пир(юзер)
-New Peer Password:==Новый пароль Пира:
-Repeat Peer Password:==Повторите пароль Пира
+New Peer Password:==Новый пароль Узла:
+Repeat Peer Password:==Повторите пароль Узла:
 "Define Administrator"=="Определить Администратором"
 Select user==Выбранный пользователь
 New user==Новый пользователь
@@ -416,31 +416,31 @@ You can also use your peer without opening it, but this is not recomended.==Вы
 #File: ConfigHeuristics_p.html
 #---------------------------
 Heuristics Configuration==Конфигурация Эвристик
-A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==Эвристика <a href=\"http://ru.wikipedia.org/wiki/Эвристика\"> </a> специальные методы, которые помогают в анализе и поиска лучшего результата.
-The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==Эвристический поиск использует методы, которые помогают улучшить результат поиска по основным ссылкам и другим запросам в поисковой системе. 
-When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Когда используется эвристический поиск, непосредственно ссылки не используются в выдаче результата, но загруженные и индексированные страницы храняться как обычный контент.
-#This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Damit wird sichergestellt dass die Sperrlisten verwendet werden können und dass die Suchbegriffe auch wirklich auf den Seiten auftauchen, die mithilfe der Heuristik gefunden wurden.
+A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==Эвристика <a href=\"http://ru.wikipedia.org/wiki/Эвристика\"> </a> это специальный метод, которые помогают в анализе и поиске лучшего результата.
+The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==Эвристический поиск использует методы, которые помогают улучшить результат поиска за счет предугадывания ссылок и/или запросов к другим поисковым системам. 
+When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Когда используется эвристический поиск, полученные ссылки не используются в поисковой выдаче напрямую а используются для индексации новых страниц.
+#This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Это дает возможность использовать черные списки и гарантирует что что искомое слово реально есть на странице найденной эвристикой.
 The success of heuristics are marked with an image==Успех эвристик отмечен изображением
-heuristic:&lt;name&gt;==Эвристика:&lt;Name&gt;
-#\(redundant\)==\(избыточный\)
+heuristic:&lt;name&gt;==эвристика:&lt;название&gt;
+#\(redundant\)==\(избыточно\)
 \(new link\)==\(новый линк\)
-below the favicon left from the search result entry:==ниже значок слева от результата поиска:
+below the favicon left from the search result entry:==под иконкой слева от результата поиска:
 The search result was discovered by a heuristic, but the link was already known by YaCy==Результат поиска был обнаружен при помощи эвристики, но линк был уже известен YaCy
 The search result was discovered by a heuristic, not previously known by YaCy==Результат поиска был обнаружен при помоще эвристики, но ранее не был известен YaCy
-\'site\'-operator: instant shallow crawl=='site'-Operator: Sofortiger oberflächlicher Crawl
-When a search is made using a \'site\'-operator \(like: \'download site:yacy.net\'\) then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==Wenn eine Suche mit dem 'site'-Operator gestartet wird (z.B.: 'download site:yacy.net') dann wird der Host des 'site'-Operator sofort gecrawlt mit einer auf den Host beschränkten Suchtiefe von 1.
-That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Das bedeutet: Gleich nach der Suchanfrage wird die Portalseite des Hosts geladen und jede verlinkte Seite die auf eine Seite auf demselben Host verweist.
-Because this \'instant crawl\' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search \(after a small pause of some seconds\).==Weil dieser 'Sofort Crawl' auch die robots.txt und eine minimale Zugriffszeit für folgende Seiten berücksichtigen muss, ist diese Heuristik sehr langsam - aber kann alle gewünschten Suchergebniss finden indem eine zweite Suche (nach einigen Sekunden Pause) gestartet wird. 
+\'site\'-operator: instant shallow crawl== Оператор 'site': - мгновенная неглубокая индексация
+When a search is made using a \'site\'-operator \(like: \'download site:yacy.net\'\) then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==Если при поиске используется оператор 'site' (например: 'download site:yacy.net') то указанный сайт обходится с глубиной поиска 1.
+That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Это значит: сразу после поиска главная страница сайта и все страницы сайта на которые есть ссылки с главной - загружены.
+Because this \'instant crawl\' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search \(after a small pause of some seconds\).==Так как эта эвристика должна соблюдать указанные в robots.txt и в конфигурации YaCy ограничения то эта эвристика достаточно медленная. Но страницы могут быть доступны при следущем поиске (через несколько секунд). 
 scroogle: load external search result list==scroogle: загрузка внешних результатов поиска
 When using this heuristic, then every search request line is used for a call to scroogle.==При использовании эвристически,  каждая строка поискового запроса используется для вызова scroogle .
-20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==20 результаты взяты из scroogle и загружаются одновременно, анализируются и индексируются сразу.
+20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==20 результатов берутся из scroogle и загружаются одновременно, анализируются и индексируются сразу.
 #-----------------------------
 #File: ConfigHTCache_p.html
 #---------------------------
 Hypertext Cache Configuration==Настройка кэша гипертекста
 The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==Кэш храненит данные полученные по HTTP и FTP протоколу. Документы из smb:// and file:// не кэшируются.
-The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==Ротация кэша: если она заполнена, то старые записи будут удалены и заменены на новые.
-HTCache Configuration==HT Настройка кэша
+The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==Ротация кэша: если он заполнен, то старые записи будут удалены и заменены на новые.
+HTCache Configuration==Настройка кэша
 The path where the cache is stored==Путь, где сохраняется кэш
 The current size of the cache==Текущий размер кэша
 The maximum size of the cache==Максимальный размер кэша
@@ -483,24 +483,24 @@ YaCy Portal Search==Поисковый Портал YaCy
 #Configuration options and defaults for \'yconf\':==Konfigurations Optionen und Standardeinstellungen für 'yconf':
 Defaults<==По умолчанию<
 url<==URL<
-#is a mandatory property - no default<==muss angegeben werden<
+#is a mandatory property - no default<==является обязательным свойством<
 YaCy P2P Web Search==YaCy P2P Веб поиск
-#Size and position \(width \| height \| position\)==Größe und Position (Breite | Höhe | Position)
-#Specifies where the dialog should be displayed. Possible values for position: \'center\', \'left\', \'right\', \'top\', \'bottom\', or an array containing a coordinate pair \(in pixel offset from top left of viewport\) or the possible string values \(e.g. \[\'right\',\'top\'\] for top right corner\)==Gibt an wo der Dialog angezeigt werden soll. Mögliche Werte für position: 'center', 'left', 'right', 'top', 'bottom', oder ein Array das ein Koordinatenpaar enthält (in Pixel Werten als Offset von der linken oberen Ecke des Viewports) oder einer möglichen String Variabble (e.g. ['right','top'] für die rechte obere Ecke)
-#Animation effects \(show | hide\)==Animationseffekte (show | hide)
+Size and position \(width \| height \| position\)==Размер и положение (ширина | высота | положение )
+Specifies where the dialog should be displayed. Possible values for position: \'center\', \'left\', \'right\', \'top\', \'bottom\', or an array containing a coordinate pair \(in pixel offset from top left of viewport\) or the possible string values \(e.g. \[\'right\',\'top\'\] for top right corner\)==Gibt an wo der Dialog angezeigt werden soll. Mögliche Werte für position: 'center', 'left', 'right', 'top', 'bottom', oder ein Array das ein Koordinatenpaar enthält (in Pixel Werten als Offset von der linken oberen Ecke des Viewports) oder einer möglichen String Variabble (e.g. ['right','top'] für die rechte obere Ecke)
+Animation effects \(show | hide\)== Анимационные эффекты (показать | скрыть)
 #The effect to be used. Possible values: \'blind\', \'clip\', \'drop\', \'explode\', \'fold\', \'puff\', \'slide\', \'scale\', \'size\', \'pulsate\'.==
 #Der Effekt der angewendet werden soll. Mögliche Werte sind: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
-#Interaction \(modal \| resizable\)==Interaktion (modal | resizable)
+#Interaction \(modal \| resizable\)==Взаимодействие (модальное | изменяемый размер)
 #If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled \(i.e. cannot be interacted with\).==Wenn modal auf true gesetzt wird verhält sich der Dialog genau so; Andere Elemente auf der Seite werden deaktiviert. (können also solange das Fenster geöffnet ist nicht verwendet werden)
 #Modal dialogs create an overlay below the dialog but above other page elements.==Modale Dialoge erzeugen einen Overlay unter dem Dialog aber überhalb anderer Seitenelemente
 #If resizable is set to true, the dialog will be resizeable.==Wenn resizable auf true gesetzt wird, kann man die Größe des Dialogfensters verändern.
-#Load JavaScript load_js==JavaScript laden load_js
+#Load JavaScript load_js==Загружать JavaScript load_js
 #If load_js is set to false, you have to manually load the needed JavaScript on your portal page.==Wenn load_js auf false gesetzt wird, müssen Sie manuell das benötigte Javascript auf Ihrer Portalseite laden.
 #This can help to avoid timing problems or double loading.==Das kann helfen Timing Probleme oder das doppelte Laden zu verhindern.
 #Load Stylesheets load_css==Stylesheets laden load_css
 #If load_css is set to false, you have to manually load the needed CSS on your portal page.==Wenn load_css auf false gesetzt wird, müssen Sie manuell das benötigte CSS auf Ihrer Portalseite laden. 
 #Themes==Themes
-#You can <==Sie können <
+#You can <==Вы можете <
 #download</a> ready made themes or <a href=\"http://jqueryui.com/themeroller/\" target=\"_blank\">create</a>==fertige Themes herunterladen</a> oder <a href="http://jqueryui.com/themeroller/" target="_blank">erstellen</a>
 #your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/==Ihr ganz eigenes Theme. <br/>Themes werden im folgenden Verzeichnis installiert: DATA/HTDOCS/yacy/ui/css/themes/
 #-----------------------------
@@ -511,17 +511,17 @@ No changes were made!==Изменений не произведено!
 Accepted Changes==Приняты изменения!
 Inapplicable Setting Combination==Некорректное сочетанией настроек
 #P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on==P2P-Tätigkeit läuft ohne Remote-Indexierung, aber funktioniert besser, wenn diese eingeschaltet ist. Bitte aktivieren Sie 'Remote Crawling akzeptieren'
-For P2P operation, at least DHT distribution or DHT receive \(or both\) must be set. You have thus defined a Robinson configuration==Für P2P-Tätigkeit muss mindestens DHT-Verteilung oder DHT-Empfang (oder beides) aktiviert sein. Ansonsten haben Sie einen Robinson-Peer definiert
-Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.==Die globale Suche im P2P-Modus ist nur erlaubt, wenn der Index-Empfang aktiviert ist. Sie sind im P2P-Modus, aber Sie dürfen keine anderen Peers durchsuchen.
-For Robinson Mode, index distribution and receive is switched off==Im Robinson-Modus werden Indexverteilung und -empfang deaktiviert
+For P2P operation, at least DHT distribution or DHT receive \(or both\) must be set. You have thus defined a Robinson configuration==Для P2P-режима должно быть разрешено или отсылка через DHT или прием \(или и то и другое\). Вы указали автономную (Robinson) конфигурацию
+Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.==Глобальный P2P-поиск доступ только если у вас включен включен прием индекса через DHT. У вас P2P-конфигурация но вам не доступен глобальный поиск.
+For Robinson Mode, index distribution and receive is switched off==Для автономного(Robinson) режима, отсылка и прием индекса отключены
 #This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted==Dieser Robinson-Modus aktiviert Remote-Indexierung, aber beschränkt die Anfragen auf Peers des selben Clusters. Nur Remote-Indexierungsanfragen von Peers des selben Clusters werden akzeptiert
 #This Robinson Mode does not allow any remote indexing \(neither requests remote indexing, nor accepts it\)==Dieser Robinson-Modus erlaubt keinerlei Remote-Indexierung (es wird weder Remote-Indexierung angefragt, noch akzeptiert)
-Network and Domain Specification==Netzwerk und Domain Spezifikation
+Network and Domain Specification==Спецификация Сети и Домена
 # With this configuration it is not allowed to authentify automatically from localhost!==Diese Konfiguration erlaubt keine automatische Authentifikation von localhost!
 # Please open the <a href=\"ConfigAccounts_p.html\">Account Configuration</a> and set a new password.==Bitte in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> ein neues Passwort festlegen.
-YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==Sie können an einem verteiltem Netz aus YaCy Peers mitwirken oder einen eigenständigen Peer betreiben.
-To control that all participants within a web indexing domain have access to the same domain,==Um zu kontrollieren, dass alle Teilnehmer innerhalb einer Indexierungs Domain Zugriff zu der selben Domain haben, 
-this network definition must be equal to all members of the same YaCy network.==müssen diese Netzwerkdefinitionen bei allen Mitgliedern des YaCy Netzwerkes gleich sein.
+YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==YaCy может работать в режиме кластера узлов или как одиночный узел.
+To control that all participants within a web indexing domain have access to the same domain,==Для контроля того что все участники домена индексации имеют доступ к одним и тем же данным, 
+this network definition must be equal to all members of the same YaCy network.==данное описание сети должно быть одинаково у всех членов этой сети.
 #Network Definition==Netzwerk Definition
 #Network Nick==Netzwerk Nick
 #Long Description==Lange Beschreibung
@@ -560,7 +560,7 @@ this network definition must be equal to all members of the same YaCy network.==
 #Index data is not distributed, but remote crawl requests are distributed and accepted from your cluster
 #Search requests are spread over all peers of the cluster, and answered from all peers of the cluster
 #List of ip:port - addresses of the cluster: \(comma-separated\)
->Public Cluster==>Öffentlicher Cluster
+>Public Cluster==>Публичный кластер
 Your peer is part of a public cluster within the YaCy network==Ihr Peer ist Teil eines öffentlichen Clusters innerhalb des YaCy-Netzwerkes
 Index data is not distributed, but remote crawl requests are distributed and accepted==Indexdaten werden nicht verteilt, aber Remotecrawl-Anfragen werden verteilt und akzeptiert
 Search requests are spread over all peers of the cluster, and answered from all peers of the cluster==Suchanfragen werden über alle Peers des Clusters verteilt und von allen Peers des Clusters beantwortet
