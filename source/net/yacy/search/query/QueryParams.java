@@ -87,7 +87,7 @@ public final class QueryParams {
         YaCySchema.host_s.getSolrFieldName(),
         YaCySchema.url_protocol_s.getSolrFieldName(),
         YaCySchema.url_file_ext_s.getSolrFieldName(),
-        YaCySchema.author_s.getSolrFieldName()};
+        YaCySchema.author_sxt.getSolrFieldName()};
     
     private static final int defaultmaxfacets = 30;
     
@@ -471,7 +471,7 @@ public final class QueryParams {
         
         // add author facets
         if (this.author != null && this.author.length() > 0) {
-            fq.append(" AND ").append(YaCySchema.author_s.getSolrFieldName()).append(":\"").append(this.author).append('\"');
+            fq.append(" AND ").append(YaCySchema.author_sxt.getSolrFieldName()).append(":\"").append(this.author).append('\"');
         }
         
         if (this.protocol != null) {

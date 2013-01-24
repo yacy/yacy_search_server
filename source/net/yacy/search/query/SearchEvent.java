@@ -526,7 +526,7 @@ public final class SearchEvent {
         }
 
         if (this.authorNavigator != null) {
-            fcts = facets.get(YaCySchema.author_s.getSolrFieldName());
+            fcts = facets.get(YaCySchema.author_sxt.getSolrFieldName());
             if (fcts != null) this.authorNavigator.inc(fcts);
         }
 
