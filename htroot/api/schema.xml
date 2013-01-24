@@ -60,6 +60,8 @@
         <field name="#[solrname]#" type="#[type]#"#(indexedChecked)#:: indexed="true"#(/indexedChecked)##(storedChecked)#:: stored="true"#(/storedChecked)##(multiValuedChecked)#:: multiValued="true"#(/multiValuedChecked)##(omitNormsChecked)#:: omitNorms="true"#(/omitNormsChecked)#/>
 
 #{/fields}#
+
+        <copyField source="author" dest="author_sxt" maxChars="100" />
     </fields>
     
     <uniqueKey>#[solruniquekey]#</uniqueKey>
