@@ -1104,18 +1104,20 @@ public final class Protocol
         // evaluate snippets
         Map<String, Map<String, List<String>>> rawsnippets = rsp.getHighlighting(); // a map from the urlhash to a map with key=field and value = list of snippets
         Map<String, String> snippets = new HashMap<String, String>(); // this will be a list of urlhash-snippet entries
-        nextsnippet: for (Map.Entry<String, Map<String, List<String>>> re: rawsnippets.entrySet()) {
-            Map<String, List<String>> rs = re.getValue();
-            for (YaCySchema field: snippetFields) {
-                if (rs.containsKey(field.getSolrFieldName())) {
-                    List<String> s = rs.get(field.getSolrFieldName());
-                    if (s.size() > 0) {
-                        snippets.put(re.getKey(), s.get(0));
-                        continue nextsnippet;
+        if (rawsnippets != null) {
+            nextsnippet: for (Map.Entry<String, Map<String, List<String>>> re: rawsnippets.entrySet()) {
+                Map<String, List<String>> rs = re.getValue();
+                for (YaCySchema field: snippetFields) {
+                    if (rs.containsKey(field.getSolrFieldName())) {
+                        List<String> s = rs.get(field.getSolrFieldName());
+                        if (s.size() > 0) {
+                            snippets.put(re.getKey(), s.get(0));
+                            continue nextsnippet;
+                        }
                     }
                 }
+                // no snippet found :( --we don't assign a value here by default; that can be done as an evaluation outside this method
             }
-            // no snippet found :( --we don't assign a value here by default; that can be done as an evaluation outside this method
         }
 
         // evaluate result
