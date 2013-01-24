@@ -23,7 +23,7 @@
 
 
 import java.util.ConcurrentModificationException;
-import java.util.Iterator;
+import java.util.SortedSet;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -64,27 +64,29 @@ public class suggest {
         final String originalquerystring = (post == null) ? "" : post.get("query", post.get("q", "")).trim();
         final String querystring =  originalquerystring.replace('+', ' ');
         final int timeout = (post == null) ? 300 : post.getInt("timeout", 300);
-        final int count = (post == null) ? 20 : post.getInt("count", 20);
+        final int count = (post == null) ? 10 : Math.min(20, post.getInt("count", 10));
 
         int c = 0;
         if (more || (sb.index.getQueryCount(querystring) == 0)) {
             final DidYouMean didYouMean = new DidYouMean(sb.index, new StringBuilder(querystring));
-            final Iterator<StringBuilder> meanIt = didYouMean.getSuggestions(timeout, count).iterator();
-            String suggestion;
+            final SortedSet<StringBuilder> suggestions = didYouMean.getSuggestions(timeout, count);
             //[#[query]#,[#{suggestions}##[text]##(eol)#,::#(/eol)##{/suggestions}#]]
-            while (c < meanMax && meanIt.hasNext()) {
-                try {
-                    suggestion = meanIt.next().toString();
-                    if (json) {
-                        prop.putJSON("suggestions_" + c + "_text", suggestion);
-                    } else if (xml) {
-                        prop.putXML("suggestions_" + c + "_text", suggestion);
-                    } else {
-                        prop.putHTML("suggestions_" + c + "_text", suggestion);
-                    }
-                    prop.put("suggestions_" + c + "_eol", 0);
-                    c++;
-                } catch (ConcurrentModificationException e) {}
+            synchronized (suggestions) {
+                for (StringBuilder suggestion: suggestions) {
+                    if (c >= meanMax) break;
+                    try {
+                        String s = suggestion.toString();
+                        if (json) {
+                            prop.putJSON("suggestions_" + c + "_text", s);
+                        } else if (xml) {
+                            prop.putXML("suggestions_" + c + "_text", s);
+                        } else {
+                            prop.putHTML("suggestions_" + c + "_text", s);
+                        }
+                        prop.put("suggestions_" + c + "_eol", 0);
+                        c++;
+                    } catch (ConcurrentModificationException e) {}
+                }
             }
         }
 
