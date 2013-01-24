@@ -143,17 +143,8 @@ public final class ResultURLs {
         return getDomains(stack).keys(false);
     }
 
-    public static int deleteDomain(final EventOrigin stack, final String host, final String hosthash) {
+    public static int deleteDomain(final EventOrigin stack, final String host) {
         assert host != null : "host = null";
-        assert hosthash.length() == 6;
-        final Iterator<Map.Entry<String, InitExecEntry>> i = results(stack);
-        Map.Entry<String, InitExecEntry> w;
-        String urlhash;
-        while (i.hasNext()) {
-            w = i.next();
-            urlhash = w.getKey();
-            if (urlhash == null || urlhash.substring(6).equals(hosthash)) i.remove();
-        }
         assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
         return getDomains(stack).delete(host);
     }

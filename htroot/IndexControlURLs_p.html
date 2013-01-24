@@ -77,7 +77,6 @@ function updatepage(str) {
         <dt class="TableCellDark">Retrieve by URL-Hash:</dt>
         <dd><input type="text" name="urlhash" value="#[urlhash]#" size="40" maxlength="12" />
             <input type="submit" name="urlhashsearch" value="Show Details for URL-Hash" class="submitready" style="width:240px;"/>
-            <input type="submit" name="urlhashsimilar" value="Generate List" class="submitready" style="width:240px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -132,7 +131,7 @@ function updatepage(str) {
         <td>
           <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
             <div>
-              <input type="hidden" name="hashpart" value="#[hashpart]#" />
+              <input type="hidden" name="domain" value="#[domain]#" />
               <input type="hidden" name="lines" value="#[lines]#" />
               <input type="submit" name="deletedomain" value="delete all" class="submitready" style="width:240px;"/>
             </div>
@@ -205,13 +204,6 @@ function updatepage(str) {
     #(indexdump)#::
     <div class="commit">Stored a solr dump to file #[dumpfile]#</div>::
     #(/indexdump)#
-    
-    #(urlhashsimilar)#::<p>Sequential List of URL-Hashes:<br />
-    #{rows}# 
-    #{cols}#<a href="/IndexControlURLs_p.html?urlhash=#[urlHash]#&amp;urlhashsearch=1" class="tt">#[urlHash]#</a> #{/cols}#<br />
-    #{/rows}#
-    </p>
-    #(/urlhashsimilar)#
     
     #(genUrlProfile)#
     ::No entry found for URL-hash #[urlhash]#

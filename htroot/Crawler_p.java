@@ -294,7 +294,7 @@ public class Crawler_p {
                         siteFilter = CrawlProfile.siteFilter(rootURLs);
                         if (deleteold) {
                             for (DigestURI u: rootURLs) {
-                                int count = sb.index.fulltext().deleteDomain(u.hosthash(), deleteageDate, rootURLs.size() > 1);
+                                int count = sb.index.fulltext().deleteDomainHashpart(u.hosthash(), deleteageDate, rootURLs.size() > 1);
                                 if (count > 0) Log.logInfo("Crawler_p", "deleted " + count + " documents for host " + u.getHost());
                             }
                         }

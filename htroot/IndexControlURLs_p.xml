@@ -13,13 +13,4 @@
     #(indexdump)#::
     <dumpfile>#[dumpfile]#</dumpfile>::
     #(/indexdump)#
-    #(urlhashsimilar)#::
-    <urls>
-    #{rows}# 
-    #{cols}#
-    <urlhash>#[urlHash]#</urlhash>
-    #{/cols}#
-    #{/rows}#
-    </urls>
-    #(/urlhashsimilar)#
 </data>

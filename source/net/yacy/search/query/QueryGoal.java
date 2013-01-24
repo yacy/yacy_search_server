@@ -246,7 +246,8 @@ public class QueryGoal {
         q.append(')');
 
         // add filter to prevent that results come from failed urls
-        q.append(" AND -").append(YaCySchema.failreason_t.getSolrFieldName()).append(":[* TO *]");
+        q.append(" AND ").append(YaCySchema.httpstatus_i.getSolrFieldName()).append(":200");
+        //q.append(" AND -").append(YaCySchema.failreason_t.getSolrFieldName()).append(":[* TO *]");
 
         return q;
     }

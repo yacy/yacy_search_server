@@ -30,13 +30,15 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.lod.JenaTripleStore;
-import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.data.WorkTables;
@@ -44,7 +46,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.RotateIterator;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
@@ -236,30 +237,6 @@ public class IndexControlURLs_p {
             }
         }
 
-        // generate list
-        if (post.containsKey("urlhashsimilar")) {
-            final Iterator<DigestURI> entryIt = new RotateIterator<DigestURI>(segment.fulltext().urls(), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), (int) segment.RWICount());
-			final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
-			DigestURI entry;
-			int i = 0, rows = 0, cols = 0;
-			prop.put("urlhashsimilar", "1");
-			while (entryIt.hasNext() && i < 256) {
-			    entry = entryIt.next();
-			    if (entry == null) break;
-			    prop.put("urlhashsimilar_rows_"+rows+"_cols_"+cols+"_urlHash", ASCII.String(entry.hash()));
-			    cols++;
-			    if (cols==8) {
-			        prop.put("urlhashsimilar_rows_"+rows+"_cols", cols);
-			        cols = 0;
-			        rows++;
-			    }
-			    i++;
-			}
-			prop.put("statistics", 0);
-			prop.put("urlhashsimilar_rows", rows);
-			prop.put("result", result.toString());
-        }
-
         if (post.containsKey("lurlexport")) {
             // parse format
             int format = 0;
@@ -279,7 +256,7 @@ public class IndexControlURLs_p {
             final File f = new File(s);
             f.getParentFile().mkdirs();
             final String filter = post.get("exportfilter", ".*");
-            final Fulltext.Export running = segment.fulltext().export(f, filter, null, format, dom);
+            final Fulltext.Export running = segment.fulltext().export(f, filter, format, dom);
 
             prop.put("lurlexport_exportfile", s);
             prop.put("lurlexport_urlcount", running.count());
@@ -301,29 +278,29 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("deletedomain")) {
-            final String hp = post.get("hashpart");
-            segment.fulltext().deleteDomain(hp, null, false);
+            final String domain = post.get("domain");
+            segment.fulltext().deleteDomainHostname(domain, null, false);
             // trigger the loading of the table
             post.put("statistics", "");
         }
 
         if (post.containsKey("statistics")) {
             final int count = post.getInt("lines", 100);
-            Iterator<Fulltext.HostStat> statsiter;
             prop.put("statistics_lines", count);
             int cnt = 0;
             try {
                 final Fulltext metadata = segment.fulltext();
-                statsiter = metadata.statistics(count, metadata.urlSampleScores(metadata.domainSampleCollector()));
+                Map<String, ReversibleScoreMap<String>> scores = metadata.getSolr().getFacets(YaCySchema.httpstatus_i.getSolrFieldName() + ":200", count, YaCySchema.host_s.getSolrFieldName());
+                ReversibleScoreMap<String> stats = scores.get(YaCySchema.host_s.getSolrFieldName());
+                Iterator<String> statsiter = stats.keys(false);
                 boolean dark = true;
-                Fulltext.HostStat hs;
+                String hostname;
+                prop.put("statisticslines_domains_" + cnt + "lines", count);
                 while (statsiter.hasNext() && cnt < count) {
-                    hs = statsiter.next();
+                    hostname = statsiter.next();
                     prop.put("statisticslines_domains_" + cnt + "_dark", (dark) ? "1" : "0");
-                    prop.put("statisticslines_domains_" + cnt + "_domain", hs.hostname + ((hs.port == 80) ? "" : ":" + hs.port));
-                    prop.put("statisticslines_domains_" + cnt + "lines", count);
-                    prop.put("statisticslines_domains_" + cnt + "_hashpart", hs.hosthash);
-                    prop.put("statisticslines_domains_" + cnt + "_count", hs.count);
+                    prop.put("statisticslines_domains_" + cnt + "_domain", hostname);
+                    prop.put("statisticslines_domains_" + cnt + "_count", stats.get(hostname));
                     dark = !dark;
                     cnt++;
                 }

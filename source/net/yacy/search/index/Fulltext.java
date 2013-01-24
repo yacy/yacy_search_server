@@ -34,9 +34,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
@@ -49,8 +49,8 @@ import net.yacy.cora.federate.solr.connector.MirrorSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
+import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
-import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.storage.ZIPReader;
 import net.yacy.cora.storage.ZIPWriter;
 import net.yacy.document.parser.html.CharacterCoding;
@@ -64,15 +64,15 @@ import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.kelondro.util.MergeIterator;
 import net.yacy.search.Switchboard;
 
+import org.apache.commons.httpclient.util.DateUtil;
 import org.apache.lucene.util.Version;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 
-public final class Fulltext implements Iterable<byte[]> {
+public final class Fulltext {
 
     private static final String SOLR_PATH = "solr_40"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
     private static final String SOLR_OLD_PATH[] = new String[]{"solr_36"};
@@ -359,7 +359,7 @@ public final class Fulltext implements Iterable<byte[]> {
      * @return number of deleted domains
      * @throws IOException
      */
-    public int deleteDomain(final String hosthash, Date freshdate, boolean concurrent) {
+    public int deleteDomainHashpart(final String hosthash, Date freshdate, boolean concurrent) {
         // first collect all url hashes that belong to the domain
         assert hosthash.length() == 6;
         final String q = YaCySchema.host_id_s.getSolrFieldName() + ":\"" + hosthash + "\"" +
@@ -401,6 +401,38 @@ public final class Fulltext implements Iterable<byte[]> {
                     while (hsi.hasNext()) {
                         hs = hsi.next();
                         if (hs.hosthash.equals(hosthash)) {
+                            hsi.remove();
+                            break;
+                        }
+                    }
+                }
+            }
+        };
+        if (concurrent) t.start(); else t.run();
+        return count.get();
+    }
+
+    public int deleteDomainHostname(final String hostname, Date freshdate, boolean concurrent) {
+        // first collect all url hashes that belong to the domain
+        final String q = YaCySchema.host_s.getSolrFieldName() + ":\"" + hostname + "\"" +
+                ((freshdate != null && freshdate.before(new Date())) ? (" AND " + YaCySchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") : "");
+        final AtomicInteger count = new AtomicInteger(0);
+        Thread t = new Thread() {
+            public void run() {
+                // delete in solr
+                synchronized (Fulltext.this.solr) {
+                    try {
+                        count.addAndGet(Fulltext.this.solr.deleteByQuery(q));
+                        if (count.get() > 0) Fulltext.this.solr.commit(true);
+                    } catch (IOException e) {}
+                }
+                // finally remove the line with statistics
+                if (Fulltext.this.statsDump != null) {
+                    final Iterator<HostStat> hsi = Fulltext.this.statsDump.iterator();
+                    HostStat hs;
+                    while (hsi.hasNext()) {
+                        hs = hsi.next();
+                        if (hs.hostname.equals(hostname)) {
                             hsi.remove();
                             break;
                         }
@@ -510,96 +542,6 @@ public final class Fulltext implements Iterable<byte[]> {
         if (reason == null) return null;
         return reason == null ? null : reason.length() == 0 ? null : reason;
     }
-
-    @Override
-    public Iterator<byte[]> iterator() {
-    	CloneableIterator<byte[]> a = null;
-    	if (this.urlIndexFile != null) try {a = this.urlIndexFile.keys(true, null);} catch (IOException e) {}
-    	final Iterator<String> idi = this.solr.iterator();
-    	CloneableIterator<byte[]> b = new CloneableIterator<byte[]>() {
-			@Override
-			public boolean hasNext() {
-				return idi.hasNext();
-			}
-			@Override
-			public byte[] next() {
-				String s = idi.next();
-				return s == null ? null : ASCII.getBytes(s);
-			}
-			@Override
-			public void remove() {
-				throw new UnsupportedOperationException();
-			}
-			@Override
-			public CloneableIterator<byte[]> clone(Object modifier) {
-				return this;
-			}
-			@Override
-			public void close() {
-			}
-    	};
-    	if (a == null) return b;
-        return new MergeIterator<byte[]>(a, b,
-                URIMetadataRow.rowdef.objectOrder,
-                MergeIterator.simpleMerge,
-                true);
-    }
-
-    public CloneableIterator<DigestURI> urls() {
-        // enumerates entry elements
-        final Iterator<byte[]> ids = iterator();
-        return new CloneableIterator<DigestURI>() {
-            @Override
-            public CloneableIterator<DigestURI> clone(final Object secondHash) {
-                return this;
-            }
-            @Override
-            public final boolean hasNext() {
-                return ids.hasNext();
-            }
-            @Override
-            public final DigestURI next() {
-                byte[] id = ids.next();
-                if (id == null) return null;
-                return getURL(id);
-            }
-            @Override
-            public final void remove() {
-                ids.remove();
-            }
-            @Override
-            public void close() {
-            }
-        };
-    }
-
-    public CloneableIterator<URIMetadataNode> entries() {
-        // enumerates entry elements
-        final Iterator<byte[]> ids = iterator();
-        return new CloneableIterator<URIMetadataNode>() {
-            @Override
-            public CloneableIterator<URIMetadataNode> clone(final Object secondHash) {
-                return this;
-            }
-            @Override
-            public final boolean hasNext() {
-                return ids.hasNext();
-            }
-            @Override
-            public final URIMetadataNode next() {
-                byte[] id = ids.next();
-                if (id == null) return null;
-                return getMetadata(id);
-            }
-            @Override
-            public final void remove() {
-                ids.remove();
-            }
-            @Override
-            public void close() {
-            }
-        };
-    }
     
     public List<File> dumpFiles() {
         EmbeddedSolrConnector esc = (EmbeddedSolrConnector) this.solr.getSolr0();
@@ -675,12 +617,12 @@ public final class Fulltext implements Iterable<byte[]> {
     }
     
     // export methods
-    public Export export(final File f, final String filter, final HandleSet set, final int format, final boolean dom) {
+    public Export export(final File f, final String filter, final int format, final boolean dom) {
         if ((this.exportthread != null) && (this.exportthread.isAlive())) {
             Log.logWarning("LURL-EXPORT", "cannot start another export thread, already one running");
             return this.exportthread;
         }
-        this.exportthread = new Export(f, filter, set, format, dom);
+        this.exportthread = new Export(f, filter, format, dom);
         this.exportthread.start();
         return this.exportthread;
     }
@@ -691,22 +633,20 @@ public final class Fulltext implements Iterable<byte[]> {
 
     public class Export extends Thread {
         private final File f;
-        private final String filter;
+        private final Pattern pattern;
         private int count;
         private String failure;
         private final int format;
         private final boolean dom;
-        private final HandleSet set;
 
-        private Export(final File f, final String filter, final HandleSet set, final int format, boolean dom) {
+        private Export(final File f, final String filter, final int format, boolean dom) {
             // format: 0=text, 1=html, 2=rss/xml
             this.f = f;
-            this.filter = filter;
+            this.pattern = filter == null ? null : Pattern.compile(filter);
             this.count = 0;
             this.failure = null;
             this.format = format;
             this.dom = dom;
-            this.set = set;
             if ((dom) && (format == 2)) dom = false;
         }
 
@@ -724,43 +664,54 @@ public final class Fulltext implements Iterable<byte[]> {
                     pw.println("<?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>");
                     pw.println("<rss version=\"2.0\" xmlns:yacy=\"http://www.yacy.net/\" xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\" xmlns:atom=\"http://www.w3.org/2005/Atom\">");
                     pw.println("<channel>");
-                    pw.println("<title>YaCy Peer-to-Peer - Web-Search LURL Export</title>");
+                    pw.println("<title>YaCy Peer-to-Peer - Web-Search URL Export</title>");
                     pw.println("<description></description>");
                     pw.println("<link>http://yacy.net</link>");
                 }
-
+                
+               
                 if (this.dom) {
-                    final TreeSet<String> set = domainNameCollector(-1, domainSampleCollector());
-                    for (final String host: set) {
-                        if (!host.matches(this.filter)) continue;
+                    Map<String, ReversibleScoreMap<String>> scores = Fulltext.this.getSolr().getFacets(YaCySchema.httpstatus_i.getSolrFieldName() + ":200", 100000, YaCySchema.host_s.getSolrFieldName());
+                    ReversibleScoreMap<String> stats = scores.get(YaCySchema.host_s.getSolrFieldName());
+                    for (final String host: stats) {
+                        if (this.pattern != null && !this.pattern.matcher(host).matches()) continue;
                         if (this.format == 0) pw.println(host);
                         if (this.format == 1) pw.println("<a href=\"http://" + host + "\">" + host + "</a><br>");
                         this.count++;
                     }
                 } else {
-                    final Iterator<URIMetadataNode> i = entries(); // iterates indexURLEntry objects
-                    URIMetadataNode entry;
-                    String url;
-                    while (i.hasNext()) {
-                        entry = i.next();
-                        if (this.set != null && !this.set.has(entry.hash())) continue;
-                        url = entry.url().toNormalform(true);
-                        if (!url.matches(this.filter)) continue;
+                    BlockingQueue<SolrDocument> docs = Fulltext.this.getSolr().concurrentQuery(YaCySchema.httpstatus_i.getSolrFieldName() + ":200", 0, 100000000, 10 * 60 * 60 * 1000, 100,
+                            YaCySchema.id.getSolrFieldName(), YaCySchema.sku.getSolrFieldName(), YaCySchema.title.getSolrFieldName(),
+                            YaCySchema.author.getSolrFieldName(), YaCySchema.description.getSolrFieldName(), YaCySchema.size_i.getSolrFieldName(), YaCySchema.last_modified.getSolrFieldName());
+                    SolrDocument doc;
+                    ArrayList<?> title;
+                    String url, author, description, hash;
+                    Integer size;
+                    Date date;
+                    while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+                        hash = (String) doc.getFieldValue(YaCySchema.id.getSolrFieldName());
+                        url = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
+                        title = (ArrayList<?>) doc.getFieldValue(YaCySchema.title.getSolrFieldName());
+                        author = (String) doc.getFieldValue(YaCySchema.author.getSolrFieldName());
+                        description = (String) doc.getFieldValue(YaCySchema.description.getSolrFieldName());
+                        size = (Integer) doc.getFieldValue(YaCySchema.size_i.getSolrFieldName());
+                        date = (Date) doc.getFieldValue(YaCySchema.last_modified.getSolrFieldName());
+                        if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
                         if (this.format == 0) {
                             pw.println(url);
                         }
                         if (this.format == 1) {
-                            pw.println("<a href=\"" + url + "\">" + CharacterCoding.unicode2xml(entry.dc_title(), true) + "</a><br>");
+                            if (title != null) pw.println("<a href=\"" + MultiProtocolURI.escape(url) + "\">" + CharacterCoding.unicode2xml((String) title.iterator().next(), true) + "</a>");
                         }
                         if (this.format == 2) {
                             pw.println("<item>");
-                            pw.println("<title>" + CharacterCoding.unicode2xml(entry.dc_title(), true) + "</title>");
+                            if (title != null) pw.println("<title>" + CharacterCoding.unicode2xml((String) title.iterator().next(), true) + "</title>");
                             pw.println("<link>" + MultiProtocolURI.escape(url) + "</link>");
-                            if (!entry.dc_creator().isEmpty()) pw.println("<author>" + CharacterCoding.unicode2xml(entry.dc_creator(), true) + "</author>");
-                            if (!entry.dc_subject().isEmpty()) pw.println("<description>" + CharacterCoding.unicode2xml(entry.dc_subject(), true) + "</description>");
-                            pw.println("<pubDate>" + entry.moddate().toString() + "</pubDate>");
-                            pw.println("<yacy:size>" + entry.size() + "</yacy:size>");
-                            pw.println("<guid isPermaLink=\"false\">" + ASCII.String(entry.hash()) + "</guid>");
+                            if (author != null && !author.isEmpty()) pw.println("<author>" + CharacterCoding.unicode2xml(author, true) + "</author>");
+                            if (description != null && !description.isEmpty()) pw.println("<description>" + CharacterCoding.unicode2xml(description, true) + "</description>");
+                            if (date != null) pw.println("<pubDate>" + DateUtil.formatDate(date) + "</pubDate>");
+                            if (size != null) pw.println("<yacy:size>" + size.intValue() + "</yacy:size>");
+                            pw.println("<guid isPermaLink=\"false\">" + hash + "</guid>");
                             pw.println("</item>");
                         }
                         this.count++;
@@ -796,60 +747,6 @@ public final class Fulltext implements Iterable<byte[]> {
             return this.count;
         }
 
-    }
-
-    /**
-     * collect domain samples: all url hashes from the metadata database is listed and the domain part
-     * of the url hashes is used to count how many of these domain hashes appear
-     * @return a map from domain hashes to hash statistics
-     * @throws IOException
-     */
-    public Map<String, URLHashCounter> domainSampleCollector() throws IOException {
-        final Map<String, URLHashCounter> map = new HashMap<String, URLHashCounter>();
-        // first collect all domains and calculate statistics about it
-        synchronized (this) {
-            final Iterator<byte[]> i = this.iterator();
-            String hosthash;
-            byte[] urlhashb;
-            URLHashCounter ds;
-            if (i != null) while (i.hasNext()) {
-                urlhashb = i.next();
-                hosthash = ASCII.String(urlhashb, 6, 6);
-                ds = map.get(hosthash);
-                if (ds == null) {
-                    ds = new URLHashCounter(urlhashb);
-                    map.put(hosthash, ds);
-                } else {
-                    ds.count++;
-                }
-            }
-        }
-        return map;
-    }
-
-    /**
-     * create a list of domain names in this database
-     * @param count number of entries or -1 for all
-     * @param domainSamples a map from domain hashes to hash statistics
-     * @return a set of domain names, ordered by name of the domains
-     */
-    private TreeSet<String> domainNameCollector(int count, final Map<String, URLHashCounter> domainSamples) {
-        // collect hashes from all domains
-
-        // fetch urls from the database to determine the host in clear text
-        DigestURI url;
-        if (count < 0 || count > domainSamples.size()) count = domainSamples.size();
-        this.statsDump = new ArrayList<HostStat>();
-        final TreeSet<String> set = new TreeSet<String>();
-        for (final URLHashCounter hs: domainSamples.values()) {
-            if (hs == null) continue;
-            url = this.getURL(hs.urlhashb);
-            if (url == null || url.getHost() == null) continue;
-            set.add(url.getHost());
-            count--;
-            if (count == 0) break;
-        }
-        return set;
     }
 
     /**
