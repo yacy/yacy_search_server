@@ -516,7 +516,7 @@ Global Search in P2P configuration is only allowed, if index receive is switched
 For Robinson Mode, index distribution and receive is switched off==Для автономного(Robinson) режима, отсылка и прием индекса отключены
 #This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted==Dieser Robinson-Modus aktiviert Remote-Indexierung, aber beschränkt die Anfragen auf Peers des selben Clusters. Nur Remote-Indexierungsanfragen von Peers des selben Clusters werden akzeptiert
 #This Robinson Mode does not allow any remote indexing \(neither requests remote indexing, nor accepts it\)==Dieser Robinson-Modus erlaubt keinerlei Remote-Indexierung (es wird weder Remote-Indexierung angefragt, noch akzeptiert)
-Network and Domain Specification==Спецификация Сети и Домена
+Network and Domain Specification==Указание сети и доме́на
 # With this configuration it is not allowed to authentify automatically from localhost!==Diese Konfiguration erlaubt keine automatische Authentifikation von localhost!
 # Please open the <a href=\"ConfigAccounts_p.html\">Account Configuration</a> and set a new password.==Bitte in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> ein neues Passwort festlegen.
 YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==YaCy может работать в режиме кластера узлов или как одиночный узел.
@@ -618,7 +618,7 @@ You can change the \'corporate identity\'-images, the greeting line==Вы мож
 and a link to a home page that is reached when the \'corporate identity\'-images are clicked.==и ссылку на домашную страницу, которая будет доступна при нажатии на картинку фирменного логотипа.
 To change also colours and styles use the <a href=\"ConfigAppearance_p.html\">Appearance Servlet</a> for different skins and languages.==
 Um auch die Farben und Stile zu verändern verwenden Sie das <a href="ConfigAppearance_p.html">Servlet Aussehen</a> für andere Skins und Sprachen.
-Greeting Line<==Строка приветсвия<
+Greeting Line<==Строка приветствия<
 URL of Home Page<==URL домашней страницы<
 URL of a Small Corporate Image<==URL адрес маленького логотипа<
 URL of a Large Corporate Image<==URL адрес крупного логотипа<
@@ -651,10 +651,10 @@ Show Information Links for each Search Result Entry==Отображать инф
 >Parser&==>Парсер&
 >Pictures==>Картинки
 Show Navigation on Side-Bar==Показывать элементы навигации
-Host Navigation==Навигации хоста
-Author Navigation==Навигации автора
-Wiki Name-Space Navigation==Wiki нивигация
-Topics (Tag-Cloud) Navigation==Топик навигация
+Host Navigation==по хостам
+Author Navigation==по авторам
+Wiki Name-Space Navigation==по пространствам имён wiki
+Topics (Tag-Cloud) Navigation==по темам (облако тегов)
 Default Pop-Up Page<==Первая страница по умолчанию<
 >Status Page==>Страница статуса
 >Search Front Page==>Главная страница поиска
@@ -727,7 +727,7 @@ Integration of a Search Box==Интеграция Search Box
 We give information how to integrate a search box on any web page that==Hier finden Sie Informationen dazu wie man eine Suchbox auf jeder Webseite einsetzen kann das
 calls the normal YaCy search window.==ein normales YaCy Suchfenster aufruft.
 Simply use the following code:==Просто используете следующий код:
-  MySearch==  МоиПоиск
+  MySearch==  МойПоиск
 "Search"=="Поиск"
 This would look like:==Это будет выглядеть как:
 This does not use a style sheet file to make the integration into another web page with a different style sheet easier.==Da hier keine Stylesheet Datei verwendet wird, gestaltet sich die Integration in andere Webseiten mit einem anderen Stylesheet einfacher.
@@ -1253,9 +1253,9 @@ RWI-DB-Cleaner - Clean up the database by deletion of words with reference to bl
 #-----------------------------
 #File: IndexControlRWIs_p.html
 #---------------------------
-Reverse Word Index Administration==Обратное управление индексом слов
+Reverse Word Index Administration==Администрирование индекса ссылок по слову
 The local index currently contains \#\[wcount\]\# reverse word indexes==Локальный индекс в настоящее время содержит #[wcount]# слов обратного индекса
-RWI Retrieval \(= search for a single word\)==RWI запрос (= поиск одного слова)
+RWI Retrieval \(= search for a single word\)==RWI‐запрос (= поиск одного слова)
 Select Segment:==Выбрать сегмент:
 Retrieve by Word:<==Запрос по слову:<
 "Show URL Entries for Word"=="Показать URL адреса для слова"
@@ -1268,10 +1268,10 @@ Cleanup==Очистка
 Stop Crawler and delete Crawl Queues==Остановить сканирование и удалить очередь запросов
 Delete HTTP &amp; FTP Cache==Удалить HTTP &amp; FTP кэш
 Delete robots.txt Cache==Удалить кеш robots.txt
-Delete cached snippet-fetching failures during search==Удалить кэшированные фрагменты полученные ошибки во время поиска
+#Delete cached snippet-fetching failures during search==Удалить кэшированные фрагменты полученные ошибки во время поиска
 "Delete"=="Удалить"
-No entry for word \'\#\[word\]\#\'==Не найдено для слова "#[word]#"
-No entry for word hash==Не найдено для хэш слова слова
+No entry for word \'\#\[word\]\#\'==Не найдено для слова «#[word]#»
+No entry for word hash==Не найдено для хэш‐суммы слова
 Search result==Результат поиска
 total URLs</td>==количество URL адресов</td>
 appearance in</td>==kommt vor in</td>
@@ -1355,8 +1355,8 @@ Retrieve by URL-Hash==Abfrage nach URL-Hash
 "Show Details for URL-Hash"=="Details für URL-Hash zeigen"
 "Generate List"=="Liste erstellen"
 Statistics about top-domains in URL Database==Statistik über die Top-Domains in der URL Datenbank
-Show top==Zeige die
-domains from all URLs.==Top-Domains aus allen URLs.
+Show top==Показать
+domains from all URLs.==наиболее часто встречающихся доменов среди всех URL.
 "Generate Statistics"=="Statistik erstellen"
 Statistics about the top-\#\[domains\]\# domains in the database:==Statistik über die Top-#[domains]# Domains in der Datenbank:
 "delete all"=="Alle Löschen"
@@ -1370,10 +1370,10 @@ Export File==Export-Datei
 #Only Domain <i>\(superfast\)==Nur Domains <i>(sehr schnell)
 Only Domain:==Только домен:
 Full URL List:==Liste mit vollständiger URL:
-Plain Text List \(domains only\)==Einfache Text Liste (nur Domains)
+Plain Text List \(domains only\)==Простой текстовый список (только домены)
 HTML \(domains as URLs, no title\)==HTML (Domains als URLs, kein Titel)
 #Full URL List <i>\(high IO\)==Vollständige URL Liste <i>(hoher IO)
-Plain Text List \(URLs only\)==Einfache Text Liste (nur URLs)
+Plain Text List \(URLs only\)==Простой текстовый список (только URL’ы)
 HTML \(URLs with title\)==HTML (URLs mit Titel)
 #XML (RSS)==XML (RSS)
 "Export URLs"=="Экспортировать URL адреса"
@@ -2630,7 +2630,7 @@ YaCy Address:==YaCy адрес:
 #Port Forwarding Host==Port Forwarding Host
 broken==повреждено
 connected==подключено
-Remote Proxy==Прокси сервер
+Remote Proxy==Вышестоящий прокси
 not used==не используется
 Used for YaCy -> YaCy communication:==Используется для YaCy -> YaCy коммуникаций:
 WARNING:==WARNUNG:
@@ -3172,6 +3172,10 @@ Host Browser==Просмотр хостов
 Local Peer Wiki==Локальная вики
 >Bookmarks==>Закладки
 >Help==>Помощь
+### SEARCH DESIGN ###
+#Search Design==Suchmaskendesign
+Search Integration into External Sites==Вставка поискового интерфейса в другие сайты
+Integrated Search Configuration==Настройка встраиваемого поиска
 ### INDEX CONTROL ###
 Index&nbsp;Production==Индексирование
 Index&nbsp;Control==Контроль&nbsp;индексации
@@ -3338,11 +3342,11 @@ Crawler/Spider<==Сбор/Паук<
 Full Site Crawl==Полное сканирование сайта
 Sitemap Loader==Загрузка карты сайта
 Crawl Start<br/>\(Expert\)==Запуск сканирования<br/>(Эксперт)
-Network<br/>Scanner==Сетевой<br/>сканер
+Network<br/>Scanner==Сканер<br/>сети
 #>Intranet<br/>Scanner<==>Интранет<br/>сканер<
 Crawling of==Сканирование
 #MediaWikis==MediaWikis
->phpBB3 Forums<==>phpBB3 форумы<
+>phpBB3 Forums<==>phpBB3‐форумы<
 Content Import<==Импорт контента<
 Network Harvesting<==Сеть сбора<
 #Remote<br/>Crawling==Remote<br/>Crawling
@@ -3350,7 +3354,7 @@ Network Harvesting<==Сеть сбора<
 Database Reader<==Обозреватель БД<
 for phpBB3 Forums==для форумов phpBB3
 Dump Reader for==Dump Leser für
-#MediaWiki dumps==MediaWiki дамп
+#MediaWiki dumps==MediaWiki‐дампы
 #-----------------------------
 #File: env/templates/submenuPortalIntegration.template
 #---------------------------
@@ -3481,7 +3485,7 @@ Accounts==Аккаунты
 \tProject==Projekt
 "YaCy Statistics"=="YaCy Statistiken"
 \tStatistics==Statistiken
-"YaCy Forum"=="YaCy форум"
+"YaCy Forum"=="Форум YaCy"
 #Forum==Forum
 "Help"=="Hilfe"
 #"YaCy Wiki"=="YaCy Wiki"
