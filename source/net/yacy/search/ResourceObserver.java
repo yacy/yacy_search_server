@@ -26,8 +26,11 @@ package net.yacy.search;
 
 import java.io.File;
 
+import net.yacy.cora.document.WordCache;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.search.query.SearchEventCache;
 
 public class ResourceObserver {
 
@@ -85,7 +88,13 @@ public class ResourceObserver {
     			this.sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true);
     		}
     		if (this.normalizedMemoryFree.compareTo(Space.HIGH) < 0 ) {
+    			// clear some caches - @all: are there more of these, we could clear here?
     			this.sb.index.fulltext().clearCache();
+                SearchEventCache.cleanupEvents(true);
+                this.sb.trail.clear();
+                Switchboard.urlBlacklist.clearblacklistCache();
+                WordCache.clear();
+                Domains.clear();
     		}
     	}
 

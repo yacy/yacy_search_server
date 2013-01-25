@@ -824,7 +824,11 @@ public class Domains {
     }
 
     public static void clear() {
-        try {globalHosts.clear();} catch (IOException e) {}
+        try {
+        	globalHosts.clear();
+        	NAME_CACHE_HIT.clear();
+        	NAME_CACHE_MISS.clear();
+        } catch (IOException e) {}
     }
     
 

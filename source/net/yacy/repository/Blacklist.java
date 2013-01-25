@@ -307,6 +307,13 @@ public class Blacklist {
         return size;
     }
 
+    public void clearblacklistCache() {
+        final Iterator<BlacklistType> iter = this.cachedUrlHashs.keySet().iterator();
+        while (iter.hasNext()) {
+            this.cachedUrlHashs.get(iter.next()).clear();
+        }
+    }
+
     public boolean hashInBlacklistedCache(final BlacklistType blacklistType, final byte[] urlHash) {
         HandleSet s = getCacheUrlHashsSet(blacklistType);
         return s != null && s.has(urlHash);
