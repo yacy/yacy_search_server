@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 
+import org.apache.solr.common.SolrException;
+
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
@@ -91,9 +93,9 @@ public class IndexFederated_p {
 
             // solr
             final boolean solrRemoteWasOn = sb.index.fulltext().connectedRemoteSolr() && env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, true);
-            final boolean solrRemoteIsOnAfterwards = post.getBoolean("solr.indexing.solrremote");
-            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, solrRemoteIsOnAfterwards);
             String solrurls = post.get("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr"));
+            final boolean solrRemoteIsOnAfterwards = post.getBoolean("solr.indexing.solrremote") & solrurls.length() > 0;
+            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, solrRemoteIsOnAfterwards);
             boolean lazy = post.getBoolean("solr.indexing.lazy");
             final BufferedReader r = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(UTF8.getBytes(solrurls))));
             final StringBuilder s = new StringBuilder();
@@ -127,14 +129,14 @@ public class IndexFederated_p {
                 }
             }
 
-            if (solrRemoteIsOnAfterwards) {
+            if (solrRemoteIsOnAfterwards) try {
                 if (solrRemoteWasOn) sb.index.fulltext().disconnectRemoteSolr();
                 // switch on
                 final boolean usesolr = sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;
                 try {
                     if (usesolr) {
                         SolrConnector solr = new ShardSolrConnector(solrurls, ShardSelection.Method.MODULO_HOST_MD5, 10000, true);
-                        solr.setCommitWithinMs(commitWithinMs);
+                        if (commitWithinMs >= 0) solr.setCommitWithinMs(commitWithinMs);
                         sb.index.fulltext().connectRemoteSolr(solr);
                     } else {
                         sb.index.fulltext().disconnectRemoteSolr();
@@ -147,6 +149,8 @@ public class IndexFederated_p {
                         Log.logException(ee);
                     }
                 }
+            } catch (SolrException e) {
+                Log.logSevere("IndexFederated_p", "change of solr connection failed", e);
             }
 
             // read index scheme table flags
