@@ -1157,76 +1157,76 @@ To learn how to do that, watch one of the demonstration videos below==Bitte sehe
 #-----------------------------
 #File: index.html
 #---------------------------
-YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
-#kiosk mode==Kiosk Modus
+YaCy \'\#\[clientname\]\#\': Search Page== Yacy: '#[clientname]#': Поиск
+#kiosk mode==режим киоска
 "Search"=="Поиск"
 Text==Текст
 Images==Картинки
 #Audio==Аудио
 Video==Видео
-Applications==Anwendungen
+Applications==Приложения
 more options...==Расширенный поиск...
-advanced parameters==erweiterte Parameter
-Max. number of results==Max. Anzahl der Ergebnisse
-Results per page==Ergebnisse pro Seite
-Resource==Quelle
+advanced parameters==расширенные параметры
+Max. number of results==максимальное количество результатов
+Results per page==Результатов на страницу
+Resource==Ресурс
 global==global
->local==>lokal
-Global search is disabled because==Die globale Suche ist deaktiviert, denn
-DHT Distribution</a> is==die DHT-Verteilung</a> ist
-Index Receive</a> is==der Index-Empfang</a> ist 
-DHT Distribution and Index Receive</a> are==DHT-Verteilung und Index-Empfang</a> sind
-disabled.\#\(==deaktiviert.#(
-URL mask==URL-Filter
-restrict on==beschränken auf
-show all==alle zeigen
+>local==>local
+Global search is disabled because==Глобальный поиск отключен так как
+DHT Distribution</a> is==Прием DHT-данных</a>
+Index Receive</a> is==Прием индекса</a> 
+DHT Distribution and Index Receive</a> are==Прим DHT-данны и индекса</a>
+disabled.\#\(==отключен.#(
+URL mask==маска URL
+restrict on==ограничение
+show all==показать все
 #überarbeiten!!!
-Prefer mask==Vorzugsmaske
-Constraints==Einschränkungen
-only index pages==Nur Index-Seiten
-"authentication required"=="Autorisierung erforderlich"
-Disable search function for users without authorization==Suchfunktion für Benutzer ohne Autorisierung sperren
-Enable web search to everyone==Suchfunktion für alle Nutzer erlauben
-the peer-to-peer network==Peer-to-Peer-Netzwerk
-only the local index==Nur lokaler Index
-Query Operators==Such-Operatoren
-restrictions==Restriktionen
-only urls with the &lt;phrase&gt; in the url==Nur URLs, welche &lt;phrase&gt; enthalten
-only urls with extension==Nur URLs mit der Dateinamenserweiterung
-only urls from host==Nur URLs vom Server
-only pages with as-author-anotated==Nur Seiten mit dem angegebenen Autor
-only pages from top-level-domains==Nur Seiten aus der Top-Level-Domain
-only resources from http or https servers==Nur Ressources auf HTTP- oder HTTPS-Servern
-only resources from ftp servers==Nur Ressourcen auf FTP-Servern
-they are rare==eher selten
-crawl them yourself==crawlen Sie sie selbst
-only resources from smb servers==Nur Ressourcen von SMB-Servern
-Intranet Indexing</a> must be selected==Intranet-Indexierung</a> muss ausgewählt sein
-only files from a local file system==Nur Dateien aus dem lokalen Dateisystem
-ranking modifier==Ranking-Modifizierung
+Prefer mask==Маска предпочтений
+Constraints==Ограничения
+only index pages==only index pages
+"authentication required"=="требуется авторизация"
+Disable search function for users without authorization==Отключить веб-поиск для пользователей без авторизации
+Enable web search to everyone==Разрешить веб-поиск всем
+the peer-to-peer network==P2P-сеть
+only the local index==Только локальный индекс
+Query Operators==Операторы запроса
+restrictions==ограничения
+only urls with the &lt;phrase&gt; in the url==только URL c &lt;phrase&gt; в URL
+only urls with extension==только URL с расширением
+only urls from host==только URL с хоста
+only pages with as-author-anotated==только страницы с аннотацией (as-author-annotated)
+only pages from top-level-domains==только страницы с TLD
+only resources from http or https servers==только ресурсы с HTTP или HTTPS-серверов
+only resources from ftp servers==только ресурсы с FTP серверов
+they are rare==они редки
+crawl them yourself==проиндексируйте их сами
+only resources from smb servers==только ресурсы с SMB-серверов
+Intranet Indexing</a> must be selected==Индексация интранет</a> должна быть активна
+only files from a local file system==только файлы с локальной файловой системы
+ranking modifier==модификация ранжирования
 sort by date==сортировка по дате
-latest first==Neuste zuerst
-multiple words shall appear near==Mehrere Wörter sollen nah zusammen stehen
-doublequotes==Anführungszeichen
-prefer given language==Angegebene Sprache bevorzugen
-an ISO639 2-letter code==2-Buchstaben-Ländercode nach ISO639
-heuristics==Heuristiken
-add search results from scroogle==Benutze zusätzliche Ergebnisse von Scroogle
-add search results from blekko==Benutze zusätzliche Ergebnisse von Blekko
-Search Navigation==Such-Navigation
-keyboard shotcuts==Tastatur-Kürzel
-tab or page-up==Tab oder Bild hoch
-next result page==Nächste Ergebnisseite
-page-down==Bild nach unten
-previous result page==Vorherige Ergebnisseite
-automatic result retrieval==Automatische Ergebnis-Abfrage
-browser integration==Browserintegration
-after searching, click-open on the default search engine in the upper right search field of your browser and select 'Add "YaCy Search.."'==Nach der Suche clicken Sie auf das Suchfeld Ihres Browsers und wählen Sie '"YaCy" hinzufügen'
-search as rss feed==Suche als RSS-Feed
-click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an==Klicken Sie nach der Suche auf das rote Icon in der rechten oberen Ecke. Dies funktioniert gut mit dem '/date' Ranking-Modifizierer. Hier ein
->example==>Beispiel
-json search results==JSON-Suchergebnisse
-for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==Für AJAX-Entwickler: Rufen Sie den RSS-Feed auf und ersetzen Sie '.rss' durch '.json'
+latest first==последние вперед
+multiple words shall appear near==слова должны быть рядом
+doublequotes==двойные кавычки
+prefer given language==предпочитать указанный язык
+an ISO639 2-letter code==2-буквенных языковый код ISO639
+heuristics==эвристики
+add search results from scroogle==добавить результаты из scroogle
+add search results from blekko==добавить результаты из Blekko
+Search Navigation==Поисковая навигация
+keyboard shotcuts==клавиатурные ярлыки
+tab or page-up==Tab или PgUp
+next result page==следущая страница результатов
+page-down==PgDn
+previous result page==предыдущая страница результатов
+automatic result retrieval==автоматический запрос результатов
+browser integration==интеграция в браузер
+after searching, click-open on the default search engine in the upper right search field of your browser and select 'Add "YaCy Search.."'==после поиска, кликлнет на поиске по умолчанию в правом верхнем углу браузера и выберите 'добавить Поиск YaCy'
+search as rss feed==представить как RSS-фид
+click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an==после поиска кликните на красной иконке в правом верхнему углу. Также хорошо работает с модификатором ранжирования /date. Сотри
+>example==>пример
+json search results==результаты в формате JSON
+for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==для AJAX-разрбаотчиков: получите rss-ленту и замените расширение .rss на .json
 #-----------------------------
 #File: IndexCleaner_p.html
 #---------------------------
@@ -3160,7 +3160,7 @@ YaCy - Distributed Search Engine==YaCy - Система распределённ
 ### SEARCH & BROWSE ###
 >Search==>Поиск
 Web Search==Веб поиск
-File Search==Поиск файла
+File Search==Поиск файлов
 Search&nbsp;&amp;&nbsp;Browse==Поиск&nbsp;&amp;&nbsp;Обзор
 Search Page==Страница поиска
 #Rich Client Search==Богатый Поиск Клиента
