@@ -41,40 +41,27 @@ public class schema {
 
         // write scheme
         int c = 0;
-        /*
-        //<field name="#[solrname]#" type="#[type]#"#(indexedChecked)#:: indexed="true"#(/indexedChecked)##(storedChecked)#:: stored="true"#(/storedChecked)##(multiValuedChecked)#:: multiValued="true"#(/multiValuedChecked)##(omitNormsChecked)#:: omitNorms="true"#(/omitNormsChecked)#/>
-        if (sb == null) {
-            for (SolrType type : SolrType.values()) {
-                prop.put("fields_" + c + "_solrname", field.getSolrFieldName());
-                prop.put("fields_" + c + "_type", field.getType().printName());
-                prop.put("fields_" + c + "_comment", field.getComment());
-                prop.put("fields_" + c + "_indexedChecked", field.isIndexed() ? 1 : 0);
-                prop.put("fields_" + c + "_storedChecked", field.isStored() ? 1 : 0);
-                prop.put("fields_" + c + "_multiValuedChecked", field.isMultiValued() ? 1 : 0);
-                prop.put("fields_" + c + "_omitNormsChecked", field.isOmitNorms() ? 1 : 0);
-                c++;
-            }
-            prop.put("fields", c);
-        } else {
-        */
         SolrConfiguration solrScheme = sb.index.fulltext().getSolrScheme();
         for (YaCySchema field : YaCySchema.values()) {
             if (solrScheme.contains(field.name())) {
-                prop.put("fields_" + c + "_solrname", field.getSolrFieldName());
-                prop.put("fields_" + c + "_type", field.getType().printName());
-                prop.put("fields_" + c + "_comment", field.getComment());
-                prop.put("fields_" + c + "_indexedChecked", field.isIndexed() ? 1 : 0);
-                prop.put("fields_" + c + "_storedChecked", field.isStored() ? 1 : 0);
-                prop.put("fields_" + c + "_multiValuedChecked", field.isMultiValued() ? 1 : 0);
-                prop.put("fields_" + c + "_omitNormsChecked", field.isOmitNorms() ? 1 : 0);
+                addField(prop, c, field);
                 c++;
             }
         }
+        if (solrScheme.contains(YaCySchema.author)) {
+            addField(prop, c, YaCySchema.author_sxt);
+        }
         prop.put("fields", c);
-        //}
 
+        prop.put("copyFieldAuthor", solrScheme.contains(YaCySchema.author) ? 1 : 0);
+        
         prop.put("solruniquekey",YaCySchema.id.getSolrFieldName());
-        prop.put("solrdefaultsearchfield",YaCySchema.text_t.getSolrFieldName());
+        prop.put("solrdefaultsearchfield",
+                solrScheme.contains(YaCySchema.text_t) ? YaCySchema.text_t.getSolrFieldName() :
+                solrScheme.contains(YaCySchema.fuzzy_signature_text_t) ? YaCySchema.fuzzy_signature_text_t.getSolrFieldName() :
+                solrScheme.contains(YaCySchema.h1_txt) ? YaCySchema.h1_txt.getSolrFieldName() :
+                YaCySchema.id.getSolrFieldName()
+                );
         
 
         // add CORS Access header
@@ -84,5 +71,15 @@ public class schema {
         
         // return rewrite properties
         return prop;
+    }
+    
+    private static void addField(servletProperties prop, int c, YaCySchema field) {
+        prop.put("fields_" + c + "_solrname", field.getSolrFieldName());
+        prop.put("fields_" + c + "_type", field.getType().printName());
+        prop.put("fields_" + c + "_comment", field.getComment());
+        prop.put("fields_" + c + "_indexedChecked", field.isIndexed() ? 1 : 0);
+        prop.put("fields_" + c + "_storedChecked", field.isStored() ? 1 : 0);
+        prop.put("fields_" + c + "_multiValuedChecked", field.isMultiValued() ? 1 : 0);
+        prop.put("fields_" + c + "_omitNormsChecked", field.isOmitNorms() ? 1 : 0);
     }
 }
