@@ -61,7 +61,8 @@
 
 #{/fields}#
 
-        #(copyFieldAuthor)#::<copyField source="author" dest="author_sxt" maxChars="100" />#(/copyFieldAuthor)#
+        #(copyFieldAuthor)#::<field name="author_sxt" type="string" indexed="true" stored="true" multiValued="true"/>
+        <copyField source="author" dest="author_sxt" maxChars="100" />#(/copyFieldAuthor)#
     </fields>
     
     <uniqueKey>#[solruniquekey]#</uniqueKey>
