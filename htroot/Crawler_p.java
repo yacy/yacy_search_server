@@ -461,7 +461,7 @@ public class Crawler_p {
                         try {
                             // check if the crawl filter works correctly
                             Pattern.compile(newcrawlingMustMatch);
-                            final ContentScraper scraper = new ContentScraper(new DigestURI(crawlingFile), 10000);
+                            final ContentScraper scraper = new ContentScraper(new DigestURI(crawlingFile), 10000000);
                             final Writer writer = new TransformerWriter(null, null, scraper, null, false);
                             if (crawlingFile != null && crawlingFile.exists()) {
                                 FileUtils.copy(new FileInputStream(crawlingFile), writer);
