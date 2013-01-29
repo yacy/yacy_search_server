@@ -28,6 +28,7 @@ package net.yacy.search.index;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -221,7 +222,7 @@ public class Segment {
     public Iterator<DigestURI> urlSelector(MultiProtocolURI stub) {
         final String host = stub.getHost();
         String hh = DigestURI.hosthash(host);
-        final BlockingQueue<String> hostQueue = this.fulltext.getSolr().concurrentIDs(YaCySchema.host_id_s + ":" + hh, 0, Integer.MAX_VALUE, 10000);
+        final BlockingQueue<SolrDocument> docQueue = this.fulltext.getSolr().concurrentQuery(YaCySchema.host_id_s + ":\"" + hh + "\"", 0, Integer.MAX_VALUE, 600000L, 100000, YaCySchema.id.getSolrFieldName(), YaCySchema.sku.getSolrFieldName());
 
         final String urlstub = stub.toNormalform(true);
 
@@ -230,16 +231,23 @@ public class Segment {
             @Override
             protected DigestURI next0() {
                 while (true) {
-                    String id;
+                    SolrDocument doc;
                     try {
-                        id = hostQueue.take();
+                        doc = docQueue.take();
                     } catch (InterruptedException e) {
                         Log.logException(e);
                         return null;
                     }
-                    if (id == null || id == AbstractSolrConnector.POISON_ID) return null;
-                    DigestURI u = Segment.this.fulltext.getURL(ASCII.getBytes(id));
-                    if (u.toNormalform(true).startsWith(urlstub)) return u;
+                    if (doc == null || doc == AbstractSolrConnector.POISON_DOCUMENT) return null;
+                    String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
+                    String id =  (String) doc.getFieldValue(YaCySchema.id.getSolrFieldName());
+                    DigestURI url;
+                    try {
+                        url = new DigestURI(u, ASCII.getBytes(id));
+                    } catch (MalformedURLException e) {
+                        continue;
+                    }
+                    if (u.startsWith(urlstub)) return url;
                 }
             }
         };
