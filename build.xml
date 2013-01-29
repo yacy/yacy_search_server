@@ -243,10 +243,22 @@
       <compilerarg value="-Xlint"/>
     </javac>
   	
+    <!-- prepare classpath for MANIFEST (manifest cp is relative to jar) -->
+    <path id="project.classpath.runtime">
+        <fileset dir="./lib">
+            <include name="**/*.jar" />
+            <exclude name="yacycore.jar"/>
+        </fileset>
+    </path>
+    <pathconvert property="manifest.classpath" pathsep=" " refid="project.classpath.runtime">
+        <flattenmapper/>
+    </pathconvert>
+
   	<!-- make the jacycore jar -->
     <jar destfile="${lib}/yacycore.jar" basedir="${build}/">
       <manifest>
-        <attribute name="Main-Class" value="yacy"/>
+        <attribute name="Main-Class" value="net.yacy.yacy"/>
+        <attribute name="Class-Path" value="../htroot ${manifest.classpath}"/>
       </manifest>
     </jar>
 
