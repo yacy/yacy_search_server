@@ -219,12 +219,18 @@ public class Segment {
      * @param stub
      * @return an iterator for all matching urls
      */
-    public Iterator<DigestURI> urlSelector(MultiProtocolURI stub) {
-        final String host = stub.getHost();
-        String hh = DigestURI.hosthash(host);
-        final BlockingQueue<SolrDocument> docQueue = this.fulltext.getSolr().concurrentQuery(YaCySchema.host_id_s + ":\"" + hh + "\"", 0, Integer.MAX_VALUE, 600000L, 100000, YaCySchema.id.getSolrFieldName(), YaCySchema.sku.getSolrFieldName());
-
-        final String urlstub = stub.toNormalform(true);
+    public Iterator<DigestURI> urlSelector(final MultiProtocolURI stub, final long maxtime, final int maxcount) {
+        final BlockingQueue<SolrDocument> docQueue;
+        final String urlstub;
+        if (stub == null) {
+            docQueue = this.fulltext.getSolr().concurrentQuery("*:*", 0, Integer.MAX_VALUE, maxtime, maxcount, YaCySchema.id.getSolrFieldName(), YaCySchema.sku.getSolrFieldName());
+            urlstub = null;
+        } else {
+            final String host = stub.getHost();
+            String hh = DigestURI.hosthash(host);
+            docQueue = this.fulltext.getSolr().concurrentQuery(YaCySchema.host_id_s + ":\"" + hh + "\"", 0, Integer.MAX_VALUE, maxtime, maxcount, YaCySchema.id.getSolrFieldName(), YaCySchema.sku.getSolrFieldName());
+            urlstub = stub.toNormalform(true);
+        }
 
         // now filter the stub from the iterated urls
         return new LookAheadIterator<DigestURI>() {
@@ -247,7 +253,7 @@ public class Segment {
                     } catch (MalformedURLException e) {
                         continue;
                     }
-                    if (u.startsWith(urlstub)) return url;
+                    if (urlstub == null || u.startsWith(urlstub)) return url;
                 }
             }
         };
