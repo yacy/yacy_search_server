@@ -68,52 +68,51 @@ public class Vocabulary_p {
                         boolean discoverFromTitle = post.get("discovermethod", "").equals("title");
                         boolean discoverFromTitleSplitted = post.get("discovermethod", "").equals("titlesplitted");
                         boolean discoverFromAuthor = post.get("discovermethod", "").equals("author");
-                        if (discoveruri != null) {
-                            Segment segment = sb.index;
-                            Iterator<DigestURI> ui = segment.urlSelector(discoveruri);
-                            String t;
-                            while (ui.hasNext()) {
-                                DigestURI u = ui.next();
-                                String u0 = u.toNormalform(true);
-                                t = "";
-                                if (discoverFromPath) {
-                                    t = u0.substring(discoverobjectspace.length());
-                                    if (t.indexOf('/') >= 0) continue;
-                                    int p = t.indexOf('.');
-                                    if (p >= 0) t = t.substring(0, p);
-                                    while ((p = t.indexOf(':')) >= 0) t = t.substring(p + 1);
-                                    while ((p = t.indexOf('=')) >= 0) t = t.substring(p + 1);
-                                    if (p >= 0) t = t.substring(p + 1);
+                        Segment segment = sb.index;
+                        Iterator<DigestURI> ui = segment.urlSelector(discoveruri, 600000L, 100000);
+                        String t;
+                        while (ui.hasNext()) {
+                            DigestURI u = ui.next();
+                            String u0 = u.toNormalform(true);
+                            t = "";
+                            if (discoverFromPath) {
+                                int exp = u0.lastIndexOf('.');
+                                if (exp < 0) continue;
+                                int slp = u0.lastIndexOf('/', exp);
+                                if (slp < 0) continue;
+                                t = u0.substring(slp, exp);
+                                int p;
+                                while ((p = t.indexOf(':')) >= 0) t = t.substring(p + 1);
+                                while ((p = t.indexOf('=')) >= 0) t = t.substring(p + 1);
+                            }
+                            if (discoverFromTitle || discoverFromTitleSplitted) {
+                                URIMetadataNode m = segment.fulltext().getMetadata(u.hash());
+                                if (m != null) t = m.dc_title();
+                                if (t.endsWith(".jpg") || t.endsWith(".gif")) continue;
+                            }
+                            if (discoverFromAuthor) {
+                                URIMetadataNode m = segment.fulltext().getMetadata(u.hash());
+                                if (m != null) t = m.dc_creator();
+                            }
+                            t = t.replaceAll("_", " ").replaceAll("\"", " ").replaceAll("'", " ").replaceAll(",", " ").replaceAll("  ", " ").trim();
+                            if (t.isEmpty()) continue;
+                            if (discoverFromTitleSplitted) {
+                                String[] ts = t.split(" ");
+                                for (String s: ts) {
+                                    if (s.isEmpty()) continue;
+                                    if (s.endsWith(".jpg") || s.endsWith(".gif")) continue;
+                                    table.put(s, new Tagging.SOTuple(Tagging.normalizeTerm(s), u0));
                                 }
-                                if (discoverFromTitle || discoverFromTitleSplitted) {
-                                    URIMetadataNode m = segment.fulltext().getMetadata(u.hash());
-                                    if (m != null) t = m.dc_title();
-                                    if (t.endsWith(".jpg") || t.endsWith(".gif")) continue;
+                            } else if (discoverFromAuthor) {
+                                String[] ts = t.split(";"); // author names are often separated by ';'
+                                for (String s: ts) {
+                                    if (s.isEmpty()) continue;
+                                    int p = s.indexOf(','); // check if there is a reversed method to mention the name
+                                    if (p >= 0) s = s.substring(p + 1).trim() + " " + s.substring(0, p).trim();
+                                    table.put(s, new Tagging.SOTuple(Tagging.normalizeTerm(s), u0));
                                 }
-                                if (discoverFromAuthor) {
-                                    URIMetadataNode m = segment.fulltext().getMetadata(u.hash());
-                                    if (m != null) t = m.dc_creator();
-                                }
-                                t = t.replaceAll("_", " ").replaceAll("\"", " ").replaceAll("'", " ").replaceAll(",", " ").replaceAll("  ", " ").trim();
-                                if (t.isEmpty()) continue;
-                                if (discoverFromTitleSplitted) {
-                                    String[] ts = t.split(" ");
-                                    for (String s: ts) {
-                                        if (s.isEmpty()) continue;
-                                        if (s.endsWith(".jpg") || s.endsWith(".gif")) continue;
-                                        table.put(s, new Tagging.SOTuple(Tagging.normalizeTerm(s), u0));
-                                    }
-                                } else if (discoverFromAuthor) {
-                                    String[] ts = t.split(";"); // author names are often separated by ';'
-                                    for (String s: ts) {
-                                        if (s.isEmpty()) continue;
-                                        int p = s.indexOf(','); // check if there is a reversed method to mention the name
-                                        if (p >= 0) s = s.substring(p + 1).trim() + " " + s.substring(0, p).trim();
-                                        table.put(s, new Tagging.SOTuple(Tagging.normalizeTerm(s), u0));
-                                    }
-                                } else {
-                                    table.put(t, new Tagging.SOTuple(Tagging.normalizeTerm(t), u0));
-                                }
+                            } else {
+                                table.put(t, new Tagging.SOTuple(Tagging.normalizeTerm(t), u0));
                             }
                         }
                         Tagging newvoc = new Tagging(discovername, propFile, discoverobjectspace, table);

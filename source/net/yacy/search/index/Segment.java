@@ -28,6 +28,7 @@ package net.yacy.search.index;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -218,28 +219,41 @@ public class Segment {
      * @param stub
      * @return an iterator for all matching urls
      */
-    public Iterator<DigestURI> urlSelector(MultiProtocolURI stub) {
-        final String host = stub.getHost();
-        String hh = DigestURI.hosthash(host);
-        final BlockingQueue<String> hostQueue = this.fulltext.getSolr().concurrentIDs(YaCySchema.host_id_s + ":" + hh, 0, Integer.MAX_VALUE, 10000);
-
-        final String urlstub = stub.toNormalform(true);
+    public Iterator<DigestURI> urlSelector(final MultiProtocolURI stub, final long maxtime, final int maxcount) {
+        final BlockingQueue<SolrDocument> docQueue;
+        final String urlstub;
+        if (stub == null) {
+            docQueue = this.fulltext.getSolr().concurrentQuery("*:*", 0, Integer.MAX_VALUE, maxtime, maxcount, YaCySchema.id.getSolrFieldName(), YaCySchema.sku.getSolrFieldName());
+            urlstub = null;
+        } else {
+            final String host = stub.getHost();
+            String hh = DigestURI.hosthash(host);
+            docQueue = this.fulltext.getSolr().concurrentQuery(YaCySchema.host_id_s + ":\"" + hh + "\"", 0, Integer.MAX_VALUE, maxtime, maxcount, YaCySchema.id.getSolrFieldName(), YaCySchema.sku.getSolrFieldName());
+            urlstub = stub.toNormalform(true);
+        }
 
         // now filter the stub from the iterated urls
         return new LookAheadIterator<DigestURI>() {
             @Override
             protected DigestURI next0() {
                 while (true) {
-                    String id;
+                    SolrDocument doc;
                     try {
-                        id = hostQueue.take();
+                        doc = docQueue.take();
                     } catch (InterruptedException e) {
                         Log.logException(e);
                         return null;
                     }
-                    if (id == null || id == AbstractSolrConnector.POISON_ID) return null;
-                    DigestURI u = Segment.this.fulltext.getURL(ASCII.getBytes(id));
-                    if (u.toNormalform(true).startsWith(urlstub)) return u;
+                    if (doc == null || doc == AbstractSolrConnector.POISON_DOCUMENT) return null;
+                    String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
+                    String id =  (String) doc.getFieldValue(YaCySchema.id.getSolrFieldName());
+                    DigestURI url;
+                    try {
+                        url = new DigestURI(u, ASCII.getBytes(id));
+                    } catch (MalformedURLException e) {
+                        continue;
+                    }
+                    if (urlstub == null || u.startsWith(urlstub)) return url;
                 }
             }
         };
