@@ -30,7 +30,6 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +47,6 @@ import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.connector.MirrorSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.order.CloneableIterator;
-import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.storage.ZIPReader;
@@ -206,6 +204,7 @@ public final class Fulltext {
             this.urlIndexFile.clear();
         }
         this.statsDump = null;
+        this.getSolr().commit(true);
     }
 
     public void clearLocalSolr() throws IOException {
@@ -356,22 +355,19 @@ public final class Fulltext {
      * here such a fragment can be used to delete all these domains at once
      * @param hosthash the hash of the host to be deleted
      * @param freshdate either NULL or a date in the past which is the limit for deletion. Only documents older than this date are deleted
-     * @return number of deleted domains
      * @throws IOException
      */
-    public int deleteDomainHashpart(final String hosthash, Date freshdate, boolean concurrent) {
+    public void deleteDomainHashpart(final String hosthash, Date freshdate, boolean concurrent) {
         // first collect all url hashes that belong to the domain
         assert hosthash.length() == 6;
         final String q = YaCySchema.host_id_s.getSolrFieldName() + ":\"" + hosthash + "\"" +
                 ((freshdate != null && freshdate.before(new Date())) ? (" AND " + YaCySchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") : "");
-        final AtomicInteger count = new AtomicInteger(0);
         Thread t = new Thread() {
             public void run() {
                 // delete in solr
                 synchronized (Fulltext.this.solr) {
                     try {
-                        count.addAndGet(Fulltext.this.solr.deleteByQuery(q));
-                        if (count.get() > 0) Fulltext.this.solr.commit(true);
+                        Fulltext.this.solr.deleteByQuery(q);
                     } catch (IOException e) {}
                 }
         
@@ -408,22 +404,22 @@ public final class Fulltext {
                 }
             }
         };
-        if (concurrent) t.start(); else t.run();
-        return count.get();
+        if (concurrent) t.start(); else {
+            t.run();
+            Fulltext.this.getSolr().commit(true);
+        }
     }
 
-    public int deleteDomainHostname(final String hostname, Date freshdate, boolean concurrent) {
+    public void deleteDomainHostname(final String hostname, Date freshdate, boolean concurrent) {
         // first collect all url hashes that belong to the domain
         final String q = YaCySchema.host_s.getSolrFieldName() + ":\"" + hostname + "\"" +
                 ((freshdate != null && freshdate.before(new Date())) ? (" AND " + YaCySchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") : "");
-        final AtomicInteger count = new AtomicInteger(0);
         Thread t = new Thread() {
             public void run() {
                 // delete in solr
                 synchronized (Fulltext.this.solr) {
                     try {
-                        count.addAndGet(Fulltext.this.solr.deleteByQuery(q));
-                        if (count.get() > 0) Fulltext.this.solr.commit(true);
+                        Fulltext.this.solr.deleteByQuery(q);
                     } catch (IOException e) {}
                 }
                 // finally remove the line with statistics
@@ -440,8 +436,10 @@ public final class Fulltext {
                 }
             }
         };
-        if (concurrent) t.start(); else t.run();
-        return count.get();
+        if (concurrent) t.start(); else {
+            t.run();
+            Fulltext.this.getSolr().commit(true);
+        }
     }
 
     /**
@@ -748,42 +746,7 @@ public final class Fulltext {
         }
 
     }
-
-    /**
-     * calculate a score map for url hash samples: each sample is a single url hash
-     * that stands for all entries for the corresponding domain. The map counts the number
-     * of occurrences of the domain
-     * @param domainSamples a map from domain hashes to hash statistics
-     * @return a map from url hash samples to counters
-     */
-    public ScoreMap<String> urlSampleScores(final Map<String, URLHashCounter> domainSamples) {
-        final ScoreMap<String> urlSampleScore = new ConcurrentScoreMap<String>();
-        for (final Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
-            urlSampleScore.inc(ASCII.String(e.getValue().urlhashb), e.getValue().count);
-        }
-        return urlSampleScore;
-    }
-
-    /**
-     * calculate all domain names for all domain hashes
-     * @param domainSamples a map from domain hashes to hash statistics
-     * @return a map from domain hashes to host stats including domain names
-     */
-    public Map<String, HostStat> domainHashResolver(final Map<String, URLHashCounter> domainSamples) {
-        final HashMap<String, HostStat> hostMap = new HashMap<String, HostStat>();
-
-        final ScoreMap<String> hosthashScore = new ConcurrentScoreMap<String>();
-        for (final Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
-            hosthashScore.inc(ASCII.String(e.getValue().urlhashb, 6, 6), e.getValue().count);
-        }
-        DigestURI url;
-        for (final Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
-            url = this.getURL(e.getValue().urlhashb);
-            hostMap.put(e.getKey(), new HostStat(url.getHost(), url.getPort(), e.getKey(), hosthashScore.get(e.getKey())));
-        }
-        return hostMap;
-    }
-
+    
     public Iterator<HostStat> statistics(int count, final ScoreMap<String> domainScore) {
         // prevent too heavy IO.
         if (this.statsDump != null && count <= this.statsDump.size()) return this.statsDump.iterator();
@@ -807,15 +770,6 @@ public final class Fulltext {
         }
         // finally return an iterator for the result array
         return (this.statsDump == null) ? new ArrayList<HostStat>().iterator() : this.statsDump.iterator();
-    }
-
-    private static class URLHashCounter {
-        public byte[] urlhashb;
-        public int count;
-        public URLHashCounter(final byte[] urlhashb) {
-            this.urlhashb = urlhashb;
-            this.count = 1;
-        }
     }
 
     public static class HostStat {

@@ -242,14 +242,10 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      * @throws IOException
      */
     @Override
-    public int deleteByQuery(final String querystring) throws IOException {
+    public void deleteByQuery(final String querystring) throws IOException {
         try {
             synchronized (this.server) {
-                long c0 = this.getQueryCount(querystring);
                 this.server.deleteByQuery(querystring, this.commitWithinMs);
-                this.commit(true);
-                long c1 = this.getQueryCount(querystring);
-                return (int) (c1 - c0);
             }
         } catch (final Throwable e) {
             throw new IOException(e);

@@ -109,15 +109,13 @@
           <td><label for="mustmatch">Must-Match Filter</label>:</td>
           <td>
             <table border="0">
-          
-          
-          <tr><td width="160">on URLs for Crawling:<br/>
+            <tr><td width="160">on URLs for Crawling:<br/>
 			<input type="radio" name="range" id="rangeDomain" value="domain" onclick="document.getElementById('mustmatch').disabled=true;document.getElementById('deleteoldon').disabled=false;document.getElementById('deleteoldage').disabled=false;document.getElementById('deleteoldon').checked=true;"/>Restrict to start domain(s)<br />
 			<input type="radio" name="range" id="rangeSubpath" value="subpath" onclick="document.getElementById('mustmatch').disabled=true;document.getElementById('deleteoldon').disabled=false;document.getElementById('deleteoldage').disabled=false;document.getElementById('deleteoldon').checked=true;" />Restrict to sub-path(s)<br />
 			<input type="radio" name="range" id="rangeWide" value="wide" checked="checked" onclick="document.getElementById('mustmatch').disabled=false;document.getElementById('deleteoldoff').checked=true;document.getElementById('deleteoldon').disabled=true;document.getElementById('deleteoldage').disabled=true;"/>Use filter</td>
-			<td valign="bottom"><input name="mustmatch" id="mustmatch" type="text" size="55" maxlength="1000" value="#[mustmatch]#" /></td></tr>
-		    <tr><td>on IPs for Crawling:</td><td><input name="ipMustmatch" id="ipMustmatch" type="text" size="55" maxlength="100" value="#[ipMustmatch]#" /></td></tr>
-		    <tr><td>on URLs for Indexing</td><td><input name="indexmustmatch" id="indexmustmatch" type="text" size="55" maxlength="100" value="#[indexmustmatch]#" /></td></tr>
+			<td valign="bottom"><input name="mustmatch" id="mustmatch" type="text" size="55" maxlength="100000" value="#[mustmatch]#" onclick="document.getElementById('deleteoldon').disabled=false;document.getElementById('deleteoldage').disabled=false"/></td></tr>
+		    <tr><td>on IPs for Crawling:</td><td><input name="ipMustmatch" id="ipMustmatch" type="text" size="55" maxlength="100000" value="#[ipMustmatch]#" /></td></tr>
+		    <tr><td>on URLs for Indexing</td><td><input name="indexmustmatch" id="indexmustmatch" type="text" size="55" maxlength="100000" value="#[indexmustmatch]#" /></td></tr>
 			</table>
 		  </td>
           <td>
@@ -131,9 +129,9 @@
           <td><label for="mustnotmatch">Must-Not-Match Filter</label>:</td>
           <td>
             <table border="0">
-            <tr><td width="160">on URLs for Crawling:</td><td><input name="mustnotmatch" id="mustnotmatch" type="text" size="55" maxlength="1000" value="#[mustnotmatch]#" /></td></tr>
-		    <tr><td>on IPs for Crawling:</td><td><input name="ipMustnotmatch" id="ipMustnotmatch" type="text" size="55" maxlength="1000" value="#[ipMustnotmatch]#" /></td></tr>
-		    <tr><td>on URLs for Indexing:</td><td><input name="indexmustnotmatch" id="indexmustnotmatch" type="text" size="55" maxlength="1000" value="#[indexmustnotmatch]#" /></td></tr>
+            <tr><td width="160">on URLs for Crawling:</td><td><input name="mustnotmatch" id="mustnotmatch" type="text" size="55" maxlength="100000" value="#[mustnotmatch]#" /></td></tr>
+		    <tr><td>on IPs for Crawling:</td><td><input name="ipMustnotmatch" id="ipMustnotmatch" type="text" size="55" maxlength="100000" value="#[ipMustnotmatch]#" /></td></tr>
+		    <tr><td>on URLs for Indexing:</td><td><input name="indexmustnotmatch" id="indexmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexmustnotmatch]#" /></td></tr>
 			</table>
 		  </td>
           <td>

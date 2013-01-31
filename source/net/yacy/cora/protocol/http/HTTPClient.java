@@ -605,7 +605,7 @@ public class HTTPClient {
         } catch (final IOException e) {
             ConnectionInfo.removeConnection(httpUriRequest.hashCode());
             httpUriRequest.abort();
-            throw new IOException("Client can't execute: " + e.getMessage());
+            throw new IOException("Client can't execute: " + e.getCause().getMessage());
         }
     }
 

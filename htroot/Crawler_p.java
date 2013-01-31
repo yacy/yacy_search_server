@@ -24,9 +24,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -294,8 +296,7 @@ public class Crawler_p {
                         siteFilter = CrawlProfile.siteFilter(rootURLs);
                         if (deleteold) {
                             for (DigestURI u: rootURLs) {
-                                int count = sb.index.fulltext().deleteDomainHashpart(u.hosthash(), deleteageDate, rootURLs.size() > 1);
-                                if (count > 0) Log.logInfo("Crawler_p", "deleted " + count + " documents for host " + u.getHost());
+                                sb.index.fulltext().deleteDomainHashpart(u.hosthash(), deleteageDate, rootURLs.size() > 1);
                             }
                         }
                     } else if (subPath) {
@@ -366,14 +367,17 @@ public class Crawler_p {
                 try {sb.crawlQueues.noticeURL.removeByProfileHandle(profile.handle(), 10000);} catch (SpaceExceededException e1) {}
                 
                 // delete all error urls for that domain
+                List<byte[]> hosthashes = new ArrayList<byte[]>();
                 for (DigestURI u: rootURLs) {
-                    String hosthash = u.hosthash();
+                    hosthashes.add(ASCII.getBytes(u.hosthash()));
+                }
+                sb.crawlQueues.errorURL.removeHost(hosthashes, true);
+                for (byte[] hosthash: hosthashes) {
                     try {
-                        sb.crawlQueues.errorURL.removeHost(ASCII.getBytes(hosthash));
-                        sb.index.fulltext().getSolr().deleteByQuery(YaCySchema.host_id_s.getSolrFieldName() + ":\"" + hosthash + "\" AND " + YaCySchema.failreason_t.getSolrFieldName() + ":[* TO *]");
-                        sb.index.fulltext().commit(true);
+                        sb.index.fulltext().getSolr().deleteByQuery(YaCySchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + YaCySchema.failreason_t.getSolrFieldName() + ":[* TO *]");
                     } catch (IOException e) {Log.logException(e);}
                 }
+                sb.index.fulltext().commit(true);
                 
                 // start the crawl
                 if ("url".equals(crawlingMode)) {

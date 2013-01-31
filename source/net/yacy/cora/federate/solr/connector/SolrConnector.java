@@ -90,7 +90,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @return the number of deletions
      * @throws IOException
      */
-    public int deleteByQuery(final String querystring) throws IOException;
+    public void deleteByQuery(final String querystring) throws IOException;
 
     /**
      * check if a given key exists in solr at the field fieldName

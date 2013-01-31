@@ -255,12 +255,10 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     @Override
-    public int deleteByQuery(final String querystring) throws IOException {
-        int count = 0;
-        if (this.solr0 != null) count += this.solr0.deleteByQuery(querystring);
-        if (this.solr1 != null) count += this.solr1.deleteByQuery(querystring);
+    public void deleteByQuery(final String querystring) throws IOException {
+        if (this.solr0 != null) this.solr0.deleteByQuery(querystring);
+        if (this.solr1 != null) this.solr1.deleteByQuery(querystring);
         this.clearCache();
-        return count;
     }
 
     @Override

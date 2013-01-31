@@ -120,10 +120,8 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
     @Override
-    public int deleteByQuery(final String querystring) throws IOException {
-        int count = 0;
-        for (final SolrConnector connector: this.connectors) count += connector.deleteByQuery(querystring);
-        return count;
+    public void deleteByQuery(final String querystring) throws IOException {
+        for (final SolrConnector connector: this.connectors) connector.deleteByQuery(querystring);
     }
 
     /**

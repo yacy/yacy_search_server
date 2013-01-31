@@ -147,20 +147,31 @@ public class ZURL implements Iterable<ZURL.Entry> {
         }
     }
     
-    public void removeHost(final byte[] hosthash) throws IOException {
-        if (hosthash == null) return;
-        Iterator<byte[]> i = this.urlIndex.keys(true, null);
-        List<byte[]> r = new ArrayList<byte[]>();
-        while (i.hasNext()) {
-            byte[] b = i.next();
-            if (NaturalOrder.naturalOrder.equal(hosthash, 0, b, 6, 6)) r.add(b);
-        }
-        for (byte[] b: r) this.urlIndex.remove(b);
-        i = this.stack.iterator();
-        while (i.hasNext()) {
-            byte[] b = i.next();
-            if (NaturalOrder.naturalOrder.equal(hosthash, 0, b, 6, 6)) i.remove();
-        }
+    public void removeHost(final Iterable<byte[]> hosthashes, final boolean concurrent) {
+        if (hosthashes == null) return;
+        Thread t = new Thread() {
+            public void run() {
+                try {
+                    Iterator<byte[]> i = ZURL.this.urlIndex.keys(true, null);
+                    List<byte[]> r = new ArrayList<byte[]>();
+                    while (i.hasNext()) {
+                        byte[] b = i.next();
+                        for (byte[] hosthash: hosthashes) {
+                            if (NaturalOrder.naturalOrder.equal(hosthash, 0, b, 6, 6)) r.add(b);
+                        }
+                    }
+                    for (byte[] b: r) ZURL.this.urlIndex.remove(b);
+                    i = ZURL.this.stack.iterator();
+                    while (i.hasNext()) {
+                        byte[] b = i.next();
+                        for (byte[] hosthash: hosthashes) {
+                            if (NaturalOrder.naturalOrder.equal(hosthash, 0, b, 6, 6)) i.remove();
+                        }
+                    }
+                } catch (IOException e) {}
+            }
+        };
+        if (concurrent) t.start(); else t.run();
     }
 
     public void push(
