@@ -993,7 +993,7 @@ public class Domains {
         final Set<InetAddress> list = new HashSet<InetAddress>();
         if (localHostAddresses.isEmpty()) return list; // give up
         for (final InetAddress a: localHostAddresses) {
-            if ((0Xff & a.getAddress()[0]) == 127 || LOCAL_PATTERNS.matcher(a.getHostAddress()).matches()) continue;
+            if ((0Xff & a.getAddress()[0]) == 127) continue;
             list.add(a);
         }
         return list;

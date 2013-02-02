@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -44,7 +45,7 @@ import net.yacy.server.serverSwitch;
 public class CrawlStartScanner_p
 {
 
-    private final static int CONCURRENT_RUNNER = 100;
+    private final static int CONCURRENT_RUNNER = 200;
 
     public static serverObjects respond(
         @SuppressWarnings("unused") final RequestHeader header,
@@ -100,71 +101,38 @@ public class CrawlStartScanner_p
                 repeat_unit = post.get("repeat_unit", "selminutes"); // selminutes, selhours, seldays
             }
 
-            final boolean bigrange = post.get("subnet", "24").equals("16");
+            final int subnet = post.getInt("subnet", 24);
 
-            // case: an IP range was given; scan the range for services and display result
-            if ( post.containsKey("scan") && "hosts".equals(post.get("source", "")) ) {
-                final Set<InetAddress> ia = new HashSet<InetAddress>();
-                for ( String host : hosts.split(",") ) {
-                    if ( host.startsWith("http://") ) {
-                        host = host.substring(7);
+            // scan a range of ips
+            if (post.containsKey("scan")) {
+                final Set<InetAddress> scanbase = new HashSet<InetAddress>();
+                
+                // select host base to scan
+                if ("hosts".equals(post.get("source", ""))) {
+                    for (String host: hosts.split(",")) {
+                        if (host.startsWith("http://")) host = host.substring(7);
+                        if (host.startsWith("https://")) host = host.substring(8);
+                        if (host.startsWith("ftp://")) host = host.substring(6);
+                        if (host.startsWith("smb://")) host = host.substring(6);
+                        final int p = host.indexOf('/', 0);
+                        if (p >= 0) host = host.substring(0, p);
+                        if (host.length() > 0) scanbase.add(Domains.dnsResolve(host));
                     }
-                    if ( host.startsWith("https://") ) {
-                        host = host.substring(8);
-                    }
-                    if ( host.startsWith("ftp://") ) {
-                        host = host.substring(6);
-                    }
-                    if ( host.startsWith("smb://") ) {
-                        host = host.substring(6);
-                    }
-                    final int p = host.indexOf('/', 0);
-                    if ( p >= 0 ) {
-                        host = host.substring(0, p);
-                    }
-                    ia.add(Domains.dnsResolve(host));
                 }
-                final Scanner scanner = new Scanner(ia, CONCURRENT_RUNNER, timeout);
-                if ( post.get("scanftp", "").equals("on") ) {
-                    scanner.addFTP(bigrange);
+                if ("intranet".equals(post.get("source", ""))) {
+                    scanbase.addAll(Domains.myIntranetIPs());
                 }
-                if ( post.get("scanhttp", "").equals("on") ) {
-                    scanner.addHTTP(bigrange);
-                }
-                if ( post.get("scanhttps", "").equals("on") ) {
-                    scanner.addHTTPS(bigrange);
-                }
-                if ( post.get("scansmb", "").equals("on") ) {
-                    scanner.addSMB(bigrange);
-                }
+                
+                // start a scanner
+                final Scanner scanner = new Scanner(scanbase, CONCURRENT_RUNNER, timeout);
+                List<InetAddress> addresses = scanner.genlist(subnet);
+                if ("on".equals(post.get("scanftp", ""))) scanner.addFTP(addresses);
+                if ("on".equals(post.get("scanhttp", ""))) scanner.addHTTP(addresses);
+                if ("on".equals(post.get("scanhttps", ""))) scanner.addHTTPS(addresses);
+                if ("on".equals(post.get("scansmb", ""))) scanner.addSMB(addresses);
                 scanner.start();
                 scanner.terminate();
-                if ( "on".equals(post.get("accumulatescancache", ""))
-                    && !"scheduler".equals(post.get("rescan", "")) ) {
-                    Scanner.scancacheExtend(scanner);
-                } else {
-                    Scanner.scancacheReplace(scanner);
-                }
-            }
-
-            if ( post.containsKey("scan") && "intranet".equals(post.get("source", "")) ) {
-                final Scanner scanner = new Scanner(Domains.myIntranetIPs(), CONCURRENT_RUNNER, timeout);
-                if ( "on".equals(post.get("scanftp", "")) ) {
-                    scanner.addFTP(bigrange);
-                }
-                if ( "on".equals(post.get("scanhttp", "")) ) {
-                    scanner.addHTTP(bigrange);
-                }
-                if ( "on".equals(post.get("scanhttps", "")) ) {
-                    scanner.addHTTPS(bigrange);
-                }
-                if ( "on".equals(post.get("scansmb", "")) ) {
-                    scanner.addSMB(bigrange);
-                }
-                scanner.start();
-                scanner.terminate();
-                if ( "on".equals(post.get("accumulatescancache", ""))
-                    && !"scheduler".equals(post.get("rescan", "")) ) {
+                if ("on".equals(post.get("accumulatescancache", "")) && !"scheduler".equals(post.get("rescan", ""))) {
                     Scanner.scancacheExtend(scanner);
                 } else {
                     Scanner.scancacheReplace(scanner);
@@ -177,7 +145,7 @@ public class CrawlStartScanner_p
                 final Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
                 final Map<byte[], DigestURI> pkmap =
                     new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
-                while ( se.hasNext() ) {
+                while (se.hasNext()) {
                     final Scanner.Service u = se.next().getKey();
                     DigestURI uu;
                     try {
@@ -193,8 +161,7 @@ public class CrawlStartScanner_p
                         final byte[] pk = entry.getValue().substring(5).getBytes();
                         final DigestURI url = pkmap.get(pk);
                         if ( url != null ) {
-                            String path =
-                                "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99&directDocByURL=off";
+                            String path = "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99&directDocByURL=off";
                             path += "&crawlingURL=" + url.toNormalform(true);
                             WorkTables.execAPICall(
                                 Domains.LOCALHOST,
@@ -263,5 +230,5 @@ public class CrawlStartScanner_p
 
         return prop;
     }
-
+    
 }

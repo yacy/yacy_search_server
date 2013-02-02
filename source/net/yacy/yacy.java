@@ -40,6 +40,8 @@ import java.nio.channels.FileLock;
 import java.util.Properties;
 import java.util.concurrent.Semaphore;
 
+import sun.security.action.GetBooleanAction;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -597,6 +599,7 @@ public final class yacy {
 	        if (OS.isWindows) headless = false;
 	        if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) headless = false;
 	        System.setProperty("java.awt.headless", headless ? "true" : "false");
+            System.setProperty("java.net.preferIPv4Stack", "true");
 
 	        String s = ""; for (final String a: args) s += a + " ";
 	        yacyRelease.startParameter = s.trim();

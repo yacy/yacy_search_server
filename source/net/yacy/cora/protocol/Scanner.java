@@ -212,7 +212,7 @@ public class Scanner extends Thread {
         Service uri;
         try {
             while ((uri = this.scanqueue.take()) != POISONSERVICE) {
-                Thread.currentThread().setName("Scanner Start Loop; now: " + uri.getHostName()); // good for debugging
+                Thread.currentThread().setName("Scanner Start Loop; now: " + uri.getInetAddress()); // good for debugging
                 while (this.runner.size() >= this.runnerCount) {
                     /*for (Runner r: runner.keySet()) {
                         if (r.age() > 3000) synchronized(r) { r.interrupt(); }
@@ -301,24 +301,24 @@ public class Scanner extends Thread {
         }
     }
 
-    public void addHTTP(final boolean bigrange) {
-        addProtocol(Protocol.http, bigrange);
+    public void addHTTP(final List<InetAddress> addresses) {
+        addProtocol(Protocol.http, addresses);
     }
 
-    public void addHTTPS(final boolean bigrange) {
-        addProtocol(Protocol.https, bigrange);
+    public void addHTTPS(final List<InetAddress> addresses) {
+        addProtocol(Protocol.https, addresses);
     }
 
-    public void addSMB(final boolean bigrange) {
-        addProtocol(Protocol.smb, bigrange);
+    public void addSMB(final List<InetAddress> addresses) {
+        addProtocol(Protocol.smb, addresses);
     }
 
-    public void addFTP(final boolean bigrange) {
-        addProtocol(Protocol.ftp, bigrange);
+    public void addFTP(final List<InetAddress> addresses) {
+        addProtocol(Protocol.ftp, addresses);
     }
 
-    private void addProtocol(final Protocol protocol, final boolean bigrange) {
-        for (final InetAddress i: genlist(bigrange)) {
+    private void addProtocol(final Protocol protocol, final List<InetAddress> addresses) {
+        for (final InetAddress i: addresses) {
             try {
                 this.scanqueue.put(new Service(protocol, i));
             } catch (final InterruptedException e) {
@@ -326,10 +326,16 @@ public class Scanner extends Thread {
         }
     }
 
-    private final List<InetAddress> genlist(final boolean bigrange) {
+    /**
+     * generate a list of internetaddresses
+     * @param subnet the subnet: 24 will generate 254 addresses, 16 will generate 256 * 254; must be >= 16 and <= 24
+     * @return
+     */
+    public final List<InetAddress> genlist(final int subnet) {
         final ArrayList<InetAddress> c = new ArrayList<InetAddress>(10);
         for (final InetAddress i: this.scanrange) {
-            for (int br = bigrange ? 1 : i.getAddress()[2]; br < (bigrange ? 255 : i.getAddress()[2] + 1); br++) {
+            int ul = subnet >= 24 ? i.getAddress()[2] : (1 << (24 - subnet)) - 1;
+            for (int br = subnet >= 24 ? i.getAddress()[2] : 0; br <= ul; br++) {
                 for (int j = 1; j < 255; j++) {
                     final byte[] address = i.getAddress();
                     address[2] = (byte) br;
@@ -358,10 +364,11 @@ public class Scanner extends Thread {
     public static void main(final String[] args) {
         //try {System.out.println("192.168.1.91: " + ping(new MultiProtocolURI("smb://192.168.1.91/"), 1000));} catch (MalformedURLException e) {}
         final Scanner scanner = new Scanner(100, 10);
-        scanner.addFTP(false);
-        scanner.addHTTP(false);
-        scanner.addHTTPS(false);
-        scanner.addSMB(false);
+        List<InetAddress> addresses = scanner.genlist(20);
+        scanner.addFTP(addresses);
+        scanner.addHTTP(addresses);
+        scanner.addHTTPS(addresses);
+        scanner.addSMB(addresses);
         scanner.start();
         scanner.terminate();
         for (final Service service: scanner.services().keySet()) {
