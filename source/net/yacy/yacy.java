@@ -40,8 +40,6 @@ import java.nio.channels.FileLock;
 import java.util.Properties;
 import java.util.concurrent.Semaphore;
 
-import sun.security.action.GetBooleanAction;
-
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.ClientIdentification;
