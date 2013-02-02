@@ -599,7 +599,7 @@ public final class SearchEvent {
                     }
                 } else {
                     // filter out all domains that do not match with the site constraint
-                    if (!hosthash.equals(this.query.nav_sitehash)) continue pollloop;
+                    if (iEntry.url().getHost().indexOf(this.query.nav_sitehost) < 0) continue pollloop;
                 }
 
                 // finally extend the double-check and insert result to stack

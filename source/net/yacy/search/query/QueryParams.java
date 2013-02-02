@@ -128,7 +128,7 @@ public final class QueryParams {
     public final RankingProfile ranking;
     private final Segment indexSegment;
     public final String clienthost; // this is the client host that starts the query, not a site operator
-    private final String nav_sitehost; // this is a domain name which is used to navigate to that host
+    public final String nav_sitehost; // this is a domain name which is used to navigate to that host
     public final String nav_sitehash; // this is a domain hash, 6 bytes long or null
     protected final Set<String> siteexcludes; // set of domain hashes that are excluded if not included by sitehash
     public final String author;
@@ -145,6 +145,7 @@ public final class QueryParams {
     protected double lat, lon, radius;
     public List<String> facetfields;
     public int maxfacets;
+    private SolrQuery cachedQuery;
     
     // the following values are filled during the search process as statistics for the search
     public final AtomicInteger local_rwi_available;  // the number of hits generated/ranked by the local search in rwi index
@@ -212,6 +213,7 @@ public final class QueryParams {
         this.facetfields = new ArrayList<String>(); for (String f: defaultfacetfields) facetfields.add(f);
         for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(YaCySchema.VOCABULARY_PREFIX + v.getName() + YaCySchema.VOCABULARY_SUFFIX);
         this.maxfacets = defaultmaxfacets;
+        this.cachedQuery = null;
     }
 
     public QueryParams(
@@ -313,6 +315,7 @@ public final class QueryParams {
         this.facetfields = new ArrayList<String>(); for (String f: defaultfacetfields) facetfields.add(f);
         for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(YaCySchema.VOCABULARY_PREFIX + v.getName() + YaCySchema.VOCABULARY_SUFFIX);
         this.maxfacets = defaultmaxfacets;
+        this.cachedQuery = null;
     }
 
     private double kmNormal = 100.d; // 100 =ca 40000.d / 360.d == 111.11 - if lat/lon is multiplied with this, rounded and diveded by this, the location is normalized to a 1km grid
@@ -431,6 +434,10 @@ public final class QueryParams {
     }
 
     public SolrQuery solrQuery() {
+        if (this.cachedQuery != null) {
+            this.cachedQuery.setStart(this.offset);
+            return this.cachedQuery;
+        }
         if (this.queryGoal.getIncludeStrings().size() == 0) return null;
         // construct query
         final SolrQuery params = new SolrQuery();
@@ -519,10 +526,13 @@ public final class QueryParams {
                 params.setSortField(YaCySchema.last_modified.getSolrFieldName(), ORDER.desc);
             }
         }
-        if (fq.length() > 0) params.setFilterQueries(fq.substring(5));
+        if (fq.length() > 0) {
+            params.setFilterQueries(fq.substring(5));
+        }
         
         // prepare result
         Log.logInfo("Protocol", "SOLR QUERY: " + params.toString());
+        this.cachedQuery = params;
         return params;
     }
 
