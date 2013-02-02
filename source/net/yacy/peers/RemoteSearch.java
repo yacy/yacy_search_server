@@ -263,9 +263,10 @@ public class RemoteSearch extends Thread {
                 int tmpoffset = 0;
                 int tmpcount = 10;
                 while (tmpoffset + tmpcount <= count && tmpcount > 0) {
+                    int urls = 0;
                     try {
                         event.rankingProcess.oneFeederStarted();
-                        int urls = Protocol.solrQuery(
+                        urls = Protocol.solrQuery(
                                         event,
                                         tmpoffset,
                                         tmpcount,
@@ -286,6 +287,7 @@ public class RemoteSearch extends Thread {
                     } finally {
                         event.rankingProcess.oneFeederTerminated();
                     }
+                    if (urls < tmpcount) break; // there won't be more
                     tmpoffset += tmpcount;
                     tmpcount = count - tmpoffset; // increase the tmpcount to get to all results in less time
                 }
