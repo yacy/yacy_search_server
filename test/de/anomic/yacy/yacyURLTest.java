@@ -23,15 +23,19 @@ public class yacyURLTest extends TestCase {
 				new String[]{"/test/test2/../hallo/","/test/hallo/"},
 				new String[]{"/home/..test/../hallo/../","/home/"}
 		};		
-		
+		String testhost = "http://localhost";
 		for (int i=0; i < testStrings.length; i++) {
 			// desired conversion result
 			System.out.print("testResolveBackpath: " + testStrings[i][0]);
-			String shouldBe = testStrings[i][1];
+			String shouldBe = testhost + testStrings[i][1];
 			
 			// conversion result
-			String resolvedURL = MultiProtocolURI.resolveBackpath(testStrings[i][0]);
-			
+			String resolvedURL="";
+                        try {
+                            resolvedURL = (new MultiProtocolURI(testhost + testStrings[i][0])).toString();
+                        } catch (MalformedURLException ex) {
+                            fail ("malformed URL");
+                        }
 			// test if equal
 			assertEquals(shouldBe,resolvedURL);
 			System.out.println(" -> " + resolvedURL);

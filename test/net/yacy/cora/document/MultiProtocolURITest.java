@@ -28,7 +28,7 @@ public class MultiProtocolURITest {
 		for (int i=0; i<testURIs.length; i++) {
 			MultiProtocolURI uri = new MultiProtocolURI(testURIs[i][0]);
     
-   			assertEquals(uri.toNormalform(true, true, false, true), testURIs[i][1]);
+   			assertEquals(uri.toNormalform(true, true), testURIs[i][1]);
 		}
 	}
 }
