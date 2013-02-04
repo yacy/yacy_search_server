@@ -110,9 +110,16 @@ public class ConfigUpdate_p {
                 final String release = post.get("releaseinstall", "");
                 if (!release.isEmpty()) {
                     try {
+                        // only delete files from RELEASE directory
+                        if (FileUtils.isInDirectory(new File(sb.releasePath, release), sb.releasePath)) {
                         FileUtils.deletedelete(new File(sb.releasePath, release));
                         FileUtils.deletedelete(new File(sb.releasePath, release + ".sig"));
+                        } else {
+                            sb.getLog().logSevere("AUTO-UPDATE: could not delete " + release + ": file not in release directory.");
+                        }
                     } catch (final NullPointerException e) {
+                        sb.getLog().logSevere("AUTO-UPDATE: could not delete release " + release + ": " + e.getMessage());
+                    } catch (final IOException e) {
                         sb.getLog().logSevere("AUTO-UPDATE: could not delete release " + release + ": " + e.getMessage());
                     }
                 }
