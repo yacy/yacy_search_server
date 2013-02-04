@@ -59,10 +59,6 @@ import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.servlet.cache.HttpCacheHeaderUtil;
 import org.apache.solr.servlet.cache.Method;
 import org.apache.solr.util.FastWriter;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.FilterHolder;
 
 
 public class SolrServlet implements Filter {
@@ -194,38 +190,6 @@ public class SolrServlet implements Filter {
         StringWriter sw = new StringWriter();
         ex.printStackTrace(new PrintWriter(sw));
         hresponse.sendError((code < 100) ? 500 : code, ex.getMessage() + "\n\n" + sw.toString());
-    }
-
-    /**
-     * from org.apache.solr.client.solrj.embedded.JettySolrRunner
-     */
-    public static Server startServer(String context, int port, EmbeddedSolrConnector c) {
-        //this.context = context;
-        Server server = new Server(port);
-        /*
-            SocketConnector connector = new SocketConnector();
-            connector.setPort(port);
-            connector.setReuseAddress(true);
-            this.server.setConnectors(new Connector[] { connector });
-            this.server.setSessionIdManager(new HashSessionIdManager(new Random()));
-        */
-        server.setStopAtShutdown(true);
-        Context root = new Context(server, context, Context.SESSIONS);
-        root.addServlet(Servlet404.class, "/*");
-
-        // attach org.apache.solr.response.XMLWriter to search requests
-        SolrServlet.initCore(c);
-        FilterHolder dispatchFilter = root.addFilter(SolrServlet.class, "*", Handler.REQUEST);
-
-        if (!server.isRunning()) {
-            try {
-                server.start();
-                waitForSolr(context, port);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return server;
     }
 
     public static void waitForSolr(String context, int port) throws Exception {

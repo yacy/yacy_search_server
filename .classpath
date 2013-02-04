@@ -43,8 +43,6 @@
 	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar"/>
 	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-api-2.5-20081211.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-6.1.26-patched-JETTY-1340.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-util-6.1.26-patched-JETTY-1340.jar"/>
 	<classpathentry kind="lib" path="lib/jaudiotagger-2.0.4-20111207.115108-15.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.7.jar"/>
 	<classpathentry kind="lib" path="lib/spatial4j-0.3.jar"/>

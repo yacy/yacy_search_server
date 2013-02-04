@@ -24,18 +24,13 @@ package net.yacy.cora.federate.solr.connector;
 import java.io.File;
 import java.io.IOException;
 
-import net.yacy.cora.federate.solr.SolrServlet;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
@@ -198,37 +193,4 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         }
     }
 
-    public static void main(String[] args) {
-        File solr_config = new File("defaults/solr");
-        File storage = new File("DATA/INDEX/webportal/SEGMENTS/text/solr/");
-        storage.mkdirs();
-        try {
-            EmbeddedSolrConnector solr = new EmbeddedSolrConnector(storage, solr_config);
-            SolrInputDocument doc = new SolrInputDocument();
-            doc.addField(YaCySchema.id.name(), "ABCD0000abcd");
-            doc.addField(YaCySchema.title.name(), "Lorem ipsum");
-            doc.addField(YaCySchema.host_s.name(), "yacy.net");
-            doc.addField(YaCySchema.text_t.name(), "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
-            solr.add(doc);
-            
-            // start a server
-            SolrServlet.startServer("/solr", 8091, solr); // try http://localhost:8091/solr/select?q=*:*
-
-            // do a normal query
-            SolrDocumentList select = solr.query(YaCySchema.text_t.name() + ":tempor", 0, 10);
-            for (SolrDocument d : select) System.out.println("***TEST SELECT*** " + d.toString());
-
-            // do a facet query
-            select = solr.query(YaCySchema.text_t.name() + ":tempor", 0, 10);
-            for (SolrDocument d : select) System.out.println("***TEST SELECT*** " + d.toString());
-            
-            
-            // try http://127.0.0.1:8091/solr/select?q=ping
-            try {Thread.sleep(1000 * 1000);} catch (InterruptedException e) {}
-            solr.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
 }

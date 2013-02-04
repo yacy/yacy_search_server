@@ -41,9 +41,9 @@ public class ParserTest {
 			final String mimetype = testFile[1];
 			final DigestURI url = new DigestURI("http://localhost/"+filename);
 
-			final Document[] docs = TextParser.parseSource(url, mimetype, null, file.length(), new FileInputStream(file), true);
+			final Document[] docs = TextParser.parseSource(url, mimetype, null, file.length(), new FileInputStream(file));
 			for (final Document doc: docs) {
-    			final Reader content = new InputStreamReader(doc.getText(), doc.getCharset());
+    			final Reader content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
     			final StringBuilder str = new StringBuilder();
     			int c;
     			while( (c = content.read()) != -1 )

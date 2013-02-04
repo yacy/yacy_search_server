@@ -185,8 +185,6 @@
     	<pathelement location="${lib}/jcl-over-slf4j-1.7.2.jar" />
     	<pathelement location="${lib}/jempbox-1.7.1" />
     	<pathelement location="${lib}/jena-2.6.4.jar" />
-    	<pathelement location="${lib}/jetty-6.1.26-patched-JETTY-1340.jar" />
-    	<pathelement location="${lib}/jetty-util-6.1.26-patched-JETTY-1340.jar" />
     	<pathelement location="${lib}/jsch-0.1.42.jar" />
     	<pathelement location="${lib}/json-simple-1.1.jar" />
     	<pathelement location="${lib}/jsoup-1.6.3.jar" />
@@ -433,7 +431,7 @@
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${htroot}"/>
-	<pathelement location="${libt}/junit-4.7.jar" />
+        <fileset dir="${libt}" includes="**/*.jar" />
         <fileset dir="${lib}" includes="**/*.jar" />
       </classpath>
       <compilerarg value="-Xlint"/>
@@ -441,7 +439,7 @@
   </target>
 
   <target name="test" depends="compileTest" description="run some unittests">
-    <junit printsummary="yes" haltonfailure="no">
+    <junit printsummary="yes" haltonfailure="no" fork="true" dir="${yacyroot}">
       <formatter type="plain"/>
       <batchtest>
         <fileset dir="${test}">
@@ -452,7 +450,7 @@
         <pathelement location="${test}"/>
         <pathelement location="${build}"/>
         <pathelement location="${htroot}"/>
-	<pathelement location="${libt}/junit-4.7.jar" />
+	<fileset dir="${libt}" includes="**/*.jar" />
         <fileset dir="${lib}" includes="**/*.jar" />
       </classpath>
     </junit>
@@ -508,7 +506,7 @@
     <delete file="${lib}/yacy-cora.jar" failonerror="false"/>
     <delete file="${lib}/svnRevNr.jar" failonerror="false"/>
     <delete file="${libbuild}/svnRevNr.jar" failonerror="false"/>
-    <delete file="${libbuild}/GitRevTask.jar" failonerror="false"/>
+    <delete file="${libbuild}/GitRevTask.jar" failonerror="false"/>    
     <delete failonerror="false">
       <fileset dir="${src}" includes="**/*.class" />
       <fileset dir="${build}" includes="**/*.class" />
@@ -518,6 +516,7 @@
       <fileset dir="${libbuild}/GitRevTask" includes="**/*.class" />
       <fileset dir="." includes="TEST-*" />
     </delete>
+    <delete dir="test/DATA" failonerror="false"/>
   </target>
 
   <target name="installonlinux">
