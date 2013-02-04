@@ -1035,8 +1035,6 @@ public final class Protocol
             return -1; // we cannot query solr only with word hashes, there is no clear text string
         }
         event.addExpectedRemoteReferences(count);
-        QueryResponse rsp = null;
-        SolrDocumentList docList = null;
         final SolrQuery solrQuery = event.query.solrQuery();
         solrQuery.setStart(offset);
         solrQuery.setRows(count);
@@ -1061,16 +1059,15 @@ public final class Protocol
         for (YaCySchema field: snippetFields) solrQuery.addHighlightField(field.getSolrFieldName());
         
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
+        SolrDocumentList docList = null;
+        QueryResponse rsp = null;
         if (localsearch) {
             // search the local index
             try {
                 rsp = event.rankingProcess.getQuery().getSegment().fulltext().getSolr().query(solrQuery);
                 docList = rsp.getResults();
-            } catch (SolrException e) {
-                Network.log.logInfo("SEARCH failed (solr, 1), localpeer (" + e.getMessage() + ")", e);
-                return -1;
-            } catch (IOException e) {
-                Network.log.logInfo("SEARCH failed (solr, 2), localpeer (" + e.getMessage() + ")", e);
+            } catch (Throwable e) {
+                Network.log.logInfo("SEARCH failed (solr), localpeer (" + e.getMessage() + ")", e);
                 return -1;
             }
         } else {
@@ -1080,8 +1077,8 @@ public final class Protocol
                 rsp = solrConnector.query(solrQuery);
                 docList = rsp.getResults();
                 // no need to close this here because that sends a commit to remote solr which is not wanted here
-            } catch (IOException e) {
-                Network.log.logInfo("SEARCH failed (solr), Peer: " +target.getName() + "/" + target.getPublicAddress() + " (" + e.getMessage() + ")", e);
+            } catch (Throwable e) {
+                Network.log.logInfo("SEARCH failed (solr), remote Peer: " +target.getName() + "/" + target.getPublicAddress() + " (" + e.getMessage() + ")", e);
                 return -1;
             }
         }
@@ -1123,7 +1120,7 @@ public final class Protocol
         // evaluate result
         List<URIMetadataNode> container = new ArrayList<URIMetadataNode>();
 		if (docList == null || docList.size() == 0) {
-		    Network.log.logInfo("SEARCH (solr), returned 0 out of " + docList.getNumFound() + " documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())) + " query = " + solrQuery.toString()) ;
+		    Network.log.logInfo("SEARCH (solr), returned 0 out of 0 documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())) + " query = " + solrQuery.toString()) ;
 		    return 0;
 		}
 		
