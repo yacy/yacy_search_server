@@ -46,18 +46,16 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.ResponseParser;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
-import org.apache.solr.core.CoreContainer;
-import org.apache.solr.core.SolrCore;
 
 
 public class RemoteSolrConnector extends SolrServerConnector implements SolrConnector {
@@ -94,7 +92,10 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
         }
         HttpSolrServer s;
         if (this.solraccount.length() > 0) {
-            this.client = new DefaultHttpClient() {
+            PoolingClientConnectionManager cm = new PoolingClientConnectionManager(); // try also: ThreadSafeClientConnManager
+            cm.setMaxTotal(100);
+            
+            this.client = new DefaultHttpClient(cm) {
                 @Override
                 protected HttpContext createHttpContext() {
                     HttpContext context = super.createHttpContext();

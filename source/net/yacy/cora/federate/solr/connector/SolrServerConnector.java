@@ -33,6 +33,7 @@ import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.kelondro.logging.Log;
 
 import org.apache.log4j.Logger;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -102,8 +103,10 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
 
     @Override
     public synchronized void commit(final boolean softCommit) {
+        //if (this.server instanceof HttpSolrServer) ((HttpSolrServer) this.server).getHttpClient().getConnectionManager().closeExpiredConnections();
         try {
             this.server.commit(true, true, softCommit);
+            if (this.server instanceof HttpSolrServer) ((HttpSolrServer) this.server).shutdown();
         } catch (Throwable e) {
             Log.logException(e);
         }
