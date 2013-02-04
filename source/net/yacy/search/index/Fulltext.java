@@ -65,10 +65,10 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
 
 import org.apache.commons.httpclient.util.DateUtil;
-import org.apache.lucene.util.Version;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.lucene.util.Version;
 
 public final class Fulltext {
 
@@ -155,9 +155,10 @@ public final class Fulltext {
         if (commitWithin >= 0) esc.setCommitWithinMs(commitWithin);
         Version luceneVersion = esc.getConfig().getLuceneVersion("luceneMatchVersion");
         String lvn = luceneVersion.name();
+        Log.logInfo("Fulltext", "using lucene version " + lvn);
         int p = lvn.indexOf('_');
         assert SOLR_PATH.endsWith(lvn.substring(p)) : "luceneVersion = " + lvn + ", solrPath = " + SOLR_PATH + ", p = " + p + ", check defaults/solr/solrconfig.xml";
-        Log.logInfo("MetadataRepository", "connected solr in " + solrLocation.toString() + ", lucene version " + lvn);
+        Log.logInfo("Fulltext", "connected solr in " + solrLocation.toString() + ", lucene version " + lvn);
         this.solr.connect0(esc);
     }
 

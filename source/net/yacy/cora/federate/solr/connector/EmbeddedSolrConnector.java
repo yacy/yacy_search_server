@@ -24,8 +24,6 @@ package net.yacy.cora.federate.solr.connector;
 import java.io.File;
 import java.io.IOException;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import net.yacy.cora.federate.solr.SolrServlet;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.kelondro.logging.Log;
@@ -50,7 +48,6 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.SolrQueryResponse;
-import org.xml.sax.SAXException;
 
 import com.google.common.io.Files;
 
@@ -97,17 +94,11 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             }
         }
 
-        try {
+        this.cores = new CoreContainer(storagePath.getAbsolutePath(), new File(solr_config, "solr.xml"));
+        if (this.cores == null) {
+            // try again
+            System.gc();
             this.cores = new CoreContainer(storagePath.getAbsolutePath(), new File(solr_config, "solr.xml"));
-            if (this.cores == null) {
-                // try again
-                System.gc();
-                this.cores = new CoreContainer(storagePath.getAbsolutePath(), new File(solr_config, "solr.xml"));
-            }
-        } catch (ParserConfigurationException e) {
-            throw new IOException(e.getMessage(), e);
-        } catch (SAXException e) {
-            throw new IOException(e.getMessage(), e);
         }
         this.defaultCoreName = this.cores.getDefaultCoreName();
         this.defaultCore = this.cores.getCore(this.defaultCoreName); // should be "collection1"

@@ -45,8 +45,8 @@ import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 
 import org.apache.lucene.document.Document;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.core.SolrCore;
-import org.apache.solr.request.ServletSolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.QueryResponseWriter;
@@ -55,6 +55,7 @@ import org.apache.solr.response.XMLResponseWriter;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.servlet.cache.HttpCacheHeaderUtil;
 import org.apache.solr.servlet.cache.Method;
 import org.apache.solr.util.FastWriter;
@@ -126,7 +127,8 @@ public class SolrServlet implements Filter {
 
             // prepare request to solr
             hrequest.setAttribute("org.apache.solr.CoreContainer", core);
-            req = connector.request(new ServletSolrParams(hrequest));
+            MultiMapSolrParams mmsp = SolrRequestParsers.parseQueryString(hrequest.getQueryString());
+            req = connector.request(mmsp);
 
             SolrQueryResponse rsp = connector.query(req);
 
