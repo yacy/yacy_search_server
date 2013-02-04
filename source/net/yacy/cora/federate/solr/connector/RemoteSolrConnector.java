@@ -49,7 +49,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.ResponseParser;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.QueryRequest;
@@ -177,8 +176,6 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
 
             if (q != null) Thread.currentThread().setName(threadname);
             return response;
-        } catch (SolrServerException e) {
-            throw new IOException(e.getMessage());
         } catch (Throwable e) {
             throw new IOException("Error executing query", e);
         }
