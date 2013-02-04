@@ -30,6 +30,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.kelondro.logging.Log;
 
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -103,8 +104,8 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     public synchronized void commit(final boolean softCommit) {
         try {
             this.server.commit(true, true, softCommit);
-        } catch (SolrServerException e) {
-        } catch (IOException e) {
+        } catch (Throwable e) {
+            Log.logException(e);
         }
     }
 
@@ -115,8 +116,8 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     public void optimize(int maxSegments) {
         try {
             this.server.optimize(true, true, maxSegments);
-        } catch (SolrServerException e) {
-        } catch (IOException e) {
+        } catch (Throwable e) {
+            Log.logException(e);
         }
     }
 
@@ -125,10 +126,8 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         try {
             if (this.server != null) synchronized (this.server) {this.server.commit(true, true, false);}
             this.server = null;
-        } catch (SolrServerException e) {
-            log.warn(e);
-        } catch (IOException e) {
-            log.warn(e);
+        } catch (Throwable e) {
+            Log.logException(e);
         }
     }
 

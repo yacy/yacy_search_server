@@ -26,6 +26,7 @@ import java.net.InetAddress;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.kelondro.logging.Log;
 
 import org.apache.commons.httpclient.HttpException;
 import org.apache.http.Header;
@@ -48,12 +49,15 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.ResponseParser;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.core.CoreContainer;
+import org.apache.solr.core.SolrCore;
 
 
 public class RemoteSolrConnector extends SolrServerConnector implements SolrConnector {
@@ -130,8 +134,11 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
             BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
             credsProvider.setCredentials(new AuthScope(this.host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(this.solraccount, this.solrpw));
             this.client.setCredentialsProvider(credsProvider);
-            s = new HttpSolrServer("http://" + this.host + ":" + this.port + this.solrpath, this.client);
+            String p = "http://" + this.host + ":" + this.port + this.solrpath;
+            Log.logInfo("RemoteSolrConnector", "connecting Solr authenticated with url:" + p);
+            s = new HttpSolrServer(p, this.client);
         } else {
+            Log.logInfo("RemoteSolrConnector", "connecting Solr with url:" + this.solrurl);
             s = new HttpSolrServer(this.solrurl);
         }
         s.setAllowCompression(true);

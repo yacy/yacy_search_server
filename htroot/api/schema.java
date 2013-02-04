@@ -48,9 +48,7 @@ public class schema {
                 c++;
             }
         }
-        if (solrScheme.contains(YaCySchema.author)) {
-            addField(prop, c, YaCySchema.author_sxt);
-        }
+        //if (solrScheme.contains(YaCySchema.author)) {addField(prop, c, YaCySchema.author_sxt);}
         prop.put("fields", c);
 
         prop.put("copyFieldAuthor", solrScheme.contains(YaCySchema.author) ? 1 : 0);

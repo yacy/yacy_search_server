@@ -67,6 +67,7 @@ import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.Seed;
 import net.yacy.search.index.Segment;
+import net.yacy.search.index.SolrConfiguration;
 import net.yacy.search.ranking.RankingProfile;
 
 public final class QueryParams {
@@ -83,11 +84,8 @@ public final class QueryParams {
         }
     }
 
-    private static final String[] defaultfacetfields = new String[]{
-        YaCySchema.host_s.getSolrFieldName(),
-        YaCySchema.url_protocol_s.getSolrFieldName(),
-        YaCySchema.url_file_ext_s.getSolrFieldName(),
-        YaCySchema.author_sxt.getSolrFieldName()};
+    private static final YaCySchema[] defaultfacetfields = new YaCySchema[]{
+        YaCySchema.host_s, YaCySchema.url_protocol_s, YaCySchema.url_file_ext_s, YaCySchema.author_sxt};
     
     private static final int defaultmaxfacets = 30;
     
@@ -146,6 +144,7 @@ public final class QueryParams {
     public List<String> facetfields;
     public int maxfacets;
     private SolrQuery cachedQuery;
+    private SolrConfiguration solrScheme;
     
     // the following values are filled during the search process as statistics for the search
     public final AtomicInteger local_rwi_available;  // the number of hits generated/ranked by the local search in rwi index
@@ -158,7 +157,8 @@ public final class QueryParams {
     public final SortedSet<byte[]> misses; // url hashes that had been sorted out because of constraints in postranking
 
     public QueryParams(
-            final String query_original, final String query_words,
+            final String query_original,
+            final String query_words,
             final int itemsPerPage,
             final Bitfield constraint,
             final Segment indexSegment,
@@ -210,7 +210,12 @@ public final class QueryParams {
         this.remote_available    = new AtomicInteger(0); // the number of result contributions from all the remote peers
         this.remote_peerCount    = new AtomicInteger(0); // the number of remote peers that have contributed
         this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
-        this.facetfields = new ArrayList<String>(); for (String f: defaultfacetfields) facetfields.add(f);
+        this.facetfields = new ArrayList<String>();
+
+        this.solrScheme = indexSegment.fulltext().getSolrScheme();
+        for (YaCySchema f: defaultfacetfields) {
+            if (solrScheme.contains(f)) facetfields.add(f.getSolrFieldName());
+        }
         for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(YaCySchema.VOCABULARY_PREFIX + v.getName() + YaCySchema.VOCABULARY_SUFFIX);
         this.maxfacets = defaultmaxfacets;
         this.cachedQuery = null;
@@ -312,7 +317,12 @@ public final class QueryParams {
         this.remote_available    = new AtomicInteger(0); // the number of result contributions from all the remote peers
         this.remote_peerCount    = new AtomicInteger(0); // the number of remote peers that have contributed
         this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
-        this.facetfields = new ArrayList<String>(); for (String f: defaultfacetfields) facetfields.add(f);
+        this.facetfields = new ArrayList<String>();
+        
+        this.solrScheme = indexSegment.fulltext().getSolrScheme();
+        for (YaCySchema f: defaultfacetfields) {
+            if (solrScheme.contains(f)) facetfields.add(f.getSolrFieldName());
+        }
         for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(YaCySchema.VOCABULARY_PREFIX + v.getName() + YaCySchema.VOCABULARY_SUFFIX);
         this.maxfacets = defaultmaxfacets;
         this.cachedQuery = null;
@@ -477,7 +487,7 @@ public final class QueryParams {
         }
         
         // add author facets
-        if (this.author != null && this.author.length() > 0) {
+        if (this.author != null && this.author.length() > 0 && this.solrScheme.contains(YaCySchema.author_sxt)) {
             fq.append(" AND ").append(YaCySchema.author_sxt.getSolrFieldName()).append(":\"").append(this.author).append('\"');
         }
         
