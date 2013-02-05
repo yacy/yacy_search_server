@@ -33,6 +33,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.operation.yacyRelease;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -76,12 +77,16 @@ public class Steering {
             Log.logInfo("STEERING", "update request from " + requestIP);
             final boolean devenvironment = new File(sb.getAppPath(), ".git").exists();
             final String releaseFileName = post.get("releaseinstall", "");
-            final File releaseFile = new File(sb.getDataPath(), "DATA/RELEASE/".replace("/", File.separator) + releaseFileName);
-            if ((!devenvironment) && (releaseFileName.length() > 0) && (releaseFile.exists())) {
-                yacyRelease.deployRelease(releaseFile);
+            final File releaseFile = new File(sb.releasePath, releaseFileName);
+            if (FileUtils.isInDirectory(releaseFile, sb.releasePath)) {
+                if ((!devenvironment) && (releaseFileName.length() > 0) && (releaseFile.exists())) {
+                    yacyRelease.deployRelease(releaseFile);
+                }
+                prop.put("info", "5");
+                prop.putHTML("info_release", releaseFileName);
+            } else {
+                prop.put("info", "6");
             }
-            prop.put("info", "5");
-            prop.putHTML("info_release", releaseFileName);
 
             return prop;
         }

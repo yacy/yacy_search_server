@@ -856,17 +856,25 @@ public final class FileUtils {
      * Checks if a certain file is in a given directory.
      * @param file the file to check
      * @param directory the directory which must contain the file
-     * @return true if file is contained in diretory
+     * @return true if file is contained in directory
      */
-    public static boolean isInDirectory(final File file, final File directory) throws IOException {
+    public static boolean isInDirectory(final File file, final File directory) {
         
-        return 
-                directory != null
-                && directory.isDirectory()
-                && file != null
-                && file.isFile()
-                && directory.getCanonicalPath().equalsIgnoreCase(
-                        file.getParentFile().getCanonicalPath());
+        boolean inDirectory;
+        
+        try {
+            inDirectory = (
+                    directory != null
+                    && directory.isDirectory()
+                    && file != null
+                    && file.isFile()
+                    && directory.getCanonicalPath().equalsIgnoreCase(
+                            file.getParentFile().getCanonicalPath()));
+        } catch (IOException e) {
+            inDirectory = false;
+        }
+        
+        return inDirectory;
     }
 
 }

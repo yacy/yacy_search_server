@@ -119,8 +119,6 @@ public class ConfigUpdate_p {
                         }
                     } catch (final NullPointerException e) {
                         sb.getLog().logSevere("AUTO-UPDATE: could not delete release " + release + ": " + e.getMessage());
-                    } catch (final IOException e) {
-                        sb.getLog().logSevere("AUTO-UPDATE: could not delete release " + release + ": " + e.getMessage());
                     }
                 }
             }
