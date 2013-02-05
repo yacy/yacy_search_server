@@ -96,6 +96,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             this.cores = new CoreContainer(storagePath.getAbsolutePath(), new File(solr_config, "solr.xml"));
         }
         this.defaultCoreName = this.cores.getDefaultCoreName();
+        Log.logInfo("EmbeddedSolrConnector", "detected default solr core: " + this.defaultCoreName);
         this.defaultCore = this.cores.getCore(this.defaultCoreName); // should be "collection1"
         if (this.defaultCore == null) {
             // try again

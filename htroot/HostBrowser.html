@@ -101,7 +101,7 @@ function updatepage(str) {
     #(/hosts)#
     
     #(files)#::
-     <fieldset><legend>Browser for #[path]#</legend>
+     <fieldset><legend>Browser for <a href="#[path]#" target="_blank">#[path]#</a></legend>
      <p>documents stored for host: #[hostsize]#; documents stored for subpath: #[subpathloadsize]#; unloaded documents detected in subpath: #[subpathdetectedsize]# <!-- #(complete)#;<a href="/HostBrowser.html?complete=true&path=#[path]#">get complete list</a>::<a href="/HostBrowser.html?path=#[path]#">directory view</a>#(/complete)#-->
      </p>
       <table class="sortable" border="0" cellpadding="2" cellspacing="2" style="float:left">
@@ -152,7 +152,7 @@ function updatepage(str) {
      <fieldset><legend>Outbound Links, outgoing from #[host]# - Host List</legend>
       #{list}#
       <div style="float:left; padding:1px 5px 1px 5px;">
-        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div id="info"><a href="/HostBrowser.html?path=#[link]#">#[host]#</a><span>browse #[host]#</span></div></div>
+        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div id="info"><a href="/HostBrowser.html?path=#[link]#">#[host]#</a></div></div>
         <div style="width:80px; text-align:right; float: left; white-space:nowrap; overflow:hidden;">#[count]# URLs</div>
       </div>
       #{/list}#
@@ -168,7 +168,7 @@ function updatepage(str) {
      <fieldset><legend>Inbound Links, incoming to #[host]# - Host List</legend>
       #{list}#
       <div style="float:left; padding:1px 5px 1px 5px;">
-        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div id="info"><a href="/HostBrowser.html?path=#[host]#">#[host]#</a><span>browse #[host]#</span></div></div>
+        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div id="info"><a href="/HostBrowser.html?path=#[host]#">#[host]#</a></div></div>
         <div style="width:80px; text-align:right; float: left; white-space:nowrap; overflow:hidden;">#[count]# URLs</div>
       </div>
       #{/list}#

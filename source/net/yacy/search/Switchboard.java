@@ -3522,8 +3522,8 @@ public final class Switchboard extends serverSwitch {
         this.peers.mySeed().setFlagDirectConnect(true);
         this.peers.mySeed().setLastSeenUTC();
         this.peers.mySeed().put(Seed.UTC, GenericFormatter.UTCDiffString());
-        this.peers.mySeed().setFlagAcceptRemoteCrawl(getConfig("crawlResponse", "").equals("true"));
-        this.peers.mySeed().setFlagAcceptRemoteIndex(getConfig("allowReceiveIndex", "").equals("true"));
+        this.peers.mySeed().setFlagAcceptRemoteCrawl(getConfigBool("crawlResponse", true));
+        this.peers.mySeed().setFlagAcceptRemoteIndex(getConfigBool("allowReceiveIndex", true));
         //mySeed.setFlagAcceptRemoteIndex(true);
     }
 

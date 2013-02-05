@@ -294,6 +294,14 @@ legend {
   color:white;
 }
 
+legend a:link {
+  color:white;
+}
+
+legend a:link:hover {
+  color:white;
+}
+
 form dt, dl.pairs dt {
   background-color:#DEE6F3;
   font-weight:bold;

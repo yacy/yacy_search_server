@@ -26,6 +26,7 @@ import java.net.InetAddress;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.kelondro.logging.Log;
 
 import org.apache.commons.httpclient.HttpException;
 import org.apache.http.Header;
@@ -45,9 +46,9 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.ResponseParser;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.QueryRequest;
@@ -90,7 +91,10 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
         }
         HttpSolrServer s;
         if (this.solraccount.length() > 0) {
-            this.client = new DefaultHttpClient() {
+            PoolingClientConnectionManager cm = new PoolingClientConnectionManager(); // try also: ThreadSafeClientConnManager
+            cm.setMaxTotal(100);
+            
+            this.client = new DefaultHttpClient(cm) {
                 @Override
                 protected HttpContext createHttpContext() {
                     HttpContext context = super.createHttpContext();
@@ -130,8 +134,11 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
             BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
             credsProvider.setCredentials(new AuthScope(this.host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(this.solraccount, this.solrpw));
             this.client.setCredentialsProvider(credsProvider);
-            s = new HttpSolrServer("http://" + this.host + ":" + this.port + this.solrpath, this.client);
+            String p = "http://" + this.host + ":" + this.port + this.solrpath;
+            Log.logInfo("RemoteSolrConnector", "connecting Solr authenticated with url:" + p);
+            s = new HttpSolrServer(p, this.client);
         } else {
+            Log.logInfo("RemoteSolrConnector", "connecting Solr with url:" + this.solrurl);
             s = new HttpSolrServer(this.solrurl);
         }
         s.setAllowCompression(true);
@@ -169,8 +176,6 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
 
             if (q != null) Thread.currentThread().setName(threadname);
             return response;
-        } catch (SolrServerException e) {
-            throw new IOException(e.getMessage());
         } catch (Throwable e) {
             throw new IOException("Error executing query", e);
         }

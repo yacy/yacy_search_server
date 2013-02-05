@@ -224,7 +224,7 @@ public final class SearchEvent {
         // start a local RWI search concurrently
         if (this.remote || this.peers.mySeed().getBirthdate() < noRobinsonLocalRWISearch) {
             // we start the local search only if this peer is doing a remote search or when it is doing a local search and the peer is old
-            this.rankingProcess.start();
+            if (query.getSegment().connectedRWI()) this.rankingProcess.start();
         }
 
         if (this.remote) {
@@ -270,7 +270,7 @@ public final class SearchEvent {
             if ( generateAbstracts ) {
                 // we need the results now
                 try {
-                    this.rankingProcess.join();
+                    if (query.getSegment().connectedRWI()) this.rankingProcess.join();
                 } catch ( final Throwable e ) {
                 }
                 // compute index abstracts
@@ -278,7 +278,7 @@ public final class SearchEvent {
                 int maxcount = -1;
                 long mindhtdistance = Long.MAX_VALUE, l;
                 byte[] wordhash;
-                assert this.rankingProcess.searchContainerMap() != null;
+                assert !query.getSegment().connectedRWI() || this.rankingProcess.searchContainerMap() != null;
                 if (this.rankingProcess.searchContainerMap() != null) {
                     for (final Map.Entry<byte[], ReferenceContainer<WordReference>> entry : this.rankingProcess.searchContainerMap().entrySet()) {
                         wordhash = entry.getKey();
@@ -303,7 +303,7 @@ public final class SearchEvent {
                 // give process time to accumulate a certain amount of data
                 // before a reading process wants to get results from it
                 try {
-                    this.rankingProcess.join(100);
+                    if (query.getSegment().connectedRWI()) this.rankingProcess.join(100);
                 } catch ( final Throwable e ) {
                 }
                 // this will reduce the maximum waiting time until results are available to 100 milliseconds

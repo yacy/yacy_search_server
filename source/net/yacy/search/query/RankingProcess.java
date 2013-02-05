@@ -197,6 +197,8 @@ public final class RankingProcess extends Thread {
     @Override
     public void run() {
 
+        if (query.getSegment().termIndex() == null) return; // nothing to do; this index is not used
+        
         // do a search
         oneFeederStarted();
 
