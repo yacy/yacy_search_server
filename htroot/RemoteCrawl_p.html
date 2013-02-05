@@ -17,9 +17,11 @@
       </legend>
     <form id="ConfigForm" method="post" action="RemoteCrawl_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
       <dl>
+        #(disabled)#::<dt></dt><dd><span class="error">Your peer cannot accept remote crawls because you need senior or principal peer status for that!</span></dd>#(/disabled)#
+        <dt>
         <dt>
           <label for="crawlResponse">Accept Remote Crawl Requests</label>
-          <input type="checkbox" id="crawlResponse" name="crawlResponse" onclick="window.location.href='RemoteCrawl_p.html?#(crawlResponse)#crawlResponse=on::crawlResponse=off#(/crawlResponse)#'" #(crawlResponse)#::checked="checked" #(/crawlResponse)#/>
+          <input type="checkbox" #(disabled)#::disabled="disabled"#(/disabled)# id="crawlResponse" name="crawlResponse" onclick="window.location.href='RemoteCrawl_p.html?#(crawlResponse)#crawlResponse=on::crawlResponse=off#(/crawlResponse)#'" #(crawlResponse)#::checked="checked" #(/crawlResponse)#/>
         </dt>
         <dd>
           Perform web indexing upon request of another peer.<br />

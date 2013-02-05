@@ -69,14 +69,16 @@ public class RemoteCrawl_p {
             }
         }
 
+        // set seed information directly
+        sb.peers.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
+        
         // write remote crawl request settings
-        prop.put("crawlResponse", sb.getConfigBool("crawlResponse", false) ? "1" : "0");
+        prop.put("disabled", !sb.peers.mySeed().isActive() && !sb.peers.mySeed().getFlagAcceptRemoteCrawl() ? 1 : 0);
+        prop.put("crawlResponse", sb.peers.mySeed().getFlagAcceptRemoteCrawl() ? 1 : 0);
         long RTCbusySleep = Math.max(1, env.getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 100));
         final int RTCppm = (int) (60000L / RTCbusySleep);
         prop.put("acceptCrawlLimit", RTCppm);
 
-        // set seed information directly
-        sb.peers.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
 
         // -------------------------------------------------------------------------------------
         // write network list
