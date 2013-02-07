@@ -44,6 +44,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.sorting.Array;
 import net.yacy.data.Translator;
@@ -135,10 +136,9 @@ public final class yacy {
 
             // check java version
             try {
-                "a".codePointAt(0); // needs at least Java 1.5
+                "a".isEmpty(); // needs at least Java 1.6
             } catch (final NoSuchMethodError e) {
-                System.err.println("STARTUP: Java Version too low. You need at least Java 1.5 to run YaCy"); // TODO: is 1.6 now
-                Thread.sleep(3000);
+                System.err.println("STARTUP: Java Version too low. You need at least Java 1.6 to run YaCy");
                 System.exit(-1);
             }
 
@@ -180,12 +180,33 @@ public final class yacy {
             Log.logConfig("STARTUP", "Maximum file system path length: " + OS.maxPathLength);
 
             f = new File(dataHome, "DATA/yacy.running");
+            final String conf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
             if (f.exists()) {                // another instance running? VM crash? User will have to care about this
                 Log.logSevere("STARTUP", "WARNING: the file " + f + " exists, this usually means that a YaCy instance is still running");
+                
+                // If YaCy is actually running, then we check if the server port is open.
+                // If yes, then we consider that a restart is a user mistake and then we just respond
+                // as the user expects and tell the browser to open the start page.
+                // That will especially happen if Windows Users double-Click the YaCy Icon on the desktop to simply
+                // open the web interface. (They don't think of 'servers' they just want to get to the search page).
+                // We need to parse the configuration file for that to get the host port
+                File dataFile = new File(dataHome, conf);
+                if (dataFile.exists()) {
+                    Properties p = new Properties();
+                    p.load(new FileInputStream(dataFile));
+                    int port = Integer.parseInt(p.getProperty("port", "8090"));
+                    if (TimeoutRequest.ping("127.0.0.1", port, 1000)) {
+                        Browser.openBrowser("http://localhost:" + port + "/" + p.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
+                        // Thats it; YaCy was running, the user is happy, we can stop now.
+                        Log.logSevere("STARTUP", "WARNING: YaCy instance was still running; just opening the browser and exit.");
+                        System.exit(0);
+                    }
+                }
+                
+                // YaCy is not running; thus delete the file an go on as nothing was wrong.
                 delete(f);
             }
-            if(!f.createNewFile())
-                Log.logSevere("STARTUP", "WARNING: the file " + f + " can not be created!");
+            if (!f.createNewFile()) Log.logSevere("STARTUP", "WARNING: the file " + f + " can not be created!");
             try { new FileOutputStream(f).write(Integer.toString(OS.getPID()).getBytes()); } catch (final Exception e) { } // write PID
             f.deleteOnExit();
             FileChannel channel = null;
@@ -195,7 +216,6 @@ public final class yacy {
             	lock = channel.tryLock(); // lock yacy.running
             } catch (final Exception e) { }
 
-            final String conf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
             try {
                 sb = new Switchboard(dataHome, appHome, "defaults/yacy.init".replace("/", File.separator), conf);
             } catch (final RuntimeException e) {
