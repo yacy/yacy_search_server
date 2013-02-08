@@ -44,7 +44,7 @@ public class XMLBlacklistImporter extends DefaultHandler {
 
     private ListAccumulator ba = null;
     private String currentListName = null;
-    private String lastText = null;
+    private StringBuilder lastText = null;
 
     /**
      * Takes the input data and turns it into a {@link ListAccumulator} which can
@@ -141,6 +141,10 @@ public class XMLBlacklistImporter extends DefaultHandler {
             }
         }
         
+        if (qName.equalsIgnoreCase("item")) {
+            lastText = new StringBuilder();
+        }
+        
     }
 
     /**
@@ -158,7 +162,7 @@ public class XMLBlacklistImporter extends DefaultHandler {
     @Override
     public void endElement(final String uri, final String localName, final String qName) throws SAXException {
         if (qName.equalsIgnoreCase("item")) {
-            ba.addEntryToCurrent(lastText);
+            ba.addEntryToCurrent(lastText.toString());
         }
     }
 
@@ -171,7 +175,8 @@ public class XMLBlacklistImporter extends DefaultHandler {
      */
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
-        lastText = new String(ch, start, length);
+        if (lastText == null) lastText = new StringBuilder();
+        lastText.append(ch, start, length);
     }
 
 }
