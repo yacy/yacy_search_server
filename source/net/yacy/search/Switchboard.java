@@ -2692,7 +2692,7 @@ public final class Switchboard extends serverSwitch {
                 condenser,
                 searchEvent,
                 sourceName,
-                getConfigBool(SwitchboardConstants.DHT_ENABLED, false));
+                getConfigBool(SwitchboardConstants.DHT_ENABLED, false) && !isRobinsonMode());
         final RSSFeed feed =
             EventChannel.channels(queueEntry.initiator() == null
                 ? EventChannel.PROXY
