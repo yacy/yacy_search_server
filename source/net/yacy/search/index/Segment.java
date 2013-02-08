@@ -436,7 +436,7 @@ public class Segment {
                         // switch attribute also in all existing documents (which should be exactly only one!)
                         SolrDocumentList docs = this.fulltext.getSolr().query(checkfield.getSolrFieldName() + ":" + checkstring + " AND " + uniquefield.getSolrFieldName() + ":true", 0, 1000);
                         for (SolrDocument doc: docs) {
-                            SolrInputDocument sid = ClientUtils.toSolrInputDocument(doc);
+                            SolrInputDocument sid = YaCySchema.toSolrInputDocument(doc);
                             sid.setField(uniquefield.getSolrFieldName(), false);
                             this.fulltext.getSolr().add(sid);
                         }

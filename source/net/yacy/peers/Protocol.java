@@ -1161,7 +1161,7 @@ public final class Protocol
             // passed all checks, store url
             if (!localsearch) {
                 try {
-                    event.query.getSegment().fulltext().putDocument(ClientUtils.toSolrInputDocument(doc));
+                    event.query.getSegment().fulltext().putDocument(YaCySchema.toSolrInputDocument(doc));
                     ResultURLs.stack(
                         ASCII.String(urlEntry.url().hash()),
                         urlEntry.url().getHost(),

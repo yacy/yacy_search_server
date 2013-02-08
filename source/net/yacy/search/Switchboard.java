@@ -82,7 +82,6 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -2233,7 +2232,9 @@ public final class Switchboard extends serverSwitch {
             if (this.crawlQueues.coreCrawlJobSize() == 0 && index.connectedCitation() && index.fulltext().getSolrScheme().contains(YaCySchema.process_sxt)) {
                 // that means we must search for those entries.
                 index.fulltext().getSolr().commit(true); // make sure that we have latest information that can be found
+                //BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery("*:*", 0, 1000, 60000, 10);
                 BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery(YaCySchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 1000, 60000, 10);
+                
                 SolrDocument doc;
                 int proccount_clickdepth = 0;
                 int proccount_clickdepthchange = 0;
@@ -2256,7 +2257,7 @@ public final class Switchboard extends serverSwitch {
                                     url = new DigestURI((String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())));
                                     int clickdepth = SolrConfiguration.getClickDepth(index.urlCitation(), url);
                                     if (oldclickdepth == null || oldclickdepth.intValue() != clickdepth) proccount_clickdepthchange++;
-                                    SolrInputDocument sid = ClientUtils.toSolrInputDocument(doc);
+                                    SolrInputDocument sid = YaCySchema.toSolrInputDocument(doc);
                                     sid.setField(YaCySchema.clickdepth_i.getSolrFieldName(), clickdepth);
                                     
                                     // refresh the link count; it's 'cheap' to do this here
