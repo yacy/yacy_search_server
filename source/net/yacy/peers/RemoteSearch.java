@@ -26,6 +26,7 @@ package net.yacy.peers;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -145,7 +146,7 @@ public class RemoteSearch extends Thread {
         //if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
         // prepare seed targets and threads
-        final Seed[] targetPeers =
+        final List<Seed> dhtPeers =
             (clusterselection == null) ?
                     DHTSelection.selectSearchTargets(
                             event.peers,
@@ -154,21 +155,33 @@ public class RemoteSearch extends Thread {
                             burstRobinsonPercent,
                             burstMultiwordPercent)
                   : DHTSelection.selectClusterPeers(event.peers, clusterselection);
-        if (targetPeers == null) return;
+        if (dhtPeers == null) return;
+
+        // find nodes
+        Set<Seed> omit = new HashSet<Seed>();
+        for (Seed s: dhtPeers) omit.add(s);
+        List<Seed> nodePeers = DHTSelection.selectNodeSearchTargets(event.peers, 20, omit);
+        
+        // remove all robinson peers from the dhtPeers and put them to the nodes
+        Iterator<Seed> si = dhtPeers.iterator();
+        while (si.hasNext()) {
+            Seed s = si.next();
+            if (!s.getFlagAcceptRemoteIndex()) {
+                si.remove();
+                nodePeers.add(s);
+            }
+        }
 
         // start solr searches
-        Set<Seed> omit = new HashSet<Seed>();
-        for (Seed s: targetPeers) omit.add(s);
-        Seed[] nodes = DHTSelection.selectNodeSearchTargets(event.peers, 20, omit);
-        for (Seed s: nodes) {
+        for (Seed s: nodePeers) {
             solrRemoteSearch(event, count, s, blacklist);
         }
         
-        // start search to YaCy peers
-        final int targets = targetPeers.length;
+        // start search to YaCy DHT peers
+        final int targets = dhtPeers.size();
         if (targets == 0) return;
         for (int i = 0; i < targets; i++) {
-            if (targetPeers[i] == null || targetPeers[i].hash == null) continue;
+            if (dhtPeers.get(i) == null || dhtPeers.get(i).hash == null) continue;
             try {
                 RemoteSearch rs = new RemoteSearch(
                     event,
@@ -183,7 +196,7 @@ public class RemoteSearch extends Thread {
                     time,
                     event.query.maxDistance,
                     targets,
-                    targetPeers[i],
+                    dhtPeers.get(i),
                     event.secondarySearchSuperviser,
                     blacklist);
                 rs.start();

@@ -55,7 +55,7 @@ import net.yacy.peers.operation.yacyVersion;
 
 public class DHTSelection {
 
-    public static Seed[] selectClusterPeers(final SeedDB seedDB, final SortedMap<byte[], String> peerhashes) {
+    public static List<Seed> selectClusterPeers(final SeedDB seedDB, final SortedMap<byte[], String> peerhashes) {
         final Iterator<Map.Entry<byte[], String>> i = peerhashes.entrySet().iterator();
         final List<Seed> l = new ArrayList<Seed>();
         Map.Entry<byte[], String> entry;
@@ -68,10 +68,10 @@ public class DHTSelection {
                 l.add(s);
             }
         }
-        return l.toArray(new Seed[l.size()]);
+        return l;
     }
     
-    public static Seed[] selectNodeSearchTargets(final SeedDB seedDB, int maxCount, Set<Seed> omit) {
+    public static List<Seed> selectNodeSearchTargets(final SeedDB seedDB, int maxCount, Set<Seed> omit) {
         if (seedDB == null) { return null; }
 
         final List<Seed> goodSeeds = new ArrayList<Seed>();
@@ -93,13 +93,10 @@ public class DHTSelection {
         	goodSeeds.add(optionalSeeds.remove(r.nextInt(optionalSeeds.size())));
         }
         
-        // produce return set
-        Seed[] result = new Seed[goodSeeds.size()];
-        result = goodSeeds.toArray(result);
-        return result;
+        return goodSeeds;
     }
 
-    public static Seed[] selectSearchTargets(
+    public static List<Seed> selectSearchTargets(
             final SeedDB seedDB,
             final HandleSet wordhashes,
             int redundancy,
@@ -186,8 +183,8 @@ public class DHTSelection {
         }
 
         // produce return set
-        Seed[] result = new Seed[regularSeeds.size()];
-        result = regularSeeds.values().toArray(result);
+        List<Seed> result = new ArrayList<Seed>(regularSeeds.size());
+        result.addAll(regularSeeds.values());
         return result;
     }
     
