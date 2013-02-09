@@ -173,27 +173,30 @@ public class import_ymark {
         		final Iterator<String> bit=sb.bookmarksDB.getBookmarksIterator(isAdmin);
             	BookmarksDB.Bookmark bookmark;
             	while(bit.hasNext()){
-        			bookmark=sb.bookmarksDB.getBookmark(bit.next());
-        			final YMarkEntry bmk_entry = new YMarkEntry(false);
-        			bmk_entry.put(YMarkEntry.BOOKMARK.URL.key(), bookmark.getUrl());
         			try {
-						if(!sb.tables.has(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), YMarkUtil.getBookmarkId(bookmark.getUrl()))) {
-    						bmk_entry.put(YMarkEntry.BOOKMARK.PUBLIC.key(), bookmark.getPublic() ? "true" : "false");
-	    					bmk_entry.put(YMarkEntry.BOOKMARK.TITLE.key(), bookmark.getTitle());
-	    					bmk_entry.put(YMarkEntry.BOOKMARK.DESC.key(), bookmark.getDescription());
-	    					bmk_entry.put(YMarkEntry.BOOKMARK.TAGS.key(), bookmark.getTagsString());
-	    					bmk_entry.put(YMarkEntry.BOOKMARK.FOLDERS.key(), root+bookmark.getFoldersString().replaceAll(".*"+YMarkUtil.TAGS_SEPARATOR+YMarkUtil.FOLDERS_SEPARATOR, root+YMarkUtil.FOLDERS_SEPARATOR));
-						}
-						if(autotag) {
-							bmk_entry.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkAutoTagger.autoTag(bookmark.getUrl(), sb.loader, 3, sb.tables.bookmarks.getTags(bmk_user)));
-						}
-						sb.tables.bookmarks.addBookmark(bmk_user, bmk_entry, merge, true);
-			        	prop.put("status", "1");
-					} catch (final MalformedURLException e) {
-						Log.logException(e);
-					} catch (final IOException e) {
-						Log.logException(e);
-					}
+                        bookmark=sb.bookmarksDB.getBookmark(bit.next());
+                        final YMarkEntry bmk_entry = new YMarkEntry(false);
+                        bmk_entry.put(YMarkEntry.BOOKMARK.URL.key(), bookmark.getUrl());
+                        try {
+                            if(!sb.tables.has(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), YMarkUtil.getBookmarkId(bookmark.getUrl()))) {
+                                bmk_entry.put(YMarkEntry.BOOKMARK.PUBLIC.key(), bookmark.getPublic() ? "true" : "false");
+                                bmk_entry.put(YMarkEntry.BOOKMARK.TITLE.key(), bookmark.getTitle());
+                                bmk_entry.put(YMarkEntry.BOOKMARK.DESC.key(), bookmark.getDescription());
+                                bmk_entry.put(YMarkEntry.BOOKMARK.TAGS.key(), bookmark.getTagsString());
+                                bmk_entry.put(YMarkEntry.BOOKMARK.FOLDERS.key(), root+bookmark.getFoldersString().replaceAll(".*"+YMarkUtil.TAGS_SEPARATOR+YMarkUtil.FOLDERS_SEPARATOR, root+YMarkUtil.FOLDERS_SEPARATOR));
+                            }
+                            if(autotag) {
+                                bmk_entry.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkAutoTagger.autoTag(bookmark.getUrl(), sb.loader, 3, sb.tables.bookmarks.getTags(bmk_user)));
+                            }
+                            sb.tables.bookmarks.addBookmark(bmk_user, bmk_entry, merge, true);
+                            prop.put("status", "1");
+                        } catch (final MalformedURLException e) {
+                            Log.logException(e);
+                        } catch (final IOException e) {
+                            Log.logException(e);
+                        }
+                    } catch (IOException e1) {
+                    }
             	}
             } else if(post.containsKey("importer") && post.get("importer").equals("dmoz")) {
         		if(!isAdmin) {

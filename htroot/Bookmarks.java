@@ -192,7 +192,11 @@ public class Bookmarks {
                     prop.put("mode_public", "0");
                     prop.put("mode_feed", "0");
                 } else {
-                    final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
+                    BookmarksDB.Bookmark bookmark = null;
+                    try {
+                        bookmark = sb.bookmarksDB.getBookmark(urlHash);
+                    } catch (IOException e1) {
+                    }
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
                         final URIMetadataNode urlentry = sb.index.fulltext().getMetadata(ASCII.getBytes(urlHash));
@@ -305,7 +309,11 @@ public class Bookmarks {
 
 	       	count = 0;
 	       	while(count < max_count && it.hasNext()) {
-                    final Bookmark bookmark = sb.bookmarksDB.getBookmark(it.next());
+                    Bookmark bookmark = null;
+                    try {
+                        bookmark = sb.bookmarksDB.getBookmark(it.next());
+                    } catch (IOException e) {
+                    }
 
                     if (bookmark != null){
                         if (bookmark.getFeed() && isAdmin) {
@@ -425,10 +433,12 @@ public class Bookmarks {
             final Iterator<String> bit = sb.bookmarksDB.getBookmarksIterator(fn, isAdmin);
 
             while (bit.hasNext()) {
-                final Bookmark bookmark=sb.bookmarksDB.getBookmark(bit.next());
-    		if(bookmark == null) {
-                    break;
+                Bookmark bookmark = null;
+                try {
+                    bookmark = sb.bookmarksDB.getBookmark(bit.next());
+                } catch (IOException e) {
                 }
+        		if (bookmark == null) break;
                 prop.put("display_folderlist_" + count + "_folder", "<li><a href=\"" + bookmark.getUrl() + "\" title=\"" + bookmark.getDescription() + "\">" + bookmark.getTitle() + "</a></li>");
                 count++;
             }

@@ -1,5 +1,6 @@
 
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -106,36 +107,39 @@ public class xbel {
     	BookmarksDB.Bookmark bookmark;
     	Date date;
     	while(bit.hasNext()){
-			bookmark=switchboard.bookmarksDB.getBookmark(bit.next());
-			date=new Date(bookmark.getTimeStamp());
-			prop.put("xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
-					+ "\" href=\"" + CharacterCoding.unicode2xml(bookmark.getUrl(), true)
-					+ "\" added=\"" + CharacterCoding.unicode2xml(ISO8601Formatter.FORMATTER.format(date), true)+"\">");
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "<title>");
-    		count++;
-    		prop.putXML("xbel_"+count+"_elements", bookmark.getTitle());
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "</title>");
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "<info>");
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "<metadata owner=\"Mozilla\" ShortcutURL=\""
-				+ CharacterCoding.unicode2xml(bookmark.getTagsString().replaceAll("/.*,", "").toLowerCase(), true)
-				+ "\"/>");
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "<metadata owner=\"YaCy\" public=\""+Boolean.toString(bookmark.getPublic())+"\"/>");
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "</info>");
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "<desc>");
-    		count++;
-    		prop.putXML("xbel_"+count+"_elements", bookmark.getDescription());
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "</desc>");
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "</bookmark>");
-    		count++;
+			try {
+                bookmark=switchboard.bookmarksDB.getBookmark(bit.next());
+                date=new Date(bookmark.getTimeStamp());
+                prop.put("xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
+                        + "\" href=\"" + CharacterCoding.unicode2xml(bookmark.getUrl(), true)
+                        + "\" added=\"" + CharacterCoding.unicode2xml(ISO8601Formatter.FORMATTER.format(date), true)+"\">");
+                count++;
+                prop.put("xbel_"+count+"_elements", "<title>");
+                count++;
+                prop.putXML("xbel_"+count+"_elements", bookmark.getTitle());
+                count++;
+                prop.put("xbel_"+count+"_elements", "</title>");
+                count++;
+                prop.put("xbel_"+count+"_elements", "<info>");
+                count++;
+                prop.put("xbel_"+count+"_elements", "<metadata owner=\"Mozilla\" ShortcutURL=\""
+                    + CharacterCoding.unicode2xml(bookmark.getTagsString().replaceAll("/.*,", "").toLowerCase(), true)
+                    + "\"/>");
+                count++;
+                prop.put("xbel_"+count+"_elements", "<metadata owner=\"YaCy\" public=\""+Boolean.toString(bookmark.getPublic())+"\"/>");
+                count++;
+                prop.put("xbel_"+count+"_elements", "</info>");
+                count++;
+                prop.put("xbel_"+count+"_elements", "<desc>");
+                count++;
+                prop.putXML("xbel_"+count+"_elements", bookmark.getDescription());
+                count++;
+                prop.put("xbel_"+count+"_elements", "</desc>");
+                count++;
+                prop.put("xbel_"+count+"_elements", "</bookmark>");
+                count++;
+            } catch (IOException e) {
+            }
 		}
     	return count;
     }

@@ -1,5 +1,6 @@
 
 
+import java.io.IOException;
 import java.util.Iterator;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
@@ -73,24 +74,27 @@ public class get_folders {
     	it = sb.bookmarksDB.getBookmarksIterator(root, isAdmin);
     	BookmarksDB.Bookmark bm;
     	while (it.hasNext()) {
-    		bm = sb.bookmarksDB.getBookmark(it.next());
-    		// TODO: get rid of bmtype
-    		if (post.containsKey("bmtype")) {
-    			if (post.get("bmtype").equals("title")) {
-    				prop.put("folders_"+count+"_foldername", bm.getTitle());
-    			} else if (post.get("bmtype").equals("href")) {
-    				prop.put("folders_"+count+"_foldername", "<a href='"+bm.getUrl()+" 'target='_blank'>"+bm.getTitle()+"</a>");
-    			} else {
-    				prop.put("folders_"+count+"_foldername", bm.getUrl());
-    			}
-    		}
-    		prop.put("folders_"+count+"_expanded", "false");
-    		prop.put("folders_"+count+"_url", bm.getUrl());
-    		prop.put("folders_"+count+"_type", "file");
-    		prop.put("folders_"+count+"_hash", bm.getUrlHash());
-    		prop.put("folders_"+count+"_hasChildren", "false");
-    		prop.put("folders_"+count+"_comma", ",");
-    		count++;
+    		try {
+                bm = sb.bookmarksDB.getBookmark(it.next());
+                // TODO: get rid of bmtype
+                if (post.containsKey("bmtype")) {
+                    if (post.get("bmtype").equals("title")) {
+                        prop.put("folders_"+count+"_foldername", bm.getTitle());
+                    } else if (post.get("bmtype").equals("href")) {
+                        prop.put("folders_"+count+"_foldername", "<a href='"+bm.getUrl()+" 'target='_blank'>"+bm.getTitle()+"</a>");
+                    } else {
+                        prop.put("folders_"+count+"_foldername", bm.getUrl());
+                    }
+                }
+                prop.put("folders_"+count+"_expanded", "false");
+                prop.put("folders_"+count+"_url", bm.getUrl());
+                prop.put("folders_"+count+"_type", "file");
+                prop.put("folders_"+count+"_hash", bm.getUrlHash());
+                prop.put("folders_"+count+"_hasChildren", "false");
+                prop.put("folders_"+count+"_comma", ",");
+                count++;
+            } catch (IOException e) {
+            }
     	}
 
     	count--;

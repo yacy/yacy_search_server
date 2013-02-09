@@ -1,4 +1,6 @@
 
+import java.io.IOException;
+
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.search.Switchboard;
@@ -21,9 +23,14 @@ public class addTag_p {
                 switchboard.bookmarksDB.addTag(post.get("selectTag"), post.get("addTag"));
                 prop.put("result", "1");//success
         	} else if (post.containsKey("urlhash") && post.containsKey("addTag")) {
-                final Bookmark bm = switchboard.bookmarksDB.getBookmark(post.get("urlhash"));
-        		bm.addTag(post.get("addTag"));
-                prop.put("result", "1");//success
+                Bookmark bm;
+                try {
+                    bm = switchboard.bookmarksDB.getBookmark(post.get("urlhash"));
+                    bm.addTag(post.get("addTag"));
+                    prop.put("result", "1");//success
+                } catch (IOException e) {
+                    prop.put("result", "0");//success
+                }
         	}
         }
         // return rewrite properties
