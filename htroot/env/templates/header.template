@@ -16,6 +16,7 @@
       <!--<li><a href="/yacy/ui/" accesskey="s" class="MenuItemLink">Rich Client Search</a></li>-->
       <li><a href="/compare_yacy.html?display=1" class="MenuItemLink">Compare Search</a></li>
       <li><a href="/ViewFile.html" class="MenuItemLink">URL Viewer</a></li>
+      <li><a href="/YMarks.html" class="MenuItemLink">Bookmarks</a></li>
     </ul>
   <li class="menugroup" id="menugroupGlobalIndex">
     <h3>Search Design</h3>
@@ -44,7 +45,6 @@
       <li><a href="/AccessGrid_p.html" class="MenuItemLink lock">Network Access</a></li>
       <li><a href="/ViewLog_p.html" class="MenuItemLink lock">Computation</a></li>
       <li><a href="/terminal_p.html" accesskey="t" class="MenuItemLink lock">Terminal</a></li>
-      <li><a href="/YMarks.html" class="MenuItemLink">Bookmarks</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupPeerControl">
