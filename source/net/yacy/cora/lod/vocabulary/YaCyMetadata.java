@@ -37,12 +37,16 @@ import net.yacy.cora.lod.Vocabulary;
 public enum YaCyMetadata implements Vocabulary {
 
     hash,     // the url's hash
+    host,     // the url's host
+    path,     // the path element of the url without file bname
+    file,     // the file name inside the url
     mod,      // last-modified from the httpd
     load,     // time when the url was loaded
     fresh,    // time until this url is fresh
     referrer, // (one of) the url's referrer hash(es)
     md5,      // the md5 of the url content (to identify changes)
     size,     // size of file in bytes
+    sizename, // printable version of the size
     wc,       // size of file by number of words; for video and audio: seconds
     dt,       // doctype, taken from extension or any other heuristic
     flags,    // flags; any stuff (see Word-Entity definition)

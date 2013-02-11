@@ -22,6 +22,7 @@ package net.yacy.cora.federate.solr.responsewriter;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,9 +31,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.lod.vocabulary.DublinCore;
+import net.yacy.cora.lod.vocabulary.Geo;
+import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.HeaderFramework;
 
 import org.apache.lucene.document.Document;
@@ -60,7 +64,8 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         };
     static final Set<String> SOLR_FIELDS = new HashSet<String>();
     static {
-        field2tag.put(YaCySchema.sku.getSolrFieldName(), RSSMessage.Token.link.name());
+        field2tag.put(YaCySchema.coordinate_p.getSolrFieldName() + "_0_coordinate", Geo.Lat.getURIref());
+        field2tag.put(YaCySchema.coordinate_p.getSolrFieldName() + "_1_coordinate", Geo.Long.getURIref());
         field2tag.put(YaCySchema.publisher_t.getSolrFieldName(), DublinCore.Publisher.getURIref());
         field2tag.put(YaCySchema.author.getSolrFieldName(), DublinCore.Creator.getURIref());
         SOLR_FIELDS.addAll(field2tag.keySet());
@@ -103,6 +108,10 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
 
         SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
         DocList response = ((ResultContext) values.get("response")).docs;
+        @SuppressWarnings("unchecked")
+        SimpleOrderedMap<Object> facetCounts = (SimpleOrderedMap<Object>) values.get("facet_counts");
+        @SuppressWarnings("unchecked")
+        SimpleOrderedMap<Object> facetFields = facetCounts == null || facetCounts.size() == 0 ? null : (SimpleOrderedMap<Object>) facetCounts.get("facet_fields");
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) values.get("highlighting");
         Map<String, List<String>> snippets = highlighting(highlighting);
@@ -165,7 +174,20 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                     solitaireTag(writer, stag, value.stringValue());
                     continue;
                 }
-
+                
+                // take apart the url
+                if (YaCySchema.sku.getSolrFieldName().equals(fieldName)) {
+                    String u = value.stringValue();
+                    solitaireTag(writer, RSSMessage.Token.link.name(), u);
+                    try {
+                        MultiProtocolURI url = new MultiProtocolURI(u);
+                        solitaireTag(writer, YaCyMetadata.host.getURIref(), url.getHost());
+                        solitaireTag(writer, YaCyMetadata.path.getURIref(), url.getPath());
+                        solitaireTag(writer, YaCyMetadata.file.getURIref(), url.getFileName());
+                    } catch (MalformedURLException e) {}
+                    continue;
+                }
+                
                 // if the rule is not generic, use the specific here
                 if (YaCySchema.id.getSolrFieldName().equals(fieldName)) {
                     urlhash = value.stringValue();
@@ -192,6 +214,12 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                     texts.add(value.stringValue());
                     continue;
                 }
+                if (YaCySchema.size_i.getSolrFieldName().equals(fieldName)) {
+                    int size = value.numericValue().intValue();
+                    solitaireTag(writer, YaCyMetadata.size.getURIref(), Integer.toString(size));
+                    solitaireTag(writer, YaCyMetadata.sizename.getURIref(), RSSMessage.sizename(size));
+                    continue;
+                }
                 if (YaCySchema.h1_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h2_txt.getSolrFieldName().equals(fieldName) ||
                     YaCySchema.h3_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h4_txt.getSolrFieldName().equals(fieldName) ||
                     YaCySchema.h5_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h6_txt.getSolrFieldName().equals(fieldName)) {
@@ -200,21 +228,58 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                     continue;
                 }
             }
+            
             // compute snippet from texts
-
             solitaireTag(writer, RSSMessage.Token.title.name(), title.length() == 0 ? (texts.size() == 0 ? "" : texts.get(0)) : title);
             List<String> snippet = urlhash == null ? null : snippets.get(urlhash);
             String tagname = RSSMessage.Token.description.name();
             writer.write("<"); writer.write(tagname); writer.write('>');
             XML.escapeCharData(snippet == null || snippet.size() == 0 ? description : snippet.get(0), writer);
             writer.write("</"); writer.write(tagname); writer.write(">\n");
+            
+            // open: where do we get the subject?
+            //solitaireTag(writer, DublinCore.Subject.getURIref(), ""); // TODO: fill with actual data
+            
             closeTag(writer, "item");
         }
 
+        // the facets can be created with the options &facet=true&facet.mincount=1&facet.field=host_s&facet.field=url_file_ext_s&facet.field=url_protocol_s&facet.field=author_sxt
+        @SuppressWarnings("unchecked")
+        NamedList<Integer> domains = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.host_s.getSolrFieldName());
+        @SuppressWarnings("unchecked")
+        NamedList<Integer> filetypes = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_file_ext_s.getSolrFieldName());
+        @SuppressWarnings("unchecked")
+        NamedList<Integer> protocols = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_protocol_s.getSolrFieldName());
+        @SuppressWarnings("unchecked")
+        NamedList<Integer> authors = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.author_sxt.getSolrFieldName());
+        
+        openTag(writer, "yacy:navigation");
+        if (domains != null) {
+            openTag(writer, "yacy:facet name=\"domains\" displayname=\"Domains\" type=\"String\" min=\"0\" max=\"0\" mean=\"0\"");
+            for (Map.Entry<String, Integer> entry: domains) facetEntry(writer, entry.getKey(), Integer.toString(entry.getValue()));
+            closeTag(writer, "yacy:facet");
+        }
+        if (filetypes != null) {
+            openTag(writer, "yacy:facet name=\"filetypes\" displayname=\"Filetypes\" type=\"String\" min=\"0\" max=\"0\" mean=\"0\"");
+            for (Map.Entry<String, Integer> entry: filetypes) facetEntry(writer, entry.getKey(), Integer.toString(entry.getValue()));
+            closeTag(writer, "yacy:facet");
+        }
+        if (protocols != null) {
+            openTag(writer, "yacy:facet name=\"protocols\" displayname=\"Protocols\" type=\"String\" min=\"0\" max=\"0\" mean=\"0\"");
+            for (Map.Entry<String, Integer> entry: protocols) facetEntry(writer, entry.getKey(), Integer.toString(entry.getValue()));
+            closeTag(writer, "yacy:facet");
+        }
+        if (authors != null) {
+            openTag(writer, "yacy:facet name=\"authors\" displayname=\"Authors\" type=\"String\" min=\"0\" max=\"0\" mean=\"0\"");
+            for (Map.Entry<String, Integer> entry: authors) facetEntry(writer, entry.getKey(), Integer.toString(entry.getValue()));
+            closeTag(writer, "yacy:facet");
+        }
+        closeTag(writer, "yacy:navigation");
+        
         closeTag(writer, "channel");
         writer.write("</rss>\n".toCharArray());
     }
-
+    
     /**
      * produce snippets from solr (they call that 'highlighting')
      * @param val
@@ -267,6 +332,13 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         writer.write('>');
         writer.write(value);
         writer.write("</"); writer.write(tagname); writer.write(">\n");
+    }
+
+    private static void facetEntry(final Writer writer, final String propname, String value) throws IOException {
+        writer.write("<yacy:element name=\""); writer.write(propname);
+        writer.write("\" count=\""); writer.write(value); 
+        writer.write("\" modifier=\"site%3A"); writer.write(propname);
+        writer.write("\" />\n");
     }
 
 }

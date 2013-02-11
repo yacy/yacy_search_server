@@ -107,7 +107,7 @@ applinkscount_i
 ## tags that are attached to crawls/index generation to separate the search result into user-defined subsets
 collection_sxt
 
-## point in degrees of latitude,longitude as declared in WSG84, location
+## geospatial point in degrees of latitude,longitude as declared in WSG84, location; this creates two additional subfields, coordinate_p_0_coordinate (latitude) and coordinate_p_1_coordinate (longitude)
 coordinate_p
 
 ## content of author-tag, texgen

@@ -29,6 +29,7 @@ import java.util.List;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.protocol.Domains;
@@ -200,8 +201,8 @@ public class yacysearchitem {
             prop.put("content_date822", HeaderFramework.formatRFC1123(result.modified()));
             //prop.put("content_ybr", RankingProcess.ybr(result.hash()));
             prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
-            prop.putHTML("content_sizename", sizename(result.filesize()));
-            prop.putHTML("content_showSize_sizename", sizename(result.filesize()));
+            prop.putHTML("content_sizename", RSSMessage.sizename(result.filesize()));
+            prop.putHTML("content_showSize_sizename", RSSMessage.sizename(result.filesize()));
             prop.putHTML("content_host", resultURL.getHost() == null ? "" : resultURL.getHost());
             prop.putHTML("content_file", resultURL.getFileName());
             prop.putHTML("content_path", resultURL.getPath());
@@ -337,15 +338,5 @@ public class yacysearchitem {
             }
         }
         return ret;
-    }
-
-    private static String sizename(int size) {
-        if (size < 1024) return size + " bytes";
-        size = size / 1024;
-        if (size < 1024) return size + " kbyte";
-        size = size / 1024;
-        if (size < 1024) return size + " mbyte";
-        size = size / 1024;
-        return size + " gbyte";
     }
 }

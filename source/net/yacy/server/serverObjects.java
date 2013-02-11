@@ -47,12 +47,16 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.MultiProtocolURI;
@@ -69,8 +73,9 @@ import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.params.SolrParams;
 
 
-public class serverObjects extends HashMap<String, String> implements Cloneable {
-
+public class serverObjects implements Serializable, Cloneable {
+    
+    private static final long serialVersionUID = 3999165204849858546L;
     public static final String ACTION_AUTHENTICATE = "AUTHENTICATE";
     public static final String ACTION_LOCATION = "LOCATION";
 	public final static String ADMIN_AUTHENTICATE_MSG = "admin log-in. If you don't know the password, set it with {yacyhome}/bin/passwd.sh {newpassword}";
@@ -83,29 +88,89 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     private final static Pattern patternR = Pattern.compile("\r");
     private final static Pattern patternT = Pattern.compile("\t");
 
-    private static final long serialVersionUID = 1L;
     private boolean localized = true;
+    private boolean allowMultipleEntries = false;
 
     private final static char BOM = '\uFEFF'; // ByteOrderMark character that may appear at beginnings of Strings (Browser may append that)
-
+    private final MultiMapSolrParams map;
+    
     public serverObjects() {
         super();
+        this.map = new MultiMapSolrParams(new HashMap<String, String[]>());
     }
 
-    protected serverObjects(final Map<String, String> input) {
-        super(input);
+    public serverObjects(final boolean allowMultipleEntries) {
+        super();
+        this.allowMultipleEntries = allowMultipleEntries;
+        this.map = new MultiMapSolrParams(new HashMap<String, String[]>());
+    }
+
+    protected serverObjects(serverObjects o) {
+        super();
+        this.map = o.map;
+    }
+    
+    protected serverObjects(final Map<String, String[]> input) {
+        super();
+        this.map = new MultiMapSolrParams(input);
     }
 
     public void authenticationRequired() {
     	this.put(ACTION_AUTHENTICATE, ADMIN_AUTHENTICATE_MSG);
     }
 
+    public void clear() {
+        this.map.getMap().clear();
+    }
+
+    public boolean isEmpty() {
+        return this.map.getMap().isEmpty();
+    }
+    
     private static final String removeByteOrderMark(final String s) {
         if (s == null || s.isEmpty()) return s;
         if (s.charAt(0) == BOM) return s.substring(1);
         return s;
     }
 
+    public boolean containsKey(String key) {
+        return this.map.get(key) != null;
+    }
+    
+    public MultiMapSolrParams getSolrParams() {
+        return this.map;
+    }
+
+    public List<Map.Entry<String, String>> entrySet() {
+        List<Map.Entry<String, String>> set = new ArrayList<Map.Entry<String, String>>(this.map.getMap().size() * 2);
+        for (Map.Entry<String, String[]> entry: this.map.getMap().entrySet()) {
+            for (String v: entry.getValue()) set.add(new AbstractMap.SimpleEntry<String, String>(entry.getKey(), v));
+        }
+        return set;
+    }
+    
+    public Set<String> values() {
+        Set<String> set = new HashSet<String>(this.map.getMap().size() * 2);
+        for (Map.Entry<String, String[]> entry: this.map.getMap().entrySet()) {
+            for (String v: entry.getValue()) set.add(v);
+        }
+        return set;
+    }
+    
+    public Set<String> keySet() {
+        return this.map.getMap().keySet();
+    }
+    
+    public String[] remove(String key) {
+        return this.map.getMap().remove(key);
+    }
+    
+    public void putAll(Map<String, String> m) {
+        for (Map.Entry<String, String> e: m.entrySet()) {
+            put(e.getKey(), e.getValue());
+        }
+    }
+    
     /**
      * Add a key-value pair of Objects to the map.
      * @param key   This method will do nothing if the key is <code>null</code>.
@@ -115,30 +180,44 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @return The value that was added to the map.
      * @see java.util.Hashtable#insert(K, V)
      */
-    @Override
-    public String put(final String key, final String value) {
+    public void put(final String key, final String value) {
         if (key == null) {
             // this does nothing
-            return null;
-        } else if (value == null) {
-            // assigning the null value creates the same effect like removing the element
-            return super.remove(key);
-        } else {
-            return super.put(key, value);
+            return;
         }
+        if (value == null) {
+            // assigning the null value creates the same effect like removing the element
+            map.getMap().remove(key);
+            return;
+        }
+        String[] a = map.getMap().get(key);
+        if (a == null) {
+            map.getMap().put(key, new String[]{value});
+            return;
+        }
+        if (this.allowMultipleEntries) {
+            for (int i = 0; i < a.length; i++) {
+                if (a[i].equals(value)) return;
+            }
+            String[] aa = new String[a.length + 1];
+            System.arraycopy(a, 0, aa, 0, a.length);
+            aa[a.length] = value;
+            map.getMap().put(key, aa);
+            return;
+        }
+        map.getMap().put(key, new String[]{value});
     }
 
-    public String put(final String key, final String[] values) {
+    public void put(final String key, final String[] values) {
         if (key == null) {
             // this does nothing
-            return null;
+            return;
         } else if (values == null) {
             // assigning the null value creates the same effect like removing the element
-            return super.remove(key);
+            map.getMap().remove(key);
+            return;
         } else {
-            StringBuilder sb = new StringBuilder(10 + values.length * 8);
-            for (String s: values) sb.append(s).append(' ');
-            return put(key, sb.toString().trim());
+            map.getMap().put(key, values);
         }
     }
 
@@ -155,12 +234,8 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         if (key == null) {
             // this does nothing
             return;
-        } else if (value == null) {
-            // assigning the null value creates the same effect like removing the element
-            super.remove(key);
-        } else {
-            super.put(key, value.toString());
         }
+        put(key, value.toString());
     }
 
     /**
@@ -169,9 +244,9 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @param value mapped value as a byte array.
      * @return      the previous value as String.
      */
-    public String put(final String key, final byte[] value) {
-        if (value == null) return this.put(key, "NULL");
-        return this.put(key, UTF8.String(value));
+    public void put(final String key, final byte[] value) {
+        if (value == null) return;
+        put(key, UTF8.String(value));
     }
 
     /**
@@ -179,40 +254,37 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * to the map.
      * @param key   key name as String.
      * @param value value as double/float.
-     * @return value as it was added to the map or <code>NaN</code> if an error occured.
      */
-    public double put(final String key, final float value) {
-        return (null == this.put(key, Float.toString(value))) ? Float.NaN : value;
+    public void put(final String key, final float value) {
+        put(key, Float.toString(value));
     }
 
-    public double put(final String key, final double value) {
-        return (null == this.put(key, Double.toString(value))) ? Double.NaN : value;
+    public void put(final String key, final double value) {
+        put(key, Double.toString(value));
     }
 
     /**
      * same as {@link #put(String, double)} but for integer types
-     * @return Returns 0 for the error case.
      */
-    public long put(final String key, final long value) {
-        return (null == this.put(key, Long.toString(value))) ? 0 : value;
+    public void put(final String key, final long value) {
+        put(key, Long.toString(value));
     }
 
-    public String put(final String key, final java.util.Date value) {
-        return this.put(key, value.toString());
+    public void put(final String key, final java.util.Date value) {
+        put(key, value.toString());
     }
 
-    public String put(final String key, final InetAddress value) {
-        return this.put(key, value.toString());
+    public void put(final String key, final InetAddress value) {
+        put(key, value.toString());
     }
 
     /**
      * Add a String to the map. The content of the String is escaped to be usable in JSON output.
      * @param key   key name as String.
      * @param value a String that will be reencoded for JSON output.
-     * @return      the modified String that was added to the map.
      */
-    public String putJSON(final String key, final String value) {
-        return put(key, toJSON(value));
+    public void putJSON(final String key, final String value) {
+        put(key, toJSON(value));
     }
 
     public static String toJSON(String value) {
@@ -234,12 +306,12 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @return      the modified String that was added to the map.
      * @see CharacterCoding#encodeUnicode2html(String, boolean)
      */
-    public String putHTML(final String key, final String value) {
-        return put(key, CharacterCoding.unicode2html(value, true));
+    public void putHTML(final String key, final String value) {
+        put(key, CharacterCoding.unicode2html(value, true));
     }
 
-    public String putHTML(final String key, final byte[] value) {
-        return putHTML(key, UTF8.String(value));
+    public void putHTML(final String key, final byte[] value) {
+        putHTML(key, UTF8.String(value));
     }
 
     /**
@@ -248,8 +320,8 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * If forXML is <code>true</code>, then only the characters <b>&amp; &quot; &lt; &gt;</b> will be
      * replaced in the returned String.
      */
-    public String putXML(final String key, final String value) {
-        return put(key, CharacterCoding.unicode2xml(value, true));
+    public void putXML(final String key, final String value) {
+        put(key, CharacterCoding.unicode2xml(value, true));
     }
 
     /**
@@ -259,10 +331,10 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @param value
      * @return
      */
-    public String put(final RequestHeader.FileType fileType, final String key, final String value) {
-        if (fileType == FileType.JSON) return putJSON(key, value);
-        if (fileType == FileType.XML) return putXML(key, value);
-        return putHTML(key, value);
+    public void put(final RequestHeader.FileType fileType, final String key, final String value) {
+        if (fileType == FileType.JSON) putJSON(key, value);
+        else if (fileType == FileType.XML) putXML(key, value);
+        else putHTML(key, value);
     }
 
     /**
@@ -273,62 +345,71 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      *              representation.
      * @return the String value added to the map.
      */
-    public String putNum(final String key, final long value) {
-        return this.put(key, Formatter.number(value, this.localized));
+    public void putNum(final String key, final long value) {
+        this.put(key, Formatter.number(value, this.localized));
     }
 
     /**
      * Variant for double/float types.
      * @see #putNum(String, long)
      */
-    public String putNum(final String key, final double value) {
-        return this.put(key, Formatter.number(value, this.localized));
+    public void putNum(final String key, final double value) {
+        this.put(key, Formatter.number(value, this.localized));
     }
 
     /**
      * Variant for string encoded numbers.
      * @see #putNum(String, long)
      */
-    public String putNum(final String key, final String value) {
-        return this.put(key, value == null ? "" : Formatter.number(value));
+    public void putNum(final String key, final String value) {
+        this.put(key, value == null ? "" : Formatter.number(value));
     }
 
 
-    public String putWiki(final String hostport, final String key, final String wikiCode){
-        return this.put(key, Switchboard.wikiParser.transform(hostport, wikiCode));
+    public void putWiki(final String hostport, final String key, final String wikiCode){
+        this.put(key, Switchboard.wikiParser.transform(hostport, wikiCode));
     }
 
-    public String putWiki(final String hostport, final String key, final byte[] wikiCode) {
+    public void putWiki(final String hostport, final String key, final byte[] wikiCode) {
         try {
-            return this.put(key, Switchboard.wikiParser.transform(hostport, wikiCode));
+            this.put(key, Switchboard.wikiParser.transform(hostport, wikiCode));
         } catch (final UnsupportedEncodingException e) {
-            return this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
+            this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
         }
     }
 
     // inc variant: for counters
     public long inc(final String key) {
-        String c = super.get(key);
+        String c = get(key);
         if (c == null) c = "0";
         final long l = Long.parseLong(c) + 1;
-        super.put(key, Long.toString(l));
+        put(key, Long.toString(l));
         return l;
     }
 
+    public String[] getParams(String name) {
+      return map.getMap().get(name);
+    }
+
+    public String get(String name) {
+      String[] arr = map.getMap().get(name);
+      return arr==null ? null : arr[0];
+    }
+    
     // new get with default objects
     public Object get(final String key, final Object dflt) {
-        final Object result = super.get(key);
+        final Object result = get(key);
         return (result == null) ? dflt : result;
     }
 
     // string variant
     public String get(final String key, final String dflt) {
-        final String result = removeByteOrderMark(super.get(key));
+        final String result = removeByteOrderMark(get(key));
         return (result == null) ? dflt : result;
     }
 
     public int getInt(final String key, final int dflt) {
-        final String s = removeByteOrderMark(super.get(key));
+        final String s = removeByteOrderMark(get(key));
         if (s == null) return dflt;
         try {
             return Integer.parseInt(s);
@@ -338,7 +419,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     public long getLong(final String key, final long dflt) {
-        final String s = removeByteOrderMark(super.get(key));
+        final String s = removeByteOrderMark(get(key));
         if (s == null) return dflt;
         try {
             return Long.parseLong(s);
@@ -348,7 +429,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     public float getFloat(final String key, final float dflt) {
-        final String s = removeByteOrderMark(super.get(key));
+        final String s = removeByteOrderMark(get(key));
         if (s == null) return dflt;
         try {
             return Float.parseFloat(s);
@@ -358,7 +439,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     public double getDouble(final String key, final double dflt) {
-        final String s = removeByteOrderMark(super.get(key));
+        final String s = removeByteOrderMark(get(key));
         if (s == null) return dflt;
         try {
             return Double.parseDouble(s);
@@ -368,7 +449,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     public boolean getBoolean(final String key) {
-        String s = removeByteOrderMark(super.get(key));
+        String s = removeByteOrderMark(get(key));
         if (s == null) return false;
         s = s.toLowerCase();
         return s.equals("true") || s.equals("on") || s.equals("1");
@@ -433,7 +514,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
 
     @Override
     public Object clone() {
-        return super.clone();
+        return new serverObjects(this.map.getMap());
     }
 
     /**
@@ -441,8 +522,8 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      */
     @Override
     public String toString() {
-        if (isEmpty()) return "";
-        final StringBuilder param = new StringBuilder(size() * 40);
+        if (this.map.getMap().isEmpty()) return "";
+        final StringBuilder param = new StringBuilder(this.map.getMap().size() * 40);
         for (final Map.Entry<String, String> entry: entrySet()) {
             param.append(MultiProtocolURI.escape(entry.getKey()))
                 .append('=')
@@ -459,18 +540,12 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         if (!this.containsKey(CommonParams.START)) this.put(CommonParams.START, "0"); // set default start item
         if (!this.containsKey(CommonParams.ROWS)) this.put(CommonParams.ROWS, "10"); // set default number of search results
 
-        Map<String,String[]> m = new HashMap<String, String[]>();
-        for (Map.Entry<String, String> e: this.entrySet()) {
-            m.put(e.getKey(), new String[]{e.getValue()});
-        }
         if (facets != null && facets.length > 0) {
-            m.put("facet", new String[]{"true"});
-            String[] fs = new String[facets.length];
-            for (int i = 0; i < facets.length; i++) fs[i] = facets[i].getSolrFieldName();
-            m.put("facet.field", fs);
+            this.remove("facet");
+            this.put("facet", "true");
+            for (int i = 0; i < facets.length; i++) this.put("facet.field", facets[i].getSolrFieldName());
         }
-        final SolrParams solrParams = new MultiMapSolrParams(m);
-        return solrParams;
+        return this.map;
     }
 
     public static void main(final String[] args) {

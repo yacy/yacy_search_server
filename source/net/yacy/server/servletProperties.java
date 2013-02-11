@@ -59,13 +59,13 @@ public class servletProperties extends serverObjects {
     }
 
     @Override
-    public String put(final String key, final byte[] value) {
-        return super.put(this.prefix + key, value);
+    public void put(final String key, final byte[] value) {
+        super.put(this.prefix + key, value);
     }
 
     @Override
-    public long put(final String key, final long value) {
-        return super.put(this.prefix + key, value);
+    public void put(final String key, final long value) {
+        super.put(this.prefix + key, value);
     }
 
     @Override
