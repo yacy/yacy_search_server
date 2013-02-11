@@ -39,6 +39,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.Properties;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.ExecutionException;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.lod.JenaTripleStore;
@@ -195,11 +196,15 @@ public final class yacy {
                     Properties p = new Properties();
                     p.load(new FileInputStream(dataFile));
                     int port = Integer.parseInt(p.getProperty("port", "8090"));
-                    if (TimeoutRequest.ping("127.0.0.1", port, 1000)) {
-                        Browser.openBrowser("http://localhost:" + port + "/" + p.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
-                        // Thats it; YaCy was running, the user is happy, we can stop now.
-                        Log.logSevere("STARTUP", "WARNING: YaCy instance was still running; just opening the browser and exit.");
-                        System.exit(0);
+                    try {
+                        if (TimeoutRequest.ping("127.0.0.1", port, 1000)) {
+                            Browser.openBrowser("http://localhost:" + port + "/" + p.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
+                            // Thats it; YaCy was running, the user is happy, we can stop now.
+                            Log.logSevere("STARTUP", "WARNING: YaCy instance was still running; just opening the browser and exit.");
+                            System.exit(0);
+                        }
+                    } catch (ExecutionException ex) {
+                        Log.logInfo("STARTUP", "INFO: delete old yacy.running file; likely previous YaCy session was not orderly shutdown!");
                     }
                 }
                 
