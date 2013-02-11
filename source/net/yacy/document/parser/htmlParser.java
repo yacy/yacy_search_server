@@ -208,7 +208,7 @@ public class htmlParser extends AbstractParser implements Parser {
         } finally {
             writer.flush();
             sourceStream.close();
-            //writer.close();
+            writer.close();
         }
         //OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);
         //serverFileUtils.copy(sourceFile, hfos);

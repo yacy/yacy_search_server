@@ -32,6 +32,7 @@ package net.yacy.data;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -104,7 +105,7 @@ public class BookmarkDate {
 
         public Entry(final String mydate){
             //round to seconds, but store as milliseconds (java timestamp)
-            date = String.valueOf((Long.parseLong(mydate)/1000)*1000);
+            date = String.valueOf(((mydate == null ? System.currentTimeMillis() : Long.parseLong(mydate))/1000)*1000);
             mem = new HashMap<String, String>();
             mem.put(URL_HASHES, "");
         }

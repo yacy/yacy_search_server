@@ -493,6 +493,7 @@ public final class TransformerWriter extends Writer {
 
     @Override
     public void close() throws IOException {
+        flush();
         final char quotechar = (this.inSingleQuote) ? singlequote : doublequote;
         if (this.buffer != null) {
             if (this.buffer.length() > 0) {
