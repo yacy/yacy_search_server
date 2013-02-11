@@ -144,13 +144,13 @@ public class searchresult {
         } else {
             post.put(CommonParams.SORT, sorts);
         }
-        String site = post.remove("site"); // example: col1|col2
-        String access = post.remove("access");
-        String entqr = post.remove("entqr");
+        String[] site = post.remove("site"); // example: col1|col2
+        String[] access = post.remove("access");
+        String[] entqr = post.remove("entqr");
 
         // add sites operator
-        if (site != null && site.length() > 0) {
-            String[] s0 = CommonPattern.VERTICALBAR.split(site);
+        if (site != null && site[0].length() > 0) {
+            String[] s0 = CommonPattern.VERTICALBAR.split(site[0]);
             ArrayList<String> sites = new ArrayList<String>(2);
             for (String s: s0) {
                 s = s.trim().toLowerCase();
@@ -189,8 +189,8 @@ public class searchresult {
         context.put("client", "vsm_frontent");
         context.put("sort", sort.sort);
         context.put("site", site == null ? "" : site);
-        context.put("access", access == null ? "p" : access);
-        context.put("entqr", entqr == null ? "3" : entqr);
+        context.put("access", access == null ? "p" : access[0]);
+        context.put("entqr", entqr == null ? "3" : entqr[0]);
 
         // write the result directly to the output stream
         Writer ow = new FastWriter(new OutputStreamWriter(out, UTF8.charset));

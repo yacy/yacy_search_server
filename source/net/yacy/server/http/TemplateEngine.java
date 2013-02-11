@@ -55,14 +55,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.server.serverObjects;
 
 
 /**
@@ -193,7 +192,7 @@ public final class TemplateEngine {
         return false;
     }
 
-    public final static void writeTemplate(final InputStream in, final OutputStream out, final Map<String, String> pattern, final byte[] dflt) throws IOException {
+    public final static void writeTemplate(final InputStream in, final OutputStream out, final serverObjects pattern, final byte[] dflt) throws IOException {
         if (pattern == null) {
             FileUtils.copy(in, out);
         } else {
@@ -204,7 +203,7 @@ public final class TemplateEngine {
     /**
      * Reads a input stream, and writes the data with replaced templates on a output stream
      */
-    private final static byte[] writeTemplate(final InputStream in, final OutputStream out, final Map<String, String> pattern, final byte[] dflt, final byte[] prefix) throws IOException {
+    private final static byte[] writeTemplate(final InputStream in, final OutputStream out, final serverObjects pattern, final byte[] dflt, final byte[] prefix) throws IOException {
         final PushbackInputStream pis = new PushbackInputStream(in, 100);
         final ByteArrayOutputStream keyStream = new ByteArrayOutputStream(4048);
         byte[] key;
@@ -437,7 +436,7 @@ public final class TemplateEngine {
         return sb;
     }
 
-    private final static byte[] replacePattern(final String key, final Map<String, String> pattern, final byte dflt[]) {
+    private final static byte[] replacePattern(final String key, final serverObjects pattern, final byte dflt[]) {
         byte[] replacement;
         Object value;
         if (pattern.containsKey(key)) {
@@ -512,7 +511,7 @@ public final class TemplateEngine {
         // arg1 = test input; arg2 = replacement for pattern 'test'; arg3 = default replacement
         try {
             final InputStream i = new ByteArrayInputStream(UTF8.getBytes(args[0]));
-            final Map<String, String> h = new HashMap<String, String>();
+            final serverObjects h = new serverObjects(true);
             h.put("test", args[1]);
             writeTemplate(new PushbackInputStream(i, 100), System.out, h, UTF8.getBytes(args[2]));
             System.out.flush();

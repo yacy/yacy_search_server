@@ -366,7 +366,7 @@ public final class HTTPDFileHandler {
             serverCore.bfHost.remove(conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
 
             // parse arguments
-            serverObjects args = new serverObjects();
+            serverObjects args = new serverObjects(true);
             int argc = 0;
             if (argsString == null) {
                 // no args here, maybe a POST with multipart extension

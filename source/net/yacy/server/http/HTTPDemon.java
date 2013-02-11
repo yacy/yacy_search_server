@@ -329,7 +329,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 if (returncode == UserDB.Entry.PROXY_ALLOK) {
                     return true;
                 }
-                final serverObjects tp = new serverObjects();
+                final serverObjects tp = new serverObjects(true);
                 if (returncode == UserDB.Entry.PROXY_TIMELIMIT_REACHED) {
                     tp.put("limit", "1");//time per day
                     tp.put("limit_timelimit", entry.getTimeLimit());
@@ -1075,7 +1075,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             }
 
             // set rewrite values
-            final serverObjects tp = new serverObjects();
+            final serverObjects tp = new serverObjects(true);
 
             String clientIP = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); if (clientIP == null) clientIP = Domains.LOCALHOST;
 
