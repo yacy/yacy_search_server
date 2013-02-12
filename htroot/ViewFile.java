@@ -290,7 +290,7 @@ public class ViewFile {
                             token = tokens.nextElement();
                             if (token.length() > 0) {
                                 prop.put("viewMode_words_" + i + "_nr", i + 1);
-                                prop.put("viewMode_words_" + i + "_word", token);
+                                prop.put("viewMode_words_" + i + "_word", token.toString());
                                 prop.put("viewMode_words_" + i + "_dark", dark ? "1" : "0");
                                 dark = !dark;
                                 i++;

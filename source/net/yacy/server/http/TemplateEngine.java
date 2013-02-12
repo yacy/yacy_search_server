@@ -511,7 +511,7 @@ public final class TemplateEngine {
         // arg1 = test input; arg2 = replacement for pattern 'test'; arg3 = default replacement
         try {
             final InputStream i = new ByteArrayInputStream(UTF8.getBytes(args[0]));
-            final serverObjects h = new serverObjects(true);
+            final serverObjects h = new serverObjects();
             h.put("test", args[1]);
             writeTemplate(new PushbackInputStream(i, 100), System.out, h, UTF8.getBytes(args[2]));
             System.out.flush();

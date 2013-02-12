@@ -329,10 +329,10 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 if (returncode == UserDB.Entry.PROXY_ALLOK) {
                     return true;
                 }
-                final serverObjects tp = new serverObjects(true);
+                final serverObjects tp = new serverObjects();
                 if (returncode == UserDB.Entry.PROXY_TIMELIMIT_REACHED) {
                     tp.put("limit", "1");//time per day
-                    tp.put("limit_timelimit", entry.getTimeLimit());
+                    tp.put("limit_timelimit", Long.toString(entry.getTimeLimit()));
                     sendRespondError(prop, session.out, 403, "Internet-Timelimit reached", new File("proxymsg/proxylimits.inc"), tp, null);
                 } else if (returncode == UserDB.Entry.PROXY_NORIGHT){
                     tp.put("limit", "0");
@@ -709,7 +709,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             sep = argsString.indexOf("&amp;", eqp + 1);
             if (sep > 0) {
                 // resulting equations are inserted into the property args with leading '&amp;'
-                args.put(parseArg(argsString.substring(0, eqp)), parseArg(argsString.substring(eqp + 1, sep)));
+                args.add(parseArg(argsString.substring(0, eqp)), parseArg(argsString.substring(eqp + 1, sep)));
                 argsString = argsString.substring(sep + 5);
                 argc++;
                 continue;
@@ -717,7 +717,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             sep = argsString.indexOf('&', eqp + 1);
             if (sep > 0) {
                 // resulting equations are inserted into the property args with leading '&'
-                args.put(parseArg(argsString.substring(0, eqp)), parseArg(argsString.substring(eqp + 1, sep)));
+                args.add(parseArg(argsString.substring(0, eqp)), parseArg(argsString.substring(eqp + 1, sep)));
                 argsString = argsString.substring(sep + 1);
                 argc++;
                 continue;
@@ -864,14 +864,14 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 // simple text
                 if (item.getContentType() == null || !item.getContentType().contains("charset")) {
                     // old yacy clients use their local default charset, on most systems UTF-8 (I hope ;)
-                    args.put(item.getFieldName(), item.getString("UTF-8"));
+                    args.add(item.getFieldName(), item.getString("UTF-8"));
                 } else {
                     // use default encoding (given as header or ISO-8859-1)
-                    args.put(item.getFieldName(), item.getString());
+                    args.add(item.getFieldName(), item.getString());
                 }
             } else {
                 // file
-                args.put(item.getFieldName(), item.getName());
+                args.add(item.getFieldName(), item.getName());
                 fileContent = FileUtils.read(item.getInputStream(), (int) item.getSize());
                 item.getInputStream().close();
                 files.put(item.getFieldName(), fileContent);
@@ -1075,7 +1075,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             }
 
             // set rewrite values
-            final serverObjects tp = new serverObjects(true);
+            final serverObjects tp = new serverObjects();
 
             String clientIP = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); if (clientIP == null) clientIP = Domains.LOCALHOST;
 
@@ -1083,17 +1083,17 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             final InetAddress hostAddress = Domains.dnsResolve(clientIP);
             if (hostAddress == null) {
                 tp.put("host", Domains.myPublicLocalIP().getHostAddress());
-                tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8090")));
+                tp.put("port", Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8090"))));
             } else if (hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress()) {
                 tp.put("host", Domains.myPublicLocalIP().getHostAddress());
-                tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8090")));
+                tp.put("port", Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8090"))));
             } else {
                 tp.put("host", switchboard.myPublicIP());
                 tp.put("port", Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8090"))));
             }
 
             tp.put("peerName", (getAlternativeResolver() == null) ? "" : getAlternativeResolver().myName());
-            tp.put("errorMessageType", errorcase);
+            tp.put("errorMessageType", Integer.toString(errorcase));
             tp.put("httpStatus",       Integer.toString(httpStatusCode) + " " + httpStatusText);
             tp.put("requestMethod",    (String) conProp.get(HeaderFramework.CONNECTION_PROP_METHOD));
             tp.put("requestURL",       urlString);
@@ -1116,13 +1116,13 @@ public final class HTTPDemon implements serverHandler, Cloneable {
 
             // building the stacktrace
             if (stackTrace != null) {
-                tp.put("printStackTrace",1);
+                tp.put("printStackTrace", "1");
                 final ByteBuffer errorMsg = new ByteBuffer(100);
                 stackTrace.printStackTrace(new PrintStream(errorMsg));
                 tp.put("printStackTrace_exception", stackTrace.toString());
                 tp.put("printStackTrace_stacktrace", UTF8.String(errorMsg.getBytes()));
             } else {
-                tp.put("printStackTrace", 0);
+                tp.put("printStackTrace", "0");
             }
 
             // Generated Tue, 23 Aug 2005 11:19:14 GMT by brain.wg (squid/2.5.STABLE3)

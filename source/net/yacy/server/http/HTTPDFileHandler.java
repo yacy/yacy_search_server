@@ -366,7 +366,7 @@ public final class HTTPDFileHandler {
             serverCore.bfHost.remove(conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
 
             // parse arguments
-            serverObjects args = new serverObjects(true);
+            serverObjects args = new serverObjects();
             int argc = 0;
             if (argsString == null) {
                 // no args here, maybe a POST with multipart extension
@@ -392,7 +392,7 @@ public final class HTTPDFileHandler {
                             Map.Entry<String, byte[]> entry;
                             while (fit.hasNext()) {
                                 entry = fit.next();
-                                args.put(entry.getKey() + "$file", entry.getValue());
+                                args.add(entry.getKey() + "$file", entry.getValue());
                             }
                         }
                         argc = Integer.parseInt(requestHeader.get("ARGC"));

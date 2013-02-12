@@ -89,19 +89,12 @@ public class serverObjects implements Serializable, Cloneable {
     private final static Pattern patternT = Pattern.compile("\t");
 
     private boolean localized = true;
-    private boolean allowMultipleEntries = false;
 
     private final static char BOM = '\uFEFF'; // ByteOrderMark character that may appear at beginnings of Strings (Browser may append that)
     private final MultiMapSolrParams map;
     
     public serverObjects() {
         super();
-        this.map = new MultiMapSolrParams(new HashMap<String, String[]>());
-    }
-
-    public serverObjects(final boolean allowMultipleEntries) {
-        super();
-        this.allowMultipleEntries = allowMultipleEntries;
         this.map = new MultiMapSolrParams(new HashMap<String, String[]>());
     }
 
@@ -170,16 +163,30 @@ public class serverObjects implements Serializable, Cloneable {
             put(e.getKey(), e.getValue());
         }
     }
+
+    public void add(final String key, final String value) {
+        if (key == null) {
+            // this does nothing
+            return;
+        }
+        if (value == null) {
+            return;
+        }
+        String[] a = map.getMap().get(key);
+        if (a == null) {
+            map.getMap().put(key, new String[]{value});
+            return;
+        }
+        for (int i = 0; i < a.length; i++) {
+            if (a[i].equals(value)) return;
+        }
+        String[] aa = new String[a.length + 1];
+        System.arraycopy(a, 0, aa, 0, a.length);
+        aa[a.length] = value;
+        map.getMap().put(key, aa);
+        return;
+    }
     
-    /**
-     * Add a key-value pair of Objects to the map.
-     * @param key   This method will do nothing if the key is <code>null</code>.
-     * @param value The value that should be mapped to the key.
-     *              If value is <code>null</code>, then the element at <code>key</code>
-     *              is removed from the map.
-     * @return The value that was added to the map.
-     * @see java.util.Hashtable#insert(K, V)
-     */
     public void put(final String key, final String value) {
         if (key == null) {
             // this does nothing
@@ -195,17 +202,17 @@ public class serverObjects implements Serializable, Cloneable {
             map.getMap().put(key, new String[]{value});
             return;
         }
-        if (this.allowMultipleEntries) {
-            for (int i = 0; i < a.length; i++) {
-                if (a[i].equals(value)) return;
-            }
-            String[] aa = new String[a.length + 1];
-            System.arraycopy(a, 0, aa, 0, a.length);
-            aa[a.length] = value;
-            map.getMap().put(key, aa);
-            return;
-        }
         map.getMap().put(key, new String[]{value});
+    }
+
+    public void add(final String key, final byte[] value) {
+        if (value == null) return;
+        add(key, UTF8.String(value));
+    }
+
+    public void put(final String key, final byte[] value) {
+        if (value == null) return;
+        put(key, UTF8.String(value));
     }
 
     public void put(final String key, final String[] values) {
@@ -219,34 +226,6 @@ public class serverObjects implements Serializable, Cloneable {
         } else {
             map.getMap().put(key, values);
         }
-    }
-
-    /**
-     * Add a key-value pair of Objects to the map.
-     * @param key   This method will do nothing if the key is <code>null</code>.
-     * @param value The value that should be mapped to the key.
-     *              If value is <code>null</code>, then the element at <code>key</code>
-     *              is removed from the map.
-     * @return The value that was added to the map.
-     * @see java.util.Hashtable#insert(K, V)
-     */
-    public void put(final String key, final StringBuilder value) {
-        if (key == null) {
-            // this does nothing
-            return;
-        }
-        put(key, value.toString());
-    }
-
-    /**
-     * Add byte array to the map, value is kept as it is.
-     * @param key   key name as String.
-     * @param value mapped value as a byte array.
-     * @return      the previous value as String.
-     */
-    public void put(final String key, final byte[] value) {
-        if (value == null) return;
-        put(key, UTF8.String(value));
     }
 
     /**
