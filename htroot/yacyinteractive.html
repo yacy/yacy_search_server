@@ -37,7 +37,7 @@
 <script type="text/javascript">
 //<![CDATA[
 //document.write("\<a id=\"rsslink\" href=\"yacysearch.rss?" + window.location.search.substring(1) + "\"\>")
-document.write("\<a id=\"rsslink\" href=\"solr/select?start=0&rows=100&wt=opensearch&facet=true&facet.mincount=1&facet.field=host_s&facet.field=url_file_ext_s&facet.field=url_protocol_s&facet.field=author_sxt&" + window.location.search.substring(1) + "\"\>")
+document.write("\<a id=\"rsslink\" href=\"/solr/select?hl=false&wt=opensearch&facet=true&facet.mincount=1&facet.field=url_file_ext_s&start=0&rows=10&query=" + window.location.search.substring(1) + "\"\>")
 //]]>
 </script>
 <img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>

@@ -37,7 +37,7 @@ function search(search, count, offset) {
     self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
   }
   //self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&nav=all&contentdom=all&maximumRecords=" + maximumRecords + "&startRecord=" + startRecord + "&query=" + query, true);
-  self.xmlHttpReq.open('GET', "solr/select?hl=false&wt=yjson&facet=true&facet.mincount=1&facet.field=host_s&facet.field=url_file_ext_s&facet.field=url_protocol_s&facet.field=author_sxt&start=" + startRecord + "&rows=" + maximumRecords + "&startRecord=" + startRecord + "&query=" + query, true);
+  self.xmlHttpReq.open('GET', "/solr/select?hl=false&wt=yjson&facet=true&facet.mincount=1&facet.field=url_file_ext_s&start=" + startRecord + "&rows=" + maximumRecords + "&query=" + query, true);
   self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   self.xmlHttpReq.onreadystatechange = function() {
     if (self.xmlHttpReq.readyState == 4) {
