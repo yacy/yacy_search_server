@@ -321,11 +321,11 @@ public final class RankingProcess extends Thread {
 
                 // check site constraints
                 final String hosthash = iEntry.hosthash();
-                if ( this.query.nav_sitehash == null ) {
+                if ( this.query.modifier.sitehash == null ) {
                     if (this.query.siteexcludes != null && this.query.siteexcludes.contains(hosthash)) continue pollloop;
                 } else {
                     // filter out all domains that do not match with the site constraint
-                    if (!hosthash.equals(this.query.nav_sitehash)) continue pollloop;
+                    if (!hosthash.equals(this.query.modifier.sitehash)) continue pollloop;
                 }
 
                 // finally extend the double-check and insert result to stack

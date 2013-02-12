@@ -207,30 +207,78 @@ public class JsonResponseWriter implements QueryResponseWriter {
                 writer.write(",\n".toCharArray());
             }
         }
-        writer.write("]\n".toCharArray());
-        writer.write(",\n\"navigation\":[\n");
-
-        @SuppressWarnings("unchecked")
-        NamedList<Integer> hosts = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.host_s.getSolrFieldName());
-        @SuppressWarnings("unchecked")
-        NamedList<Integer> exts = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_file_ext_s.getSolrFieldName());
-        @SuppressWarnings("unchecked")
-        NamedList<Integer> prots = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_protocol_s.getSolrFieldName());
+        writer.write("],\n".toCharArray());
         
-        writer.write("{\"facetname\":\"filetypes\",\"displayname\":\"Filetypes\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[]},\n".toCharArray());
-        writer.write("{\"facetname\":\"protocols\",\"displayname\":\"Protocol\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[]},\n".toCharArray());
-        writer.write("{\"facetname\":\"domains\",\"displayname\":\"Domains\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[]},\n".toCharArray());
-        writer.write("{\"facetname\":\"topics\",\"displayname\":\"Topics\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[]}\n".toCharArray());
+        
+        writer.write("\"navigation\":[\n");
+
+        // the facets can be created with the options &facet=true&facet.mincount=1&facet.field=host_s&facet.field=url_file_ext_s&facet.field=url_protocol_s&facet.field=author_sxt
+        @SuppressWarnings("unchecked")
+        NamedList<Integer> domains = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.host_s.getSolrFieldName());
+        @SuppressWarnings("unchecked")
+        NamedList<Integer> filetypes = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_file_ext_s.getSolrFieldName());
+        @SuppressWarnings("unchecked")
+        NamedList<Integer> protocols = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_protocol_s.getSolrFieldName());
+        @SuppressWarnings("unchecked")
+        NamedList<Integer> authors = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.author_sxt.getSolrFieldName());
+
+        if (domains != null) {
+            writer.write("{\"facetname\":\"domains\",\"displayname\":\"Domains\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[".toCharArray());
+            for (int i = 0; i < domains.size(); i++) {
+                facetEntry(writer, "site", domains.getName(i), Integer.toString(domains.getVal(i)));
+                if (i < domains.size() - 1) writer.write(',');
+                writer.write("\n");
+            }
+            writer.write("]},\n".toCharArray());
+        }
+        if (filetypes != null) {
+            writer.write("{\"facetname\":\"filetypes\",\"displayname\":\"Filetypes\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[".toCharArray());
+            List<Map.Entry<String, Integer>> l = new ArrayList<Map.Entry<String,Integer>>();
+            for (Map.Entry<String, Integer> e: filetypes) {
+                if (e.getKey().length() <= 6) l.add(e);
+                if (l.size() >= 16) break;
+            }
+            for (int i = 0; i < l.size(); i++) {
+                Map.Entry<String, Integer> e = l.get(i);
+                facetEntry(writer, "filetype", e.getKey(), Integer.toString(e.getValue()));
+                if (i < l.size() - 1) writer.write(',');
+                writer.write("\n");
+            }
+            writer.write("]},\n".toCharArray());
+        }
+        if (protocols != null) {
+            writer.write("{\"facetname\":\"protocols\",\"displayname\":\"Protocol\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[".toCharArray());
+            for (int i = 0; i < protocols.size(); i++) {
+                facetEntry(writer, "protocol", protocols.getName(i), Integer.toString(protocols.getVal(i)));
+                if (i < protocols.size() - 1) writer.write(',');
+                writer.write("\n");
+            }
+            writer.write("]},\n".toCharArray());
+        }
+        if (authors != null) {
+            writer.write("{\"facetname\":\"authors\",\"displayname\":\"Authors\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[".toCharArray());
+            for (int i = 0; i < authors.size(); i++) {
+                facetEntry(writer, "author", authors.getName(i), Integer.toString(authors.getVal(i)));
+                if (i < authors.size() - 1) writer.write(',');
+                writer.write("\n");
+            }
+            writer.write("]},\n".toCharArray());
+        }
         writer.write("]}]}\n".toCharArray());
     }
 
     public static void solitaireTag(final Writer writer, final String tagname, String value) throws IOException {
-        if (value == null || value.length() == 0) return;
+        if (value == null) return;
         writer.write('"'); writer.write(tagname); writer.write("\":\""); writer.write(serverObjects.toJSON(value)); writer.write("\","); writer.write('\n');
     }
 
+    private static void facetEntry(final Writer writer, final String modifier, final String propname, String value) throws IOException {
+        writer.write("{\"name\": \""); writer.write(propname);
+        writer.write("\", \"count\": \""); writer.write(value); 
+        writer.write("\", \"modifier\": \""); writer.write(modifier); writer.write("%3A"); writer.write(propname);
+        writer.write("\"}");
+    }
 }
-
 /**
 {
   "channels": [{
@@ -246,9 +294,7 @@ public class JsonResponseWriter implements QueryResponseWriter {
     "startIndex": "0",
     "itemsPerPage": "10",
     "searchTerms": "uni-mainz",
-
     "items": [
-
     {
       "title": "From dark matter to school experiments: Physicists meet in Mainz",
       "link": "http://www.phmi.uni-mainz.de/5305.php",

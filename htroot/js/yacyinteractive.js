@@ -36,7 +36,8 @@ function search(search, count, offset) {
   } else if (window.ActiveXObject) { // IE
     self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
   }
-  self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&nav=all&contentdom=all&maximumRecords=" + maximumRecords + "&startRecord=" + startRecord + "&query=" + query, true);
+  //self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&nav=all&contentdom=all&maximumRecords=" + maximumRecords + "&startRecord=" + startRecord + "&query=" + query, true);
+  self.xmlHttpReq.open('GET', "solr/select?hl=false&wt=yjson&facet=true&facet.mincount=1&facet.field=host_s&facet.field=url_file_ext_s&facet.field=url_protocol_s&facet.field=author_sxt&start=" + startRecord + "&rows=" + maximumRecords + "&startRecord=" + startRecord + "&query=" + query, true);
   self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   self.xmlHttpReq.onreadystatechange = function() {
     if (self.xmlHttpReq.readyState == 4) {
@@ -143,7 +144,7 @@ function resultNavigation() {
   } else {
       // check if there is a filetype constraint and offer a removal
       if (modifier != "") {
-        html += "<span style=\"display:block\"><a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=" + query.substring(0, query.length - 12) + "&startRecord=" + startRecord + "&maximumRecords=" + maximumRecords + "\">remove the filter '" + modifier + "'</a></span>";
+        html += "<span style=\"display:block\"><a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=" + query.substring(0, query.length - 13) + "&startRecord=" + startRecord + "&maximumRecords=" + maximumRecords + "\">remove the filter '" + modifier + "'</a></span>";
       }
   }
 

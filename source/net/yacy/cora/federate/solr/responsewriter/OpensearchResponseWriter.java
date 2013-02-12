@@ -243,6 +243,8 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
             closeTag(writer, "item");
         }
 
+        openTag(writer, "yacy:navigation");
+        
         // the facets can be created with the options &facet=true&facet.mincount=1&facet.field=host_s&facet.field=url_file_ext_s&facet.field=url_protocol_s&facet.field=author_sxt
         @SuppressWarnings("unchecked")
         NamedList<Integer> domains = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.host_s.getSolrFieldName());
@@ -253,25 +255,24 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         @SuppressWarnings("unchecked")
         NamedList<Integer> authors = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.author_sxt.getSolrFieldName());
         
-        openTag(writer, "yacy:navigation");
         if (domains != null) {
             openTag(writer, "yacy:facet name=\"domains\" displayname=\"Domains\" type=\"String\" min=\"0\" max=\"0\" mean=\"0\"");
-            for (Map.Entry<String, Integer> entry: domains) facetEntry(writer, entry.getKey(), Integer.toString(entry.getValue()));
+            for (Map.Entry<String, Integer> entry: domains) facetEntry(writer, "site", entry.getKey(), Integer.toString(entry.getValue()));
             closeTag(writer, "yacy:facet");
         }
         if (filetypes != null) {
             openTag(writer, "yacy:facet name=\"filetypes\" displayname=\"Filetypes\" type=\"String\" min=\"0\" max=\"0\" mean=\"0\"");
-            for (Map.Entry<String, Integer> entry: filetypes) facetEntry(writer, entry.getKey(), Integer.toString(entry.getValue()));
+            for (Map.Entry<String, Integer> entry: filetypes) facetEntry(writer, "filetype", entry.getKey(), Integer.toString(entry.getValue()));
             closeTag(writer, "yacy:facet");
         }
         if (protocols != null) {
             openTag(writer, "yacy:facet name=\"protocols\" displayname=\"Protocols\" type=\"String\" min=\"0\" max=\"0\" mean=\"0\"");
-            for (Map.Entry<String, Integer> entry: protocols) facetEntry(writer, entry.getKey(), Integer.toString(entry.getValue()));
+            for (Map.Entry<String, Integer> entry: protocols) facetEntry(writer, "protocol", entry.getKey(), Integer.toString(entry.getValue()));
             closeTag(writer, "yacy:facet");
         }
         if (authors != null) {
             openTag(writer, "yacy:facet name=\"authors\" displayname=\"Authors\" type=\"String\" min=\"0\" max=\"0\" mean=\"0\"");
-            for (Map.Entry<String, Integer> entry: authors) facetEntry(writer, entry.getKey(), Integer.toString(entry.getValue()));
+            for (Map.Entry<String, Integer> entry: authors) facetEntry(writer, "author", entry.getKey(), Integer.toString(entry.getValue()));
             closeTag(writer, "yacy:facet");
         }
         closeTag(writer, "yacy:navigation");
@@ -334,10 +335,10 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         writer.write("</"); writer.write(tagname); writer.write(">\n");
     }
 
-    private static void facetEntry(final Writer writer, final String propname, String value) throws IOException {
-        writer.write("<yacy:element name=\""); writer.write(propname);
-        writer.write("\" count=\""); writer.write(value); 
-        writer.write("\" modifier=\"site%3A"); writer.write(propname);
+    private static void facetEntry(final Writer writer, final String modifier, final String propname, String value) throws IOException {
+        writer.write("<yacy:element name=\""); XML.escapeCharData(propname, writer);
+        writer.write("\" count=\""); XML.escapeCharData(value, writer);
+        writer.write("\" modifier=\""); writer.write(modifier); writer.write("%3A"); XML.escapeCharData(propname, writer);
         writer.write("\" />\n");
     }
 

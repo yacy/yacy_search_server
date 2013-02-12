@@ -88,20 +88,7 @@ public final class QueryParams {
         YaCySchema.host_s, YaCySchema.url_protocol_s, YaCySchema.url_file_ext_s, YaCySchema.author_sxt};
     
     private static final int defaultmaxfacets = 30;
-    
     private static final String ampersand = "&amp;";
-
-    public static class Modifier {
-        private String s;
-        private Modifier(final String modifier) {
-            this.s = modifier;
-        }
-        public String getModifier() {
-            return this.s;
-        }
-    }
-
-
     public static final Bitfield empty_constraint    = new Bitfield(4, "AAAAAA");
     public static final Pattern catchall_pattern = Pattern.compile(".*");
     private static final Pattern matchnothing_pattern = Pattern.compile("");
@@ -112,7 +99,7 @@ public final class QueryParams {
     public Pattern urlMask;
 
     public final Pattern prefer;
-    public final String protocol, tld, ext, inlink;
+    public final String tld, inlink;
     boolean urlMask_isCatchall;
     public final Classification.ContentDomain contentdom;
     public final String targetlang;
@@ -126,11 +113,8 @@ public final class QueryParams {
     public final RankingProfile ranking;
     private final Segment indexSegment;
     public final String clienthost; // this is the client host that starts the query, not a site operator
-    public final String nav_sitehost; // this is a domain name which is used to navigate to that host
-    public final String nav_sitehash; // this is a domain hash, 6 bytes long or null
     protected final Set<String> siteexcludes; // set of domain hashes that are excluded if not included by sitehash
-    public final String author;
-    public final Modifier modifier;
+    public final QueryModifier modifier;
     public Seed remotepeer;
     public final long starttime; // the time when the query started, how long it should take and the time when the timeout is reached (milliseconds)
     protected final long maxtime;
@@ -166,13 +150,11 @@ public final class QueryParams {
             final String userAgent) {
         this.queryGoal = new QueryGoal(query_original, query_words);
     	this.ranking = ranking;
-    	this.modifier = new Modifier("");
+    	this.modifier = new QueryModifier();
         this.maxDistance = Integer.MAX_VALUE;
         this.urlMask = catchall_pattern;
         this.urlMask_isCatchall = true;
-        this.protocol = null;
         this.tld = null;
-        this.ext = null;
         this.inlink = null;
         this.prefer = matchnothing_pattern;
         this.contentdom = ContentDomain.ALL;
@@ -186,10 +168,7 @@ public final class QueryParams {
         this.allofconstraint = false;
         this.snippetCacheStrategy = null;
         this.clienthost = null;
-        this.nav_sitehash = null;
-        this.nav_sitehost = null;
         this.siteexcludes = null;
-        this.author = null;
         this.remotepeer = null;
         this.starttime = Long.valueOf(System.currentTimeMillis());
         this.maxtime = 10000;
@@ -223,19 +202,23 @@ public final class QueryParams {
 
     public QueryParams(
         final QueryGoal queryGoal,
-        final String modifier,
-        final int maxDistance, final String prefer, final ContentDomain contentdom,
+        final QueryModifier modifier,
+        final int maxDistance,
+        final String prefer,
+        final ContentDomain contentdom,
         final String language,
         final Collection<Tagging.Metatag> metatags,
         final CacheStrategy snippetCacheStrategy,
-        final int itemsPerPage, final int offset,
-        final String urlMask, final String protocol, final String tld, final String ext, final String inlink,
-        final Searchdom domType, final int domMaxTargets,
-        final Bitfield constraint, final boolean allofconstraint,
-        final String nav_sitehash,
-        final String nav_sitehost,
+        final int itemsPerPage,
+        final int offset,
+        final String urlMask,
+        final String tld,
+        final String inlink,
+        final Searchdom domType,
+        final int domMaxTargets,
+        final Bitfield constraint,
+        final boolean allofconstraint,
         final Set<String> siteexcludes,
-        final String author,
         final int domainzone,
         final String host,
         final boolean specialRights,
@@ -244,9 +227,12 @@ public final class QueryParams {
         final String userAgent,
         final boolean filterfailurls,
         final boolean filterscannerfail,
-        final double lat, final double lon, final double radius) {
+        final double lat,
+        final double lon,
+        final double radius
+        ) {
         this.queryGoal = queryGoal;
-        this.modifier = new Modifier(modifier == null ? "" : modifier);
+        this.modifier = modifier;
         this.ranking = ranking;
         this.maxDistance = maxDistance;
         this.contentdom = contentdom;
@@ -259,22 +245,20 @@ public final class QueryParams {
         }
         this.urlMask_isCatchall = this.urlMask.toString().equals(catchall_pattern.toString());
         if (this.urlMask_isCatchall) {
-            if (protocol != null) {
-                this.urlMask = Pattern.compile(protocol + ".*");
+            if (modifier.protocol != null) {
+                this.urlMask = Pattern.compile(modifier.protocol + ".*");
                 this.urlMask_isCatchall = false;
             }
             if (tld != null) {
                 this.urlMask = Pattern.compile(".*" + tld + ".*");
                 this.urlMask_isCatchall = false;
             }
-            if (ext != null) {
-                this.urlMask = Pattern.compile(".*" + ext + ".*");
+            if (modifier.filetype != null) {
+                this.urlMask = Pattern.compile(".*" + modifier.filetype + ".*");
                 this.urlMask_isCatchall = false;
             }
         }
-        this.protocol = protocol;
         this.tld = tld;
-        this.ext = ext;
         this.inlink = inlink;
         try {
             this.prefer = Pattern.compile(prefer);
@@ -289,10 +273,7 @@ public final class QueryParams {
         this.zonecode = domainzone;
         this.constraint = constraint;
         this.allofconstraint = allofconstraint;
-        this.nav_sitehash = nav_sitehash; assert nav_sitehash == null || nav_sitehash.length() == 6;
-        this.nav_sitehost = nav_sitehost;
         this.siteexcludes = siteexcludes != null && siteexcludes.isEmpty() ? null: siteexcludes;
-        this.author = author; assert author == null || !author.isEmpty();
         this.snippetCacheStrategy = snippetCacheStrategy;
         this.clienthost = host;
         this.remotepeer = null;
@@ -461,24 +442,24 @@ public final class QueryParams {
         
         // add site facets
         final StringBuilder fq = new StringBuilder();
-        if (this.nav_sitehash == null && this.nav_sitehost == null) {
+        if (this.modifier.sitehash == null && this.modifier.sitehost == null) {
             if (this.siteexcludes != null) {
                 for (String ex: this.siteexcludes) {
                     fq.append(" AND -").append(YaCySchema.host_id_s.getSolrFieldName()).append(':').append(ex);
                 }
             }
         } else {
-            if (this.nav_sitehost != null) {
+            if (this.modifier.sitehost != null) {
                 // consider to search for hosts with 'www'-prefix, if not already part of the host name
-                if (this.nav_sitehost.startsWith("www.")) {
-                    fq.append(" AND (").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.nav_sitehost.substring(4)).append('\"');
-                    fq.append(" OR ").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.nav_sitehost).append("\")");
+                if (this.modifier.sitehost.startsWith("www.")) {
+                    fq.append(" AND (").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehost.substring(4)).append('\"');
+                    fq.append(" OR ").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehost).append("\")");
                 } else {
-                    fq.append(" AND (").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.nav_sitehost).append('\"');
-                    fq.append(" OR ").append(YaCySchema.host_s.getSolrFieldName()).append(":\"www.").append(this.nav_sitehost).append("\")");
+                    fq.append(" AND (").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehost).append('\"');
+                    fq.append(" OR ").append(YaCySchema.host_s.getSolrFieldName()).append(":\"www.").append(this.modifier.sitehost).append("\")");
                 }
             } else
-                fq.append(" AND ").append(YaCySchema.host_id_s.getSolrFieldName()).append(":\"").append(this.nav_sitehash).append('\"');
+                fq.append(" AND ").append(YaCySchema.host_id_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehash).append('\"');
         }
 
         // add vocabulary facets
@@ -487,20 +468,20 @@ public final class QueryParams {
         }
         
         // add author facets
-        if (this.author != null && this.author.length() > 0 && this.solrScheme.contains(YaCySchema.author_sxt)) {
-            fq.append(" AND ").append(YaCySchema.author_sxt.getSolrFieldName()).append(":\"").append(this.author).append('\"');
+        if (this.modifier.author != null && this.modifier.author.length() > 0 && this.solrScheme.contains(YaCySchema.author_sxt)) {
+            fq.append(" AND ").append(YaCySchema.author_sxt.getSolrFieldName()).append(":\"").append(this.modifier.author).append('\"');
         }
         
-        if (this.protocol != null) {
-            fq.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append(this.protocol);
+        if (this.modifier.protocol != null) {
+            fq.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append(this.modifier.protocol);
         }
         
         if (this.tld != null) {
             fq.append(" AND ").append(YaCySchema.host_dnc_s.getSolrFieldName()).append(":\"").append(this.tld).append('\"');
         }
         
-        if (this.ext != null) {
-            fq.append(" AND ").append(YaCySchema.url_file_ext_s.getSolrFieldName()).append(":\"").append(this.ext).append('\"');
+        if (this.modifier.filetype != null) {
+            fq.append(" AND ").append(YaCySchema.url_file_ext_s.getSolrFieldName()).append(":\"").append(this.modifier.filetype).append('\"');
         }
         
         if (this.inlink != null) {
@@ -602,16 +583,16 @@ public final class QueryParams {
             context.append(ASCII.String(Word.word2hash(this.ranking.toExternalString()))).append(asterisk);
             context.append(Base64Order.enhancedCoder.encodeString(this.prefer.toString())).append(asterisk);
             context.append(Base64Order.enhancedCoder.encodeString(this.urlMask.toString())).append(asterisk);
-            context.append(this.nav_sitehash).append(asterisk);
+            context.append(this.modifier.sitehash).append(asterisk);
             context.append(this.siteexcludes).append(asterisk);
-            context.append(this.author).append(asterisk);
+            context.append(this.modifier.author).append(asterisk);
             context.append(this.targetlang).append(asterisk);
             context.append(this.constraint).append(asterisk);
             context.append(this.maxDistance).append(asterisk);
-            context.append(this.modifier.s).append(asterisk);
-            context.append(this.protocol).append(asterisk);
+            context.append(this.modifier.toString()).append(asterisk);
+            context.append(this.modifier.protocol).append(asterisk);
             context.append(this.tld).append(asterisk);
-            context.append(this.ext).append(asterisk);
+            context.append(this.modifier.filetype).append(asterisk);
             context.append(this.inlink).append(asterisk);
             context.append(this.lat).append(asterisk).append(this.lon).append(asterisk).append(this.radius).append(asterisk);
             context.append(this.snippetCacheStrategy == null ? "null" : this.snippetCacheStrategy.name());

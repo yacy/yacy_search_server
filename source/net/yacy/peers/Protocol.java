@@ -105,6 +105,7 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
+import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SecondarySearchSuperviser;
 import net.yacy.search.snippet.TextSnippet;
@@ -597,10 +598,7 @@ public final class Protocol {
         final SearchEvent event,
         final String wordhashes,
         final String excludehashes,
-        final String modifier,
         final String language,
-        final String sitehash,
-        final String author,
         final String contentdom,
         final int count,
         final long time,
@@ -635,10 +633,7 @@ public final class Protocol {
                     wordhashes,
                     excludehashes,
                     "",
-                    modifier,
                     language,
-                    sitehash,
-                    author,
                     contentdom,
                     count,
                     time,
@@ -715,9 +710,6 @@ public final class Protocol {
                     wordhashes,
                     "",
                     urlhashes,
-                    "",
-                    "",
-                    "",
                     "",
                     contentdom,
                     count,
@@ -889,10 +881,7 @@ public final class Protocol {
             final String wordhashes,
             final String excludehashes,
             final String urlhashes,
-            final String modifier,
             final String language,
-            final String sitehash,
-            final String author,
             final String contentdom,
             final int count,
             final long time,
@@ -931,8 +920,8 @@ public final class Protocol {
             
             String filter = event.query.urlMask.pattern().toString();
             if (event.query.tld != null) filter = ".*" + event.query.tld + ".*" + filter;
-            if (event.query.protocol != null) filter = ".*" + event.query.protocol + ".*" + filter;
-            if (event.query.ext != null) filter = filter + ".*" + event.query.ext + ".*";
+            if (event.query.modifier.protocol != null) filter = ".*" + event.query.modifier.protocol + ".*" + filter;
+            if (event.query.modifier.filetype != null) filter = filter + ".*" + event.query.modifier.filetype + ".*";
             parts.put("myseed", UTF8.StringBody((event.peers.mySeed() == null) ? "" : event.peers.mySeed().genSeedStr(key)));
             parts.put("count", UTF8.StringBody(Integer.toString(Math.max(10, count))));
             parts.put("time", UTF8.StringBody(Long.toString(Math.max(3000, time))));
@@ -943,10 +932,10 @@ public final class Protocol {
             parts.put("urls", UTF8.StringBody(urlhashes));
             parts.put("prefer", UTF8.StringBody(event.query.prefer.pattern()));
             parts.put("filter", UTF8.StringBody(filter));
-            parts.put("modifier", UTF8.StringBody(modifier));
+            parts.put("modifier", UTF8.StringBody(event.query.modifier.toString()));
             parts.put("language", UTF8.StringBody(language));
-            parts.put("sitehash", UTF8.StringBody(sitehash));
-            parts.put("author", UTF8.StringBody(author));
+            parts.put("sitehash", UTF8.StringBody(event.query.modifier.sitehash));
+            parts.put("author", UTF8.StringBody(event.query.modifier.author));
             parts.put("contentdom", UTF8.StringBody(contentdom));
             parts.put("ttl", UTF8.StringBody("0"));
             parts.put("maxdist", UTF8.StringBody(Integer.toString(maxDistance)));

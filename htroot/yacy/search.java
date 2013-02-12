@@ -69,6 +69,7 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryGoal;
+import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
@@ -108,16 +109,20 @@ public final class search {
         final String  query  = post.get("query", "");  // a string of word hashes that shall be searched and combined
         final String  exclude= post.get("exclude", "");// a string of word hashes that shall not be within the search result
         final String  urls   = post.get("urls", "");         // a string of url hashes that are preselected for the search: no other may be returned
-        final String abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
+        final String  abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
         final int     count  = Math.min((int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_DEFAULT, 100), post.getInt("count", 10)); // maximum number of wanted results
         final long    maxtime = Math.min((int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000), post.getLong("time", 3000)); // maximum waiting time
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
-        final String  modifier = post.get("modifier", "").trim();
         final String  contentdom = post.get("contentdom", "all");
         final String  filter = post.get("filter", ".*"); // a filter on the url
-        String  sitehash = post.get("sitehash", ""); if (sitehash.isEmpty()) sitehash = null;
-        String  author = post.get("author", ""); if (author.isEmpty()) author = null;
+        QueryModifier modifier = new QueryModifier();
+        modifier.sitehost = post.get("sitehost", ""); if (modifier.sitehost.isEmpty()) modifier.sitehost = null;
+        modifier.sitehash = post.get("sitehash", ""); if (modifier.sitehash.isEmpty()) modifier.sitehash = null;
+        modifier.author = post.get("author", ""); if (modifier.author.isEmpty()) modifier.author = null;
+        modifier.filetype = post.get("filetype", ""); if (modifier.filetype.isEmpty()) modifier.filetype = null;
+        modifier.protocol = post.get("protocol", ""); if (modifier.protocol.isEmpty()) modifier.protocol = null;
+        modifier.parse(post.get("modifier", "").trim());
         String  language = post.get("language", "");
         if (language == null || language.isEmpty() || !ISO639.exists(language)) {
             // take language from the user agent
@@ -228,22 +233,25 @@ public final class search {
                     null, // no snippet computation
                     count,
                     0,
-                    filter, null, null, null, null,
+                    filter,
+                    null,
+                    null,
                     QueryParams.Searchdom.LOCAL,
                     -1,
                     null,
                     false,
-                    sitehash,
                     null,
-                    null,
-                    author,
                     DigestURI.TLD_any_zone_filter,
                     client,
                     false,
                     indexSegment,
                     rankingProfile,
                     header.get(RequestHeader.USER_AGENT, ""),
-                    false, false, 0.0d, 0.0d, 0.0d
+                    false,
+                    false,
+                    0.0d,
+                    0.0d,
+                    0.0d
                     );
             Network.log.logInfo("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
 
@@ -290,22 +298,25 @@ public final class search {
                     null, // no snippet computation
                     count,
                     0,
-                    filter, null, null, null, null,
+                    filter,
+                    null,
+                    null,
                     QueryParams.Searchdom.LOCAL,
                     -1,
                     constraint,
                     false,
-                    sitehash,
                     null,
-                    null,
-                    author,
                     DigestURI.TLD_any_zone_filter,
                     client,
                     false,
                     sb.index,
                     rankingProfile,
                     header.get(RequestHeader.USER_AGENT, ""),
-                    false, false, 0.0d, 0.0d, 0.0d
+                    false,
+                    false,
+                    0.0d,
+                    0.0d,
+                    0.0d
                     );
             Network.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
             EventChannel.channels(EventChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()), ""));

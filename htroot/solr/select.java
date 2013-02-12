@@ -41,6 +41,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -144,7 +145,14 @@ public class select {
         sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
         
         // rename post fields according to result style
-        if (!post.containsKey(CommonParams.Q)) post.put(CommonParams.Q, post.remove("query")); // sru patch
+        if (!post.containsKey(CommonParams.Q) && post.containsKey("query")) {
+            String querystring = post.get("query", "");
+            post.remove("query");
+            QueryModifier modifier = new QueryModifier();
+            querystring = modifier.parse(querystring);
+            modifier.apply(post);
+            post.put(CommonParams.Q, querystring); // sru patch
+        }
         String q = post.get(CommonParams.Q, "");
         if (!post.containsKey(CommonParams.START)) post.put(CommonParams.START, post.remove("startRecord")); // sru patch
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, post.getInt("maximumRecords", 10)), (authenticated) ? 5000 : 100));
@@ -164,7 +172,7 @@ public class select {
         }
         
         // if this is a call to YaCys special search formats, enhance the query with field assignments
-        if (responseWriter instanceof JsonResponseWriter || responseWriter instanceof OpensearchResponseWriter) {
+        if ((responseWriter instanceof JsonResponseWriter || responseWriter instanceof OpensearchResponseWriter) && "true".equals(post.get("hl", "true"))) {
             // add options for snippet generation
             post.put("hl", "true");
             post.put("hl.fl", "text_t,h1,h2");

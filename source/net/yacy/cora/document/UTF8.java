@@ -104,7 +104,7 @@ public class UTF8 implements Comparator<String> {
 
     public final static StringBody StringBody(final String s) {
         try {
-            return new StringBody(s, charset);
+            return new StringBody(s == null ? "" : s, charset);
         } catch (final UnsupportedEncodingException e) {
             e.printStackTrace();
             return null;

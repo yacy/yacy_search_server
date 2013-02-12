@@ -593,13 +593,13 @@ public final class SearchEvent {
 
                 // check site constraints
                 final String hosthash = iEntry.hosthash();
-                if ( this.query.nav_sitehash == null ) {
+                if ( this.query.modifier.sitehash == null ) {
                     if (this.query.siteexcludes != null && this.query.siteexcludes.contains(hosthash)) {
                         continue pollloop;
                     }
                 } else {
                     // filter out all domains that do not match with the site constraint
-                    if (iEntry.url().getHost().indexOf(this.query.nav_sitehost) < 0) continue pollloop;
+                    if (iEntry.url().getHost().indexOf(this.query.modifier.sitehost) < 0) continue pollloop;
                 }
 
                 // finally extend the double-check and insert result to stack

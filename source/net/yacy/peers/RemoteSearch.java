@@ -44,7 +44,7 @@ public class RemoteSearch extends Thread {
     private static final ThreadGroup ysThreadGroup = new ThreadGroup("yacySearchThreadGroup");
 
     final private SearchEvent event;
-    final private String wordhashes, excludehashes, sitehash, author, contentdom;
+    final private String wordhashes, excludehashes, contentdom;
     final private int partitions;
     final private SecondarySearchSuperviser secondarySearchSuperviser;
     final private Blacklist blacklist;
@@ -52,17 +52,13 @@ public class RemoteSearch extends Thread {
     private int urls;
     private final int count, maxDistance;
     private final long time;
-    final private QueryParams.Modifier modifier;
     final private String language;
 
     public RemoteSearch(
               final SearchEvent event,
               final String wordhashes,
               final String excludehashes,
-              final QueryParams.Modifier modifier,
               final String language,
-              final String sitehash,
-              final String author,
               final String contentdom,
               final int count,
               final long time,
@@ -75,10 +71,7 @@ public class RemoteSearch extends Thread {
         this.event = event;
         this.wordhashes = wordhashes;
         this.excludehashes = excludehashes;
-        this.modifier = modifier;
         this.language = language;
-        this.sitehash = sitehash;
-        this.author = author;
         this.contentdom = contentdom;
         this.partitions = partitions;
         this.secondarySearchSuperviser = secondarySearchSuperviser;
@@ -98,10 +91,7 @@ public class RemoteSearch extends Thread {
                         this.event,
                         this.wordhashes,
                         this.excludehashes,
-                        this.modifier.getModifier(),
                         this.language,
-                        this.sitehash,
-                        this.author,
                         this.contentdom,
                         this.count,
                         this.time,
@@ -187,10 +177,7 @@ public class RemoteSearch extends Thread {
                     event,
                     QueryParams.hashSet2hashString(event.query.getQueryGoal().getIncludeHashes()),
                     QueryParams.hashSet2hashString(event.query.getQueryGoal().getExcludeHashes()),
-                    event.query.modifier,
                     event.query.targetlang == null ? "" : event.query.targetlang,
-                    event.query.nav_sitehash == null ? "" : event.query.nav_sitehash,
-                    event.query.author == null ? "" : event.query.author,
                     event.query.contentdom == null ? "all" : event.query.contentdom.toString(),
                     count,
                     time,
