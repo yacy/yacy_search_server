@@ -22,14 +22,9 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import net.yacy.cora.sorting.ReversibleScoreMap;
-
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
@@ -151,16 +146,6 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
     }
 
     @Override
-    public Object getFieldById(final String key, final String field) throws IOException {
-        return this.solr.getFieldById(key, field);
-    }
-
-    @Override
-    public SolrDocument getById(final String key, final String ... fields) throws IOException {
-        return this.solr.getById(key, fields);
-    }
-
-    @Override
     public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
         try {
             this.queue.put(solrdoc);
@@ -170,23 +155,8 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
     }
 
     @Override
-    public SolrDocumentList query(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
-        return this.solr.query(querystring, offset, count, fields);
-    }
-
-    @Override
     public QueryResponse query(final ModifiableSolrParams query) throws IOException, SolrException {
         return this.solr.query(query);
-    }
-
-    @Override
-    public long getQueryCount(final String querystring) throws IOException {
-        return this.solr.getQueryCount(querystring);
-    }
-
-    @Override
-    public Map<String, ReversibleScoreMap<String>> getFacets(final String query, final int maxresults, final String ... fields) throws IOException {
-        return this.solr.getFacets(query, maxresults, fields);
     }
 
     @Override

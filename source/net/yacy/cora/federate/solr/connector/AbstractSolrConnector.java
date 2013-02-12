@@ -21,20 +21,31 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.YaCySchema;
+import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.util.LookAheadIterator;
 
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.params.FacetParams;
+import org.apache.solr.common.params.ModifiableSolrParams;
 
 public abstract class AbstractSolrConnector implements SolrConnector {
 
@@ -162,5 +173,116 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             }
 
         };
+    }
+    
+    /**
+     * get a query result from solr
+     * to get all results set the query String to "*:*"
+     * @param querystring
+     * @throws IOException
+     */
+    @Override
+    public SolrDocumentList query(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
+        // construct query
+        final SolrQuery params = new SolrQuery();
+        params.setQuery(querystring);
+        params.setRows(count);
+        params.setStart(offset);
+        params.setFacet(false);
+        //params.addSortField( "price", SolrQuery.ORDER.asc );
+
+        if (fields.length > 0) params.setFields(fields);
+        
+        // query the server
+        QueryResponse rsp = query(params);
+        final SolrDocumentList docs = rsp.getResults();
+        return docs;
+    }
+
+    /**
+     * get the number of results when this query is done.
+     * This should only be called if the actual result is never used, and only the count is interesting
+     * @param querystring
+     * @return the number of results for this query
+     */
+    @Override
+    public long getQueryCount(String querystring) throws IOException {
+        // construct query
+        final SolrQuery params = new SolrQuery();
+        params.setQuery(querystring);
+        params.setRows(0);
+        params.setStart(0);
+        params.setFacet(false);
+        //params.setFields(YaCySchema.id.getSolrFieldName());
+
+        // query the server
+        QueryResponse rsp = query(params);
+        final SolrDocumentList docs = rsp.getResults();
+        return docs.getNumFound();
+    }
+
+    /**
+     * get facets of the index: a list of lists with values that are most common in a specific field
+     * @param query a query which is performed to get the facets
+     * @param fields the field names which are selected as facet
+     * @param maxresults the maximum size of the resulting maps
+     * @return a map with key = facet field name, value = an ordered map of field values for that field
+     * @throws IOException
+     */
+    @Override
+    public Map<String, ReversibleScoreMap<String>> getFacets(String query, int maxresults, final String ... fields) throws IOException {
+        // construct query
+        assert fields.length > 0;
+        final SolrQuery params = new SolrQuery();
+        params.setQuery(query);
+        params.setRows(0);
+        params.setStart(0);
+        params.setFacet(true);
+        params.setFacetLimit(maxresults);
+        params.setFacetSort(FacetParams.FACET_SORT_COUNT);
+        params.setFields(fields);
+        for (String field: fields) params.addFacetField(field);
+        
+        // query the server
+        QueryResponse rsp = query(params);
+        Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>(fields.length);
+        for (String field: fields) {
+            FacetField facet = rsp.getFacetField(field);
+            ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+            List<Count> values = facet.getValues();
+            if (values == null) continue;
+            for (Count ff: values) result.set(ff.getName(), (int) ff.getCount());
+            facets.put(field, result);
+        }
+        return facets;
+    }
+
+    @Override
+    abstract public QueryResponse query(ModifiableSolrParams params) throws IOException;
+
+    private final char[] queryIDTemplate = "id:\"            \"".toCharArray();
+    
+    @Override
+    public SolrDocument getById(final String key, final String ... fields) throws IOException {
+        final SolrQuery query = new SolrQuery();
+        assert key.length() == 12;
+        // construct query
+        char[] q = new char[17];
+        System.arraycopy(this.queryIDTemplate, 0, q, 0, 17);
+        System.arraycopy(key.toCharArray(), 0, q, 4, 12);
+        query.setQuery(new String(q));
+        query.setRows(1);
+        query.setStart(0);
+        if (fields.length > 0) query.setFields(fields);
+
+        // query the server
+        try {
+            final QueryResponse rsp = query(query);
+            final SolrDocumentList docs = rsp.getResults();
+            if (docs.isEmpty()) return null;
+            return docs.get(0);
+        } catch (final Throwable e) {
+            throw new IOException(e.getMessage(), e);
+        }
     }
 }

@@ -23,6 +23,7 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
@@ -53,7 +54,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     private final static String[] confFiles = {"solrconfig.xml", "schema.xml", "stopwords.txt", "synonyms.txt", "protwords.txt", "currency.xml", "elevate.xml", "xslt/example.xsl", "xslt/json.xsl", "lang/"};
 
     private CoreContainer cores;
-    private final String defaultCoreName;
+    private String defaultCoreName;
     private SolrCore defaultCore;
     
     private final SearchHandler requestHandler;
@@ -89,7 +90,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             }
         }
 
-        this.cores = new CoreContainer(storagePath.getAbsolutePath(), new File(solr_config, "solr.xml"));
+        this.cores = new CoreContainer(storagePath.getAbsolutePath(), new File(solr_config, "solr.xml")); // this may take indefinitely long if solr files are broken
         if (this.cores == null) {
             // try again
             System.gc();
@@ -100,8 +101,11 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         this.defaultCore = this.cores.getCore(this.defaultCoreName); // should be "collection1"
         if (this.defaultCore == null) {
             // try again
-            System.gc();
-            this.defaultCore = this.cores.getCore(this.defaultCoreName); // should be "collection1"
+            Collection<SolrCore> cores = this.cores.getCores();
+            if (cores.size() > 0) {
+                this.defaultCore = cores.iterator().next();
+                this.defaultCoreName = this.defaultCore.getName();
+            }
         }
         if (this.defaultCore == null) {
             throw new IOException("cannot get the default core; available = " + MemoryControl.available() + ", free = " + MemoryControl.free());

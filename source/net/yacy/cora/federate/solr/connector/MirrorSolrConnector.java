@@ -21,17 +21,13 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.federate.solr.YaCySchema;
-import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
-import net.yacy.kelondro.util.MemoryControl;
 
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -91,7 +87,6 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         this.fieldCache = new ConcurrentHashMap<String, ARC<String, Object>>();
         this.documentCache = new ConcurrentARC<String, SolrDocument>(docCacheMax, this.partitions);
     }
-
 
     public HitMissCache getHitMissCache(String field) {
         HitMissCache c = this.hitMissCache.get(field);
@@ -356,57 +351,6 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         if (this.solr1 != null) this.solr1.add(solrdoc);
     }
 
-    /**
-     * get a query result from solr
-     * to get all results set the query String to "*:*"
-     * @param querystring
-     * @throws IOException
-     */
-    @Override
-    public SolrDocumentList query(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
-        if (this.solr0 == null && this.solr1 == null) return new SolrDocumentList();
-        if (offset == 0 && count == 1 && querystring.startsWith("id:")) {
-            final SolrDocumentList list = new SolrDocumentList();
-            SolrDocument doc = getById(querystring.charAt(3) == '"' ? querystring.substring(4, querystring.length() - 1) : querystring.substring(3), fields);
-            list.add(doc);
-            // no addToCache(list) here because that was already handlet in get();
-            return list;
-        }
-        if (this.solr0 != null && this.solr1 == null) {
-            SolrDocumentList list = this.solr0.query(querystring, offset, count, fields);
-            addToCache(list, fields.length == 0);
-            return list;
-        }
-        if (this.solr1 != null && this.solr0 == null) {
-            SolrDocumentList list = this.solr1.query(querystring, offset, count, fields);
-            addToCache(list, fields.length == 0);
-            return list;
-        }
-
-        // combine both lists
-        SolrDocumentList l;
-        l = this.solr0.query(querystring, offset, count, fields);
-        if (l.size() >= count) return l;
-
-        // at this point we need to know how many results are in solr0
-        // compute this with a very bad hack; replace with better method later
-        int size0 = 0;
-        { //bad hack - TODO: replace
-            SolrDocumentList lHack = this.solr0.query(querystring, 0, Integer.MAX_VALUE, fields);
-            size0 = lHack.size();
-        }
-
-        // now use the size of the first query to do a second query
-        final SolrDocumentList list = new SolrDocumentList();
-        for (final SolrDocument d: l) list.add(d);
-        l = this.solr1.query(querystring, offset + l.size() - size0, count - l.size(), fields);
-        for (final SolrDocument d: l) list.add(d);
-
-        // add caching
-        addToCache(list, fields.length == 0);
-        return list;
-    }
-
     @Override
     public QueryResponse query(ModifiableSolrParams query) throws IOException, SolrException {
         Integer count0 = query.getInt(CommonParams.ROWS);
@@ -449,68 +393,6 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         query.set(CommonParams.ROWS, count);
         // TODO: combine both
         return rsp1;
-    }
-    
-    @Override
-    public long getQueryCount(final String querystring) throws IOException {
-        if (this.solr0 == null && this.solr1 == null) return 0;
-        if (this.solr0 != null && this.solr1 == null) {
-            return this.solr0.getQueryCount(querystring);
-        }
-        if (this.solr1 != null && this.solr0 == null) {
-            return this.solr1.getQueryCount(querystring);
-        }
-        final AtomicLong count = new AtomicLong(0);
-        Thread t0 = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    count.addAndGet(MirrorSolrConnector.this.solr0.getQueryCount(querystring));
-                } catch (IOException e) {}
-            }
-        };
-        t0.start();
-        Thread t1 = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    count.addAndGet(MirrorSolrConnector.this.solr1.getQueryCount(querystring));
-                } catch (IOException e) {}
-            }
-        };
-        t1.start();
-        try {t0.join();} catch (InterruptedException e) {}
-        try {t1.join();} catch (InterruptedException e) {}
-        return count.get();
-    }
-
-    @Override
-    public Map<String, ReversibleScoreMap<String>> getFacets(final String query, final int maxresults, final String ... fields) throws IOException {
-        if (this.solr0 == null && this.solr1 == null) return new HashMap<String, ReversibleScoreMap<String>>(0);
-        if (this.solr0 != null && this.solr1 == null) {
-            return this.solr0.getFacets(query, maxresults, fields);
-        }
-        if (this.solr1 != null && this.solr0 == null) {
-            return this.solr1.getFacets(query, maxresults, fields);
-        }
-        Map<String, ReversibleScoreMap<String>> facets0 = this.solr0.getFacets(query, maxresults, fields);
-        Map<String, ReversibleScoreMap<String>> facets1 = this.solr1.getFacets(query, maxresults, fields);
-        for (Map.Entry<String, ReversibleScoreMap<String>> facet0: facets0.entrySet()) {
-            ReversibleScoreMap<String> facet1 = facets1.remove(facet0.getKey());
-            if (facet1 == null) continue;
-            for (String key: facet1) facet0.getValue().inc(key, facet1.get(key));
-        }
-        for (Map.Entry<String, ReversibleScoreMap<String>> facet1: facets1.entrySet()) {
-            facets0.put(facet1.getKey(), facet1.getValue());
-        }
-        return facets0;
-    }
-    
-    private void addToCache(SolrDocumentList list, boolean doccache) {
-        if (MemoryControl.shortStatus()) clearCache();
-        for (final SolrDocument solrdoc: list) {
-            addToCache(solrdoc, doccache);
-        }
     }
 
     private void addToCache(SolrDocument doc, boolean doccach) {
