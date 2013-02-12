@@ -156,7 +156,7 @@ function resultList() {
   if (searchresult.length > 0) {
     document.getElementById("searchnavigation").innerHTML = "<div>found " + searchresult.length + " documents, preparing table...</div>";
     html += "<table class=\"sortable\" id=\"sortable\" border=\"0\" cellpadding=\"0\" cellspacing=\"1\" width=\"99%\">";
-    html += "<tr class=\"TableHeader\" valign=\"bottom\"><td width=\"10\">count</td><td width=\"40\">Protocol</td><td width=\"60\">Host</td><td width=\"260\">Path</td><td width=\"360\">Name</td><td width=\"60\">Size</td><td width=\"75\">Date</td></tr>";
+    html += "<tr class=\"TableHeader\" valign=\"bottom\"><td width=\"10\">Count</td><td width=\"40\">Protocol</td><td width=\"60\">Host</td><td width=\"140\">Path</td><td width=\"360\">URL</td><td width=\"60\">Size</td><td width=\"120\">Date</td></tr>";
     for (var i = 0; i < searchresult.length; i++) { html += resultLine("row", searchresult[i], i + 1); }
     html += "</table>";
   }
@@ -174,19 +174,31 @@ function resultLine(type, item, linenumber) {
   // evaluate item
   if (item == null) return "";
   if (item.link == null) return "";
-  p = item.link.indexOf("//");
   protocol = "";
   host = "";
   path = item.link;
+  file = "";
+  p = item.link.indexOf("//");
   if (p > 0) {
-  	q = item.link.indexOf("/", p + 2);
     protocol = item.link.substring(0, p - 1);
-    host = item.link.substring(p + 2, q);
-    path = item.link.substring(q + 1);
+  	q = item.link.indexOf("/", p + 2);
+    if (q > 0) {
+      host = item.link.substring(p + 2, q);
+      path = item.link.substring(q);
+    } else {
+      host = item.link.substring(p + 2);
+      path = "/";
+    }
   }
   title = item.title;
   q = path.lastIndexOf("/");
-  if (q > 0) path = path.substring(0, q);
+  if (q > 0) {
+    file = path.substring(q + 1);
+    path = path.substring(0, q + 1);
+  } else {
+    file = path;
+    path = "/";
+  }
   path = unescape(path);
   if (path.length >= 40) path = path.substring(0, 18) + "..." + path.substring(path.length - 19);
   if (title == "") title = path;
@@ -208,14 +220,13 @@ function resultLine(type, item, linenumber) {
   var html = "";
   if (type == "row") {
     html += "<tr class=\"TableCellDark\">";
-    html += "<td align=\"left\">" + linenumber + "</td>";
-    html += "<td align=\"left\">" + protocol + "</td>";
-    html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + "\">" + host + "</a></td>";
-    html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + path + "/\">" + path + "</a></td>";
-    html += "<td align=\"left\"><a href=\"" + item.link + "\">" + item.link + "</a></td>";
-    if (item.sizename == "-1 bytes") html += "<td></td>"; else html += "<td align=\"right\">" + item.sizename + "</td>";
-    //html += "<td>" + item.description + "</td>";
-    html += "<td align=\"right\">" + pd + "</td>";
+    html += "<td align=\"left\">" + linenumber + "</td>"; // Count
+    html += "<td align=\"left\">" + protocol + "</td>"; // Protocol
+    html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + "\">" + host + "</a></td>"; // Host
+    html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + path + "\">" + path + "</a></td>"; // Path 
+    html += "<td align=\"left\"><a href=\"" + item.link + "\">" + item.link + "</a></td>"; // URL
+    if (item.sizename == "-1 bytes") html += "<td></td>"; else html += "<td align=\"right\">" + item.sizename + "</td>"; // Size
+    html += "<td align=\"right\">" + pd + "</td>"; // Date
     html += "</tr>";
   }
   if (type == "image") {
