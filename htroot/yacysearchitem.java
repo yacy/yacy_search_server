@@ -36,6 +36,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
+import net.yacy.data.URLLicense;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Formatter;
@@ -186,7 +187,7 @@ public class yacysearchitem {
 
             prop.putHTML("content_target", target);
             if (faviconURL != null && fileType == FileType.HTML) sb.loader.loadIfNotExistBackground(faviconURL, 1024 * 1024 * 10, null, TextSnippet.snippetMinLoadDelay);
-            prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // acquire license for favicon url loading
+            prop.putHTML("content_faviconCode", URLLicense.aquireLicense(faviconURL)); // acquire license for favicon url loading
             prop.put("content_urlhash", resulthashString);
             prop.put("content_ranking", result.ranking);
             prop.put("content_showMetadata_urlhash", resulthashString);
@@ -239,7 +240,7 @@ public class yacysearchitem {
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theSearch.query.id(true), SearchEventType.FINALIZATION, "" + item, 0, 0), false);
             final String ext = resultURL.getFileExtension().toLowerCase();
             if (ext.equals("png") || ext.equals("jpg") || ext.equals("gif")) {
-                final String license = sb.licensedURLs.aquireLicense(resultURL);
+                final String license = URLLicense.aquireLicense(resultURL);
                 prop.put("content_code", license);
             } else {
                 prop.put("content_code", "");
@@ -268,7 +269,7 @@ public class yacysearchitem {
                 final String resultUrlstring = ms.url().toNormalform(true);
                 final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
 
-                final String license = sb.licensedURLs.aquireLicense(ms.url());
+                final String license = URLLicense.aquireLicense(ms.url());
                 sb.loader.loadIfNotExistBackground(ms.url(), 1024 * 1024 * 10, null, TextSnippet.snippetMinLoadDelay);
                 prop.putHTML("content_item_hrefCache", (auth) ? "/ViewImage.png?url=" + resultUrlstring : resultUrlstring);
                 prop.putHTML("content_item_href", resultUrlstring);

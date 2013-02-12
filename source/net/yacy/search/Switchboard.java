@@ -140,7 +140,6 @@ import net.yacy.data.BookmarkHelper;
 import net.yacy.data.BookmarksDB;
 import net.yacy.data.ListManager;
 import net.yacy.data.MessageBoard;
-import net.yacy.data.URLLicense;
 import net.yacy.data.UserDB;
 import net.yacy.data.WorkTables;
 import net.yacy.data.wiki.WikiBoard;
@@ -260,7 +259,6 @@ public final class Switchboard extends serverSwitch {
     public int searchQueriesRobinsonFromRemote = 0; // absolute counter of all local queries submitted on this peer from a remote IP without authentication
     public float searchQueriesGlobal = 0f; // partial counter of remote queries (1/number-of-requested-peers)
     public SortedMap<byte[], String> clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
-    public URLLicense licensedURLs;
     public List<Pattern> networkWhitelist, networkBlacklist;
     public FilterEngine domainList;
     private Dispatcher dhtDispatcher;
@@ -1178,9 +1176,6 @@ public final class Switchboard extends serverSwitch {
             // TODO Auto-generated catch block
             Log.logException(e1);
         }
-
-        // initiate url license object
-        this.licensedURLs = new URLLicense(8);
 
         // set white/blacklists
         this.networkWhitelist = Domains.makePatterns(getConfig(SwitchboardConstants.NETWORK_WHITELIST, ""));

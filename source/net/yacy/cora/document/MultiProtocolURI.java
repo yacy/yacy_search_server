@@ -972,6 +972,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                ls.indexOf(".exe",0) >= 0;
     }
 
+    public final boolean isImage() {
+        final String ext = getFileExtension().toLowerCase();
+        return "png.gif.jpg.jpeg".indexOf(ext) >= 0;
+    }
+
     public final boolean isIndividual() {
         final String q = unescape(this.path.toLowerCase());
         for (final String sid: sessionIDnames.keySet()) {

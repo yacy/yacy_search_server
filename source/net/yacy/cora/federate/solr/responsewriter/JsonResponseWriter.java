@@ -33,6 +33,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter.ResHead;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.data.URLLicense;
 import net.yacy.server.serverObjects;
 
 import org.apache.lucene.document.Document;
@@ -119,7 +120,6 @@ public class JsonResponseWriter implements QueryResponseWriter {
         final int responseCount = response.size();
         SolrIndexSearcher searcher = request.getSearcher();
         DocIterator iterator = response.iterator();
-        String urlhash = null;
         for (int i = 0; i < responseCount; i++) {
             writer.write("{\n".toCharArray());
             int id = iterator.nextDoc();
@@ -128,6 +128,7 @@ public class JsonResponseWriter implements QueryResponseWriter {
             int fieldc = fields.size();
             List<String> texts = new ArrayList<String>();
             MultiProtocolURI url = null;
+            String urlhash = null;
             String description = "", title = "";
             StringBuilder path = new StringBuilder(80);
             for (int j = 0; j < fieldc; j++) {
@@ -197,6 +198,9 @@ public class JsonResponseWriter implements QueryResponseWriter {
 
                 //missing: "code","faviconCode"
             }
+            
+            // get image license
+            if (url.isImage()) URLLicense.aquireLicense(urlhash, url.toNormalform(true));
             
             // compute snippet from texts            
             solitaireTag(writer, "path", path.toString());

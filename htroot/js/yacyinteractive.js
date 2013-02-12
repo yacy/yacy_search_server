@@ -232,7 +232,7 @@ function resultLine(type, item, linenumber) {
   if (type == "image") {
     html += "<div style=\"float:left\">";
     html += "<a href=\"" + item.link + "\" class=\"thumblink\" onclick=\"return hs.expand(this)\">";
-    html += "<img src=\"/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=" + item.code + "\" alt=\"" + title + "\" />";
+    html += "<img src=\"/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=" + item.guid + "\" alt=\"" + title + "\" />";
     //html += "<img src=\"" + item.link + "\" width=\"96\" height=\"96\" alt=\"" + title + "\" />";
     html += "</a>";
     var name = title;

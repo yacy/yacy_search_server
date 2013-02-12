@@ -38,6 +38,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.crawler.data.CrawlQueues;
+import net.yacy.data.URLLicense;
 import net.yacy.document.ImageParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -80,8 +81,13 @@ public class ViewImage {
         }
 
         if ((url == null) && (urlLicense.length() > 0)) {
-            url = sb.licensedURLs.releaseLicense(urlLicense);
-            urlString = (url == null) ? null : url.toNormalform(true);
+            urlString = URLLicense.releaseLicense(urlLicense);
+            try {
+                url = new DigestURI(urlString);
+            } catch (final MalformedURLException e1) {
+                url = null;
+                urlString = null;
+            }
         }
 
         if (urlString == null) return null;

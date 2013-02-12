@@ -26,11 +26,11 @@
 
 package net.yacy.data;
 
-import java.util.Queue;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.Collections;
+import java.util.Map;
 
+import net.yacy.cora.document.ASCII;
+import net.yacy.cora.storage.SizeLimitedMap;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 
@@ -38,49 +38,27 @@ public class URLLicense {
 
     // this class defines a license-generation for URLs
     // it is used in case of snippet- and preview-Image-fetching to grant also non-authorized users the usage of a image-fetcher servlet
-    private static final int maxQueue = 500;
-    private static final long minCheck = 5000;
+    private static final int maxQueue = 10000;
+    private static final Map<String, String> permissions = Collections.synchronizedMap(new SizeLimitedMap<String, String>(maxQueue));
 
-    private final Random random;
-    private final ConcurrentHashMap<String, DigestURI> permissions;
-    private final Queue<String> aging;
-    private long lastCheck;
-    private final int keylen;
-
-    public URLLicense(final int keylen) {
-        this.permissions = new ConcurrentHashMap<String, DigestURI>();
-        this.aging = new LinkedBlockingQueue<String>();
-        this.lastCheck = System.currentTimeMillis();
-        this.random = new Random(System.currentTimeMillis());
-        this.keylen = keylen;
-    }
-
-    public String aquireLicense(final DigestURI url) {
+    public static String aquireLicense(final DigestURI url) {
         // generate license key
-        StringBuilder stringBuilder = new StringBuilder(this.keylen * 2);
-        if (url == null) return stringBuilder.toString();
-        while (stringBuilder.length() < this.keylen) stringBuilder.append(Integer.toHexString(this.random.nextInt()));
-        String license = stringBuilder.substring(0, this.keylen);
+        String license = ASCII.String(url.hash());
         // store reference to url with license key
-        this.permissions.put(license, url);
-        this.aging.add(license);
-        if (System.currentTimeMillis() - this.lastCheck > minCheck) {
-            // check aging
-            this.lastCheck = System.currentTimeMillis();
-            String s;
-            while (this.aging.size() > maxQueue) {
-                s = this.aging.poll();
-                if (s != null) this.permissions.remove(s);
-            }
-        }
+        permissions.put(license, url.toNormalform(true));
         // return the license key
         return license;
     }
 
-    public DigestURI releaseLicense(final String license) {
-        DigestURI url = null;
-        url = this.permissions.remove(license);
-        return url;
+    public static String aquireLicense(final String license, final String url) {
+        // store reference to url with license key
+        permissions.put(license, url);
+        // return the license key
+        return license;
+    }
+
+    public static String releaseLicense(final String license) {
+        return permissions.remove(license);
     }
 
 }
