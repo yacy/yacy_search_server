@@ -522,7 +522,7 @@ public class serverObjects implements Serializable, Cloneable {
         if (facets != null && facets.length > 0) {
             this.remove("facet");
             this.put("facet", "true");
-            for (int i = 0; i < facets.length; i++) this.put("facet.field", facets[i].getSolrFieldName());
+            for (int i = 0; i < facets.length; i++) this.add("facet.field", facets[i].getSolrFieldName());
         }
         return this.map;
     }

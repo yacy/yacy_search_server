@@ -126,6 +126,13 @@ public class QueryModifier {
             }
         }
         
+        // check the number of quotes in the string; if there is only one double-quote, add another one. this will prevent error messages in 
+        int p = querystring.indexOf('"');
+        if (p >= 0) {
+            int q = querystring.indexOf('"', p + 1);
+            if (q < 0) querystring += '"';
+        }
+        
         return querystring.trim();
     }
     

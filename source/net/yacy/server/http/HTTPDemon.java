@@ -698,6 +698,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // <key1>=<value1>'&'<key2>=<value2>'&'<key3>=<value3>
         // the calling function must strip off a possible leading '?' char
         if (argsString.isEmpty()) return 0;
+        argsString = argsString.replaceAll("&quot;", "%22");
         argsString = argsString + "&"; // for technical reasons
         int sep;
         int eqp;

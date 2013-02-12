@@ -186,7 +186,7 @@ public class select {
         if (connector == null) return null;
 
         // do the solr request, generate facets if we use a special YaCy format
-        SolrParams params = post.toSolrParams(responseWriter instanceof JsonResponseWriter ? new YaCySchema[]{YaCySchema.host_s, YaCySchema.url_file_ext_s, YaCySchema.url_protocol_s} : null);
+        SolrParams params = post.toSolrParams(/*responseWriter instanceof JsonResponseWriter ? new YaCySchema[]{YaCySchema.host_s, YaCySchema.url_file_ext_s, YaCySchema.url_protocol_s} :*/ null);
         SolrQueryRequest req = connector.request(params);
         SolrQueryResponse response = null;
         Exception e = null;
