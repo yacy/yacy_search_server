@@ -39,20 +39,6 @@ public class RetrySolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
     @Override
-    public int getCommitWithinMs() {
-        return this.solrConnector.getCommitWithinMs();
-    }
-
-    /**
-     * set the solr autocommit delay
-     * @param c the maximum waiting time after a solr command until it is transported to the server
-     */
-    @Override
-    public void setCommitWithinMs(int c) {
-        this.solrConnector.setCommitWithinMs(c);
-    }
-
-    @Override
     public void commit(boolean softCommit) {
         this.solrConnector.commit(softCommit);
     }

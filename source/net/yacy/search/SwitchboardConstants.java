@@ -294,7 +294,6 @@ public final class SwitchboardConstants {
 
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_ENABLED = "federated.service.solr.indexing.enabled";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_URL = "federated.service.solr.indexing.url";
-    public static final String FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS = "federated.service.solr.indexing.commitWithinMs";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_SHARDING = "federated.service.solr.indexing.sharding";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE = "federated.service.solr.indexing.schemefile";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_LAZY = "federated.service.solr.indexing.lazy";

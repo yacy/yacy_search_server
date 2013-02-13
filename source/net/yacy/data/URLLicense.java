@@ -42,6 +42,7 @@ public class URLLicense {
     private static final Map<String, String> permissions = Collections.synchronizedMap(new SizeLimitedMap<String, String>(maxQueue));
 
     public static String aquireLicense(final DigestURI url) {
+        if (url == null) return "";
         // generate license key
         String license = ASCII.String(url.hash());
         // store reference to url with license key

@@ -79,7 +79,6 @@ public class IndexFederated_p {
             final boolean previous_core_fulltext = sb.index.fulltext().connectedLocalSolr() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, false);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_FULLTEXT, post_core_fulltext);
 
-            final int commitWithinMs = post.getInt("solr.indexing.commitWithinMs", env.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, -1));
             if (previous_core_fulltext && !post_core_fulltext) {
                 // switch off
                 sb.index.fulltext().disconnectLocalSolr();
@@ -88,7 +87,7 @@ public class IndexFederated_p {
             if (!previous_core_fulltext && post_core_fulltext) {
                 // switch on
                 sb.index.connectUrlDb(sb.useTailCache, sb.exceed134217727);
-                try { sb.index.fulltext().connectLocalSolr(commitWithinMs); } catch (IOException e) { Log.logException(e); }
+                try { sb.index.fulltext().connectLocalSolr(); } catch (IOException e) { Log.logException(e); }
             }
 
             // solr
@@ -114,7 +113,6 @@ public class IndexFederated_p {
             }
             solrurls = s.toString().trim();
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, solrurls);
-            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, commitWithinMs);
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, lazy);
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, post.get("solr.indexing.sharding", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, "modulo-host-md5")));
             final String schemename = post.get("solr.indexing.schemefile", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE, "solr.keys.default.list"));
@@ -136,7 +134,6 @@ public class IndexFederated_p {
                 try {
                     if (usesolr) {
                         SolrConnector solr = new ShardSolrConnector(solrurls, ShardSelection.Method.MODULO_HOST_MD5, 10000, true);
-                        if (commitWithinMs >= 0) solr.setCommitWithinMs(commitWithinMs);
                         sb.index.fulltext().connectRemoteSolr(solr);
                     } else {
                         sb.index.fulltext().disconnectRemoteSolr();
@@ -225,7 +222,6 @@ public class IndexFederated_p {
         prop.put(SwitchboardConstants.CORE_SERVICE_CITATION + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false) ? 1 : 0);
         prop.put("solr.indexing.solrremote.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) ? 1 : 0);
         prop.put("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr").replace(",", "\n"));
-        prop.put("solr.indexing.commitWithinMs", env.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_COMMITWITHINMS, 180000));
         prop.put("solr.indexing.lazy.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true) ? 1 : 0);
         prop.put("solr.indexing.sharding", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, "modulo-host-md5"));
         prop.put("solr.indexing.schemefile", schemename);

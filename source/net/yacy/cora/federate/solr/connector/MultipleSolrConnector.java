@@ -36,13 +36,11 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
     private final ArrayBlockingQueue<SolrInputDocument> queue;
     private final AddWorker[] worker;
     private final SolrConnector solr;
-    private int commitWithinMs;
 
     public MultipleSolrConnector(final String url, final int connections) throws IOException {
         this.solr = new RemoteSolrConnector(url);
         this.queue = new ArrayBlockingQueue<SolrInputDocument>(1000);
         this.worker = new AddWorker[connections];
-        this.commitWithinMs = -1;
         for (int i = 0; i < connections; i++) {
             this.worker[i] = new AddWorker(url);
             this.worker[i].start();
@@ -53,7 +51,6 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
         private final SolrConnector solr;
         public AddWorker(final String url) throws IOException {
             this.solr = new RemoteSolrConnector(url);
-            if (MultipleSolrConnector.this.commitWithinMs >= 0 ) this.solr.setCommitWithinMs(MultipleSolrConnector.this.commitWithinMs);
         }
         @Override
         public void run() {
@@ -73,22 +70,6 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
                 this.solr.close();
             }
         }
-    }
-
-    @Override
-    public int getCommitWithinMs() {
-        return this.commitWithinMs;
-    }
-
-    /**
-     * set the solr autocommit delay
-     * @param c the maximum waiting time after a solr command until it is transported to the server
-     */
-    @Override
-    public void setCommitWithinMs(final int c) {
-        this.commitWithinMs = c;
-        this.solr.setCommitWithinMs(c);
-        for (AddWorker w: this.worker) w.solr.setCommitWithinMs(c);
     }
 
     @Override

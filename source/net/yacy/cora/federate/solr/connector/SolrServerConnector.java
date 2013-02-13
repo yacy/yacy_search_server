@@ -56,11 +56,9 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     protected final static Logger log = Logger.getLogger(SolrServerConnector.class);
     
     protected SolrServer server;
-    protected int commitWithinMs; // max time (in ms) before a commit will happen
 
     protected SolrServerConnector() {
         this.server = null;
-        this.commitWithinMs = 180000;
     }
 
     protected void init(SolrServer server) {
@@ -69,25 +67,6 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
 
     public SolrServer getServer() {
         return this.server;
-    }
-
-    /**
-     * get the solr autocommit delay
-     * @return the maximum waiting time after a solr command until it is transported to the server
-     */
-    @Override
-    public int getCommitWithinMs() {
-        return this.commitWithinMs;
-    }
-
-    /**
-     * set the solr autocommit delay
-     * when doing continuous inserts, don't set this value because it would cause continuous commits
-     * @param c the maximum waiting time after a solr command until it is transported to the server
-     */
-    @Override
-    public void setCommitWithinMs(int c) {
-        this.commitWithinMs = c;
     }
 
     @Override
@@ -209,7 +188,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     public void delete(final String id) throws IOException {
         try {
             synchronized (this.server) {
-                this.server.deleteById(id, this.commitWithinMs);
+                this.server.deleteById(id, -1);
             }
         } catch (final Throwable e) {
             throw new IOException(e);
@@ -220,7 +199,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     public void delete(final List<String> ids) throws IOException {
         try {
             synchronized (this.server) {
-                this.server.deleteById(ids, this.commitWithinMs);
+                this.server.deleteById(ids, -1);
             }
         } catch (final Throwable e) {
             throw new IOException(e);
@@ -236,7 +215,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     public void deleteByQuery(final String querystring) throws IOException {
         try {
             synchronized (this.server) {
-                this.server.deleteByQuery(querystring, this.commitWithinMs);
+                this.server.deleteByQuery(querystring, -1);
             }
         } catch (final Throwable e) {
             throw new IOException(e);
@@ -249,7 +228,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         up.setParam("literal.id", solrId);
         up.setParam("uprefix", "attr_");
         up.setParam("fmap.content", "attr_content");
-        up.setCommitWithin(this.commitWithinMs);
+        up.setCommitWithin(-1);
         //up.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
         try {
             synchronized (this.server) {
@@ -266,7 +245,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         try {
             if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
             synchronized (this.server) {
-                this.server.add(solrdoc, this.commitWithinMs);
+                this.server.add(solrdoc, -1);
             }
         } catch (Throwable e) {
             // catches "version conflict for": try this again and delete the document in advance
@@ -275,7 +254,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             } catch (SolrServerException e1) {}
             try {
                 synchronized (this.server) {
-                    this.server.add(solrdoc, this.commitWithinMs);
+                    this.server.add(solrdoc, -1);
                 }
             } catch (Throwable ee) {
                 log.warn(e.getMessage() + " DOC=" + solrdoc.toString());
