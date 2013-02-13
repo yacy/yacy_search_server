@@ -39,6 +39,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
@@ -128,7 +129,7 @@ public class ViewProfile {
         }
         Map.Entry<String, String> entry;
         // all known keys which should be set as they are
-        final HashSet<String> knownKeys = new HashSet<String>();
+        final Set<String> knownKeys = new HashSet<String>();
         knownKeys.add("name");
         knownKeys.add("nickname");
         // knownKeys.add("homepage");//+http
