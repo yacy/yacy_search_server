@@ -149,23 +149,6 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     @Override
-    public int getCommitWithinMs() {
-        if (this.solr0 != null) this.solr0.getCommitWithinMs();
-        if (this.solr1 != null) this.solr1.getCommitWithinMs();
-        return -1;
-    }
-
-    /**
-     * set the solr autocommit delay
-     * @param c the maximum waiting time after a solr command until it is transported to the server
-     */
-    @Override
-    public void setCommitWithinMs(int c) {
-        if (this.solr0 != null) this.solr0.setCommitWithinMs(c);
-        if (this.solr1 != null) this.solr1.setCommitWithinMs(c);
-    }
-
-    @Override
     public void commit(boolean softCommit) {
         if (this.solr0 != null) this.solr0.commit(softCommit);
         if (this.solr1 != null) this.solr1.commit(softCommit);

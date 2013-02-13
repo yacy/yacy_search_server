@@ -142,7 +142,7 @@ public final class Fulltext {
         return this.solr.isConnected0();
     }
 
-    public void connectLocalSolr(final int commitWithin) throws IOException {
+    public void connectLocalSolr() throws IOException {
         File baseLocation = this.location;
         if (baseLocation.getName().equals("default")) baseLocation = baseLocation.getParentFile();
         File solrLocation = new File(baseLocation, SOLR_PATH);
@@ -152,7 +152,6 @@ public final class Fulltext {
             if (oldLocation.exists()) oldLocation.renameTo(solrLocation);
         }
         EmbeddedSolrConnector esc = new EmbeddedSolrConnector(solrLocation, new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"));
-        if (commitWithin >= 0) esc.setCommitWithinMs(commitWithin);
         Version luceneVersion = esc.getConfig().getLuceneVersion("luceneMatchVersion");
         String lvn = luceneVersion.name();
         Log.logInfo("Fulltext", "using lucene version " + lvn);
@@ -229,10 +228,6 @@ public final class Fulltext {
             this.urlIndexFile = null;
         }
         this.solr.close();
-    }
-
-    public int getCommitWithinMs() {
-        return this.solr.getCommitWithinMs();
     }
     
     public void commit(boolean softCommit) {
@@ -571,7 +566,6 @@ public final class Fulltext {
      */
     public File dumpSolr() {
         EmbeddedSolrConnector esc = (EmbeddedSolrConnector) this.solr.getSolr0();
-        int commitWithin = esc.getCommitWithinMs();
         File storagePath = esc.getStoragePath();
         File zipOut = new File(storagePath.toString() + "_" + GenericFormatter.SHORT_DAY_FORMATTER.format() + ".zip");
         synchronized (this.solr) {
@@ -582,7 +576,7 @@ public final class Fulltext {
                 Log.logException(e);
             } finally {
                 try {
-                    this.connectLocalSolr(commitWithin);
+                    this.connectLocalSolr();
                 } catch (IOException e) {
                     Log.logException(e);
                 }
@@ -597,7 +591,6 @@ public final class Fulltext {
      */
     public void restoreSolr(File solrDumpZipFile) {
         EmbeddedSolrConnector esc = (EmbeddedSolrConnector) this.solr.getSolr0();
-        int commitWithin = esc.getCommitWithinMs();
         File storagePath = esc.getStoragePath();
         synchronized (this.solr) {
             this.disconnectLocalSolr();
@@ -607,7 +600,7 @@ public final class Fulltext {
                 Log.logException(e);
             } finally {
                 try {
-                    this.connectLocalSolr(commitWithin);
+                    this.connectLocalSolr();
                 } catch (IOException e) {
                     Log.logException(e);
                 }

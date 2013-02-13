@@ -37,18 +37,6 @@ import org.apache.solr.common.params.ModifiableSolrParams;
 public interface SolrConnector extends Iterable<String> /* Iterable of document IDs */ {
 
     /**
-     * get the solr autocommit delay
-     * @return the maximum waiting time after a solr command until it is transported to the server
-     */
-    public int getCommitWithinMs();
-
-    /**
-     * set the solr autocommit delay
-     * @param c the maximum waiting time after a solr command until it is transported to the server
-     */
-    public void setCommitWithinMs(int c);
-
-    /**
      * force a commit
      */
     public void commit(boolean softCommit);
