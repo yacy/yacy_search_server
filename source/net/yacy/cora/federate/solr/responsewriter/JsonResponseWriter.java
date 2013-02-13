@@ -107,6 +107,12 @@ public class JsonResponseWriter implements QueryResponseWriter {
         resHead.offset = response.offset(); // equal to 'start'
         resHead.numFound = response.matches();
 
+        String jsonp = request.getParams().get("jsonp"); // check for JSONP
+        if (jsonp != null) {
+            writer.write(jsonp.toCharArray());
+            writer.write("([".toCharArray());
+        }
+        
         // write header
         writer.write(("{\"channels\": [{\n").toCharArray());
         solitaireTag(writer, "totalResults", Integer.toString(resHead.numFound));
@@ -269,6 +275,10 @@ public class JsonResponseWriter implements QueryResponseWriter {
             writer.write("]},\n".toCharArray());
         }
         writer.write("]}]}\n".toCharArray());
+        
+        if (jsonp != null) {
+            writer.write("])".toCharArray());
+        }
     }
 
     public static void solitaireTag(final Writer writer, final String tagname, String value) throws IOException {

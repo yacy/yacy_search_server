@@ -29,7 +29,6 @@ import javax.servlet.ServletException;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.SolrServlet;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
