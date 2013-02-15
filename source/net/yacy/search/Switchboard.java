@@ -2778,6 +2778,7 @@ public final class Switchboard extends serverSwitch {
     }
 
     public void stackURLs(Set<DigestURI> rootURLs, final CrawlProfile profile, final Set<DigestURI> successurls, final Map<DigestURI,String> failurls) {
+        if (rootURLs == null || rootURLs.size() == 0) return;
         List<Thread> stackthreads = new ArrayList<Thread>(); // do this concurrently
         for (DigestURI url: rootURLs) {
             final DigestURI turl = url;
@@ -2789,10 +2790,11 @@ public final class Switchboard extends serverSwitch {
             };
             t.start();
             stackthreads.add(t);
+            try {Thread.sleep(10);} catch (InterruptedException e) {} // to prevent that this fires more than 100 connections pre second!
         }
-        for (Thread t: stackthreads)try {t.join(5000);} catch (InterruptedException e) {}
+        long waitingtime = 1 + (30000 / rootURLs.size()); // at most wait only halve an minute to prevent that the crawl start runs into a time-out
+        for (Thread t: stackthreads) try {t.join(waitingtime);} catch (InterruptedException e) {}
     }
-    
     
     /**
      * stack the url to the crawler
