@@ -76,7 +76,7 @@ public class CrawlStartExpert_p {
         prop.put("xdstopwChecked", env.getConfigBool("xdstopw", true) ? "1" : "0");
         prop.put("xpstopwChecked", env.getConfigBool("xpstopw", true) ? "1" : "0");
 
-        boolean collectionEnabled = sb.index.fulltext().getSolrScheme().isEmpty() || sb.index.fulltext().getSolrScheme().contains(YaCySchema.collection_sxt);
+        boolean collectionEnabled = sb.index.fulltext().getSolrSchema().isEmpty() || sb.index.fulltext().getSolrSchema().contains(YaCySchema.collection_sxt);
         prop.put("collectionEnabled", collectionEnabled ? 1 : 0);
         prop.put("collection", collectionEnabled ? "user" : "");
 

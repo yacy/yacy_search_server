@@ -55,7 +55,7 @@ public class CrawlResults {
         final serverObjects prop = new serverObjects();
 
         int lines = 500;
-        boolean showCollection = sb.index.fulltext().getSolrScheme().isEmpty() || sb.index.fulltext().getSolrScheme().contains(YaCySchema.collection_sxt);
+        boolean showCollection = sb.index.fulltext().getSolrSchema().isEmpty() || sb.index.fulltext().getSolrSchema().contains(YaCySchema.collection_sxt);
         boolean showInit    = env.getConfigBool("IndexMonitorInit", false);
         boolean showExec    = env.getConfigBool("IndexMonitorExec", false);
         boolean showDate    = env.getConfigBool("IndexMonitorDate", true);

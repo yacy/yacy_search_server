@@ -112,13 +112,13 @@ public class Segment {
     protected       IndexCell<WordReference>       termIndex;
     protected       IndexCell<CitationReference>   urlCitationIndex;
 
-    public Segment(final Log log, final File segmentPath, final SolrConfiguration solrScheme) {
+    public Segment(final Log log, final File segmentPath, final SolrConfiguration solrSchema) {
         log.logInfo("Initializing Segment '" + segmentPath + ".");
         this.log = log;
         this.segmentPath = segmentPath;
 
         // create LURL-db
-        this.fulltext = new Fulltext(segmentPath, solrScheme);
+        this.fulltext = new Fulltext(segmentPath, solrSchema);
     }
 
     public boolean connectedRWI() {
@@ -371,10 +371,10 @@ public class Segment {
             this.fulltext.getSolr().commit(false);
         } else {
             if (
-                (this.fulltext.getSolrScheme().contains(YaCySchema.exact_signature_l) && this.fulltext.getSolrScheme().contains(YaCySchema.exact_signature_unique_b)) ||
-                (this.fulltext.getSolrScheme().contains(YaCySchema.fuzzy_signature_l) && this.fulltext.getSolrScheme().contains(YaCySchema.fuzzy_signature_unique_b)) ||
-                this.fulltext.getSolrScheme().contains(YaCySchema.title_unique_b) ||
-                this.fulltext.getSolrScheme().contains(YaCySchema.description_unique_b)
+                (this.fulltext.getSolrSchema().contains(YaCySchema.exact_signature_l) && this.fulltext.getSolrSchema().contains(YaCySchema.exact_signature_unique_b)) ||
+                (this.fulltext.getSolrSchema().contains(YaCySchema.fuzzy_signature_l) && this.fulltext.getSolrSchema().contains(YaCySchema.fuzzy_signature_unique_b)) ||
+                this.fulltext.getSolrSchema().contains(YaCySchema.title_unique_b) ||
+                this.fulltext.getSolrSchema().contains(YaCySchema.description_unique_b)
                ) {
                 this.fulltext.getSolr().commit(true); // make sure that we have latest information for the postprocessing steps
             }
@@ -395,7 +395,7 @@ public class Segment {
         char docType = Response.docType(document.dc_format());
         
         // CREATE SOLR DOCUMENT
-        final SolrInputDocument solrInputDoc = this.fulltext.getSolrScheme().yacy2solr(id, profile, responseHeader, document, condenser, referrerURL, language, urlCitationIndex);
+        final SolrInputDocument solrInputDoc = this.fulltext.getSolrSchema().yacy2solr(id, profile, responseHeader, document, condenser, referrerURL, language, urlCitationIndex);
         
         // FIND OUT IF THIS IS A DOUBLE DOCUMENT
         for (YaCySchema[] checkfields: new YaCySchema[][]{
@@ -403,7 +403,7 @@ public class Segment {
                 {YaCySchema.fuzzy_signature_l, YaCySchema.fuzzy_signature_unique_b}}) {
             YaCySchema checkfield = checkfields[0];
             YaCySchema uniquefield = checkfields[1];
-            if (this.fulltext.getSolrScheme().contains(checkfield) && this.fulltext.getSolrScheme().contains(uniquefield)) {
+            if (this.fulltext.getSolrSchema().contains(checkfield) && this.fulltext.getSolrSchema().contains(uniquefield)) {
                 // lookup the document with the same signature
                 long signature = ((Long) solrInputDoc.getField(checkfield.getSolrFieldName()).getValue()).longValue();
                 try {
@@ -421,7 +421,7 @@ public class Segment {
                 {YaCySchema.description, YaCySchema.description_unique_b}}) {
             YaCySchema checkfield = checkfields[0];
             YaCySchema uniquefield = checkfields[1];
-            if (this.fulltext.getSolrScheme().contains(checkfield) && this.fulltext.getSolrScheme().contains(uniquefield)) {
+            if (this.fulltext.getSolrSchema().contains(checkfield) && this.fulltext.getSolrSchema().contains(uniquefield)) {
                 // lookup in the index for the same title
                 String checkstring = checkfield == YaCySchema.title ? document.dc_title() : document.dc_description();
                 if (checkstring.length() == 0) {
@@ -436,7 +436,7 @@ public class Segment {
                         // switch attribute also in all existing documents (which should be exactly only one!)
                         SolrDocumentList docs = this.fulltext.getSolr().query(checkfield.getSolrFieldName() + ":" + checkstring + " AND " + uniquefield.getSolrFieldName() + ":true", 0, 1000);
                         for (SolrDocument doc: docs) {
-                            SolrInputDocument sid = YaCySchema.toSolrInputDocument(doc);
+                            SolrInputDocument sid = this.fulltext.getSolrSchema().toSolrInputDocument(doc);
                             sid.setField(uniquefield.getSolrFieldName(), false);
                             this.fulltext.getSolr().add(sid);
                         }
@@ -448,7 +448,7 @@ public class Segment {
         }
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
-        if (this.urlCitationIndex != null && this.fulltext.getSolrScheme().contains(YaCySchema.references_i)) {
+        if (this.urlCitationIndex != null && this.fulltext.getSolrSchema().contains(YaCySchema.references_i)) {
             int references = this.urlCitationIndex.count(url.hash());
             if (references > 0) solrInputDoc.setField(YaCySchema.references_i.getSolrFieldName(), references);
         }

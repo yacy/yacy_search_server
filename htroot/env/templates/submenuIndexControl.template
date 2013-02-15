@@ -2,7 +2,8 @@
   <h3>Index Administration</h3>
   <ul class="SubMenu">
     <li><a href="/IndexControlURLs_p.html" class="MenuItemLink lock">Database Administration</a></li>
-    <li><a href="/IndexFederated_p.html" class="MenuItemLink lock">Federated Solr Index</a></li>
+    <li><a href="/IndexSchema_p.html" class="MenuItemLink lock">Solr Schema Editor</a></li>
+    <li><a href="/IndexFederated_p.html" class="MenuItemLink lock">Remote Solr Configuration</a></li>
     #(p2p)#::<li><a href="/IndexControlRWIs_p.html" class="MenuItemLink lock">Reverse Word Index Administration</a></li>#(/p2p)#
     <!--<li><a href="/IndexControlCleaner_p.html" class="MenuItemLink lock">Index Cleaner</a></li>-->
     <li><a href="/ConfigHTCache_p.html" class="MenuItemLink lock">Web Cache</a></li>

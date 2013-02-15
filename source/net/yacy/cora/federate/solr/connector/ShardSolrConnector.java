@@ -1,5 +1,5 @@
 /**
- *  SolrChardingConnector
+ *  ShardSolrConnector
  *  Copyright 2011 by Michael Peter Christen
  *  First released 25.05.2011 at http://yacy.net
  *
@@ -21,7 +21,6 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,34 +29,69 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.sorting.ReversibleScoreMap;
-import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.federate.solr.instance.SolrInstance;
+import net.yacy.cora.federate.solr.instance.SolrRemoteInstance;
 
+import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
-
+import org.apache.solr.common.util.NamedList;
+import org.apache.solr.common.util.SimpleOrderedMap;
 
 public class ShardSolrConnector extends AbstractSolrConnector implements SolrConnector {
 
-    private final List<SolrConnector> connectors;
+    private final ArrayList<SolrRemoteInstance> instances;
+    private final ArrayList<SolrConnector> connectors;
     private final ShardSelection sharding;
-    private final String[] urls;
+    private final String[] adminInterfaces;
 
-    public ShardSolrConnector(final String urlList, final ShardSelection.Method method, final long timeout, boolean multipleConnections) throws IOException {
-        urlList.replace(' ', ',');
-        this.urls = urlList.split(",");
+    public ShardSolrConnector(
+            ArrayList<SolrRemoteInstance> instances,
+            final ShardSelection.Method method, boolean multipleConnections) {
+        this.instances = instances;
         this.connectors = new ArrayList<SolrConnector>();
         SolrConnector s;
-        for (final String u: this.urls) {
-            s = multipleConnections ? new MultipleSolrConnector(u.trim(), 2) : new RemoteSolrConnector(u.trim());
-            this.connectors.add(new RetrySolrConnector(s, timeout));
+        this.adminInterfaces = new String[instances.size()];
+        int c = 0;
+        String defaultCoreName = instances.get(0).getDefaultCoreName();
+        for (final SolrRemoteInstance instance: instances) {
+            adminInterfaces[c++] = instance.getAdminInterface();
+            s = multipleConnections ? new MultipleSolrConnector(instance, defaultCoreName, 2) : new RemoteSolrConnector(instance, defaultCoreName);
+            this.connectors.add(s /*new RetrySolrConnector(s, timeout)*/);
         }
-        this.sharding = new ShardSelection(method, this.urls.length);
+        this.sharding = new ShardSelection(method, this.connectors.size());
     }
 
+    public static ArrayList<SolrRemoteInstance> getShardInstances(final String urlList) throws IOException {
+        urlList.replace(' ', ',');
+        String[] urls = urlList.split(",");
+        ArrayList<SolrRemoteInstance> instances = new ArrayList<SolrRemoteInstance>();
+        for (final String u: urls) {
+            SolrRemoteInstance instance = new SolrRemoteInstance(u);
+            instances.add(instance);
+        }
+        return instances;
+    }
+
+    public static ArrayList<SolrRemoteInstance> getShardInstances(final String urlList, Collection<String> coreNames, String defaultCoreName) throws IOException {
+        urlList.replace(' ', ',');
+        String[] urls = urlList.split(",");
+        ArrayList<SolrRemoteInstance> instances = new ArrayList<SolrRemoteInstance>();
+        for (final String u: urls) {
+            SolrRemoteInstance instance = new SolrRemoteInstance(u, coreNames, defaultCoreName);
+            instances.add(instance);
+        }
+        return instances;
+    }
+    
+    public ArrayList<SolrRemoteInstance> getInstances() {
+        return this.instances;
+    }
+    
     @Override
     public void commit(boolean softCommit) {
         for (final SolrConnector connector: this.connectors) connector.commit(softCommit);
@@ -67,6 +101,7 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
      * force an explicit merge of segments
      * @param maxSegments the maximum number of segments. Set to 1 for maximum optimization
      */
+    @Override
     public void optimize(int maxSegments) {
         for (final SolrConnector connector: this.connectors) connector.optimize(maxSegments);
     }
@@ -185,11 +220,70 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
 
     @Override
     public QueryResponse query(final ModifiableSolrParams query) throws IOException, SolrException {
+
+        final SimpleOrderedMap<Object> facet_countsAcc = new SimpleOrderedMap<Object>();
+        final SimpleOrderedMap<Object> highlightingAcc = new SimpleOrderedMap<Object>();
+        final SimpleOrderedMap<Object> headerAcc = new SimpleOrderedMap<Object>();
+        final SolrDocumentList resultsAcc = new SolrDocumentList();
+
+        // concurrently call all shards
+        List<Thread> t = new ArrayList<Thread>();
         for (final SolrConnector connector: this.connectors) {
-            QueryResponse rsp = connector.query(query);
-            if (rsp != null && rsp.getResults().size() > 0) return rsp;
+            Thread t0 = new Thread() {
+                @SuppressWarnings("unchecked")
+                @Override
+                public void run() {
+                    QueryResponse rsp;
+                    try {
+                        rsp = connector.query(query);
+                    } catch (Throwable e) {return;}
+                    NamedList<Object> response = rsp.getResponse();          
+
+                    // set the header; this is mostly always the same (well this is not evaluated much)
+                    SimpleOrderedMap<Object> header = (SimpleOrderedMap<Object>) response.get("responseHeader");
+                    //Integer status = (Integer) header.get("status");
+                    //Integer QTime = (Integer) header.get("QTime");
+                    //SimpleOrderedMap<Object> params = (SimpleOrderedMap<Object>) header.get("params");
+                    if (headerAcc.size() == 0) {
+                        for (Map.Entry<String, Object> e: header) headerAcc.add(e.getKey(), e.getValue());
+                    }
+                    
+                    // accumulate the results
+                    SolrDocumentList results = (SolrDocumentList) response.get("response");
+                    long found = results.size();
+                    for (int i = 0; i < found; i++) resultsAcc.add(results.get(i));
+                    resultsAcc.setNumFound(resultsAcc.getNumFound() + results.getNumFound());
+                    resultsAcc.setMaxScore(Math.max(resultsAcc.getMaxScore() == null ? 0f : resultsAcc.getMaxScore().floatValue(), results.getMaxScore() == null ? 0f : results.getMaxScore().floatValue()));
+                    
+                    // accumulate the highlighting
+                    SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) response.get("highlighting");
+                    if (highlighting != null) {
+                        for (Map.Entry<String, Object> e: highlighting) highlightingAcc.add(e.getKey(), e.getValue());
+                    }
+                    
+                    // accumulate the facets (well this is not correct at this time...)
+                    SimpleOrderedMap<Object> facet_counts = (SimpleOrderedMap<Object>) response.get("facet_counts");
+                    if (facet_counts != null) {
+                        for (Map.Entry<String, Object> e: facet_counts) facet_countsAcc.add(e.getKey(), e.getValue());
+                    }
+                }
+            };
+            t0.start();
+            t.add(t0);
         }
-        return new QueryResponse();
+        for (Thread t0: t) {
+            try {t0.join();} catch (InterruptedException e) {}
+        }
+        
+        // prepare combined response
+        QueryResponse rspAcc = new QueryResponse();
+        NamedList<Object> nl = new NamedList<Object>();
+        nl.add("responseHeader", headerAcc);
+        nl.add("response", resultsAcc);
+        if (highlightingAcc != null && highlightingAcc.size() > 0) nl.add("highlighting", highlightingAcc);
+        if (facet_countsAcc != null && facet_countsAcc.size() > 0) nl.add("facet_counts", facet_countsAcc);
+        rspAcc.setResponse(nl);
+        return rspAcc;
     }
     
     @Override
@@ -250,18 +344,7 @@ public class ShardSolrConnector extends AbstractSolrConnector implements SolrCon
     }
 
     public String[] getAdminInterfaceList() {
-        final String[] urlAdmin = new String[this.connectors.size()];
-        int i = 0;
-        final InetAddress localhostExternAddress = Domains.myPublicLocalIP();
-        final String localhostExtern = localhostExternAddress == null ? Domains.LOCALHOST : localhostExternAddress.getHostAddress();
-        for (String u: this.urls) {
-            int p = u.indexOf("localhost",0);
-            if (p < 0) p = u.indexOf("127.0.0.1",0);
-            if (p < 0) p = u.indexOf("0:0:0:0:0:0:0:1",0);
-            if (p >= 0) u = u.substring(0, p) + localhostExtern + u.substring(p + 9);
-            urlAdmin[i++] = u + (u.endsWith("/") ? "admin/" : "/admin/");
-        }
-        return urlAdmin;
+        return this.adminInterfaces;
     }
 
 }

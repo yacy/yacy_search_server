@@ -648,7 +648,7 @@ public final class SearchEvent {
             int loops = 0; // a loop counter to terminate the reading if all the results are from the same domain
             // wait some time if we did not get so much remote results so far to get a better ranking over remote results
             // we wait at most 30 milliseconds to get a maximum total waiting time of 300 milliseconds for 10 results
-            long wait = waitTimeRecommendation();
+            long wait = Math.min(waitingtime, waitTimeRecommendation());
             if ( wait > 0 ) {
                 //System.out.println("*** RWIProcess extra wait: " + wait + "ms; expectedRemoteReferences = " + this.expectedRemoteReferences.get() + ", receivedRemoteReferences = " + this.receivedRemoteReferences.get() + ", initialExpectedRemoteReferences = " + this.maxExpectedRemoteReferences.get());
                 Thread.sleep(wait);

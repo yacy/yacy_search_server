@@ -352,24 +352,5 @@ public enum YaCySchema implements Schema {
         doc.setField(this.getSolrFieldName(), value);
     }
 
-    /**
-     * Convert a SolrDocument to a SolrInputDocument.
-     * This is useful if a document from the search index shall be modified and indexed again.
-     * This shall be used as replacement of ClientUtils.toSolrInputDocument because we remove some fields
-     * which are created automatically during the indexing process.
-     * @param doc the solr document
-     * @return a solr input document
-     */
-    public static SolrInputDocument toSolrInputDocument(SolrDocument doc) {
-        SolrInputDocument sid = new SolrInputDocument();
-        Set<String> omitFields = new HashSet<String>();
-        omitFields.add(YaCySchema.coordinate_p.getSolrFieldName() + "_0_coordinate");
-        omitFields.add(YaCySchema.coordinate_p.getSolrFieldName() + "_1_coordinate");
-        omitFields.add(YaCySchema.author_sxt.getSolrFieldName());
-        for (String name: doc.getFieldNames()) {
-            if (!omitFields.contains(name)) sid.addField(name, doc.getFieldValue(name), 1.0f);
-        }
-        return sid;
-    }
 }
 

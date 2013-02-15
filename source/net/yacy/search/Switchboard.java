@@ -103,6 +103,7 @@ import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.ShardSelection;
 import net.yacy.cora.federate.solr.connector.ShardSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
+import net.yacy.cora.federate.solr.instance.SolrRemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.federate.yacy.ConfigurationSet;
 import net.yacy.cora.lod.JenaTripleStore;
@@ -413,9 +414,9 @@ public final class Switchboard extends serverSwitch {
         for (YaCySchema field: new YaCySchema[]{
                 YaCySchema.host_s, YaCySchema.load_date_dt,
                 YaCySchema.url_file_ext_s, YaCySchema.last_modified,                        // needed for media search and /date operator
-                YaCySchema.url_paths_sxt, YaCySchema.host_organization_s,                   // needed to search in the url
-                YaCySchema.inboundlinks_protocol_sxt, YaCySchema.inboundlinks_urlstub_txt,  // needed for HostBrowser
-                YaCySchema.outboundlinks_protocol_sxt, YaCySchema.outboundlinks_urlstub_txt // needed to enhance the crawler
+                /*YaCySchema.url_paths_sxt,*/ YaCySchema.host_organization_s,                   // needed to search in the url
+                /*YaCySchema.inboundlinks_protocol_sxt,*/ YaCySchema.inboundlinks_urlstub_txt,  // needed for HostBrowser
+                /*YaCySchema.outboundlinks_protocol_sxt,*/ YaCySchema.outboundlinks_urlstub_txt // needed to enhance the crawler
             }) {
             ConfigurationSet.Entry entry = solrScheme.get(field.name()); entry.setEnable(true); solrScheme.put(field.name(), entry);
         }
@@ -441,10 +442,8 @@ public final class Switchboard extends serverSwitch {
 
         if (usesolr && solrurls != null && solrurls.length() > 0) {
             try {
-                SolrConnector solr = new ShardSolrConnector(
-                                solrurls,
-                                ShardSelection.Method.MODULO_HOST_MD5,
-                                10000, true);
+                ArrayList<SolrRemoteInstance> instances = ShardSolrConnector.getShardInstances(solrurls);
+                ShardSolrConnector solr = new ShardSolrConnector(instances, ShardSelection.Method.MODULO_HOST_MD5, true);
                 this.index.fulltext().connectRemoteSolr(solr);
             } catch ( final IOException e ) {
                 Log.logException(e);
@@ -1231,7 +1230,7 @@ public final class Switchboard extends serverSwitch {
         synchronized ( this ) {
 
             // remember the solr scheme
-            SolrConfiguration solrScheme = this.index.fulltext().getSolrScheme();
+            SolrConfiguration solrScheme = this.index.fulltext().getSolrSchema();
 
             // shut down
             this.crawler.close();
@@ -1293,10 +1292,8 @@ public final class Switchboard extends serverSwitch {
 
             if (usesolr && solrurls != null && solrurls.length() > 0) {
                 try {
-                    SolrConnector solr = new ShardSolrConnector(
-                                    solrurls,
-                                    ShardSelection.Method.MODULO_HOST_MD5,
-                                    10000, true);
+                    ArrayList<SolrRemoteInstance> instances = ShardSolrConnector.getShardInstances(solrurls);
+                    ShardSolrConnector solr = new ShardSolrConnector(instances, ShardSelection.Method.MODULO_HOST_MD5, true);
                     this.index.fulltext().connectRemoteSolr(solr);
                 } catch ( final IOException e ) {
                     Log.logException(e);
@@ -2220,7 +2217,7 @@ public final class Switchboard extends serverSwitch {
 
             // if no crawl is running and processing is activated:
             // execute the (post-) processing steps for all entries that have a process tag assigned
-            if (this.crawlQueues.coreCrawlJobSize() == 0 && index.connectedCitation() && index.fulltext().getSolrScheme().contains(YaCySchema.process_sxt)) {
+            if (this.crawlQueues.coreCrawlJobSize() == 0 && index.connectedCitation() && index.fulltext().getSolrSchema().contains(YaCySchema.process_sxt)) {
                 // that means we must search for those entries.
                 index.fulltext().getSolr().commit(true); // make sure that we have latest information that can be found
                 //BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery("*:*", 0, 1000, 60000, 10);
@@ -2240,7 +2237,7 @@ public final class Switchboard extends serverSwitch {
                         // switch over tag types
                         if (tagtype == ProcessType.CLICKDEPTH) {
                             //proctags.remove(tag);
-                            if (index.fulltext().getSolrScheme().contains(YaCySchema.clickdepth_i)) {
+                            if (index.fulltext().getSolrSchema().contains(YaCySchema.clickdepth_i)) {
                                 DigestURI url;
                                 try {
                                     // get new click depth and compare with old
@@ -2248,11 +2245,11 @@ public final class Switchboard extends serverSwitch {
                                     url = new DigestURI((String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())));
                                     int clickdepth = SolrConfiguration.getClickDepth(index.urlCitation(), url);
                                     if (oldclickdepth == null || oldclickdepth.intValue() != clickdepth) proccount_clickdepthchange++;
-                                    SolrInputDocument sid = YaCySchema.toSolrInputDocument(doc);
+                                    SolrInputDocument sid = index.fulltext().getSolrSchema().toSolrInputDocument(doc);
                                     sid.setField(YaCySchema.clickdepth_i.getSolrFieldName(), clickdepth);
                                     
                                     // refresh the link count; it's 'cheap' to do this here
-                                    if (index.fulltext().getSolrScheme().contains(YaCySchema.references_i)) {
+                                    if (index.fulltext().getSolrSchema().contains(YaCySchema.references_i)) {
                                         Integer oldreferences = (Integer) doc.getFieldValue(YaCySchema.references_i.getSolrFieldName());
                                         int references = index.urlCitation().count(url.hash());
                                         if (references > 0) {

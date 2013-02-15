@@ -128,7 +128,7 @@ public final class QueryParams {
     public List<String> facetfields;
     public int maxfacets;
     private SolrQuery cachedQuery;
-    private SolrConfiguration solrScheme;
+    private SolrConfiguration solrSchema;
     
     // the following values are filled during the search process as statistics for the search
     public final AtomicInteger local_rwi_available;  // the number of hits generated/ranked by the local search in rwi index
@@ -191,9 +191,9 @@ public final class QueryParams {
         this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
         this.facetfields = new ArrayList<String>();
 
-        this.solrScheme = indexSegment.fulltext().getSolrScheme();
+        this.solrSchema = indexSegment.fulltext().getSolrSchema();
         for (YaCySchema f: defaultfacetfields) {
-            if (solrScheme.contains(f)) facetfields.add(f.getSolrFieldName());
+            if (solrSchema.contains(f)) facetfields.add(f.getSolrFieldName());
         }
         for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(YaCySchema.VOCABULARY_PREFIX + v.getName() + YaCySchema.VOCABULARY_SUFFIX);
         this.maxfacets = defaultmaxfacets;
@@ -300,9 +300,9 @@ public final class QueryParams {
         this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
         this.facetfields = new ArrayList<String>();
         
-        this.solrScheme = indexSegment.fulltext().getSolrScheme();
+        this.solrSchema = indexSegment.fulltext().getSolrSchema();
         for (YaCySchema f: defaultfacetfields) {
-            if (solrScheme.contains(f)) facetfields.add(f.getSolrFieldName());
+            if (solrSchema.contains(f)) facetfields.add(f.getSolrFieldName());
         }
         for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(YaCySchema.VOCABULARY_PREFIX + v.getName() + YaCySchema.VOCABULARY_SUFFIX);
         this.maxfacets = defaultmaxfacets;
@@ -432,7 +432,7 @@ public final class QueryParams {
         if (this.queryGoal.getIncludeStrings().size() == 0) return null;
         // construct query
         final SolrQuery params = new SolrQuery();
-        params.setQuery(this.queryGoal.solrQueryString(this.indexSegment.fulltext().getSolrScheme()).toString());
+        params.setQuery(this.queryGoal.solrQueryString(this.indexSegment.fulltext().getSolrSchema()).toString());
         params.setParam("defType", "edismax");
         params.setParam("bq", Boost.RANKING.getBoostQuery()); // a boost query that moves double content to the back
         params.setParam("bf", Boost.RANKING.getBoostFunction()); // a boost function extension
@@ -468,7 +468,7 @@ public final class QueryParams {
         }
         
         // add author facets
-        if (this.modifier.author != null && this.modifier.author.length() > 0 && this.solrScheme.contains(YaCySchema.author_sxt)) {
+        if (this.modifier.author != null && this.modifier.author.length() > 0 && this.solrSchema.contains(YaCySchema.author_sxt)) {
             fq.append(" AND ").append(YaCySchema.author_sxt.getSolrFieldName()).append(":\"").append(this.modifier.author).append('\"');
         }
         

@@ -61,9 +61,9 @@ public class DocumentIndex extends Segment {
 
     static final ThreadGroup workerThreadGroup = new ThreadGroup("workerThreadGroup");
 
-    public DocumentIndex(final File segmentPath, final File schemePath, final CallbackListener callback, final int cachesize)
+    public DocumentIndex(final File segmentPath, final File schemaPath, final CallbackListener callback, final int cachesize)
         throws IOException {
-        super(new Log("DocumentIndex"), segmentPath, schemePath == null ? null : new SolrConfiguration(schemePath, true));
+        super(new Log("DocumentIndex"), segmentPath, schemaPath == null ? null : new SolrConfiguration(schemaPath, true));
         super.connectRWI(cachesize, targetFileSize * 4 - 1);
         super.connectCitation(cachesize, targetFileSize * 4 - 1);
         super.connectUrlDb(

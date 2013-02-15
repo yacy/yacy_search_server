@@ -72,7 +72,7 @@ public class ConfigHeuristics_p {
             }
             if (post.containsKey("opensearch_off")) sb.setConfig("heuristic.opensearch", false);
             if (post.containsKey("discoverosd")) {
-                final boolean metafieldNOTavailable = sb.index.fulltext().getSolrScheme().containsDisabled(YaCySchema.outboundlinks_tag_txt.name());
+                final boolean metafieldNOTavailable = sb.index.fulltext().getSolrSchema().containsDisabled(YaCySchema.outboundlinks_tag_txt.name());
                 if (!metafieldNOTavailable) {
                 OpenSearchConnector osc = new OpenSearchConnector(sb, false);
                 if (osc.discoverFromSolrIndex(sb)) {
@@ -102,24 +102,24 @@ public class ConfigHeuristics_p {
             }
 
             if (post.containsKey("setopensearch")) {
-                // read index scheme table flags
+                // read index schema table flags
                 writeopensearchcfg (sb,post);
              }
 
             if (post.containsKey("switchsolrfieldson")) {
-                final boolean metafieldNOTavailable = sb.index.fulltext().getSolrScheme().containsDisabled(YaCySchema.outboundlinks_tag_txt.name());
+                final boolean metafieldNOTavailable = sb.index.fulltext().getSolrSchema().containsDisabled(YaCySchema.outboundlinks_tag_txt.name());
                 if (metafieldNOTavailable) {
                     ConfigurationSet.Entry entry;
-                    entry = sb.index.fulltext().getSolrScheme().get(YaCySchema.outboundlinks_tag_txt.name());
+                    entry = sb.index.fulltext().getSolrSchema().get(YaCySchema.outboundlinks_tag_txt.name());
                     if (entry != null && !entry.enabled()) {
                         entry.setEnable(true);
                     }
-                    entry = sb.index.fulltext().getSolrScheme().get(YaCySchema.inboundlinks_tag_txt.name());
+                    entry = sb.index.fulltext().getSolrSchema().get(YaCySchema.inboundlinks_tag_txt.name());
                     if (entry != null && !entry.enabled()) {
                         entry.setEnable(true);
                     }
                     try {
-                        sb.index.fulltext().getSolrScheme().commit();
+                        sb.index.fulltext().getSolrSchema().commit();
                     } catch (IOException ex) {}
                 }
             }
@@ -139,7 +139,7 @@ public class ConfigHeuristics_p {
             }
         }
 
-        final boolean showmetafieldbutton = sb.index.fulltext().getSolrScheme().containsDisabled(YaCySchema.outboundlinks_tag_txt.name());
+        final boolean showmetafieldbutton = sb.index.fulltext().getSolrSchema().containsDisabled(YaCySchema.outboundlinks_tag_txt.name());
         if (showmetafieldbutton) prop.put("osdsolrfieldswitch",1);
         prop.put("site.checked", sb.getConfigBool("heuristic.site", false) ? 1 : 0);
         prop.put("searchresult.checked", sb.getConfigBool("heuristic.searchresults", false) ? 1 : 0);
@@ -175,7 +175,7 @@ public class ConfigHeuristics_p {
     }
 
     private static void writeopensearchcfg(final Switchboard sb, final serverObjects post) {
-        // read index scheme table flags
+        // read index schema table flags
 
         final File f = new File(sb.getDataPath(), "DATA/SETTINGS/heuristicopensearch.conf");
         ConfigurationSet cfg = new ConfigurationSet(f);

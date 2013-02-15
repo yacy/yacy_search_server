@@ -1,5 +1,5 @@
 /**
- *  SolrScheme
+ *  SolrConfiguration
  *  Copyright 2011 by Michael Peter Christen
  *  First released 14.04.2011 at http://yacy.net
  *
@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -68,6 +69,7 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ByteBuffer;
 
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
 
@@ -87,7 +89,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     }
     
     /**
-     * initialize the scheme with a given configuration file
+     * initialize the schema with a given configuration file
      * the configuration file simply contains a list of lines with keywords
      * or keyword = value lines (while value is a custom Solr field name
      * @param configurationFile
@@ -103,16 +105,36 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 YaCySchema f = YaCySchema.valueOf(etr.key());
                 f.setSolrFieldName(etr.getValue());
             } catch (IllegalArgumentException e) {
-                Log.logFine("SolrScheme", "solr scheme file " + configurationFile.getAbsolutePath() + " defines unknown attribute '" + etr.toString() + "'");
+                Log.logFine("SolrSchema", "solr schema file " + configurationFile.getAbsolutePath() + " defines unknown attribute '" + etr.toString() + "'");
                 it.remove();
             }
         }
         // check consistency the other way: look if all enum constants in SolrField appear in the configuration file
         for (YaCySchema field: YaCySchema.values()) {
         	if (this.get(field.name()) == null) {
-        		Log.logWarning("SolrScheme", " solr scheme file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
+        		Log.logWarning("SolrSchema", " solr schema file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
         	}
         }
+    }
+    
+    /**
+     * Convert a SolrDocument to a SolrInputDocument.
+     * This is useful if a document from the search index shall be modified and indexed again.
+     * This shall be used as replacement of ClientUtils.toSolrInputDocument because we remove some fields
+     * which are created automatically during the indexing process.
+     * @param doc the solr document
+     * @return a solr input document
+     */
+    public SolrInputDocument toSolrInputDocument(SolrDocument doc) {
+        SolrInputDocument sid = new SolrInputDocument();
+        Set<String> omitFields = new HashSet<String>();
+        omitFields.add(YaCySchema.coordinate_p.getSolrFieldName() + "_0_coordinate");
+        omitFields.add(YaCySchema.coordinate_p.getSolrFieldName() + "_1_coordinate");
+        omitFields.add(YaCySchema.author_sxt.getSolrFieldName());
+        for (String name: doc.getFieldNames()) {
+            if (this.contains(name) && !omitFields.contains(name)) sid.addField(name, doc.getFieldValue(name), 1.0f);
+        }
+        return sid;
     }
 
     public boolean contains(YaCySchema field) {
@@ -318,7 +340,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             final String id, final CrawlProfile profile, final ResponseHeader responseHeader,
             final Document document, Condenser condenser, DigestURI referrerURL, String language,
             IndexCell<CitationReference> citations) {
-        // we use the SolrCell design as index scheme
+        // we use the SolrCell design as index schema
         final SolrInputDocument doc = new SolrInputDocument();
         final DigestURI digestURI = DigestURI.toDigestURI(document.dc_source());
         boolean allAttr = this.isEmpty();
@@ -445,7 +467,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         if (allAttr || contains(YaCySchema.url_paths_sxt)) add(doc, YaCySchema.url_paths_sxt, digestURI.getPaths());
         if (allAttr || contains(YaCySchema.url_file_ext_s)) add(doc, YaCySchema.url_file_ext_s, digestURI.getFileExtension());
 
-        // get list of all links; they will be shrinked by urls that appear in other fields of the solr scheme
+        // get list of all links; they will be shrinked by urls that appear in other fields of the solr schema
         Set<MultiProtocolURI> inboundLinks = document.inboundLinks();
         Set<MultiProtocolURI> outboundLinks = document.outboundLinks();
 

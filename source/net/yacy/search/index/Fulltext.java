@@ -45,7 +45,9 @@ import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.connector.MirrorSolrConnector;
+import net.yacy.cora.federate.solr.connector.ShardSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
+import net.yacy.cora.federate.solr.instance.SolrEmbeddedInstance;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
@@ -82,16 +84,16 @@ public final class Fulltext {
     private       String              tablename;
     private       ArrayList<HostStat> statsDump;
     private final MirrorSolrConnector solr;
-    private final SolrConfiguration   solrScheme;
+    private final SolrConfiguration   solrSchema;
 
-    protected Fulltext(final File path, final SolrConfiguration solrScheme) {
+    protected Fulltext(final File path, final SolrConfiguration solrSchema) {
         this.location = path;
         this.tablename = null;
         this.urlIndexFile = null;
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
         this.solr = new MirrorSolrConnector(10000, 10000, 100);
-        this.solrScheme = solrScheme;
+        this.solrSchema = solrSchema;
     }
 
     /**
@@ -134,8 +136,8 @@ public final class Fulltext {
     	this.urlIndexFile = null;
     }
 
-    public SolrConfiguration getSolrScheme() {
-        return this.solrScheme;
+    public SolrConfiguration getSolrSchema() {
+        return this.solrSchema;
     }
 
     public boolean connectedLocalSolr() {
@@ -151,7 +153,8 @@ public final class Fulltext {
             File oldLocation = new File(baseLocation, oldVersion);
             if (oldLocation.exists()) oldLocation.renameTo(solrLocation);
         }
-        EmbeddedSolrConnector esc = new EmbeddedSolrConnector(solrLocation, new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"));
+        SolrEmbeddedInstance instance = new SolrEmbeddedInstance(solrLocation, new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"));
+        EmbeddedSolrConnector esc = new EmbeddedSolrConnector(instance);
         Version luceneVersion = esc.getConfig().getLuceneVersion("luceneMatchVersion");
         String lvn = luceneVersion.name();
         Log.logInfo("Fulltext", "using lucene version " + lvn);
@@ -169,7 +172,7 @@ public final class Fulltext {
         return this.solr.isConnected1();
     }
 
-    public void connectRemoteSolr(final SolrConnector rs) {
+    public void connectRemoteSolr(final ShardSolrConnector rs) {
         this.solr.connect1(rs);
     }
 
@@ -291,7 +294,7 @@ public final class Fulltext {
     		final Row.Entry entry = this.urlIndexFile.remove(urlHash);
             if (entry == null) return null;
 			URIMetadataRow row = new URIMetadataRow(entry, wre);
-			SolrInputDocument solrInput = this.solrScheme.metadata2solr(row);
+			SolrInputDocument solrInput = this.solrSchema.metadata2solr(row);
 			this.putDocument(solrInput);
 			return new URIMetadataNode(solrInput, wre, weight);
         } catch (final IOException e) {
@@ -309,7 +312,7 @@ public final class Fulltext {
         	Date sdDate = (Date) this.solr.getFieldById(id, YaCySchema.last_modified.getSolrFieldName());
         	Date docDate = null;
         	if (sdDate == null || (docDate = SolrConfiguration.getDate(doc, YaCySchema.last_modified)) == null || sdDate.before(docDate)) {
-                if (this.solrScheme.contains(YaCySchema.ip_s)) {
+                if (this.solrSchema.contains(YaCySchema.ip_s)) {
                     // ip_s needs a dns lookup which causes blockings during search here
                     this.solr.add(doc);
                 } else synchronized (this.solr) {
@@ -332,11 +335,11 @@ public final class Fulltext {
         	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
             SolrDocument sd = this.solr.getById(id);
             if (sd == null || (new URIMetadataNode(sd)).isOlder(row)) {
-                if (this.solrScheme.contains(YaCySchema.ip_s)) {
+                if (this.solrSchema.contains(YaCySchema.ip_s)) {
                     // ip_s needs a dns lookup which causes blockings during search here
-                    this.solr.add(getSolrScheme().metadata2solr(row));
+                    this.solr.add(getSolrSchema().metadata2solr(row));
                 }  else synchronized (this.solr) {
-                    this.solr.add(getSolrScheme().metadata2solr(row));
+                    this.solr.add(getSolrSchema().metadata2solr(row));
                 }
             }
         } catch (SolrException e) {
@@ -544,11 +547,12 @@ public final class Fulltext {
             Log.logWarning("Fulltext", "HOT DUMP selected solr0 == NULL, no dump list!");
             return zips;
         }
-        if (esc.getStoragePath() == null) {
+        SolrEmbeddedInstance sei = (SolrEmbeddedInstance) esc.getInstance();
+        if (sei.getStoragePath() == null) {
             Log.logWarning("Fulltext", "HOT DUMP selected solr0.getStoragePath() == NULL, no dump list!");
             return zips;
         }
-        File storagePath = esc.getStoragePath().getParentFile();
+        File storagePath = sei.getStoragePath().getParentFile();
         if (storagePath == null) {
             Log.logWarning("Fulltext", "HOT DUMP selected esc.getStoragePath().getParentFile() == NULL, no dump list!");
             return zips;
@@ -566,7 +570,8 @@ public final class Fulltext {
      */
     public File dumpSolr() {
         EmbeddedSolrConnector esc = (EmbeddedSolrConnector) this.solr.getSolr0();
-        File storagePath = esc.getStoragePath();
+        SolrEmbeddedInstance sei = (SolrEmbeddedInstance) esc.getInstance();
+        File storagePath = sei.getStoragePath();
         File zipOut = new File(storagePath.toString() + "_" + GenericFormatter.SHORT_DAY_FORMATTER.format() + ".zip");
         synchronized (this.solr) {
             this.disconnectLocalSolr();
@@ -591,7 +596,8 @@ public final class Fulltext {
      */
     public void restoreSolr(File solrDumpZipFile) {
         EmbeddedSolrConnector esc = (EmbeddedSolrConnector) this.solr.getSolr0();
-        File storagePath = esc.getStoragePath();
+        SolrEmbeddedInstance sei = (SolrEmbeddedInstance) esc.getInstance();
+        File storagePath = sei.getStoragePath();
         synchronized (this.solr) {
             this.disconnectLocalSolr();
             try {

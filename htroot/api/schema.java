@@ -39,11 +39,11 @@ public class schema {
         final servletProperties prop = new servletProperties();
         final Switchboard sb = (Switchboard) env;
 
-        // write scheme
+        // write schema
         int c = 0;
-        SolrConfiguration solrScheme = sb.index.fulltext().getSolrScheme();
+        SolrConfiguration solrSchema = sb.index.fulltext().getSolrSchema();
         for (YaCySchema field : YaCySchema.values()) {
-            if (solrScheme.contains(field.name())) {
+            if (solrSchema.contains(field.name())) {
                 addField(prop, c, field);
                 c++;
             }
@@ -51,13 +51,13 @@ public class schema {
         //if (solrScheme.contains(YaCySchema.author)) {addField(prop, c, YaCySchema.author_sxt);}
         prop.put("fields", c);
 
-        prop.put("copyFieldAuthor", solrScheme.contains(YaCySchema.author) ? 1 : 0);
+        prop.put("copyFieldAuthor", solrSchema.contains(YaCySchema.author) ? 1 : 0);
         
         prop.put("solruniquekey",YaCySchema.id.getSolrFieldName());
         prop.put("solrdefaultsearchfield",
-                solrScheme.contains(YaCySchema.text_t) ? YaCySchema.text_t.getSolrFieldName() :
-                solrScheme.contains(YaCySchema.fuzzy_signature_text_t) ? YaCySchema.fuzzy_signature_text_t.getSolrFieldName() :
-                solrScheme.contains(YaCySchema.h1_txt) ? YaCySchema.h1_txt.getSolrFieldName() :
+                solrSchema.contains(YaCySchema.text_t) ? YaCySchema.text_t.getSolrFieldName() :
+                solrSchema.contains(YaCySchema.fuzzy_signature_text_t) ? YaCySchema.fuzzy_signature_text_t.getSolrFieldName() :
+                solrSchema.contains(YaCySchema.h1_txt) ? YaCySchema.h1_txt.getSolrFieldName() :
                 YaCySchema.id.getSolrFieldName()
                 );
         

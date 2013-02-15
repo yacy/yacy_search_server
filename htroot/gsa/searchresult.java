@@ -114,7 +114,7 @@ public class searchresult {
         
         // get a solr query string
         QueryGoal qg = new QueryGoal(originalQuery, originalQuery);
-        StringBuilder solrQ = qg.solrQueryString(sb.index.fulltext().getSolrScheme());
+        StringBuilder solrQ = qg.solrQueryString(sb.index.fulltext().getSolrSchema());
         post.put("defType", "edismax");
         post.put(CommonParams.Q, solrQ.toString());
         post.put(CommonParams.ROWS, post.remove("num"));

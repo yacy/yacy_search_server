@@ -21,11 +21,14 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.federate.solr.YaCySchema;
+import net.yacy.cora.federate.solr.instance.SolrInstance;
+import net.yacy.cora.federate.solr.instance.SolrRemoteInstance;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 
@@ -51,8 +54,8 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
 
     private final static Object EXIST = new Object();
 
-    private SolrConnector solr0;
-    private SolrConnector solr1;
+    private EmbeddedSolrConnector solr0;
+    private ShardSolrConnector solr1;
     private int hitCacheMax, missCacheMax, partitions;
     private final Map<String, HitMissCache> hitMissCache;
     private final Map<String, ARC<String, Object>> fieldCache; // a map from a field name to a id-key/value object cache
@@ -105,12 +108,19 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         }
         return c;
     }
+
+    /**
+     * the usage of getInstance is not possible here, use getSolr0().getInstance() instead
+     */
+    public SolrInstance getInstance() {
+        throw new UnsupportedOperationException();
+    }
     
     public boolean isConnected0() {
         return this.solr0 != null;
     }
 
-    public void connect0(SolrConnector c) {
+    public void connect0(EmbeddedSolrConnector c) {
         this.solr0 = c;
     }
 
@@ -120,7 +130,9 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
 
     public void disconnect0() {
         if (this.solr0 == null) return;
+        SolrInstance instance = this.solr0.getInstance();
         this.solr0.close();
+        instance.close();
         this.solr0 = null;
     }
 
@@ -128,7 +140,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         return this.solr1 != null;
     }
 
-    public void connect1(SolrConnector c) {
+    public void connect1(ShardSolrConnector c) {
         this.solr1 = c;
     }
 
@@ -138,6 +150,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
 
     public void disconnect1() {
         if (this.solr1 == null) return;
+        // we cannot get the instance here because that is not applicable
         this.solr1.close();
         this.solr1 = null;
     }
@@ -165,8 +178,16 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     
     @Override
     public synchronized void close() {
-        if (this.solr0 != null) this.solr0.close();
-        if (this.solr1 != null) this.solr1.close();
+        if (this.solr0 != null) {
+            SolrInstance instance = this.solr0.getInstance();
+            this.solr0.close();
+            instance.close();
+        }
+        if (this.solr1 != null) {
+            ArrayList<SolrRemoteInstance> instances = this.solr1.getInstances();
+            this.solr1.close();
+            for (SolrRemoteInstance instance: instances) instance.close();
+        }
     }
 
     /**

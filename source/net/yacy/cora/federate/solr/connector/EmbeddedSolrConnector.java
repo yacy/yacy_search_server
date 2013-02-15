@@ -21,15 +21,16 @@
 
 package net.yacy.cora.federate.solr.connector;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
+import java.util.List;
 
+import net.yacy.cora.federate.solr.instance.SolrEmbeddedInstance;
+import net.yacy.cora.federate.solr.instance.SolrInstance;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.MemoryControl;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.ModifiableSolrParams;
@@ -39,113 +40,113 @@ import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
+import org.apache.solr.handler.component.QueryComponent;
+import org.apache.solr.handler.component.ResponseBuilder;
+import org.apache.solr.handler.component.SearchComponent;
 import org.apache.solr.handler.component.SearchHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequestBase;
+import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.SolrQueryResponse;
-
-import com.google.common.io.Files;
+import org.apache.solr.servlet.SolrRequestParsers;
 
 public class EmbeddedSolrConnector extends SolrServerConnector implements SolrConnector {
 
     public static final String SELECT = "/select";
     public static final String CONTEXT = "/solr";
-    private final static String[] confFiles = {"solrconfig.xml", "schema.xml", "stopwords.txt", "synonyms.txt", "protwords.txt", "currency.xml", "elevate.xml", "xslt/example.xsl", "xslt/json.xsl", "lang/"};
-
-    private CoreContainer cores;
-    private String defaultCoreName;
-    private SolrCore defaultCore;
     
     private final SearchHandler requestHandler;
-    private final File storagePath;
+    private final SolrEmbeddedInstance instance;
+    private SolrCore core;
 
-    public EmbeddedSolrConnector(File storagePath, File solr_config) throws IOException {
+    public EmbeddedSolrConnector(SolrEmbeddedInstance instance) {
         super();
-        // copy the solrconfig.xml to the storage path
-        this.storagePath = storagePath;
-        File conf = new File(storagePath, "conf");
-        conf.mkdirs();
-        File source, target;
-        for (String cf: confFiles) {
-            source = new File(solr_config, cf);
-            if (source.isDirectory()) {
-                target = new File(conf, cf);
-                target.mkdirs();
-                for (String cfl: source.list()) {
-                    try {
-                        Files.copy(new File(source, cfl), new File(target, cfl));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } else {
-                target = new File(conf, cf);
-                target.getParentFile().mkdirs();
-                try {
-                    Files.copy(source, target);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        this.cores = new CoreContainer(storagePath.getAbsolutePath(), new File(solr_config, "solr.xml")); // this may take indefinitely long if solr files are broken
-        if (this.cores == null) {
-            // try again
-            System.gc();
-            this.cores = new CoreContainer(storagePath.getAbsolutePath(), new File(solr_config, "solr.xml"));
-        }
-        this.defaultCoreName = this.cores.getDefaultCoreName();
-        Log.logInfo("EmbeddedSolrConnector", "detected default solr core: " + this.defaultCoreName);
-        this.defaultCore = this.cores.getCore(this.defaultCoreName); // should be "collection1"
-        if (this.defaultCore == null) {
-            // try again
-            Collection<SolrCore> cores = this.cores.getCores();
-            if (cores.size() > 0) {
-                this.defaultCore = cores.iterator().next();
-                this.defaultCoreName = this.defaultCore.getName();
-            }
-        }
-        if (this.defaultCore == null) {
-            throw new IOException("cannot get the default core; available = " + MemoryControl.available() + ", free = " + MemoryControl.free());
-        }
-        final NamedList<Object> config = new NamedList<Object>();
+        this.instance = instance;
+        this.core = this.instance.getDefaultCore();
         this.requestHandler = new SearchHandler();
-        this.requestHandler.init(config);
-        this.requestHandler.inform(this.defaultCore);
-        super.init(new EmbeddedSolrServer(this.cores, this.defaultCoreName));
+        this.requestHandler.init(new NamedList<Object>());
+        this.requestHandler.inform(this.core);
+        super.init(this.instance.getDefaultServer());
+    }
+    
+    public EmbeddedSolrConnector(SolrEmbeddedInstance instance, String coreName) {
+        super();
+        this.instance = instance;
+        this.core = this.instance.getCore(coreName);
+        this.requestHandler = new SearchHandler();
+        this.requestHandler.init(new NamedList<Object>());
+        this.requestHandler.inform(this.core);
+        super.init(this.instance.getServer(coreName));
     }
 
-    public File getStoragePath() {
-        return this.storagePath;
+    public SolrInstance getInstance() {
+        return this.instance;
     }
     
     public SolrCore getCore() {
-        return this.defaultCore;
+        return this.core;
     }
 
     public SolrConfig getConfig() {
-        return this.defaultCore.getSolrConfig();
+        return this.core.getSolrConfig();
     }
 
+    private static final SolrRequestParsers _parser = new SolrRequestParsers(null);
+    
+    /**
+     * get the size of the index. We override the implementation in SolrServerConnector
+     * because we can do this with more efficiently in a different way for embedded indexes.
+     */
     @Override
     public long getSize() {
-    	// do some magic here to prevent the super.getSize() call which is a bad hack
-        return super.getSize();
+        String threadname = Thread.currentThread().getName();
+        Thread.currentThread().setName("solr query: size");
+        EmbeddedSolrServer ess = (EmbeddedSolrServer) this.server;
+        CoreContainer coreContainer = ess.getCoreContainer();
+        String coreName = coreContainer.getDefaultCoreName();
+        SolrCore core = coreContainer.getCore(coreName);
+        if (core == null) throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "No such core: " + coreName);
+
+        try {
+            SolrParams params = AbstractSolrConnector.catchSuccessQuery;
+            QueryRequest request = new QueryRequest(AbstractSolrConnector.catchSuccessQuery);
+            SolrQueryRequest req = _parser.buildRequestFrom(core, params, request.getContentStreams());
+            String path = "/select"; 
+            req.getContext().put("path", path);
+            SolrQueryResponse rsp = new SolrQueryResponse();
+            SolrRequestInfo.setRequestInfo(new SolrRequestInfo(req, rsp));
+            SolrRequestHandler handler = core.getRequestHandler(path);
+            SearchHandler sh = (SearchHandler) handler;
+            List<SearchComponent> components = sh.getComponents();
+            ResponseBuilder rb = new ResponseBuilder(req, rsp, components);
+            QueryComponent qc = (QueryComponent) components.get(0);
+            qc.prepare(rb);
+            qc.process(rb);
+            qc.finishStage(rb);
+            int hits = rb.getResults().docList.matches();
+            if (req != null) req.close();
+            core.close();
+            SolrRequestInfo.clearRequestInfo();
+            Thread.currentThread().setName(threadname);
+            return hits;
+        } catch (final Throwable e) {
+            log.warn(e);
+            Thread.currentThread().setName(threadname);
+            return 0;
+        }
     }
 
     @Override
     public synchronized void close() {
         try {this.commit(false);} catch (Throwable e) {Log.logException(e);}
         try {super.close();} catch (Throwable e) {Log.logException(e);}
-        try {this.defaultCore.close();} catch (Throwable e) {Log.logException(e);}
-        try {this.cores.shutdown();} catch (Throwable e) {Log.logException(e);}
+        try {this.core.close();} catch (Throwable e) {Log.logException(e);}
     }
 
     public SolrQueryRequest request(final SolrParams params) {
         SolrQueryRequest req = null;
-        req = new SolrQueryRequestBase(this.defaultCore, params){};
+        req = new SolrQueryRequestBase(this.core, params){};
         req.getContext().put("path", SELECT);
         req.getContext().put("webapp", CONTEXT);
         return req;

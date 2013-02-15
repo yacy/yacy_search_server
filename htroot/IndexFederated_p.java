@@ -3,10 +3,6 @@
  *  Copyright 2011 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 25.05.2011 at http://yacy.net
  *
- *  $LastChangedDate: 2011-04-14 00:04:23 +0200 (Do, 14 Apr 2011) $
- *  $LastChangedRevision: 7653 $
- *  $LastChangedBy: orbiter $
- *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -26,17 +22,16 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Iterator;
+import java.util.ArrayList;
 
 import org.apache.solr.common.SolrException;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
 import net.yacy.cora.federate.solr.connector.ShardSelection;
 import net.yacy.cora.federate.solr.connector.ShardSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
-import net.yacy.cora.federate.yacy.ConfigurationSet;
+import net.yacy.cora.federate.solr.instance.SolrRemoteInstance;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.OS;
@@ -95,7 +90,6 @@ public class IndexFederated_p {
             String solrurls = post.get("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr"));
             final boolean solrRemoteIsOnAfterwards = post.getBoolean("solr.indexing.solrremote") & solrurls.length() > 0;
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, solrRemoteIsOnAfterwards);
-            boolean lazy = post.getBoolean("solr.indexing.lazy");
             final BufferedReader r = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(UTF8.getBytes(solrurls))));
             final StringBuilder s = new StringBuilder();
             String s0;
@@ -113,11 +107,8 @@ public class IndexFederated_p {
             }
             solrurls = s.toString().trim();
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, solrurls);
-            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, lazy);
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, post.get("solr.indexing.sharding", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, "modulo-host-md5")));
-            final String schemename = post.get("solr.indexing.schemefile", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE, "solr.keys.default.list"));
-            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE, schemename);
-
+            
             if (solrRemoteWasOn && !solrRemoteIsOnAfterwards) {
                 // switch off
                 try {
@@ -133,7 +124,8 @@ public class IndexFederated_p {
                 final boolean usesolr = sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;
                 try {
                     if (usesolr) {
-                        SolrConnector solr = new ShardSolrConnector(solrurls, ShardSelection.Method.MODULO_HOST_MD5, 10000, true);
+                        ArrayList<SolrRemoteInstance> instances = ShardSolrConnector.getShardInstances(solrurls);
+                        ShardSolrConnector solr = new ShardSolrConnector(instances, ShardSelection.Method.MODULO_HOST_MD5, true);
                         sb.index.fulltext().connectRemoteSolr(solr);
                     } else {
                         sb.index.fulltext().disconnectRemoteSolr();
@@ -149,35 +141,6 @@ public class IndexFederated_p {
             } catch (SolrException e) {
                 Log.logSevere("IndexFederated_p", "change of solr connection failed", e);
             }
-
-            // read index scheme table flags
-            final Iterator<ConfigurationSet.Entry> i = sb.index.fulltext().getSolrScheme().entryIterator();
-            ConfigurationSet.Entry entry;
-            boolean modified = false; // flag to remember changes
-            while (i.hasNext()) {
-                entry = i.next();
-                final String v = post.get("scheme_" + entry.key());
-                final String sfn = post.get("scheme_solrfieldname_" + entry.key());
-                if (sfn != null ) {
-                    // set custom solr field name
-                    if (!sfn.equals(entry.getValue())) {
-                        entry.setValue(sfn);
-                        modified = true;
-                    }
-                }
-                // set enable flag
-                final boolean c = v != null && v.equals("checked");
-                if (entry.enabled() != c) {
-                    entry.setEnable(c);
-                    modified = true;
-                }
-            }
-            if (modified) { // save settings to config file if modified
-                try {
-                    sb.index.fulltext().getSolrScheme().commit();
-                    modified = false;
-                } catch (IOException ex) {}
-            }
         }
 
         // show solr host table
@@ -187,7 +150,7 @@ public class IndexFederated_p {
             prop.put("table", 1);
             final SolrConnector solr = sb.index.fulltext().getRemoteSolr();
             final long[] size = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getSizeList() : new long[]{((RemoteSolrConnector) solr).getSize()};
-            final String[] urls = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getAdminInterfaceList() : new String[]{((RemoteSolrConnector) solr).getAdminInterface()};
+            final String[] urls = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getAdminInterfaceList() : new String[]{((SolrRemoteInstance) ((RemoteSolrConnector) solr).getInstance()).getAdminInterface()};
             boolean dark = false;
             for (int i = 0; i < size.length; i++) {
                 prop.put("table_list_" + i + "_dark", dark ? 1 : 0); dark = !dark;
@@ -197,34 +160,12 @@ public class IndexFederated_p {
             prop.put("table_list", size.length);
         }
 
-        // write scheme
-        final String schemename = sb.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE, "solr.keys.default.list");
-
-        int c = 0;
-        boolean dark = false;
-        // use enum SolrField to keep defined order
-        for(YaCySchema field : YaCySchema.values()) {
-            prop.put("scheme_" + c + "_dark", dark ? 1 : 0); dark = !dark;
-            prop.put("scheme_" + c + "_checked", sb.index.fulltext().getSolrScheme().contains(field.name()) ? 1 : 0);
-            prop.putHTML("scheme_" + c + "_key", field.name());
-            prop.putHTML("scheme_" + c + "_solrfieldname",field.name().equalsIgnoreCase(field.getSolrFieldName()) ? "" : field.getSolrFieldName());
-            if (field.getComment() != null) prop.putHTML("scheme_" + c + "_comment",field.getComment());
-            c++;
-        }
-        prop.put("scheme", c);
-
-        // fill attribute fields
-        // allowed values are: classic, solr, off
-        // federated.service.yacy.indexing.engine = classic
-
         prop.put(SwitchboardConstants.CORE_SERVICE_FULLTEXT + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, false) ? 1 : 0);
         prop.put(SwitchboardConstants.CORE_SERVICE_RWI + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, false) ? 1 : 0);
         prop.put(SwitchboardConstants.CORE_SERVICE_CITATION + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false) ? 1 : 0);
         prop.put("solr.indexing.solrremote.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) ? 1 : 0);
         prop.put("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr").replace(",", "\n"));
-        prop.put("solr.indexing.lazy.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true) ? 1 : 0);
         prop.put("solr.indexing.sharding", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, "modulo-host-md5"));
-        prop.put("solr.indexing.schemefile", schemename);
 
         if ((sb.index.fulltext().connectedURLDb())) {
             prop.put("migrateUrlDbtoSolr", 1);

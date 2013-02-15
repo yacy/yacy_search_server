@@ -72,6 +72,7 @@ import net.yacy.cora.federate.opensearch.SRURSSConnector;
 import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
+import net.yacy.cora.federate.solr.instance.SolrRemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
@@ -105,7 +106,6 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SecondarySearchSuperviser;
 import net.yacy.search.snippet.TextSnippet;
@@ -1059,9 +1059,12 @@ public final class Protocol {
         } else {
             final String solrURL = "http://" + target.getPublicAddress() + "/solr";
             try {
-                SolrConnector solrConnector = new RemoteSolrConnector(solrURL);
+                SolrRemoteInstance instance = new SolrRemoteInstance(solrURL);
+                SolrConnector solrConnector = new RemoteSolrConnector(instance, "solr");
                 rsp = solrConnector.query(solrQuery);
                 docList = rsp.getResults();
+                solrConnector.close();
+                instance.close();
                 // no need to close this here because that sends a commit to remote solr which is not wanted here
             } catch (Throwable e) {
                 Network.log.logInfo("SEARCH failed (solr), remote Peer: " +target.getName() + "/" + target.getPublicAddress() + " (" + e.getMessage() + ")", e);
@@ -1148,7 +1151,7 @@ public final class Protocol {
             // passed all checks, store url
             if (!localsearch) {
                 try {
-                    event.query.getSegment().fulltext().putDocument(YaCySchema.toSolrInputDocument(doc));
+                    event.query.getSegment().fulltext().putDocument(event.query.getSegment().fulltext().getSolrSchema().toSolrInputDocument(doc));
                     ResultURLs.stack(
                         ASCII.String(urlEntry.url().hash()),
                         urlEntry.url().getHost(),

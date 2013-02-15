@@ -213,12 +213,12 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setRows(0);
         params.setStart(0);
         params.setFacet(false);
-        //params.setFields(YaCySchema.id.getSolrFieldName());
+        params.setFields(YaCySchema.id.getSolrFieldName());
 
         // query the server
         QueryResponse rsp = query(params);
         final SolrDocumentList docs = rsp.getResults();
-        return docs.getNumFound();
+        return docs == null ? 0 : docs.getNumFound();
     }
 
     /**

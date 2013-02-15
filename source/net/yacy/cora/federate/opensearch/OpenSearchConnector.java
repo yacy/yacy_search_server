@@ -180,7 +180,7 @@ public class OpenSearchConnector {
             Log.logSevere("OpenSearchConnector.Discover", "Error on connecting to embedded Solr index");
             return false;
         }
-        final boolean metafieldNOTavailable = sb.index.fulltext().getSolrScheme().containsDisabled(YaCySchema.outboundlinks_tag_txt.name());
+        final boolean metafieldNOTavailable = sb.index.fulltext().getSolrSchema().containsDisabled(YaCySchema.outboundlinks_tag_txt.name());
         if (metafieldNOTavailable) {
             Log.logWarning("OpenSearchConnector.Discover", "Solr Schema field outboundlinks_tag_txt must be switched on");
             return false;

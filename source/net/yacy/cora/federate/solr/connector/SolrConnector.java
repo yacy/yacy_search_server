@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
+import net.yacy.cora.federate.solr.instance.SolrInstance;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -35,7 +36,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
 
 public interface SolrConnector extends Iterable<String> /* Iterable of document IDs */ {
-
+    
     /**
      * force a commit
      */

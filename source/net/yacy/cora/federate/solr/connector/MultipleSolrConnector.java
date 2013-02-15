@@ -24,6 +24,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import net.yacy.cora.federate.solr.instance.SolrInstance;
+import net.yacy.cora.federate.solr.instance.SolrRemoteInstance;
+
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
@@ -37,20 +40,20 @@ public class MultipleSolrConnector extends AbstractSolrConnector implements Solr
     private final AddWorker[] worker;
     private final SolrConnector solr;
 
-    public MultipleSolrConnector(final String url, final int connections) throws IOException {
-        this.solr = new RemoteSolrConnector(url);
+    public MultipleSolrConnector(final SolrRemoteInstance instance, final String corename, final int connections) {
+        this.solr = new RemoteSolrConnector(instance, corename);
         this.queue = new ArrayBlockingQueue<SolrInputDocument>(1000);
         this.worker = new AddWorker[connections];
         for (int i = 0; i < connections; i++) {
-            this.worker[i] = new AddWorker(url);
+            this.worker[i] = new AddWorker(instance, corename);
             this.worker[i].start();
         }
     }
 
     private class AddWorker extends Thread {
         private final SolrConnector solr;
-        public AddWorker(final String url) throws IOException {
-            this.solr = new RemoteSolrConnector(url);
+        public AddWorker(final SolrRemoteInstance instance, final String corename) {
+            this.solr = new RemoteSolrConnector(instance, corename);
         }
         @Override
         public void run() {
