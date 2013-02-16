@@ -204,6 +204,7 @@ function resultLine(type, item, linenumber) {
   if (title == "") title = path;
   if (title.length >= 60) title = title.substring(0, 28) + "..." + title.substring(title.length - 29);
   pd = item.pubDate;
+  if (pd == undefined) pd = "";
   if (pd.substring(pd.length - 6) == " +0000") pd = pd.substring(0, pd.length - 6);
   if (pd.substring(pd.length - 9) == " 00:00:00") pd = pd.substring(0, pd.length - 9);
   if (pd.substring(pd.length - 5) == " 2010") pd = pd.substring(0, pd.length - 5);
