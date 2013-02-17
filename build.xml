@@ -256,7 +256,7 @@
     <jar destfile="${lib}/yacycore.jar" basedir="${build}/">
       <manifest>
         <attribute name="Main-Class" value="net.yacy.yacy"/>
-        <attribute name="Class-Path" value="../htroot ${manifest.classpath}"/>
+        <attribute name="Class-Path" value="${manifest.classpath}"/>
       </manifest>
     </jar>
 
