@@ -5,11 +5,8 @@ REM setting startup type for proper restart
 if not exist DATA md DATA
 echo . >DATA\yacy.noconsole
 
-If %1.==CPGEN. GoTo :CPGEN
-
-Rem Generating the proper classpath unsing loops and labels
-Set CLASSPATH=htroot
-For %%X in (lib/*.jar) Do Call %0 CPGEN lib\%%X
+Rem Setting the classpath
+Set CLASSPATH=lib\yacycore.jar;htroot
 
 REM Please change the "javastart" settings in the web-interface "Basic Configuration" -> "Advanced" 
 set jmx=
@@ -64,10 +61,6 @@ if defined priolvl (
 )
 
 GoTo :STARTJAVA
-
-Rem This target is used to concatenate the classpath parts 
-:CPGEN
-Set CLASSPATH=%CLASSPATH%;%2
 
 Rem Target needed to jump to the end of the file
 :END
