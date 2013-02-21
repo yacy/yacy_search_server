@@ -1,5 +1,5 @@
 /**
- *  SolrConfiguration
+ *  CollectionConfiguration
  *  Copyright 2011 by Michael Peter Christen
  *  First released 14.04.2011 at http://yacy.net
  *
@@ -22,7 +22,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.search.index;
+package net.yacy.search.schema;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,10 +44,10 @@ import java.util.Set;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.FailType;
 import net.yacy.cora.federate.solr.ProcessType;
-import net.yacy.cora.federate.solr.YaCySchema;
-import net.yacy.cora.federate.yacy.ConfigurationSet;
+import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -73,19 +73,17 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
 
-public class SolrConfiguration extends ConfigurationSet implements Serializable {
+public class CollectionConfiguration extends SchemaConfiguration implements Serializable {
 
     private static final long serialVersionUID=-499100932212840385L;
 
-    private boolean lazy;
 
     /**
      * initialize with an empty ConfigurationSet which will cause that all the index
      * attributes are used
      */
-    public SolrConfiguration() {
+    public CollectionConfiguration() {
         super();
-        this.lazy = false;
     }
     
     /**
@@ -94,29 +92,49 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
      * or keyword = value lines (while value is a custom Solr field name
      * @param configurationFile
      */
-    public SolrConfiguration(final File configurationFile, boolean lazy) {
+    public CollectionConfiguration(final File configurationFile, boolean lazy) {
         super(configurationFile);
-        this.lazy = lazy;
+        super.lazy = lazy;
         // check consistency: compare with YaCyField enum
         if (this.isEmpty()) return;
         Iterator<Entry> it = this.entryIterator();
-        for (ConfigurationSet.Entry etr = it.next(); it.hasNext(); etr = it.next()) {
+        for (SchemaConfiguration.Entry etr = it.next(); it.hasNext(); etr = it.next()) {
             try {
-                YaCySchema f = YaCySchema.valueOf(etr.key());
+                CollectionSchema f = CollectionSchema.valueOf(etr.key());
                 f.setSolrFieldName(etr.getValue());
             } catch (IllegalArgumentException e) {
-                Log.logFine("SolrSchema", "solr schema file " + configurationFile.getAbsolutePath() + " defines unknown attribute '" + etr.toString() + "'");
+                Log.logFine("SolrCollectionWriter", "solr schema file " + configurationFile.getAbsolutePath() + " defines unknown attribute '" + etr.toString() + "'");
                 it.remove();
             }
         }
         // check consistency the other way: look if all enum constants in SolrField appear in the configuration file
-        for (YaCySchema field: YaCySchema.values()) {
+        for (CollectionSchema field: CollectionSchema.values()) {
         	if (this.get(field.name()) == null) {
-        		Log.logWarning("SolrSchema", " solr schema file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
+        		Log.logWarning("SolrCollectionWriter", " solr schema file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
         	}
         }
     }
-    
+
+    /**
+     * save configuration to file and update enum SolrFields
+     * @throws IOException
+     */
+    public void commit() throws IOException {
+        try {
+            super.commit();
+            // make sure the enum SolrField.SolrFieldName is current
+            Iterator<Entry> it = this.entryIterator();
+            for (SchemaConfiguration.Entry etr = it.next(); it.hasNext(); etr = it.next()) {
+                try {
+                    SchemaDeclaration f = CollectionSchema.valueOf(etr.key());
+                    f.setSolrFieldName(etr.getValue());
+                } catch (IllegalArgumentException e) {
+                    continue;
+                }
+            }
+        } catch (final IOException e) {}
+    }
+
     /**
      * Convert a SolrDocument to a SolrInputDocument.
      * This is useful if a document from the search index shall be modified and indexed again.
@@ -128,110 +146,39 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     public SolrInputDocument toSolrInputDocument(SolrDocument doc) {
         SolrInputDocument sid = new SolrInputDocument();
         Set<String> omitFields = new HashSet<String>();
-        omitFields.add(YaCySchema.coordinate_p.getSolrFieldName() + "_0_coordinate");
-        omitFields.add(YaCySchema.coordinate_p.getSolrFieldName() + "_1_coordinate");
-        omitFields.add(YaCySchema.author_sxt.getSolrFieldName());
+        omitFields.add(CollectionSchema.coordinate_p.getSolrFieldName() + "_0_coordinate");
+        omitFields.add(CollectionSchema.coordinate_p.getSolrFieldName() + "_1_coordinate");
+        omitFields.add(CollectionSchema.author_sxt.getSolrFieldName());
         for (String name: doc.getFieldNames()) {
             if (this.contains(name) && !omitFields.contains(name)) sid.addField(name, doc.getFieldValue(name), 1.0f);
         }
         return sid;
     }
-
-    public boolean contains(YaCySchema field) {
-    	return this.contains(field.name());
-    }
-
-    private void add(final SolrInputDocument doc, final YaCySchema key, final String value) {
-        assert !key.isMultiValued();
-        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && !value.isEmpty()))) key.add(doc, value);
-    }
-
-    private void add(final SolrInputDocument doc, final YaCySchema key, final Date value) {
-        assert !key.isMultiValued();
-        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.getTime() > 0))) key.add(doc, value);
-    }
-
-    private void add(final SolrInputDocument doc, final YaCySchema key, final String[] value) {
-        assert key.isMultiValued();
-        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.length > 0))) key.add(doc, value);
-    }
-
-    private void add(final SolrInputDocument doc, final YaCySchema key, final Integer[] value) {
-        assert key.isMultiValued();
-        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.length > 0))) key.add(doc, value);
-    }
-
-    private void add(final SolrInputDocument doc, final YaCySchema key, final List<?> values) {
-        assert key.isMultiValued();
-        if ((isEmpty() || contains(key)) && (!this.lazy || (values != null && !values.isEmpty()))) key.add(doc, values);
-    }
-
-    private void add(final SolrInputDocument doc, final YaCySchema key, final int value) {
-        assert !key.isMultiValued();
-        if ((isEmpty() || contains(key)) && (!this.lazy || value != 0)) key.add(doc, value);
-    }
-
-    private void add(final SolrInputDocument doc, final YaCySchema key, final long value) {
-        assert !key.isMultiValued();
-        if ((isEmpty() || contains(key)) && (!this.lazy || value != 0)) key.add(doc, value);
-    }
-
-    private void add(final SolrInputDocument doc, final YaCySchema key, final boolean value) {
-        assert !key.isMultiValued();
-        if (isEmpty() || contains(key)) key.add(doc, value);
-    }
-
-    protected static Date getDate(SolrInputDocument doc, final YaCySchema key) {
-        Date x = (Date) doc.getFieldValue(key.getSolrFieldName());
-        Date now = new Date();
-        return (x == null) ? new Date(0) : x.after(now) ? now : x;
-    }
-
-    /**
-     * save configuration to file and update enum SolrFields
-     * @throws IOException
-     */
-    @Override
-    public void commit() throws IOException {
-        try {
-            super.commit();
-            // make sure the enum SolrField.SolrFieldName is current
-            Iterator<Entry> it = this.entryIterator();
-            for (ConfigurationSet.Entry etr = it.next(); it.hasNext(); etr = it.next()) {
-                try {
-                    YaCySchema f = YaCySchema.valueOf(etr.key());
-                    f.setSolrFieldName(etr.getValue());
-                } catch (IllegalArgumentException e) {
-                    continue;
-                }
-            }
-        } catch (final IOException e) {}
-    }
-
-    protected SolrInputDocument metadata2solr(final URIMetadataRow md) {
+    
+    public SolrInputDocument metadata2solr(final URIMetadataRow md) {
 
         final SolrInputDocument doc = new SolrInputDocument();
         final DigestURI digestURI = DigestURI.toDigestURI(md.url());
         boolean allAttr = this.isEmpty();
 
-        if (allAttr || contains(YaCySchema.failreason_t)) add(doc, YaCySchema.failreason_t, "");
-        add(doc, YaCySchema.id, ASCII.String(md.hash()));
+        if (allAttr || contains(CollectionSchema.failreason_t)) add(doc, CollectionSchema.failreason_t, "");
+        add(doc, CollectionSchema.id, ASCII.String(md.hash()));
         String us = digestURI.toNormalform(true);
-        add(doc, YaCySchema.sku, us);
-        if (allAttr || contains(YaCySchema.ip_s)) {
+        add(doc, CollectionSchema.sku, us);
+        if (allAttr || contains(CollectionSchema.ip_s)) {
         	final InetAddress address = digestURI.getInetAddress();
-        	if (address != null) add(doc, YaCySchema.ip_s, address.getHostAddress());
+        	if (address != null) add(doc, CollectionSchema.ip_s, address.getHostAddress());
         }
-        if (allAttr || contains(YaCySchema.url_protocol_s)) add(doc, YaCySchema.url_protocol_s, digestURI.getProtocol());
+        if (allAttr || contains(CollectionSchema.url_protocol_s)) add(doc, CollectionSchema.url_protocol_s, digestURI.getProtocol());
         Map<String, String> searchpart = digestURI.getSearchpartMap();
         if (searchpart == null) {
-            if (allAttr || contains(YaCySchema.url_parameter_i)) add(doc, YaCySchema.url_parameter_i, 0);
+            if (allAttr || contains(CollectionSchema.url_parameter_i)) add(doc, CollectionSchema.url_parameter_i, 0);
         } else {
-            if (allAttr || contains(YaCySchema.url_parameter_i)) add(doc, YaCySchema.url_parameter_i, searchpart.size());
-            if (allAttr || contains(YaCySchema.url_parameter_key_sxt)) add(doc, YaCySchema.url_parameter_key_sxt, searchpart.keySet().toArray(new String[searchpart.size()]));
-            if (allAttr || contains(YaCySchema.url_parameter_value_sxt)) add(doc, YaCySchema.url_parameter_value_sxt,  searchpart.values().toArray(new String[searchpart.size()]));
+            if (allAttr || contains(CollectionSchema.url_parameter_i)) add(doc, CollectionSchema.url_parameter_i, searchpart.size());
+            if (allAttr || contains(CollectionSchema.url_parameter_key_sxt)) add(doc, CollectionSchema.url_parameter_key_sxt, searchpart.keySet().toArray(new String[searchpart.size()]));
+            if (allAttr || contains(CollectionSchema.url_parameter_value_sxt)) add(doc, CollectionSchema.url_parameter_value_sxt,  searchpart.values().toArray(new String[searchpart.size()]));
         }
-        if (allAttr || contains(YaCySchema.url_chars_i)) add(doc, YaCySchema.url_chars_i, us.length());
+        if (allAttr || contains(CollectionSchema.url_chars_i)) add(doc, CollectionSchema.url_chars_i, us.length());
         String host = null;
         if ((host = digestURI.getHost()) != null) {
             String dnc = Domains.getDNC(host);
@@ -239,41 +186,41 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             int p = subdomOrga.lastIndexOf('.');
             String subdom = (p < 0) ? "" : subdomOrga.substring(0, p);
             String orga = (p < 0) ? subdomOrga : subdomOrga.substring(p + 1);
-            if (allAttr || contains(YaCySchema.host_s)) add(doc, YaCySchema.host_s, host);
-            if (allAttr || contains(YaCySchema.host_dnc_s)) add(doc, YaCySchema.host_dnc_s, dnc);
-            if (allAttr || contains(YaCySchema.host_organization_s)) add(doc, YaCySchema.host_organization_s, orga);
-            if (allAttr || contains(YaCySchema.host_organizationdnc_s)) add(doc, YaCySchema.host_organizationdnc_s, orga + '.' + dnc);
-            if (allAttr || contains(YaCySchema.host_subdomain_s)) add(doc, YaCySchema.host_subdomain_s, subdom);
+            if (allAttr || contains(CollectionSchema.host_s)) add(doc, CollectionSchema.host_s, host);
+            if (allAttr || contains(CollectionSchema.host_dnc_s)) add(doc, CollectionSchema.host_dnc_s, dnc);
+            if (allAttr || contains(CollectionSchema.host_organization_s)) add(doc, CollectionSchema.host_organization_s, orga);
+            if (allAttr || contains(CollectionSchema.host_organizationdnc_s)) add(doc, CollectionSchema.host_organizationdnc_s, orga + '.' + dnc);
+            if (allAttr || contains(CollectionSchema.host_subdomain_s)) add(doc, CollectionSchema.host_subdomain_s, subdom);
         }
 
         String title = md.dc_title();
-        if (allAttr || contains(YaCySchema.title)) add(doc, YaCySchema.title, new String[]{title});
-        if (allAttr || contains(YaCySchema.title_count_i)) add(doc, YaCySchema.title_count_i, 1);
-        if (allAttr || contains(YaCySchema.title_chars_val)) {
+        if (allAttr || contains(CollectionSchema.title)) add(doc, CollectionSchema.title, new String[]{title});
+        if (allAttr || contains(CollectionSchema.title_count_i)) add(doc, CollectionSchema.title_count_i, 1);
+        if (allAttr || contains(CollectionSchema.title_chars_val)) {
             Integer[] cv = new Integer[]{new Integer(title.length())};
-            add(doc, YaCySchema.title_chars_val, cv);
+            add(doc, CollectionSchema.title_chars_val, cv);
         }
-        if (allAttr || contains(YaCySchema.title_words_val)) {
+        if (allAttr || contains(CollectionSchema.title_words_val)) {
             Integer[] cv = new Integer[]{new Integer(CommonPattern.SPACE.split(title).length)};
-            add(doc, YaCySchema.title_words_val, cv);
+            add(doc, CollectionSchema.title_words_val, cv);
         }
 
         String description = md.snippet(); if (description == null) description = "";
-        if (allAttr || contains(YaCySchema.description)) add(doc, YaCySchema.description, description);
-        if (allAttr || contains(YaCySchema.description_count_i)) add(doc, YaCySchema.description_count_i, 1);
-        if (allAttr || contains(YaCySchema.description_chars_val)) {
+        if (allAttr || contains(CollectionSchema.description)) add(doc, CollectionSchema.description, description);
+        if (allAttr || contains(CollectionSchema.description_count_i)) add(doc, CollectionSchema.description_count_i, 1);
+        if (allAttr || contains(CollectionSchema.description_chars_val)) {
             Integer[] cv = new Integer[]{new Integer(description.length())};
-            add(doc, YaCySchema.description_chars_val, cv);
+            add(doc, CollectionSchema.description_chars_val, cv);
         }
-        if (allAttr || contains(YaCySchema.description_words_val)) {
+        if (allAttr || contains(CollectionSchema.description_words_val)) {
             Integer[] cv = new Integer[]{new Integer(CommonPattern.SPACE.split(description).length)};
-            add(doc, YaCySchema.description_words_val, cv);
+            add(doc, CollectionSchema.description_words_val, cv);
         }
 
-        if (allAttr || contains(YaCySchema.author)) add(doc, YaCySchema.author, md.dc_creator());
-        if (allAttr || contains(YaCySchema.content_type)) add(doc, YaCySchema.content_type, Response.doctype2mime(digestURI.getFileExtension(), md.doctype()));
-        if (allAttr || contains(YaCySchema.last_modified)) add(doc, YaCySchema.last_modified, md.moddate());
-        if (allAttr || contains(YaCySchema.wordcount_i)) add(doc, YaCySchema.wordcount_i, md.wordCount());
+        if (allAttr || contains(CollectionSchema.author)) add(doc, CollectionSchema.author, md.dc_creator());
+        if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, Response.doctype2mime(digestURI.getFileExtension(), md.doctype()));
+        if (allAttr || contains(CollectionSchema.last_modified)) add(doc, CollectionSchema.last_modified, md.moddate());
+        if (allAttr || contains(CollectionSchema.wordcount_i)) add(doc, CollectionSchema.wordcount_i, md.wordCount());
 
         String keywords = md.dc_subject();
     	Bitfield flags = md.flags();
@@ -282,38 +229,38 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     			if (keywords.indexOf(',') > 0) keywords += ", indexof"; else keywords += " indexof";
     		}
     	}
-        if (allAttr || contains(YaCySchema.keywords)) {
-        	add(doc, YaCySchema.keywords, keywords);
+        if (allAttr || contains(CollectionSchema.keywords)) {
+        	add(doc, CollectionSchema.keywords, keywords);
         }
 
         // path elements of link
-        if (allAttr || contains(YaCySchema.url_paths_sxt)) add(doc, YaCySchema.url_paths_sxt, digestURI.getPaths());
-        if (allAttr || contains(YaCySchema.url_file_ext_s)) add(doc, YaCySchema.url_file_ext_s, digestURI.getFileExtension());
+        if (allAttr || contains(CollectionSchema.url_paths_sxt)) add(doc, CollectionSchema.url_paths_sxt, digestURI.getPaths());
+        if (allAttr || contains(CollectionSchema.url_file_ext_s)) add(doc, CollectionSchema.url_file_ext_s, digestURI.getFileExtension());
 
-        if (allAttr || contains(YaCySchema.imagescount_i)) add(doc, YaCySchema.imagescount_i, md.limage());
-        if (allAttr || contains(YaCySchema.inboundlinkscount_i)) add(doc, YaCySchema.inboundlinkscount_i, md.llocal());
-        if (allAttr || contains(YaCySchema.outboundlinkscount_i)) add(doc, YaCySchema.outboundlinkscount_i, md.lother());
-        if (allAttr || contains(YaCySchema.charset_s)) add(doc, YaCySchema.charset_s, "UTF8");
+        if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, md.limage());
+        if (allAttr || contains(CollectionSchema.inboundlinkscount_i)) add(doc, CollectionSchema.inboundlinkscount_i, md.llocal());
+        if (allAttr || contains(CollectionSchema.outboundlinkscount_i)) add(doc, CollectionSchema.outboundlinkscount_i, md.lother());
+        if (allAttr || contains(CollectionSchema.charset_s)) add(doc, CollectionSchema.charset_s, "UTF8");
 
         // coordinates
         if (md.lat() != 0.0 && md.lon() != 0.0) {
-            if (allAttr || contains(YaCySchema.coordinate_p)) add(doc, YaCySchema.coordinate_p, Double.toString(md.lat()) + "," + Double.toString(md.lon()));
+            if (allAttr || contains(CollectionSchema.coordinate_p)) add(doc, CollectionSchema.coordinate_p, Double.toString(md.lat()) + "," + Double.toString(md.lon()));
         }
-        if (allAttr || contains(YaCySchema.httpstatus_i)) add(doc, YaCySchema.httpstatus_i, 200);
+        if (allAttr || contains(CollectionSchema.httpstatus_i)) add(doc, CollectionSchema.httpstatus_i, 200);
 
         // fields that are in URIMetadataRow additional to yacy2solr basic requirement
-        if (allAttr || contains(YaCySchema.load_date_dt)) add(doc, YaCySchema.load_date_dt, md.loaddate());
-        if (allAttr || contains(YaCySchema.fresh_date_dt)) add(doc, YaCySchema.fresh_date_dt, md.freshdate());
-        if (allAttr || contains(YaCySchema.host_id_s)) add(doc, YaCySchema.host_id_s, md.hosthash());
-        if ((allAttr || contains(YaCySchema.referrer_id_txt)) && md.referrerHash() != null) add(doc, YaCySchema.referrer_id_txt, new String[]{ASCII.String(md.referrerHash())});
-        if (allAttr || contains(YaCySchema.md5_s)) add(doc, YaCySchema.md5_s, md.md5());
-        if (allAttr || contains(YaCySchema.publisher_t)) add(doc, YaCySchema.publisher_t, md.dc_publisher());
-        if ((allAttr || contains(YaCySchema.language_s)) && md.language() != null) add(doc, YaCySchema.language_s, UTF8.String(md.language()));
-        if (allAttr || contains(YaCySchema.size_i)) add(doc, YaCySchema.size_i, md.size());
-        if (allAttr || contains(YaCySchema.audiolinkscount_i)) add(doc, YaCySchema.audiolinkscount_i, md.laudio());
-        if (allAttr || contains(YaCySchema.videolinkscount_i)) add(doc, YaCySchema.videolinkscount_i, md.lvideo());
-        if (allAttr || contains(YaCySchema.applinkscount_i)) add(doc, YaCySchema.applinkscount_i, md.lapp());
-        if (allAttr || contains(YaCySchema.text_t)) {
+        if (allAttr || contains(CollectionSchema.load_date_dt)) add(doc, CollectionSchema.load_date_dt, md.loaddate());
+        if (allAttr || contains(CollectionSchema.fresh_date_dt)) add(doc, CollectionSchema.fresh_date_dt, md.freshdate());
+        if (allAttr || contains(CollectionSchema.host_id_s)) add(doc, CollectionSchema.host_id_s, md.hosthash());
+        if ((allAttr || contains(CollectionSchema.referrer_id_txt)) && md.referrerHash() != null) add(doc, CollectionSchema.referrer_id_txt, new String[]{ASCII.String(md.referrerHash())});
+        if (allAttr || contains(CollectionSchema.md5_s)) add(doc, CollectionSchema.md5_s, md.md5());
+        if (allAttr || contains(CollectionSchema.publisher_t)) add(doc, CollectionSchema.publisher_t, md.dc_publisher());
+        if ((allAttr || contains(CollectionSchema.language_s)) && md.language() != null) add(doc, CollectionSchema.language_s, UTF8.String(md.language()));
+        if (allAttr || contains(CollectionSchema.size_i)) add(doc, CollectionSchema.size_i, md.size());
+        if (allAttr || contains(CollectionSchema.audiolinkscount_i)) add(doc, CollectionSchema.audiolinkscount_i, md.laudio());
+        if (allAttr || contains(CollectionSchema.videolinkscount_i)) add(doc, CollectionSchema.videolinkscount_i, md.lvideo());
+        if (allAttr || contains(CollectionSchema.applinkscount_i)) add(doc, CollectionSchema.applinkscount_i, md.lapp());
+        if (allAttr || contains(CollectionSchema.text_t)) {
         	// construct the text from other metadata parts.
         	// This is necessary here since that is used to search the link when no other data (parsed text body) is available
         	StringBuilder sb = new StringBuilder(120);
@@ -323,7 +270,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         	accText(sb, md.snippet());
         	accText(sb, digestURI.toTokens());
         	accText(sb, keywords);
-        	add(doc, YaCySchema.text_t, sb.toString());
+        	add(doc, CollectionSchema.text_t, sb.toString());
         }
 
         return doc;
@@ -336,7 +283,7 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
     	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
     
-    protected SolrInputDocument yacy2solr(
+    public SolrInputDocument yacy2solr(
             final String id, final CrawlProfile profile, final ResponseHeader responseHeader,
             final Document document, Condenser condenser, DigestURI referrerURL, String language,
             IndexCell<CitationReference> citations) {
@@ -347,15 +294,15 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         
         Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
         
-        add(doc, YaCySchema.id, id);
-        if (allAttr || contains(YaCySchema.failreason_t)) add(doc, YaCySchema.failreason_t, ""); // overwrite a possible fail reason (in case that there was a fail reason before)
+        add(doc, CollectionSchema.id, id);
+        if (allAttr || contains(CollectionSchema.failreason_t)) add(doc, CollectionSchema.failreason_t, ""); // overwrite a possible fail reason (in case that there was a fail reason before)
         String docurl = digestURI.toNormalform(true);
-        add(doc, YaCySchema.sku, docurl);
+        add(doc, CollectionSchema.sku, docurl);
 
-        if ((allAttr || contains(YaCySchema.clickdepth_i)) && citations != null) {
+        if ((allAttr || contains(CollectionSchema.clickdepth_i)) && citations != null) {
             if (digestURI.probablyRootURL()) {
                 boolean lc = this.lazy; this.lazy = false;
-                add(doc, YaCySchema.clickdepth_i, 0);
+                add(doc, CollectionSchema.clickdepth_i, 0);
                 this.lazy = lc;
             } else {
                 // search the citations for references
@@ -363,30 +310,30 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 try {
                     clickdepth = getClickDepth(citations, digestURI);
                 } catch (IOException e) {
-                    add(doc, YaCySchema.clickdepth_i, -1);
+                    add(doc, CollectionSchema.clickdepth_i, -1);
                 }
-                add(doc, YaCySchema.clickdepth_i, clickdepth);
+                add(doc, CollectionSchema.clickdepth_i, clickdepth);
                 if (clickdepth < 0 || clickdepth > 1) {
                     processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
                 }
             }
         }
         
-        if (allAttr || contains(YaCySchema.ip_s)) {
+        if (allAttr || contains(CollectionSchema.ip_s)) {
             final InetAddress address = digestURI.getInetAddress();
-            if (address != null) add(doc, YaCySchema.ip_s, address.getHostAddress());
+            if (address != null) add(doc, CollectionSchema.ip_s, address.getHostAddress());
         }
-        if (allAttr || contains(YaCySchema.collection_sxt) && profile != null) add(doc, YaCySchema.collection_sxt, profile.collections());
-        if (allAttr || contains(YaCySchema.url_protocol_s)) add(doc, YaCySchema.url_protocol_s, digestURI.getProtocol());
+        if (allAttr || contains(CollectionSchema.collection_sxt) && profile != null) add(doc, CollectionSchema.collection_sxt, profile.collections());
+        if (allAttr || contains(CollectionSchema.url_protocol_s)) add(doc, CollectionSchema.url_protocol_s, digestURI.getProtocol());
         Map<String, String> searchpart = digestURI.getSearchpartMap();
         if (searchpart == null) {
-            if (allAttr || contains(YaCySchema.url_parameter_i)) add(doc, YaCySchema.url_parameter_i, 0);
+            if (allAttr || contains(CollectionSchema.url_parameter_i)) add(doc, CollectionSchema.url_parameter_i, 0);
         } else {
-            if (allAttr || contains(YaCySchema.url_parameter_i)) add(doc, YaCySchema.url_parameter_i, searchpart.size());
-            if (allAttr || contains(YaCySchema.url_parameter_key_sxt)) add(doc, YaCySchema.url_parameter_key_sxt, searchpart.keySet().toArray(new String[searchpart.size()]));
-            if (allAttr || contains(YaCySchema.url_parameter_value_sxt)) add(doc, YaCySchema.url_parameter_value_sxt,  searchpart.values().toArray(new String[searchpart.size()]));
+            if (allAttr || contains(CollectionSchema.url_parameter_i)) add(doc, CollectionSchema.url_parameter_i, searchpart.size());
+            if (allAttr || contains(CollectionSchema.url_parameter_key_sxt)) add(doc, CollectionSchema.url_parameter_key_sxt, searchpart.keySet().toArray(new String[searchpart.size()]));
+            if (allAttr || contains(CollectionSchema.url_parameter_value_sxt)) add(doc, CollectionSchema.url_parameter_value_sxt,  searchpart.values().toArray(new String[searchpart.size()]));
         }
-        if (allAttr || contains(YaCySchema.url_chars_i)) add(doc, YaCySchema.url_chars_i, docurl.length());
+        if (allAttr || contains(CollectionSchema.url_chars_i)) add(doc, CollectionSchema.url_chars_i, docurl.length());
         String host = null;
         if ((host = digestURI.getHost()) != null) {
             String dnc = Domains.getDNC(host);
@@ -394,78 +341,78 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             int p = subdomOrga.lastIndexOf('.');
             String subdom = (p < 0) ? "" : subdomOrga.substring(0, p);
             String orga = (p < 0) ? subdomOrga : subdomOrga.substring(p + 1);
-            if (allAttr || contains(YaCySchema.host_s)) add(doc, YaCySchema.host_s, host);
-            if (allAttr || contains(YaCySchema.host_dnc_s)) add(doc, YaCySchema.host_dnc_s, dnc);
-            if (allAttr || contains(YaCySchema.host_organization_s)) add(doc, YaCySchema.host_organization_s, orga);
-            if (allAttr || contains(YaCySchema.host_organizationdnc_s)) add(doc, YaCySchema.host_organizationdnc_s, orga + '.' + dnc);
-            if (allAttr || contains(YaCySchema.host_subdomain_s)) add(doc, YaCySchema.host_subdomain_s, subdom);
+            if (allAttr || contains(CollectionSchema.host_s)) add(doc, CollectionSchema.host_s, host);
+            if (allAttr || contains(CollectionSchema.host_dnc_s)) add(doc, CollectionSchema.host_dnc_s, dnc);
+            if (allAttr || contains(CollectionSchema.host_organization_s)) add(doc, CollectionSchema.host_organization_s, orga);
+            if (allAttr || contains(CollectionSchema.host_organizationdnc_s)) add(doc, CollectionSchema.host_organizationdnc_s, orga + '.' + dnc);
+            if (allAttr || contains(CollectionSchema.host_subdomain_s)) add(doc, CollectionSchema.host_subdomain_s, subdom);
         }
 
         List<String> titles = document.titles();
-        if (allAttr || contains(YaCySchema.title)) add(doc, YaCySchema.title, titles);
-        if (allAttr || contains(YaCySchema.title_count_i)) add(doc, YaCySchema.title_count_i, titles.size());
-        if (allAttr || contains(YaCySchema.title_chars_val)) {
+        if (allAttr || contains(CollectionSchema.title)) add(doc, CollectionSchema.title, titles);
+        if (allAttr || contains(CollectionSchema.title_count_i)) add(doc, CollectionSchema.title_count_i, titles.size());
+        if (allAttr || contains(CollectionSchema.title_chars_val)) {
             ArrayList<Integer> cv = new ArrayList<Integer>(titles.size());
             for (String s: titles) cv.add(new Integer(s.length()));
-            add(doc, YaCySchema.title_chars_val, cv);
+            add(doc, CollectionSchema.title_chars_val, cv);
         }
-        if (allAttr || contains(YaCySchema.title_words_val)) {
+        if (allAttr || contains(CollectionSchema.title_words_val)) {
             ArrayList<Integer> cv = new ArrayList<Integer>(titles.size());
             for (String s: titles) cv.add(new Integer(CommonPattern.SPACE.split(s).length));
-            add(doc, YaCySchema.title_words_val, cv);
+            add(doc, CollectionSchema.title_words_val, cv);
         }
 
         String description = document.dc_description();
         List<String> descriptions = new ArrayList<String>();
         for (String s: CommonPattern.NEWLINE.split(description)) descriptions.add(s);
-        if (allAttr || contains(YaCySchema.description)) add(doc, YaCySchema.description, description);
-        if (allAttr || contains(YaCySchema.description_count_i)) add(doc, YaCySchema.description_count_i, descriptions.size());
-        if (allAttr || contains(YaCySchema.description_chars_val)) {
+        if (allAttr || contains(CollectionSchema.description)) add(doc, CollectionSchema.description, description);
+        if (allAttr || contains(CollectionSchema.description_count_i)) add(doc, CollectionSchema.description_count_i, descriptions.size());
+        if (allAttr || contains(CollectionSchema.description_chars_val)) {
             ArrayList<Integer> cv = new ArrayList<Integer>(descriptions.size());
             for (String s: descriptions) cv.add(new Integer(s.length()));
-            add(doc, YaCySchema.description_chars_val, cv);
+            add(doc, CollectionSchema.description_chars_val, cv);
         }
-        if (allAttr || contains(YaCySchema.description_words_val)) {
+        if (allAttr || contains(CollectionSchema.description_words_val)) {
             ArrayList<Integer> cv = new ArrayList<Integer>(descriptions.size());
             for (String s: descriptions) cv.add(new Integer(CommonPattern.SPACE.split(s).length));
-            add(doc, YaCySchema.description_words_val, cv);
+            add(doc, CollectionSchema.description_words_val, cv);
         }
 
-        if (allAttr || contains(YaCySchema.author)) {
+        if (allAttr || contains(CollectionSchema.author)) {
             String author = document.dc_creator();
             if (author == null || author.length() == 0) author = document.dc_publisher();
-            add(doc, YaCySchema.author, author);
+            add(doc, CollectionSchema.author, author);
         }
-        if (allAttr || contains(YaCySchema.content_type)) add(doc, YaCySchema.content_type, new String[]{document.dc_format()});
-        if (allAttr || contains(YaCySchema.last_modified)) add(doc, YaCySchema.last_modified, responseHeader == null ? new Date() : responseHeader.lastModified());
-        if (allAttr || contains(YaCySchema.keywords)) add(doc, YaCySchema.keywords, document.dc_subject(' '));
+        if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, new String[]{document.dc_format()});
+        if (allAttr || contains(CollectionSchema.last_modified)) add(doc, CollectionSchema.last_modified, responseHeader == null ? new Date() : responseHeader.lastModified());
+        if (allAttr || contains(CollectionSchema.keywords)) add(doc, CollectionSchema.keywords, document.dc_subject(' '));
         String content = document.getTextString();
         if (content == null || content.length() == 0) {
             content = digestURI.toTokens();
         }
-        if (allAttr || contains(YaCySchema.text_t)) add(doc, YaCySchema.text_t, content);
-        if (allAttr || contains(YaCySchema.wordcount_i)) {
+        if (allAttr || contains(CollectionSchema.text_t)) add(doc, CollectionSchema.text_t, content);
+        if (allAttr || contains(CollectionSchema.wordcount_i)) {
             if (content.length() == 0) {
-                add(doc, YaCySchema.wordcount_i, 0);
+                add(doc, CollectionSchema.wordcount_i, 0);
             } else {
                 int contentwc = 1;
                 for (int i = content.length() - 1; i >= 0; i--) if (content.charAt(i) == ' ') contentwc++;
-                add(doc, YaCySchema.wordcount_i, contentwc);
+                add(doc, CollectionSchema.wordcount_i, contentwc);
             }
         }
-        if (allAttr || contains(YaCySchema.synonyms_sxt)) {
+        if (allAttr || contains(CollectionSchema.synonyms_sxt)) {
             List<String> synonyms = condenser.synonyms();
-            add(doc, YaCySchema.synonyms_sxt, synonyms);
+            add(doc, CollectionSchema.synonyms_sxt, synonyms);
         }
-        add(doc, YaCySchema.exact_signature_l, condenser.exactSignature());
-        add(doc, YaCySchema.exact_signature_unique_b, true); // this must be corrected afterwards!
-        add(doc, YaCySchema.fuzzy_signature_l, condenser.fuzzySignature());
-        add(doc, YaCySchema.fuzzy_signature_text_t, condenser.fuzzySignatureText());
-        add(doc, YaCySchema.fuzzy_signature_unique_b, true); // this must be corrected afterwards!
+        add(doc, CollectionSchema.exact_signature_l, condenser.exactSignature());
+        add(doc, CollectionSchema.exact_signature_unique_b, true); // this must be corrected afterwards!
+        add(doc, CollectionSchema.fuzzy_signature_l, condenser.fuzzySignature());
+        add(doc, CollectionSchema.fuzzy_signature_text_t, condenser.fuzzySignatureText());
+        add(doc, CollectionSchema.fuzzy_signature_unique_b, true); // this must be corrected afterwards!
 
         // path elements of link
-        if (allAttr || contains(YaCySchema.url_paths_sxt)) add(doc, YaCySchema.url_paths_sxt, digestURI.getPaths());
-        if (allAttr || contains(YaCySchema.url_file_ext_s)) add(doc, YaCySchema.url_file_ext_s, digestURI.getFileExtension());
+        if (allAttr || contains(CollectionSchema.url_paths_sxt)) add(doc, CollectionSchema.url_paths_sxt, digestURI.getPaths());
+        if (allAttr || contains(CollectionSchema.url_file_ext_s)) add(doc, CollectionSchema.url_file_ext_s, digestURI.getFileExtension());
 
         // get list of all links; they will be shrinked by urls that appear in other fields of the solr schema
         Set<MultiProtocolURI> inboundLinks = document.inboundLinks();
@@ -483,22 +430,22 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             int f = 1;
             String[] hs;
 
-            hs = html.getHeadlines(1); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h1_txt, hs); add(doc, YaCySchema.h1_i, hs.length);
-            hs = html.getHeadlines(2); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h2_txt, hs); add(doc, YaCySchema.h2_i, hs.length);
-            hs = html.getHeadlines(3); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h3_txt, hs); add(doc, YaCySchema.h3_i, hs.length);
-            hs = html.getHeadlines(4); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h4_txt, hs); add(doc, YaCySchema.h4_i, hs.length);
-            hs = html.getHeadlines(5); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h5_txt, hs); add(doc, YaCySchema.h5_i, hs.length);
-            hs = html.getHeadlines(6); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, YaCySchema.h6_txt, hs); add(doc, YaCySchema.h6_i, hs.length);
+            hs = html.getHeadlines(1); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, CollectionSchema.h1_txt, hs); add(doc, CollectionSchema.h1_i, hs.length);
+            hs = html.getHeadlines(2); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, CollectionSchema.h2_txt, hs); add(doc, CollectionSchema.h2_i, hs.length);
+            hs = html.getHeadlines(3); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, CollectionSchema.h3_txt, hs); add(doc, CollectionSchema.h3_i, hs.length);
+            hs = html.getHeadlines(4); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, CollectionSchema.h4_txt, hs); add(doc, CollectionSchema.h4_i, hs.length);
+            hs = html.getHeadlines(5); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, CollectionSchema.h5_txt, hs); add(doc, CollectionSchema.h5_i, hs.length);
+            hs = html.getHeadlines(6); h = h | (hs.length > 0 ? f : 0); f = f * 2; add(doc, CollectionSchema.h6_txt, hs); add(doc, CollectionSchema.h6_i, hs.length);
        
-            add(doc, YaCySchema.htags_i, h);
-            add(doc, YaCySchema.schema_org_breadcrumb_i, html.breadcrumbCount());
+            add(doc, CollectionSchema.htags_i, h);
+            add(doc, CollectionSchema.schema_org_breadcrumb_i, html.breadcrumbCount());
 
             // meta tags: Open Graph properties
             String og;
-            og = html.getMetas().get("og:title"); if (og != null) add(doc, YaCySchema.opengraph_title_t, og);
-            og = html.getMetas().get("og:type"); if (og != null) add(doc, YaCySchema.opengraph_type_s, og);
-            og = html.getMetas().get("og:url"); if (og != null) add(doc, YaCySchema.opengraph_url_s, og);
-            og = html.getMetas().get("og:image"); if (og != null) add(doc, YaCySchema.opengraph_image_s, og);
+            og = html.getMetas().get("og:title"); if (og != null) add(doc, CollectionSchema.opengraph_title_t, og);
+            og = html.getMetas().get("og:type"); if (og != null) add(doc, CollectionSchema.opengraph_type_s, og);
+            og = html.getMetas().get("og:url"); if (og != null) add(doc, CollectionSchema.opengraph_url_s, og);
+            og = html.getMetas().get("og:image"); if (og != null) add(doc, CollectionSchema.opengraph_image_s, og);
 
             // noindex and nofollow attributes
             // from HTML (meta-tag in HTML header: robots)
@@ -537,40 +484,40 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 if (x_robots_tag.indexOf("nofollow",0) >= 0) b += 2048;         // set bit 11
                 if (x_robots_tag.indexOf("unavailable_after",0) >=0) b += 4096; // set bit 12
             }
-            add(doc, YaCySchema.robots_i, b);
+            add(doc, CollectionSchema.robots_i, b);
 
             // meta tags: generator
             final String generator = html.getMetas().get("generator");
-            if (generator != null) add(doc, YaCySchema.metagenerator_t, generator);
+            if (generator != null) add(doc, CollectionSchema.metagenerator_t, generator);
 
             // bold, italic
             final String[] bold = html.getBold();
-            add(doc, YaCySchema.boldcount_i, bold.length);
+            add(doc, CollectionSchema.boldcount_i, bold.length);
             if (bold.length > 0) {
-                add(doc, YaCySchema.bold_txt, bold);
-                if (allAttr || contains(YaCySchema.bold_val)) {
-                    add(doc, YaCySchema.bold_val, html.getBoldCount(bold));
+                add(doc, CollectionSchema.bold_txt, bold);
+                if (allAttr || contains(CollectionSchema.bold_val)) {
+                    add(doc, CollectionSchema.bold_val, html.getBoldCount(bold));
                 }
             }
             final String[] italic = html.getItalic();
-            add(doc, YaCySchema.italiccount_i, italic.length);
+            add(doc, CollectionSchema.italiccount_i, italic.length);
             if (italic.length > 0) {
-                add(doc, YaCySchema.italic_txt, italic);
-                if (allAttr || contains(YaCySchema.italic_val)) {
-                    add(doc, YaCySchema.italic_val, html.getItalicCount(italic));
+                add(doc, CollectionSchema.italic_txt, italic);
+                if (allAttr || contains(CollectionSchema.italic_val)) {
+                    add(doc, CollectionSchema.italic_val, html.getItalicCount(italic));
                 }
             }
             final String[] underline = html.getUnderline();
-            add(doc, YaCySchema.underlinecount_i, underline.length);
+            add(doc, CollectionSchema.underlinecount_i, underline.length);
             if (underline.length > 0) {
-                add(doc, YaCySchema.underline_txt, underline);
-                if (allAttr || contains(YaCySchema.underline_val)) {
-                    add(doc, YaCySchema.underline_val, html.getUnderlineCount(underline));
+                add(doc, CollectionSchema.underline_txt, underline);
+                if (allAttr || contains(CollectionSchema.underline_val)) {
+                    add(doc, CollectionSchema.underline_val, html.getUnderlineCount(underline));
                 }
             }
             final String[] li = html.getLi();
-            add(doc, YaCySchema.licount_i, li.length);
-            if (li.length > 0) add(doc, YaCySchema.li_txt, li);
+            add(doc, CollectionSchema.licount_i, li.length);
+            if (li.length > 0) add(doc, CollectionSchema.li_txt, li);
 
             // images
             final Collection<ImageEntry> imagesc = images.values();
@@ -590,15 +537,15 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 imgalts.add(ie.alt());
                 if (ie.alt() != null && ie.alt().length() > 0) withalt++;
             }
-            if (allAttr || contains(YaCySchema.imagescount_i)) add(doc, YaCySchema.imagescount_i, imgtags.size());
-            if (allAttr || contains(YaCySchema.images_tag_txt)) add(doc, YaCySchema.images_tag_txt, imgtags);
-            if (allAttr || contains(YaCySchema.images_protocol_sxt)) add(doc, YaCySchema.images_protocol_sxt, protocolList2indexedList(imgprots));
-            if (allAttr || contains(YaCySchema.images_urlstub_txt)) add(doc, YaCySchema.images_urlstub_txt, imgstubs);
-            if (allAttr || contains(YaCySchema.images_alt_txt)) add(doc, YaCySchema.images_alt_txt, imgalts);
-            if (allAttr || contains(YaCySchema.images_withalt_i)) add(doc, YaCySchema.images_withalt_i, withalt);
+            if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, imgtags.size());
+            if (allAttr || contains(CollectionSchema.images_tag_txt)) add(doc, CollectionSchema.images_tag_txt, imgtags);
+            if (allAttr || contains(CollectionSchema.images_protocol_sxt)) add(doc, CollectionSchema.images_protocol_sxt, protocolList2indexedList(imgprots));
+            if (allAttr || contains(CollectionSchema.images_urlstub_txt)) add(doc, CollectionSchema.images_urlstub_txt, imgstubs);
+            if (allAttr || contains(CollectionSchema.images_alt_txt)) add(doc, CollectionSchema.images_alt_txt, imgalts);
+            if (allAttr || contains(CollectionSchema.images_withalt_i)) add(doc, CollectionSchema.images_withalt_i, withalt);
 
             // style sheets
-            if (allAttr || contains(YaCySchema.css_tag_txt)) {
+            if (allAttr || contains(CollectionSchema.css_tag_txt)) {
                 final Map<MultiProtocolURI, String> csss = html.getCSS();
                 final String[] css_tag = new String[csss.size()];
                 final String[] css_url = new String[csss.size()];
@@ -613,13 +560,13 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                     css_url[c] = cssurl;
                     c++;
                 }
-                add(doc, YaCySchema.csscount_i, css_tag.length);
-                if (css_tag.length > 0) add(doc, YaCySchema.css_tag_txt, css_tag);
-                if (css_url.length > 0) add(doc, YaCySchema.css_url_txt, css_url);
+                add(doc, CollectionSchema.csscount_i, css_tag.length);
+                if (css_tag.length > 0) add(doc, CollectionSchema.css_tag_txt, css_tag);
+                if (css_url.length > 0) add(doc, CollectionSchema.css_url_txt, css_url);
             }
 
             // Scripts
-            if (allAttr || contains(YaCySchema.scripts_txt)) {
+            if (allAttr || contains(CollectionSchema.scripts_txt)) {
                 final Set<MultiProtocolURI> scriptss = html.getScript();
                 final String[] scripts = new String[scriptss.size()];
                 c = 0;
@@ -628,12 +575,12 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                     outboundLinks.remove(u);
                     scripts[c++] = u.toNormalform(false);
                 }
-                add(doc, YaCySchema.scriptscount_i, scripts.length);
-                if (scripts.length > 0) add(doc, YaCySchema.scripts_txt, scripts);
+                add(doc, CollectionSchema.scriptscount_i, scripts.length);
+                if (scripts.length > 0) add(doc, CollectionSchema.scripts_txt, scripts);
             }
 
             // Frames
-            if (allAttr || contains(YaCySchema.frames_txt)) {
+            if (allAttr || contains(CollectionSchema.frames_txt)) {
                 final Set<MultiProtocolURI> framess = html.getFrames();
                 final String[] frames = new String[framess.size()];
                 c = 0;
@@ -642,12 +589,12 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                     outboundLinks.remove(u);
                     frames[c++] = u.toNormalform(false);
                 }
-                add(doc, YaCySchema.framesscount_i, frames.length);
-                if (frames.length > 0) add(doc, YaCySchema.frames_txt, frames);
+                add(doc, CollectionSchema.framesscount_i, frames.length);
+                if (frames.length > 0) add(doc, CollectionSchema.frames_txt, frames);
             }
 
             // IFrames
-            if (allAttr || contains(YaCySchema.iframes_txt)) {
+            if (allAttr || contains(CollectionSchema.iframes_txt)) {
                 final Set<MultiProtocolURI> iframess = html.getIFrames();
                 final String[] iframes = new String[iframess.size()];
                 c = 0;
@@ -656,26 +603,26 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                     outboundLinks.remove(u);
                     iframes[c++] = u.toNormalform(false);
                 }
-                add(doc, YaCySchema.iframesscount_i, iframes.length);
-                if (iframes.length > 0) add(doc, YaCySchema.iframes_txt, iframes);
+                add(doc, CollectionSchema.iframesscount_i, iframes.length);
+                if (iframes.length > 0) add(doc, CollectionSchema.iframes_txt, iframes);
             }
 
             // canonical tag
-            if (allAttr || contains(YaCySchema.canonical_t)) {
+            if (allAttr || contains(CollectionSchema.canonical_t)) {
                 final MultiProtocolURI canonical = html.getCanonical();
                 if (canonical != null) {
                     inboundLinks.remove(canonical);
                     outboundLinks.remove(canonical);
-                    add(doc, YaCySchema.canonical_t, canonical.toNormalform(false));
+                    add(doc, CollectionSchema.canonical_t, canonical.toNormalform(false));
                     // set a flag if this is equal to sku
-                    if (contains(YaCySchema.canonical_equal_sku_b) && canonical.equals(docurl)) {
-                        add(doc, YaCySchema.canonical_equal_sku_b, true);
+                    if (contains(CollectionSchema.canonical_equal_sku_b) && canonical.equals(docurl)) {
+                        add(doc, CollectionSchema.canonical_equal_sku_b, true);
                     }
                 }
             }
 
             // meta refresh tag
-            if (allAttr || contains(YaCySchema.refresh_s)) {
+            if (allAttr || contains(CollectionSchema.refresh_s)) {
                 String refresh = html.getRefreshPath();
                 if (refresh != null && refresh.length() > 0) {
                     MultiProtocolURI refreshURL;
@@ -684,23 +631,23 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                         if (refreshURL != null) {
                             inboundLinks.remove(refreshURL);
                             outboundLinks.remove(refreshURL);
-                            add(doc, YaCySchema.refresh_s, refreshURL.toNormalform(false));
+                            add(doc, CollectionSchema.refresh_s, refreshURL.toNormalform(false));
                         }
                     } catch (MalformedURLException e) {
-                        add(doc, YaCySchema.refresh_s, refresh);
+                        add(doc, CollectionSchema.refresh_s, refresh);
                     }
                 }
             }
 
             // flash embedded
-            if (allAttr || contains(YaCySchema.flash_b)) {
+            if (allAttr || contains(CollectionSchema.flash_b)) {
                 MultiProtocolURI[] flashURLs = html.getFlash();
                 for (MultiProtocolURI u: flashURLs) {
                     // remove all flash links from ibound/outbound links
                     inboundLinks.remove(u);
                     outboundLinks.remove(u);
                 }
-                add(doc, YaCySchema.flash_b, flashURLs.length > 0);
+                add(doc, CollectionSchema.flash_b, flashURLs.length > 0);
             }
 
             // generic evaluation pattern
@@ -708,21 +655,21 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
                 if (allAttr || contains("ext_" + model + "_txt")) {
                     final String[] scorenames = html.getEvaluationModelScoreNames(model);
                     if (scorenames.length > 0) {
-                        add(doc, YaCySchema.valueOf("ext_" + model + "_txt"), scorenames);
-                        add(doc, YaCySchema.valueOf("ext_" + model + "_val"), html.getEvaluationModelScoreCounts(model, scorenames));
+                        add(doc, CollectionSchema.valueOf("ext_" + model + "_txt"), scorenames);
+                        add(doc, CollectionSchema.valueOf("ext_" + model + "_val"), html.getEvaluationModelScoreCounts(model, scorenames));
                     }
                 }
             }
 
             // response time
-            add(doc, YaCySchema.responsetime_i, responseHeader == null ? 0 : Integer.parseInt(responseHeader.get(HeaderFramework.RESPONSE_TIME_MILLIS, "0")));
+            add(doc, CollectionSchema.responsetime_i, responseHeader == null ? 0 : Integer.parseInt(responseHeader.get(HeaderFramework.RESPONSE_TIME_MILLIS, "0")));
         }
 
         // list all links
         final Map<MultiProtocolURI, Properties> alllinks = document.getAnchors();
         c = 0;
-        if (allAttr || contains(YaCySchema.inboundlinkscount_i)) add(doc, YaCySchema.inboundlinkscount_i, inboundLinks.size());
-        if (allAttr || contains(YaCySchema.inboundlinksnofollowcount_i)) add(doc, YaCySchema.inboundlinksnofollowcount_i, document.inboundLinkNofollowCount());
+        if (allAttr || contains(CollectionSchema.inboundlinkscount_i)) add(doc, CollectionSchema.inboundlinkscount_i, inboundLinks.size());
+        if (allAttr || contains(CollectionSchema.inboundlinksnofollowcount_i)) add(doc, CollectionSchema.inboundlinksnofollowcount_i, document.inboundLinkNofollowCount());
         final List<String> inboundlinksTag = new ArrayList<String>(inboundLinks.size());
         final List<String> inboundlinksURLProtocol = new ArrayList<String>(inboundLinks.size());
         final List<String> inboundlinksURLStub = new ArrayList<String>(inboundLinks.size());
@@ -757,20 +704,20 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             inboundlinksAltTag.add(ientry == null ? "" : ientry.alt());
             c++;
         }
-        if (allAttr || contains(YaCySchema.inboundlinks_tag_txt)) add(doc, YaCySchema.inboundlinks_tag_txt, inboundlinksTag);
-        if (allAttr || contains(YaCySchema.inboundlinks_protocol_sxt)) add(doc, YaCySchema.inboundlinks_protocol_sxt, protocolList2indexedList(inboundlinksURLProtocol));
-        if (allAttr || contains(YaCySchema.inboundlinks_urlstub_txt)) add(doc, YaCySchema.inboundlinks_urlstub_txt, inboundlinksURLStub);
-        if (allAttr || contains(YaCySchema.inboundlinks_name_txt)) add(doc, YaCySchema.inboundlinks_name_txt, inboundlinksName);
-        if (allAttr || contains(YaCySchema.inboundlinks_rel_sxt)) add(doc, YaCySchema.inboundlinks_rel_sxt, inboundlinksRel);
-        if (allAttr || contains(YaCySchema.inboundlinks_relflags_val)) add(doc, YaCySchema.inboundlinks_relflags_val, relEval(inboundlinksRel));
-        if (allAttr || contains(YaCySchema.inboundlinks_text_txt)) add(doc, YaCySchema.inboundlinks_text_txt, inboundlinksText);
-        if (allAttr || contains(YaCySchema.inboundlinks_text_chars_val)) add(doc, YaCySchema.inboundlinks_text_chars_val, inboundlinksTextChars);
-        if (allAttr || contains(YaCySchema.inboundlinks_text_words_val)) add(doc, YaCySchema.inboundlinks_text_words_val, inboundlinksTextWords);
-        if (allAttr || contains(YaCySchema.inboundlinks_alttag_txt)) add(doc, YaCySchema.inboundlinks_alttag_txt, inboundlinksAltTag);
+        if (allAttr || contains(CollectionSchema.inboundlinks_tag_txt)) add(doc, CollectionSchema.inboundlinks_tag_txt, inboundlinksTag);
+        if (allAttr || contains(CollectionSchema.inboundlinks_protocol_sxt)) add(doc, CollectionSchema.inboundlinks_protocol_sxt, protocolList2indexedList(inboundlinksURLProtocol));
+        if (allAttr || contains(CollectionSchema.inboundlinks_urlstub_txt)) add(doc, CollectionSchema.inboundlinks_urlstub_txt, inboundlinksURLStub);
+        if (allAttr || contains(CollectionSchema.inboundlinks_name_txt)) add(doc, CollectionSchema.inboundlinks_name_txt, inboundlinksName);
+        if (allAttr || contains(CollectionSchema.inboundlinks_rel_sxt)) add(doc, CollectionSchema.inboundlinks_rel_sxt, inboundlinksRel);
+        if (allAttr || contains(CollectionSchema.inboundlinks_relflags_val)) add(doc, CollectionSchema.inboundlinks_relflags_val, relEval(inboundlinksRel));
+        if (allAttr || contains(CollectionSchema.inboundlinks_text_txt)) add(doc, CollectionSchema.inboundlinks_text_txt, inboundlinksText);
+        if (allAttr || contains(CollectionSchema.inboundlinks_text_chars_val)) add(doc, CollectionSchema.inboundlinks_text_chars_val, inboundlinksTextChars);
+        if (allAttr || contains(CollectionSchema.inboundlinks_text_words_val)) add(doc, CollectionSchema.inboundlinks_text_words_val, inboundlinksTextWords);
+        if (allAttr || contains(CollectionSchema.inboundlinks_alttag_txt)) add(doc, CollectionSchema.inboundlinks_alttag_txt, inboundlinksAltTag);
 
         c = 0;
-        if (allAttr || contains(YaCySchema.outboundlinkscount_i)) add(doc, YaCySchema.outboundlinkscount_i, outboundLinks.size());
-        if (allAttr || contains(YaCySchema.outboundlinksnofollowcount_i)) add(doc, YaCySchema.outboundlinksnofollowcount_i, document.outboundLinkNofollowCount());
+        if (allAttr || contains(CollectionSchema.outboundlinkscount_i)) add(doc, CollectionSchema.outboundlinkscount_i, outboundLinks.size());
+        if (allAttr || contains(CollectionSchema.outboundlinksnofollowcount_i)) add(doc, CollectionSchema.outboundlinksnofollowcount_i, document.outboundLinkNofollowCount());
         final List<String> outboundlinksTag = new ArrayList<String>(outboundLinks.size());
         final List<String> outboundlinksURLProtocol = new ArrayList<String>(outboundLinks.size());
         final List<String> outboundlinksURLStub = new ArrayList<String>(outboundLinks.size());
@@ -805,42 +752,42 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
             inboundlinksAltTag.add(ientry == null ? "" : ientry.alt());
             c++;
         }
-        if (allAttr || contains(YaCySchema.outboundlinks_tag_txt)) add(doc, YaCySchema.outboundlinks_tag_txt, outboundlinksTag);
-        if (allAttr || contains(YaCySchema.outboundlinks_protocol_sxt)) add(doc, YaCySchema.outboundlinks_protocol_sxt, protocolList2indexedList(outboundlinksURLProtocol));
-        if (allAttr || contains(YaCySchema.outboundlinks_urlstub_txt)) add(doc, YaCySchema.outboundlinks_urlstub_txt, outboundlinksURLStub);
-        if (allAttr || contains(YaCySchema.outboundlinks_name_txt)) add(doc, YaCySchema.outboundlinks_name_txt, outboundlinksName);
-        if (allAttr || contains(YaCySchema.outboundlinks_rel_sxt)) add(doc, YaCySchema.outboundlinks_rel_sxt, outboundlinksRel);
-        if (allAttr || contains(YaCySchema.outboundlinks_relflags_val)) add(doc, YaCySchema.outboundlinks_relflags_val, relEval(outboundlinksRel));
-        if (allAttr || contains(YaCySchema.outboundlinks_text_txt)) add(doc, YaCySchema.outboundlinks_text_txt, outboundlinksText);
-        if (allAttr || contains(YaCySchema.outboundlinks_text_chars_val)) add(doc, YaCySchema.outboundlinks_text_chars_val, outboundlinksTextChars);
-        if (allAttr || contains(YaCySchema.outboundlinks_text_words_val)) add(doc, YaCySchema.outboundlinks_text_words_val, outboundlinksTextWords);
-        if (allAttr || contains(YaCySchema.outboundlinks_alttag_txt)) add(doc, YaCySchema.outboundlinks_alttag_txt, outboundlinksAltTag);
+        if (allAttr || contains(CollectionSchema.outboundlinks_tag_txt)) add(doc, CollectionSchema.outboundlinks_tag_txt, outboundlinksTag);
+        if (allAttr || contains(CollectionSchema.outboundlinks_protocol_sxt)) add(doc, CollectionSchema.outboundlinks_protocol_sxt, protocolList2indexedList(outboundlinksURLProtocol));
+        if (allAttr || contains(CollectionSchema.outboundlinks_urlstub_txt)) add(doc, CollectionSchema.outboundlinks_urlstub_txt, outboundlinksURLStub);
+        if (allAttr || contains(CollectionSchema.outboundlinks_name_txt)) add(doc, CollectionSchema.outboundlinks_name_txt, outboundlinksName);
+        if (allAttr || contains(CollectionSchema.outboundlinks_rel_sxt)) add(doc, CollectionSchema.outboundlinks_rel_sxt, outboundlinksRel);
+        if (allAttr || contains(CollectionSchema.outboundlinks_relflags_val)) add(doc, CollectionSchema.outboundlinks_relflags_val, relEval(outboundlinksRel));
+        if (allAttr || contains(CollectionSchema.outboundlinks_text_txt)) add(doc, CollectionSchema.outboundlinks_text_txt, outboundlinksText);
+        if (allAttr || contains(CollectionSchema.outboundlinks_text_chars_val)) add(doc, CollectionSchema.outboundlinks_text_chars_val, outboundlinksTextChars);
+        if (allAttr || contains(CollectionSchema.outboundlinks_text_words_val)) add(doc, CollectionSchema.outboundlinks_text_words_val, outboundlinksTextWords);
+        if (allAttr || contains(CollectionSchema.outboundlinks_alttag_txt)) add(doc, CollectionSchema.outboundlinks_alttag_txt, outboundlinksAltTag);
 
         // charset
-        if (allAttr || contains(YaCySchema.charset_s)) add(doc, YaCySchema.charset_s, document.getCharset());
+        if (allAttr || contains(CollectionSchema.charset_s)) add(doc, CollectionSchema.charset_s, document.getCharset());
 
         // coordinates
         if (document.lat() != 0.0 && document.lon() != 0.0) {
-            if (allAttr || contains(YaCySchema.coordinate_p)) add(doc, YaCySchema.coordinate_p, Double.toString(document.lat()) + "," + Double.toString(document.lon()));
+            if (allAttr || contains(CollectionSchema.coordinate_p)) add(doc, CollectionSchema.coordinate_p, Double.toString(document.lat()) + "," + Double.toString(document.lon()));
         }
-        if (allAttr || contains(YaCySchema.httpstatus_i)) add(doc, YaCySchema.httpstatus_i, responseHeader == null ? 200 : responseHeader.getStatusCode());
+        if (allAttr || contains(CollectionSchema.httpstatus_i)) add(doc, CollectionSchema.httpstatus_i, responseHeader == null ? 200 : responseHeader.getStatusCode());
 
         // fields that were additionally in URIMetadataRow
         Date loadDate = new Date();
         Date modDate = responseHeader == null ? new Date() : responseHeader.lastModified();
         if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
         int size = (int) Math.max(document.dc_source().length(), responseHeader == null ? 0 : responseHeader.getContentLength());
-        if (allAttr || contains(YaCySchema.load_date_dt)) add(doc, YaCySchema.load_date_dt, loadDate);
-        if (allAttr || contains(YaCySchema.fresh_date_dt)) add(doc, YaCySchema.fresh_date_dt, new Date(loadDate.getTime() + Math.max(0, loadDate.getTime() - modDate.getTime()) / 2)); // freshdate, computed with Proxy-TTL formula
-        if (allAttr || contains(YaCySchema.host_id_s)) add(doc, YaCySchema.host_id_s, document.dc_source().hosthash());
-        if ((allAttr || contains(YaCySchema.referrer_id_txt)) && referrerURL != null) add(doc, YaCySchema.referrer_id_txt, new String[]{ASCII.String(referrerURL.hash())});
+        if (allAttr || contains(CollectionSchema.load_date_dt)) add(doc, CollectionSchema.load_date_dt, loadDate);
+        if (allAttr || contains(CollectionSchema.fresh_date_dt)) add(doc, CollectionSchema.fresh_date_dt, new Date(loadDate.getTime() + Math.max(0, loadDate.getTime() - modDate.getTime()) / 2)); // freshdate, computed with Proxy-TTL formula
+        if (allAttr || contains(CollectionSchema.host_id_s)) add(doc, CollectionSchema.host_id_s, document.dc_source().hosthash());
+        if ((allAttr || contains(CollectionSchema.referrer_id_txt)) && referrerURL != null) add(doc, CollectionSchema.referrer_id_txt, new String[]{ASCII.String(referrerURL.hash())});
         //if (allAttr || contains(SolrField.md5_s)) add(solrdoc, SolrField.md5_s, new byte[0]);
-        if (allAttr || contains(YaCySchema.publisher_t)) add(doc, YaCySchema.publisher_t, document.dc_publisher());
-        if ((allAttr || contains(YaCySchema.language_s)) && language != null) add(doc, YaCySchema.language_s, language);
-        if (allAttr || contains(YaCySchema.size_i)) add(doc, YaCySchema.size_i, size);
-        if (allAttr || contains(YaCySchema.audiolinkscount_i)) add(doc, YaCySchema.audiolinkscount_i, document.getAudiolinks().size());
-        if (allAttr || contains(YaCySchema.videolinkscount_i)) add(doc, YaCySchema.videolinkscount_i, document.getVideolinks().size());
-        if (allAttr || contains(YaCySchema.applinkscount_i)) add(doc, YaCySchema.applinkscount_i, document.getApplinks().size());
+        if (allAttr || contains(CollectionSchema.publisher_t)) add(doc, CollectionSchema.publisher_t, document.dc_publisher());
+        if ((allAttr || contains(CollectionSchema.language_s)) && language != null) add(doc, CollectionSchema.language_s, language);
+        if (allAttr || contains(CollectionSchema.size_i)) add(doc, CollectionSchema.size_i, size);
+        if (allAttr || contains(CollectionSchema.audiolinkscount_i)) add(doc, CollectionSchema.audiolinkscount_i, document.getAudiolinks().size());
+        if (allAttr || contains(CollectionSchema.videolinkscount_i)) add(doc, CollectionSchema.videolinkscount_i, document.getVideolinks().size());
+        if (allAttr || contains(CollectionSchema.applinkscount_i)) add(doc, CollectionSchema.applinkscount_i, document.getApplinks().size());
 
         // write generic navigation
         // there are no pre-defined solr fields for navigation because the vocabulary is generic
@@ -849,13 +796,13 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
         for (Map.Entry<String, Set<String>> facet: document.getGenericFacets().entrySet()) {
             String facetName = facet.getKey();
             Set<String> facetValues = facet.getValue();
-            doc.setField(YaCySchema.VOCABULARY_PREFIX + facetName + YaCySchema.VOCABULARY_SUFFIX, facetValues.toArray(new String[facetValues.size()]));
+            doc.setField(CollectionSchema.VOCABULARY_PREFIX + facetName + CollectionSchema.VOCABULARY_SUFFIX, facetValues.toArray(new String[facetValues.size()]));
         }
 
-        if (allAttr || contains(YaCySchema.process_sxt)) {
+        if (allAttr || contains(CollectionSchema.process_sxt)) {
             List<String> p = new ArrayList<String>();
             for (ProcessType t: processTypes) p.add(t.name());
-            add(doc, YaCySchema.process_sxt, p);
+            add(doc, CollectionSchema.process_sxt, p);
         }
         return doc;
     }
@@ -970,20 +917,20 @@ public class SolrConfiguration extends ConfigurationSet implements Serializable 
      */
     public SolrInputDocument err(final DigestURI digestURI, final String failReason, final FailType failType, final int httpstatus) throws IOException {
         final SolrInputDocument solrdoc = new SolrInputDocument();
-        add(solrdoc, YaCySchema.id, ASCII.String(digestURI.hash()));
-        add(solrdoc, YaCySchema.sku, digestURI.toNormalform(true));
+        add(solrdoc, CollectionSchema.id, ASCII.String(digestURI.hash()));
+        add(solrdoc, CollectionSchema.sku, digestURI.toNormalform(true));
         final InetAddress address = digestURI.getInetAddress();
-        if (contains(YaCySchema.ip_s) && address != null) add(solrdoc, YaCySchema.ip_s, address.getHostAddress());
-        if (contains(YaCySchema.host_s) && digestURI.getHost() != null) add(solrdoc, YaCySchema.host_s, digestURI.getHost());
+        if (contains(CollectionSchema.ip_s) && address != null) add(solrdoc, CollectionSchema.ip_s, address.getHostAddress());
+        if (contains(CollectionSchema.host_s) && digestURI.getHost() != null) add(solrdoc, CollectionSchema.host_s, digestURI.getHost());
 
         // path elements of link
-        if (contains(YaCySchema.url_paths_sxt)) add(solrdoc, YaCySchema.url_paths_sxt, digestURI.getPaths());
-        if (contains(YaCySchema.url_file_ext_s)) add(solrdoc, YaCySchema.url_file_ext_s, digestURI.getFileExtension());
+        if (contains(CollectionSchema.url_paths_sxt)) add(solrdoc, CollectionSchema.url_paths_sxt, digestURI.getPaths());
+        if (contains(CollectionSchema.url_file_ext_s)) add(solrdoc, CollectionSchema.url_file_ext_s, digestURI.getFileExtension());
         
         // fail reason and status
-        if (contains(YaCySchema.failreason_t)) add(solrdoc, YaCySchema.failreason_t, failReason);
-        if (contains(YaCySchema.failtype_s)) add(solrdoc, YaCySchema.failtype_s, failType.name());
-        if (contains(YaCySchema.httpstatus_i)) add(solrdoc, YaCySchema.httpstatus_i, httpstatus);
+        if (contains(CollectionSchema.failreason_t)) add(solrdoc, CollectionSchema.failreason_t, failReason);
+        if (contains(CollectionSchema.failtype_s)) add(solrdoc, CollectionSchema.failtype_s, failType.name());
+        if (contains(CollectionSchema.httpstatus_i)) add(solrdoc, CollectionSchema.httpstatus_i, httpstatus);
         return solrdoc;
     }
 

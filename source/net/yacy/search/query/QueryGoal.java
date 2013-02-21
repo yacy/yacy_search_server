@@ -28,13 +28,13 @@ import java.util.Map;
 import java.util.SortedSet;
 
 import net.yacy.cora.federate.solr.Boost;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.SolrConfiguration;
+import net.yacy.search.schema.CollectionConfiguration;
+import net.yacy.search.schema.CollectionSchema;
 
 public class QueryGoal {
 
@@ -203,7 +203,7 @@ public class QueryGoal {
         for (final byte[] b: blues) this.include_hashes.remove(b);
     }
     
-    public StringBuilder solrQueryString(SolrConfiguration configuration) {
+    public StringBuilder solrQueryString(CollectionConfiguration configuration) {
         final StringBuilder q = new StringBuilder(80);
 
         // parse special requests
@@ -230,8 +230,8 @@ public class QueryGoal {
         // combine these queries for all relevant fields
         wc = 0;
         Float boost;
-        for (Map.Entry<YaCySchema,Float> entry: Boost.RANKING.entrySet()) {
-            YaCySchema field = entry.getKey();
+        for (Map.Entry<CollectionSchema,Float> entry: Boost.RANKING.entrySet()) {
+            CollectionSchema field = entry.getKey();
             if (entry.getValue().floatValue() < 0.0f) continue;
             if (configuration != null && !configuration.contains(field.getSolrFieldName())) continue;
             if (wc > 0) q.append(" OR ");
@@ -246,7 +246,7 @@ public class QueryGoal {
         q.append(')');
 
         // add filter to prevent that results come from failed urls
-        q.append(" AND ").append(YaCySchema.httpstatus_i.getSolrFieldName()).append(":200");
+        q.append(" AND ").append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200");
         //q.append(" AND -").append(YaCySchema.failreason_t.getSolrFieldName()).append(":[* TO *]");
 
         return q;

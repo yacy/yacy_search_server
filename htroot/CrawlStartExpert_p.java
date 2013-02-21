@@ -24,11 +24,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -76,7 +76,7 @@ public class CrawlStartExpert_p {
         prop.put("xdstopwChecked", env.getConfigBool("xdstopw", true) ? "1" : "0");
         prop.put("xpstopwChecked", env.getConfigBool("xpstopw", true) ? "1" : "0");
 
-        boolean collectionEnabled = sb.index.fulltext().getSolrSchema().isEmpty() || sb.index.fulltext().getSolrSchema().contains(YaCySchema.collection_sxt);
+        boolean collectionEnabled = sb.index.fulltext().getDefaultConfiguration().isEmpty() || sb.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.collection_sxt);
         prop.put("collectionEnabled", collectionEnabled ? 1 : 0);
         prop.put("collection", collectionEnabled ? "user" : "");
 

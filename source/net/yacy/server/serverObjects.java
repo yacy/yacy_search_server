@@ -61,12 +61,12 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.search.Switchboard;
+import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
@@ -513,9 +513,9 @@ public class serverObjects implements Serializable, Cloneable {
         return param.toString();
     }
 
-    public SolrParams toSolrParams(YaCySchema[] facets) {
+    public SolrParams toSolrParams(CollectionSchema[] facets) {
         // check if all required post fields are there
-        if (!this.containsKey(CommonParams.DF)) this.put(CommonParams.DF, YaCySchema.text_t.getSolrFieldName()); // set default field to the text field
+        if (!this.containsKey(CommonParams.DF)) this.put(CommonParams.DF, CollectionSchema.text_t.getSolrFieldName()); // set default field to the text field
         if (!this.containsKey(CommonParams.START)) this.put(CommonParams.START, "0"); // set default start item
         if (!this.containsKey(CommonParams.ROWS)) this.put(CommonParams.ROWS, "10"); // set default number of search results
 

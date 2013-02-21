@@ -1,5 +1,5 @@
 /**
- *  SolrRemoteInstance
+ *  RemoteInstance
  *  Copyright 2013 by Michael Peter Christen
  *  First released 13.02.2013 at http://yacy.net
  *
@@ -25,10 +25,14 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphSchema;
 
 import org.apache.commons.httpclient.HttpException;
 import org.apache.http.Header;
@@ -53,25 +57,31 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 
-public class SolrRemoteInstance implements SolrInstance {
+public class RemoteInstance implements SolrInstance {
     
     private String solrurl;
-    private DefaultHttpClient client;
+    private final DefaultHttpClient client;
     
-    private String defaultCoreName;
-    private HttpSolrServer defaultServer;
-    private Collection<String> coreNames;
+    private final String defaultCoreName;
+    private final HttpSolrServer defaultServer;
+    private final Collection<String> coreNames;
+    private final Map<String, HttpSolrServer> server;
     
-    public SolrRemoteInstance(final String url) throws IOException {
-        this(url, null, url.endsWith("solr/") || url.endsWith("solr") ? "solr" : "shard0");
+    /*
+    public RemoteInstance(final String url) throws IOException {
+        this(url, null, url.endsWith("solr/") || url.endsWith("solr") ? "solr" : CollectionSchema.CORE_NAME);
     }
+    */
     
-    public SolrRemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName) throws IOException {
-        this.solrurl = url;
-        if (this.solrurl == null) this.solrurl = "http://127.0.0.1:8983/solr/"; // that should work for the example configuration of solr 4.x.x
+    public RemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName) throws IOException {
+        this.server= new HashMap<String, HttpSolrServer>();
+        this.solrurl = url == null ? "http://127.0.0.1:8983/solr/" : url; // that should work for the example configuration of solr 4.x.x
         this.coreNames = coreNames == null ? new ArrayList<String>() : coreNames;
-        this.defaultCoreName = defaultCoreName;
-        if (this.defaultCoreName == null) this.defaultCoreName = "shard0";
+        if (this.coreNames.size() == 0) {
+            this.coreNames.add(CollectionSchema.CORE_NAME);
+            this.coreNames.add(WebgraphSchema.CORE_NAME);
+        }
+        this.defaultCoreName = defaultCoreName == null ? CollectionSchema.CORE_NAME : defaultCoreName;
         if (!this.coreNames.contains(this.defaultCoreName)) this.coreNames.add(this.defaultCoreName);
 
         // check the url
@@ -193,7 +203,10 @@ public class SolrRemoteInstance implements SolrInstance {
 
     @Override
     public SolrServer getServer(String name) {
-        HttpSolrServer server;
+        // try to get the server from the cache
+        HttpSolrServer s = this.server.get(name);
+        if (s != null) return s;
+        // create new http server
         if (this.client != null) {
             final MultiProtocolURI u;
             try {
@@ -206,16 +219,17 @@ public class SolrRemoteInstance implements SolrInstance {
             String solrpath = u.getPath();
             String p = "http://" + host + ":" + port + solrpath;
             Log.logInfo("RemoteSolrConnector", "connecting Solr authenticated with url:" + p);
-            server = new HttpSolrServer(p, client);
+            s = new HttpSolrServer(p, client);
         } else {
             Log.logInfo("RemoteSolrConnector", "connecting Solr with url:" + this.solrurl + name);
-            server = new HttpSolrServer(this.solrurl + name);
+            s = new HttpSolrServer(this.solrurl + name);
         }
-        server.setAllowCompression(true);
-        server.setConnectionTimeout(60000);
-        server.setMaxRetries(1); // Solr-Doc: No more than 1 recommended (depreciated)
-        server.setSoTimeout(60000);
-        return server;
+        s.setAllowCompression(true);
+        s.setConnectionTimeout(60000);
+        s.setMaxRetries(1); // Solr-Doc: No more than 1 recommended (depreciated)
+        s.setSoTimeout(60000);
+        this.server.put(name, s);
+        return s;
     }
 
     @Override

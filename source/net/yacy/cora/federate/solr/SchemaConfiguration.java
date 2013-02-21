@@ -1,5 +1,5 @@
 /**
- *  ConfigurationSet
+ *  SchemaConfiguration
  *  Copyright 2011 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
  *  First released 29.06.2011 at http://yacy.net
  *
@@ -18,7 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.federate.yacy;
+package net.yacy.cora.federate.solr;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -27,13 +27,16 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
+import org.apache.solr.common.SolrInputDocument;
 
-import net.yacy.cora.federate.yacy.ConfigurationSet.Entry;
+import net.yacy.cora.federate.solr.SchemaConfiguration.Entry;
 import net.yacy.cora.storage.Files;
 
 /**
@@ -49,18 +52,20 @@ import net.yacy.cora.storage.Files;
  * - a line may contain a key only or a key=value pair
  * @author Michael Christen
  */
-public class ConfigurationSet extends TreeMap<String,Entry> implements Serializable {
+public class SchemaConfiguration extends TreeMap<String,Entry> implements Serializable {
 
     private final static long serialVersionUID=-5961730809008841258L;
-    private final static Logger log = Logger.getLogger(ConfigurationSet.class);
+    private final static Logger log = Logger.getLogger(SchemaConfiguration.class);
    
     private final File file;
+    protected boolean lazy;
 
-    public ConfigurationSet() {
+    public SchemaConfiguration() {
         this.file = null;
+        this.lazy = false;
     }
 
-    public ConfigurationSet(final File file) {
+    public SchemaConfiguration(final File file) {
         this.file = file;
         BufferedReader br = null;
         try {
@@ -167,7 +172,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
         return modified;
     }
 
-    public void fill(final ConfigurationSet other, final boolean defaultActivated) {
+    public void fill(final SchemaConfiguration other, final boolean defaultActivated) {
         final Iterator<Entry> i = other.entryIterator();
         Entry e, enew = null;
         while (i.hasNext()) {
@@ -176,7 +181,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
             // add as new entry
             enew = new Entry(e.key(),e.getValue(),defaultActivated && e.enabled());
             enew.setComment(e.getComment());
-            this.put (e.key(),enew);
+            this.put(e.key(),enew);
         }
         if (enew != null) {
             try {
@@ -187,6 +192,56 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
         }
     }
 
+    public boolean contains(SchemaDeclaration field) {
+        return this.contains(field.name());
+    }
+
+    public void add(final SolrInputDocument doc, final SchemaDeclaration key, final String value) {
+        assert !key.isMultiValued();
+        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && !value.isEmpty()))) key.add(doc, value);
+    }
+
+    public void add(final SolrInputDocument doc, final SchemaDeclaration key, final Date value) {
+        assert !key.isMultiValued();
+        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.getTime() > 0))) key.add(doc, value);
+    }
+
+    public void add(final SolrInputDocument doc, final SchemaDeclaration key, final String[] value) {
+        assert key.isMultiValued();
+        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.length > 0))) key.add(doc, value);
+    }
+
+    public void add(final SolrInputDocument doc, final SchemaDeclaration key, final Integer[] value) {
+        assert key.isMultiValued();
+        if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.length > 0))) key.add(doc, value);
+    }
+
+    public void add(final SolrInputDocument doc, final SchemaDeclaration key, final List<?> values) {
+        assert key.isMultiValued();
+        if ((isEmpty() || contains(key)) && (!this.lazy || (values != null && !values.isEmpty()))) key.add(doc, values);
+    }
+
+    public void add(final SolrInputDocument doc, final SchemaDeclaration key, final int value) {
+        assert !key.isMultiValued();
+        if ((isEmpty() || contains(key)) && (!this.lazy || value != 0)) key.add(doc, value);
+    }
+
+    public void add(final SolrInputDocument doc, final SchemaDeclaration key, final long value) {
+        assert !key.isMultiValued();
+        if ((isEmpty() || contains(key)) && (!this.lazy || value != 0)) key.add(doc, value);
+    }
+
+    public void add(final SolrInputDocument doc, final SchemaDeclaration key, final boolean value) {
+        assert !key.isMultiValued();
+        if (isEmpty() || contains(key)) key.add(doc, value);
+    }
+
+    public static Date getDate(SolrInputDocument doc, final SchemaDeclaration key) {
+        Date x = (Date) doc.getFieldValue(key.getSolrFieldName());
+        Date now = new Date();
+        return (x == null) ? new Date(0) : x.after(now) ? now : x;
+    }
+    
     /**
      * save the configuration back to the file
      * @throws IOException
@@ -256,6 +311,10 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
         writer.close();
     }
 
+    
+    
+    
+    
     public Iterator<Entry> entryIterator() {
         return this.values().iterator();
     }
@@ -320,7 +379,7 @@ public class ConfigurationSet extends TreeMap<String,Entry> implements Serializa
     public static void main(final String[] args) {
         if (args.length == 0) return;
         final File f = new File (args[0]);
-        final ConfigurationSet cs = new ConfigurationSet(f);
+        final SchemaConfiguration cs = new SchemaConfiguration(f);
         Iterator<Entry> i = cs.entryIterator();
         Entry k;
         System.out.println("\nall activated attributes:");

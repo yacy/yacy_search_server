@@ -28,10 +28,10 @@ import org.apache.solr.common.SolrException;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
-import net.yacy.cora.federate.solr.connector.ShardSelection;
 import net.yacy.cora.federate.solr.connector.ShardSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
-import net.yacy.cora.federate.solr.instance.SolrRemoteInstance;
+import net.yacy.cora.federate.solr.instance.RemoteInstance;
+import net.yacy.cora.federate.solr.instance.ShardInstance;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.OS;
@@ -124,9 +124,8 @@ public class IndexFederated_p {
                 final boolean usesolr = sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;
                 try {
                     if (usesolr) {
-                        ArrayList<SolrRemoteInstance> instances = ShardSolrConnector.getShardInstances(solrurls);
-                        ShardSolrConnector solr = new ShardSolrConnector(instances, ShardSelection.Method.MODULO_HOST_MD5, true);
-                        sb.index.fulltext().connectRemoteSolr(solr);
+                        ArrayList<RemoteInstance> instances = ShardSolrConnector.getShardInstances(solrurls, null, null);
+                        sb.index.fulltext().connectRemoteSolr(instances);
                     } else {
                         sb.index.fulltext().disconnectRemoteSolr();
                     }
@@ -148,13 +147,13 @@ public class IndexFederated_p {
             prop.put("table", 0);
         } else {
             prop.put("table", 1);
-            final SolrConnector solr = sb.index.fulltext().getRemoteSolr();
+            final SolrConnector solr = sb.index.fulltext().getDefaultRemoteSolrConnector();
             final long[] size = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getSizeList() : new long[]{((RemoteSolrConnector) solr).getSize()};
-            final String[] urls = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getAdminInterfaceList() : new String[]{((SolrRemoteInstance) ((RemoteSolrConnector) solr).getInstance()).getAdminInterface()};
+            final ArrayList<String> urls = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getAdminInterfaces() : ((ShardInstance) ((RemoteSolrConnector) solr).getInstance()).getAdminInterfaces();
             boolean dark = false;
             for (int i = 0; i < size.length; i++) {
                 prop.put("table_list_" + i + "_dark", dark ? 1 : 0); dark = !dark;
-                prop.put("table_list_" + i + "_url", urls[i]);
+                prop.put("table_list_" + i + "_url", urls.get(i));
                 prop.put("table_list_" + i + "_size", size[i]);
             }
             prop.put("table_list", size.length);

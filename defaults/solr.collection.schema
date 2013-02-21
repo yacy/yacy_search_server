@@ -1,8 +1,6 @@
-## this is a list of all solr keys
-## solr can be used as alternative index target, solr is NOT the primary indexing system of YaCy
-## this complete list of keys can be reduced:
-## reduced list of keys can be placed in DATA/SETTINGS/solr.keys.<profile>.list
-## where they can be used as profiles for solr index transport
+## this is a list of all solr keys for the default index 'collection1', the fulltext search index
+## this complete list of keys can be changed; the actual schema is stored in:
+## DATA/SETTINGS/solr.collection.schema
 
 ## the syntax of this file:
 ## - all lines beginning with '##' are comments

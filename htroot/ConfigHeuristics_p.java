@@ -30,11 +30,12 @@ import java.io.File;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
+import net.yacy.search.schema.CollectionSchema;
+
 import java.io.IOException;
 import java.util.Iterator;
-import net.yacy.cora.federate.yacy.ConfigurationSet;
 import net.yacy.cora.federate.opensearch.OpenSearchConnector;
-import net.yacy.cora.federate.solr.YaCySchema;
+import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -72,7 +73,7 @@ public class ConfigHeuristics_p {
             }
             if (post.containsKey("opensearch_off")) sb.setConfig("heuristic.opensearch", false);
             if (post.containsKey("discoverosd")) {
-                final boolean metafieldNOTavailable = sb.index.fulltext().getSolrSchema().containsDisabled(YaCySchema.outboundlinks_tag_txt.name());
+                final boolean metafieldNOTavailable = sb.index.fulltext().getDefaultConfiguration().containsDisabled(CollectionSchema.outboundlinks_tag_txt.name());
                 if (!metafieldNOTavailable) {
                 OpenSearchConnector osc = new OpenSearchConnector(sb, false);
                 if (osc.discoverFromSolrIndex(sb)) {
@@ -107,19 +108,19 @@ public class ConfigHeuristics_p {
              }
 
             if (post.containsKey("switchsolrfieldson")) {
-                final boolean metafieldNOTavailable = sb.index.fulltext().getSolrSchema().containsDisabled(YaCySchema.outboundlinks_tag_txt.name());
+                final boolean metafieldNOTavailable = sb.index.fulltext().getDefaultConfiguration().containsDisabled(CollectionSchema.outboundlinks_tag_txt.name());
                 if (metafieldNOTavailable) {
-                    ConfigurationSet.Entry entry;
-                    entry = sb.index.fulltext().getSolrSchema().get(YaCySchema.outboundlinks_tag_txt.name());
+                    SchemaConfiguration.Entry entry;
+                    entry = sb.index.fulltext().getDefaultConfiguration().get(CollectionSchema.outboundlinks_tag_txt.name());
                     if (entry != null && !entry.enabled()) {
                         entry.setEnable(true);
                     }
-                    entry = sb.index.fulltext().getSolrSchema().get(YaCySchema.inboundlinks_tag_txt.name());
+                    entry = sb.index.fulltext().getDefaultConfiguration().get(CollectionSchema.inboundlinks_tag_txt.name());
                     if (entry != null && !entry.enabled()) {
                         entry.setEnable(true);
                     }
                     try {
-                        sb.index.fulltext().getSolrSchema().commit();
+                        sb.index.fulltext().getDefaultConfiguration().commit();
                     } catch (IOException ex) {}
                 }
             }
@@ -139,7 +140,7 @@ public class ConfigHeuristics_p {
             }
         }
 
-        final boolean showmetafieldbutton = sb.index.fulltext().getSolrSchema().containsDisabled(YaCySchema.outboundlinks_tag_txt.name());
+        final boolean showmetafieldbutton = sb.index.fulltext().getDefaultConfiguration().containsDisabled(CollectionSchema.outboundlinks_tag_txt.name());
         if (showmetafieldbutton) prop.put("osdsolrfieldswitch",1);
         prop.put("site.checked", sb.getConfigBool("heuristic.site", false) ? 1 : 0);
         prop.put("searchresult.checked", sb.getConfigBool("heuristic.searchresults", false) ? 1 : 0);
@@ -150,12 +151,12 @@ public class ConfigHeuristics_p {
 
         // display config file content
         final File f = new File (sb.getDataPath(),"DATA/SETTINGS/heuristicopensearch.conf");
-        ConfigurationSet p = new ConfigurationSet(f);
+        SchemaConfiguration p = new SchemaConfiguration(f);
         int c = 0;
         boolean dark = false;
-        Iterator<ConfigurationSet.Entry> i = p.entryIterator();
+        Iterator<SchemaConfiguration.Entry> i = p.entryIterator();
         while (i.hasNext()) {
-            ConfigurationSet.Entry e = i.next();
+            SchemaConfiguration.Entry e = i.next();
             prop.put("osdcfg_" + c + "_dark", dark ? 1 : 0);
             dark = !dark;
             prop.put("osdcfg_" + c + "_checked", e.enabled() ? 1 : 0);
@@ -178,9 +179,9 @@ public class ConfigHeuristics_p {
         // read index schema table flags
 
         final File f = new File(sb.getDataPath(), "DATA/SETTINGS/heuristicopensearch.conf");
-        ConfigurationSet cfg = new ConfigurationSet(f);
-        final Iterator<ConfigurationSet.Entry> cfgentries = cfg.entryIterator();
-        ConfigurationSet.Entry entry;
+        SchemaConfiguration cfg = new SchemaConfiguration(f);
+        final Iterator<SchemaConfiguration.Entry> cfgentries = cfg.entryIterator();
+        SchemaConfiguration.Entry entry;
         boolean modified = false; // flag to remember changes
         while (cfgentries.hasNext()) {
             entry = cfgentries.next();

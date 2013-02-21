@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
-import net.yacy.cora.federate.solr.instance.SolrInstance;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 
 import org.apache.solr.client.solrj.response.QueryResponse;

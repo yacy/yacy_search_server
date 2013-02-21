@@ -23,8 +23,6 @@ package net.yacy.cora.federate.solr.connector;
 import java.io.IOException;
 import java.util.List;
 
-import net.yacy.cora.federate.solr.instance.SolrInstance;
-
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;

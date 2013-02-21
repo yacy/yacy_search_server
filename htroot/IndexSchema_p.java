@@ -21,11 +21,13 @@
 import java.io.IOException;
 import java.util.Iterator;
 
-import net.yacy.cora.federate.solr.YaCySchema;
-import net.yacy.cora.federate.yacy.ConfigurationSet;
+import net.yacy.cora.federate.solr.SchemaConfiguration;
+import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -36,10 +38,14 @@ public class IndexSchema_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
+        String schemaName = CollectionSchema.CORE_NAME;
+        if (post != null) schemaName = post.get("core", schemaName); 
+        SchemaConfiguration cs = schemaName.equals(CollectionSchema.CORE_NAME) ? sb.index.fulltext().getDefaultConfiguration() : sb.index.fulltext().getWebgraphConfiguration();
+        
         if (post != null && post.containsKey("set")) {
             // read index schema table flags
-            final Iterator<ConfigurationSet.Entry> i = sb.index.fulltext().getSolrSchema().entryIterator();
-            ConfigurationSet.Entry entry;
+            final Iterator<SchemaConfiguration.Entry> i = cs.entryIterator();
+            SchemaConfiguration.Entry entry;
             boolean modified = false; // flag to remember changes
             while (i.hasNext()) {
                 entry = i.next();
@@ -61,7 +67,9 @@ public class IndexSchema_p {
             }
             if (modified) { // save settings to config file if modified
                 try {
-                    sb.index.fulltext().getSolrSchema().commit();
+                    cs.commit();
+                    sb.index.fulltext().getDefaultConfiguration().commit();
+                    sb.index.fulltext().getWebgraphConfiguration().commit();
                     modified = false;
                 } catch (IOException ex) {}
             }
@@ -74,15 +82,23 @@ public class IndexSchema_p {
         int c = 0;
         boolean dark = false;
         // use enum SolrField to keep defined order
-        for(YaCySchema field : YaCySchema.values()) {
+        SchemaDeclaration[] cc = schemaName.equals(CollectionSchema.CORE_NAME) ? CollectionSchema.values() : WebgraphSchema.values();
+        for(SchemaDeclaration field : cc) {
             prop.put("schema_" + c + "_dark", dark ? 1 : 0); dark = !dark;
-            prop.put("schema_" + c + "_checked", sb.index.fulltext().getSolrSchema().contains(field.name()) ? 1 : 0);
+            prop.put("schema_" + c + "_checked", cs.contains(field.name()) ? 1 : 0);
             prop.putHTML("schema_" + c + "_key", field.name());
             prop.putHTML("schema_" + c + "_solrfieldname",field.name().equalsIgnoreCase(field.getSolrFieldName()) ? "" : field.getSolrFieldName());
             if (field.getComment() != null) prop.putHTML("schema_" + c + "_comment",field.getComment());
             c++;
         }
         prop.put("schema", c);
+
+        prop.put("cores_" + 0 + "_name", CollectionSchema.CORE_NAME);
+        prop.put("cores_" + 0 + "_selected", CollectionSchema.CORE_NAME.equals(schemaName) ? 1 : 0);
+        prop.put("cores_" + 1 + "_name", WebgraphSchema.CORE_NAME);
+        prop.put("cores_" + 1 + "_selected", WebgraphSchema.CORE_NAME.equals(schemaName) ? 1 : 0);
+        prop.put("cores", 2);
+        prop.put("core", schemaName);
         
         prop.put("lazy.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true) ? 1 : 0);
         

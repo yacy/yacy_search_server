@@ -97,15 +97,12 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.WordCache;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.federate.solr.Boost;
+import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.ProcessType;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
-import net.yacy.cora.federate.solr.connector.ShardSelection;
 import net.yacy.cora.federate.solr.connector.ShardSolrConnector;
-import net.yacy.cora.federate.solr.connector.SolrConnector;
-import net.yacy.cora.federate.solr.instance.SolrRemoteInstance;
+import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
-import net.yacy.cora.federate.yacy.ConfigurationSet;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
@@ -190,12 +187,14 @@ import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.FilterEngine;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.SolrConfiguration;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.BlockRank;
 import net.yacy.search.ranking.RankingProfile;
+import net.yacy.search.schema.CollectionConfiguration;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphConfiguration;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverSwitch;
@@ -209,6 +208,10 @@ import com.google.common.io.Files;
 
 public final class Switchboard extends serverSwitch {
 
+    final static String SOLR_COLLECTION_CONFIGURATION_NAME_OLD = "solr.keys.default.list";
+    final static String SOLR_COLLECTION_CONFIGURATION_NAME = "solr.collection.schema";
+    final static String SOLR_WEBGRAPH_CONFIGURATION_NAME = "solr.webgraph.schema";
+    
     // load slots
     public static int xstackCrawlSlots = 2000;
     public static long lastPPMUpdate = System.currentTimeMillis() - 30000;
@@ -397,38 +400,55 @@ public final class Switchboard extends serverSwitch {
         this.networkRoot.mkdirs();
         this.queuesRoot.mkdirs();
 
-        // prepare a solr index profile switch list
-        final File solrBackupProfile = new File("defaults/solr.keys.list");
-        final String schemename = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SCHEMEFILE, "solr.keys.default.list");
-        final File solrWorkProfile = new File(getDataPath(), "DATA/SETTINGS/" + schemename);
-        if ( !solrWorkProfile.exists() ) {
-            Files.copy(solrBackupProfile, solrWorkProfile);
-        }
-        final boolean solrlazy = getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true);
-        final SolrConfiguration backupScheme = new SolrConfiguration(solrBackupProfile, solrlazy);
-        final SolrConfiguration solrScheme = new SolrConfiguration(solrWorkProfile, solrlazy);
-        // update the working scheme with the backup scheme. This is necessary to include new features.
-        // new features are always activated by default (if activated in input-backupScheme)
-        solrScheme.fill(backupScheme, true);
-        // switch on some fields which are necessary for ranking and faceting
-        for (YaCySchema field: new YaCySchema[]{
-                YaCySchema.host_s, YaCySchema.load_date_dt,
-                YaCySchema.url_file_ext_s, YaCySchema.last_modified,                        // needed for media search and /date operator
-                /*YaCySchema.url_paths_sxt,*/ YaCySchema.host_organization_s,                   // needed to search in the url
-                /*YaCySchema.inboundlinks_protocol_sxt,*/ YaCySchema.inboundlinks_urlstub_txt,  // needed for HostBrowser
-                /*YaCySchema.outboundlinks_protocol_sxt,*/ YaCySchema.outboundlinks_urlstub_txt // needed to enhance the crawler
-            }) {
-            ConfigurationSet.Entry entry = solrScheme.get(field.name()); entry.setEnable(true); solrScheme.put(field.name(), entry);
-        }
-        solrScheme.commit();
+        // define boosts
         Boost.RANKING.updateBoosts(this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_BOOST, "")); // must be called every time the boosts change
         Boost.RANKING.setMinTokenLen(this.getConfigInt(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_MINLENGTH, 3));
         Boost.RANKING.setQuantRate(this.getConfigFloat(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_QUANTRATE, 0.5f));
         
+        // prepare a solr index profile switch list
+        final File solrCollectionConfigurationInitFile = new File(getAppPath(),  "defaults/" + SOLR_COLLECTION_CONFIGURATION_NAME);
+        final File solrCollectionConfigurationWorkFile = new File(getDataPath(), "DATA/SETTINGS/" + SOLR_COLLECTION_CONFIGURATION_NAME);
+        final File solrWebgraphConfigurationInitFile   = new File(getAppPath(),  "defaults/" + SOLR_WEBGRAPH_CONFIGURATION_NAME);
+        final File solrWebgraphConfigurationWorkFile   = new File(getDataPath(), "DATA/SETTINGS/" + SOLR_WEBGRAPH_CONFIGURATION_NAME);
+        
+        // migrate the old Schema file path to a new one
+        final File solrCollectionConfigurationWorkOldFile = new File(getDataPath(), "DATA/SETTINGS/" + SOLR_COLLECTION_CONFIGURATION_NAME_OLD);
+        if (solrCollectionConfigurationWorkOldFile.exists() && !solrCollectionConfigurationWorkFile.exists()) solrCollectionConfigurationWorkOldFile.renameTo(solrCollectionConfigurationWorkFile);
+        
+        // initialize the schema if it does not yet exist
+        if (!solrCollectionConfigurationWorkFile.exists()) Files.copy(solrCollectionConfigurationInitFile, solrCollectionConfigurationWorkFile);
+        
+        // lazy definition of schema: do not write empty fields
+        final boolean solrlazy = getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true);
+        
+        // define collection schema
+        final CollectionConfiguration solrCollectionConfigurationInit = new CollectionConfiguration(solrCollectionConfigurationInitFile, solrlazy);
+        final CollectionConfiguration solrCollectionConfigurationWork = new CollectionConfiguration(solrCollectionConfigurationWorkFile, solrlazy);
+        // update the working scheme with the backup scheme. This is necessary to include new features.
+        // new features are always activated by default (if activated in input-backupScheme)
+        solrCollectionConfigurationWork.fill(solrCollectionConfigurationInit, true);
+        // switch on some fields which are necessary for ranking and faceting
+        for (CollectionSchema field: new CollectionSchema[]{
+                CollectionSchema.host_s, CollectionSchema.load_date_dt,
+                CollectionSchema.url_file_ext_s, CollectionSchema.last_modified,                            // needed for media search and /date operator
+                /*YaCySchema.url_paths_sxt,*/ CollectionSchema.host_organization_s,                   // needed to search in the url
+                /*YaCySchema.inboundlinks_protocol_sxt,*/ CollectionSchema.inboundlinks_urlstub_txt,  // needed for HostBrowser
+                /*YaCySchema.outboundlinks_protocol_sxt,*/ CollectionSchema.outboundlinks_urlstub_txt // needed to enhance the crawler
+            }) {
+            SchemaConfiguration.Entry entry = solrCollectionConfigurationWork.get(field.name()); entry.setEnable(true); solrCollectionConfigurationWork.put(field.name(), entry);
+        }
+        solrCollectionConfigurationWork.commit();
+        
+        // define webgraph schema
+        final WebgraphConfiguration solrWebgraphConfigurationInit = new WebgraphConfiguration(solrWebgraphConfigurationInitFile, solrlazy);
+        final WebgraphConfiguration solrWebgraphConfigurationWork = new WebgraphConfiguration(solrWebgraphConfigurationWorkFile, solrlazy);
+        solrWebgraphConfigurationWork.fill(solrWebgraphConfigurationInit, true);
+        solrWebgraphConfigurationWork.commit();
+        
         // initialize index
         ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
         final File segmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
-        this.index = new Segment(this.log, new File(segmentsPath, "default"), solrScheme);
+        this.index = new Segment(this.log, segmentsPath, solrCollectionConfigurationWork, solrWebgraphConfigurationWork);
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true)) {
@@ -442,9 +462,8 @@ public final class Switchboard extends serverSwitch {
 
         if (usesolr && solrurls != null && solrurls.length() > 0) {
             try {
-                ArrayList<SolrRemoteInstance> instances = ShardSolrConnector.getShardInstances(solrurls);
-                ShardSolrConnector solr = new ShardSolrConnector(instances, ShardSelection.Method.MODULO_HOST_MD5, true);
-                this.index.fulltext().connectRemoteSolr(solr);
+                ArrayList<RemoteInstance> instances = ShardSolrConnector.getShardInstances(solrurls, null, null);
+                this.index.fulltext().connectRemoteSolr(instances);
             } catch ( final IOException e ) {
                 Log.logException(e);
             }
@@ -1230,7 +1249,8 @@ public final class Switchboard extends serverSwitch {
         synchronized ( this ) {
 
             // remember the solr scheme
-            SolrConfiguration solrScheme = this.index.fulltext().getSolrSchema();
+            CollectionConfiguration collectionConfiguration = this.index.fulltext().getDefaultConfiguration();
+            WebgraphConfiguration webgraphConfiguration = this.index.fulltext().getWebgraphConfiguration();
 
             // shut down
             this.crawler.close();
@@ -1278,7 +1298,7 @@ public final class Switchboard extends serverSwitch {
                 partitionExponent,
                 this.useTailCache,
                 this.exceed134217727);
-            this.index = new Segment(this.log, new File(new File(new File(indexPrimaryPath, networkName), "SEGMENTS"), "default"), solrScheme);
+            this.index = new Segment(this.log, new File(new File(indexPrimaryPath, networkName), "SEGMENTS"), collectionConfiguration, webgraphConfiguration);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
             if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true)) {
@@ -1292,9 +1312,8 @@ public final class Switchboard extends serverSwitch {
 
             if (usesolr && solrurls != null && solrurls.length() > 0) {
                 try {
-                    ArrayList<SolrRemoteInstance> instances = ShardSolrConnector.getShardInstances(solrurls);
-                    ShardSolrConnector solr = new ShardSolrConnector(instances, ShardSelection.Method.MODULO_HOST_MD5, true);
-                    this.index.fulltext().connectRemoteSolr(solr);
+                    ArrayList<RemoteInstance> instances = ShardSolrConnector.getShardInstances(solrurls, null, null);
+                    this.index.fulltext().connectRemoteSolr(instances);
                 } catch ( final IOException e ) {
                     Log.logException(e);
                 }
@@ -2217,11 +2236,11 @@ public final class Switchboard extends serverSwitch {
 
             // if no crawl is running and processing is activated:
             // execute the (post-) processing steps for all entries that have a process tag assigned
-            if (this.crawlQueues.coreCrawlJobSize() == 0 && index.connectedCitation() && index.fulltext().getSolrSchema().contains(YaCySchema.process_sxt)) {
+            if (this.crawlQueues.coreCrawlJobSize() == 0 && index.connectedCitation() && index.fulltext().getDefaultConfiguration().contains(CollectionSchema.process_sxt)) {
                 // that means we must search for those entries.
-                index.fulltext().getSolr().commit(true); // make sure that we have latest information that can be found
+                index.fulltext().getDefaultConnector().commit(true); // make sure that we have latest information that can be found
                 //BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery("*:*", 0, 1000, 60000, 10);
-                BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery(YaCySchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 1000, 60000, 10);
+                BlockingQueue<SolrDocument> docs = index.fulltext().getDefaultConnector().concurrentQuery(CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 1000, 60000, 10);
                 
                 SolrDocument doc;
                 int proccount_clickdepth = 0;
@@ -2229,7 +2248,7 @@ public final class Switchboard extends serverSwitch {
                 int proccount_referencechange = 0;
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                     // for each to-be-processed entry work on the process tag
-                    Collection<Object> proctags = doc.getFieldValues(YaCySchema.process_sxt.getSolrFieldName());
+                    Collection<Object> proctags = doc.getFieldValues(CollectionSchema.process_sxt.getSolrFieldName());
                     for (Object tag: proctags) {
                         String tagname = (String) tag;
                         ProcessType tagtype = ProcessType.valueOf(tagname);
@@ -2237,32 +2256,32 @@ public final class Switchboard extends serverSwitch {
                         // switch over tag types
                         if (tagtype == ProcessType.CLICKDEPTH) {
                             //proctags.remove(tag);
-                            if (index.fulltext().getSolrSchema().contains(YaCySchema.clickdepth_i)) {
+                            if (index.fulltext().getDefaultConfiguration().contains(CollectionSchema.clickdepth_i)) {
                                 DigestURI url;
                                 try {
                                     // get new click depth and compare with old
-                                    Integer oldclickdepth = (Integer) doc.getFieldValue(YaCySchema.clickdepth_i.getSolrFieldName());
-                                    url = new DigestURI((String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())));
-                                    int clickdepth = SolrConfiguration.getClickDepth(index.urlCitation(), url);
+                                    Integer oldclickdepth = (Integer) doc.getFieldValue(CollectionSchema.clickdepth_i.getSolrFieldName());
+                                    url = new DigestURI((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())));
+                                    int clickdepth = CollectionConfiguration.getClickDepth(index.urlCitation(), url);
                                     if (oldclickdepth == null || oldclickdepth.intValue() != clickdepth) proccount_clickdepthchange++;
-                                    SolrInputDocument sid = index.fulltext().getSolrSchema().toSolrInputDocument(doc);
-                                    sid.setField(YaCySchema.clickdepth_i.getSolrFieldName(), clickdepth);
+                                    SolrInputDocument sid = index.fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
+                                    sid.setField(CollectionSchema.clickdepth_i.getSolrFieldName(), clickdepth);
                                     
                                     // refresh the link count; it's 'cheap' to do this here
-                                    if (index.fulltext().getSolrSchema().contains(YaCySchema.references_i)) {
-                                        Integer oldreferences = (Integer) doc.getFieldValue(YaCySchema.references_i.getSolrFieldName());
+                                    if (index.fulltext().getDefaultConfiguration().contains(CollectionSchema.references_i)) {
+                                        Integer oldreferences = (Integer) doc.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
                                         int references = index.urlCitation().count(url.hash());
                                         if (references > 0) {
                                             if (oldreferences == null || oldreferences.intValue() != references) proccount_referencechange++;
-                                            sid.setField(YaCySchema.references_i.getSolrFieldName(), references);
+                                            sid.setField(CollectionSchema.references_i.getSolrFieldName(), references);
                                         }
                                     }
                                     
                                     // remove the processing tag
-                                    sid.removeField(YaCySchema.process_sxt.getSolrFieldName());
+                                    sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());
                                     
                                     // send back to index
-                                    index.fulltext().getSolr().add(sid);
+                                    index.fulltext().getDefaultConnector().add(sid);
                                     proccount_clickdepth++;
                                 } catch (Throwable e) {
                                     Log.logException(e);

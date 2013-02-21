@@ -30,8 +30,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 
-import net.yacy.cora.federate.solr.YaCySchema;
-import net.yacy.cora.federate.solr.connector.MirrorSolrConnector;
+import net.yacy.cora.federate.solr.connector.CachedSolrConnector;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.index.Cache;
@@ -42,6 +41,7 @@ import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -204,8 +204,8 @@ public class PerformanceMemory_p {
         prop.putNum("objectMissCacheTotalMem", totalmissmem / (1024d * 1024d));
 
         // other caching structures
-        final MirrorSolrConnector solr = (MirrorSolrConnector) Switchboard.getSwitchboard().index.fulltext().getSolr();
-        final MirrorSolrConnector.HitMissCache hitMissCache = solr.getHitMissCache(YaCySchema.id.getSolrFieldName());
+        final CachedSolrConnector solr = (CachedSolrConnector) Switchboard.getSwitchboard().index.fulltext().getDefaultConnector();
+        final CachedSolrConnector.HitMissCache hitMissCache = solr.getCache(CollectionSchema.id.getSolrFieldName());
         prop.putNum("solrcacheHit.size", solr.nameCacheHitSize());
         prop.putNum("solrcacheHit.Hit", hitMissCache.hitCache_Hit);
         prop.putNum("solrcacheHit.Miss", hitMissCache.hitCache_Miss);

@@ -37,7 +37,6 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.FailType;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ClusteredScoreMap;
@@ -53,6 +52,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.graphics.WebStructureGraph.StructureEntry;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -153,7 +153,7 @@ public class HostBrowser {
                 int maxcount = admin ? 2 * 3 * 2 * 5 * 7 * 2 * 3 : 360; // which makes nice matrixes for 2, 3, 4, 5, 6, 7, 8, 9 rows/colums
                 
                 // collect hosts from index
-                ReversibleScoreMap<String> hostscore = fulltext.getSolr().getFacets("*:*", maxcount, YaCySchema.host_s.getSolrFieldName()).get(YaCySchema.host_s.getSolrFieldName());
+                ReversibleScoreMap<String> hostscore = fulltext.getDefaultConnector().getFacets("*:*", maxcount, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
                 if (hostscore == null) hostscore = new ClusteredScoreMap<String>();
                 
                 // collect hosts from crawler
@@ -163,10 +163,10 @@ public class HostBrowser {
                 }
                 
                 // collect the errorurls
-                Map<String, ReversibleScoreMap<String>> exclfacets = admin ? fulltext.getSolr().getFacets(YaCySchema.failtype_s.getSolrFieldName() + ":" + FailType.excl.name(), maxcount, YaCySchema.host_s.getSolrFieldName()) : null;
-                ReversibleScoreMap<String> exclscore = exclfacets == null ? new ClusteredScoreMap<String>() : exclfacets.get(YaCySchema.host_s.getSolrFieldName());
-                Map<String, ReversibleScoreMap<String>> failfacets = admin ? fulltext.getSolr().getFacets(YaCySchema.failtype_s.getSolrFieldName() + ":" + FailType.fail.name(), maxcount, YaCySchema.host_s.getSolrFieldName()) : null;
-                ReversibleScoreMap<String> failscore = failfacets == null ? new ClusteredScoreMap<String>() : failfacets.get(YaCySchema.host_s.getSolrFieldName());
+                Map<String, ReversibleScoreMap<String>> exclfacets = admin ? fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.excl.name(), maxcount, CollectionSchema.host_s.getSolrFieldName()) : null;
+                ReversibleScoreMap<String> exclscore = exclfacets == null ? new ClusteredScoreMap<String>() : exclfacets.get(CollectionSchema.host_s.getSolrFieldName());
+                Map<String, ReversibleScoreMap<String>> failfacets = admin ? fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.fail.name(), maxcount, CollectionSchema.host_s.getSolrFieldName()) : null;
+                ReversibleScoreMap<String> failscore = failfacets == null ? new ClusteredScoreMap<String>() : failfacets.get(CollectionSchema.host_s.getSolrFieldName());
                 
                 int c = 0;
                 Iterator<String> i = hostscore.keys(false);
@@ -235,26 +235,26 @@ public class HostBrowser {
                 
                 // get all files for a specific host from the index
                 StringBuilder q = new StringBuilder();
-                q.append(YaCySchema.host_s.getSolrFieldName()).append(':').append(host);
+                q.append(CollectionSchema.host_s.getSolrFieldName()).append(':').append(host);
                 if (pathparts.length > 0 && pathparts[0].length() > 0) {
                     for (String pe: pathparts) {
-                        if (pe.length() > 0) q.append(" AND ").append(YaCySchema.url_paths_sxt.getSolrFieldName()).append(":\"").append(pe).append('\"');
+                        if (pe.length() > 0) q.append(" AND ").append(CollectionSchema.url_paths_sxt.getSolrFieldName()).append(":\"").append(pe).append('\"');
                     }
                 } else {
                     if (facetcount > 1000 || post.containsKey("nepr")) {
-                        q.append(" AND ").append(YaCySchema.url_paths_sxt.getSolrFieldName()).append(":[* TO *]");
+                        q.append(" AND ").append(CollectionSchema.url_paths_sxt.getSolrFieldName()).append(":[* TO *]");
                     }
                 }
-                BlockingQueue<SolrDocument> docs = fulltext.getSolr().concurrentQuery(q.toString(), 0, 100000, TIMEOUT, 100,
-                        YaCySchema.id.getSolrFieldName(),
-                        YaCySchema.sku.getSolrFieldName(),
-                        YaCySchema.failreason_t.getSolrFieldName(),
-                        YaCySchema.failtype_s.getSolrFieldName(),
-                        YaCySchema.inboundlinks_protocol_sxt.getSolrFieldName(),
-                        YaCySchema.inboundlinks_urlstub_txt.getSolrFieldName(),
-                        YaCySchema.outboundlinks_protocol_sxt.getSolrFieldName(),
-                        YaCySchema.outboundlinks_urlstub_txt.getSolrFieldName(),
-                        YaCySchema.clickdepth_i.getSolrFieldName()
+                BlockingQueue<SolrDocument> docs = fulltext.getDefaultConnector().concurrentQuery(q.toString(), 0, 100000, TIMEOUT, 100,
+                        CollectionSchema.id.getSolrFieldName(),
+                        CollectionSchema.sku.getSolrFieldName(),
+                        CollectionSchema.failreason_t.getSolrFieldName(),
+                        CollectionSchema.failtype_s.getSolrFieldName(),
+                        CollectionSchema.inboundlinks_protocol_sxt.getSolrFieldName(),
+                        CollectionSchema.inboundlinks_urlstub_txt.getSolrFieldName(),
+                        CollectionSchema.outboundlinks_protocol_sxt.getSolrFieldName(),
+                        CollectionSchema.outboundlinks_urlstub_txt.getSolrFieldName(),
+                        CollectionSchema.clickdepth_i.getSolrFieldName()
                         );
                 SolrDocument doc;
                 Set<String> storedDocs = new HashSet<String>();
@@ -266,14 +266,14 @@ public class HostBrowser {
                 final List<byte[]> deleteIDs = new ArrayList<byte[]>();
                 long timeout = System.currentTimeMillis() + TIMEOUT;
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                    String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
-                    String errortype = (String) doc.getFieldValue(YaCySchema.failtype_s.getSolrFieldName());
+                    String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+                    String errortype = (String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName());
                     FailType error = errortype == null ? null : FailType.valueOf(errortype);  
-                    Integer cd = (Integer) doc.getFieldValue(YaCySchema.clickdepth_i.getSolrFieldName());
-                    if (cd != null && cd.intValue() >= 0) clickdepth.add(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())), cd.intValue());
+                    Integer cd = (Integer) doc.getFieldValue(CollectionSchema.clickdepth_i.getSolrFieldName());
+                    if (cd != null && cd.intValue() >= 0) clickdepth.add(ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())), cd.intValue());
                     if (u.startsWith(path)) {
                         if (delete) {
-                            deleteIDs.add(ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())));
+                            deleteIDs.add(ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())));
                         } else {
                             if (error == null) storedDocs.add(u); else if (admin) errorDocs.put(u, error);
                         }

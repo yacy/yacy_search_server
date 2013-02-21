@@ -69,10 +69,9 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.opensearch.SRURSSConnector;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
-import net.yacy.cora.federate.solr.instance.SolrRemoteInstance;
+import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
@@ -108,6 +107,7 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SecondarySearchSuperviser;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
@@ -1007,7 +1007,7 @@ public final class Protocol {
         }
     }
 
-    private final static YaCySchema[] snippetFields = new YaCySchema[]{YaCySchema.h1_txt, YaCySchema.h2_txt, YaCySchema.text_t};
+    private final static CollectionSchema[] snippetFields = new CollectionSchema[]{CollectionSchema.h1_txt, CollectionSchema.h2_txt, CollectionSchema.text_t};
     
     protected static int solrQuery(
             final SearchEvent event,
@@ -1035,14 +1035,14 @@ public final class Protocol {
             solrQuery.setFacet(false);
         }
         
-        // set highlightning query attributes
+        // set highlighting query attributes
         solrQuery.setHighlight(true);
         solrQuery.setHighlightFragsize(SearchEvent.SNIPPET_MAX_LENGTH);
         //solrQuery.setHighlightRequireFieldMatch();
         solrQuery.setHighlightSimplePost("</b>");
         solrQuery.setHighlightSimplePre("<b>");
         solrQuery.setHighlightSnippets(1);
-        for (YaCySchema field: snippetFields) solrQuery.addHighlightField(field.getSolrFieldName());
+        for (CollectionSchema field: snippetFields) solrQuery.addHighlightField(field.getSolrFieldName());
         
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
         SolrDocumentList docList = null;
@@ -1050,16 +1050,15 @@ public final class Protocol {
         if (localsearch) {
             // search the local index
             try {
-                rsp = event.rankingProcess.getQuery().getSegment().fulltext().getSolr().query(solrQuery);
+                rsp = event.rankingProcess.getQuery().getSegment().fulltext().getDefaultConnector().query(solrQuery);
                 docList = rsp.getResults();
             } catch (Throwable e) {
                 Network.log.logInfo("SEARCH failed (solr), localpeer (" + e.getMessage() + ")", e);
                 return -1;
             }
         } else {
-            final String solrURL = "http://" + target.getPublicAddress() + "/solr";
             try {
-                SolrRemoteInstance instance = new SolrRemoteInstance(solrURL);
+                RemoteInstance instance = new RemoteInstance("http://" + target.getPublicAddress(), null, "solr"); // this is a 'patch configuration' which considers 'solr' as default collection
                 SolrConnector solrConnector = new RemoteSolrConnector(instance, "solr");
                 rsp = solrConnector.query(solrQuery);
                 docList = rsp.getResults();
@@ -1093,7 +1092,7 @@ public final class Protocol {
         if (rawsnippets != null) {
             nextsnippet: for (Map.Entry<String, Map<String, List<String>>> re: rawsnippets.entrySet()) {
                 Map<String, List<String>> rs = re.getValue();
-                for (YaCySchema field: snippetFields) {
+                for (CollectionSchema field: snippetFields) {
                     if (rs.containsKey(field.getSolrFieldName())) {
                         List<String> s = rs.get(field.getSolrFieldName());
                         if (s.size() > 0) {
@@ -1151,7 +1150,7 @@ public final class Protocol {
             // passed all checks, store url
             if (!localsearch) {
                 try {
-                    event.query.getSegment().fulltext().putDocument(event.query.getSegment().fulltext().getSolrSchema().toSolrInputDocument(doc));
+                    event.query.getSegment().fulltext().putDocument(event.query.getSegment().fulltext().getDefaultConfiguration().toSolrInputDocument(doc));
                     ResultURLs.stack(
                         ASCII.String(urlEntry.url().hash()),
                         urlEntry.url().getHost(),

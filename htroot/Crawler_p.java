@@ -37,7 +37,6 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.SpaceExceededException;
@@ -58,6 +57,7 @@ import net.yacy.peers.NewsPool;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -374,7 +374,7 @@ public class Crawler_p {
                 sb.crawlQueues.errorURL.removeHost(hosthashes, true);
                 for (byte[] hosthash: hosthashes) {
                     try {
-                        sb.index.fulltext().getSolr().deleteByQuery(YaCySchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + YaCySchema.failreason_t.getSolrFieldName() + ":[* TO *]");
+                        sb.index.fulltext().getDefaultConnector().deleteByQuery(CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + CollectionSchema.failreason_t.getSolrFieldName() + ":[* TO *]");
                     } catch (IOException e) {Log.logException(e);}
                 }
                 sb.index.fulltext().commit(true);

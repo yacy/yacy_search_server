@@ -34,7 +34,6 @@ import java.util.Map;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
@@ -49,6 +48,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -290,8 +290,8 @@ public class IndexControlURLs_p {
             int cnt = 0;
             try {
                 final Fulltext metadata = segment.fulltext();
-                Map<String, ReversibleScoreMap<String>> scores = metadata.getSolr().getFacets(YaCySchema.httpstatus_i.getSolrFieldName() + ":200", count, YaCySchema.host_s.getSolrFieldName());
-                ReversibleScoreMap<String> stats = scores.get(YaCySchema.host_s.getSolrFieldName());
+                Map<String, ReversibleScoreMap<String>> scores = metadata.getDefaultConnector().getFacets(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", count, CollectionSchema.host_s.getSolrFieldName());
+                ReversibleScoreMap<String> stats = scores.get(CollectionSchema.host_s.getSolrFieldName());
                 Iterator<String> statsiter = stats.keys(false);
                 boolean dark = true;
                 String hostname;

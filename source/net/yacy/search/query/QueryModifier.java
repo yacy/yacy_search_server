@@ -22,8 +22,8 @@ package net.yacy.search.query;
 
 import org.apache.solr.common.params.CommonParams;
 
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 
 
@@ -149,30 +149,30 @@ public class QueryModifier {
         
         final StringBuilder fq = new StringBuilder(post.get(CommonParams.FQ,""));
         
-        if (this.sitehost != null && this.sitehost.length() > 0 && fq.indexOf(YaCySchema.host_s.getSolrFieldName()) < 0) {
+        if (this.sitehost != null && this.sitehost.length() > 0 && fq.indexOf(CollectionSchema.host_s.getSolrFieldName()) < 0) {
             // consider to search for hosts with 'www'-prefix, if not already part of the host name
             if (this.sitehost.startsWith("www.")) {
-                fq.append(" AND (").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.sitehost.substring(4)).append('\"');
-                fq.append(" OR ").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.sitehost).append("\")");
+                fq.append(" AND (").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"").append(this.sitehost.substring(4)).append('\"');
+                fq.append(" OR ").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"").append(this.sitehost).append("\")");
             } else {
-                fq.append(" AND (").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.sitehost).append('\"');
-                fq.append(" OR ").append(YaCySchema.host_s.getSolrFieldName()).append(":\"www.").append(this.sitehost).append("\")");
+                fq.append(" AND (").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"").append(this.sitehost).append('\"');
+                fq.append(" OR ").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"www.").append(this.sitehost).append("\")");
             }
         }
-        if (this.sitehash != null && this.sitehash.length() > 0 && fq.indexOf(YaCySchema.host_id_s.getSolrFieldName()) < 0) {
-            fq.append(" AND ").append(YaCySchema.host_id_s.getSolrFieldName()).append(":\"").append(this.sitehash).append('\"');
+        if (this.sitehash != null && this.sitehash.length() > 0 && fq.indexOf(CollectionSchema.host_id_s.getSolrFieldName()) < 0) {
+            fq.append(" AND ").append(CollectionSchema.host_id_s.getSolrFieldName()).append(":\"").append(this.sitehash).append('\"');
         }
 
-        if (this.filetype != null && this.filetype.length() > 0 && fq.indexOf(YaCySchema.url_file_ext_s.getSolrFieldName()) < 0) {
-            fq.append(" AND ").append(YaCySchema.url_file_ext_s.getSolrFieldName()).append(":\"").append(this.filetype).append('\"');
+        if (this.filetype != null && this.filetype.length() > 0 && fq.indexOf(CollectionSchema.url_file_ext_s.getSolrFieldName()) < 0) {
+            fq.append(" AND ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"").append(this.filetype).append('\"');
         }
         
-        if (this.author != null && this.author.length() > 0 && fq.indexOf(YaCySchema.author_sxt.getSolrFieldName()) < 0) {
-            fq.append(" AND ").append(YaCySchema.author_sxt.getSolrFieldName()).append(":\"").append(this.author).append('\"');
+        if (this.author != null && this.author.length() > 0 && fq.indexOf(CollectionSchema.author_sxt.getSolrFieldName()) < 0) {
+            fq.append(" AND ").append(CollectionSchema.author_sxt.getSolrFieldName()).append(":\"").append(this.author).append('\"');
         }
         
-        if (this.protocol != null && this.protocol.length() > 0 && fq.indexOf(YaCySchema.url_protocol_s.getSolrFieldName()) < 0) {
-            fq.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(":\"").append(this.protocol).append('\"');
+        if (this.protocol != null && this.protocol.length() > 0 && fq.indexOf(CollectionSchema.url_protocol_s.getSolrFieldName()) < 0) {
+            fq.append(" AND ").append(CollectionSchema.url_protocol_s.getSolrFieldName()).append(":\"").append(this.protocol).append('\"');
         }
 
         if (fq.length() > 0) {

@@ -39,7 +39,6 @@ import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.FailType;
-import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.util.SpaceExceededException;
@@ -52,7 +51,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.search.index.SolrConfiguration;
+import net.yacy.search.index.Fulltext;
 
 public class ZURL implements Iterable<ZURL.Entry> {
 
@@ -92,19 +91,16 @@ public class ZURL implements Iterable<ZURL.Entry> {
     // the class object
     private Index urlIndex;
     private final Queue<byte[]> stack;
-    private final SolrConnector solrConnector;
-    private final SolrConfiguration solrConfiguration;
+    private final Fulltext fulltext;
 
     protected ZURL(
-            final SolrConnector solrConnector,
-            final SolrConfiguration solrConfiguration,
+            final Fulltext fulltext,
     		final File cachePath,
     		final String tablename,
     		final boolean startWithEmptyFile,
             final boolean useTailCache,
             final boolean exceed134217727) {
-        this.solrConnector = solrConnector;
-        this.solrConfiguration = solrConfiguration;
+        this.fulltext = fulltext;
         // creates a new ZURL in a file
         cachePath.mkdirs();
         final File f = new File(cachePath, tablename);
@@ -191,11 +187,11 @@ public class ZURL implements Iterable<ZURL.Entry> {
         put(entry);
         this.stack.add(entry.hash());
         if (!reason.startsWith("double")) log.logInfo(bentry.url().toNormalform(true) + " - " + reason);
-        if (this.solrConnector != null && failCategory.store) {
+        if (this.fulltext.getDefaultConnector() != null && failCategory.store) {
             // send the error to solr
             try {
-                SolrInputDocument errorDoc = this.solrConfiguration.err(bentry.url(), failCategory.name() + " " + reason, failCategory.failType, httpcode);
-                this.solrConnector.add(errorDoc);
+                SolrInputDocument errorDoc = this.fulltext.getDefaultConfiguration().err(bentry.url(), failCategory.name() + " " + reason, failCategory.failType, httpcode);
+                this.fulltext.getDefaultConnector().add(errorDoc);
             } catch (final IOException e) {
                 Log.logWarning("SOLR", "failed to send error " + bentry.url().toNormalform(true) + " to solr: " + e.getMessage());
             }

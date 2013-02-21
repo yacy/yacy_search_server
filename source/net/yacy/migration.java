@@ -279,12 +279,11 @@ public class migration {
             f.deleteOnExit();
             if (f.exists()) {
                 return ret;
-            } else {
-                try {
-                    f.createNewFile();                    
-                } catch (IOException ex) {
-                    Log.logInfo("migrateUrldbtoSolr","could not create lock file");
-                }
+            }
+            try {
+                f.createNewFile();                    
+            } catch (IOException ex) {
+                Log.logInfo("migrateUrldbtoSolr","could not create lock file");
             }
 
             final Thread t = new Thread() {

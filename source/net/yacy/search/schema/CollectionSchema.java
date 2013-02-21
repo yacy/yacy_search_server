@@ -1,5 +1,5 @@
 /**
- *  YaCySchema
+ *  CollectionSchema
  *  Copyright 2011 by Michael Peter Christen
  *  First released 14.04.2011 at http://yacy.net
  *
@@ -18,17 +18,17 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.federate.solr;
+package net.yacy.search.schema;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import org.apache.solr.common.SolrDocument;
+import net.yacy.cora.federate.solr.SchemaDeclaration;
+import net.yacy.cora.federate.solr.SolrType;
+
 import org.apache.solr.common.SolrInputDocument;
 
-public enum YaCySchema implements Schema {
+public enum CollectionSchema implements SchemaDeclaration {
     
     // mandatory
     id(SolrType.string, true, true, false, "primary key of document, the URL hash **mandatory field**"),
@@ -202,6 +202,8 @@ public enum YaCySchema implements Schema {
     ext_title_txt(SolrType.text_general, true, true, true, "names matching title expressions"),
     ext_title_val(SolrType.num_integer, true, true, true, "number of matching title expressions");
 
+    public final static String CORE_NAME = "collection1";
+    
     public final static String VOCABULARY_PREFIX = "vocabulary_";
     public final static String VOCABULARY_SUFFIX = "_sxt";
     
@@ -211,7 +213,7 @@ public enum YaCySchema implements Schema {
     private boolean multiValued, omitNorms;
     private String comment;
 
-    private YaCySchema(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final String comment) {
+    private CollectionSchema(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final String comment) {
         this.type = type;
         this.indexed = indexed;
         this.stored = stored;
@@ -221,12 +223,12 @@ public enum YaCySchema implements Schema {
         assert type.appropriateName(this.name(), this.multiValued) : "bad configuration: " + this.name();
     }
 
-    private YaCySchema(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final boolean omitNorms, final String comment) {
+    private CollectionSchema(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final boolean omitNorms, final String comment) {
         this(type, indexed, stored, multiValued, comment);
         this.omitNorms = omitNorms;
         assert type.appropriateName(this.name(), this.multiValued) : "bad configuration: " + this.name();
     }
-
+    
     /**
      * Returns the YaCy default or (if available) custom field name for Solr
      * @return SolrFieldname String

@@ -1,5 +1,5 @@
 /**
- *  SolrField
+ *  SchemaDeclaration
  *  Copyright 2011 by Michael Peter Christen
  *  First released 14.04.2011 at http://yacy.net
  *
@@ -20,8 +20,12 @@
 
 package net.yacy.cora.federate.solr;
 
+import java.util.Date;
+import java.util.List;
 
-public interface Schema {
+import org.apache.solr.common.SolrInputDocument;
+
+public interface SchemaDeclaration {
 
     /**
      * this shall be implemented as enum, thus shall have the name() method
@@ -42,5 +46,27 @@ public interface Schema {
     public boolean isOmitNorms();
 
     public String getComment();
+
+    public void setSolrFieldName(String name);
+
+    public void add(final SolrInputDocument doc, final String value);
+
+    public void add(final SolrInputDocument doc, final Date value);
+
+    public void add(final SolrInputDocument doc, final int value);
+
+    public void add(final SolrInputDocument doc, final long value);
+
+    public void add(final SolrInputDocument doc, final String[] value);
+
+    public void add(final SolrInputDocument doc, final Integer[] value);
+
+    public void add(final SolrInputDocument doc, final List<?> value);
+    
+    public void add(final SolrInputDocument doc, final float value);
+
+    public void add(final SolrInputDocument doc, final double value);
+
+    public void add(final SolrInputDocument doc, final boolean value);
 
 }

@@ -27,7 +27,6 @@ import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.Boost;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -39,6 +38,7 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryGoal;
 import net.yacy.search.query.SearchEvent;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -114,7 +114,7 @@ public class searchresult {
         
         // get a solr query string
         QueryGoal qg = new QueryGoal(originalQuery, originalQuery);
-        StringBuilder solrQ = qg.solrQueryString(sb.index.fulltext().getSolrSchema());
+        StringBuilder solrQ = qg.solrQueryString(sb.index.fulltext().getDefaultConfiguration());
         post.put("defType", "edismax");
         post.put(CommonParams.Q, solrQ.toString());
         post.put(CommonParams.ROWS, post.remove("num"));
@@ -122,18 +122,18 @@ public class searchresult {
         post.put("bq", Boost.RANKING.getBoostQuery()); // a boost query that moves double content to the back
         post.put("bf", Boost.RANKING.getBoostFunction()); // a boost function extension
         post.put(CommonParams.FL,
-                YaCySchema.content_type.getSolrFieldName() + ',' +
-                YaCySchema.id.getSolrFieldName() + ',' +
-                YaCySchema.sku.getSolrFieldName() + ',' +
-                YaCySchema.title.getSolrFieldName() + ',' +
-                YaCySchema.description.getSolrFieldName() + ',' +
-                YaCySchema.load_date_dt.getSolrFieldName() + ',' +
-                YaCySchema.last_modified.getSolrFieldName() + ',' +
-                YaCySchema.size_i.getSolrFieldName());
+                CollectionSchema.content_type.getSolrFieldName() + ',' +
+                CollectionSchema.id.getSolrFieldName() + ',' +
+                CollectionSchema.sku.getSolrFieldName() + ',' +
+                CollectionSchema.title.getSolrFieldName() + ',' +
+                CollectionSchema.description.getSolrFieldName() + ',' +
+                CollectionSchema.load_date_dt.getSolrFieldName() + ',' +
+                CollectionSchema.last_modified.getSolrFieldName() + ',' +
+                CollectionSchema.size_i.getSolrFieldName());
         post.put("hl", "true");
         post.put("hl.q", originalQuery);
-        post.put("hl.fl", YaCySchema.h1_txt.getSolrFieldName() + "," + YaCySchema.h2_txt.getSolrFieldName() + "," + YaCySchema.text_t.getSolrFieldName());
-        post.put("hl.alternateField", YaCySchema.description.getSolrFieldName());
+        post.put("hl.fl", CollectionSchema.h1_txt.getSolrFieldName() + "," + CollectionSchema.h2_txt.getSolrFieldName() + "," + CollectionSchema.text_t.getSolrFieldName());
+        post.put("hl.alternateField", CollectionSchema.description.getSolrFieldName());
         post.put("hl.simple.pre", "<b>");
         post.put("hl.simple.post", "</b>");
         post.put("hl.fragsize", Integer.toString(SearchEvent.SNIPPET_MAX_LENGTH));
@@ -158,18 +158,18 @@ public class searchresult {
             }
             StringBuilder fq = new StringBuilder(20);
             if (sites.size() > 1) {
-                fq.append(YaCySchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(0));
+                fq.append(CollectionSchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(0));
                 for (int i = 1; i < sites.size(); i++) {
-                    fq.append(" OR ").append(YaCySchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(i));
+                    fq.append(" OR ").append(CollectionSchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(i));
                 }
             } else if (sites.size() == 1) {
-                fq.append(YaCySchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(0));
+                fq.append(CollectionSchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(0));
             }
             post.put(CommonParams.FQ, fq.toString());
         }
         
         // get the embedded connector
-        EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.fulltext().getLocalSolr();
+        EmbeddedSolrConnector connector = sb.index.fulltext().getDefaultLocalSolrConnector();
         if (connector == null) return null;
 
         // do the solr request

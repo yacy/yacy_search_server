@@ -33,11 +33,11 @@ import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSMessage;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.cora.lod.vocabulary.Geo;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
@@ -58,18 +58,18 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
     private static final Map<String, String> field2tag = new HashMap<String, String>();
 
     // pre-select a set of YaCy schema fields for the solr searcher which should cause a better caching
-    private static final YaCySchema[] extrafields = new YaCySchema[]{
-        YaCySchema.id, YaCySchema.title, YaCySchema.description, YaCySchema.text_t,
-        YaCySchema.h1_txt, YaCySchema.h2_txt, YaCySchema.h3_txt, YaCySchema.h4_txt, YaCySchema.h5_txt, YaCySchema.h6_txt,
+    private static final CollectionSchema[] extrafields = new CollectionSchema[]{
+        CollectionSchema.id, CollectionSchema.title, CollectionSchema.description, CollectionSchema.text_t,
+        CollectionSchema.h1_txt, CollectionSchema.h2_txt, CollectionSchema.h3_txt, CollectionSchema.h4_txt, CollectionSchema.h5_txt, CollectionSchema.h6_txt,
         };
     static final Set<String> SOLR_FIELDS = new HashSet<String>();
     static {
-        field2tag.put(YaCySchema.coordinate_p.getSolrFieldName() + "_0_coordinate", Geo.Lat.getURIref());
-        field2tag.put(YaCySchema.coordinate_p.getSolrFieldName() + "_1_coordinate", Geo.Long.getURIref());
-        field2tag.put(YaCySchema.publisher_t.getSolrFieldName(), DublinCore.Publisher.getURIref());
-        field2tag.put(YaCySchema.author.getSolrFieldName(), DublinCore.Creator.getURIref());
+        field2tag.put(CollectionSchema.coordinate_p.getSolrFieldName() + "_0_coordinate", Geo.Lat.getURIref());
+        field2tag.put(CollectionSchema.coordinate_p.getSolrFieldName() + "_1_coordinate", Geo.Long.getURIref());
+        field2tag.put(CollectionSchema.publisher_t.getSolrFieldName(), DublinCore.Publisher.getURIref());
+        field2tag.put(CollectionSchema.author.getSolrFieldName(), DublinCore.Creator.getURIref());
         SOLR_FIELDS.addAll(field2tag.keySet());
-        for (YaCySchema field: extrafields) SOLR_FIELDS.add(field.getSolrFieldName());
+        for (CollectionSchema field: extrafields) SOLR_FIELDS.add(field.getSolrFieldName());
     }
 
     private String title;
@@ -176,7 +176,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                 }
                 
                 // take apart the url
-                if (YaCySchema.sku.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.sku.getSolrFieldName().equals(fieldName)) {
                     String u = value.stringValue();
                     solitaireTag(writer, RSSMessage.Token.link.name(), u);
                     try {
@@ -189,40 +189,40 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                 }
                 
                 // if the rule is not generic, use the specific here
-                if (YaCySchema.id.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.id.getSolrFieldName().equals(fieldName)) {
                     urlhash = value.stringValue();
                     solitaireTag(writer, RSSMessage.Token.guid.name(), urlhash, "isPermaLink=\"false\"");
                     continue;
                 }
-                if (YaCySchema.title.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.title.getSolrFieldName().equals(fieldName)) {
                     title = value.stringValue();
                     texts.add(title);
                     continue;
                 }
-                if (YaCySchema.last_modified.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.last_modified.getSolrFieldName().equals(fieldName)) {
                     Date d = new Date(Long.parseLong(value.stringValue()));
                     solitaireTag(writer, RSSMessage.Token.pubDate.name(), HeaderFramework.formatRFC1123(d));
                     continue;
                 }
-                if (YaCySchema.description.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.description.getSolrFieldName().equals(fieldName)) {
                     description = value.stringValue();
                     solitaireTag(writer, DublinCore.Description.getURIref(), description);
                     texts.add(description);
                     continue;
                 }
-                if (YaCySchema.text_t.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.text_t.getSolrFieldName().equals(fieldName)) {
                     texts.add(value.stringValue());
                     continue;
                 }
-                if (YaCySchema.size_i.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.size_i.getSolrFieldName().equals(fieldName)) {
                     int size = value.numericValue().intValue();
                     solitaireTag(writer, YaCyMetadata.size.getURIref(), Integer.toString(size));
                     solitaireTag(writer, YaCyMetadata.sizename.getURIref(), RSSMessage.sizename(size));
                     continue;
                 }
-                if (YaCySchema.h1_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h2_txt.getSolrFieldName().equals(fieldName) ||
-                    YaCySchema.h3_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h4_txt.getSolrFieldName().equals(fieldName) ||
-                    YaCySchema.h5_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h6_txt.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.h1_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h2_txt.getSolrFieldName().equals(fieldName) ||
+                    CollectionSchema.h3_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h4_txt.getSolrFieldName().equals(fieldName) ||
+                    CollectionSchema.h5_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h6_txt.getSolrFieldName().equals(fieldName)) {
                     // because these are multi-valued fields, there can be several of each
                     texts.add(value.stringValue());
                     continue;
@@ -247,13 +247,13 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         
         // the facets can be created with the options &facet=true&facet.mincount=1&facet.field=host_s&facet.field=url_file_ext_s&facet.field=url_protocol_s&facet.field=author_sxt
         @SuppressWarnings("unchecked")
-        NamedList<Integer> domains = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.host_s.getSolrFieldName());
+        NamedList<Integer> domains = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.host_s.getSolrFieldName());
         @SuppressWarnings("unchecked")
-        NamedList<Integer> filetypes = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_file_ext_s.getSolrFieldName());
+        NamedList<Integer> filetypes = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.url_file_ext_s.getSolrFieldName());
         @SuppressWarnings("unchecked")
-        NamedList<Integer> protocols = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_protocol_s.getSolrFieldName());
+        NamedList<Integer> protocols = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.url_protocol_s.getSolrFieldName());
         @SuppressWarnings("unchecked")
-        NamedList<Integer> authors = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.author_sxt.getSolrFieldName());
+        NamedList<Integer> authors = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.author_sxt.getSolrFieldName());
         
         if (domains != null) {
             openTag(writer, "yacy:facet name=\"domains\" displayname=\"Domains\" type=\"String\" min=\"0\" max=\"0\" mean=\"0\"");

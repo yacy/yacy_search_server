@@ -33,16 +33,15 @@ import java.util.Map;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
 import net.yacy.crawler.data.ResultURLs.InitExecEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.nxTools;
@@ -55,7 +54,7 @@ public class CrawlResults {
         final serverObjects prop = new serverObjects();
 
         int lines = 500;
-        boolean showCollection = sb.index.fulltext().getSolrSchema().isEmpty() || sb.index.fulltext().getSolrSchema().contains(YaCySchema.collection_sxt);
+        boolean showCollection = sb.index.fulltext().getDefaultConfiguration().isEmpty() || sb.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.collection_sxt);
         boolean showInit    = env.getConfigBool("IndexMonitorInit", false);
         boolean showExec    = env.getConfigBool("IndexMonitorExec", false);
         boolean showDate    = env.getConfigBool("IndexMonitorDate", true);

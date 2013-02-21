@@ -24,7 +24,7 @@ package net.yacy.cora.federate.solr.connector;
 import java.io.IOException;
 import java.util.List;
 
-import net.yacy.cora.federate.solr.instance.SolrEmbeddedInstance;
+import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.cora.federate.solr.instance.SolrInstance;
 import net.yacy.kelondro.logging.Log;
 
@@ -57,10 +57,10 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     public static final String CONTEXT = "/solr";
     
     private final SearchHandler requestHandler;
-    private final SolrEmbeddedInstance instance;
+    private final EmbeddedInstance instance;
     private SolrCore core;
 
-    public EmbeddedSolrConnector(SolrEmbeddedInstance instance) {
+    public EmbeddedSolrConnector(EmbeddedInstance instance) {
         super();
         this.instance = instance;
         this.core = this.instance.getDefaultCore();
@@ -70,7 +70,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         super.init(this.instance.getDefaultServer());
     }
     
-    public EmbeddedSolrConnector(SolrEmbeddedInstance instance, String coreName) {
+    public EmbeddedSolrConnector(EmbeddedInstance instance, String coreName) {
         super();
         this.instance = instance;
         this.core = this.instance.getCore(coreName);

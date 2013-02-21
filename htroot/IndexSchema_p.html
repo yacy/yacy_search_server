@@ -6,7 +6,7 @@
   </head>
   <body id="IndexSchema_p">
 <div id="api">
-<a href="/api/schema.xml">
+<a href="/api/schema.xml?core=#[core]#">
 <img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
 <span>The solr schema can also be retrieved as xml here. Click the API icon to see the xml. Just copy this xml to solr/conf/schema.xml to configure solr.</span>
 </div>	
@@ -15,8 +15,18 @@
     <h2>Solr Schema Editor</h2>
     <p>If you use a custom Solr schema you may enter a different field name in the column 'Custom Solr Field Name' of the YaCy default attribute name</p>
     
+    <form action="IndexSchema_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
+    Select a Core:
+      <select id="core" name="core" onchange='submit()'>
+          #{cores}#
+            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+          #{/cores}#
+      </select>
+    </form>
+    
     <form action="IndexSchema_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
+      <input type="hidden" name="core" value="#[core]#" />
       <div>
       <table class="sortable" border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">

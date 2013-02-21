@@ -48,7 +48,6 @@ import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.solr.Boost;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.lod.vocabulary.Tagging;
@@ -67,8 +66,9 @@ import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.Seed;
 import net.yacy.search.index.Segment;
-import net.yacy.search.index.SolrConfiguration;
 import net.yacy.search.ranking.RankingProfile;
+import net.yacy.search.schema.CollectionConfiguration;
+import net.yacy.search.schema.CollectionSchema;
 
 public final class QueryParams {
 
@@ -84,8 +84,8 @@ public final class QueryParams {
         }
     }
 
-    private static final YaCySchema[] defaultfacetfields = new YaCySchema[]{
-        YaCySchema.host_s, YaCySchema.url_protocol_s, YaCySchema.url_file_ext_s, YaCySchema.author_sxt};
+    private static final CollectionSchema[] defaultfacetfields = new CollectionSchema[]{
+        CollectionSchema.host_s, CollectionSchema.url_protocol_s, CollectionSchema.url_file_ext_s, CollectionSchema.author_sxt};
     
     private static final int defaultmaxfacets = 30;
     private static final String ampersand = "&amp;";
@@ -128,7 +128,7 @@ public final class QueryParams {
     public List<String> facetfields;
     public int maxfacets;
     private SolrQuery cachedQuery;
-    private SolrConfiguration solrSchema;
+    private CollectionConfiguration solrSchema;
     
     // the following values are filled during the search process as statistics for the search
     public final AtomicInteger local_rwi_available;  // the number of hits generated/ranked by the local search in rwi index
@@ -191,11 +191,11 @@ public final class QueryParams {
         this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
         this.facetfields = new ArrayList<String>();
 
-        this.solrSchema = indexSegment.fulltext().getSolrSchema();
-        for (YaCySchema f: defaultfacetfields) {
+        this.solrSchema = indexSegment.fulltext().getDefaultConfiguration();
+        for (CollectionSchema f: defaultfacetfields) {
             if (solrSchema.contains(f)) facetfields.add(f.getSolrFieldName());
         }
-        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(YaCySchema.VOCABULARY_PREFIX + v.getName() + YaCySchema.VOCABULARY_SUFFIX);
+        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_SUFFIX);
         this.maxfacets = defaultmaxfacets;
         this.cachedQuery = null;
     }
@@ -300,11 +300,11 @@ public final class QueryParams {
         this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
         this.facetfields = new ArrayList<String>();
         
-        this.solrSchema = indexSegment.fulltext().getSolrSchema();
-        for (YaCySchema f: defaultfacetfields) {
+        this.solrSchema = indexSegment.fulltext().getDefaultConfiguration();
+        for (CollectionSchema f: defaultfacetfields) {
             if (solrSchema.contains(f)) facetfields.add(f.getSolrFieldName());
         }
-        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(YaCySchema.VOCABULARY_PREFIX + v.getName() + YaCySchema.VOCABULARY_SUFFIX);
+        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_SUFFIX);
         this.maxfacets = defaultmaxfacets;
         this.cachedQuery = null;
     }
@@ -432,7 +432,7 @@ public final class QueryParams {
         if (this.queryGoal.getIncludeStrings().size() == 0) return null;
         // construct query
         final SolrQuery params = new SolrQuery();
-        params.setQuery(this.queryGoal.solrQueryString(this.indexSegment.fulltext().getSolrSchema()).toString());
+        params.setQuery(this.queryGoal.solrQueryString(this.indexSegment.fulltext().getDefaultConfiguration()).toString());
         params.setParam("defType", "edismax");
         params.setParam("bq", Boost.RANKING.getBoostQuery()); // a boost query that moves double content to the back
         params.setParam("bf", Boost.RANKING.getBoostFunction()); // a boost function extension
@@ -445,47 +445,47 @@ public final class QueryParams {
         if (this.modifier.sitehash == null && this.modifier.sitehost == null) {
             if (this.siteexcludes != null) {
                 for (String ex: this.siteexcludes) {
-                    fq.append(" AND -").append(YaCySchema.host_id_s.getSolrFieldName()).append(':').append(ex);
+                    fq.append(" AND -").append(CollectionSchema.host_id_s.getSolrFieldName()).append(':').append(ex);
                 }
             }
         } else {
             if (this.modifier.sitehost != null) {
                 // consider to search for hosts with 'www'-prefix, if not already part of the host name
                 if (this.modifier.sitehost.startsWith("www.")) {
-                    fq.append(" AND (").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehost.substring(4)).append('\"');
-                    fq.append(" OR ").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehost).append("\")");
+                    fq.append(" AND (").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehost.substring(4)).append('\"');
+                    fq.append(" OR ").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehost).append("\")");
                 } else {
-                    fq.append(" AND (").append(YaCySchema.host_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehost).append('\"');
-                    fq.append(" OR ").append(YaCySchema.host_s.getSolrFieldName()).append(":\"www.").append(this.modifier.sitehost).append("\")");
+                    fq.append(" AND (").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehost).append('\"');
+                    fq.append(" OR ").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"www.").append(this.modifier.sitehost).append("\")");
                 }
             } else
-                fq.append(" AND ").append(YaCySchema.host_id_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehash).append('\"');
+                fq.append(" AND ").append(CollectionSchema.host_id_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehash).append('\"');
         }
 
         // add vocabulary facets
         for (Tagging.Metatag tag: this.metatags) {
-            fq.append(" AND ").append(YaCySchema.VOCABULARY_PREFIX).append(tag.getVocabularyName()).append(YaCySchema.VOCABULARY_SUFFIX).append(":\"").append(tag.getObject()).append('\"');
+            fq.append(" AND ").append(CollectionSchema.VOCABULARY_PREFIX).append(tag.getVocabularyName()).append(CollectionSchema.VOCABULARY_SUFFIX).append(":\"").append(tag.getObject()).append('\"');
         }
         
         // add author facets
-        if (this.modifier.author != null && this.modifier.author.length() > 0 && this.solrSchema.contains(YaCySchema.author_sxt)) {
-            fq.append(" AND ").append(YaCySchema.author_sxt.getSolrFieldName()).append(":\"").append(this.modifier.author).append('\"');
+        if (this.modifier.author != null && this.modifier.author.length() > 0 && this.solrSchema.contains(CollectionSchema.author_sxt)) {
+            fq.append(" AND ").append(CollectionSchema.author_sxt.getSolrFieldName()).append(":\"").append(this.modifier.author).append('\"');
         }
         
         if (this.modifier.protocol != null) {
-            fq.append(" AND ").append(YaCySchema.url_protocol_s.getSolrFieldName()).append(':').append(this.modifier.protocol);
+            fq.append(" AND ").append(CollectionSchema.url_protocol_s.getSolrFieldName()).append(':').append(this.modifier.protocol);
         }
         
         if (this.tld != null) {
-            fq.append(" AND ").append(YaCySchema.host_dnc_s.getSolrFieldName()).append(":\"").append(this.tld).append('\"');
+            fq.append(" AND ").append(CollectionSchema.host_dnc_s.getSolrFieldName()).append(":\"").append(this.tld).append('\"');
         }
         
         if (this.modifier.filetype != null) {
-            fq.append(" AND ").append(YaCySchema.url_file_ext_s.getSolrFieldName()).append(":\"").append(this.modifier.filetype).append('\"');
+            fq.append(" AND ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"").append(this.modifier.filetype).append('\"');
         }
         
         if (this.inlink != null) {
-            fq.append(" AND ").append(YaCySchema.outboundlinks_urlstub_txt.getSolrFieldName()).append(":\"").append(this.inlink).append('\"');
+            fq.append(" AND ").append(CollectionSchema.outboundlinks_urlstub_txt.getSolrFieldName()).append(":\"").append(this.inlink).append('\"');
         }
         
         if (!this.urlMask_isCatchall) {
@@ -497,7 +497,7 @@ public final class QueryParams {
             while ((p = urlMaskPattern.indexOf(':')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 1);
             while ((p = urlMaskPattern.indexOf('/')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 1);
             while ((p = urlMaskPattern.indexOf('\\')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 2);
-            fq.append(" AND ").append(YaCySchema.sku.getSolrFieldName() + ":/" + urlMaskPattern + "/");
+            fq.append(" AND ").append(CollectionSchema.sku.getSolrFieldName() + ":/" + urlMaskPattern + "/");
         }
         
         if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {
@@ -508,13 +508,13 @@ public final class QueryParams {
             //params.set("sfield", YaCySchema.coordinate_p.name());
             //params.set("pt", Double.toString(this.lat) + "," + Double.toString(this.lon));
             //params.set("d", GeoLocation.degreeToKm(this.radius));
-            fq.append(" AND ").append("{!bbox sfield=" + YaCySchema.coordinate_p.getSolrFieldName() + " pt=" + Double.toString(this.lat) + "," + Double.toString(this.lon) + " d=" + GeoLocation.degreeToKm(this.radius) + "}");
+            fq.append(" AND ").append("{!bbox sfield=" + CollectionSchema.coordinate_p.getSolrFieldName() + " pt=" + Double.toString(this.lat) + "," + Double.toString(this.lon) + " d=" + GeoLocation.degreeToKm(this.radius) + "}");
             //params.setRows(Integer.MAX_VALUE);
         } else {
             // set ranking
             if (this.ranking.coeff_date == RankingProfile.COEFF_MAX) {
                 // set a most-recent ordering
-                params.setSortField(YaCySchema.last_modified.getSolrFieldName(), ORDER.desc);
+                params.setSortField(CollectionSchema.last_modified.getSolrFieldName(), ORDER.desc);
             }
         }
         if (fq.length() > 0) {

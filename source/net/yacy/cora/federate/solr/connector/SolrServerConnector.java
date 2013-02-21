@@ -24,12 +24,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
@@ -185,7 +184,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         } catch (Throwable e) {
             // catches "version conflict for": try this again and delete the document in advance
             try {
-                this.server.deleteById((String) solrdoc.getFieldValue(YaCySchema.id.getSolrFieldName()));
+                this.server.deleteById((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
             } catch (SolrServerException e1) {}
             try {
                 synchronized (this.server) {

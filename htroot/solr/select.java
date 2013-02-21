@@ -181,7 +181,7 @@ public class select {
         }
 
         // get the embedded connector
-        EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.fulltext().getLocalSolr();
+        EmbeddedSolrConnector connector = sb.index.fulltext().getDefaultLocalSolrConnector();
         if (connector == null) return null;
 
         // do the solr request, generate facets if we use a special YaCy format

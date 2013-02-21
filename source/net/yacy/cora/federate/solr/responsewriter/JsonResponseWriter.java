@@ -30,10 +30,10 @@ import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter.ResHead;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.data.URLLicense;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 
 import org.apache.lucene.document.Document;
@@ -58,9 +58,9 @@ public class JsonResponseWriter implements QueryResponseWriter {
     // define a list of simple YaCySchema -> json Token matchings
     private static final Map<String, String> field2tag = new HashMap<String, String>();
     static {
-        field2tag.put(YaCySchema.url_protocol_s.getSolrFieldName(), "protocol");
-        field2tag.put(YaCySchema.host_s.getSolrFieldName(), "host");
-        field2tag.put(YaCySchema.url_file_ext_s.getSolrFieldName(), "ext");
+        field2tag.put(CollectionSchema.url_protocol_s.getSolrFieldName(), "protocol");
+        field2tag.put(CollectionSchema.host_s.getSolrFieldName(), "host");
+        field2tag.put(CollectionSchema.url_file_ext_s.getSolrFieldName(), "ext");
     }
      
     private String title;
@@ -149,7 +149,7 @@ public class JsonResponseWriter implements QueryResponseWriter {
                 }
                 
                 // some special handling here
-                if (YaCySchema.sku.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.sku.getSolrFieldName().equals(fieldName)) {
                     String u = value.stringValue();
                     try {
                         url = new MultiProtocolURI(u);
@@ -158,31 +158,31 @@ public class JsonResponseWriter implements QueryResponseWriter {
                     } catch (MalformedURLException e) {}
                     continue;
                 }
-                if (YaCySchema.title.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.title.getSolrFieldName().equals(fieldName)) {
                     title = value.stringValue();
                     texts.add(title);
                     continue;
                 }
-                if (YaCySchema.description.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.description.getSolrFieldName().equals(fieldName)) {
                     description = value.stringValue();
                     texts.add(description);
                     continue;
                 }
-                if (YaCySchema.id.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.id.getSolrFieldName().equals(fieldName)) {
                     urlhash = value.stringValue();
                     solitaireTag(writer, "guid", urlhash);
                     continue;
                 }
-                if (YaCySchema.url_paths_sxt.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.url_paths_sxt.getSolrFieldName().equals(fieldName)) {
                     path.append('/').append(value.stringValue());
                     continue;
                 }
-                if (YaCySchema.last_modified.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.last_modified.getSolrFieldName().equals(fieldName)) {
                     Date d = new Date(Long.parseLong(value.stringValue()));
                     solitaireTag(writer, "pubDate", HeaderFramework.formatRFC1123(d));
                     continue;
                 }
-                if (YaCySchema.size_i.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.size_i.getSolrFieldName().equals(fieldName)) {
                     int size = value.stringValue() != null && value.stringValue().length() > 0 ? Integer.parseInt(value.stringValue()) : -1;
                     int sizekb = size / 1024;
                     int sizemb = sizekb / 1024;
@@ -190,13 +190,13 @@ public class JsonResponseWriter implements QueryResponseWriter {
                     solitaireTag(writer, "sizename", sizemb > 0 ? (Integer.toString(sizemb) + " mbyte") : sizekb > 0 ? (Integer.toString(sizekb) + " kbyte") : (Integer.toString(size) + " byte"));
                     continue;
                 }
-                if (YaCySchema.text_t.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.text_t.getSolrFieldName().equals(fieldName)) {
                     texts.add(value.stringValue());
                     continue;
                 }
-                if (YaCySchema.h1_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h2_txt.getSolrFieldName().equals(fieldName) ||
-                    YaCySchema.h3_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h4_txt.getSolrFieldName().equals(fieldName) ||
-                    YaCySchema.h5_txt.getSolrFieldName().equals(fieldName) || YaCySchema.h6_txt.getSolrFieldName().equals(fieldName)) {
+                if (CollectionSchema.h1_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h2_txt.getSolrFieldName().equals(fieldName) ||
+                    CollectionSchema.h3_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h4_txt.getSolrFieldName().equals(fieldName) ||
+                    CollectionSchema.h5_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h6_txt.getSolrFieldName().equals(fieldName)) {
                     // because these are multi-valued fields, there can be several of each
                     texts.add(value.stringValue());
                     continue;
@@ -224,13 +224,13 @@ public class JsonResponseWriter implements QueryResponseWriter {
 
         // the facets can be created with the options &facet=true&facet.mincount=1&facet.field=host_s&facet.field=url_file_ext_s&facet.field=url_protocol_s&facet.field=author_sxt
         @SuppressWarnings("unchecked")
-        NamedList<Integer> domains = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.host_s.getSolrFieldName());
+        NamedList<Integer> domains = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.host_s.getSolrFieldName());
         @SuppressWarnings("unchecked")
-        NamedList<Integer> filetypes = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_file_ext_s.getSolrFieldName());
+        NamedList<Integer> filetypes = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.url_file_ext_s.getSolrFieldName());
         @SuppressWarnings("unchecked")
-        NamedList<Integer> protocols = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.url_protocol_s.getSolrFieldName());
+        NamedList<Integer> protocols = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.url_protocol_s.getSolrFieldName());
         @SuppressWarnings("unchecked")
-        NamedList<Integer> authors = facetFields == null ? null : (NamedList<Integer>) facetFields.get(YaCySchema.author_sxt.getSolrFieldName());
+        NamedList<Integer> authors = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.author_sxt.getSolrFieldName());
 
         if (domains != null) {
             writer.write("{\"facetname\":\"domains\",\"displayname\":\"Domains\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());

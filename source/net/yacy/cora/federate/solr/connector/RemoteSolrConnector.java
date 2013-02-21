@@ -22,9 +22,11 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import net.yacy.cora.federate.solr.instance.SolrInstance;
-import net.yacy.cora.federate.solr.instance.SolrRemoteInstance;
+import net.yacy.cora.federate.solr.instance.RemoteInstance;
+import net.yacy.cora.federate.solr.instance.ShardInstance;
 
 import org.apache.solr.client.solrj.ResponseParser;
 import org.apache.solr.client.solrj.SolrServer;
@@ -36,7 +38,7 @@ import org.apache.solr.common.util.NamedList;
 
 public class RemoteSolrConnector extends SolrServerConnector implements SolrConnector {
 
-    SolrRemoteInstance instance;
+    SolrInstance instance;
     String corename;
     
     /**
@@ -44,7 +46,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
      * @param instance the instance of the remote solr url, like http://192.168.1.60:8983/solr/ or http://admin:pw@192.168.1.60:8983/solr/
      * @throws IOException
      */
-    public RemoteSolrConnector(final SolrRemoteInstance instance) throws IOException {
+    public RemoteSolrConnector(final SolrInstance instance) throws IOException {
         super();
         this.instance = instance;
         this.corename = this.instance.getDefaultCoreName();
@@ -52,7 +54,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
         super.init(s);
     }
     
-    public RemoteSolrConnector(final SolrRemoteInstance instance, String corename) {
+    public RemoteSolrConnector(final SolrInstance instance, String corename) {
         super();
         this.instance = instance;
         this.corename = corename == null ? this.instance.getDefaultCoreName() : corename;
@@ -102,8 +104,10 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
     public static void main(final String args[]) {
         RemoteSolrConnector solr;
         try {
-            SolrRemoteInstance instance = new SolrRemoteInstance("http://127.0.0.1:8983/solr/");
-            solr = new RemoteSolrConnector(instance, "solr");
+            RemoteInstance instance = new RemoteInstance("http://127.0.0.1:8983/solr/", null, "collection1");
+            ArrayList<RemoteInstance> instances = new ArrayList<RemoteInstance>();
+            instances.add(instance);
+            solr = new RemoteSolrConnector(new ShardInstance(instances, ShardSelection.Method.MODULO_HOST_MD5), "solr");
             solr.clear();
             final File exampleDir = new File("test/parsertest/");
             long t, t0, a = 0;

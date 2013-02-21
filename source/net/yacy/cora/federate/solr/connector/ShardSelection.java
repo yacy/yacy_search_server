@@ -28,9 +28,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.federate.solr.YaCySchema;
+import net.yacy.kelondro.logging.Log;
+import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 
 public class ShardSelection {
 
@@ -53,28 +55,51 @@ public class ShardSelection {
 
     public int select(final SolrInputDocument solrdoc) throws IOException {
         if (this.method == Method.MODULO_HOST_MD5) {
-            final String sku = (String) solrdoc.getField(YaCySchema.sku.getSolrFieldName()).getValue();
-            return selectURL(sku);
+            SolrInputField sif = solrdoc.getField(CollectionSchema.host_s.getSolrFieldName());
+            if (sif != null) {
+                final String host = (String) sif.getValue();
+                return selectHost(host);
+            }
+            sif = solrdoc.getField(CollectionSchema.sku.getSolrFieldName());
+            if (sif != null) {
+                final String url = (String) sif.getValue();
+                try {
+                    return selectURL(url);
+                } catch (IOException e) {
+                    Log.logException(e);
+                    return 0;
+                }
+            }
+            return 0;
         }
 
         // finally if no method matches use ROUND_ROBIN
         return selectRoundRobin();
     }
 
+    public int selectHost(final String host) throws IOException {
+        if (this.method == Method.MODULO_HOST_MD5) {
+            if (host == null) throw new IOException("sharding - host url, host empty: " + host);
+            try {
+                final MessageDigest digest = MessageDigest.getInstance("MD5");
+                digest.update(ASCII.getBytes(host));
+                final byte[] md5 = digest.digest();
+                return (0xff & md5[0]) % this.dimension;
+            } catch (final NoSuchAlgorithmException e) {
+                throw new IOException("sharding - no md5 available: " + e.getMessage());
+            }
+        }
+
+        // finally if no method matches use ROUND_ROBIN
+        return (int) (this.chardID.getAndIncrement() % this.dimension);
+    }
+    
     public int selectURL(final String sku) throws IOException {
         if (this.method == Method.MODULO_HOST_MD5) {
             try {
                 final URL url = new URL(sku);
                 final String host = url.getHost();
-                if (host == null) throw new IOException("sharding - bad url, host empty: " + sku);
-                try {
-                    final MessageDigest digest = MessageDigest.getInstance("MD5");
-                    digest.update(ASCII.getBytes(host));
-                    final byte[] md5 = digest.digest();
-                    return (0xff & md5[0]) % this.dimension;
-                } catch (final NoSuchAlgorithmException e) {
-                    throw new IOException("sharding - no md5 available: " + e.getMessage());
-                }
+                return selectHost(host);
             } catch (final MalformedURLException e) {
                 throw new IOException("sharding - bad url: " + sku);
             }

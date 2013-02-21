@@ -21,11 +21,11 @@
 import java.util.Map;
 
 import net.yacy.cora.federate.solr.Boost;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -58,7 +58,7 @@ public class RankingSolr_p {
             for (Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getKey().startsWith("boost")) {
                     String fieldName = entry.getKey().substring(6);
-                    YaCySchema field = YaCySchema.valueOf(fieldName);
+                    CollectionSchema field = CollectionSchema.valueOf(fieldName);
                     if (field == null) continue;
                     try {
                         float boost = Float.parseFloat(entry.getValue());
@@ -85,8 +85,8 @@ public class RankingSolr_p {
         prop.put("minTokenLen", Boost.RANKING.getMinTokenLen());
         prop.put("quantRate", Boost.RANKING.getQuantRate());
         int i = 0;
-        for (Map.Entry<YaCySchema, Float> entry: Boost.RANKING.entrySet()) {
-            YaCySchema field = entry.getKey();
+        for (Map.Entry<CollectionSchema, Float> entry: Boost.RANKING.entrySet()) {
+            CollectionSchema field = entry.getKey();
             float boost = entry.getValue();
             prop.put("boosts_" + i + "_field", field.getSolrFieldName());
             prop.put("boosts_" + i + "_boost", Float.toString(boost));

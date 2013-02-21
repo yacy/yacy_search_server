@@ -31,10 +31,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.util.LookAheadIterator;
+import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -56,14 +56,14 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     public final static SolrQuery catchallQuery = new SolrQuery();
     static {
         catchallQuery.setQuery("*:*");
-        catchallQuery.setFields(YaCySchema.id.getSolrFieldName());
+        catchallQuery.setFields(CollectionSchema.id.getSolrFieldName());
         catchallQuery.setRows(1);
         catchallQuery.setStart(0);
     }
     public final static SolrQuery catchSuccessQuery = new SolrQuery();
     static {
-        catchSuccessQuery.setQuery("-" + YaCySchema.failreason_t.getSolrFieldName() + ":[* TO *]");
-        catchSuccessQuery.setFields(YaCySchema.id.getSolrFieldName());
+        catchSuccessQuery.setQuery("-" + CollectionSchema.failreason_t.getSolrFieldName() + ":[* TO *]");
+        catchSuccessQuery.setFields(CollectionSchema.id.getSolrFieldName());
         catchSuccessQuery.setRows(1);
         catchSuccessQuery.setStart(0);
     }
@@ -138,9 +138,9 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                 int o = offset;
                 while (System.currentTimeMillis() < endtime) {
                     try {
-                        SolrDocumentList sdl = query(querystring, o, pagesize, YaCySchema.id.getSolrFieldName());
+                        SolrDocumentList sdl = query(querystring, o, pagesize, CollectionSchema.id.getSolrFieldName());
                         for (SolrDocument d: sdl) {
-                            try {queue.put((String) d.getFieldValue(YaCySchema.id.getSolrFieldName()));} catch (InterruptedException e) {break;}
+                            try {queue.put((String) d.getFieldValue(CollectionSchema.id.getSolrFieldName()));} catch (InterruptedException e) {break;}
                         }
                         if (sdl.size() < pagesize) break;
                         o += pagesize;
@@ -213,7 +213,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setRows(0);
         params.setStart(0);
         params.setFacet(false);
-        params.setFields(YaCySchema.id.getSolrFieldName());
+        params.setFields(CollectionSchema.id.getSolrFieldName());
 
         // query the server
         QueryResponse rsp = query(params);

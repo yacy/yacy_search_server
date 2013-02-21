@@ -28,16 +28,17 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import net.yacy.cora.federate.solr.YaCySchema;
+import net.yacy.cora.federate.solr.SchemaConfiguration;
+import net.yacy.cora.federate.solr.SchemaConfiguration.Entry;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
-import net.yacy.cora.federate.yacy.ConfigurationSet;
-import net.yacy.cora.federate.yacy.ConfigurationSet.Entry;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.parser.xml.opensearchdescriptionReader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEvent;
+import net.yacy.search.schema.CollectionSchema;
+
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 
@@ -63,7 +64,7 @@ public class OpenSearchConnector {
         if (createworktable) { // read from config file and create worktable
             sb.tables.clear("opensearchsys");
             try {
-                ConfigurationSet cfg = new ConfigurationSet(confFile);
+                SchemaConfiguration cfg = new SchemaConfiguration(confFile);
 
                 // copy active opensearch systems to a work table (opensearchsys)
                 Iterator<Entry> cfgentries = cfg.entryIterator();
@@ -140,7 +141,7 @@ public class OpenSearchConnector {
             return false;
         }
 
-        ConfigurationSet conf = new ConfigurationSet(confFile);
+        SchemaConfiguration conf = new SchemaConfiguration(confFile);
         if (name != null && !name.isEmpty()) {
             conf.add(name, null, active);
             Entry e = conf.get(name);
@@ -174,21 +175,21 @@ public class OpenSearchConnector {
         if (sb == null) {
             return false;
         }
-        final EmbeddedSolrConnector connector = (EmbeddedSolrConnector) sb.index.fulltext().getLocalSolr();
+        final EmbeddedSolrConnector connector = sb.index.fulltext().getDefaultLocalSolrConnector();
         // check if needed Solr fields are available (selected)
         if (connector == null) {
             Log.logSevere("OpenSearchConnector.Discover", "Error on connecting to embedded Solr index");
             return false;
         }
-        final boolean metafieldNOTavailable = sb.index.fulltext().getSolrSchema().containsDisabled(YaCySchema.outboundlinks_tag_txt.name());
+        final boolean metafieldNOTavailable = sb.index.fulltext().getDefaultConfiguration().containsDisabled(CollectionSchema.outboundlinks_tag_txt.name());
         if (metafieldNOTavailable) {
             Log.logWarning("OpenSearchConnector.Discover", "Solr Schema field outboundlinks_tag_txt must be switched on");
             return false;
         }
         // the solr query
-        final String solrquerystr = YaCySchema.outboundlinks_tag_txt.getSolrFieldName() + ":\"rel=\\\"search\\\"\" OR "
-                + YaCySchema.inboundlinks_tag_txt.getSolrFieldName() + ":\"rel=\\\"search\\\"\"&fl="
-                + YaCySchema.sku.getSolrFieldName() + "," + YaCySchema.outboundlinks_tag_txt.getSolrFieldName() +"," + YaCySchema.inboundlinks_tag_txt.getSolrFieldName();
+        final String solrquerystr = CollectionSchema.outboundlinks_tag_txt.getSolrFieldName() + ":\"rel=\\\"search\\\"\" OR "
+                + CollectionSchema.inboundlinks_tag_txt.getSolrFieldName() + ":\"rel=\\\"search\\\"\"&fl="
+                + CollectionSchema.sku.getSolrFieldName() + "," + CollectionSchema.outboundlinks_tag_txt.getSolrFieldName() +"," + CollectionSchema.inboundlinks_tag_txt.getSolrFieldName();
         final long numfound;
         try {
             SolrDocumentList docList = connector.query(solrquerystr, 0, 1);
@@ -226,11 +227,11 @@ public class OpenSearchConnector {
                             Iterator<SolrDocument> docidx = docList.iterator();
                             while (docidx.hasNext()) {
                                 SolrDocument sdoc = docidx.next();
-                                Collection<Object> tagtxtlist = sdoc.getFieldValues(YaCySchema.outboundlinks_tag_txt.getSolrFieldName());
+                                Collection<Object> tagtxtlist = sdoc.getFieldValues(CollectionSchema.outboundlinks_tag_txt.getSolrFieldName());
                                 if (tagtxtlist == null) {
-                                    tagtxtlist = sdoc.getFieldValues(YaCySchema.inboundlinks_tag_txt.getSolrFieldName());
+                                    tagtxtlist = sdoc.getFieldValues(CollectionSchema.inboundlinks_tag_txt.getSolrFieldName());
                                 } else {
-                                    tagtxtlist.addAll(sdoc.getFieldValues(YaCySchema.inboundlinks_tag_txt.getSolrFieldName()));
+                                    tagtxtlist.addAll(sdoc.getFieldValues(CollectionSchema.inboundlinks_tag_txt.getSolrFieldName()));
                                 }
                                 Iterator<Object> tagtxtidx = tagtxtlist.iterator();
                                 while (tagtxtidx.hasNext()) {

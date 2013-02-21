@@ -44,7 +44,6 @@ import org.apache.solr.common.SolrInputDocument;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
@@ -78,6 +77,9 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.RankingProcess;
 import net.yacy.search.query.SearchEvent;
+import net.yacy.search.schema.CollectionConfiguration;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphConfiguration;
 
 public class Segment {
 
@@ -112,13 +114,20 @@ public class Segment {
     protected       IndexCell<WordReference>       termIndex;
     protected       IndexCell<CitationReference>   urlCitationIndex;
 
-    public Segment(final Log log, final File segmentPath, final SolrConfiguration solrSchema) {
+    /**
+     * create a new Segment
+     * @param log
+     * @param segmentPath that should be the path ponting to the directory "SEGMENT"
+     * @param collectionSchema
+     */
+    public Segment(final Log log, final File segmentPath,
+            final CollectionConfiguration collectionConfiguration, final WebgraphConfiguration webgraphConfiguration) {
         log.logInfo("Initializing Segment '" + segmentPath + ".");
         this.log = log;
         this.segmentPath = segmentPath;
 
         // create LURL-db
-        this.fulltext = new Fulltext(segmentPath, solrSchema);
+        this.fulltext = new Fulltext(segmentPath, collectionConfiguration, webgraphConfiguration);
     }
 
     public boolean connectedRWI() {
@@ -128,7 +137,7 @@ public class Segment {
     public void connectRWI(final int entityCacheMaxSize, final long maxFileSize) throws IOException {
         if (this.termIndex != null) return;
         this.termIndex = new IndexCell<WordReference>(
-                        this.segmentPath,
+                        new File(this.segmentPath, "default"),
                         termIndexName,
                         wordReferenceFactory,
                         wordOrder,
@@ -152,7 +161,7 @@ public class Segment {
     public void connectCitation(final int entityCacheMaxSize, final long maxFileSize) throws IOException {
         if (this.urlCitationIndex != null) return;
         this.urlCitationIndex = new IndexCell<CitationReference>(
-                        this.segmentPath,
+                        new File(this.segmentPath, "default"),
                         citationIndexName,
                         citationReferenceFactory,
                         wordOrder,
@@ -206,7 +215,7 @@ public class Segment {
     public int getQueryCount(String word) {
         if (word == null || word.indexOf(':') >= 0 || word.indexOf(' ') >= 0 || word.indexOf('/') >= 0) return 0;
         int count = this.termIndex == null ? 0 : this.termIndex.count(Word.word2hash(word));
-        try {count += this.fulltext.getSolr().getQueryCount(YaCySchema.text_t.getSolrFieldName() + ':' + word);} catch (IOException e) {}
+        try {count += this.fulltext.getDefaultConnector().getQueryCount(CollectionSchema.text_t.getSolrFieldName() + ':' + word);} catch (IOException e) {}
         return count;
     }
 
@@ -223,12 +232,12 @@ public class Segment {
         final BlockingQueue<SolrDocument> docQueue;
         final String urlstub;
         if (stub == null) {
-            docQueue = this.fulltext.getSolr().concurrentQuery("*:*", 0, Integer.MAX_VALUE, maxtime, maxcount, YaCySchema.id.getSolrFieldName(), YaCySchema.sku.getSolrFieldName());
+            docQueue = this.fulltext.getDefaultConnector().concurrentQuery("*:*", 0, Integer.MAX_VALUE, maxtime, maxcount, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
             urlstub = null;
         } else {
             final String host = stub.getHost();
             String hh = DigestURI.hosthash(host);
-            docQueue = this.fulltext.getSolr().concurrentQuery(YaCySchema.host_id_s + ":\"" + hh + "\"", 0, Integer.MAX_VALUE, maxtime, maxcount, YaCySchema.id.getSolrFieldName(), YaCySchema.sku.getSolrFieldName());
+            docQueue = this.fulltext.getDefaultConnector().concurrentQuery(CollectionSchema.host_id_s + ":\"" + hh + "\"", 0, Integer.MAX_VALUE, maxtime, maxcount, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
             urlstub = stub.toNormalform(true);
         }
 
@@ -245,8 +254,8 @@ public class Segment {
                         return null;
                     }
                     if (doc == null || doc == AbstractSolrConnector.POISON_DOCUMENT) return null;
-                    String u = (String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName());
-                    String id =  (String) doc.getFieldValue(YaCySchema.id.getSolrFieldName());
+                    String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+                    String id =  (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
                     DigestURI url;
                     try {
                         url = new DigestURI(u, ASCII.getBytes(id));
@@ -368,15 +377,15 @@ public class Segment {
         // DO A SOFT/HARD COMMIT IF NEEDED
         if (MemoryControl.shortStatus()) {
             // do a 'hard' commit to flush index caches
-            this.fulltext.getSolr().commit(false);
+            this.fulltext.getDefaultConnector().commit(false);
         } else {
             if (
-                (this.fulltext.getSolrSchema().contains(YaCySchema.exact_signature_l) && this.fulltext.getSolrSchema().contains(YaCySchema.exact_signature_unique_b)) ||
-                (this.fulltext.getSolrSchema().contains(YaCySchema.fuzzy_signature_l) && this.fulltext.getSolrSchema().contains(YaCySchema.fuzzy_signature_unique_b)) ||
-                this.fulltext.getSolrSchema().contains(YaCySchema.title_unique_b) ||
-                this.fulltext.getSolrSchema().contains(YaCySchema.description_unique_b)
+                (this.fulltext.getDefaultConfiguration().contains(CollectionSchema.exact_signature_l) && this.fulltext.getDefaultConfiguration().contains(CollectionSchema.exact_signature_unique_b)) ||
+                (this.fulltext.getDefaultConfiguration().contains(CollectionSchema.fuzzy_signature_l) && this.fulltext.getDefaultConfiguration().contains(CollectionSchema.fuzzy_signature_unique_b)) ||
+                this.fulltext.getDefaultConfiguration().contains(CollectionSchema.title_unique_b) ||
+                this.fulltext.getDefaultConfiguration().contains(CollectionSchema.description_unique_b)
                ) {
-                this.fulltext.getSolr().commit(true); // make sure that we have latest information for the postprocessing steps
+                this.fulltext.getDefaultConnector().commit(true); // make sure that we have latest information for the postprocessing steps
             }
         }
         
@@ -395,19 +404,19 @@ public class Segment {
         char docType = Response.docType(document.dc_format());
         
         // CREATE SOLR DOCUMENT
-        final SolrInputDocument solrInputDoc = this.fulltext.getSolrSchema().yacy2solr(id, profile, responseHeader, document, condenser, referrerURL, language, urlCitationIndex);
+        final SolrInputDocument solrInputDoc = this.fulltext.getDefaultConfiguration().yacy2solr(id, profile, responseHeader, document, condenser, referrerURL, language, urlCitationIndex);
         
         // FIND OUT IF THIS IS A DOUBLE DOCUMENT
-        for (YaCySchema[] checkfields: new YaCySchema[][]{
-                {YaCySchema.exact_signature_l, YaCySchema.exact_signature_unique_b},
-                {YaCySchema.fuzzy_signature_l, YaCySchema.fuzzy_signature_unique_b}}) {
-            YaCySchema checkfield = checkfields[0];
-            YaCySchema uniquefield = checkfields[1];
-            if (this.fulltext.getSolrSchema().contains(checkfield) && this.fulltext.getSolrSchema().contains(uniquefield)) {
+        for (CollectionSchema[] checkfields: new CollectionSchema[][]{
+                {CollectionSchema.exact_signature_l, CollectionSchema.exact_signature_unique_b},
+                {CollectionSchema.fuzzy_signature_l, CollectionSchema.fuzzy_signature_unique_b}}) {
+            CollectionSchema checkfield = checkfields[0];
+            CollectionSchema uniquefield = checkfields[1];
+            if (this.fulltext.getDefaultConfiguration().contains(checkfield) && this.fulltext.getDefaultConfiguration().contains(uniquefield)) {
                 // lookup the document with the same signature
                 long signature = ((Long) solrInputDoc.getField(checkfield.getSolrFieldName()).getValue()).longValue();
                 try {
-                    if (this.fulltext.getSolr().exists(checkfield.getSolrFieldName(), Long.toString(signature))) {
+                    if (this.fulltext.getDefaultConnector().exists(checkfield.getSolrFieldName(), Long.toString(signature))) {
                         // change unique attribut in content
                         solrInputDoc.setField(uniquefield.getSolrFieldName(), false);
                     }
@@ -416,29 +425,29 @@ public class Segment {
         }
         
         // CHECK IF TITLE AND DESCRIPTION IS UNIQUE (this is by default not switched on)
-        uniquecheck: for (YaCySchema[] checkfields: new YaCySchema[][]{
-                {YaCySchema.title, YaCySchema.title_unique_b},
-                {YaCySchema.description, YaCySchema.description_unique_b}}) {
-            YaCySchema checkfield = checkfields[0];
-            YaCySchema uniquefield = checkfields[1];
-            if (this.fulltext.getSolrSchema().contains(checkfield) && this.fulltext.getSolrSchema().contains(uniquefield)) {
+        uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][]{
+                {CollectionSchema.title, CollectionSchema.title_unique_b},
+                {CollectionSchema.description, CollectionSchema.description_unique_b}}) {
+            CollectionSchema checkfield = checkfields[0];
+            CollectionSchema uniquefield = checkfields[1];
+            if (this.fulltext.getDefaultConfiguration().contains(checkfield) && this.fulltext.getDefaultConfiguration().contains(uniquefield)) {
                 // lookup in the index for the same title
-                String checkstring = checkfield == YaCySchema.title ? document.dc_title() : document.dc_description();
+                String checkstring = checkfield == CollectionSchema.title ? document.dc_title() : document.dc_description();
                 if (checkstring.length() == 0) {
                     solrInputDoc.setField(uniquefield.getSolrFieldName(), false);
                     continue uniquecheck;
                 }
                 checkstring = ClientUtils.escapeQueryChars("\"" + checkstring + "\"");
                 try {
-                    if (this.fulltext.getSolr().exists(checkfield.getSolrFieldName(), checkstring)) {
+                    if (this.fulltext.getDefaultConnector().exists(checkfield.getSolrFieldName(), checkstring)) {
                         // switch unique attribute in new document
                         solrInputDoc.setField(uniquefield.getSolrFieldName(), false);
                         // switch attribute also in all existing documents (which should be exactly only one!)
-                        SolrDocumentList docs = this.fulltext.getSolr().query(checkfield.getSolrFieldName() + ":" + checkstring + " AND " + uniquefield.getSolrFieldName() + ":true", 0, 1000);
+                        SolrDocumentList docs = this.fulltext.getDefaultConnector().query(checkfield.getSolrFieldName() + ":" + checkstring + " AND " + uniquefield.getSolrFieldName() + ":true", 0, 1000);
                         for (SolrDocument doc: docs) {
-                            SolrInputDocument sid = this.fulltext.getSolrSchema().toSolrInputDocument(doc);
+                            SolrInputDocument sid = this.fulltext.getDefaultConfiguration().toSolrInputDocument(doc);
                             sid.setField(uniquefield.getSolrFieldName(), false);
-                            this.fulltext.getSolr().add(sid);
+                            this.fulltext.getDefaultConnector().add(sid);
                         }
                     } else {
                         solrInputDoc.setField(uniquefield.getSolrFieldName(), true);
@@ -448,9 +457,9 @@ public class Segment {
         }
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
-        if (this.urlCitationIndex != null && this.fulltext.getSolrSchema().contains(YaCySchema.references_i)) {
+        if (this.urlCitationIndex != null && this.fulltext.getDefaultConfiguration().contains(CollectionSchema.references_i)) {
             int references = this.urlCitationIndex.count(url.hash());
-            if (references > 0) solrInputDoc.setField(YaCySchema.references_i.getSolrFieldName(), references);
+            if (references > 0) solrInputDoc.setField(CollectionSchema.references_i.getSolrFieldName(), references);
         }
         
         // STORE TO SOLR

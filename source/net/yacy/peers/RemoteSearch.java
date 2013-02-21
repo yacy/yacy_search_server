@@ -161,6 +161,9 @@ public class RemoteSearch extends Thread {
                 nodePeers.add(s);
             }
         }
+        
+        // for debugging: remove all dht peer to see if solr is working properly
+        //dhtPeers.clear(); // FOR DEBUGGING ONLY!!!
 
         // start solr searches
         for (Seed s: nodePeers) {

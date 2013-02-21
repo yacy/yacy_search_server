@@ -22,27 +22,33 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import net.yacy.cora.federate.solr.YaCySchema;
+import net.yacy.cora.federate.solr.SchemaConfiguration;
+import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.SolrConfiguration;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
 
 public class schema {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final servletProperties prop = new servletProperties();
         final Switchboard sb = (Switchboard) env;
 
+        String schemaName = CollectionSchema.CORE_NAME;
+        if (post != null) schemaName = post.get("core", schemaName); 
+        
         // write schema
         int c = 0;
-        SolrConfiguration solrSchema = sb.index.fulltext().getSolrSchema();
-        for (YaCySchema field : YaCySchema.values()) {
+        SchemaConfiguration solrSchema = schemaName.equals(CollectionSchema.CORE_NAME) ? sb.index.fulltext().getDefaultConfiguration() : sb.index.fulltext().getWebgraphConfiguration();
+        SchemaDeclaration[] cc = schemaName.equals(CollectionSchema.CORE_NAME) ? CollectionSchema.values() : WebgraphSchema.values();
+        for (SchemaDeclaration field : cc) {
             if (solrSchema.contains(field.name())) {
                 addField(prop, c, field);
                 c++;
@@ -51,16 +57,27 @@ public class schema {
         //if (solrScheme.contains(YaCySchema.author)) {addField(prop, c, YaCySchema.author_sxt);}
         prop.put("fields", c);
 
-        prop.put("copyFieldAuthor", solrSchema.contains(YaCySchema.author) ? 1 : 0);
-        
-        prop.put("solruniquekey",YaCySchema.id.getSolrFieldName());
-        prop.put("solrdefaultsearchfield",
-                solrSchema.contains(YaCySchema.text_t) ? YaCySchema.text_t.getSolrFieldName() :
-                solrSchema.contains(YaCySchema.fuzzy_signature_text_t) ? YaCySchema.fuzzy_signature_text_t.getSolrFieldName() :
-                solrSchema.contains(YaCySchema.h1_txt) ? YaCySchema.h1_txt.getSolrFieldName() :
-                YaCySchema.id.getSolrFieldName()
-                );
-        
+        if (schemaName.equals(CollectionSchema.CORE_NAME)) {
+            prop.put("copyFieldAuthor", solrSchema.contains(CollectionSchema.author) ? 1 : 0);
+            
+            prop.put("solruniquekey", CollectionSchema.id.getSolrFieldName());
+            prop.put("solrdefaultsearchfield",
+                    solrSchema.contains(CollectionSchema.text_t) ? CollectionSchema.text_t.getSolrFieldName() :
+                    solrSchema.contains(CollectionSchema.fuzzy_signature_text_t) ? CollectionSchema.fuzzy_signature_text_t.getSolrFieldName() :
+                    solrSchema.contains(CollectionSchema.h1_txt) ? CollectionSchema.h1_txt.getSolrFieldName() :
+                    CollectionSchema.id.getSolrFieldName()
+                    );
+        } else {
+            prop.put("copyFieldAuthor", 0);
+            
+            prop.put("solruniquekey", WebgraphSchema.id.getSolrFieldName());
+            prop.put("solrdefaultsearchfield",
+                    solrSchema.contains(WebgraphSchema.target_linktext_t) ? WebgraphSchema.target_linktext_t.getSolrFieldName() :
+                    solrSchema.contains(WebgraphSchema.target_name_t) ? WebgraphSchema.target_name_t.getSolrFieldName() :
+                    solrSchema.contains(WebgraphSchema.target_alt_t) ? WebgraphSchema.target_alt_t.getSolrFieldName() :
+                    WebgraphSchema.id.getSolrFieldName()
+                    );
+        }     
 
         // add CORS Access header
         final ResponseHeader outgoingHeader = new ResponseHeader(200);
@@ -71,7 +88,7 @@ public class schema {
         return prop;
     }
     
-    private static void addField(servletProperties prop, int c, YaCySchema field) {
+    private static void addField(servletProperties prop, int c, SchemaDeclaration field) {
         prop.put("fields_" + c + "_solrname", field.getSolrFieldName());
         prop.put("fields_" + c + "_type", field.getType().printName());
         prop.put("fields_" + c + "_comment", field.getComment());

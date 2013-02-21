@@ -36,7 +36,6 @@ import net.yacy.cora.date.MicroDate;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.SolrType;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.crawler.retrieval.Response;
@@ -44,6 +43,7 @@ import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Bitfield;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.utils.crypt;
 
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -58,15 +58,15 @@ import org.apache.solr.common.SolrInputDocument;
  */
 public class URIMetadataNode {
 
-    public static YaCySchema[] fieldList = new YaCySchema[]{
-        YaCySchema.audiolinkscount_i, YaCySchema.author, YaCySchema.collection_sxt, YaCySchema.content_type,
-        YaCySchema.coordinate_p, YaCySchema.description, YaCySchema.fresh_date_dt, YaCySchema.host_id_s, YaCySchema.id,
-        YaCySchema.imagescount_i, YaCySchema.inboundlinks_protocol_sxt, YaCySchema.inboundlinks_urlstub_txt,
-        YaCySchema.inboundlinkscount_i, YaCySchema.keywords, YaCySchema.language_s, YaCySchema.last_modified, YaCySchema.load_date_dt,
-        YaCySchema.md5_s, YaCySchema.outboundlinks_protocol_sxt, YaCySchema.outboundlinks_urlstub_txt,
-        YaCySchema.outboundlinkscount_i, YaCySchema.publisher_t, YaCySchema.referrer_id_txt, YaCySchema.size_i, YaCySchema.sku,
-        YaCySchema.text_t, YaCySchema.title, YaCySchema.title_words_val, YaCySchema.url_chars_i,
-        YaCySchema.videolinkscount_i, YaCySchema.videolinkscount_i, YaCySchema.wordcount_i};
+    public static CollectionSchema[] fieldList = new CollectionSchema[]{
+        CollectionSchema.audiolinkscount_i, CollectionSchema.author, CollectionSchema.collection_sxt, CollectionSchema.content_type,
+        CollectionSchema.coordinate_p, CollectionSchema.description, CollectionSchema.fresh_date_dt, CollectionSchema.host_id_s, CollectionSchema.id,
+        CollectionSchema.imagescount_i, CollectionSchema.inboundlinks_protocol_sxt, CollectionSchema.inboundlinks_urlstub_txt,
+        CollectionSchema.inboundlinkscount_i, CollectionSchema.keywords, CollectionSchema.language_s, CollectionSchema.last_modified, CollectionSchema.load_date_dt,
+        CollectionSchema.md5_s, CollectionSchema.outboundlinks_protocol_sxt, CollectionSchema.outboundlinks_urlstub_txt,
+        CollectionSchema.outboundlinkscount_i, CollectionSchema.publisher_t, CollectionSchema.referrer_id_txt, CollectionSchema.size_i, CollectionSchema.sku,
+        CollectionSchema.text_t, CollectionSchema.title, CollectionSchema.title_words_val, CollectionSchema.url_chars_i,
+        CollectionSchema.videolinkscount_i, CollectionSchema.videolinkscount_i, CollectionSchema.wordcount_i};
     
     private byte[] hash = null;
     private String urlRaw = null, keywords = null;
@@ -88,8 +88,8 @@ public class URIMetadataNode {
         this.snippet = "";
         this.word = null;
         this.ranking = Long.MIN_VALUE;
-        this.hash = ASCII.getBytes(getString(YaCySchema.id));
-        this.urlRaw = getString(YaCySchema.sku);
+        this.hash = ASCII.getBytes(getString(CollectionSchema.id));
+        this.urlRaw = getString(CollectionSchema.sku);
         try {
             this.url = new DigestURI(this.urlRaw, this.hash);
         } catch (MalformedURLException e) {
@@ -119,13 +119,13 @@ public class URIMetadataNode {
     }
 
     public String hosthash() {
-        String hosthash = (String) this.doc.getFieldValue(YaCySchema.host_id_s.getSolrFieldName());
+        String hosthash = (String) this.doc.getFieldValue(CollectionSchema.host_id_s.getSolrFieldName());
         if (hosthash == null) hosthash = ASCII.String(this.hash, 6, 6);
         return hosthash;
     }
 
     public Date moddate() {
-        return getDate(YaCySchema.last_modified);
+        return getDate(CollectionSchema.last_modified);
     }
 
     public DigestURI url() {
@@ -137,22 +137,22 @@ public class URIMetadataNode {
     }
 
     public String dc_title() {
-        ArrayList<String> a = getStringList(YaCySchema.title);
+        ArrayList<String> a = getStringList(CollectionSchema.title);
         if (a == null || a.size() == 0) return "";
         return a.get(0);
     }
 
     public String dc_creator() {
-        return getString(YaCySchema.author);
+        return getString(CollectionSchema.author);
     }
 
     public String dc_publisher() {
-        return getString(YaCySchema.publisher_t);
+        return getString(CollectionSchema.publisher_t);
     }
 
     public String dc_subject() {
         if (this.keywords == null) {
-            this.keywords = getString(YaCySchema.keywords);
+            this.keywords = getString(CollectionSchema.keywords);
         }
         return this.keywords;
     }
@@ -161,7 +161,7 @@ public class URIMetadataNode {
         if (this.lat == Double.NaN) {
             this.lon = 0.0d;
             this.lat = 0.0d;
-            String latlon = (String) this.doc.getFieldValue(YaCySchema.coordinate_p.getSolrFieldName());
+            String latlon = (String) this.doc.getFieldValue(CollectionSchema.coordinate_p.getSolrFieldName());
             if (latlon != null) {
                 int p = latlon.indexOf(',');
                 if (p > 0) {
@@ -183,37 +183,37 @@ public class URIMetadataNode {
     }
 
     public Date loaddate() {
-        return getDate(YaCySchema.load_date_dt);
+        return getDate(CollectionSchema.load_date_dt);
     }
 
     public Date freshdate() {
-        return getDate(YaCySchema.fresh_date_dt);
+        return getDate(CollectionSchema.fresh_date_dt);
     }
 
     public String md5() {
-        return getString(YaCySchema.md5_s);
+        return getString(CollectionSchema.md5_s);
     }
 
     public char doctype() {
-        ArrayList<String> a = getStringList(YaCySchema.content_type);
+        ArrayList<String> a = getStringList(CollectionSchema.content_type);
         if (a == null || a.size() == 0) return Response.docType(url());
         return Response.docType(a.get(0));
     }
 
     public byte[] language() {
-        String language = getString(YaCySchema.language_s);
+        String language = getString(CollectionSchema.language_s);
         if (language == null || language.length() == 0) return ASCII.getBytes("en");
         return UTF8.getBytes(language);
     }
 
     public byte[] referrerHash() {
-        ArrayList<String>  referrer = getStringList(YaCySchema.referrer_id_txt);
+        ArrayList<String>  referrer = getStringList(CollectionSchema.referrer_id_txt);
         if (referrer == null || referrer.size() == 0) return null;
         return ASCII.getBytes(referrer.get(0));
     }
 
     public int size() {
-        return getInt(YaCySchema.size_i);
+        return getInt(CollectionSchema.size_i);
     }
 
     public Bitfield flags() {
@@ -230,41 +230,41 @@ public class URIMetadataNode {
     }
 
     public int wordCount() {
-        return getInt(YaCySchema.wordcount_i);
+        return getInt(CollectionSchema.wordcount_i);
     }
 
     public int llocal() {
-        return getInt(YaCySchema.inboundlinkscount_i);
+        return getInt(CollectionSchema.inboundlinkscount_i);
     }
 
     public int lother() {
-        return getInt(YaCySchema.outboundlinkscount_i);
+        return getInt(CollectionSchema.outboundlinkscount_i);
     }
 
     public int limage() {
         if (this.imagec == -1) {
-            this.imagec = getInt(YaCySchema.imagescount_i);
+            this.imagec = getInt(CollectionSchema.imagescount_i);
         }
         return this.imagec;
     }
 
     public int laudio() {
         if (this.audioc == -1) {
-            this.audioc = getInt(YaCySchema.audiolinkscount_i);
+            this.audioc = getInt(CollectionSchema.audiolinkscount_i);
         }
         return this.audioc;
     }
 
     public int lvideo() {
         if (this.videoc == -1) {
-            this.videoc = getInt(YaCySchema.videolinkscount_i);
+            this.videoc = getInt(CollectionSchema.videolinkscount_i);
         }
         return this.videoc;
     }
 
     public int lapp() {
         if (this.appc == -1) {
-            this.appc = getInt(YaCySchema.videolinkscount_i);
+            this.appc = getInt(CollectionSchema.videolinkscount_i);
         }
         return this.appc;
     }
@@ -274,13 +274,13 @@ public class URIMetadataNode {
     }
 
     public int wordsintitle() {
-        ArrayList<Integer>  x = getIntList(YaCySchema.title_words_val);
+        ArrayList<Integer>  x = getIntList(CollectionSchema.title_words_val);
         if (x == null || x.size() == 0) return 0;
         return x.get(0).intValue();
     }
 
     public int urllength() {
-        return getInt(YaCySchema.url_chars_i);
+        return getInt(CollectionSchema.url_chars_i);
     }
 
     public String snippet() {
@@ -288,7 +288,7 @@ public class URIMetadataNode {
     }
 
     public String[] collections() {
-        ArrayList<String> a = getStringList(YaCySchema.collection_sxt);
+        ArrayList<String> a = getStringList(CollectionSchema.collection_sxt);
         return a.toArray(new String[a.size()]);
     }
 
@@ -305,8 +305,8 @@ public class URIMetadataNode {
     }
 
     public static Iterator<String> getLinks(SolrDocument doc, boolean inbound) {
-        Collection<Object> urlstub = doc.getFieldValues((inbound ? YaCySchema.inboundlinks_urlstub_txt :  YaCySchema.outboundlinks_urlstub_txt).getSolrFieldName());
-        Collection<String> urlprot = urlstub == null ? null : indexedList2protocolList(doc.getFieldValues((inbound ? YaCySchema.inboundlinks_protocol_sxt : YaCySchema.outboundlinks_protocol_sxt).getSolrFieldName()), urlstub.size());
+        Collection<Object> urlstub = doc.getFieldValues((inbound ? CollectionSchema.inboundlinks_urlstub_txt :  CollectionSchema.outboundlinks_urlstub_txt).getSolrFieldName());
+        Collection<String> urlprot = urlstub == null ? null : indexedList2protocolList(doc.getFieldValues((inbound ? CollectionSchema.inboundlinks_protocol_sxt : CollectionSchema.outboundlinks_protocol_sxt).getSolrFieldName()), urlstub.size());
         String u;
         LinkedHashSet<String> list = new LinkedHashSet<String>();
         if (urlprot != null && urlstub != null) {
@@ -323,18 +323,18 @@ public class URIMetadataNode {
         return list.iterator();
     }
     
-    public static Date getDate(SolrDocument doc, final YaCySchema key) {
+    public static Date getDate(SolrDocument doc, final CollectionSchema key) {
         Date x = doc == null ? null : (Date) doc.getFieldValue(key.getSolrFieldName());
         Date now = new Date();
         return (x == null) ? new Date(0) : x.after(now) ? now : x;
     }
 
     public String getText() {
-        return getString(YaCySchema.text_t);
+        return getString(CollectionSchema.text_t);
     }
 
     public String getDescription() {
-        return getString(YaCySchema.description);
+        return getString(CollectionSchema.description);
     }    
 
     public boolean isOlder(URIMetadataRow other) {
@@ -429,7 +429,7 @@ public class URIMetadataNode {
         return core.toString();
     }
     
-    private DigestURI getURL(YaCySchema field) {
+    private DigestURI getURL(CollectionSchema field) {
         assert !field.isMultiValued();
         assert field.getType() == SolrType.string || field.getType() == SolrType.text_general || field.getType() == SolrType.text_en_splitting_tight;
         Object x = this.doc.getFieldValue(field.getSolrFieldName());
@@ -441,7 +441,7 @@ public class URIMetadataNode {
         }
     }
 
-    private int getInt(YaCySchema field) {
+    private int getInt(CollectionSchema field) {
         assert !field.isMultiValued();
         assert field.getType() == SolrType.num_integer;
         Object x = this.doc.getFieldValue(field.getSolrFieldName());
@@ -451,7 +451,7 @@ public class URIMetadataNode {
         return 0;
     }
 
-    private Date getDate(YaCySchema field) {
+    private Date getDate(CollectionSchema field) {
         assert !field.isMultiValued();
         assert field.getType() == SolrType.date;
         Date x = (Date) this.doc.getFieldValue(field.getSolrFieldName());
@@ -460,7 +460,7 @@ public class URIMetadataNode {
         return x.after(now) ? now : x;
     }
 
-    private String getString(YaCySchema field) {
+    private String getString(CollectionSchema field) {
         assert !field.isMultiValued();
         assert field.getType() == SolrType.string || field.getType() == SolrType.text_general || field.getType() == SolrType.text_en_splitting_tight;
         Object x = this.doc.getFieldValue(field.getSolrFieldName());
@@ -474,7 +474,7 @@ public class URIMetadataNode {
     }
 
     @SuppressWarnings("unchecked")
-    private ArrayList<String> getStringList(YaCySchema field) {
+    private ArrayList<String> getStringList(CollectionSchema field) {
         assert field.isMultiValued();
         assert field.getType() == SolrType.string || field.getType() == SolrType.text_general;
         Object r = this.doc.getFieldValue(field.getSolrFieldName());
@@ -488,7 +488,7 @@ public class URIMetadataNode {
     }
     
     @SuppressWarnings("unchecked")
-    private ArrayList<Integer> getIntList(YaCySchema field) {
+    private ArrayList<Integer> getIntList(CollectionSchema field) {
         assert field.isMultiValued();
         assert field.getType() == SolrType.num_integer;
         Object r = this.doc.getFieldValue(field.getSolrFieldName());

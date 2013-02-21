@@ -23,6 +23,7 @@ package net.yacy.cora.federate.solr;
 import java.util.LinkedHashMap;
 
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.search.schema.CollectionSchema;
 
 /**
  * The Boost class is the solr ranking definition file. It contains boost values in a Linked HashMap; the 'linked'-Version is used
@@ -30,7 +31,7 @@ import net.yacy.cora.util.CommonPattern;
  * Because the order is influence by a double-check mechanismn the attributes to apply a document signature are also integrated
  * into this class.
  */
-public class Boost extends LinkedHashMap<YaCySchema, Float> {
+public class Boost extends LinkedHashMap<CollectionSchema, Float> {
     
     private static final long serialVersionUID = 5248172257724571603L;
 
@@ -47,17 +48,17 @@ public class Boost extends LinkedHashMap<YaCySchema, Float> {
 
     public void initDefaults() {
         this.clear();
-        put(YaCySchema.sku, 20.0f);
-        put(YaCySchema.url_paths_sxt, 20.0f);
-        put(YaCySchema.title, 15.0f);
-        put(YaCySchema.h1_txt, 11.0f);
-        put(YaCySchema.h2_txt, 10.0f);
-        put(YaCySchema.author, 8.0f);
-        put(YaCySchema.description, 5.0f);
-        put(YaCySchema.keywords, 2.0f);
-        put(YaCySchema.text_t, 1.0f);
-        put(YaCySchema.synonyms_sxt, 0.9f);
-        put(YaCySchema.references_i, 0.5f);
+        put(CollectionSchema.sku, 20.0f);
+        put(CollectionSchema.url_paths_sxt, 20.0f);
+        put(CollectionSchema.title, 15.0f);
+        put(CollectionSchema.h1_txt, 11.0f);
+        put(CollectionSchema.h2_txt, 10.0f);
+        put(CollectionSchema.author, 8.0f);
+        put(CollectionSchema.description, 5.0f);
+        put(CollectionSchema.keywords, 2.0f);
+        put(CollectionSchema.text_t, 1.0f);
+        put(CollectionSchema.synonyms_sxt, 0.9f);
+        put(CollectionSchema.references_i, 0.5f);
     }
    
     /**
@@ -82,7 +83,7 @@ public class Boost extends LinkedHashMap<YaCySchema, Float> {
         for (String boost: bf) {
             int p = boost.indexOf('^');
             if (p < 0) continue;
-            YaCySchema field = YaCySchema.valueOf(boost.substring(0, p));
+            CollectionSchema field = CollectionSchema.valueOf(boost.substring(0, p));
             Float factor = Float.parseFloat(boost.substring(p + 1));
             this.put(field, factor);
         }
@@ -109,7 +110,7 @@ public class Boost extends LinkedHashMap<YaCySchema, Float> {
      * @return
      */
     public String getBoostQuery() {
-        return YaCySchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^100000.0f";
+        return CollectionSchema.fuzzy_signature_unique_b.getSolrFieldName() + ":true^100000.0f";
     }
     
     /**

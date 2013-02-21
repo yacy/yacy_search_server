@@ -40,6 +40,8 @@ import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.search.schema.CollectionConfiguration;
+import net.yacy.search.schema.WebgraphConfiguration;
 
 /**
  * convenience class to access the yacycore library from outside of yacy to put files into the index
@@ -61,9 +63,12 @@ public class DocumentIndex extends Segment {
 
     static final ThreadGroup workerThreadGroup = new ThreadGroup("workerThreadGroup");
 
-    public DocumentIndex(final File segmentPath, final File schemaPath, final CallbackListener callback, final int cachesize)
+    public DocumentIndex(final File segmentPath, final File collectionConfigurationPath, final File webgraphConfigurationPath, final CallbackListener callback, final int cachesize)
         throws IOException {
-        super(new Log("DocumentIndex"), segmentPath, schemaPath == null ? null : new SolrConfiguration(schemaPath, true));
+        super(new Log("DocumentIndex"), segmentPath,
+                collectionConfigurationPath == null ? null : new CollectionConfiguration(collectionConfigurationPath, true),
+                webgraphConfigurationPath == null ? null : new WebgraphConfiguration(webgraphConfigurationPath, true)
+        );
         super.connectRWI(cachesize, targetFileSize * 4 - 1);
         super.connectCitation(cachesize, targetFileSize * 4 - 1);
         super.connectUrlDb(

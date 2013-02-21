@@ -42,7 +42,6 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
-import net.yacy.cora.federate.solr.YaCySchema;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.lod.vocabulary.Tagging;
@@ -78,6 +77,7 @@ import net.yacy.repository.LoaderDispatcher;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.snippet.ResultEntry;
 
 public final class SearchEvent {
@@ -497,7 +497,7 @@ public final class SearchEvent {
         // collect navigation information
         ReversibleScoreMap<String> fcts;
         if (this.hostNavigator != null) {
-            fcts = facets.get(YaCySchema.host_s.getSolrFieldName());
+            fcts = facets.get(CollectionSchema.host_s.getSolrFieldName());
             if (fcts != null) {
                 for (String host: fcts) {
                     int hc = fcts.get(host);
@@ -510,7 +510,7 @@ public final class SearchEvent {
         }
 
         if (this.filetypeNavigator != null) {
-            fcts = facets.get(YaCySchema.url_file_ext_s.getSolrFieldName());
+            fcts = facets.get(CollectionSchema.url_file_ext_s.getSolrFieldName());
             if (fcts != null) {
                 // remove all filetypes that we don't know
                 Iterator<String> i = fcts.iterator();
@@ -526,12 +526,12 @@ public final class SearchEvent {
         }
 
         if (this.authorNavigator != null) {
-            fcts = facets.get(YaCySchema.author_sxt.getSolrFieldName());
+            fcts = facets.get(CollectionSchema.author_sxt.getSolrFieldName());
             if (fcts != null) this.authorNavigator.inc(fcts);
         }
 
         if (this.protocolNavigator != null) {
-            fcts = facets.get(YaCySchema.url_protocol_s.getSolrFieldName());
+            fcts = facets.get(CollectionSchema.url_protocol_s.getSolrFieldName());
             if (fcts != null) {
                 // remove all protocols that we don't know
                 Iterator<String> i = fcts.iterator();
@@ -545,7 +545,7 @@ public final class SearchEvent {
         
         // get the vocabulary navigation
         for (Tagging v: LibraryProvider.autotagging.getVocabularies()) {
-            fcts = facets.get(YaCySchema.VOCABULARY_PREFIX + v.getName() + YaCySchema.VOCABULARY_SUFFIX);
+            fcts = facets.get(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_SUFFIX);
             if (fcts != null) {
                 ScoreMap<String> vocNav = this.vocabularyNavigator.get(v.getName());
                 if (vocNav == null) {
