@@ -64,8 +64,6 @@
         <dt class="TableCellDark">Solr URL(s)</dt>
         <dd><textarea rows="2" cols="80" name="solr.indexing.url" id="solr.indexing.url"/>#[solr.indexing.url]#</textarea><br/>
         You can set one or more Solr targets here which are accessed as a shard. For several targets, list them using a ',' (comma) as separator.</dd>
-        <dt class="TableCellDark">Commit-Within (milliseconds)</dt>
-        <dd><input type="text" size="6" maxlength="6" value="#[solr.indexing.commitWithinMs]#"  name="solr.indexing.commitWithinMs" id="solr.indexing.commitWithinMs"/> (increase this value to i.e. 180000 - 3 minutes - for more performance)</dd>
         <dt class="TableCellDark">Lazy Value Initialization</dt>
         <dd><input type="checkbox" name="solr.indexing.lazy" id="solr.indexing.lazy" #(solr.indexing.lazy.checked)#:: checked="checked"#(/solr.indexing.lazy.checked)# /> (if checked, only non-zero values and non-empty strings are written)</dd>
         <dt class="TableCellDark">Sharding Method</dt>
