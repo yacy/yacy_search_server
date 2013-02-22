@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.util.Date;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -152,7 +151,7 @@ public final class HTTPLoader {
             }
 
             // normalize URL
-            final DigestURI redirectionUrl = DigestURI.toDigestURI(MultiProtocolURI.newURL(request.url(), redirectionUrlString));
+            final DigestURI redirectionUrl = DigestURI.newURL(request.url(), redirectionUrlString);
 
             // restart crawling with new url
             this.log.logInfo("CRAWLER Redirection detected ('" + client.getHttpResponse().getStatusLine() + "') for URL " + requestURLString);
@@ -172,7 +171,7 @@ public final class HTTPLoader {
                     }
 
                     // check if the url was already indexed
-                    final HarvestProcess dbname = this.sb.urlExists(redirectionUrl.hash());
+                    final HarvestProcess dbname = this.sb.urlExists(ASCII.String(redirectionUrl.hash()));
                     if (dbname != null) { // customer request
                         this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "redirection to double content", statusCode);
                         throw new IOException("CRAWLER Redirection of URL=" + requestURLString + " ignored. The url appears already in db " + dbname.toString());
@@ -293,7 +292,7 @@ public final class HTTPLoader {
                     }
 
                     // normalizing URL
-                    final DigestURI redirectionUrl = DigestURI.toDigestURI(MultiProtocolURI.newURL(request.url(), redirectionUrlString));
+                    final DigestURI redirectionUrl = DigestURI.newURL(request.url(), redirectionUrlString);
 
 
                     // if we are already doing a shutdown we don't need to retry crawling

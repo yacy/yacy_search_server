@@ -79,7 +79,7 @@ public class HostBrowser {
         // set default values
         prop.put("path", "");
         prop.put("result", "");
-        prop.putNum("ucount", fulltext.size());
+        prop.putNum("ucount", fulltext.collectionSize());
         prop.put("hosts", 0);
         prop.put("files", 0);
         prop.put("admin", 0);
@@ -117,7 +117,7 @@ public class HostBrowser {
 
         String load = post.get("load", "");
         boolean wait = false;
-        if (loadRight && autoload && path.length() != 0 && pathURI != null && load.length() == 0 && !sb.index.exists(pathURI.hash())) {
+        if (loadRight && autoload && path.length() != 0 && pathURI != null && load.length() == 0 && !sb.index.exists(ASCII.String(pathURI.hash()))) {
             // in case that the url does not exist and loading is wanted turn this request into a loading request
             load = path;
             wait = true;
@@ -136,7 +136,7 @@ public class HostBrowser {
                     ));
                 prop.put("result", reasonString == null ? ("added url to indexer: " + load) : ("not indexed url '" + load + "': " + reasonString));
                 if (wait) for (int i = 0; i < 30; i++) {
-                    if (sb.index.exists(url.hash())) break;
+                    if (sb.index.exists(ASCII.String(url.hash()))) break;
                     try {Thread.sleep(100);} catch (InterruptedException e) {}
                 }
             } catch (MalformedURLException e) {
@@ -480,7 +480,7 @@ public class HostBrowser {
         }
 
         // insert constants
-        prop.putNum("ucount", fulltext.size());
+        prop.putNum("ucount", fulltext.collectionSize());
         // return rewrite properties
         return prop;
     }

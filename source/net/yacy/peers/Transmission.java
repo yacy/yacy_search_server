@@ -169,7 +169,7 @@ public class Transmission {
                     notFoundx.add(e.urlhash());
                     continue;
                 }
-                if (!Transmission.this.segment.fulltext().exists(e.urlhash())) {
+                if (!Transmission.this.segment.fulltext().exists(ASCII.String(e.urlhash()))) {
                     notFoundx.add(e.urlhash());
                     this.badReferences.put(e.urlhash());
                 } else {

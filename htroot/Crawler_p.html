@@ -21,7 +21,7 @@
 #%env/templates/submenuCrawlMonitor.template%#
 <h2>Crawler</h2>
 <noscript><p>(Please enable JavaScript to automatically update this page!)</p></noscript>
-<fieldset style="width:270px;height:140px;float:left;">
+<fieldset style="width:260px;height:140px;float:left;">
 <legend>Queues</legend>
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
@@ -74,20 +74,24 @@
         </tbody>
       </table>
 </fieldset>
-<fieldset style="width:140px;height:140px;float:left;">
+<fieldset style="width:180px;height:140px;float:left;">
 <legend>Index Size</legend>
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
           <tr class="TableHeader"> 
-            <th>Database</th>
-            <th>Entries</th>
+            <th width="100">Database</th>
+            <th width="80">Entries</th>
           </tr>
           <tr class="TableCellLight"> 
-            <td align="left">Pages (URLs)</td>
+            <td align="left">Documents<br/><a href="/solr/select?core=collection1&q=*:*&start=0&rows=3">solr search api</a></td>
             <td align="right"><span id="urldbsize">#[urlpublictextSize]#</span></td>
           </tr>
           <tr class="TableCellLight"> 
-            <td align="left">RWIs (Words)</td>
+            <td align="left">Webgraph Edges<br/><a href="/solr/select?core=webgraph&q=*:*&start=0&rows=3">solr search api</a></td>
+            <td align="right"><span id="webgraphsize">#[webgraphSize]#</span></td>
+          </tr>
+          <tr class="TableCellLight"> 
+            <td align="left">RWIs<br/>(P2P Chunks)</td>
             <td align="right"><span id="rwidbsize">#[rwipublictextSize]#</span></td>
           </tr>
         </tbody>

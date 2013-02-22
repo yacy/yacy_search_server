@@ -201,7 +201,7 @@ public final class transferRWI {
 
                 // check if we need to ask for the corresponding URL
                 if (!knownURL.has(urlHash) && !unknownURL.has(urlHash))  try {
-                    if (sb.index.fulltext().exists(urlHash)) {
+                    if (sb.index.fulltext().exists(ASCII.String(urlHash))) {
                         knownURL.put(urlHash);
                     } else {
                         unknownURL.put(urlHash);

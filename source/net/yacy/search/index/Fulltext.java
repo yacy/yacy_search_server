@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -195,9 +196,12 @@ public final class Fulltext {
         this.solrInstances.disconnect1();
     }
 
-    public EmbeddedSolrConnector getDefaultLocalSolrConnector() {
-        if (this.solrInstances.getSolr0() == null) return null;
-        return new EmbeddedSolrConnector(this.solrInstances.getSolr0());
+    public EmbeddedSolrConnector getDefaultEmbeddedConnector() {
+        return this.solrInstances.getDefaultEmbeddedConnector();
+    }
+
+    public EmbeddedSolrConnector getEmbeddedConnector(String corename) {
+        return this.solrInstances.getEmbeddedConnector(corename);
     }
 
     public RemoteSolrConnector getDefaultRemoteSolrConnector() {
@@ -210,11 +214,11 @@ public final class Fulltext {
     }
     
     public SolrConnector getDefaultConnector() {
-        return this.solrInstances.getDefaultConnector();
+        return this.solrInstances.getDefaultMirrorConnector();
     }
     
     public SolrConnector getWebgraphConnector() {
-        return this.solrInstances.getConnector(WebgraphSchema.CORE_NAME);
+        return this.solrInstances.getMirrorConnector(WebgraphSchema.CORE_NAME);
     }
 
     public void clearCache() {
@@ -232,7 +236,7 @@ public final class Fulltext {
             this.urlIndexFile.clear();
         }
         this.statsDump = null;
-        this.solrInstances.getDefaultConnector().commit(true);
+        this.commit(true);
     }
 
     public void clearLocalSolr() throws IOException {
@@ -240,6 +244,7 @@ public final class Fulltext {
         if (instance != null) {
             for (String name: instance.getCoreNames()) new EmbeddedSolrConnector(instance, name).clear();
         }
+        this.commit(false);
         this.solrInstances.clearCache();
     }
 
@@ -255,10 +260,18 @@ public final class Fulltext {
      * get the size of the default index
      * @return
      */
-    public int size() {
-        int size = this.urlIndexFile == null ? 0 : this.urlIndexFile.size();
-        size += this.solrInstances.getDefaultConnector().getSize();
+    public long collectionSize() {
+        long size = this.urlIndexFile == null ? 0 : this.urlIndexFile.size();
+        size += this.getDefaultConnector().getSize();
         return size;
+    }
+    
+    /**
+     * get the size of the webgraph index
+     * @return
+     */
+    public long webgraphSize() {
+        return this.getWebgraphConnector().getSize();
     }
 
     public void close() {
@@ -279,7 +292,7 @@ public final class Fulltext {
         if (urlHash == null) return null;
         Date x;
         try {
-            x = (Date) this.solrInstances.getDefaultConnector().getFieldById(urlHash, CollectionSchema.load_date_dt.getSolrFieldName());
+            x = (Date) this.getDefaultConnector().getFieldById(urlHash, CollectionSchema.load_date_dt.getSolrFieldName());
         } catch (IOException e) {
             return null;
         }
@@ -290,7 +303,7 @@ public final class Fulltext {
         if (urlHash == null) return null;
         String x;
         try {
-            x = (String) this.solrInstances.getDefaultConnector().getFieldById(ASCII.String(urlHash), CollectionSchema.sku.getSolrFieldName());
+            x = (String) this.getDefaultConnector().getFieldById(ASCII.String(urlHash), CollectionSchema.sku.getSolrFieldName());
         } catch (IOException e) {
             return null;
         }
@@ -317,7 +330,7 @@ public final class Fulltext {
 
         // get the metadata from Solr
         try {
-            SolrDocument doc = this.solrInstances.getDefaultConnector().getById(ASCII.String(urlHash));
+            SolrDocument doc = this.getDefaultConnector().getById(ASCII.String(urlHash));
             if (doc != null) {
             	if (this.urlIndexFile != null) this.urlIndexFile.remove(urlHash);
             	return new URIMetadataNode(doc, wre, weight);
@@ -346,17 +359,27 @@ public final class Fulltext {
         String id = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
         byte[] idb = ASCII.getBytes(id);
         try {
-        	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-        	Date sdDate = (Date) this.solrInstances.getDefaultConnector().getFieldById(id, CollectionSchema.last_modified.getSolrFieldName());
-        	Date docDate = null;
-        	if (sdDate == null || (docDate = SchemaConfiguration.getDate(doc, CollectionSchema.last_modified)) == null || sdDate.before(docDate)) {
+            if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
+            Date sdDate = (Date) this.getDefaultConnector().getFieldById(id, CollectionSchema.last_modified.getSolrFieldName());
+            Date docDate = null;
+            if (sdDate == null || (docDate = SchemaConfiguration.getDate(doc, CollectionSchema.last_modified)) == null || sdDate.before(docDate)) {
                 if (this.collectionConfiguration.contains(CollectionSchema.ip_s)) {
                     // ip_s needs a dns lookup which causes blockings during search here
-                    this.solrInstances.getDefaultConnector().add(doc);
+                    this.getDefaultConnector().add(doc);
                 } else synchronized (this.solrInstances) {
-                    this.solrInstances.getDefaultConnector().add(doc);
+                    this.getDefaultConnector().add(doc);
                 }
-        	}
+            }
+        } catch (SolrException e) {
+            throw new IOException(e.getMessage(), e);
+        }
+        this.statsDump = null;
+        if (MemoryControl.shortStatus()) clearCache();
+    }
+    
+    public void putEdges(final Collection<SolrInputDocument> edges) throws IOException {
+        try {
+            this.getWebgraphConnector().add(edges);
         } catch (SolrException e) {
             throw new IOException(e.getMessage(), e);
         }
@@ -371,13 +394,13 @@ public final class Fulltext {
         String id = ASCII.String(idb);
         try {
         	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-            SolrDocument sd = this.solrInstances.getDefaultConnector().getById(id);
+            SolrDocument sd = this.getDefaultConnector().getById(id);
             if (sd == null || (new URIMetadataNode(sd)).isOlder(row)) {
                 if (this.collectionConfiguration.contains(CollectionSchema.ip_s)) {
                     // ip_s needs a dns lookup which causes blockings during search here
-                    this.solrInstances.getDefaultConnector().add(getDefaultConfiguration().metadata2solr(row));
+                    this.getDefaultConnector().add(getDefaultConfiguration().metadata2solr(row));
                 }  else synchronized (this.solrInstances) {
-                    this.solrInstances.getDefaultConnector().add(getDefaultConfiguration().metadata2solr(row));
+                    this.getDefaultConnector().add(getDefaultConfiguration().metadata2solr(row));
                 }
             }
         } catch (SolrException e) {
@@ -397,15 +420,22 @@ public final class Fulltext {
     public void deleteDomainHashpart(final String hosthash, Date freshdate, boolean concurrent) {
         // first collect all url hashes that belong to the domain
         assert hosthash.length() == 6;
-        final String q = CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hosthash + "\"" +
-                ((freshdate != null && freshdate.before(new Date())) ? (" AND " + CollectionSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") : "");
+        final String collection1Query = CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hosthash + "\"" +
+                ((freshdate != null && freshdate.before(new Date())) ?
+                        (" AND " + CollectionSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") :
+                        ""
+                );
+        final String webgraphQuery = WebgraphSchema.source_host_id_s.getSolrFieldName() + ":\"" + hosthash + "\"" +
+                ((freshdate != null && freshdate.before(new Date())) ?
+                        (" AND " + WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") :
+                        ""
+                );
         Thread t = new Thread() {
             public void run() {
                 // delete in solr
                 synchronized (Fulltext.this.solrInstances) {
-                    try {
-                        Fulltext.this.solrInstances.getDefaultConnector().deleteByQuery(q);
-                    } catch (IOException e) {}
+                    try {Fulltext.this.getDefaultConnector().deleteByQuery(collection1Query);} catch (IOException e) {}
+                    try {Fulltext.this.getWebgraphConnector().deleteByQuery(webgraphQuery);} catch (IOException e) {}
                 }
         
                 // delete in old metadata structure
@@ -443,21 +473,30 @@ public final class Fulltext {
         };
         if (concurrent) t.start(); else {
             t.run();
-            Fulltext.this.getDefaultConnector().commit(true);
+            Fulltext.this.commit(true);
         }
     }
 
     public void deleteDomainHostname(final String hostname, Date freshdate, boolean concurrent) {
         // first collect all url hashes that belong to the domain
-        final String q = CollectionSchema.host_s.getSolrFieldName() + ":\"" + hostname + "\"" +
-                ((freshdate != null && freshdate.before(new Date())) ? (" AND " + CollectionSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") : "");
+        final String collectionQuery =
+                CollectionSchema.host_s.getSolrFieldName() + ":\"" + hostname + "\"" +
+                ((freshdate != null && freshdate.before(new Date())) ?
+                        (" AND " + CollectionSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") :
+                        ""
+                );
+        final String webgraphQuery =
+                WebgraphSchema.source_host_s.getSolrFieldName() + ":\"" + hostname + "\"" +
+                ((freshdate != null && freshdate.before(new Date())) ?
+                        (" AND " + WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") :
+                        ""
+                );
         Thread t = new Thread() {
             public void run() {
                 // delete in solr
                 synchronized (Fulltext.this.solrInstances) {
-                    try {
-                        Fulltext.this.getDefaultConnector().deleteByQuery(q);
-                    } catch (IOException e) {}
+                    try {Fulltext.this.getDefaultConnector().deleteByQuery(collectionQuery);} catch (IOException e) {}
+                    try {Fulltext.this.getWebgraphConnector().deleteByQuery(webgraphQuery);} catch (IOException e) {}
                 }
                 // finally remove the line with statistics
                 if (Fulltext.this.statsDump != null) {
@@ -475,7 +514,7 @@ public final class Fulltext {
         };
         if (concurrent) t.start(); else {
             t.run();
-            Fulltext.this.getDefaultConnector().commit(true);
+            Fulltext.this.commit(true);
         }
     }
 
@@ -489,12 +528,12 @@ public final class Fulltext {
         DigestURI uri;
         try {uri = new DigestURI(basepath);} catch (MalformedURLException e) {return 0;}
         final String host = uri.getHost();
-        final String q = CollectionSchema.host_s.getSolrFieldName() + ":\"" + host + "\"" +
+        final String collectionQuery = CollectionSchema.host_s.getSolrFieldName() + ":\"" + host + "\"" +
                 ((freshdate != null && freshdate.before(new Date())) ? (" AND " + CollectionSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") : "");
         final AtomicInteger count = new AtomicInteger(0);
         Thread t = new Thread(){
             public void run() {
-                final BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentQuery(q, 0, 1000000, 600000, -1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+                final BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentQuery(collectionQuery, 0, 1000000, 600000, -1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
                 try {
                     SolrDocument doc;
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
@@ -504,7 +543,7 @@ public final class Fulltext {
                             count.incrementAndGet();
                         }
                     }
-                    if (count.get() > 0) Fulltext.this.getDefaultConnector().commit(true);
+                    if (count.get() > 0) Fulltext.this.commit(true);
                 } catch (InterruptedException e) {}
             }
         };
@@ -525,8 +564,9 @@ public final class Fulltext {
                     synchronized (Fulltext.this.solrInstances) {
                         for (byte[] urlHash: deleteIDs) {
                             Fulltext.this.getDefaultConnector().delete(ASCII.String(urlHash));
+                            Fulltext.this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s.getSolrFieldName() + ":" + ASCII.String(urlHash));
                         }
-                        Fulltext.this.getDefaultConnector().commit(true);
+                        Fulltext.this.commit(true);
                     }
                 } catch (final Throwable e) {
                     Log.logException(e);
@@ -546,6 +586,7 @@ public final class Fulltext {
         try {
             synchronized (this.solrInstances) {
                 this.getDefaultConnector().delete(ASCII.String(urlHash));
+                this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s.getSolrFieldName() + ":" + ASCII.String(urlHash));
             }
         } catch (final Throwable e) {
             Log.logException(e);
@@ -560,11 +601,11 @@ public final class Fulltext {
         return false;
     }
 
-    public boolean exists(final byte[] urlHash) {
+    public boolean exists(final String urlHash) {
         if (urlHash == null) return false;
-        if (this.urlIndexFile != null && this.urlIndexFile.has(urlHash)) return true;
+        if (this.urlIndexFile != null && this.urlIndexFile.has(ASCII.getBytes(urlHash))) return true;
         try {
-            if (this.getDefaultConnector().exists(CollectionSchema.id.getSolrFieldName(), ASCII.String(urlHash))) return true;
+            if (this.getDefaultConnector().exists(CollectionSchema.id.getSolrFieldName(), urlHash)) return true;
         } catch (final Throwable e) {
             Log.logException(e);
         }

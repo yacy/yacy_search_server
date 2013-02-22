@@ -58,6 +58,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     
     private final SearchHandler requestHandler;
     private final EmbeddedInstance instance;
+    private final String coreName;
     private SolrCore core;
 
     public EmbeddedSolrConnector(EmbeddedInstance instance) {
@@ -68,6 +69,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         this.requestHandler.init(new NamedList<Object>());
         this.requestHandler.inform(this.core);
         super.init(this.instance.getDefaultServer());
+        this.coreName = ((EmbeddedSolrServer) this.server).getCoreContainer().getDefaultCoreName();
     }
     
     public EmbeddedSolrConnector(EmbeddedInstance instance, String coreName) {
@@ -78,6 +80,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         this.requestHandler.init(new NamedList<Object>());
         this.requestHandler.inform(this.core);
         super.init(this.instance.getServer(coreName));
+        this.coreName = coreName;
     }
 
     public SolrInstance getInstance() {
@@ -104,9 +107,8 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         Thread.currentThread().setName("solr query: size");
         EmbeddedSolrServer ess = (EmbeddedSolrServer) this.server;
         CoreContainer coreContainer = ess.getCoreContainer();
-        String coreName = coreContainer.getDefaultCoreName();
-        SolrCore core = coreContainer.getCore(coreName);
-        if (core == null) throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "No such core: " + coreName);
+        SolrCore core = coreContainer.getCore(this.coreName);
+        if (core == null) throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "No such core: " + this.coreName);
 
         try {
             SolrParams params = AbstractSolrConnector.catchSuccessQuery;

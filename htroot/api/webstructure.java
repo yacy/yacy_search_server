@@ -30,7 +30,6 @@ import java.util.Map;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
@@ -111,9 +110,9 @@ public class webstructure {
                     prop.put("references_documents_0_urle", url == null ? 0 : 1);
                     if (url != null) prop.putXML("references_documents_0_urle_url", url.toNormalform(true));
                     int d = 0;
-                    Iterator<MultiProtocolURI> i = scraper.inboundLinks().iterator();
+                    Iterator<DigestURI> i = scraper.inboundLinks().iterator();
             		while (i.hasNext()) {
-            			DigestURI refurl = DigestURI.toDigestURI(i.next());
+            			DigestURI refurl = i.next();
                     	byte[] refhash = refurl.hash();
                     	prop.putXML("references_documents_0_anchors_" + d + "_url", refurl.toNormalform(true));
                     	prop.put("references_documents_0_anchors_" + d + "_hash", refhash);
@@ -122,7 +121,7 @@ public class webstructure {
             		}
                     i = scraper.outboundLinks().iterator();
             		while (i.hasNext()) {
-            			DigestURI refurl = DigestURI.toDigestURI(i.next());
+            			DigestURI refurl = i.next();
                     	byte[] refhash = refurl.hash();
                     	prop.putXML("references_documents_0_anchors_" + d + "_url", refurl.toNormalform(true));
                     	prop.put("references_documents_0_anchors_" + d + "_hash", refhash);

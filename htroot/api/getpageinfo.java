@@ -127,11 +127,11 @@ public class getpageinfo {
                     prop.putXML("lang", (languages == null || languages.size() == 0) ? "unknown" : languages.iterator().next());
 
                     // get links and put them into a semicolon-separated list
-                    final Set<MultiProtocolURI> uris = scraper.getAnchors().keySet();
+                    final Set<DigestURI> uris = scraper.getAnchors().keySet();
                     final StringBuilder links = new StringBuilder(uris.size() * 80);
                     final StringBuilder filter = new StringBuilder(uris.size() * 40);
                     count = 0;
-                    for (final MultiProtocolURI uri: uris) {
+                    for (final DigestURI uri: uris) {
                         if (uri == null) continue;
                         links.append(';').append(uri.toNormalform(true));
                         filter.append('|').append(uri.getProtocol()).append("://").append(uri.getHost()).append(".*");

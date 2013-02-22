@@ -36,7 +36,6 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.SpaceExceededException;
@@ -73,6 +72,7 @@ public class Crawler_p {
         final serverObjects prop = new serverObjects();
         prop.put("rejected", 0);
         prop.put("urlpublictextSize", 0);
+        prop.put("webgraphSize", 0);
         prop.put("rwipublictextSize", 0);
         prop.put("list", "0");
         prop.put("loaderSize", 0);
@@ -277,8 +277,8 @@ public class Crawler_p {
                         try {
                             scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
                             // get links and generate filter
-                            for (MultiProtocolURI u: scraper.getAnchors().keySet()) {
-                                newRootURLs.add(DigestURI.toDigestURI(u));
+                            for (DigestURI u: scraper.getAnchors().keySet()) {
+                                newRootURLs.add(u);
                             }
                         } catch (IOException e) {
                             Log.logException(e);
@@ -475,7 +475,7 @@ public class Crawler_p {
                             writer.close();
 
                             // get links and generate filter
-                            final Map<MultiProtocolURI, Properties> hyperlinks = scraper.getAnchors();
+                            final Map<DigestURI, Properties> hyperlinks = scraper.getAnchors();
                             if (newcrawlingdepth > 0) {
                                 if (fullDomain) {
                                     newcrawlingMustMatch = CrawlProfile.siteFilter(hyperlinks.keySet());

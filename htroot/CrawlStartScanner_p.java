@@ -143,13 +143,12 @@ public class CrawlStartScanner_p
             if ( post.containsKey("crawl") ) {
                 // make a pk/url mapping
                 final Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
-                final Map<byte[], DigestURI> pkmap =
-                    new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
+                final Map<byte[], DigestURI> pkmap = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
                 while (se.hasNext()) {
                     final Scanner.Service u = se.next().getKey();
                     DigestURI uu;
                     try {
-                        uu = DigestURI.toDigestURI(u.url());
+                        uu = u.url();
                         pkmap.put(uu.hash(), uu);
                     } catch ( final MalformedURLException e ) {
                         Log.logException(e);
@@ -197,15 +196,14 @@ public class CrawlStartScanner_p
                     String urlString;
                     DigestURI u;
                     try {
-                        final Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se =
-                            Scanner.scancacheEntries();
+                        final Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
                         Map.Entry<Scanner.Service, Scanner.Access> host;
                         while ( se.hasNext() ) {
                             host = se.next();
                             try {
-                                u = DigestURI.toDigestURI(host.getKey().url());
+                                u = host.getKey().url();
                                 urlString = u.toNormalform(true);
-                                if ( host.getValue() == Access.granted
+                                if (host.getValue() == Access.granted
                                     && Scanner.inIndex(apiCommentCache, urlString) == null ) {
                                     String path =
                                         "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99";

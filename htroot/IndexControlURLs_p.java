@@ -66,7 +66,7 @@ public class IndexControlURLs_p {
         prop.put("urlstring", "");
         prop.put("urlhash", "");
         prop.put("result", "");
-        prop.putNum("ucount", segment.fulltext().size());
+        prop.putNum("ucount", segment.fulltext().collectionSize());
         prop.put("otherHosts", "");
         prop.put("genUrlProfile", 0);
         prop.put("statistics", 1);
@@ -312,7 +312,7 @@ public class IndexControlURLs_p {
         }
 
         // insert constants
-        prop.putNum("ucount", segment.fulltext().size());
+        prop.putNum("ucount", segment.fulltext().collectionSize());
         // return rewrite properties
         return prop;
     }

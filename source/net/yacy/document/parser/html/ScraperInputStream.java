@@ -35,7 +35,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Properties;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 
 public class ScraperInputStream extends InputStream implements ScraperListener {
@@ -58,7 +58,7 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
     public ScraperInputStream(
             final InputStream inStream,
             final String inputStreamCharset,
-            final MultiProtocolURI rooturl,
+            final DigestURI rooturl,
             final Transformer transformer,
             final boolean passbyIfBinarySuspect,
             final int maxLinks

@@ -46,7 +46,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.MicroDate;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.sorting.ClusteredScoreMap;
@@ -83,9 +82,9 @@ public class WebStructureGraph {
 
     private static class LearnObject {
         private final DigestURI url;
-        private final Set<MultiProtocolURI> globalRefURLs;
+        private final Set<DigestURI> globalRefURLs;
 
-        private LearnObject(final DigestURI url, final Set<MultiProtocolURI> globalRefURLs) {
+        private LearnObject(final DigestURI url, final Set<DigestURI> globalRefURLs) {
             this.url = url;
             this.globalRefURLs = globalRefURLs;
         }
@@ -160,11 +159,11 @@ public class WebStructureGraph {
     
     public void generateCitationReference(final DigestURI url, final Document document) {
         // generate citation reference
-        final Map<MultiProtocolURI, String> hl = document.getHyperlinks();
-        final Iterator<MultiProtocolURI> it = hl.keySet().iterator();
-        final HashSet<MultiProtocolURI> globalRefURLs = new HashSet<MultiProtocolURI>();
+        final Map<DigestURI, String> hl = document.getHyperlinks();
+        final Iterator<DigestURI> it = hl.keySet().iterator();
+        final HashSet<DigestURI> globalRefURLs = new HashSet<DigestURI>();
         final String refhost = url.getHost();
-        MultiProtocolURI u;
+        DigestURI u;
         int maxref = 1000;
         while ( it.hasNext() && maxref-- > 0 ) {
             u = it.next();
@@ -191,7 +190,7 @@ public class WebStructureGraph {
     }
     
     public void generateCitationReference(final DigestURI from, final DigestURI to) {
-        final HashSet<MultiProtocolURI> globalRefURLs = new HashSet<MultiProtocolURI>();
+        final HashSet<DigestURI> globalRefURLs = new HashSet<DigestURI>();
         final String refhost = from.getHost();
         if (refhost != null && to.getHost() != null && !to.getHost().equals(refhost)) globalRefURLs.add(to);
         final LearnObject lro = new LearnObject(from, globalRefURLs);
@@ -586,12 +585,10 @@ public class WebStructureGraph {
 
     private void learnrefs(final LearnObject lro) {
         final Set<String> refhosts = new HashSet<String>();
-        DigestURI du;
         String hosthash;
-        for ( final MultiProtocolURI u : lro.globalRefURLs ) {
+        for ( final DigestURI u : lro.globalRefURLs ) {
             if (Switchboard.getSwitchboard().shallTerminate()) break;
-            du = DigestURI.toDigestURI(u);
-            hosthash = ASCII.String(du.hash(), 6, 6);
+            hosthash = ASCII.String(u.hash(), 6, 6);
             if (!exists(hosthash)) {
                 // this must be recorded as an host with no references
                 synchronized ( this.structure_new ) {

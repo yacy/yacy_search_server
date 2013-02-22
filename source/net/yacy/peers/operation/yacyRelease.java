@@ -245,10 +245,10 @@ public final class yacyRelease extends yacyVersion {
         }
 
         // analyze links in scraper resource, and find link to latest release in it
-        final Map<MultiProtocolURI, Properties> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
+        final Map<DigestURI, Properties> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
         final TreeSet<yacyRelease> mainReleases = new TreeSet<yacyRelease>();
         final TreeSet<yacyRelease> devReleases = new TreeSet<yacyRelease>();
-        for (final MultiProtocolURI url : anchors.keySet()) {
+        for (final DigestURI url : anchors.keySet()) {
             try {
                 final yacyRelease release = new yacyRelease(url, location.getPublicKey());
                 //System.out.println("r " + release.toAnchor());

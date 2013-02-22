@@ -1545,12 +1545,12 @@ public final class Switchboard extends serverSwitch {
         return false;
     }
 
-    public HarvestProcess urlExists(final byte[] hash) {
+    public HarvestProcess urlExists(final String hash) {
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,
         // if it not exists, null is returned
         if (this.index.exists(hash)) return HarvestProcess.LOADED;
-        return this.crawlQueues.urlExists(hash);
+        return this.crawlQueues.urlExists(ASCII.getBytes(hash));
     }
 
     public void urlRemove(final Segment segment, final byte[] hash) {
@@ -2494,7 +2494,7 @@ public final class Switchboard extends serverSwitch {
             )
            ) {
             // get the hyperlinks
-            final Map<MultiProtocolURI, String> hl = Document.getHyperlinks(documents);
+            final Map<DigestURI, String> hl = Document.getHyperlinks(documents);
 
             // add all media links also to the crawl stack. They will be re-sorted to the NOLOAD queue and indexed afterwards as pure links
             if (response.profile().directDocByURL()) {
@@ -2506,7 +2506,7 @@ public final class Switchboard extends serverSwitch {
 
             // insert those hyperlinks to the crawler
             MultiProtocolURI nextUrl;
-            for ( final Map.Entry<MultiProtocolURI, String> nextEntry : hl.entrySet() ) {
+            for ( final Map.Entry<DigestURI, String> nextEntry : hl.entrySet() ) {
                 // check for interruption
                 checkInterruption();
 
@@ -2654,7 +2654,7 @@ public final class Switchboard extends serverSwitch {
 
         // CREATE INDEX
         final String dc_title = document.dc_title();
-        final DigestURI url = DigestURI.toDigestURI(document.dc_source());
+        final DigestURI url = document.dc_source();
         final DigestURI referrerURL = queueEntry.referrerURL();
         EventOrigin processCase = queueEntry.processCase(this.peers.mySeed().hash);
 
@@ -2711,14 +2711,14 @@ public final class Switchboard extends serverSwitch {
         feed.addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url(), ASCII.String(queueEntry.url().hash())));
 
         // store rss feeds in document into rss table
-        for ( final Map.Entry<MultiProtocolURI, String> rssEntry : document.getRSS().entrySet() ) {
+        for ( final Map.Entry<DigestURI, String> rssEntry : document.getRSS().entrySet() ) {
             final Tables.Data rssRow = new Tables.Data();
             rssRow.put("referrer", url.hash());
             rssRow.put("url", UTF8.getBytes(rssEntry.getKey().toNormalform(true)));
             rssRow.put("title", UTF8.getBytes(rssEntry.getValue()));
             rssRow.put("recording_date", new Date());
             try {
-                this.tables.update("rss", DigestURI.toDigestURI(rssEntry.getKey()).hash(), rssRow);
+                this.tables.update("rss", rssEntry.getKey().hash(), rssRow);
             } catch ( final IOException e ) {
                 Log.logException(e);
             }
@@ -2760,7 +2760,7 @@ public final class Switchboard extends serverSwitch {
 
     public final void addAllToIndex(
         final DigestURI url,
-        final Map<MultiProtocolURI, String> links,
+        final Map<DigestURI, String> links,
         final SearchEvent searchEvent,
         final String heuristicName) {
 
@@ -2775,10 +2775,10 @@ public final class Switchboard extends serverSwitch {
         }
 
         // check if some of the links match with the query
-        final Map<MultiProtocolURI, String> matcher = searchEvent.query.separateMatches(links);
+        final Map<DigestURI, String> matcher = searchEvent.query.separateMatches(links);
 
         // take the matcher and load them all
-        for ( final Map.Entry<MultiProtocolURI, String> entry : matcher.entrySet() ) {
+        for ( final Map.Entry<DigestURI, String> entry : matcher.entrySet() ) {
             try {
                 addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent, heuristicName);
             } catch ( final IOException e ) {
@@ -2787,7 +2787,7 @@ public final class Switchboard extends serverSwitch {
         }
 
         // take then the no-matcher and load them also
-        for ( final Map.Entry<MultiProtocolURI, String> entry : links.entrySet() ) {
+        for ( final Map.Entry<DigestURI, String> entry : links.entrySet() ) {
             try {
                 addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent, heuristicName);
             } catch ( final IOException e ) {
@@ -2926,10 +2926,10 @@ public final class Switchboard extends serverSwitch {
     public void addToIndex(final DigestURI url, final SearchEvent searchEvent, final String heuristicName)
         throws IOException,
         Parser.Failure {
-        if ( searchEvent != null ) {
+        if (searchEvent != null) {
             searchEvent.addHeuristic(url.hash(), heuristicName, true);
         }
-        if ( this.index.exists(url.hash()) ) {
+        if (this.index.exists(ASCII.String(url.hash()))) {
             return; // don't do double-work
         }
         final Request request = this.loader.request(url, true, true);
@@ -3004,7 +3004,7 @@ public final class Switchboard extends serverSwitch {
      */
     public void addToCrawler(final DigestURI url, final boolean asglobal) {
 
-        if ( this.index.exists(url.hash()) ) {
+        if (this.index.exists(ASCII.String(url.hash()))) {
             return; // don't do double-work
         }
         final Request request = this.loader.request(url, true, true);
@@ -3204,7 +3204,7 @@ public final class Switchboard extends serverSwitch {
             return "no DHT distribution: not enabled (per setting)";
         }
         final Segment indexSegment = this.index;
-        int size = indexSegment.fulltext().size();
+        long size = indexSegment.fulltext().collectionSize();
         if ( size < 10 ) {
             return "no DHT distribution: loadedURL.size() = " + size;
         }
@@ -3348,12 +3348,12 @@ public final class Switchboard extends serverSwitch {
                     return;
                 }
 
-                final Map<MultiProtocolURI, String> links;
+                final Map<DigestURI, String> links;
                 searchEvent.rankingProcess.oneFeederStarted();
                 try {
                     links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay);
                     if ( links != null ) {
-                        final Iterator<MultiProtocolURI> i = links.keySet().iterator();
+                        final Iterator<DigestURI> i = links.keySet().iterator();
                         while ( i.hasNext() ) {
                             if ( !i.next().getHost().endsWith(host) ) {
                                 i.remove();
@@ -3387,16 +3387,16 @@ public final class Switchboard extends serverSwitch {
                     return;
                 }
 
-                final Map<MultiProtocolURI, String> links;
+                final Map<DigestURI, String> links;
                 DigestURI url;
                 try {
                     links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay);
                     if (links != null) {
                         if (links.size() < 1000) { // limit to 1000 to skip large index pages
-                            final Iterator<MultiProtocolURI> i = links.keySet().iterator();
+                            final Iterator<DigestURI> i = links.keySet().iterator();
                             final boolean globalcrawljob = Switchboard.this.getConfigBool("heuristic.searchresults.crawlglobal",false);
                             while (i.hasNext()) {
-                                url = DigestURI.toDigestURI(i.next());
+                                url = i.next();
                                 boolean islocal = url.getHost().contentEquals(startUrl.getHost());
                                 // add all external links or links to different page to crawler
                                 if ( !islocal ) {// || (!startUrl.getPath().endsWith(url.getPath()))) {
@@ -3458,11 +3458,11 @@ public final class Switchboard extends serverSwitch {
                     //System.out.println("BLEKKO: " + UTF8.String(resource));
                     rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
                     if ( rss != null ) {
-                        final Map<MultiProtocolURI, String> links = new TreeMap<MultiProtocolURI, String>();
-                        MultiProtocolURI uri;
+                        final Map<DigestURI, String> links = new TreeMap<DigestURI, String>();
+                        DigestURI uri;
                         for ( final RSSMessage message : rss.getFeed() ) {
                             try {
-                                uri = new MultiProtocolURI(message.getLink());
+                                uri = new DigestURI(message.getLink());
                                 links.put(uri, message.getTitle());
                             } catch ( final MalformedURLException e ) {
                             }

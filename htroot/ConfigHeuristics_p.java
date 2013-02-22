@@ -121,7 +121,8 @@ public class ConfigHeuristics_p {
                     }
                     try {
                         sb.index.fulltext().getDefaultConfiguration().commit();
-                    } catch (IOException ex) {}
+                    } catch (IOException e) {
+                    }
                 }
             }
 

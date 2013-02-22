@@ -40,10 +40,10 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.NumberTools;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 
 /**
@@ -560,7 +560,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         theHeader.append("\r\n");
     }
 
-    public static MultiProtocolURI getRequestURL(final HashMap<String, Object> conProp) throws MalformedURLException {
+    public static DigestURI getRequestURL(final HashMap<String, Object> conProp) throws MalformedURLException {
         String host =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
         final String path =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH);     // always starts with leading '/'
         final String args =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);     // may be null if no args were given
@@ -574,7 +574,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             host = host.substring(0, pos);
         }
 
-        final MultiProtocolURI url = new MultiProtocolURI("http", host, port, (args == null) ? path : path + "?" + args);
+        final DigestURI url = new DigestURI("http", host, port, (args == null) ? path : path + "?" + args);
         return url;
     }
 

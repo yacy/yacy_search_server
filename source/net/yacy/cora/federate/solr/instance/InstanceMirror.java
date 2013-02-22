@@ -21,8 +21,8 @@
 package net.yacy.cora.federate.solr.instance;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.federate.solr.connector.CachedSolrConnector;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
@@ -36,12 +36,16 @@ public class InstanceMirror {
     private ShardInstance solr1;
     private CachedSolrConnector defaultConnector;
     private Map<String, CachedSolrConnector> connectorCache;
+    private EmbeddedSolrConnector defaultEmbeddedConnector;
+    private Map<String, EmbeddedSolrConnector> embeddedCache;
 
     public InstanceMirror() {
         this.solr0 = null;
         this.solr1 = null;
         this.defaultConnector = null;
-        this.connectorCache = new HashMap<String, CachedSolrConnector>();
+        this.connectorCache = new ConcurrentHashMap<String, CachedSolrConnector>();
+        this.defaultEmbeddedConnector = null;
+        this.embeddedCache = new ConcurrentHashMap<String, EmbeddedSolrConnector>();
     }
     
     public boolean isConnected0() {
@@ -50,8 +54,10 @@ public class InstanceMirror {
 
     public void connect0(EmbeddedInstance c) {
         for (SolrConnector connector: connectorCache.values()) connector.close();
-        this.connectorCache.clear();
         this.defaultConnector = null;
+        this.connectorCache.clear();
+        this.defaultEmbeddedConnector = null;
+        this.embeddedCache.clear();
         this.solr0 = c;
     }
 
@@ -62,8 +68,10 @@ public class InstanceMirror {
     public void disconnect0() {
         if (this.solr0 == null) return;
         for (SolrConnector connector: connectorCache.values()) connector.close();
-        this.connectorCache.clear();
         this.defaultConnector = null;
+        this.connectorCache.clear();
+        this.defaultEmbeddedConnector = null;
+        this.embeddedCache.clear();
         this.solr0.close();
         this.solr0 = null;
     }
@@ -74,8 +82,10 @@ public class InstanceMirror {
 
     public void connect1(ShardInstance c) {
         for (SolrConnector connector: connectorCache.values()) connector.close();
-        this.connectorCache.clear();
         this.defaultConnector = null;
+        this.connectorCache.clear();
+        this.defaultEmbeddedConnector = null;
+        this.embeddedCache.clear();
         this.solr1 = c;
     }
 
@@ -86,8 +96,10 @@ public class InstanceMirror {
     public void disconnect1() {
         if (this.solr1 == null) return;
         for (SolrConnector connector: connectorCache.values()) connector.close();
-        this.connectorCache.clear();
         this.defaultConnector = null;
+        this.connectorCache.clear();
+        this.defaultEmbeddedConnector = null;
+        this.embeddedCache.clear();
         this.solr1.close();
         this.solr1 = null;
     }
@@ -108,8 +120,23 @@ public class InstanceMirror {
         if (this.solr1 != null) return this.solr1.getCoreNames();
         return null;
     }
+
+    public EmbeddedSolrConnector getDefaultEmbeddedConnector() {
+        if (this.defaultEmbeddedConnector != null) return this.defaultEmbeddedConnector;
+        this.defaultEmbeddedConnector = this.solr0 == null ? null : new EmbeddedSolrConnector(this.solr0);
+        this.embeddedCache.put(this.getDefaultCoreName(), this.defaultEmbeddedConnector);
+        return this.defaultEmbeddedConnector;
+    }
+
+    public EmbeddedSolrConnector getEmbeddedConnector(String corename) {
+        EmbeddedSolrConnector ec = this.embeddedCache.get(corename);
+        if (ec != null) return ec;
+        ec = this.solr0 == null ? null : new EmbeddedSolrConnector(this.solr0, corename);
+        this.embeddedCache.put(corename, ec);
+        return ec;
+    }
     
-    public SolrConnector getDefaultConnector() {
+    public SolrConnector getDefaultMirrorConnector() {
         if (this.defaultConnector != null) return this.defaultConnector;
         String defaultCoreName = this.getDefaultCoreName();
         if (defaultCoreName == null) return null;
@@ -120,7 +147,7 @@ public class InstanceMirror {
         return this.defaultConnector;
     }
 
-    public SolrConnector getConnector(String corename) {
+    public SolrConnector getMirrorConnector(String corename) {
         CachedSolrConnector msc = this.connectorCache.get(corename);
         if (msc != null) return msc;
         EmbeddedSolrConnector esc = this.solr0 == null ? null : new EmbeddedSolrConnector(this.solr0, corename);

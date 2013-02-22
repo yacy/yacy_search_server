@@ -46,7 +46,6 @@ import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.solr.Boost;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
@@ -531,11 +530,11 @@ public final class QueryParams {
         return this.queryGoal;
     }
 
-    public final Map<MultiProtocolURI, String> separateMatches(final Map<MultiProtocolURI, String> links) {
-        final Map<MultiProtocolURI, String> matcher = new HashMap<MultiProtocolURI, String>();
-        final Iterator <Map.Entry<MultiProtocolURI, String>> i = links.entrySet().iterator();
-        Map.Entry<MultiProtocolURI, String> entry;
-        MultiProtocolURI url;
+    public final Map<DigestURI, String> separateMatches(final Map<DigestURI, String> links) {
+        final Map<DigestURI, String> matcher = new HashMap<DigestURI, String>();
+        final Iterator <Map.Entry<DigestURI, String>> i = links.entrySet().iterator();
+        Map.Entry<DigestURI, String> entry;
+        DigestURI url;
         String anchorText;
         while (i.hasNext()) {
             entry = i.next();

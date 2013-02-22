@@ -184,8 +184,8 @@ public class genericImageParser extends AbstractParser implements Parser {
         }
 
         final HashSet<String> languages = new HashSet<String>();
-        final HashMap<MultiProtocolURI, Properties> anchors = new HashMap<MultiProtocolURI, Properties>();
-        final HashMap<MultiProtocolURI, ImageEntry> images  = new HashMap<MultiProtocolURI, ImageEntry>();
+        final HashMap<DigestURI, Properties> anchors = new HashMap<DigestURI, Properties>();
+        final HashMap<DigestURI, ImageEntry> images  = new HashMap<DigestURI, ImageEntry>();
         // add this image to the map of images
         final String infoString = ii.info.toString();
         images.put(ii.location, new ImageEntry(location, "", ii.width, ii.height, -1));
@@ -223,7 +223,7 @@ public class genericImageParser extends AbstractParser implements Parser {
     }
 
     public static ImageInfo parseJavaImage(
-                            final MultiProtocolURI location,
+                            final DigestURI location,
                             final InputStream sourceStream) throws Parser.Failure {
         BufferedImage image = null;
         try {
@@ -238,7 +238,7 @@ public class genericImageParser extends AbstractParser implements Parser {
     }
 
     public static ImageInfo parseJavaImage(
-                            final MultiProtocolURI location,
+                            final DigestURI location,
                             final BufferedImage image) {
         final ImageInfo ii = new ImageInfo(location);
         ii.image = image;
@@ -275,12 +275,12 @@ public class genericImageParser extends AbstractParser implements Parser {
     }
 
     public static class ImageInfo {
-        public MultiProtocolURI location;
+        public DigestURI location;
         public BufferedImage image;
         public StringBuilder info;
         public int height;
         public int width;
-        public ImageInfo(final MultiProtocolURI location) {
+        public ImageInfo(final DigestURI location) {
             this.location = location;
             this.image = null;
             this.info = new StringBuilder();

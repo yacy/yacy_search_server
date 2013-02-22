@@ -21,6 +21,7 @@
   
   <dbsize>
     <urlpublictext>#[urlpublictextSize]#</urlpublictext>
+    <webgraph>#[webgraphSize]#</webgraph>
     <rwipublictext>#[rwipublictextSize]#</rwipublictext>
   </dbsize>
   

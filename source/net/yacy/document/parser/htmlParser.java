@@ -34,7 +34,6 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -149,7 +148,7 @@ public class htmlParser extends AbstractParser implements Parser {
     }
 
     public static ContentScraper parseToScraper(
-            final MultiProtocolURI location,
+            final DigestURI location,
             final String documentCharset,
             InputStream sourceStream,
             final int maxLinks) throws Parser.Failure, IOException {

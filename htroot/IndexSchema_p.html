@@ -16,12 +16,13 @@
     <p>If you use a custom Solr schema you may enter a different field name in the column 'Custom Solr Field Name' of the YaCy default attribute name</p>
     
     <form action="IndexSchema_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
-    Select a Core:
+    Select a core:
       <select id="core" name="core" onchange='submit()'>
           #{cores}#
             <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
           #{/cores}#
       </select>
+    &nbsp;&nbsp;&nbsp;... the core can be searched at <a href="/solr/select?core=#[core]#&q=*:*&start=0&rows=3">/solr/select?core=#[core]#&q=*:*&start=0&rows=3</a>
     </form>
     
     <form action="IndexSchema_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">

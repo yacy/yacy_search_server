@@ -37,7 +37,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Properties;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.document.AbstractParser;
@@ -70,7 +69,7 @@ public class vcfParser extends AbstractParser implements Parser {
             final StringBuilder parsedTitle = new StringBuilder();
             final StringBuilder parsedDataText = new StringBuilder();
             final HashMap<String, String> parsedData = new HashMap<String, String>();
-            final HashMap<MultiProtocolURI, Properties> anchors = new HashMap<MultiProtocolURI, Properties>();
+            final HashMap<DigestURI, Properties> anchors = new HashMap<DigestURI, Properties>();
             final LinkedList<String> parsedNames = new LinkedList<String>();
 
             boolean useLastLine = false;
@@ -177,7 +176,7 @@ public class vcfParser extends AbstractParser implements Parser {
                         parsedData.clear();
                     } else if (key.toUpperCase().startsWith("URL")) {
                         try {
-                            final MultiProtocolURI newURL = new MultiProtocolURI(value);
+                            final DigestURI newURL = new DigestURI(value);
                             final Properties p = new Properties();
                             p.put("name", newURL.toString());
                             anchors.put(newURL, p);

@@ -139,7 +139,7 @@ public final class transferURL {
                 }
 
                 // doublecheck
-                if (sb.index.exists(lEntry.hash())) {
+                if (sb.index.exists(ASCII.String(lEntry.hash()))) {
                 	if (Network.log.isFine()) Network.log.logFine("transferURL: double URL '" + lEntry.url() + "' from peer " + otherPeerName);
                 	lEntry = null;
                     doublecheck++;

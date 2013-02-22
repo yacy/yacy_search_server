@@ -38,7 +38,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import net.yacy.cora.document.ASCII;
@@ -158,7 +157,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     public SolrInputDocument metadata2solr(final URIMetadataRow md) {
 
         final SolrInputDocument doc = new SolrInputDocument();
-        final DigestURI digestURI = DigestURI.toDigestURI(md.url());
+        final DigestURI digestURI = md.url();
         boolean allAttr = this.isEmpty();
 
         if (allAttr || contains(CollectionSchema.failreason_t)) add(doc, CollectionSchema.failreason_t, "");
@@ -283,13 +282,29 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
     
-    public SolrInputDocument yacy2solr(
+    public static class SolrVector extends SolrInputDocument {
+        private static final long serialVersionUID = -210901881471714939L;
+        private List<SolrInputDocument> webgraphDocuments;
+        public SolrVector() {
+            super();
+            this.webgraphDocuments = new ArrayList<SolrInputDocument>();
+        }
+        public void addWebgraphDocument(SolrInputDocument webgraphDocument) {
+            this.webgraphDocuments.add(webgraphDocument);
+        }
+        public List<SolrInputDocument> getWebgraphDocuments() {
+            return this.webgraphDocuments;
+        }
+    }
+    
+    public SolrVector yacy2solr(
             final String id, final CrawlProfile profile, final ResponseHeader responseHeader,
             final Document document, Condenser condenser, DigestURI referrerURL, String language,
-            IndexCell<CitationReference> citations) {
+            IndexCell<CitationReference> citations,
+            WebgraphConfiguration webgraph) {
         // we use the SolrCell design as index schema
-        final SolrInputDocument doc = new SolrInputDocument();
-        final DigestURI digestURI = DigestURI.toDigestURI(document.dc_source());
+        SolrVector doc = new SolrVector();
+        final DigestURI digestURI = document.dc_source();
         boolean allAttr = this.isEmpty();
         
         Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
@@ -299,24 +314,24 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         String docurl = digestURI.toNormalform(true);
         add(doc, CollectionSchema.sku, docurl);
 
+        int clickdepth = -1;
         if ((allAttr || contains(CollectionSchema.clickdepth_i)) && citations != null) {
             if (digestURI.probablyRootURL()) {
                 boolean lc = this.lazy; this.lazy = false;
-                add(doc, CollectionSchema.clickdepth_i, 0);
+                clickdepth = 0;
                 this.lazy = lc;
             } else {
                 // search the citations for references
-                int clickdepth = -1;
                 try {
                     clickdepth = getClickDepth(citations, digestURI);
                 } catch (IOException e) {
                     add(doc, CollectionSchema.clickdepth_i, -1);
                 }
-                add(doc, CollectionSchema.clickdepth_i, clickdepth);
                 if (clickdepth < 0 || clickdepth > 1) {
                     processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
                 }
             }
+            add(doc, CollectionSchema.clickdepth_i, clickdepth);
         }
         
         if (allAttr || contains(CollectionSchema.ip_s)) {
@@ -415,12 +430,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.url_file_ext_s)) add(doc, CollectionSchema.url_file_ext_s, digestURI.getFileExtension());
 
         // get list of all links; they will be shrinked by urls that appear in other fields of the solr schema
-        Set<MultiProtocolURI> inboundLinks = document.inboundLinks();
-        Set<MultiProtocolURI> outboundLinks = document.outboundLinks();
+        Set<DigestURI> inboundLinks = document.inboundLinks();
+        Set<DigestURI> outboundLinks = document.outboundLinks();
 
         int c = 0;
         final Object parser = document.getParserObject();
-        Map<MultiProtocolURI, ImageEntry> images = new HashMap<MultiProtocolURI, ImageEntry>();
+        Map<DigestURI, ImageEntry> images = new HashMap<DigestURI, ImageEntry>();
         if (parser instanceof ContentScraper) {
             final ContentScraper html = (ContentScraper) parser;
             images = html.getImages();
@@ -546,11 +561,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // style sheets
             if (allAttr || contains(CollectionSchema.css_tag_txt)) {
-                final Map<MultiProtocolURI, String> csss = html.getCSS();
+                final Map<DigestURI, String> csss = html.getCSS();
                 final String[] css_tag = new String[csss.size()];
                 final String[] css_url = new String[csss.size()];
                 c = 0;
-                for (final Map.Entry<MultiProtocolURI, String> entry: csss.entrySet()) {
+                for (final Map.Entry<DigestURI, String> entry: csss.entrySet()) {
                     final String cssurl = entry.getKey().toNormalform(false);
                     inboundLinks.remove(cssurl);
                     outboundLinks.remove(cssurl);
@@ -567,10 +582,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // Scripts
             if (allAttr || contains(CollectionSchema.scripts_txt)) {
-                final Set<MultiProtocolURI> scriptss = html.getScript();
+                final Set<DigestURI> scriptss = html.getScript();
                 final String[] scripts = new String[scriptss.size()];
                 c = 0;
-                for (final MultiProtocolURI u: scriptss) {
+                for (final DigestURI u: scriptss) {
                     inboundLinks.remove(u);
                     outboundLinks.remove(u);
                     scripts[c++] = u.toNormalform(false);
@@ -581,10 +596,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // Frames
             if (allAttr || contains(CollectionSchema.frames_txt)) {
-                final Set<MultiProtocolURI> framess = html.getFrames();
+                final Set<DigestURI> framess = html.getFrames();
                 final String[] frames = new String[framess.size()];
                 c = 0;
-                for (final MultiProtocolURI u: framess) {
+                for (final DigestURI u: framess) {
                     inboundLinks.remove(u);
                     outboundLinks.remove(u);
                     frames[c++] = u.toNormalform(false);
@@ -595,10 +610,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // IFrames
             if (allAttr || contains(CollectionSchema.iframes_txt)) {
-                final Set<MultiProtocolURI> iframess = html.getIFrames();
+                final Set<DigestURI> iframess = html.getIFrames();
                 final String[] iframes = new String[iframess.size()];
                 c = 0;
-                for (final MultiProtocolURI u: iframess) {
+                for (final DigestURI u: iframess) {
                     inboundLinks.remove(u);
                     outboundLinks.remove(u);
                     iframes[c++] = u.toNormalform(false);
@@ -609,7 +624,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // canonical tag
             if (allAttr || contains(CollectionSchema.canonical_t)) {
-                final MultiProtocolURI canonical = html.getCanonical();
+                final DigestURI canonical = html.getCanonical();
                 if (canonical != null) {
                     inboundLinks.remove(canonical);
                     outboundLinks.remove(canonical);
@@ -665,104 +680,22 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             add(doc, CollectionSchema.responsetime_i, responseHeader == null ? 0 : Integer.parseInt(responseHeader.get(HeaderFramework.RESPONSE_TIME_MILLIS, "0")));
         }
 
-        // list all links
-        final Map<MultiProtocolURI, Properties> alllinks = document.getAnchors();
-        c = 0;
+        // statistics about the links
         if (allAttr || contains(CollectionSchema.inboundlinkscount_i)) add(doc, CollectionSchema.inboundlinkscount_i, inboundLinks.size());
         if (allAttr || contains(CollectionSchema.inboundlinksnofollowcount_i)) add(doc, CollectionSchema.inboundlinksnofollowcount_i, document.inboundLinkNofollowCount());
-        final List<String> inboundlinksTag = new ArrayList<String>(inboundLinks.size());
-        final List<String> inboundlinksURLProtocol = new ArrayList<String>(inboundLinks.size());
-        final List<String> inboundlinksURLStub = new ArrayList<String>(inboundLinks.size());
-        final List<String> inboundlinksName = new ArrayList<String>(inboundLinks.size());
-        final List<String> inboundlinksRel = new ArrayList<String>(inboundLinks.size());
-        final List<String> inboundlinksText = new ArrayList<String>(inboundLinks.size());
-        final List<Integer> inboundlinksTextChars = new ArrayList<Integer>(inboundLinks.size());
-        final List<Integer> inboundlinksTextWords = new ArrayList<Integer>(inboundLinks.size());
-        final List<String> inboundlinksAltTag = new ArrayList<String>(inboundLinks.size());
-        for (final MultiProtocolURI u: inboundLinks) {
-            final Properties p = alllinks.get(u);
-            if (p == null) continue;
-            final String name = p.getProperty("name", ""); // the name attribute
-            final String rel = p.getProperty("rel", "");   // the rel-attribute
-            final String text = p.getProperty("text", ""); // the text between the <a></a> tag
-            final String urls = u.toNormalform(false);
-            final int pr = urls.indexOf("://",0);
-            inboundlinksURLProtocol.add(urls.substring(0, pr));
-            inboundlinksURLStub.add(urls.substring(pr + 3));
-            inboundlinksName.add(name.length() > 0 ? name : "");
-            inboundlinksRel.add(rel.length() > 0 ? rel : "");
-            inboundlinksText.add(text.length() > 0 ? text : "");
-            inboundlinksTextChars.add(text.length() > 0 ? text.length() : 0);
-            inboundlinksTextWords.add(text.length() > 0 ? CommonPattern.SPACE.split(text).length : 0);
-            inboundlinksTag.add(
-                "<a href=\"" + u.toNormalform(false) + "\"" +
-                (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +
-                (name.length() > 0 ? " name=\"" + name + "\"" : "") +
-                ">" +
-                ((text.length() > 0) ? text : "") + "</a>");
-            ImageEntry ientry = images.get(u);
-            inboundlinksAltTag.add(ientry == null ? "" : ientry.alt());
-            c++;
-        }
-        if (allAttr || contains(CollectionSchema.inboundlinks_tag_txt)) add(doc, CollectionSchema.inboundlinks_tag_txt, inboundlinksTag);
-        if (allAttr || contains(CollectionSchema.inboundlinks_protocol_sxt)) add(doc, CollectionSchema.inboundlinks_protocol_sxt, protocolList2indexedList(inboundlinksURLProtocol));
-        if (allAttr || contains(CollectionSchema.inboundlinks_urlstub_txt)) add(doc, CollectionSchema.inboundlinks_urlstub_txt, inboundlinksURLStub);
-        if (allAttr || contains(CollectionSchema.inboundlinks_name_txt)) add(doc, CollectionSchema.inboundlinks_name_txt, inboundlinksName);
-        if (allAttr || contains(CollectionSchema.inboundlinks_rel_sxt)) add(doc, CollectionSchema.inboundlinks_rel_sxt, inboundlinksRel);
-        if (allAttr || contains(CollectionSchema.inboundlinks_relflags_val)) add(doc, CollectionSchema.inboundlinks_relflags_val, relEval(inboundlinksRel));
-        if (allAttr || contains(CollectionSchema.inboundlinks_text_txt)) add(doc, CollectionSchema.inboundlinks_text_txt, inboundlinksText);
-        if (allAttr || contains(CollectionSchema.inboundlinks_text_chars_val)) add(doc, CollectionSchema.inboundlinks_text_chars_val, inboundlinksTextChars);
-        if (allAttr || contains(CollectionSchema.inboundlinks_text_words_val)) add(doc, CollectionSchema.inboundlinks_text_words_val, inboundlinksTextWords);
-        if (allAttr || contains(CollectionSchema.inboundlinks_alttag_txt)) add(doc, CollectionSchema.inboundlinks_alttag_txt, inboundlinksAltTag);
-
-        c = 0;
         if (allAttr || contains(CollectionSchema.outboundlinkscount_i)) add(doc, CollectionSchema.outboundlinkscount_i, outboundLinks.size());
         if (allAttr || contains(CollectionSchema.outboundlinksnofollowcount_i)) add(doc, CollectionSchema.outboundlinksnofollowcount_i, document.outboundLinkNofollowCount());
-        final List<String> outboundlinksTag = new ArrayList<String>(outboundLinks.size());
-        final List<String> outboundlinksURLProtocol = new ArrayList<String>(outboundLinks.size());
-        final List<String> outboundlinksURLStub = new ArrayList<String>(outboundLinks.size());
-        final List<String> outboundlinksName = new ArrayList<String>(outboundLinks.size());
-        final List<String> outboundlinksRel = new ArrayList<String>(outboundLinks.size());
-        final List<Integer> outboundlinksTextChars = new ArrayList<Integer>(outboundLinks.size());
-        final List<Integer> outboundlinksTextWords = new ArrayList<Integer>(outboundLinks.size());
-        final List<String> outboundlinksText = new ArrayList<String>(outboundLinks.size());
-        final List<String> outboundlinksAltTag = new ArrayList<String>(outboundLinks.size());
-        for (final MultiProtocolURI u: outboundLinks) {
-            final Properties p = alllinks.get(u);
-            if (p == null) continue;
-            final String name = p.getProperty("name", ""); // the name attribute
-            final String rel = p.getProperty("rel", "");   // the rel-attribute
-            final String text = p.getProperty("text", ""); // the text between the <a></a> tag
-            final String urls = u.toNormalform(false);
-            final int pr = urls.indexOf("://",0);
-            outboundlinksURLProtocol.add(urls.substring(0, pr));
-            outboundlinksURLStub.add(urls.substring(pr + 3));
-            outboundlinksName.add(name.length() > 0 ? name : "");
-            outboundlinksRel.add(rel.length() > 0 ? rel : "");
-            outboundlinksText.add(text.length() > 0 ? text : "");
-            outboundlinksTextChars.add(text.length() > 0 ? text.length() : 0);
-            outboundlinksTextWords.add(text.length() > 0 ? CommonPattern.SPACE.split(text).length : 0);
-            outboundlinksTag.add(
-                "<a href=\"" + u.toNormalform(false) + "\"" +
-                (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +
-                (name.length() > 0 ? " name=\"" + name + "\"" : "") +
-                ">" +
-                ((text.length() > 0) ? text : "") + "</a>");
-            ImageEntry ientry = images.get(u);
-            inboundlinksAltTag.add(ientry == null ? "" : ientry.alt());
-            c++;
-        }
-        if (allAttr || contains(CollectionSchema.outboundlinks_tag_txt)) add(doc, CollectionSchema.outboundlinks_tag_txt, outboundlinksTag);
-        if (allAttr || contains(CollectionSchema.outboundlinks_protocol_sxt)) add(doc, CollectionSchema.outboundlinks_protocol_sxt, protocolList2indexedList(outboundlinksURLProtocol));
-        if (allAttr || contains(CollectionSchema.outboundlinks_urlstub_txt)) add(doc, CollectionSchema.outboundlinks_urlstub_txt, outboundlinksURLStub);
-        if (allAttr || contains(CollectionSchema.outboundlinks_name_txt)) add(doc, CollectionSchema.outboundlinks_name_txt, outboundlinksName);
-        if (allAttr || contains(CollectionSchema.outboundlinks_rel_sxt)) add(doc, CollectionSchema.outboundlinks_rel_sxt, outboundlinksRel);
-        if (allAttr || contains(CollectionSchema.outboundlinks_relflags_val)) add(doc, CollectionSchema.outboundlinks_relflags_val, relEval(outboundlinksRel));
-        if (allAttr || contains(CollectionSchema.outboundlinks_text_txt)) add(doc, CollectionSchema.outboundlinks_text_txt, outboundlinksText);
-        if (allAttr || contains(CollectionSchema.outboundlinks_text_chars_val)) add(doc, CollectionSchema.outboundlinks_text_chars_val, outboundlinksTextChars);
-        if (allAttr || contains(CollectionSchema.outboundlinks_text_words_val)) add(doc, CollectionSchema.outboundlinks_text_words_val, outboundlinksTextWords);
-        if (allAttr || contains(CollectionSchema.outboundlinks_alttag_txt)) add(doc, CollectionSchema.outboundlinks_alttag_txt, outboundlinksAltTag);
-
+        
+        // list all links
+        WebgraphConfiguration.Subgraph subgraph = webgraph.edges(digestURI, responseHeader, profile.collections(), clickdepth, document.getAnchors(), images, inboundLinks, outboundLinks);
+        doc.webgraphDocuments.addAll(subgraph.edges);
+        if (allAttr || contains(CollectionSchema.inboundlinks_tag_txt)) add(doc, CollectionSchema.inboundlinks_tag_txt, subgraph.tags[0]);
+        if (allAttr || contains(CollectionSchema.inboundlinks_protocol_sxt)) add(doc, CollectionSchema.inboundlinks_protocol_sxt, protocolList2indexedList(subgraph.urlProtocols[0]));
+        if (allAttr || contains(CollectionSchema.inboundlinks_urlstub_txt)) add(doc, CollectionSchema.inboundlinks_urlstub_txt, subgraph.urlStubs[0]);
+        if (allAttr || contains(CollectionSchema.outboundlinks_tag_txt)) add(doc, CollectionSchema.outboundlinks_tag_txt, subgraph.tags[1]);
+        if (allAttr || contains(CollectionSchema.outboundlinks_protocol_sxt)) add(doc, CollectionSchema.outboundlinks_protocol_sxt, protocolList2indexedList(subgraph.urlProtocols[1]));
+        if (allAttr || contains(CollectionSchema.outboundlinks_urlstub_txt)) add(doc, CollectionSchema.outboundlinks_urlstub_txt, subgraph.urlStubs[1]);
+        
         // charset
         if (allAttr || contains(CollectionSchema.charset_s)) add(doc, CollectionSchema.charset_s, document.getCharset());
 
@@ -896,6 +829,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param rel
      * @return binary encoded information about rel
      */
+    /*
     private static List<Integer> relEval(final List<String> rel) {
         List<Integer> il = new ArrayList<Integer>(rel.size());
         for (final String s: rel) {
@@ -907,6 +841,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         return il;
     }
+    */
     
     /**
      * register an entry as error document

@@ -44,6 +44,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 /**
  * a protocol scanner
@@ -98,8 +99,8 @@ public class Scanner extends Thread {
             //this.hostname = Domains.getHostName(this.inetAddress);
             return this.hostname;
         }
-        public MultiProtocolURI url() throws MalformedURLException {
-            return new MultiProtocolURI(this.protocol.name() + "://" + getHostName() + "/");
+        public DigestURI url() throws MalformedURLException {
+            return new DigestURI(this.protocol.name() + "://" + getHostName() + "/");
         }
         @Override
         public String toString() {

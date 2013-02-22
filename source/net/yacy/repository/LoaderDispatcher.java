@@ -39,7 +39,6 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -381,7 +380,7 @@ public final class LoaderDispatcher {
      * @return a map from URLs to the anchor texts of the urls
      * @throws IOException
      */
-    public final Map<MultiProtocolURI, String> loadLinks(final DigestURI url, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final long minDelay) throws IOException {
+    public final Map<DigestURI, String> loadLinks(final DigestURI url, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final long minDelay) throws IOException {
         final Response response = load(request(url, true, false), cacheStrategy, Integer.MAX_VALUE, blacklistType, minDelay);
         if (response == null) throw new IOException("response == null");
         final ResponseHeader responseHeader = response.getResponseHeader();

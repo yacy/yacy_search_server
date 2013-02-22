@@ -33,7 +33,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -79,7 +78,7 @@ public class swfParser extends AbstractParser implements Parser {
             final String[] sections =  null;
             final String abstrct = null;
             //TreeSet images = null;
-            final Map<MultiProtocolURI, Properties> anchors = new HashMap<MultiProtocolURI, Properties>();
+            final Map<DigestURI, Properties> anchors = new HashMap<DigestURI, Properties>();
             int urls = 0;
             int urlStart = -1;
             int urlEnd = 0;
@@ -98,7 +97,7 @@ public class swfParser extends AbstractParser implements Parser {
                 urlnr = Integer.toString(++urls).toString();
                 final Properties p = new Properties();
                 p.put("name", urlnr);
-                anchors.put(new MultiProtocolURI(url), p);
+                anchors.put(new DigestURI(url), p);
                 contents = contents.substring(0,urlStart)+contents.substring(urlEnd);
             }
 

@@ -42,6 +42,8 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.SearchEvent;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -181,7 +183,8 @@ public class select {
         }
 
         // get the embedded connector
-        EmbeddedSolrConnector connector = sb.index.fulltext().getDefaultLocalSolrConnector();
+        boolean defaultConnector = post == null || post.get("core", CollectionSchema.CORE_NAME).equals(CollectionSchema.CORE_NAME);
+        EmbeddedSolrConnector connector = defaultConnector ? sb.index.fulltext().getDefaultEmbeddedConnector() : sb.index.fulltext().getEmbeddedConnector(WebgraphSchema.CORE_NAME);
         if (connector == null) return null;
 
         // do the solr request, generate facets if we use a special YaCy format

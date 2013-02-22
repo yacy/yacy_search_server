@@ -53,6 +53,7 @@ import net.yacy.cora.util.NumberTools;
 import net.yacy.document.SentenceReader;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.Evaluation.Element;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
@@ -121,11 +122,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     // class variables: collectors for links
-    private final Map<MultiProtocolURI, Properties> anchors;
-    private final Map<MultiProtocolURI, String> rss, css;
-    private final Set<MultiProtocolURI> script, frames, iframes;
-    private final Map<MultiProtocolURI, EmbedEntry> embeds; // urlhash/embed relation
-    private final Map<MultiProtocolURI, ImageEntry> images; // urlhash/image relation
+    private final Map<DigestURI, Properties> anchors;
+    private final Map<DigestURI, String> rss, css;
+    private final Set<DigestURI> script, frames, iframes;
+    private final Map<DigestURI, EmbedEntry> embeds; // urlhash/embed relation
+    private final Map<DigestURI, ImageEntry> images; // urlhash/image relation
     private final Map<String, String> metas;
     private LinkedHashSet<String> titles;
     //private String headline;
@@ -135,7 +136,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final CharBuffer content;
     private final EventListenerList htmlFilterEventListeners;
     private double lon, lat;
-    private MultiProtocolURI canonical;
+    private DigestURI canonical;
     private final int maxLinks;
     private int breadcrumbs;
 
@@ -148,7 +149,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     /**
      * The document root {@link MultiProtocolURI}
      */
-    private MultiProtocolURI root;
+    private DigestURI root;
 
     /**
      * evaluation scores: count appearance of specific attributes
@@ -156,7 +157,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final Evaluation evaluationScores;
 
     @SuppressWarnings("unchecked")
-    public ContentScraper(final MultiProtocolURI root, int maxLinks) {
+    public ContentScraper(final DigestURI root, int maxLinks) {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
@@ -164,15 +165,15 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.root = root;
         this.maxLinks = maxLinks;
         this.evaluationScores = new Evaluation();
-        this.rss = new SizeLimitedMap<MultiProtocolURI, String>(maxLinks);
-        this.css = new SizeLimitedMap<MultiProtocolURI, String>(maxLinks);
-        this.anchors = new SizeLimitedMap<MultiProtocolURI, Properties>(maxLinks);
-        this.images = new SizeLimitedMap<MultiProtocolURI, ImageEntry>(maxLinks);
-        this.embeds = new SizeLimitedMap<MultiProtocolURI, EmbedEntry>(maxLinks);
-        this.frames = new SizeLimitedSet<MultiProtocolURI>(maxLinks);
-        this.iframes = new SizeLimitedSet<MultiProtocolURI>(maxLinks);
+        this.rss = new SizeLimitedMap<DigestURI, String>(maxLinks);
+        this.css = new SizeLimitedMap<DigestURI, String>(maxLinks);
+        this.anchors = new SizeLimitedMap<DigestURI, Properties>(maxLinks);
+        this.images = new SizeLimitedMap<DigestURI, ImageEntry>(maxLinks);
+        this.embeds = new SizeLimitedMap<DigestURI, EmbedEntry>(maxLinks);
+        this.frames = new SizeLimitedSet<DigestURI>(maxLinks);
+        this.iframes = new SizeLimitedSet<DigestURI>(maxLinks);
         this.metas = new SizeLimitedMap<String, String>(maxLinks);
-        this.script = new SizeLimitedSet<MultiProtocolURI>(maxLinks);
+        this.script = new SizeLimitedSet<DigestURI>(maxLinks);
         this.titles = new LinkedHashSet<String>();
         this.headlines = new ArrayList[6];
         for (int i = 0; i < this.headlines.length; i++) this.headlines[i] = new ArrayList<String>();
@@ -194,7 +195,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.content.trimToSize();
     }
 
-    private void mergeAnchors(final MultiProtocolURI url, final Properties p) {
+    private void mergeAnchors(final DigestURI url, final Properties p) {
         final Properties p0 = this.anchors.get(url);
         if (p0 == null) {
             this.anchors.put(url, p);
@@ -282,7 +283,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // find http links inside text
         s = 0;
         String u;
-        MultiProtocolURI url;
+        DigestURI url;
         while (s < b.length()) {
             p = find(b, dpssp, s);
             if (p == Integer.MAX_VALUE) break;
@@ -294,7 +295,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (u.endsWith(".")) u = u.substring(0, u.length() - 1); // remove the '.' that was appended above
             s = p + 6;
             try {
-                url = new MultiProtocolURI(u);
+                url = new DigestURI(u);
                 mergeAnchors(url, new Properties());
                 continue;
             } catch (final MalformedURLException e) {}
@@ -317,9 +318,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return (p < 0) ? Integer.MAX_VALUE : p;
     }
 
-    private MultiProtocolURI absolutePath(final String relativePath) {
+    private DigestURI absolutePath(final String relativePath) {
         try {
-            return MultiProtocolURI.newURL(this.root, relativePath);
+            return DigestURI.newURL(this.root, relativePath);
         } catch (final Exception e) {
             return null;
         }
@@ -331,7 +332,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String src = tagopts.getProperty("src", EMPTY_STRING);
             try {
                 if (src.length() > 0) {
-                    final MultiProtocolURI url = absolutePath(src);
+                    final DigestURI url = absolutePath(src);
                     if (url != null) {
                         final int width = Integer.parseInt(tagopts.getProperty("width", "-1"));
                         final int height = Integer.parseInt(tagopts.getProperty("height", "-1"));
@@ -343,10 +344,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             this.evaluationScores.match(Element.imgpath, src);
         } else if(tagname.equalsIgnoreCase("base")) {
             try {
-                this.root = new MultiProtocolURI(tagopts.getProperty("href", EMPTY_STRING));
+                this.root = new DigestURI(tagopts.getProperty("href", EMPTY_STRING));
             } catch (final MalformedURLException e) {}
         } else if (tagname.equalsIgnoreCase("frame")) {
-            final MultiProtocolURI src = absolutePath(tagopts.getProperty("src", EMPTY_STRING));
+            final DigestURI src = absolutePath(tagopts.getProperty("src", EMPTY_STRING));
             tagopts.put("src", src.toNormalform(true));
             mergeAnchors(src, tagopts /* with property "name" */);
             this.frames.add(src);
@@ -384,13 +385,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String href  = tagopts.getProperty("href", EMPTY_STRING);
             if (href.length() > 0) {
                 tagopts.put("nme", areatitle);
-                MultiProtocolURI url = absolutePath(href);
+                DigestURI url = absolutePath(href);
                 tagopts.put("href", url.toNormalform(true));
                 mergeAnchors(url, tagopts);
             }
         } else if (tagname.equalsIgnoreCase("link")) {
             final String href = tagopts.getProperty("href", EMPTY_STRING);
-            final MultiProtocolURI newLink = absolutePath(href);
+            final DigestURI newLink = absolutePath(href);
 
             if (newLink != null) {
                 tagopts.put("href", newLink.toNormalform(true));
@@ -420,7 +421,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String src = tagopts.getProperty("src", EMPTY_STRING);
             try {
                 if (src.length() > 0) {
-                    final MultiProtocolURI url = absolutePath(src);
+                    final DigestURI url = absolutePath(src);
                     if (url != null) {
                         final int width = Integer.parseInt(tagopts.getProperty("width", "-1"));
                         final int height = Integer.parseInt(tagopts.getProperty("height", "-1"));
@@ -434,12 +435,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         } else if(tagname.equalsIgnoreCase("param")) {
             final String name = tagopts.getProperty("name", EMPTY_STRING);
             if (name.equalsIgnoreCase("movie")) {
-                MultiProtocolURI url = absolutePath(tagopts.getProperty("value", EMPTY_STRING));
+                DigestURI url = absolutePath(tagopts.getProperty("value", EMPTY_STRING));
                 tagopts.put("value", url.toNormalform(true));
                 mergeAnchors(url, tagopts /* with property "name" */);
             }
         } else if (tagname.equalsIgnoreCase("iframe")) {
-            final MultiProtocolURI src = absolutePath(tagopts.getProperty("src", EMPTY_STRING));
+            final DigestURI src = absolutePath(tagopts.getProperty("src", EMPTY_STRING));
             tagopts.put("src", src.toNormalform(true));
             mergeAnchors(src, tagopts /* with property "name" */);
             this.iframes.add(src);
@@ -459,7 +460,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + UTF8.String(text));
         if (tagname.equalsIgnoreCase("a") && text.length < 2048) {
             final String href = tagopts.getProperty("href", EMPTY_STRING);
-            MultiProtocolURI url;
+            DigestURI url;
             if ((href.length() > 0) && ((url = absolutePath(href)) != null)) {
                 final String f = url.getFileName();
                 final int p = f.lastIndexOf('.');
@@ -552,7 +553,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             } catch (IOException e) {
             }
         }
-        for (final Map.Entry<MultiProtocolURI, Properties> entry: scraper.getAnchors().entrySet()) {
+        for (final Map.Entry<DigestURI, Properties> entry: scraper.getAnchors().entrySet()) {
             mergeAnchors(entry.getKey(), entry.getValue());
         }
         this.images.putAll(scraper.images);
@@ -640,15 +641,15 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return this.li.toArray(new String[this.li.size()]);
     }
 
-    public MultiProtocolURI[] getFlash() {
+    public DigestURI[] getFlash() {
         String ext;
-        ArrayList<MultiProtocolURI> f = new ArrayList<MultiProtocolURI>();
-        for (final MultiProtocolURI url: this.anchors.keySet()) {
+        ArrayList<DigestURI> f = new ArrayList<DigestURI>();
+        for (final DigestURI url: this.anchors.keySet()) {
             ext = url.getFileExtension();
             if (ext == null) continue;
             if (ext.equals("swf")) f.add(url);
         }
-        return f.toArray(new MultiProtocolURI[f.size()]);
+        return f.toArray(new DigestURI[f.size()]);
     }
 
     public boolean containsFlash() {
@@ -674,36 +675,36 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
     }
 
-    public Map<MultiProtocolURI, Properties> getAnchors() {
+    public Map<DigestURI, Properties> getAnchors() {
         // returns a url (String) / name (String) relation
         return this.anchors;
     }
 
-    public Map<MultiProtocolURI, String> getRSS() {
+    public Map<DigestURI, String> getRSS() {
         // returns a url (String) / name (String) relation
         return this.rss;
     }
 
-    public Map<MultiProtocolURI, String> getCSS() {
+    public Map<DigestURI, String> getCSS() {
         // returns a url (String) / name (String) relation
         return this.css;
     }
 
-    public Set<MultiProtocolURI> getFrames() {
+    public Set<DigestURI> getFrames() {
         // returns a url (String) / name (String) relation
         return this.frames;
     }
 
-    public Set<MultiProtocolURI> getIFrames() {
+    public Set<DigestURI> getIFrames() {
         // returns a url (String) / name (String) relation
         return this.iframes;
     }
 
-    public Set<MultiProtocolURI> getScript() {
+    public Set<DigestURI> getScript() {
         return this.script;
     }
 
-    public MultiProtocolURI getCanonical() {
+    public DigestURI getCanonical() {
         return this.canonical;
     }
 
@@ -711,11 +712,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * get all images
      * @return a map of <urlhash, ImageEntry>
      */
-    public Map<MultiProtocolURI, ImageEntry> getImages() {
+    public Map<DigestURI, ImageEntry> getImages() {
         return this.images;
     }
 
-    public Map<MultiProtocolURI, EmbedEntry> getEmbeds() {
+    public Map<DigestURI, EmbedEntry> getEmbeds() {
         return this.embeds;
     }
 
@@ -970,29 +971,29 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (page == null) throw new IOException("no content in file " + file.toString());
 
         // scrape document to look up charset
-        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page),"UTF-8", new MultiProtocolURI("http://localhost"),null,false, maxLinks);
+        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page),"UTF-8", new DigestURI("http://localhost"),null,false, maxLinks);
         String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
         htmlFilter.close();
         if (charset == null) charset = Charset.defaultCharset().toString();
 
         // scrape content
-        final ContentScraper scraper = new ContentScraper(new MultiProtocolURI("http://localhost"), maxLinks);
+        final ContentScraper scraper = new ContentScraper(new DigestURI("http://localhost"), maxLinks);
         final Writer writer = new TransformerWriter(null, null, scraper, null, false);
         FileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName(charset));
         writer.close();
         return scraper;
     }
 
-    public static void addAllImages(final Map<MultiProtocolURI, ImageEntry> a, final Map<MultiProtocolURI, ImageEntry> b) {
-        final Iterator<Map.Entry<MultiProtocolURI, ImageEntry>> i = b.entrySet().iterator();
-        Map.Entry<MultiProtocolURI, ImageEntry> ie;
+    public static void addAllImages(final Map<DigestURI, ImageEntry> a, final Map<DigestURI, ImageEntry> b) {
+        final Iterator<Map.Entry<DigestURI, ImageEntry>> i = b.entrySet().iterator();
+        Map.Entry<DigestURI, ImageEntry> ie;
         while (i.hasNext()) {
             ie = i.next();
             addImage(a, ie.getValue());
         }
     }
 
-    public static void addImage(final Map<MultiProtocolURI, ImageEntry> a, final ImageEntry ie) {
+    public static void addImage(final Map<DigestURI, ImageEntry> a, final ImageEntry ie) {
         if (a.containsKey(ie.url())) {
             // in case of a collision, take that image that has the better image size tags
             if ((ie.height() > 0) && (ie.width() > 0)) a.put(ie.url(), ie);

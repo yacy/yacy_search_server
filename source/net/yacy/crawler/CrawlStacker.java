@@ -191,7 +191,7 @@ public final class CrawlStacker {
             }
         }
     }
-    public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final Map<MultiProtocolURI, Properties> hyperlinks) {
+    public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final Map<DigestURI, Properties> hyperlinks) {
         new Thread() {
             @Override
             public void run() {
@@ -201,12 +201,12 @@ public final class CrawlStacker {
         }.start();
     }
 
-    private void enqueueEntries(final byte[] initiator, final String profileHandle, final Map<MultiProtocolURI, Properties> hyperlinks, final boolean replace) {
-        for (final Map.Entry<MultiProtocolURI, Properties> e: hyperlinks.entrySet()) {
+    private void enqueueEntries(final byte[] initiator, final String profileHandle, final Map<DigestURI, Properties> hyperlinks, final boolean replace) {
+        for (final Map.Entry<DigestURI, Properties> e: hyperlinks.entrySet()) {
             if (e.getKey() == null) continue;
 
             // delete old entry, if exists to force a re-load of the url (thats wanted here)
-            final DigestURI url = DigestURI.toDigestURI(e.getKey());
+            final DigestURI url = e.getKey();
             final byte[] urlhash = url.hash();
             if (replace) {
                 this.indexSegment.fulltext().remove(urlhash);

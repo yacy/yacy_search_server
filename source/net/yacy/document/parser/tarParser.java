@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -90,7 +89,7 @@ public class tarParser extends AbstractParser implements Parser {
                 try {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
                     FileUtils.copy(tis, tmp, entry.getSize());
-                    subDocs = TextParser.parseSource(DigestURI.toDigestURI(MultiProtocolURI.newURL(url,"#" + name)), mime, null, tmp);
+                    subDocs = TextParser.parseSource(DigestURI.newURL(url, "#" + name), mime, null, tmp);
                     if (subDocs == null) continue;
                     for (final Document d: subDocs) docacc.add(d);
                 } catch (final Parser.Failure e) {

@@ -15,6 +15,12 @@
 ## primary key of document, a combination of <source-url-hash><target-url-hash><four-digit-hex-counter> (28 characters)
 id
 
+## last-modified from http header, date (mandatory field)
+last_modified
+
+## time when resource was loaded
+load_date_dt
+
 ## tags that are attached to crawls/index generation to separate the search result into user-defined subsets
 collection_sxt
 
@@ -26,20 +32,17 @@ collection_sxt
 ## primary key of document, the URL hash (source)
 source_id_s
 
-## the url of the document (source)
-#source_url_s
+## the protocol of the url (source)
+#source_protocol_s
+
+## the url without the protocol (source)
+#source_urlstub_s
 
 ## the file name extension (source)
 #source_file_ext_s
 
-## normalized (absolute URLs), as <a> - tag with anchor text and nofollow (source)
-#source_tag_s
-
 ## number of all characters in the url (source)
 #source_chars_i
-
-## the protocol of the url (source)
-#source_protocol_s
 
 ## path of the url (source)
 #source_path_s
@@ -62,9 +65,12 @@ source_id_s
 ## depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url (source)
 #source_clickdepth_i
 
-## host of the url
+## host of the url (source)
 #source_host_s
 
+## id of the host (source)
+source_host_id_s
+    
 ## the Domain Class Name, either the TLD or a combination of ccSLD+TLD if a ccSLD is used (source)
 #source_host_dnc_s
 
@@ -117,8 +123,11 @@ target_name_t
 ## primary key of document, the URL hash (target)
 target_id_s
 
-## the url of the document (target)
-target_url_s
+## the protocol of the url (target)
+target_protocol_s
+
+## the url without the protocol (target)
+target_urlstub_s
 
 ## the file name extension (target)
 target_file_ext_s
@@ -128,9 +137,6 @@ target_file_ext_s
 
 ## number of all characters in the url (target)
 #target_chars_i
-
-## the protocol of the url (target)
-target_protocol_s
 
 ## path of the url (target)
 #target_path_s
@@ -156,6 +162,9 @@ target_path_folders_sxt
 ## host of the url (target)
 #target_host_s
 
+## id of the host (target)
+target_host_id_s
+    
 ## the Domain Class Name, either the TLD or a combination of ccSLD+TLD if a ccSLD is used (target)
 #target_host_dnc_s
 
@@ -168,5 +177,5 @@ target_path_folders_sxt
 ## the remaining part of the host without organizationdnc (target)
 #target_host_subdomain_s
 
-
-
+## flag shows if the target host is equal to the source host
+target_inbound_b

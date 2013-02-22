@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
@@ -90,7 +91,7 @@ public class RSSLoader extends Thread {
             try {
                 final DigestURI messageurl = new DigestURI(message.getLink());
                 if (indexTriggered.containsKey(messageurl.hash())) continue loop;
-                if (sb.urlExists(messageurl.hash()) != null) continue loop;
+                if (sb.urlExists(ASCII.String(messageurl.hash())) != null) continue loop;
                 sb.addToIndex(messageurl, null, null);
                 indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
                 loadCount++;

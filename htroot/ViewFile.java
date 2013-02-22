@@ -308,7 +308,7 @@ public class ViewFile {
                 i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0), document.getAnchors());
                 dark = (i % 2 == 0);
 
-                final Map<MultiProtocolURI, ImageEntry> ts = document.getImages();
+                final Map<DigestURI, ImageEntry> ts = document.getImages();
                 final Iterator<ImageEntry> tsi = ts.values().iterator();
                 ImageEntry entry;
                 while (tsi.hasNext()) {
@@ -432,12 +432,12 @@ public class ViewFile {
                     final serverObjects prop,
                     final String[] wordArray,
                     int c,
-                    final Map<MultiProtocolURI, String> media,
+                    final Map<DigestURI, String> media,
                     final String type,
                     boolean dark,
-                    final Map<MultiProtocolURI, Properties> alllinks) {
+                    final Map<DigestURI, Properties> alllinks) {
         int i = 0;
-        for (final Map.Entry<MultiProtocolURI, String> entry : media.entrySet()) {
+        for (final Map.Entry<DigestURI, String> entry : media.entrySet()) {
             final Properties p = alllinks.get(entry.getKey());
             final String name = p.getProperty("name", ""); // the name attribute
             final String rel = p.getProperty("rel", "");   // the rel-attribute

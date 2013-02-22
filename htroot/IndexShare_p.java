@@ -51,7 +51,7 @@ public class IndexShare_p {
             prop.put("dtable", "");
             prop.put("rtable", "");
             prop.putNum("wcount", indexSegment.RWICount());
-            prop.putNum("ucount", indexSegment.fulltext().size());
+            prop.putNum("ucount", indexSegment.fulltext().collectionSize());
             return prop; // be save
         }
 
@@ -64,7 +64,7 @@ public class IndexShare_p {
 
         // insert constants
         prop.putNum("wcount", indexSegment.RWICount());
-        prop.putNum("ucount", indexSegment.fulltext().size());
+        prop.putNum("ucount", indexSegment.fulltext().collectionSize());
 
         // return rewrite properties
         return prop;

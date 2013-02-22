@@ -195,7 +195,7 @@ public class Segment {
     }
 
     public long URLCount() {
-        return this.fulltext.size();
+        return this.fulltext.collectionSize();
     }
 
     public long RWICount() {
@@ -219,7 +219,7 @@ public class Segment {
         return count;
     }
 
-    public boolean exists(final byte[] urlhash) {
+    public boolean exists(final String urlhash) {
         return this.fulltext.exists(urlhash);
     }
 
@@ -284,16 +284,16 @@ public class Segment {
         return this.segmentPath;
     }
 
-    private int addCitationIndex(final DigestURI url, final Date urlModified, final Map<MultiProtocolURI, Properties> anchors) {
+    private int addCitationIndex(final DigestURI url, final Date urlModified, final Map<DigestURI, Properties> anchors) {
     	if (anchors == null) return 0;
     	int refCount = 0;
 
         // iterate over all outgoing links, this will create a context for those links
         final byte[] urlhash = url.hash();
         final long urldate = urlModified.getTime();
-        for (Map.Entry<MultiProtocolURI, Properties> anchorEntry: anchors.entrySet()) {
-        	MultiProtocolURI anchor = anchorEntry.getKey();
-        	byte[] refhash = DigestURI.toDigestURI(anchor).hash();
+        for (Map.Entry<DigestURI, Properties> anchorEntry: anchors.entrySet()) {
+            DigestURI anchor = anchorEntry.getKey();
+        	byte[] refhash = anchor.hash();
         	//System.out.println("*** addCitationIndex: urlhash = " + ASCII.String(urlhash) + ", refhash = " + ASCII.String(refhash) + ", urldate = " + urlModified.toString());
         	if (this.urlCitationIndex != null) try {
                 this.urlCitationIndex.add(refhash, new CitationReference(urlhash, urldate));
@@ -377,7 +377,7 @@ public class Segment {
         // DO A SOFT/HARD COMMIT IF NEEDED
         if (MemoryControl.shortStatus()) {
             // do a 'hard' commit to flush index caches
-            this.fulltext.getDefaultConnector().commit(false);
+            this.fulltext.commit(false);
         } else {
             if (
                 (this.fulltext.getDefaultConfiguration().contains(CollectionSchema.exact_signature_l) && this.fulltext.getDefaultConfiguration().contains(CollectionSchema.exact_signature_unique_b)) ||
@@ -404,7 +404,7 @@ public class Segment {
         char docType = Response.docType(document.dc_format());
         
         // CREATE SOLR DOCUMENT
-        final SolrInputDocument solrInputDoc = this.fulltext.getDefaultConfiguration().yacy2solr(id, profile, responseHeader, document, condenser, referrerURL, language, urlCitationIndex);
+        final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(id, profile, responseHeader, document, condenser, referrerURL, language, urlCitationIndex, this.fulltext.getWebgraphConfiguration());
         
         // FIND OUT IF THIS IS A DOUBLE DOCUMENT
         for (CollectionSchema[] checkfields: new CollectionSchema[][]{
@@ -414,11 +414,11 @@ public class Segment {
             CollectionSchema uniquefield = checkfields[1];
             if (this.fulltext.getDefaultConfiguration().contains(checkfield) && this.fulltext.getDefaultConfiguration().contains(uniquefield)) {
                 // lookup the document with the same signature
-                long signature = ((Long) solrInputDoc.getField(checkfield.getSolrFieldName()).getValue()).longValue();
+                long signature = ((Long) vector.getField(checkfield.getSolrFieldName()).getValue()).longValue();
                 try {
                     if (this.fulltext.getDefaultConnector().exists(checkfield.getSolrFieldName(), Long.toString(signature))) {
                         // change unique attribut in content
-                        solrInputDoc.setField(uniquefield.getSolrFieldName(), false);
+                        vector.setField(uniquefield.getSolrFieldName(), false);
                     }
                 } catch (IOException e) {}
             }
@@ -434,14 +434,14 @@ public class Segment {
                 // lookup in the index for the same title
                 String checkstring = checkfield == CollectionSchema.title ? document.dc_title() : document.dc_description();
                 if (checkstring.length() == 0) {
-                    solrInputDoc.setField(uniquefield.getSolrFieldName(), false);
+                    vector.setField(uniquefield.getSolrFieldName(), false);
                     continue uniquecheck;
                 }
                 checkstring = ClientUtils.escapeQueryChars("\"" + checkstring + "\"");
                 try {
                     if (this.fulltext.getDefaultConnector().exists(checkfield.getSolrFieldName(), checkstring)) {
                         // switch unique attribute in new document
-                        solrInputDoc.setField(uniquefield.getSolrFieldName(), false);
+                        vector.setField(uniquefield.getSolrFieldName(), false);
                         // switch attribute also in all existing documents (which should be exactly only one!)
                         SolrDocumentList docs = this.fulltext.getDefaultConnector().query(checkfield.getSolrFieldName() + ":" + checkstring + " AND " + uniquefield.getSolrFieldName() + ":true", 0, 1000);
                         for (SolrDocument doc: docs) {
@@ -450,7 +450,7 @@ public class Segment {
                             this.fulltext.getDefaultConnector().add(sid);
                         }
                     } else {
-                        solrInputDoc.setField(uniquefield.getSolrFieldName(), true);
+                        vector.setField(uniquefield.getSolrFieldName(), true);
                     }
                 } catch (IOException e) {}
             }
@@ -459,7 +459,7 @@ public class Segment {
         // ENRICH DOCUMENT WITH RANKING INFORMATION
         if (this.urlCitationIndex != null && this.fulltext.getDefaultConfiguration().contains(CollectionSchema.references_i)) {
             int references = this.urlCitationIndex.count(url.hash());
-            if (references > 0) solrInputDoc.setField(CollectionSchema.references_i.getSolrFieldName(), references);
+            if (references > 0) vector.setField(CollectionSchema.references_i.getSolrFieldName(), references);
         }
         
         // STORE TO SOLR
@@ -467,7 +467,20 @@ public class Segment {
         tryloop: for (int i = 0; i < 20; i++) {
             try {
                 error = null;
-                this.fulltext.putDocument(solrInputDoc);
+                this.fulltext.putDocument(vector);
+                break tryloop;
+            } catch ( final IOException e ) {
+                error = "failed to send " + urlNormalform + " to solr";
+                Log.logWarning("SOLR", error + e.getMessage());
+                if (i == 10) this.fulltext.commit(false);
+                try {Thread.sleep(1000);} catch (InterruptedException e1) {}
+                continue tryloop;
+            }
+        }
+        tryloop: for (int i = 0; i < 20; i++) {
+            try {
+                error = null;
+                this.fulltext.putEdges(vector.getWebgraphDocuments());
                 break tryloop;
             } catch ( final IOException e ) {
                 error = "failed to send " + urlNormalform + " to solr";
@@ -567,7 +580,7 @@ public class Segment {
         }
 
         // finished
-        return solrInputDoc;
+        return vector;
     }
 
     public void removeAllUrlReferences(final HandleSet urls, final LoaderDispatcher loader, final CacheStrategy cacheStrategy) {

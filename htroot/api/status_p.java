@@ -76,7 +76,8 @@ public class status_p {
 		prop.put("trafficCrawler", ByteCount.getAccountCount(ByteCount.CRAWLER));
 
         // index size
-        prop.putNum("urlpublictextSize", segment.fulltext().size());
+        prop.putNum("urlpublictextSize", segment.fulltext().collectionSize());
+        prop.putNum("webgraphSize", segment.fulltext().webgraphSize());
         prop.putNum("rwipublictextSize", segment.RWICount());
 
         // loader queue

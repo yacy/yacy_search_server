@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -87,7 +86,7 @@ public class zipParser extends AbstractParser implements Parser {
                 try {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
                     FileUtils.copy(zis, tmp, entry.getSize());
-                    final DigestURI virtualURL = DigestURI.toDigestURI(MultiProtocolURI.newURL(url, "#" + name));
+                    final DigestURI virtualURL = DigestURI.newURL(url, "#" + name);
                     //this.log.logInfo("ZIP file parser: " + virtualURL.toNormalform(false, false));
                     docs = TextParser.parseSource(virtualURL, mime, null, tmp);
                     if (docs == null) continue;

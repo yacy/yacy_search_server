@@ -50,6 +50,7 @@ import net.yacy.cora.language.synonyms.SynonymLibrary;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.document.language.Identificator;
 import net.yacy.document.parser.html.ImageEntry;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.logging.Log;
@@ -113,7 +114,7 @@ public final class Condenser {
         // add the URL components to the word list
         insertTextToWords(new SentenceReader(document.dc_source().toTokens()), 0, WordReferenceRow.flag_app_dc_identifier, this.RESULT_FLAGS, false, meaningLib);
 
-        Map.Entry<MultiProtocolURI, String> entry;
+        Map.Entry<DigestURI, String> entry;
         if (indexText) {
             createCondensement(document.getTextString(), meaningLib, doAutotagging);
             // the phrase counter:
@@ -163,7 +164,7 @@ public final class Condenser {
         if (indexMedia) {
             // add anchor descriptions: here, we also add the url components
             // audio
-            Iterator<Map.Entry<MultiProtocolURI, String>> i = document.getAudiolinks().entrySet().iterator();
+            Iterator<Map.Entry<DigestURI, String>> i = document.getAudiolinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
                 insertTextToWords(new SentenceReader(entry.getKey().toNormalform(true)), 99, flag_cat_hasaudio, this.RESULT_FLAGS, false, meaningLib);

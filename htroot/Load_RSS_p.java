@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Hit;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
@@ -272,7 +273,7 @@ public class Load_RSS_p {
                     final RSSMessage message = feed.getMessage(entry.getValue().substring(5));
                     final DigestURI messageurl = new DigestURI(message.getLink());
                     if (RSSLoader.indexTriggered.containsKey(messageurl.hash())) continue loop;
-                    if (sb.urlExists(messageurl.hash()) != null) continue loop;
+                    if (sb.urlExists(ASCII.String(messageurl.hash())) != null) continue loop;
                     sb.addToIndex(messageurl, null, null);
                     RSSLoader.indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
                 } catch (final IOException e) {
@@ -317,7 +318,7 @@ public class Load_RSS_p {
                     author = item.getAuthor();
                     if (author == null) author = item.getCopyright();
                     pubDate = item.getPubDate();
-                    prop.put("showitems_item_" + i + "_state", sb.urlExists(messageurl.hash()) != null ? 2 : RSSLoader.indexTriggered.containsKey(messageurl.hash()) ? 1 : 0);
+                    prop.put("showitems_item_" + i + "_state", sb.urlExists(ASCII.String(messageurl.hash())) != null ? 2 : RSSLoader.indexTriggered.containsKey(messageurl.hash()) ? 1 : 0);
                     prop.put("showitems_item_" + i + "_state_count", i);
                     prop.putHTML("showitems_item_" + i + "_state_guid", item.getGuid());
                     prop.putHTML("showitems_item_" + i + "_author", author == null ? "" : author);

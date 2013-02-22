@@ -22,6 +22,8 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import net.yacy.kelondro.logging.Log;
@@ -192,6 +194,34 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 }
             } catch (Throwable ee) {
                 log.warn(e.getMessage() + " DOC=" + solrdoc.toString());
+                throw new IOException(ee);
+            }
+        }
+    }
+
+    @Override
+    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
+        if (this.server == null) return;
+        try {
+            for (SolrInputDocument solrdoc : solrdocs) {
+                if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
+            }
+            synchronized (this.server) {
+                this.server.add(solrdocs, -1);
+            }
+        } catch (Throwable e) {
+            // catches "version conflict for": try this again and delete the document in advance
+            List<String> ids = new ArrayList<String>();
+            for (SolrInputDocument solrdoc : solrdocs) ids.add((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+            try {
+                this.server.deleteById(ids);
+            } catch (SolrServerException e1) {}
+            try {
+                synchronized (this.server) {
+                    this.server.add(solrdocs, -1);
+                }
+            } catch (Throwable ee) {
+                log.warn(e.getMessage() + " IDs=" + ids.toString());
                 throw new IOException(ee);
             }
         }

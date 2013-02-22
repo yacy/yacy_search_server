@@ -90,7 +90,9 @@ function handleStatus(){
 	dbsize=getFirstChild(statusTag, "dbsize");
 	urlpublictextSize=getValue(getFirstChild(dbsize, "urlpublictext"));
 	rwipublictextSize=getValue(getFirstChild(dbsize, "rwipublictext"));
+	webgraphSize=getValue(getFirstChild(dbsize, "webgraph"));
 	document.getElementById("urldbsize").firstChild.nodeValue=urlpublictextSize;
+	document.getElementById("webgraphsize").firstChild.nodeValue=webgraphSize;
 	document.getElementById("rwidbsize").firstChild.nodeValue=rwipublictextSize;
 	
 	loaderqueue=getFirstChild(statusTag, "loaderqueue");	

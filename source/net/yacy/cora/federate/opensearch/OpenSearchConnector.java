@@ -175,7 +175,7 @@ public class OpenSearchConnector {
         if (sb == null) {
             return false;
         }
-        final EmbeddedSolrConnector connector = sb.index.fulltext().getDefaultLocalSolrConnector();
+        final EmbeddedSolrConnector connector = sb.index.fulltext().getDefaultEmbeddedConnector();
         // check if needed Solr fields are available (selected)
         if (connector == null) {
             Log.logSevere("OpenSearchConnector.Discover", "Error on connecting to embedded Solr index");

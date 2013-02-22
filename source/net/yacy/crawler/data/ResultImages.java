@@ -61,7 +61,7 @@ public class ResultImages {
         if (MemoryControl.shortStatus()) clearQueues();
         limitQueues(1000);
 
-        final Map<MultiProtocolURI, ImageEntry> images = document.getImages();
+        final Map<DigestURI, ImageEntry> images = document.getImages();
         for (final ImageEntry image: images.values()) {
             // do a double-check; attention: this can be time-consuming since this possibly needs a DNS-lookup
             if (image == null || image.url() == null) continue;

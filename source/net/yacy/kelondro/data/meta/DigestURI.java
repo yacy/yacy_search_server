@@ -138,15 +138,12 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
      * DigestURI from general URI
      * @param u
      */
+    /*
     private DigestURI(final MultiProtocolURI u) {
         super(u);
         this.hash = (u instanceof DigestURI) ? ((DigestURI) u).hash : null;
     }
-
-
-    public static DigestURI toDigestURI(MultiProtocolURI u) {
-        return (u instanceof DigestURI) ? ((DigestURI) u) : new DigestURI(u);
-    }
+    */
     
     /**
      * DigestURI from general URI, hash already calculated
@@ -168,6 +165,23 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         this.hash = null;
     }
 
+    public static DigestURI newURL(final DigestURI baseURL, String relPath) throws MalformedURLException {
+        if (relPath.startsWith("//")) {
+            // patch for urls starting with "//" which can be found in the wild
+            relPath = (baseURL == null) ? "http:" + relPath : baseURL.getProtocol() + ":" + relPath;
+        }
+        if ((baseURL == null) ||
+            isHTTP(relPath) ||
+            isHTTPS(relPath) ||
+            isFTP(relPath) ||
+            isFile(relPath) ||
+            isSMB(relPath)/*||
+            relPath.contains(":") && patternMail.matcher(relPath.toLowerCase()).find()*/) {
+            return new DigestURI(relPath);
+        }
+        return new DigestURI(baseURL, relPath);
+    }
+    
     private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
 
     @Override

@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -168,7 +167,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
                      Document[] theDocs;
                      // workaround for relative links in file, normally '#' shall be used behind the location, see
                      // below for reversion of the effects
-                     final DigestURI url = DigestURI.toDigestURI(MultiProtocolURI.newURL(this.doc.dc_source(), this.prefix + "/" + super.filePath));
+                     final DigestURI url = DigestURI.newURL(this.doc.dc_source(), this.prefix + "/" + super.filePath);
                      final String mime = TextParser.mimeOf(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
                      theDocs = TextParser.parseSource(url, mime, null, this.cfos.toByteArray());
 

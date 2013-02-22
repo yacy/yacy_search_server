@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 public class RequestHeader extends HeaderFramework {
 
@@ -70,11 +71,11 @@ public class RequestHeader extends HeaderFramework {
         super(reverseMappingCache, othermap);
     }
 
-    public MultiProtocolURI referer() {
+    public DigestURI referer() {
         final String referer = get(REFERER, null);
         if (referer == null) return null;
         try {
-            return new MultiProtocolURI(referer);
+            return new DigestURI(referer);
         } catch (final MalformedURLException e) {
             return null;
         }

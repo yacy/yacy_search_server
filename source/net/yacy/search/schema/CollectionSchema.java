@@ -107,9 +107,13 @@ public enum CollectionSchema implements SchemaDeclaration {
     // bit 12: "unavailable_after" contained in http header properties
     robots_i(SolrType.num_integer, true, true, false, "content of <meta name=\"robots\" content=#content#> tag and the \"X-Robots-Tag\" HTTP property"),
     metagenerator_t(SolrType.text_general, true, true, false, "content of <meta name=\"generator\" content=#content#> tag"),
-    inboundlinks_tag_txt(SolrType.text_general, true, true, true, "internal links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow"),
     inboundlinks_protocol_sxt(SolrType.string, true, true, true, "internal links, only the protocol"),
     inboundlinks_urlstub_txt(SolrType.text_general, true, true, true, "internal links, the url only without the protocol"),
+    inboundlinks_tag_txt(SolrType.text_general, true, true, true, "internal links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow"),
+    outboundlinks_protocol_sxt(SolrType.string, true, true, true, "external links, only the protocol"),
+    outboundlinks_urlstub_txt(SolrType.text_general, true, true, true, "external links, the url only without the protocol"),
+    outboundlinks_tag_txt(SolrType.text_general, true, true, true, "external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow"),
+    /*
     inboundlinks_name_txt(SolrType.text_general, true, true, true, "internal links, the name property of the a-tag"),
     inboundlinks_rel_sxt(SolrType.string, true, true, true, "internal links, the rel property of the a-tag"),
     inboundlinks_relflags_val(SolrType.num_integer, true, true, true, "internal links, the rel property of the a-tag, coded binary"),
@@ -117,9 +121,6 @@ public enum CollectionSchema implements SchemaDeclaration {
     inboundlinks_text_chars_val(SolrType.num_integer, true, true, true, "internal links, the length of the a-tag as number of characters"),
     inboundlinks_text_words_val(SolrType.num_integer, true, true, true, "internal links, the length of the a-tag as number of words"),
     inboundlinks_alttag_txt(SolrType.text_general, true, true, true, "if the link is an image link, this contains the alt tag if the image is also liked as img link"),
-    outboundlinks_tag_txt(SolrType.text_general, true, true, true, "external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow"),
-    outboundlinks_protocol_sxt(SolrType.string, true, true, true, "external links, only the protocol"),
-    outboundlinks_urlstub_txt(SolrType.text_general, true, true, true, "external links, the url only without the protocol"),
     outboundlinks_name_txt(SolrType.text_general, true, true, true, "external links, the name property of the a-tag"),
     outboundlinks_rel_sxt(SolrType.string, true, true, true, "external links, the rel property of the a-tag"),
     outboundlinks_relflags_val(SolrType.num_integer, true, true, true, "external links, the rel property of the a-tag, coded binary"),
@@ -127,6 +128,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     outboundlinks_text_chars_val(SolrType.num_integer, true, true, true, "external links, the length of the a-tag as number of characters"),
     outboundlinks_text_words_val(SolrType.num_integer, true, true, true, "external links, the length of the a-tag as number of words"),
     outboundlinks_alttag_txt(SolrType.text_general, true, true, true, "if the link is an image link, this contains the alt tag if the image is also liked as img link"),
+    */
     images_tag_txt(SolrType.text_general, true, true, true, " all image tags, encoded as <img> tag inclusive alt- and title property"),
     images_urlstub_txt(SolrType.text_general, true, true, true, "all image links without the protocol and '://'"),
     images_protocol_sxt(SolrType.text_general, true, true, true, "all image link protocols"),

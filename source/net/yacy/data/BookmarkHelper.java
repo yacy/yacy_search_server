@@ -48,7 +48,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.BookmarksDB.Tag;
@@ -134,9 +133,9 @@ public class BookmarkHelper {
 
         int importCount = 0;
 
-        Map<MultiProtocolURI, Properties> links = new HashMap<MultiProtocolURI, Properties>();
+        Map<DigestURI, Properties> links = new HashMap<DigestURI, Properties>();
         String title;
-        MultiProtocolURI url;
+        DigestURI url;
         Bookmark bm;
         final Set<String> tags=ListManager.string2set(tag); //this allow multiple default tags
         try {
@@ -148,14 +147,14 @@ public class BookmarkHelper {
             writer.close();
             links = scraper.getAnchors();
         } catch (final IOException e) { Log.logWarning("BOOKMARKS", "error during load of links: "+ e.getClass() +" "+ e.getMessage());}
-        for (final Entry<MultiProtocolURI, Properties> link: links.entrySet()) {
+        for (final Entry<DigestURI, Properties> link: links.entrySet()) {
             url = link.getKey();
             title = link.getValue().getProperty("name", "");
             Log.logInfo("BOOKMARKS", "links.get(url)");
             if ("".equals(title)) {//cannot be displayed
                 title = url.toString();
             }
-            bm = db.new Bookmark(DigestURI.toDigestURI(url));
+            bm = db.new Bookmark(url);
             bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
             bm.setTags(tags);
             bm.setPublic(importPublic);

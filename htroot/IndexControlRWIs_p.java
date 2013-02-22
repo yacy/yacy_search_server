@@ -280,7 +280,7 @@ public class IndexControlRWIs_p {
                         Reference iEntry;
                         while (urlIter.hasNext()) {
                             iEntry = urlIter.next();
-                            if (!segment.fulltext().exists(iEntry.urlhash())) {
+                            if (!segment.fulltext().exists(ASCII.String(iEntry.urlhash()))) {
                                 try {
                                     unknownURLEntries.put(iEntry.urlhash());
                                 } catch (final SpaceExceededException e) {

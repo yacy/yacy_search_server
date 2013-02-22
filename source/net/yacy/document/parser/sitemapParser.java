@@ -40,7 +40,6 @@ import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -96,7 +95,7 @@ public class sitemapParser extends AbstractParser implements Parser {
                     null,
                     null,
                     null,
-                    new HashMap<MultiProtocolURI, ImageEntry>(),
+                    new HashMap<DigestURI, ImageEntry>(),
                     false);
             docs.add(doc);
         } catch (MalformedURLException e) {

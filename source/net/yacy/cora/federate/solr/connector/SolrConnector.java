@@ -21,6 +21,7 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -74,8 +75,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
 
     /**
      * delete entries from solr according the given solr query string
-     * @param id the url hash of the entry
-     * @return the number of deletions
+     * @param querystring
      * @throws IOException
      */
     public void deleteByQuery(final String querystring) throws IOException;
@@ -96,6 +96,15 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @throws SolrException
      */
     public void add(final SolrInputDocument solrdoc) throws IOException, SolrException;
+    
+    /**
+     * add a collection of solr input documents
+     * @param solrdocs
+     * @throws IOException
+     * @throws SolrException
+     */
+    public void add(final Collection<SolrInputDocument> solrdoc) throws IOException, SolrException;
+    
     /**
      * get a field value from solr by given key for the id-field and a field name
      * @param key

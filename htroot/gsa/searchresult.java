@@ -169,7 +169,7 @@ public class searchresult {
         }
         
         // get the embedded connector
-        EmbeddedSolrConnector connector = sb.index.fulltext().getDefaultLocalSolrConnector();
+        EmbeddedSolrConnector connector = sb.index.fulltext().getDefaultEmbeddedConnector();
         if (connector == null) return null;
 
         // do the solr request

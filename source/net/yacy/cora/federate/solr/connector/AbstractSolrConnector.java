@@ -21,6 +21,7 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -44,6 +45,7 @@ import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
 
@@ -283,6 +285,13 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             return docs.get(0);
         } catch (final Throwable e) {
             throw new IOException(e.getMessage(), e);
+        }
+    }
+    
+    @Override
+    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
+        for (SolrInputDocument solrdoc: solrdocs) {
+           add(solrdoc);
         }
     }
 }

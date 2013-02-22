@@ -30,16 +30,19 @@ import org.apache.solr.common.SolrInputDocument;
 
 public enum WebgraphSchema implements SchemaDeclaration {
     
+    // index organisation
     id(SolrType.string, true, true, false, "primary key of document, a combination of <source-url-hash><target-url-hash><four-digit-hex-counter> (28 characters)"),
+    last_modified(SolrType.date, true, true, false, "last-modified from http header"),
+    load_date_dt(SolrType.date, true, true, false, "time when resource was loaded"),
     collection_sxt(SolrType.string, true, true, true, "tags that are attached to crawls/index generation to separate the search result into user-defined subsets"),
     
+    // source information
     source_id_s(SolrType.string, true, true, false, "primary key of document, the URL hash (source)"),
-    source_url_s(SolrType.string, true, true, false, "the url of the document (source)"),
-    source_file_ext_s(SolrType.string, true, true, false, "the file name extension (source)"),
-    source_tag_s(SolrType.string, true, true, false, "normalized (absolute URLs), as <a> - tag with anchor text and nofollow (source)"),
-    source_chars_i(SolrType.num_integer, true, true, false, "number of all characters in the url (source)"),
     source_protocol_s(SolrType.string, true, true, false, "the protocol of the url (source)"),
-    source_path_s(SolrType.string, true, true, true, "path of the url (source)"),
+    source_urlstub_s(SolrType.string, true, true, false, "the url without the protocol (source)"),
+    source_file_ext_s(SolrType.string, true, true, false, "the file name extension (source)"),
+    source_chars_i(SolrType.num_integer, true, true, false, "number of all characters in the url (source)"),
+    source_path_s(SolrType.string, true, true, false, "path of the url (source)"),
     source_path_folders_count_i(SolrType.num_integer, true, true, false, "count of all path elements in the url (source)"),
     source_path_folders_sxt(SolrType.string, true, true, true, "all path elements in the url (source)"),
     source_parameter_count_i(SolrType.num_integer, true, true, false, "number of key-value pairs in search part of the url (source)"),
@@ -47,12 +50,14 @@ public enum WebgraphSchema implements SchemaDeclaration {
     source_parameter_value_sxt(SolrType.string, true, true, true, "the values from key-value pairs in the search part of the url (source)"),
     source_clickdepth_i(SolrType.num_integer, true, true, false, "depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url (source)"),
 
-    source_host_s(SolrType.string, true, true, false, "host of the url"),
+    source_host_s(SolrType.string, true, true, false, "host of the url (source)"),
+    source_host_id_s(SolrType.string, true, true, false, "id of the host (source)"),
     source_host_dnc_s(SolrType.string, true, true, false, "the Domain Class Name, either the TLD or a combination of ccSLD+TLD if a ccSLD is used (source)"),
     source_host_organization_s(SolrType.string, true, true, false, "either the second level domain or, if a ccSLD is used, the third level domain"),
     source_host_organizationdnc_s(SolrType.string, true, true, false, "the organization and dnc concatenated with '.' (source)"),
     source_host_subdomain_s(SolrType.string, true, true, false, "the remaining part of the host without organizationdnc (source)"),
 
+    // information in the source about the target
     target_linktext_t(SolrType.text_general, true, true, false, "the text content of the a-tag (in source, but pointing to a target)"),
     target_linktext_charcount_i(SolrType.num_integer, true, true, false, "the length of the a-tag content text as number of characters (in source, but pointing to a target)"),
     target_linktext_wordcount_i(SolrType.num_integer, true, true, false, "the length of the a-tag content text as number of words (in source, but pointing to a target)"),
@@ -63,14 +68,15 @@ public enum WebgraphSchema implements SchemaDeclaration {
     target_rel_s(SolrType.string, true, true, false, "the rel property of the a-tag (in source, but pointing to a target)"),
     target_relflags_i(SolrType.num_integer, true, true, false, "the rel property of the a-tag, coded binary (in source, but pointing to a target)"),
     
+    // target information
     target_id_s(SolrType.string, true, true, false, "primary key of document, the URL hash (target)"),
-    target_url_s(SolrType.string, true, true, false, "the url of the document (target)"),
+    target_protocol_s(SolrType.string, true, true, false, "the protocol of the url (target)"),
+    target_urlstub_s(SolrType.string, true, true, false, "the url without the protocol (target)"),
     target_file_ext_s(SolrType.string, true, true, false, "the file name extension (target)"),
     target_tag_s(SolrType.string, true, true, false, "normalized (absolute URLs), as <a> - tag with anchor text and nofollow (target)"),
     target_chars_i(SolrType.num_integer, true, true, false, "number of all characters in the url (target)"),
-    target_protocol_s(SolrType.string, true, true, false, "the protocol of the url (target)"),
-    target_path_s(SolrType.string, true, true, true, "path of the url (target)"),
-    target_path_folders_count_i(SolrType.num_integer, true, true, true, "count of all path elements in the url (target)"),
+    target_path_s(SolrType.string, true, true, false, "path of the url (target)"),
+    target_path_folders_count_i(SolrType.num_integer, true, true, false, "count of all path elements in the url (target)"),
     target_path_folders_sxt(SolrType.string, true, true, true, "all path elements in the url (target)"),
     target_parameter_count_i(SolrType.num_integer, true, true, false, "number of key-value pairs in search part of the url (target)"),
     target_parameter_key_sxt(SolrType.string, true, true, true, "the keys from key-value pairs in the search part of the url (target)"),
@@ -78,11 +84,14 @@ public enum WebgraphSchema implements SchemaDeclaration {
     target_clickdepth_i(SolrType.num_integer, true, true, false, "depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url (target)"),
 
     target_host_s(SolrType.string, true, true, false, "host of the url (target)"),
+    target_host_id_s(SolrType.string, true, true, false, "id of the host (target)"),
     target_host_dnc_s(SolrType.string, true, true, false, "the Domain Class Name, either the TLD or a combination of ccSLD+TLD if a ccSLD is used (target)"),
     target_host_organization_s(SolrType.string, true, true, false, "either the second level domain or, if a ccSLD is used, the third level domain (target)"),
     target_host_organizationdnc_s(SolrType.string, true, true, false, "the organization and dnc concatenated with '.' (target)"),
-    target_host_subdomain_s(SolrType.string, true, true, false, "the remaining part of the host without organizationdnc (target)");
-
+    target_host_subdomain_s(SolrType.string, true, true, false, "the remaining part of the host without organizationdnc (target)"),
+   
+    target_inbound_b(SolrType.bool, true, true, false, "flag shows if the target host is equal to the source host");
+    
     public final static String CORE_NAME = "webgraph";
     
     public final static String VOCABULARY_PREFIX = "vocabulary_";

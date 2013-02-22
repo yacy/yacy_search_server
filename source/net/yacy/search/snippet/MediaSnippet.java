@@ -38,7 +38,6 @@ import java.util.TreeSet;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
@@ -164,20 +163,20 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     public static List<MediaSnippet> computeMediaSnippets(final DigestURI source, final Document document, final HandleSet queryhashes, final ContentDomain mediatype) {
 
         if (document == null) return new ArrayList<MediaSnippet>();
-        Map<MultiProtocolURI, String> media = null;
+        Map<DigestURI, String> media = null;
         if (mediatype == ContentDomain.AUDIO) media = document.getAudiolinks();
         else if (mediatype == ContentDomain.VIDEO) media = document.getVideolinks();
         else if (mediatype == ContentDomain.APP) media = document.getApplinks();
         if (media == null) return null;
 
-        final Iterator<Map.Entry<MultiProtocolURI, String>> i = media.entrySet().iterator();
-        Map.Entry<MultiProtocolURI, String> entry;
+        final Iterator<Map.Entry<DigestURI, String>> i = media.entrySet().iterator();
+        Map.Entry<DigestURI, String> entry;
         DigestURI url;
         String desc;
         final List<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             entry = i.next();
-            url = DigestURI.toDigestURI(entry.getKey());
+            url = entry.getKey();
             desc = entry.getValue();
             if (isUrlBlacklisted(BlacklistType.SEARCH, url)) continue;
             final int ranking = removeAppearanceHashes(url.toNormalform(true), queryhashes).size() +
@@ -202,7 +201,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         final List<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             ientry = i.next();
-            url = DigestURI.toDigestURI(ientry.url());
+            url = ientry.url();
             final String u = url.toString();
             if (isUrlBlacklisted(BlacklistType.SEARCH, url)) continue;
             if (u.indexOf(".ico",0) >= 0 || u.indexOf("favicon",0) >= 0) continue;
