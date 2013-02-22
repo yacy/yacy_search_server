@@ -2248,7 +2248,7 @@ public final class Switchboard extends serverSwitch {
                                     url = new DigestURI((String) doc.getFieldValue(YaCySchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(YaCySchema.id.getSolrFieldName())));
                                     int clickdepth = SolrConfiguration.getClickDepth(index.urlCitation(), url);
                                     if (oldclickdepth == null || oldclickdepth.intValue() != clickdepth) proccount_clickdepthchange++;
-                                    SolrInputDocument sid = YaCySchema.toSolrInputDocument(doc);
+                                    SolrInputDocument sid = YaCySchema.toSolrInputDocument(doc, null);
                                     sid.setField(YaCySchema.clickdepth_i.getSolrFieldName(), clickdepth);
                                     
                                     // refresh the link count; it's 'cheap' to do this here

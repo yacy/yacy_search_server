@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import net.yacy.search.index.SolrConfiguration;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -357,17 +358,30 @@ public enum YaCySchema implements Schema {
      * This is useful if a document from the search index shall be modified and indexed again.
      * This shall be used as replacement of ClientUtils.toSolrInputDocument because we remove some fields
      * which are created automatically during the indexing process.
+     * Additionally, only locally enabled fields are included in the return SolrInputDocument.
+     * if SolrConfiguration is NULL no check of local enabled fields is performed
      * @param doc the solr document
+     * @param cfg solr schema to check field names (null = no name check)
      * @return a solr input document
      */
-    public static SolrInputDocument toSolrInputDocument(SolrDocument doc) {
+    public static SolrInputDocument toSolrInputDocument(SolrDocument doc, SolrConfiguration cfg) {
+        //TODO: considere to move this procedure to a higher level class where SolrConfig is available
         SolrInputDocument sid = new SolrInputDocument();
-        Set<String> omitFields = new HashSet<String>();
-        omitFields.add(YaCySchema.coordinate_p.getSolrFieldName() + "_0_coordinate");
-        omitFields.add(YaCySchema.coordinate_p.getSolrFieldName() + "_1_coordinate");
+        Set<String> omitFields = new HashSet<String>(3);
         omitFields.add(YaCySchema.author_sxt.getSolrFieldName());
-        for (String name: doc.getFieldNames()) {
-            if (!omitFields.contains(name)) sid.addField(name, doc.getFieldValue(name), 1.0f);
+        if (cfg == null) { // proceed without field name check
+            omitFields.add(YaCySchema.coordinate_p.getSolrFieldName() + "_0_coordinate");
+            omitFields.add(YaCySchema.coordinate_p.getSolrFieldName() + "_1_coordinate");
+            for (String name: doc.getFieldNames()) {
+                if (!omitFields.contains(name)) sid.addField(name, doc.getFieldValue(name), 1.0f);
+            }
+        } else {
+            // coordinage_p _0_coordinate not in YaCySchema
+            for (String name: doc.getFieldNames()) {
+                if (cfg.contains(name)) { // check each field if enabled in local Solr schema
+                    if (!omitFields.contains(name)) sid.addField(name, doc.getFieldValue(name), 1.0f);
+                }
+            }
         }
         return sid;
     }
