@@ -94,7 +94,7 @@
 			<string>$JAVAROOT/lib/solr-solrj-4.1.0.jar</string>
 			<string>$JAVAROOT/lib/spatial4j-0.3.jar</string>
 			<string>$JAVAROOT/lib/webcat-0.1-swf.jar</string>
-			<string>$JAVAROOT/lib/wstx-asl-3.2.7.jar</string>
+			<string>$JAVAROOT/lib/wstx-asl-3.2.9.jar</string>
 			<string>$JAVAROOT/lib/xercesImpl.jar</string>
 			<string>$JAVAROOT/lib/xml-apis.jar</string>
 			<string>$JAVAROOT/lib/yacycore.jar</string>
