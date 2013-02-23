@@ -214,7 +214,7 @@
         <pathelement location="${lib}/solr-solrj-4.1.0.jar" />
     	<pathelement location="${lib}/spatial4j-0.3.jar" />
     	<pathelement location="${lib}/webcat-0.1-swf.jar" />
-    	<pathelement location="${lib}/wstx-asl-3.2.7.jar" />
+    	<pathelement location="${lib}/wstx-asl-3.2.9.jar" />
     	<pathelement location="${lib}/xercesImpl.jar" />
     	<pathelement location="${lib}/xml-apis.jar" />
     	<pathelement location="${lib}/zookeeper-3.4.5.jar" />
