@@ -55,6 +55,9 @@
     </types>
     
     <fields>
+       <field name="_version_" type="long" indexed="true" stored="true"/> <!-- a mandatory solr field used for operation in SolrCloud -->
+       <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/> <!-- this is default in solrconfix.xml; not used but you get errors when not defining it -->
+       
 #{fields}#
         <!-- #[comment]# -->
         <field name="#[solrname]#" type="#[type]#"#(indexedChecked)#:: indexed="true"#(/indexedChecked)##(storedChecked)#:: stored="true"#(/storedChecked)##(multiValuedChecked)#:: multiValued="true"#(/multiValuedChecked)##(omitNormsChecked)#:: omitNorms="true"#(/omitNormsChecked)#/>
@@ -68,5 +71,8 @@
     <uniqueKey>#[solruniquekey]#</uniqueKey>
     <defaultSearchField>#[solrdefaultsearchfield]#</defaultSearchField>
     <solrQueryParser defaultOperator="AND"/>
+    
+    <!-- if you are using a search client using the default search field "text", then use this line to get to all indexed documents -->
+    <!-- <copyField source="*_t" dest="text" maxChars="3000"/> -->    
 </schema>
 

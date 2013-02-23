@@ -59,14 +59,15 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     static {
         catchallQuery.setQuery("*:*");
         catchallQuery.setFields(CollectionSchema.id.getSolrFieldName());
-        catchallQuery.setRows(1);
+        catchallQuery.setRows(0);
         catchallQuery.setStart(0);
     }
     public final static SolrQuery catchSuccessQuery = new SolrQuery();
     static {
-        catchSuccessQuery.setQuery("-" + CollectionSchema.failreason_t.getSolrFieldName() + ":[* TO *]");
+        //catchSuccessQuery.setQuery("-" + CollectionSchema.failreason_t.getSolrFieldName() + ":[* TO *]");
+        catchSuccessQuery.setQuery("*:*"); // failreason_t is only available for core collection1
         catchSuccessQuery.setFields(CollectionSchema.id.getSolrFieldName());
-        catchSuccessQuery.setRows(1);
+        catchSuccessQuery.setRows(0);
         catchSuccessQuery.setStart(0);
     }
     private final static int pagesize = 100;
