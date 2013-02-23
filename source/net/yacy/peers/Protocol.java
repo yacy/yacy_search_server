@@ -105,7 +105,6 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SecondarySearchSuperviser;
 import net.yacy.search.snippet.TextSnippet;
@@ -1064,7 +1063,7 @@ public final class Protocol {
                 docList = rsp.getResults();
                 // no need to close this here because that sends a commit to remote solr which is not wanted here
             } catch (Throwable e) {
-                Network.log.logInfo("SEARCH failed (solr), remote Peer: " +target.getName() + "/" + target.getPublicAddress() + " (" + e.getMessage() + ")", e);
+                Network.log.logInfo("SEARCH failed (solr), remote Peer: " +target.getName() + "/" + target.getPublicAddress() + " (" + e.getMessage() + ")", e);               
                 return -1;
             }
         }
@@ -1148,7 +1147,7 @@ public final class Protocol {
             // passed all checks, store url
             if (!localsearch) {
                 try {
-                    event.query.getSegment().fulltext().putDocument(YaCySchema.toSolrInputDocument(doc));
+                    event.query.getSegment().fulltext().putDocument(YaCySchema.toSolrInputDocument(doc,Switchboard.getSwitchboard().index.fulltext().getSolrScheme()));
                     ResultURLs.stack(
                         ASCII.String(urlEntry.url().hash()),
                         urlEntry.url().getHost(),
