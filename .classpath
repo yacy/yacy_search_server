@@ -47,11 +47,8 @@
 	<classpathentry kind="lib" path="lib/pdfbox-1.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/fontbox-1.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/jempbox-1.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="lib/jcl-over-slf4j-1.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/zookeeper-3.4.5.jar"/>
 	<classpathentry kind="lib" path="lib/solr-core-4.1.0.jar" sourcepath="/Users/admin/Development/sourcecode/solr-4.1.0/src/java"/>
 	<classpathentry kind="lib" path="lib/solr-solrj-4.1.0.jar" sourcepath="/Users/admin/Development/sourcecode/solr-4.1.0/src/java"/>
@@ -68,6 +65,8 @@
 	<classpathentry kind="lib" path="lib/lucene-suggest-4.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/guava-13.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/wstx-asl-3.2.9.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.2.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>
