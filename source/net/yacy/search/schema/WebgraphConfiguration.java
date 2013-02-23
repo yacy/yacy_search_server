@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.document.ASCII;
@@ -279,6 +280,26 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                 }
             }
         } catch (final IOException e) {}
+    }
+    
+
+
+    /**
+     * Convert a SolrDocument to a SolrInputDocument.
+     * This is useful if a document from the search index shall be modified and indexed again.
+     * This shall be used as replacement of ClientUtils.toSolrInputDocument because we remove some fields
+     * which are created automatically during the indexing process.
+     * @param doc the solr document
+     * @return a solr input document
+     */
+    public SolrInputDocument toSolrInputDocument(SolrDocument doc) {
+        SolrInputDocument sid = new SolrInputDocument();
+        for (String name: doc.getFieldNames()) {
+            if (this.contains(name)) { // check each field if enabled in local Solr schema
+                sid.addField(name, doc.getFieldValue(name), 1.0f);
+            }
+        }
+        return sid;
     }
 
 }

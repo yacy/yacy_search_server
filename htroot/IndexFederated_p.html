@@ -64,6 +64,10 @@
         <dt class="TableCellDark">Solr URL(s)</dt>
         <dd><textarea rows="2" cols="80" name="solr.indexing.url" id="solr.indexing.url"/>#[solr.indexing.url]#</textarea><br/>
         You can set one or more Solr targets here which are accessed as a shard. For several targets, list them using a ',' (comma) as separator.</dd>
+        <!-- will be moved here again...
+        <dt class="TableCellDark">Lazy Value Initialization</dt>
+        <dd><input type="checkbox" name="solr.indexing.lazy" id="solr.indexing.lazy" #(solr.indexing.lazy.checked)#:: checked="checked"#(/solr.indexing.lazy.checked)# /> (if checked, only non-zero values and non-empty strings are written)</dd>
+        -->
         <dt class="TableCellDark">Sharding Method</dt>
         <dd><input type="text" size="50" maxlength="50" value="#[solr.indexing.sharding]#" name="solr.indexing.sharding" id="solr.indexing.sharding" disabled="disabled"/></dd>
         <dt></dt><dd><input type="submit" name="set" value="Set" /></dd>

@@ -144,12 +144,14 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      */
     public SolrInputDocument toSolrInputDocument(SolrDocument doc) {
         SolrInputDocument sid = new SolrInputDocument();
-        Set<String> omitFields = new HashSet<String>();
+        Set<String> omitFields = new HashSet<String>(3);
+        omitFields.add(CollectionSchema.author_sxt.getSolrFieldName());
         omitFields.add(CollectionSchema.coordinate_p.getSolrFieldName() + "_0_coordinate");
         omitFields.add(CollectionSchema.coordinate_p.getSolrFieldName() + "_1_coordinate");
-        omitFields.add(CollectionSchema.author_sxt.getSolrFieldName());
         for (String name: doc.getFieldNames()) {
-            if (this.contains(name) && !omitFields.contains(name)) sid.addField(name, doc.getFieldValue(name), 1.0f);
+            if (this.contains(name) && !omitFields.contains(name)) { // check each field if enabled in local Solr schema
+                sid.addField(name, doc.getFieldValue(name), 1.0f);
+            }
         }
         return sid;
     }
