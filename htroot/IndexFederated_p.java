@@ -42,14 +42,13 @@ import net.yacy.server.serverSwitch;
 
 public class IndexFederated_p {
 
-    @SuppressWarnings("deprecation")
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
         if (post != null && post.containsKey("set")) {
-            // yacy
+            //yacy
             boolean post_core_rwi = post.getBoolean(SwitchboardConstants.CORE_SERVICE_RWI);
             final boolean previous_core_rwi = sb.index.connectedRWI() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, false);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, post_core_rwi);
@@ -85,6 +84,13 @@ public class IndexFederated_p {
                 try { sb.index.fulltext().connectLocalSolr(); } catch (IOException e) { Log.logException(e); }
             }
 
+            boolean webgraph = post.getBoolean(SwitchboardConstants.CORE_SERVICE_WEBGRAPH);
+            sb.index.writeWebgraph(webgraph);
+            env.setConfig(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, webgraph);
+            
+            boolean jena = post.getBoolean(SwitchboardConstants.CORE_SERVICE_JENA);
+            env.setConfig(SwitchboardConstants.CORE_SERVICE_JENA, jena);
+            
             // solr
             final boolean solrRemoteWasOn = sb.index.fulltext().connectedRemoteSolr() && env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, true);
             String solrurls = post.get("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr"));
@@ -140,6 +146,9 @@ public class IndexFederated_p {
             } catch (SolrException e) {
                 Log.logSevere("IndexFederated_p", "change of solr connection failed", e);
             }
+            
+            boolean lazy = post.getBoolean("solr.indexing.lazy");
+            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, lazy);
         }
 
         // show solr host table
@@ -162,14 +171,14 @@ public class IndexFederated_p {
         prop.put(SwitchboardConstants.CORE_SERVICE_FULLTEXT + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, false) ? 1 : 0);
         prop.put(SwitchboardConstants.CORE_SERVICE_RWI + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, false) ? 1 : 0);
         prop.put(SwitchboardConstants.CORE_SERVICE_CITATION + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false) ? 1 : 0);
+        prop.put(SwitchboardConstants.CORE_SERVICE_WEBGRAPH + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false) ? 1 : 0);
+        prop.put(SwitchboardConstants.CORE_SERVICE_JENA + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_JENA, false) ? 1 : 0);
         prop.put("solr.indexing.solrremote.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) ? 1 : 0);
         prop.put("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr").replace(",", "\n"));
         prop.put("solr.indexing.sharding", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, "modulo-host-md5"));
 
-        if ((sb.index.fulltext().connectedURLDb())) {
-            prop.put("migrateUrlDbtoSolr", 1);
-        } else  prop.put("migrateUrlDbtoSolr", 0);
-
+        prop.put("solr.indexing.lazy.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true) ? 1 : 0);
+        
         // return rewrite properties
         return prop;
     }

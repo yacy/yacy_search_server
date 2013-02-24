@@ -25,7 +25,6 @@ import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
 import net.yacy.server.serverObjects;
@@ -72,11 +71,7 @@ public class IndexSchema_p {
                     sb.index.fulltext().getWebgraphConfiguration().commit();
                     modified = false;
                 } catch (IOException ex) {}
-            }
-            
-            boolean lazy = post.getBoolean("lazy");
-            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, lazy);
-            
+            }            
         }
 
         int c = 0;
@@ -99,8 +94,6 @@ public class IndexSchema_p {
         prop.put("cores_" + 1 + "_selected", WebgraphSchema.CORE_NAME.equals(schemaName) ? 1 : 0);
         prop.put("cores", 2);
         prop.put("core", schemaName);
-        
-        prop.put("lazy.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true) ? 1 : 0);
         
         // return rewrite properties
         return prop;

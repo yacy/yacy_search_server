@@ -113,6 +113,7 @@ public class Segment {
     protected final Fulltext                       fulltext;
     protected       IndexCell<WordReference>       termIndex;
     protected       IndexCell<CitationReference>   urlCitationIndex;
+    protected boolean writeWebgraph;
 
     /**
      * create a new Segment
@@ -128,8 +129,15 @@ public class Segment {
 
         // create LURL-db
         this.fulltext = new Fulltext(segmentPath, collectionConfiguration, webgraphConfiguration);
+        this.termIndex = null;
+        this.urlCitationIndex = null;
+        this.writeWebgraph = false;
     }
 
+    public void writeWebgraph(boolean check) {
+        this.writeWebgraph = check;
+    }
+    
     public boolean connectedRWI() {
         return this.termIndex != null;
     }
@@ -477,17 +485,19 @@ public class Segment {
                 continue tryloop;
             }
         }
-        tryloop: for (int i = 0; i < 20; i++) {
-            try {
-                error = null;
-                this.fulltext.putEdges(vector.getWebgraphDocuments());
-                break tryloop;
-            } catch ( final IOException e ) {
-                error = "failed to send " + urlNormalform + " to solr";
-                Log.logWarning("SOLR", error + e.getMessage());
-                if (i == 10) this.fulltext.commit(false);
-                try {Thread.sleep(1000);} catch (InterruptedException e1) {}
-                continue tryloop;
+        if (this.writeWebgraph) {
+            tryloop: for (int i = 0; i < 20; i++) {
+                try {
+                    error = null;
+                    this.fulltext.putEdges(vector.getWebgraphDocuments());
+                    break tryloop;
+                } catch ( final IOException e ) {
+                    error = "failed to send " + urlNormalform + " to solr";
+                    Log.logWarning("SOLR", error + e.getMessage());
+                    if (i == 10) this.fulltext.commit(false);
+                    try {Thread.sleep(1000);} catch (InterruptedException e1) {}
+                    continue tryloop;
+                }
             }
         }
         if (error != null) {

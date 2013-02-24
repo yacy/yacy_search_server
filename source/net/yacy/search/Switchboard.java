@@ -455,6 +455,7 @@ public final class Switchboard extends serverSwitch {
             this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
             this.index.fulltext().connectLocalSolr();
         }
+        this.index.writeWebgraph(this.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false));
 
         // set up the solr interface
         final String solrurls = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr");
@@ -1305,6 +1306,7 @@ public final class Switchboard extends serverSwitch {
                 this.index.fulltext().connectLocalSolr();
                 this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
             }
+            this.index.writeWebgraph(this.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false));
 
             // set up the solr interface
             final String solrurls = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr");

@@ -351,7 +351,7 @@ div.SubMenugroup{
 div.content {
   position:absolute;
   top:3em;
-  left:12em;
+  left:13em;
   right:10px;
   margin:0;
 }
@@ -871,7 +871,7 @@ ul#menu {
   position:absolute;
   top:3em;
   left:0;
-  width:11em;
+  width:12em;
   overflow:hidden;
 }
 ul#menu a.MenuItemLink {

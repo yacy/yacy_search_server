@@ -1,50 +1,49 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>YaCy '#[clientname]#': Remote Solr Configuration</title>
+    <title>YaCy '#[clientname]#': Index Sources &amp; Targets</title>
     #%env/templates/metas.template%#
   </head>
   <body id="IndexFederated_p">
-<div id="api">
-<a href="/api/schema.xml">
-<img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
-<span>The solr schema can also be retrieved as xml here. Click the API icon to see the xml. Just copy this xml to solr/conf/schema.xml to configure solr.</span>
-</div>	
     #%env/templates/header.template%#
     #%env/templates/submenuIndexControl.template%#
-    <h2>Remote Solr Configuration</h2>
+    <h2>Index Sources &amp; Targets</h2>
     <p>
-      YaCy supports multiple index storage locations. At this time only the YaCy-internal search index can be used for the YaCy search interface
-      A Solr index storage location is optional. The local index storage location can be disabled.
+      YaCy supports multiple index storage locations.
+      As an internal indexing database a deep-embedded multi-core Solr is used and it is possible to attach also a remote Solr.
     </p>
     
-    <form action="IndexFederated_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <form id="config" action="IndexFederated_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
       <legend>
-        Local Search Index
+        <label for="p2p">Solr Search Index</label>
       </legend>
-      This is a switchboard for the usage of embedded metadata to embedded solr.
-      The rwi index is necessary for index transmission and shall be switched off in future portalmode configurations.
+      Solr stores the main search index. It is the home of two cores, the default 'collection1' core for documents and the 'webgraph' core for a web structure graph. Detailed information about the used Solr fields can be edited in the <a href="/IndexSchema_p.html">Schema Editor</a>.
       <dl>
-      <dt><input type="checkbox" name="core.service.fulltext" id="core.service.fulltext" #(core.service.fulltext.checked)#:: checked="checked"#(/core.service.fulltext.checked)# /></dt><dd>url metadata and embedded solr fulltext search index, interface at: <a href="/solr/select?q=*:*&start=0&rows=10" target="_blank">/solr/select?q=*:*&amp;start=0&amp;rows=10</a>
-        #(migrateUrlDbtoSolr)#:: <input type="button" class="submitready" onclick="window.location = 'migrateurldb_p.html';" value="migrate old index" />#(/migrateUrlDbtoSolr)# </dd>
-      <dt><input type="checkbox" name="core.service.rwi.tmp" id="core.service.rwi" #(core.service.rwi.tmp.checked)#:: checked="checked"#(/core.service.rwi.tmp.checked)# /></dt><dd>embedded 'classic' rwi index</dd>
-      <dt><input type="checkbox" name="core.service.citation.tmp" id="core.service.citation" #(core.service.citation.tmp.checked)#:: checked="checked"#(/core.service.citation.tmp.checked)# /></dt><dd>embedded citation reference index (link structure, used for ranking)</dd>
-      <dt></dt><dd><input type="submit" name="set" value="Set" /></dd>
-      </dl>
-      </fieldset>
-
-      <fieldset>
-      <legend>
-        <input type="checkbox" name="solr.indexing.solrremote" id="solr.indexing.solrremote" #(solr.indexing.solrremote.checked)#:: checked="checked"#(/solr.indexing.solrremote.checked)# />
-        <label for="p2p">Remote Solr Search Index</label>
-      </legend>
-
-      <div align="left">
-      <dl>
+      
+      <dt class="TableCellDark"><input type="checkbox" name="solr.indexing.lazy" id="solr.indexing.lazy" #(solr.indexing.lazy.checked)#:: checked="checked"#(/solr.indexing.lazy.checked)# /></dt>
+      <dd>Lazy Value Initialization. If checked, only non-zero values and non-empty strings are written to Solr fields.</dd>
+        
+      <dt>&nbsp;</dt><dd>&nbsp;</dd>
+      <dt>Use deep-embedded local Solr</dt>
+      <dd><input type="checkbox" name="core.service.fulltext" id="core_service_fulltext" #(core.service.fulltext.checked)#:: checked="checked"#(/core.service.fulltext.checked)# onclick="if(!document.getElementById('config').core_service_fulltext.checked) {document.getElementById('config').solr_indexing_solrremote.checked = true;}"/><br/>
+      This will write the YaCy-embedded Solr index which stored within the YaCy DATA directory.<br/>
+      The Solr native search interface is accessible at<br/>
+      <a href="/solr/select?q=*:*&start=0&rows=3&core=collection1">/solr/select?q=*:*&start=0&rows=3&core=collection1</a>
+      for the default search index (core: collection1) and at<br/>
+      <a href="/solr/select?q=*:*&start=0&rows=3&core=webgraph">/solr/select?q=*:*&start=0&rows=3&core=webgraph</a> for the webgraph core.<br/>
+      If you switch off this index, a remote Solr must be activated.</dd>
+      
+      <dt><input type="submit" name="set" value="Set" /></dt><dd></dd>
+      <dt>Use remote Solr server(s)</dt>
+      <dd><input type="checkbox" name="solr.indexing.solrremote" id="solr_indexing_solrremote" #(solr.indexing.solrremote.checked)#:: checked="checked"#(/solr.indexing.solrremote.checked)# onclick="if(!document.getElementById('config').solr_indexing_solrremote.checked) {document.getElementById('config').core_service_fulltext.checked = true;}"/><br/>
+      Here you can define a single or a set of remote solr servers. If both, an internal and an external Solr is used, then both are mirrored.
+      That means, every write request goes to internal and external Solr, but a read request goes only to the internal index.
+      Only if the internal index does not give any result on a search request, also the remote is requested.</dd>	
+      
       #(table)#::
-        <dt class="TableCellDark">Solr Hosts</dt>
-        <dd>
+        <dt class="TableCellDark">&nbsp;</dt>
+        <dd>Solr Hosts<br/>
       <div>
       <table class="sortable" border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">
@@ -61,18 +60,89 @@
       </div>
         </dd>
       #(/table)#
-        <dt class="TableCellDark">Solr URL(s)</dt>
-        <dd><textarea rows="2" cols="80" name="solr.indexing.url" id="solr.indexing.url"/>#[solr.indexing.url]#</textarea><br/>
-        You can set one or more Solr targets here which are accessed as a shard. For several targets, list them using a ',' (comma) as separator.</dd>
-        <!-- will be moved here again...
-        <dt class="TableCellDark">Lazy Value Initialization</dt>
-        <dd><input type="checkbox" name="solr.indexing.lazy" id="solr.indexing.lazy" #(solr.indexing.lazy.checked)#:: checked="checked"#(/solr.indexing.lazy.checked)# /> (if checked, only non-zero values and non-empty strings are written)</dd>
-        -->
-        <dt class="TableCellDark">Sharding Method</dt>
-        <dd><input type="text" size="50" maxlength="50" value="#[solr.indexing.sharding]#" name="solr.indexing.sharding" id="solr.indexing.sharding" disabled="disabled"/></dd>
-        <dt></dt><dd><input type="submit" name="set" value="Set" /></dd>
+      
+      <dt class="TableCellDark"></dt>
+      <dd>Solr URL(s)<br/><textarea rows="2" cols="80" name="solr.indexing.url" id="solr.indexing.url"/>#[solr.indexing.url]#</textarea><br/>
+      You can set one or more Solr targets here which are accessed as a shard. For several targets, list them using a ',' (comma) as separator.
+      The set of remote targets are used as shard of a complete index. The host part of the url is used as key for a hash function which selects one of the shards (one of your remote servers).
+      When a search request is made, all servers are accessed synchronously and the result is combined.</dd>
+        
+      <dt class="TableCellDark"></dt>
+      <dd>Sharding Method<br/><input type="text" size="50" maxlength="50" value="#[solr.indexing.sharding]#" name="solr.indexing.sharding" id="solr.indexing.sharding" disabled="disabled"/></dd>
+
+      <dt><input type="submit" name="set" value="Set" /></dt><dd></dd>
+      <dt></dt><dd>
+      An <strong>external Solr installation</strong> is easily done following these steps (by example for Solr 4.1.0):
+      <ul>
+      <li>Download solr-4.1.0.tgz from http://lucene.apache.org/solr/</li>
+      <li>Decompress solr-4.1.0.tgz (with 'tar xfz solr-4.1.0.tgz') and put solr-4.1.0 into ~/</li>
+      <li>Consider that YaCy is already running and stored in  ~/yacy/</li>
+      <li>To configure the multi-core configuration of YaCy, execute:<br>
+      <pre>mkdir ~/solr-4.1.0/example/solr/webgraph
+cp -R ~/solr-4.1.0/example/solr/collection1/conf ~/solr-4.1.0/example/solr/webgraph/conf
+~/yacy/bin/apicat.sh /api/schema.xml?core=collection1 > ~/solr-4.1.0/example/solr/collection1/conf/schema.xml
+~/yacy/bin/apicat.sh /api/schema.xml?core=webgraph > ~/solr-4.1.0/example/solr/webgraph/conf/schema.xml</pre></li>
+      <li>edit ~/solr-4.1.0/example/solr/solr.xml and put in the following content:<br/>
+      <pre>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;solr persistent="true"&gt;
+  &lt;cores adminPath="/admin/cores" defaultCoreName="collection1"&gt;
+    &lt;core name="collection1" instanceDir="collection1" /&gt;
+    &lt;core name="webgraph" instanceDir="webgraph" /&gt;
+  &lt;/cores&gt;
+&lt;/solr&gt;</pre></li>
+     <li>Finally, start the external Solr with:<br>
+      <pre>cd ~/solr-4.1.0/example/ && java -jar start.jar</pre></li>
+      <li>open <a href="http://localhost:8983/solr/">http://localhost:8983/solr/</a> to visit Solr's administration console.</li>
+      </ul>
+      </dd>
       </dl>
-      </div>
+      </fieldset>
+      
+      <fieldset>
+      <legend>
+        Web Structure Index
+      </legend>
+      The web structure index is used for host browsing (to discover the internal file/folder structure), ranking (counting the number of references) and file search (there are about fourty times more links from loaded pages as in documents of the main search index). 
+      <dl>
+      
+      <dt><input type="checkbox" name="core.service.citation.tmp" id="core_service_citation" #(core.service.citation.tmp.checked)#:: checked="checked"#(/core.service.citation.tmp.checked)# /></dt>
+      <dd>use citation reference index (lightweight and fast)</dd>
+      
+      <dt><input type="checkbox" name="core.service.webgraph.tmp" id="core_service_webgraph" #(core.service.webgraph.tmp.checked)#:: checked="checked"#(/core.service.webgraph.tmp.checked)# /></dt>
+      <dd>use webgraph search index (rich information in second Solr core)</dd>
+      
+      <dt><input type="submit" name="set" value="Set" /></dt><dd></dd>
+      </dl>
+      </fieldset>
+      
+      <!--
+      <fieldset>
+      <legend>
+        Content Semantics
+      </legend>
+      YaCy uses a Apache Jena instance to host metadata about web pages.
+      <dl>
+      
+      <dt><input type="checkbox" name="core.service.jena.tmp" id="core_service_jena" #(core.service.jena.tmp.checked)#:: checked="checked"#(/core.service.jena.tmp.checked)# /></dt>
+      <dd>write document metadata to the Jena index.</dd>
+      
+      <dt><input type="submit" name="set" value="Set" /></dt><dd></dd>
+      </dl>
+      </fieldset>
+      -->
+      
+      <fieldset>
+      <legend>
+        Peer-to-Peer Operation
+      </legend>
+      The 'RWI' (Reverse Word Index) is necessary for index transmission in distributed mode. For portal or intranet mode this must be switched off.
+      <dl>
+      
+      <dt><input type="checkbox" name="core.service.rwi.tmp" id="core_service_rwi" #(core.service.rwi.tmp.checked)#:: checked="checked"#(/core.service.rwi.tmp.checked)# /></dt>
+      <dd>support peer-to-peer index transmission (DHT RWI index)</dd>
+      
+      <dt><input type="submit" name="set" value="Set" /></dt><dd></dd>
+      </dl>
       </fieldset>
     </form>
     
