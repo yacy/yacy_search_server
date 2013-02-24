@@ -564,7 +564,7 @@ public final class Fulltext {
                     synchronized (Fulltext.this.solrInstances) {
                         for (byte[] urlHash: deleteIDs) {
                             Fulltext.this.getDefaultConnector().delete(ASCII.String(urlHash));
-                            Fulltext.this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s.getSolrFieldName() + ":" + ASCII.String(urlHash));
+                            Fulltext.this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s.getSolrFieldName() + ":\"" + ASCII.String(urlHash) + "\"");
                         }
                         Fulltext.this.commit(true);
                     }
@@ -586,7 +586,7 @@ public final class Fulltext {
         try {
             synchronized (this.solrInstances) {
                 this.getDefaultConnector().delete(ASCII.String(urlHash));
-                this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s.getSolrFieldName() + ":" + ASCII.String(urlHash));
+                this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s.getSolrFieldName() + ":\"" + ASCII.String(urlHash) + "\"");
             }
         } catch (final Throwable e) {
             Log.logException(e);
