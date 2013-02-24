@@ -58,14 +58,19 @@ public class EmbeddedInstance implements SolrInstance {
         if (!defaultCorePath.exists()) defaultCorePath.mkdirs();
         
         // migrate old conf directory
-        File conf = new File(defaultCorePath, "conf");
         File oldConf = new File(containerPath, "conf");
-        if (oldConf.exists()) oldConf.renameTo(conf);
+        File confDir = new File(defaultCorePath, "conf");
+        if (oldConf.exists()) oldConf.renameTo(confDir);
         
         // migrate old data directory
         File oldData = new File(containerPath, "data");
-        if (oldData.exists()) oldData.renameTo(new File(defaultCorePath, "data"));
+        File dataDir = new File(defaultCorePath, "data");
+        if (oldData.exists()) oldData.renameTo(dataDir);
 
+        // create index subdirectory in data if it does not exist
+        File indexDir = new File(dataDir, "index");
+        if (!indexDir.exists()) indexDir.mkdirs();
+        
         // initialize the cores' configuration
         for (String coreName: initializeCoreNames) {
             initializeCoreConf(solr_config, containerPath, coreName);

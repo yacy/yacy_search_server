@@ -80,12 +80,18 @@ org.apache.pdfbox.level = INFO
 
 # Properties for solr
 org.apache.solr.core.Config.level = INFO
+org.apache.solr.core.SolrCore.level = SEVERE
 org.apache.solr.core.SolrResourceLoader.level = INFO
 org.apache.solr.core.CachingDirectoryFactory.level = OFF
 org.apache.solr.util.plugin.AbstractPluginLoader.level = INFO
 org.apache.solr.schema.IndexSchema.level = INFO
+org.apache.solr.schema.FieldTypePluginLoader.level = INFO
 org.apache.solr.handler.UpdateRequestHandler.level = INFO
 org.apache.solr.handler.loader.XMLLoader.level = INFO
 org.apache.solr.search.SolrIndexSearcher.level = INFO
 org.apache.solr.update.processor.LogUpdateProcessor.level = OFF
+org.apache.solr.update.SolrIndexWriter.level = INFO
+
+# java properties
+javax.management.misc.level = INFO
 javax.management.mbeanserver.level = INFO

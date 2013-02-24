@@ -28,9 +28,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import net.yacy.cora.federate.solr.SchemaConfiguration;
-import net.yacy.cora.federate.solr.SchemaConfiguration.Entry;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
+import net.yacy.cora.storage.Configuration;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.parser.xml.opensearchdescriptionReader;
 import net.yacy.kelondro.blob.Tables;
@@ -64,12 +63,12 @@ public class OpenSearchConnector {
         if (createworktable) { // read from config file and create worktable
             sb.tables.clear("opensearchsys");
             try {
-                SchemaConfiguration cfg = new SchemaConfiguration(confFile);
+                Configuration cfg = new Configuration(confFile);
 
                 // copy active opensearch systems to a work table (opensearchsys)
-                Iterator<Entry> cfgentries = cfg.entryIterator();
+                Iterator<Configuration.Entry> cfgentries = cfg.entryIterator();
                 while (cfgentries.hasNext()) {
-                    Entry e = cfgentries.next();
+                    Configuration.Entry e = cfgentries.next();
                     if (e.enabled()) {
                         String title = e.key(); // get the title
                         String urlstr = e.getValue(); // get the search template url
@@ -141,20 +140,25 @@ public class OpenSearchConnector {
             return false;
         }
 
-        SchemaConfiguration conf = new SchemaConfiguration(confFile);
-        if (name != null && !name.isEmpty()) {
-            conf.add(name, null, active);
-            Entry e = conf.get(name);
-            e.setValue(url);
-            e.setEnable(active);
-            e.setComment(comment);
-            conf.put(name, e);
-            try {
-                conf.commit();
-            } catch (IOException ex) {
-                Log.logWarning("OpenSearchConnector.add", "config file write error");
+        try {
+            Configuration conf = new Configuration(confFile);
+            if (name != null && !name.isEmpty()) {
+                conf.add(name, null, active);
+                Configuration.Entry e = conf.get(name);
+                e.setValue(url);
+                e.setEnable(active);
+                e.setComment(comment);
+                conf.put(name, e);
+                try {
+                    conf.commit();
+                } catch (IOException ex) {
+                    Log.logWarning("OpenSearchConnector.add", "config file write error");
+                }
+                return true;
             }
-            return true;
+        } catch (IOException e1) {
+            Log.logException(e1);
+            return false;
         }
         return false;
     }

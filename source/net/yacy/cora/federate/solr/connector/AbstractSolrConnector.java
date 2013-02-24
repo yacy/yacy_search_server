@@ -37,7 +37,6 @@ import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.search.schema.CollectionSchema;
 
-import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -51,8 +50,6 @@ import org.apache.solr.common.params.ModifiableSolrParams;
 
 public abstract class AbstractSolrConnector implements SolrConnector {
 
-    private final static Logger log = Logger.getLogger(AbstractSolrConnector.class);
-    
     public final static SolrDocument POISON_DOCUMENT = new SolrDocument();
     public final static String POISON_ID = "POISON_ID";
     public final static SolrQuery catchallQuery = new SolrQuery();
@@ -79,7 +76,6 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             long count = getQueryCount(fieldName + ":\"" + key + "\"");
             return count > 0;
         } catch (final Throwable e) {
-            log.warn(e);
             return false;
         }
     }

@@ -78,7 +78,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class InternetGatewayDevice {
 
-  private final static Log log = LogFactory.getLog( InternetGatewayDevice.class );
+  //private final static Log log = LogFactory.getLog( InternetGatewayDevice.class );
 
   private final UPNPRootDevice igd;
   private UPNPMessageFactory msgFactory;
@@ -154,7 +154,7 @@ public class InternetGatewayDevice {
       }
       if ( this.msgFactory == null ) {
         // Nothing found using WANCommonInterfaceConfig! IP by default
-        log.warn( "Unable to detect active WANIPConnection, dfaulting to urn:schemas-upnp-org:service:WANIPConnection:1" );
+        //log.warn( "Unable to detect active WANIPConnection, dfaulting to urn:schemas-upnp-org:service:WANIPConnection:1" );
         this.msgFactory = UPNPMessageFactory.getNewInstance( wanIPSrv );
       }
     }
@@ -171,7 +171,7 @@ public class InternetGatewayDevice {
       // ok probably not the IP interface
     } catch ( IOException ex ) {
       // not really normal
-      log.warn( "IOException occured during device detection", ex );
+      //log.warn( "IOException occured during device detection", ex );
     }
     if ( ipToParse != null && ipToParse.length() > 0 && !ipToParse.equals( "0.0.0.0" ) ) {
       try {
@@ -259,7 +259,7 @@ public class InternetGatewayDevice {
           valid.add( new InternetGatewayDevice( device, WANIPConnection, WANPPPConnection ) );
         } catch ( UnsupportedOperationException ex ) {
           // the device is either not IP or PPP
-          if ( log.isDebugEnabled() ) log.debug( "UnsupportedOperationException during discovery " + ex.getMessage() );
+          //if ( log.isDebugEnabled() ) log.debug( "UnsupportedOperationException during discovery " + ex.getMessage() );
         }
       }
       if (  valid.isEmpty() ) {

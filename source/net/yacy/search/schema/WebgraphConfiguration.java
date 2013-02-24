@@ -55,9 +55,9 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
      * initialize with an empty ConfigurationSet which will cause that all the index
      * attributes are used
      */
-    public WebgraphConfiguration() {
+    public WebgraphConfiguration(boolean lazy) {
         super();
-        this.lazy = false;
+        this.lazy = lazy;
     }
     
     /**
@@ -65,8 +65,9 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
      * the configuration file simply contains a list of lines with keywords
      * or keyword = value lines (while value is a custom Solr field name
      * @param configurationFile
+     * @throws IOException 
      */
-    public WebgraphConfiguration(final File configurationFile, boolean lazy) {
+    public WebgraphConfiguration(final File configurationFile, boolean lazy) throws IOException {
         super(configurationFile);
         this.lazy = lazy;
         // check consistency: compare with YaCyField enum

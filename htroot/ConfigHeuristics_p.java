@@ -28,7 +28,9 @@
 import com.google.common.io.Files;
 import java.io.File;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.storage.Configuration;
 import net.yacy.data.WorkTables;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
 
@@ -152,26 +154,32 @@ public class ConfigHeuristics_p {
 
         // display config file content
         final File f = new File (sb.getDataPath(),"DATA/SETTINGS/heuristicopensearch.conf");
-        SchemaConfiguration p = new SchemaConfiguration(f);
-        int c = 0;
-        boolean dark = false;
-        Iterator<SchemaConfiguration.Entry> i = p.entryIterator();
-        while (i.hasNext()) {
-            SchemaConfiguration.Entry e = i.next();
-            prop.put("osdcfg_" + c + "_dark", dark ? 1 : 0);
-            dark = !dark;
-            prop.put("osdcfg_" + c + "_checked", e.enabled() ? 1 : 0);
-            prop.putHTML("osdcfg_" + c + "_title", e.key());
-            prop.putHTML("osdcfg_" + c + "_comment", e.getComment() != null ? e.getComment() : "");
 
-            String tmps = e.getValue();
-            prop.putHTML("osdcfg_" + c + "_url", tmps);
-            tmps = tmps.substring(0,tmps.lastIndexOf("/"));
-            prop.putHTML("osdcfg_" + c + "_urlhostlink", tmps);
+        try {
+            Configuration p = new Configuration(f);
+            int c = 0;
+            boolean dark = false;
+            Iterator<Configuration.Entry> i = p.entryIterator();
+            while (i.hasNext()) {
+                SchemaConfiguration.Entry e = i.next();
+                prop.put("osdcfg_" + c + "_dark", dark ? 1 : 0);
+                dark = !dark;
+                prop.put("osdcfg_" + c + "_checked", e.enabled() ? 1 : 0);
+                prop.putHTML("osdcfg_" + c + "_title", e.key());
+                prop.putHTML("osdcfg_" + c + "_comment", e.getComment() != null ? e.getComment() : "");
 
-            c++;
+                String tmps = e.getValue();
+                prop.putHTML("osdcfg_" + c + "_url", tmps);
+                tmps = tmps.substring(0,tmps.lastIndexOf("/"));
+                prop.putHTML("osdcfg_" + c + "_urlhostlink", tmps);
+
+                c++;
+            }
+            prop.put("osdcfg", c);
+        } catch (IOException e1) {
+            Log.logException(e1);
+            prop.put("osdcfg", 0);
         }
-        prop.put("osdcfg", c);
         prop.putHTML("osderrmsg",osderrmsg);
         return prop;
     }
@@ -180,40 +188,45 @@ public class ConfigHeuristics_p {
         // read index schema table flags
 
         final File f = new File(sb.getDataPath(), "DATA/SETTINGS/heuristicopensearch.conf");
-        SchemaConfiguration cfg = new SchemaConfiguration(f);
-        final Iterator<SchemaConfiguration.Entry> cfgentries = cfg.entryIterator();
-        SchemaConfiguration.Entry entry;
-        boolean modified = false; // flag to remember changes
-        while (cfgentries.hasNext()) {
-            entry = cfgentries.next();
-            final String sfn = post.get("ossys_url_" + entry.key());
-            if (sfn != null) {
-                if (!sfn.equals(entry.getValue())) {
-                    entry.setValue(sfn);
+        try {
+            Configuration cfg = new Configuration(f);
+            final Iterator<Configuration.Entry> cfgentries = cfg.entryIterator();
+            Configuration.Entry entry;
+            boolean modified = false; // flag to remember changes
+            while (cfgentries.hasNext()) {
+                entry = cfgentries.next();
+                final String sfn = post.get("ossys_url_" + entry.key());
+                if (sfn != null) {
+                    if (!sfn.equals(entry.getValue())) {
+                        entry.setValue(sfn);
+                        modified = true;
+    }
+                }
+                // set enable flag
+                String v = post.get("ossys_" + entry.key());
+                boolean c = v != null && v.equals("checked");
+                if (entry.enabled() != c) {
+                    entry.setEnable(c);
                     modified = true;
-}
+                }
+                // delete entry from config
+                v = post.get("ossys_del_" + entry.key());
+                c = v != null && v.equals("checked");
+                if (c) {
+                    cfgentries.remove();
+                    modified = true;
+                }
             }
-            // set enable flag
-            String v = post.get("ossys_" + entry.key());
-            boolean c = v != null && v.equals("checked");
-            if (entry.enabled() != c) {
-                entry.setEnable(c);
-                modified = true;
+            if (modified) { // save settings to config file if modified
+                try {
+                    cfg.commit();
+                } catch (IOException ex) {
+                }
             }
-            // delete entry from config
-            v = post.get("ossys_del_" + entry.key());
-            c = v != null && v.equals("checked");
-            if (c) {
-                cfgentries.remove();
-                modified = true;
-            }
+        } catch (IOException e) {
+            Log.logException(e);
         }
-        if (modified) { // save settings to config file if modified
-            try {
-                cfg.commit();
-            } catch (IOException ex) {
-            }
-        }
+        
         // re-read config (and create/update work table)
         if (sb.getConfigBool("heuristic.opensearch", true)) {
             OpenSearchConnector os = new OpenSearchConnector(sb, true);

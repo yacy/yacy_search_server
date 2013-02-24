@@ -90,8 +90,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * the configuration file simply contains a list of lines with keywords
      * or keyword = value lines (while value is a custom Solr field name
      * @param configurationFile
+     * @throws IOException 
      */
-    public CollectionConfiguration(final File configurationFile, boolean lazy) {
+    public CollectionConfiguration(final File configurationFile, boolean lazy) throws IOException {
         super(configurationFile);
         super.lazy = lazy;
         // check consistency: compare with YaCyField enum
@@ -109,6 +110,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // check consistency the other way: look if all enum constants in SolrField appear in the configuration file
         for (CollectionSchema field: CollectionSchema.values()) {
         	if (this.get(field.name()) == null) {
+        	    if (CollectionSchema.author_sxt.getSolrFieldName().endsWith(field.name())) continue; // exception for this: that is a copy-field
         		Log.logWarning("SolrCollectionWriter", " solr schema file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
         	}
         }

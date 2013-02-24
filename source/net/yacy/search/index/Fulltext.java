@@ -356,18 +356,20 @@ public final class Fulltext {
     }
 
     public void putDocument(final SolrInputDocument doc) throws IOException {
+        SolrConnector connector = this.getDefaultConnector();
+        if (connector == null) return;
         String id = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
         byte[] idb = ASCII.getBytes(id);
         try {
             if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-            Date sdDate = (Date) this.getDefaultConnector().getFieldById(id, CollectionSchema.last_modified.getSolrFieldName());
+            Date sdDate = (Date) connector.getFieldById(id, CollectionSchema.last_modified.getSolrFieldName());
             Date docDate = null;
             if (sdDate == null || (docDate = SchemaConfiguration.getDate(doc, CollectionSchema.last_modified)) == null || sdDate.before(docDate)) {
                 if (this.collectionConfiguration.contains(CollectionSchema.ip_s)) {
                     // ip_s needs a dns lookup which causes blockings during search here
-                    this.getDefaultConnector().add(doc);
+                    connector.add(doc);
                 } else synchronized (this.solrInstances) {
-                    this.getDefaultConnector().add(doc);
+                    connector.add(doc);
                 }
             }
         } catch (SolrException e) {

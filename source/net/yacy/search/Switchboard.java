@@ -286,7 +286,7 @@ public final class Switchboard extends serverSwitch {
     private static Switchboard sb;
     public HashMap<String, Object[]> crawlJobsStatus = new HashMap<String, Object[]>();
 
-    public Switchboard(final File dataPath, final File appPath, final String initPath, final String configPath) throws IOException {
+    public Switchboard(final File dataPath, final File appPath, final String initPath, final String configPath) {
         super(dataPath, appPath, initPath, configPath);
         sb = this;
         // check if port is already occupied
@@ -349,7 +349,11 @@ public final class Switchboard extends serverSwitch {
             for (String fs : defaultWorkPath.list()) {
                 File wf = new File(this.workPath, fs);
                 if (!wf.exists()) {
-                    Files.copy(new File(defaultWorkPath, fs), wf);
+                    try {
+                        Files.copy(new File(defaultWorkPath, fs), wf);
+                    } catch (IOException e) {
+                        Log.logException(e);
+                    }
                 }
             }
         }
@@ -387,7 +391,13 @@ public final class Switchboard extends serverSwitch {
         setConfig(SwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
 
         // load the network definition
-        overwriteNetworkDefinition();
+        try {
+            overwriteNetworkDefinition();
+        } catch (FileNotFoundException e) {
+            Log.logException(e);
+        } catch (IOException e) {
+            Log.logException(e);
+        }
 
         // start indexing management
         this.log.logConfig("Starting Indexing Management");
@@ -410,53 +420,70 @@ public final class Switchboard extends serverSwitch {
         final File solrCollectionConfigurationWorkFile = new File(getDataPath(), "DATA/SETTINGS/" + SOLR_COLLECTION_CONFIGURATION_NAME);
         final File solrWebgraphConfigurationInitFile   = new File(getAppPath(),  "defaults/" + SOLR_WEBGRAPH_CONFIGURATION_NAME);
         final File solrWebgraphConfigurationWorkFile   = new File(getDataPath(), "DATA/SETTINGS/" + SOLR_WEBGRAPH_CONFIGURATION_NAME);
+        CollectionConfiguration solrCollectionConfigurationWork = null;
+        WebgraphConfiguration solrWebgraphConfigurationWork = null;
         
         // migrate the old Schema file path to a new one
         final File solrCollectionConfigurationWorkOldFile = new File(getDataPath(), "DATA/SETTINGS/" + SOLR_COLLECTION_CONFIGURATION_NAME_OLD);
         if (solrCollectionConfigurationWorkOldFile.exists() && !solrCollectionConfigurationWorkFile.exists()) solrCollectionConfigurationWorkOldFile.renameTo(solrCollectionConfigurationWorkFile);
         
-        // initialize the schema if it does not yet exist
-        if (!solrCollectionConfigurationWorkFile.exists()) Files.copy(solrCollectionConfigurationInitFile, solrCollectionConfigurationWorkFile);
+        // initialize the collection schema if it does not yet exist
+        if (!solrCollectionConfigurationWorkFile.exists()) try {
+            Files.copy(solrCollectionConfigurationInitFile, solrCollectionConfigurationWorkFile);
+        } catch (IOException e) {Log.logException(e);}
         
         // lazy definition of schema: do not write empty fields
         final boolean solrlazy = getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true);
         
         // define collection schema
-        final CollectionConfiguration solrCollectionConfigurationInit = new CollectionConfiguration(solrCollectionConfigurationInitFile, solrlazy);
-        final CollectionConfiguration solrCollectionConfigurationWork = new CollectionConfiguration(solrCollectionConfigurationWorkFile, solrlazy);
-        // update the working scheme with the backup scheme. This is necessary to include new features.
-        // new features are always activated by default (if activated in input-backupScheme)
-        solrCollectionConfigurationWork.fill(solrCollectionConfigurationInit, true);
-        // switch on some fields which are necessary for ranking and faceting
-        for (CollectionSchema field: new CollectionSchema[]{
-                CollectionSchema.host_s, CollectionSchema.load_date_dt,
-                CollectionSchema.url_file_ext_s, CollectionSchema.last_modified,                            // needed for media search and /date operator
-                /*YaCySchema.url_paths_sxt,*/ CollectionSchema.host_organization_s,                   // needed to search in the url
-                /*YaCySchema.inboundlinks_protocol_sxt,*/ CollectionSchema.inboundlinks_urlstub_txt,  // needed for HostBrowser
-                /*YaCySchema.outboundlinks_protocol_sxt,*/ CollectionSchema.outboundlinks_urlstub_txt // needed to enhance the crawler
-            }) {
-            SchemaConfiguration.Entry entry = solrCollectionConfigurationWork.get(field.name()); entry.setEnable(true); solrCollectionConfigurationWork.put(field.name(), entry);
-        }
-        solrCollectionConfigurationWork.commit();
+        try {
+            final CollectionConfiguration solrCollectionConfigurationInit = new CollectionConfiguration(solrCollectionConfigurationInitFile, solrlazy);
+            solrCollectionConfigurationWork = new CollectionConfiguration(solrCollectionConfigurationWorkFile, solrlazy);
+            // update the working scheme with the backup scheme. This is necessary to include new features.
+            // new features are always activated by default (if activated in input-backupScheme)
+            solrCollectionConfigurationWork.fill(solrCollectionConfigurationInit, true);
+            // switch on some fields which are necessary for ranking and faceting
+            for (CollectionSchema field: new CollectionSchema[]{
+                    CollectionSchema.host_s, CollectionSchema.load_date_dt,
+                    CollectionSchema.url_file_ext_s, CollectionSchema.last_modified,                      // needed for media search and /date operator
+                    /*YaCySchema.url_paths_sxt,*/ CollectionSchema.host_organization_s,                   // needed to search in the url
+                    /*YaCySchema.inboundlinks_protocol_sxt,*/ CollectionSchema.inboundlinks_urlstub_txt,  // needed for HostBrowser
+                    /*YaCySchema.outboundlinks_protocol_sxt,*/ CollectionSchema.outboundlinks_urlstub_txt // needed to enhance the crawler
+                }) {
+                SchemaConfiguration.Entry entry = solrCollectionConfigurationWork.get(field.name()); entry.setEnable(true); solrCollectionConfigurationWork.put(field.name(), entry);
+            }
+            solrCollectionConfigurationWork.commit();
+        } catch (IOException e) {Log.logException(e);}
+        
+        // initialize the webgraph schema if it does not yet exist
+        if (!solrWebgraphConfigurationWorkFile.exists()) try {
+            Files.copy(solrWebgraphConfigurationInitFile, solrWebgraphConfigurationWorkFile);
+        } catch (IOException e) {Log.logException(e);}
         
         // define webgraph schema
-        final WebgraphConfiguration solrWebgraphConfigurationInit = new WebgraphConfiguration(solrWebgraphConfigurationInitFile, solrlazy);
-        final WebgraphConfiguration solrWebgraphConfigurationWork = new WebgraphConfiguration(solrWebgraphConfigurationWorkFile, solrlazy);
-        solrWebgraphConfigurationWork.fill(solrWebgraphConfigurationInit, true);
-        solrWebgraphConfigurationWork.commit();
-        
+        try {
+            final WebgraphConfiguration solrWebgraphConfigurationInit = new WebgraphConfiguration(solrWebgraphConfigurationInitFile, solrlazy);
+            solrWebgraphConfigurationWork = new WebgraphConfiguration(solrWebgraphConfigurationWorkFile, solrlazy);
+            solrWebgraphConfigurationWork.fill(solrWebgraphConfigurationInit, true);
+            solrWebgraphConfigurationWork.commit();
+        } catch (IOException e) {Log.logException(e);}
+
         // initialize index
         ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
         final File segmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
         this.index = new Segment(this.log, segmentsPath, solrCollectionConfigurationWork, solrWebgraphConfigurationWork);
-        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
-        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
+        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) try {
+            this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
+        } catch (IOException e) {Log.logException(e);}
+        if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) try {
+            this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
+        } catch (IOException e) {Log.logException(e);}
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true)) {
             this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
-            this.index.fulltext().connectLocalSolr();
+            try {this.index.fulltext().connectLocalSolr();} catch (IOException e) {Log.logException(e);}
         }
         this.index.writeWebgraph(this.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false));
-
+        
         // set up the solr interface
         final String solrurls = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr");
         final boolean usesolr = getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;
@@ -590,46 +617,6 @@ public final class Switchboard extends serverSwitch {
         final File rankingPath = new File(this.appPath, "ranking/YBR".replace('/', File.separatorChar));
         BlockRank.loadBlockRankTable(rankingPath, 16);
 
-        // load distributed ranking
-        // very large memory configurations allow to re-compute a ranking table
-        /*
-        final File hostIndexFile = new File(this.queuesRoot, "hostIndex.blob");
-        if (MemoryControl.available() > 1024 * 1024 * 1024) new Thread() {
-            public void run() {
-                ReferenceContainerCache<HostReference> hostIndex; // this will get large, more than 0.5 million entries by now
-                if (!hostIndexFile.exists()) {
-                    hostIndex = BlockRank.collect(Switchboard.this.peers, Switchboard.this.webStructure, Integer.MAX_VALUE);
-                    BlockRank.saveHostIndex(hostIndex, hostIndexFile);
-                } else {
-                    hostIndex = BlockRank.loadHostIndex(hostIndexFile);
-                }
-
-                // use an index segment to find hosts for given host hashes
-                final String segmentName = getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
-                final Segment segment = Switchboard.this.indexSegments.segment(segmentName);
-                final MetadataRepository metadata = segment.urlMetadata();
-                Map<String,HostStat> hostHashResolver;
-                try {
-                    hostHashResolver = metadata.domainHashResolver(metadata.domainSampleCollector());
-                } catch (final IOException e) {
-                    hostHashResolver = new HashMap<String, HostStat>();
-                }
-
-                // recursively compute a new ranking table
-                Switchboard.this.log.logInfo("BLOCK RANK: computing new ranking tables...");
-                BlockRank.ybrTables = BlockRank.evaluate(hostIndex, hostHashResolver, null, 0);
-                hostIndex = null; // we don't need that here any more, so free the memory
-
-                // use the web structure and the hostHash resolver to analyse the ranking table
-                Switchboard.this.log.logInfo("BLOCK RANK: analysis of " + BlockRank.ybrTables.length + " tables...");
-                BlockRank.analyse(Switchboard.this.webStructure, hostHashResolver);
-                // store the new table
-                Switchboard.this.log.logInfo("BLOCK RANK: storing fresh table...");
-                BlockRank.storeBlockRankTable(rankingPath);
-            }
-        }.start();
-        */
-
         // start a cache manager
         this.log.logConfig("Starting HT Cache Manager");
 
@@ -662,27 +649,43 @@ public final class Switchboard extends serverSwitch {
         this.log.logInfo("RELEASE Path = " + this.releasePath.getAbsolutePath());
 
         // starting message board
-        initMessages();
+        try {
+            initMessages();
+        } catch (IOException e) {
+            Log.logException(e);
+        }
 
         // starting wiki
-        initWiki();
+        try {
+            initWiki();
+        } catch (IOException e) {
+            Log.logException(e);
+        }
 
         //starting blog
-        initBlog();
+        try {
+            initBlog();
+        } catch (IOException e) {
+            Log.logException(e);
+        }
 
         // init User DB
         this.log.logConfig("Loading User DB");
         final File userDbFile = new File(getDataPath(), "DATA/SETTINGS/user.heap");
-        this.userDB = new UserDB(userDbFile);
-        this.log.logConfig("Loaded User DB from file "
-            + userDbFile.getName()
-            + ", "
-            + this.userDB.size()
-            + " entries"
-            + ", "
-            + ppRamString(userDbFile.length() / 1024));
+        try {
+            this.userDB = new UserDB(userDbFile);
+            this.log.logConfig("Loaded User DB from file "
+                    + userDbFile.getName()
+                    + ", "
+                    + this.userDB.size()
+                    + " entries"
+                    + ", "
+                    + ppRamString(userDbFile.length() / 1024));
+        } catch (IOException e) {
+            Log.logException(e);
+        }
 
-     // init user triplestores
+        // init user triplestores
         JenaTripleStore.initPrivateStores();
 
         // init html parser evaluation scheme
@@ -690,14 +693,22 @@ public final class Switchboard extends serverSwitch {
         String[] settingsList = parserPropertiesPath.list();
         for ( final String l : settingsList ) {
             if ( l.startsWith("parser.") && l.endsWith(".properties") ) {
-                Evaluation.add(new File(parserPropertiesPath, l));
+                try {
+                    Evaluation.add(new File(parserPropertiesPath, l));
+                } catch (IOException e) {
+                    Log.logException(e);
+                }
             }
         }
         parserPropertiesPath = new File(getDataPath(), "DATA/SETTINGS/");
         settingsList = parserPropertiesPath.list();
         for ( final String l : settingsList ) {
             if ( l.startsWith("parser.") && l.endsWith(".properties") ) {
-                Evaluation.add(new File(parserPropertiesPath, l));
+                try {
+                    Evaluation.add(new File(parserPropertiesPath, l));
+                } catch (IOException e) {
+                    Log.logException(e);
+                }
             }
         }
 
@@ -751,7 +762,11 @@ public final class Switchboard extends serverSwitch {
         // load the robots.txt db
         this.log.logConfig("Initializing robots.txt DB");
         this.robots = new RobotsTxt(this.tables, this.loader);
-        this.log.logConfig("Loaded robots.txt DB: " + this.robots.size() + " entries");
+        try {
+            this.log.logConfig("Loaded robots.txt DB: " + this.robots.size() + " entries");
+        } catch (IOException e) {
+            Log.logException(e);
+        }
 
         // load oai tables
         final Map<String, File> oaiFriends =
@@ -2851,7 +2866,6 @@ public final class Switchboard extends serverSwitch {
         try {
             scraper = this.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
         } catch (IOException e) {
-            Log.logException(e);
             return "scraper cannot load URL: " + e.getMessage();
         }
         

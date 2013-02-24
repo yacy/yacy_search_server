@@ -1066,7 +1066,7 @@ public final class Protocol {
                 instance.close();
                 // no need to close this here because that sends a commit to remote solr which is not wanted here
             } catch (Throwable e) {
-                Network.log.logInfo("SEARCH failed (solr), remote Peer: " +target.getName() + "/" + target.getPublicAddress() + " (" + e.getMessage() + ")", e);
+                Network.log.logInfo("SEARCH failed (solr), remote Peer: " +target.getName() + "/" + target.getPublicAddress() + " (" + e.getMessage() + ")");
                 return -1;
             }
         }

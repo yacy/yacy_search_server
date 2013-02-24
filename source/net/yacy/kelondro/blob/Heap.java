@@ -125,7 +125,7 @@ public final class Heap extends HeapModifier implements BLOB {
      */
     @Override
     public boolean containsKey(byte[] key) {
-        assert this.index != null;
+        if (this.index == null) return false;
         key = normalizeKey(key);
         synchronized (this) {
             // check the buffer
@@ -245,7 +245,6 @@ public final class Heap extends HeapModifier implements BLOB {
         
         synchronized (this) {
             // check the buffer
-            assert this.buffer != null;
             if (this.buffer != null) {
                 byte[] blob = this.buffer.get(key);
                 if (blob != null) return blob;
@@ -267,7 +266,6 @@ public final class Heap extends HeapModifier implements BLOB {
 
         synchronized (this) {
             // check the buffer
-            assert this.buffer != null;
             if (this.buffer != null) {
                 byte[] blob = this.buffer.get(key);
                 if (blob != null) return blob.length;
