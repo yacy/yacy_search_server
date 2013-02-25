@@ -65,6 +65,8 @@ public enum CollectionSchema implements SchemaDeclaration {
 
     // optional but recommended
     coordinate_p(SolrType.location, true, true, false, "point in degrees of latitude,longitude as declared in WSG84"),
+    coordinate_p_0_coordinate(SolrType.coordinate, true, true, false, "automatically created subfield, (latitude)"),
+    coordinate_p_1_coordinate(SolrType.coordinate, true, true, false, "automatically created subfield, (longitude)"),
     ip_s(SolrType.string, true, true, false, "ip of host of url (after DNS lookup)"),
     author(SolrType.text_general, true, true, false, "content of author-tag"),
     author_sxt(SolrType.string, true, true, true, "content of author-tag as copy-field from author. This is used for facet generation"),

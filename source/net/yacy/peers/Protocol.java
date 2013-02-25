@@ -813,7 +813,7 @@ public final class Protocol {
                     UTF8.getBytes(target.hash),
                     EventOrigin.QUERIES);
             } catch ( final IOException e ) {
-                Network.log.logWarning("could not store search result", e);
+                Network.log.logWarning("could not store search result");
                 continue; // db-error
             }
 
@@ -1176,7 +1176,7 @@ public final class Protocol {
             event.add(container, facets, snippets, false, target.getName() + "/" + target.hash, (int) docList.getNumFound());
             event.rankingProcess.addFinalize();
             event.addExpectedRemoteReferences(-count);
-            Network.log.logInfo("remote search (solr): peer " + target.getName() + " sent " + container.get(0).size() + "/" + docList.size() + " references");
+            Network.log.logInfo("remote search (solr): peer " + target.getName() + " sent " + (container.size() == 0 ? 0 : container.get(0).size()) + "/" + docList.size() + " references");
         }
         return docList.size();
     }

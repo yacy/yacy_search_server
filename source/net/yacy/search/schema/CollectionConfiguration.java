@@ -111,7 +111,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         for (CollectionSchema field: CollectionSchema.values()) {
         	if (this.get(field.name()) == null) {
         	    if (CollectionSchema.author_sxt.getSolrFieldName().endsWith(field.name())) continue; // exception for this: that is a copy-field
-        		Log.logWarning("SolrCollectionWriter", " solr schema file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
+        	    if (CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName().endsWith(field.name())) continue; // exception for this: automatically generated
+        	    if (CollectionSchema.coordinate_p_1_coordinate.getSolrFieldName().endsWith(field.name())) continue; // exception for this: automatically generated
+                Log.logWarning("SolrCollectionWriter", " solr schema file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
         	}
         }
     }
@@ -148,8 +150,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         SolrInputDocument sid = new SolrInputDocument();
         Set<String> omitFields = new HashSet<String>(3);
         omitFields.add(CollectionSchema.author_sxt.getSolrFieldName());
-        omitFields.add(CollectionSchema.coordinate_p.getSolrFieldName() + "_0_coordinate");
-        omitFields.add(CollectionSchema.coordinate_p.getSolrFieldName() + "_1_coordinate");
+        omitFields.add(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
+        omitFields.add(CollectionSchema.coordinate_p_1_coordinate.getSolrFieldName());
         for (String name: doc.getFieldNames()) {
             if (this.contains(name) && !omitFields.contains(name)) { // check each field if enabled in local Solr schema
                 sid.addField(name, doc.getFieldValue(name), 1.0f);

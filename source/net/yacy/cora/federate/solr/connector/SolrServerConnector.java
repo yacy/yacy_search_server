@@ -193,7 +193,6 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                     this.server.add(solrdoc, -1);
                 }
             } catch (Throwable ee) {
-                log.warn(e.getMessage() + " DOC=" + solrdoc.toString());
                 throw new IOException(ee);
             }
         }

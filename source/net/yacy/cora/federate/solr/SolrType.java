@@ -25,13 +25,14 @@ public enum SolrType {
     string("s", "sxt"),                  // The type is not analyzed, but indexed/stored verbatim
     text_general("t", "txt"),            // tokenizes with StandardTokenizer, removes stop words from case-insensitive "stopwords.txt", down cases, applies synonyms.
     text_en_splitting_tight(null, null), // can insert dashes in the wrong place and still match
-    location("p", null),                 // lat,lon - format: specialized field for geospatial search. If indexed, this fieldType must not be multivalued.
+    location("p", null),                 // lat,lon - format: specialized field for geospatial search.
     date("dt", null),                    // date format as in http://www.w3.org/TR/xmlschema-2/#dateTime with trailing 'Z'
     bool("b", "bs", "boolean"),
     num_integer("i", "val", "int"),
     num_long("l", "ls", "long"), 
     num_float("f", "fs", "float"), 
-    num_double("d", "ds", "double");
+    num_double("d", "ds", "double"),
+    coordinate("coordinate", "coordinatex", "tdouble");
     
     private String printName, singlevalExt, multivalExt;
     private SolrType(final String singlevalExt, final String multivalExt) {

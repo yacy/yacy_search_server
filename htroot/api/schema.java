@@ -54,6 +54,16 @@ public class schema {
                 c++;
             }
         }
+        if (schemaName.equals(CollectionSchema.CORE_NAME)) {
+            // add additional coordinate field for collection1
+            if (solrSchema.contains(CollectionSchema.coordinate_p)) {
+                addField(prop, c, CollectionSchema.coordinate_p_0_coordinate);
+                c++;
+                addField(prop, c, CollectionSchema.coordinate_p_1_coordinate);
+                c++;
+            }
+        }
+            
         //if (solrScheme.contains(YaCySchema.author)) {addField(prop, c, YaCySchema.author_sxt);}
         prop.put("fields", c);
 
