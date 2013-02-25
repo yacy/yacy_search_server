@@ -65,9 +65,6 @@ import net.yacy.upnp.messages.UPNPMessageFactory;
 import net.yacy.upnp.messages.UPNPResponseException;
 import net.yacy.upnp.services.UPNPService;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * This class can be used to access some funtionalities on the
  * InternetGatewayDevice on your network without having to know

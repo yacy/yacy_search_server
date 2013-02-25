@@ -40,6 +40,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryGoal;
 import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionSchema;
@@ -142,7 +143,6 @@ public class select {
 
         // check post
         if (post == null) return null;
-        Log.logInfo("SOLR Query", post.toString());
         sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
         
         // rename post fields according to result style
@@ -152,12 +152,14 @@ public class select {
             QueryModifier modifier = new QueryModifier();
             querystring = modifier.parse(querystring);
             modifier.apply(post);
-            post.put(CommonParams.Q, querystring); // sru patch
+            QueryGoal qg = new QueryGoal(querystring, querystring);
+            StringBuilder solrQ = qg.solrQueryString(sb.index.fulltext().getDefaultConfiguration());
+            post.put(CommonParams.Q, solrQ.toString()); // sru patch
         }
         String q = post.get(CommonParams.Q, "");
-        if (!post.containsKey(CommonParams.START)) post.put(CommonParams.START, post.remove("startRecord")); // sru patch
-        post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, post.getInt("maximumRecords", 10)), (authenticated) ? 5000 : 100));
-        post.remove("maximumRecords");
+        if (!post.containsKey(CommonParams.START)) post.put(CommonParams.START, post.remove("startRecord", 0)); // sru patch
+        if (!post.containsKey(CommonParams.ROWS)) post.put(CommonParams.ROWS, post.remove("maximumRecords", 10)); // sru patch
+        post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 10000 : 100));
 
         // get a response writer for the result
         String wt = post.get(CommonParams.WT, "xml"); // maybe use /solr/select?q=*:*&start=0&rows=10&wt=exml
@@ -212,9 +214,12 @@ public class select {
 
         // log result
         Object rv = response.getValues().get("response");
+        int matches = ((ResultContext) rv).docs.matches();
         if (rv != null && rv instanceof ResultContext) {
-            AccessTracker.addToDump(q, Integer.toString(((ResultContext) rv).docs.matches()));
+            AccessTracker.addToDump(q, Integer.toString(matches));
         }
+
+        Log.logInfo("SOLR Query", "results: " + matches + ", for query:" + post.toString());
         return null;
     }
 }

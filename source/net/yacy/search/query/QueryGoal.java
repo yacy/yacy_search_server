@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.SortedSet;
 
 import net.yacy.cora.federate.solr.Boost;
+import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
@@ -234,6 +235,7 @@ public class QueryGoal {
             CollectionSchema field = entry.getKey();
             if (entry.getValue().floatValue() < 0.0f) continue;
             if (configuration != null && !configuration.contains(field.getSolrFieldName())) continue;
+            if (field.getType() == SolrType.num_integer) continue;
             if (wc > 0) q.append(" OR ");
             q.append('(');
             q.append(field.getSolrFieldName()).append(':').append(w);

@@ -207,6 +207,7 @@ function yrun() {
 
 function yacysearch(clear) {	
 	var url = yconf.url + '/yacysearch.json?callback=?'    // JSONP (cross domain) request URL
+	//var url = yconf.url + '/solr/select?wt=yjson&jsonp=?'    // JSONP (cross domain) request URL
 
 	if(clear) {
 		$('#ypopup').empty();
@@ -244,7 +245,7 @@ function yacysearch(clear) {
 	
 	$.ajaxSetup({ 
         timeout: 10000,
-        error: function(x,e) {
+        error: function(x,e,ex) {
 			var err = 'Unknow Error: '+x.responseText;
         	if(x.status==0) {
 				err = 'Unknown Network Error! I try to reload...';
@@ -254,7 +255,7 @@ function yacysearch(clear) {
 			} else if(x.status==500) {
 					err = x.status + ' - Internel Server Error.';
 			} else if(e=='parsererror') {
-					err = 'Parsing JSON Request failed.';
+					err = 'Parsing JSON Request failed:' + ex;
 			} else if(e=='timeout') {
 					err = 'Request Time out.';
 			};

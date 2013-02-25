@@ -153,9 +153,20 @@ public class serverObjects implements Serializable, Cloneable {
     public Set<String> keySet() {
         return this.map.getMap().keySet();
     }
-    
+
     public String[] remove(String key) {
         return this.map.getMap().remove(key);
+    }
+    
+    public int remove(String key, int dflt) {
+        final String result = removeByteOrderMark(get(key));
+        this.map.getMap().remove(key);
+        if (result == null) return dflt;
+        try {
+            return Integer.parseInt(result);
+        } catch (NumberFormatException e) {
+            return dflt;
+        }
     }
     
     public void putAll(Map<String, String> m) {
@@ -372,7 +383,7 @@ public class serverObjects implements Serializable, Cloneable {
 
     public String get(String name) {
       String[] arr = map.getMap().get(name);
-      return arr==null ? null : arr[0];
+      return arr == null || arr.length == 0 ? null : arr[0];
     }
     
     // new get with default objects
