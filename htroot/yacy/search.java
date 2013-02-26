@@ -44,6 +44,7 @@ import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.HandleSet;
@@ -323,13 +324,14 @@ public final class search {
 
             // make event
             theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, null, abstracts.length() > 0, sb.loader, count, maxtime, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
+            if (theSearch.rwiProcess != null && theSearch.rwiProcess.isAlive()) try {theSearch.rwiProcess.join();} catch (InterruptedException e) {}
 
             // set statistic details of search result and find best result index set
-            prop.put("joincount", Integer.toString(theQuery.getResultCount()));
-            if (theQuery.getResultCount() > 0) {
+            prop.put("joincount", Integer.toString(theSearch.getResultCount()));
+            if (theSearch.getResultCount() > 0) {
                 accu = theSearch.completeResults(maxtime);
             }
-            if (theQuery.getResultCount() <= 0 || abstracts.isEmpty()) {
+            if (theSearch.getResultCount() <= 0 || abstracts.isEmpty()) {
                 prop.put("indexcount", "");
             } else {
                 // attach information about index abstracts
@@ -375,7 +377,7 @@ public final class search {
 
             // prepare reference hints
             final long timer = System.currentTimeMillis();
-            final ScoreMap<String> topicNavigator = theSearch.rankingProcess.getTopics(5, 100);
+            final ScoreMap<String> topicNavigator = sb.index.connectedRWI() ? theSearch.getTopics(5, 100) : new ConcurrentScoreMap<String>();
             final StringBuilder refstr = new StringBuilder(6000);
             final Iterator<String> navigatorIterator = topicNavigator.keys(false);
             int i = 0;
@@ -391,7 +393,8 @@ public final class search {
         prop.put("indexabstract", indexabstract.toString());
 
         // prepare result
-        if (theQuery.getResultCount() == 0 || accu == null || accu.isEmpty()) {
+        int resultCount = theSearch.getResultCount();
+        if (resultCount == 0 || accu == null || accu.isEmpty()) {
 
             // no results
             prop.put("links", "");
@@ -422,7 +425,7 @@ public final class search {
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
         theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.getURLRetrievalTime();
         theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.getSnippetComputationTime();
-        AccessTracker.add(AccessTracker.Location.remote, theQuery);
+        AccessTracker.add(AccessTracker.Location.remote, theQuery, resultCount);
 
         // update the search tracker
         synchronized (trackerHandles) {
@@ -435,7 +438,7 @@ public final class search {
 
         // log
         Network.log.logInfo("EXIT HASH SEARCH: " +
-                QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.getResultCount() + " links found, " +
+                QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + resultCount + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstracts, " +
                 (System.currentTimeMillis() - timestamp) + " milliseconds");

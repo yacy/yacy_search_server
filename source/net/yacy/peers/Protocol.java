@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -121,6 +122,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.FacetParams;
 
 
@@ -760,6 +762,7 @@ public final class Protocol {
 
         // insert results to containers
         int term = count;
+        Collection<URIMetadataRow> storeDocs = new ArrayList<URIMetadataRow>(result.links.size());
         for ( final URIMetadataRow urlEntry : result.links ) {
             if ( term-- <= 0 ) {
                 break; // do not process more that requested (in case that evil peers fill us up with rubbish)
@@ -804,18 +807,13 @@ public final class Protocol {
             }
 
             // passed all checks, store url
-            try {
-                event.query.getSegment().fulltext().putMetadata(urlEntry);
-                ResultURLs.stack(
-                    ASCII.String(urlEntry.url().hash()),
-                    urlEntry.url().getHost(),
-                    event.peers.mySeed().hash.getBytes(),
-                    UTF8.getBytes(target.hash),
-                    EventOrigin.QUERIES);
-            } catch ( final IOException e ) {
-                Network.log.logWarning("could not store search result");
-                continue; // db-error
-            }
+            storeDocs.add(urlEntry);
+            ResultURLs.stack(
+                ASCII.String(urlEntry.url().hash()),
+                urlEntry.url().getHost(),
+                event.peers.mySeed().hash.getBytes(),
+                UTF8.getBytes(target.hash),
+                EventOrigin.QUERIES);
 
             if ( urlEntry.snippet() != null
                 && urlEntry.snippet().length() > 0
@@ -837,12 +835,18 @@ public final class Protocol {
                 }
             }
         }
+        
+        try {
+            event.query.getSegment().fulltext().putMetadata(storeDocs);
+        } catch ( final IOException e ) {
+            Network.log.logWarning("could not store search result", e);
+        }
 
         // store remote result to local result container
         // insert one container into the search result buffer
         // one is enough, only the references are used, not the word
-        event.rankingProcess.add(container.get(0), false, target.getName() + "/" + target.hash, result.joincount, time);
-        event.rankingProcess.addFinalize();
+        event.addRWIs(container.get(0), false, target.getName() + "/" + target.hash, result.joincount, time);
+        event.addFinalize();
         event.addExpectedRemoteReferences(-count);
 
         // insert the containers to the index
@@ -858,9 +862,9 @@ public final class Protocol {
         if ( result.references != null && result.references.length > 0 ) {
             Network.log.logInfo("remote search: peer " + target.getName() + " sent " + result.references.length + " topics");
             // add references twice, so they can be counted (must have at least 2 entries)
-            synchronized ( event.rankingProcess ) {
-                event.rankingProcess.addTopic(result.references);
-                event.rankingProcess.addTopic(result.references);
+            synchronized (event) {
+                event.addTopic(result.references);
+                event.addTopic(result.references);
             }
         }
         Network.log.logInfo("remote search: peer " + target.getName() + " sent " + container.get(0).size() + "/" + result.joincount + " references");
@@ -1050,7 +1054,7 @@ public final class Protocol {
         if (localsearch) {
             // search the local index
             try {
-                rsp = event.rankingProcess.getQuery().getSegment().fulltext().getDefaultConnector().query(solrQuery);
+                rsp = event.getQuery().getSegment().fulltext().getDefaultConnector().query(solrQuery);
                 docList = rsp.getResults();
             } catch (Throwable e) {
                 Network.log.logInfo("SEARCH failed (solr), localpeer (" + e.getMessage() + ")", e);
@@ -1114,6 +1118,7 @@ public final class Protocol {
 		
         Network.log.logInfo("SEARCH (solr), returned " + docList.size() + " out of " + docList.getNumFound() + " documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
         int term = count;
+        Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>(docList.size());
         for (final SolrDocument doc: docList) {
             if ( term-- <= 0 ) {
                 break; // do not process more that requested (in case that evil peers fill us up with rubbish)
@@ -1149,32 +1154,32 @@ public final class Protocol {
 
             // passed all checks, store url
             if (!localsearch) {
-                try {
-                    event.query.getSegment().fulltext().putDocument(event.query.getSegment().fulltext().getDefaultConfiguration().toSolrInputDocument(doc));
-                    ResultURLs.stack(
-                        ASCII.String(urlEntry.url().hash()),
-                        urlEntry.url().getHost(),
-                        event.peers.mySeed().hash.getBytes(),
-                        UTF8.getBytes(target.hash),
-                        EventOrigin.QUERIES);
-                } catch ( final IOException e ) {
-                    Network.log.logWarning("could not store search result", e);
-                    continue; // db-error
-                }
+                docs.add(event.query.getSegment().fulltext().getDefaultConfiguration().toSolrInputDocument(doc));
+                ResultURLs.stack(
+                    ASCII.String(urlEntry.url().hash()),
+                    urlEntry.url().getHost(),
+                    event.peers.mySeed().hash.getBytes(),
+                    UTF8.getBytes(target.hash),
+                    EventOrigin.QUERIES);
             }
 
             // add the url entry to the word indexes
             container.add(urlEntry);
         }
-
+        try {
+            event.query.getSegment().fulltext().putDocuments(docs);
+        } catch ( final IOException e ) {
+            Network.log.logWarning("could not store search result", e);
+        }
+        
         if (localsearch) {
-            event.add(container, facets, snippets, true, "localpeer", (int) docList.getNumFound());
-            event.rankingProcess.addFinalize();
+            event.addNodes(container, facets, snippets, true, "localpeer", (int) docList.getNumFound());
+            event.addFinalize();
             event.addExpectedRemoteReferences(-count);
             Network.log.logInfo("local search (solr): localpeer sent " + container.get(0).size() + "/" + docList.size() + " references");
         } else {
-            event.add(container, facets, snippets, false, target.getName() + "/" + target.hash, (int) docList.getNumFound());
-            event.rankingProcess.addFinalize();
+            event.addNodes(container, facets, snippets, false, target.getName() + "/" + target.hash, (int) docList.getNumFound());
+            event.addFinalize();
             event.addExpectedRemoteReferences(-count);
             Network.log.logInfo("remote search (solr): peer " + target.getName() + " sent " + (container.size() == 0 ? 0 : container.get(0).size()) + "/" + docList.size() + " references");
         }

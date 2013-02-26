@@ -28,15 +28,11 @@ package net.yacy.search.query;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -56,7 +52,6 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.RowHandleSet;
@@ -107,7 +102,7 @@ public final class QueryParams {
     private final int zonecode;
     public final int maxDistance;
     public final Bitfield constraint;
-    final boolean allofconstraint;
+    public final boolean allofconstraint;
     protected CacheStrategy snippetCacheStrategy;
     public final RankingProfile ranking;
     private final Segment indexSegment;
@@ -128,16 +123,6 @@ public final class QueryParams {
     public int maxfacets;
     private SolrQuery cachedQuery;
     private CollectionConfiguration solrSchema;
-    
-    // the following values are filled during the search process as statistics for the search
-    public final AtomicInteger local_rwi_available;  // the number of hits generated/ranked by the local search in rwi index
-    public final AtomicInteger local_rwi_stored;     // the number of existing hits by the local search in rwi index
-    public final AtomicInteger local_solr_available; // the number of hits generated/ranked by the local search in solr
-    public final AtomicInteger local_solr_stored;    // the number of existing hits by the local search in solr
-    public final AtomicInteger remote_available;     // the number of hits imported from remote peers (rwi/solr mixed)
-    public final AtomicInteger remote_stored;        // the number of existing hits at remote site
-    public final AtomicInteger remote_peerCount;     // the number of peers which contributed to the remote search result 
-    public final SortedSet<byte[]> misses; // url hashes that had been sorted out because of constraints in postranking
 
     public QueryParams(
             final String query_original,
@@ -180,14 +165,6 @@ public final class QueryParams {
         this.lat = 0.0d;
         this.lon = 0.0d;
         this.radius = 0.0d;
-        this.local_rwi_available = new AtomicInteger(0); // the number of results in the local peer after filtering
-        this.local_rwi_stored    = new AtomicInteger(0);
-        this.local_solr_available= new AtomicInteger(0);
-        this.local_solr_stored   = new AtomicInteger(0);
-        this.remote_stored       = new AtomicInteger(0);
-        this.remote_available    = new AtomicInteger(0); // the number of result contributions from all the remote peers
-        this.remote_peerCount    = new AtomicInteger(0); // the number of remote peers that have contributed
-        this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
         this.facetfields = new ArrayList<String>();
 
         this.solrSchema = indexSegment.fulltext().getDefaultConfiguration();
@@ -289,14 +266,6 @@ public final class QueryParams {
         this.lat = Math.floor(lat * this.kmNormal) / this.kmNormal;
         this.lon = Math.floor(lon * this.kmNormal) / this.kmNormal;
         this.radius = Math.floor(radius * this.kmNormal + 1) / this.kmNormal;
-        this.local_rwi_available = new AtomicInteger(0); // the number of results in the local peer after filtering
-        this.local_rwi_stored    = new AtomicInteger(0);
-        this.local_solr_available= new AtomicInteger(0);
-        this.local_solr_stored   = new AtomicInteger(0);
-        this.remote_stored       = new AtomicInteger(0);
-        this.remote_available    = new AtomicInteger(0); // the number of result contributions from all the remote peers
-        this.remote_peerCount    = new AtomicInteger(0); // the number of remote peers that have contributed
-        this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
         this.facetfields = new ArrayList<String>();
         
         this.solrSchema = indexSegment.fulltext().getDefaultConfiguration();
@@ -322,10 +291,6 @@ public final class QueryParams {
     public int itemsPerPage() {
         // the number of result lines that are displayed at once (size of result page)
         return this.itemsPerPage;
-    }
-
-    public int getResultCount() {
-        return this.local_rwi_available.get() + this.local_solr_stored.get() - this.misses.size();
     }
     
     public void setOffset(final int newOffset) {

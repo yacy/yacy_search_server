@@ -35,6 +35,7 @@ import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.document.LibraryProvider;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.EventTracker;
+import net.yacy.search.Switchboard;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
@@ -51,7 +52,7 @@ public class yacysearchtrailer {
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
-
+        final Switchboard sb = (Switchboard) env;
         final String eventID = post.get("eventID", "");
 
         // find search event
@@ -186,7 +187,7 @@ public class yacysearchtrailer {
         }
 
         // topics navigator
-        final ScoreMap<String> topicNavigator = theSearch.getTopicNavigator(MAX_TOPWORDS);
+        final ScoreMap<String> topicNavigator = sb.index.connectedRWI() ? theSearch.getTopicNavigator(MAX_TOPWORDS) : null;
         if (topicNavigator == null || topicNavigator.isEmpty()) {
             prop.put("nav-topics", "0");
         } else {
@@ -345,7 +346,7 @@ public class yacysearchtrailer {
         // about box
         final String aboutBody = env.getConfig("about.body", "");
         final String aboutHeadline = env.getConfig("about.headline", "");
-        if ((aboutBody.isEmpty() && aboutHeadline.isEmpty()) || theSearch.query.getResultCount() == 0) {
+        if ((aboutBody.isEmpty() && aboutHeadline.isEmpty()) || theSearch.getResultCount() == 0) {
             prop.put("nav-about", 0);
         } else {
             prop.put("nav-about", 1);
@@ -355,7 +356,7 @@ public class yacysearchtrailer {
 
         // category: location search
         // show only if there is a location database present and if there had been any search results
-        if (LibraryProvider.geoLoc.isEmpty() || theSearch.query.getResultCount() == 0) {
+        if (LibraryProvider.geoLoc.isEmpty() || theSearch.getResultCount() == 0) {
             prop.put("cat-location", 0);
         } else {
             prop.put("cat-location", 1);
@@ -363,7 +364,7 @@ public class yacysearchtrailer {
             prop.put(fileType, "cat-location_query", uriginalQuery);
             prop.put(fileType, "cat-location_queryenc", uriginalQuery.replace(' ', '+'));
         }
-        prop.put("num-results_totalcount", theSearch.query.getResultCount());
+        prop.put("num-results_totalcount", theSearch.getResultCount());
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theSearch.query.id(true), SearchEventType.FINALIZATION, "bottomline", 0, 0), false);
         return prop;
     }

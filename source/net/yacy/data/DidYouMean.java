@@ -158,12 +158,12 @@ public class DidYouMean {
 	            if (!(scored.sizeSmaller(2 * preSortSelection))) {
 	                break;
 	            }
-	            scored.inc(s, this.segment.getQueryCount(s));
+	            scored.inc(s, this.segment.getWordCountGuess(s.toString()));
 	        }
         } catch (ConcurrentModificationException e) {
         }
         final SortedSet<StringBuilder> countSorted = Collections.synchronizedSortedSet(new TreeSet<StringBuilder>(new headMatchingComparator(this.word, this.INDEX_SIZE_COMPARATOR)));
-        final int wc = this.segment.getQueryCount(this.word); // all counts must be greater than this
+        final int wc = this.segment.getWordCountGuess(this.word.toString()); // all counts must be greater than this
         while (!scored.isEmpty() && countSorted.size() < preSortSelection) {
             final StringBuilder s = scored.getMaxKey();
             final int score = scored.delete(s);
@@ -432,7 +432,7 @@ public class DidYouMean {
                 StringBuilder s;
                 try {
                     while ((s = DidYouMean.this.guessLib.take()) != POISON_STRING) {
-                        if (s.length() >= MinimumOutputWordLength && DidYouMean.this.segment.getQueryCount(s) > 0) {
+                        if (s.length() >= MinimumOutputWordLength && DidYouMean.this.segment.getWordCountGuess(s.toString()) > 0) {
                             DidYouMean.this.resultSet.add(s);
                         }
                         if (System.currentTimeMillis() > DidYouMean.this.timeLimit) {
@@ -451,8 +451,8 @@ public class DidYouMean {
 
         @Override
         public int compare(final StringBuilder o1, final StringBuilder o2) {
-            final int i1 = DidYouMean.this.segment.getQueryCount(o1);
-            final int i2 = DidYouMean.this.segment.getQueryCount(o2);
+            final int i1 = DidYouMean.this.segment.getWordCountGuess(o1.toString());
+            final int i2 = DidYouMean.this.segment.getWordCountGuess(o2.toString());
             if (i1 == i2) {
                 return WORD_LENGTH_COMPARATOR.compare(o1, o2);
             }

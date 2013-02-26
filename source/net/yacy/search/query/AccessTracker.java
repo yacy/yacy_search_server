@@ -60,15 +60,15 @@ public class AccessTracker {
         dumpFile = f;
     }
 
-    public static void add(final Location location, final QueryParams query) {
-        if (location == Location.local) synchronized (localSearches) {add(localSearches, query);}
-        if (location == Location.remote) synchronized (remoteSearches) {add(remoteSearches, query);}
+    public static void add(final Location location, final QueryParams query, int resultCount) {
+        if (location == Location.local) synchronized (localSearches) {add(localSearches, query, resultCount);}
+        if (location == Location.remote) synchronized (remoteSearches) {add(remoteSearches, query, resultCount);}
     }
 
-    private static void add(final LinkedList<QueryParams> list, final QueryParams query) {
+    private static void add(final LinkedList<QueryParams> list, final QueryParams query, int resultCount) {
         // learn that this word can be a word completion for the DidYouMeanLibrary
         String queryString = query.getQueryGoal().getOriginalQueryString(false);
-        if (query.getResultCount() > 10 && queryString != null && queryString.length() > 0) {
+        if (resultCount > 10 && queryString != null && queryString.length() > 0) {
             final StringBuilder sb = new StringBuilder(queryString);
             sb.append(queryString);
             WordCache.learn(sb);
@@ -80,7 +80,7 @@ public class AccessTracker {
         // shrink dump list but keep essentials in dump
         while (list.size() > maxSize || (!list.isEmpty() && MemoryControl.shortStatus())) {
             synchronized (list) {
-                if (!list.isEmpty()) addToDump(list.removeFirst()); else break;
+                if (!list.isEmpty()) addToDump(list.removeFirst(), resultCount); else break;
             }
         }
 
@@ -92,7 +92,7 @@ public class AccessTracker {
         while (!list.isEmpty()) {
             final QueryParams q = list.getFirst();
             if (q.starttime > timeout) break;
-            addToDump(list.removeFirst());
+            addToDump(list.removeFirst(), resultCount);
         }
     }
 
@@ -108,10 +108,10 @@ public class AccessTracker {
         return 0;
     }
 
-    private static void addToDump(final QueryParams query) {
+    private static void addToDump(final QueryParams query, int resultCount) {
         String queryString = query.getQueryGoal().getOriginalQueryString(false);
         if (queryString == null || queryString.isEmpty()) return;
-        addToDump(queryString, Integer.toString(query.getResultCount()), new Date(query.starttime));
+        addToDump(queryString, Integer.toString(resultCount), new Date(query.starttime));
     }
 
     public static void addToDump(String querystring, String resultcount) {
@@ -138,7 +138,7 @@ public class AccessTracker {
 
     public static void dumpLog() {
         while (!localSearches.isEmpty()) {
-            addToDump(localSearches.removeFirst());
+            addToDump(localSearches.removeFirst(), 0);
         }
         Thread t = new Thread() {
             @Override

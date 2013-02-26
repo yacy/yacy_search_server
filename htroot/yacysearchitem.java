@@ -94,14 +94,14 @@ public class yacysearchitem {
 
         // dynamically update count values
         prop.put("offset", theSearch.query.neededResults() - theSearch.query.itemsPerPage() + 1);
-        prop.put("itemscount", Formatter.number(Math.min((item < 0) ? theSearch.query.neededResults() : item + 1, theSearch.query.getResultCount())));
+        prop.put("itemscount", Formatter.number(Math.min((item < 0) ? theSearch.query.neededResults() : item + 1, theSearch.getResultCount())));
         prop.put("itemsperpage", Formatter.number(theSearch.query.itemsPerPage));
-        prop.put("totalcount", Formatter.number(theSearch.query.getResultCount(), true));
-        prop.put("localResourceSize", Formatter.number(theSearch.query.local_rwi_available.get() + theSearch.query.local_solr_available.get(), true));
-        prop.put("localMissCount", Formatter.number(theSearch.query.misses.size(), true));
-        prop.put("remoteResourceSize", Formatter.number(theSearch.query.remote_stored.get(), true));
-        prop.put("remoteIndexCount", Formatter.number(theSearch.query.remote_available.get(), true));
-        prop.put("remotePeerCount", Formatter.number(theSearch.query.remote_peerCount.get(), true));
+        prop.put("totalcount", Formatter.number(theSearch.getResultCount(), true));
+        prop.put("localResourceSize", Formatter.number(theSearch.local_rwi_available.get() + theSearch.local_solr_available.get(), true));
+        prop.put("localMissCount", Formatter.number(theSearch.misses.size(), true));
+        prop.put("remoteResourceSize", Formatter.number(theSearch.remote_stored.get(), true));
+        prop.put("remoteIndexCount", Formatter.number(theSearch.remote_available.get(), true));
+        prop.put("remotePeerCount", Formatter.number(theSearch.remote_peerCount.get(), true));
         prop.put("navurlBase", QueryParams.navurlBase("html", theSearch.query, null).toString());
         final String target_special_pattern = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
 
@@ -109,7 +109,7 @@ public class yacysearchitem {
             // text search
 
             // generate result object
-            final ResultEntry result = theSearch.oneResult(item, theSearch.query.isLocal() ? 1000 : 5000);
+            final ResultEntry result = theSearch.oneResult(item, theSearch.query.isLocal() ? 1000 : 3000);
             if (result == null) return prop; // no content
             final String resultUrlstring = result.urlstring();
             final DigestURI resultURL = result.url();

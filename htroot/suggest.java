@@ -67,7 +67,7 @@ public class suggest {
         final int count = (post == null) ? 10 : Math.min(20, post.getInt("count", 10));
 
         int c = 0;
-        if (more || (sb.index.getQueryCount(querystring) == 0)) {
+        if (more || (sb.index.getWordCountGuess(querystring) == 0)) {
             final DidYouMean didYouMean = new DidYouMean(sb.index, new StringBuilder(querystring));
             final SortedSet<StringBuilder> suggestions = didYouMean.getSuggestions(timeout, count);
             //[#[query]#,[#{suggestions}##[text]##(eol)#,::#(/eol)##{/suggestions}#]]

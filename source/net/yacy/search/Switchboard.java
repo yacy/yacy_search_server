@@ -3365,7 +3365,7 @@ public final class Switchboard extends serverSwitch {
                 }
 
                 final Map<DigestURI, String> links;
-                searchEvent.rankingProcess.oneFeederStarted();
+                searchEvent.oneFeederStarted();
                 try {
                     links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay);
                     if ( links != null ) {
@@ -3382,7 +3382,7 @@ public final class Switchboard extends serverSwitch {
                 } catch ( final Throwable e ) {
                     Log.logException(e);
                 } finally {
-                    searchEvent.rankingProcess.oneFeederTerminated();
+                    searchEvent.oneFeederTerminated();
                 }
             }
         }.start();
@@ -3466,7 +3466,7 @@ public final class Switchboard extends serverSwitch {
 
                 // if we have an url then try to load the rss
                 RSSReader rss = null;
-                searchEvent.rankingProcess.oneFeederStarted();
+                searchEvent.oneFeederStarted();
                 try {
                     final Response response =
                         Switchboard.this.loader.load(Switchboard.this.loader.request(url, true, false), CacheStrategy.NOCACHE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay);
@@ -3495,7 +3495,7 @@ public final class Switchboard extends serverSwitch {
                 } catch ( final Throwable e ) {
                     //Log.logException(e);
                 } finally {
-                    searchEvent.rankingProcess.oneFeederTerminated();
+                    searchEvent.oneFeederTerminated();
                 }
             }
         }.start();

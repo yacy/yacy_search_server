@@ -75,7 +75,6 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.query.RankingProcess;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -216,15 +215,25 @@ public class Segment {
         return this.termIndex.getBufferSize();
     }
 
-    public int getQueryCount(StringBuilder wordsb) {
-        return getQueryCount(wordsb.toString());
-    }
-
-    public int getQueryCount(String word) {
+    /**
+     * get a guess about the word count. This is only a guess because it uses the term index if present and this index may be
+     * influenced by index transmission processes in its statistic word distribution. However, it can be a hint for heuristics
+     * which use the word count. Please do NOT use this if the termIndex is not present because it otherwise uses the solr index
+     * which makes it painfull slow.
+     * @param word
+     * @return the number of references for this word.
+     */
+    public int getWordCountGuess(String word) {
         if (word == null || word.indexOf(':') >= 0 || word.indexOf(' ') >= 0 || word.indexOf('/') >= 0) return 0;
-        int count = this.termIndex == null ? 0 : this.termIndex.count(Word.word2hash(word));
-        try {count += this.fulltext.getDefaultConnector().getQueryCount(CollectionSchema.text_t.getSolrFieldName() + ':' + word);} catch (IOException e) {}
-        return count;
+        if (this.termIndex == null) {
+            try {
+                return (int) this.fulltext.getDefaultConnector().getQueryCount(CollectionSchema.text_t.getSolrFieldName() + ':' + word);
+            } catch (Throwable e) {
+                Log.logException(e);
+                return 0;
+            }
+        }
+        return this.termIndex.count(Word.word2hash(word));
     }
 
     public boolean exists(final String urlhash) {
@@ -511,7 +520,6 @@ public class Segment {
         // STORE PAGE INDEX INTO WORD INDEX DB
         int outlinksSame = document.inboundLinks().size();
         int outlinksOther = document.outboundLinks().size();
-        final RankingProcess rankingProcess = (searchEvent == null) ? null : searchEvent.rankingProcess;
         final int urlLength = urlNormalform.length();
         final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
 
@@ -555,13 +563,13 @@ public class Segment {
                     try {
                         container = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhash, 1);
                         container.add(ientry);
-                        rankingProcess.add(container, true, sourceName, -1, 5000);
+                        searchEvent.addRWIs(container, true, sourceName, -1, 5000);
                     } catch (final SpaceExceededException e) {
                         continue;
                     }
                 }
             }
-            if (searchEvent != null) searchEvent.rankingProcess.addFinalize();
+            if (searchEvent != null) searchEvent.addFinalize();
     
             // assign the catchall word
             ientry.setWord(wprop == null ? catchallWord : wprop); // we use one of the word properties as template to get the document characteristics

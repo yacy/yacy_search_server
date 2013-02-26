@@ -72,7 +72,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      * force an explicit merge of segments
      * @param maxSegments the maximum number of segments. Set to 1 for maximum optimization
      */
-    public void optimize(int maxSegments) {
+    public synchronized void optimize(int maxSegments) {
         try {
             this.server.optimize(true, true, maxSegments);
         } catch (Throwable e) {
@@ -91,7 +91,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     }
 
     @Override
-    public long getSize() {
+    public synchronized long getSize() {
         try {
             final QueryResponse rsp = query(AbstractSolrConnector.catchSuccessQuery);
             if (rsp == null) return 0;
@@ -109,34 +109,28 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      * @throws IOException
      */
     @Override
-    public void clear() throws IOException {
+    public synchronized void clear() throws IOException {
         try {
-            synchronized (this.server) {
-                this.server.deleteByQuery("*:*");
-                this.server.commit(true, true, false);
-            }
+            this.server.deleteByQuery("*:*");
+            this.server.commit(true, true, false);
         } catch (final Throwable e) {
             throw new IOException(e);
         }
     }
 
     @Override
-    public void delete(final String id) throws IOException {
+    public synchronized void delete(final String id) throws IOException {
         try {
-            synchronized (this.server) {
-                this.server.deleteById(id, -1);
-            }
+            this.server.deleteById(id, -1);
         } catch (final Throwable e) {
             throw new IOException(e);
         }
     }
 
     @Override
-    public void delete(final List<String> ids) throws IOException {
+    public synchronized void delete(final List<String> ids) throws IOException {
         try {
-            synchronized (this.server) {
-                this.server.deleteById(ids, -1);
-            }
+            this.server.deleteById(ids, -1);
         } catch (final Throwable e) {
             throw new IOException(e);
         }
@@ -148,11 +142,9 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      * @throws IOException
      */
     @Override
-    public void deleteByQuery(final String querystring) throws IOException {
+    public synchronized void deleteByQuery(final String querystring) throws IOException {
         try {
-            synchronized (this.server) {
-                this.server.deleteByQuery(querystring, -1);
-            }
+            this.server.deleteByQuery(querystring, -1);
         } catch (final Throwable e) {
             throw new IOException(e);
         }
@@ -213,7 +205,9 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             List<String> ids = new ArrayList<String>();
             for (SolrInputDocument solrdoc : solrdocs) ids.add((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
             try {
-                this.server.deleteById(ids);
+                synchronized (this.server) {
+                    this.server.deleteById(ids);
+                }
             } catch (SolrServerException e1) {}
             try {
                 synchronized (this.server) {

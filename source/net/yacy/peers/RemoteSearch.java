@@ -85,7 +85,7 @@ public class RemoteSearch extends Thread {
 
     @Override
     public void run() {
-        this.event.rankingProcess.oneFeederStarted();
+        this.event.oneFeederStarted();
         try {
             this.urls = Protocol.primarySearch(
                         this.event,
@@ -110,7 +110,7 @@ public class RemoteSearch extends Thread {
         } catch (final Exception e) {
             Log.logException(e);
         } finally {
-            this.event.rankingProcess.oneFeederTerminated();
+            this.event.oneFeederTerminated();
         }
     }
 
@@ -218,7 +218,7 @@ public class RemoteSearch extends Thread {
         Thread secondary = new Thread() {
             @Override
             public void run() {
-                event.rankingProcess.oneFeederStarted();
+                event.oneFeederStarted();
                 try {
                     int urls = Protocol.secondarySearch(
                                 event,
@@ -242,7 +242,7 @@ public class RemoteSearch extends Thread {
                 } catch (final Exception e) {
                     Log.logException(e);
                 } finally {
-                    event.rankingProcess.oneFeederTerminated();
+                    event.oneFeederTerminated();
                 }
             }
         };
@@ -268,7 +268,7 @@ public class RemoteSearch extends Thread {
                 while (tmpoffset + tmpcount <= count && tmpcount > 0) {
                     int urls = 0;
                     try {
-                        event.rankingProcess.oneFeederStarted();
+                        event.oneFeederStarted();
                         urls = Protocol.solrQuery(
                                         event,
                                         tmpoffset,
@@ -288,11 +288,11 @@ public class RemoteSearch extends Thread {
                     } catch (final Exception e) {
                         Log.logException(e);
                     } finally {
-                        event.rankingProcess.oneFeederTerminated();
+                        event.oneFeederTerminated();
                     }
                     if (urls < tmpcount) break; // there won't be more
                     tmpoffset += tmpcount;
-                    tmpcount = count - tmpoffset; // increase the tmpcount to get to all results in less time
+                    tmpcount = targetPeer == null ? 10 : count - tmpoffset;
                 }
             }
         };

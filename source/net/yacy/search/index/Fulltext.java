@@ -42,7 +42,6 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
@@ -362,19 +361,25 @@ public final class Fulltext {
         byte[] idb = ASCII.getBytes(id);
         try {
             if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-            Date sdDate = (Date) connector.getFieldById(id, CollectionSchema.last_modified.getSolrFieldName());
-            Date docDate = null;
-            if (sdDate == null || (docDate = SchemaConfiguration.getDate(doc, CollectionSchema.last_modified)) == null || sdDate.before(docDate)) {
+            //Date sdDate = (Date) connector.getFieldById(id, CollectionSchema.last_modified.getSolrFieldName());
+            //Date docDate = null;
+            //if (sdDate == null || (docDate = SchemaConfiguration.getDate(doc, CollectionSchema.last_modified)) == null || sdDate.before(docDate)) {
                 if (this.collectionConfiguration.contains(CollectionSchema.ip_s)) {
                     // ip_s needs a dns lookup which causes blockings during search here
                     connector.add(doc);
                 } else synchronized (this.solrInstances) {
                     connector.add(doc);
                 }
-            }
+            //}
         } catch (SolrException e) {
             throw new IOException(e.getMessage(), e);
         }
+        this.statsDump = null;
+        if (MemoryControl.shortStatus()) clearCache();
+    }
+    
+    public void putDocuments(final Collection<SolrInputDocument> docs) throws IOException {
+        this.getDefaultConnector().add(docs);
         this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCache();
     }
@@ -390,26 +395,38 @@ public final class Fulltext {
     }
 
     public void putMetadata(final URIMetadataRow entry) throws IOException {
-    	URIMetadataRow row = entry;
-
-        byte[] idb = row.hash();
-        String id = ASCII.String(idb);
+        byte[] idb = entry.hash();
+        //String id = ASCII.String(idb);
         try {
-        	if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-            SolrDocument sd = this.getDefaultConnector().getById(id);
-            if (sd == null || (new URIMetadataNode(sd)).isOlder(row)) {
+            if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
+            //SolrDocument sd = this.getDefaultConnector().getById(id);
+            //if (sd == null || (new URIMetadataNode(sd)).isOlder(entry)) {
                 if (this.collectionConfiguration.contains(CollectionSchema.ip_s)) {
                     // ip_s needs a dns lookup which causes blockings during search here
-                    this.getDefaultConnector().add(getDefaultConfiguration().metadata2solr(row));
+                    this.getDefaultConnector().add(getDefaultConfiguration().metadata2solr(entry));
                 }  else synchronized (this.solrInstances) {
-                    this.getDefaultConnector().add(getDefaultConfiguration().metadata2solr(row));
+                    this.getDefaultConnector().add(getDefaultConfiguration().metadata2solr(entry));
                 }
-            }
+            //}
         } catch (SolrException e) {
             throw new IOException(e.getMessage(), e);
         }
         this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCache();
+    }
+
+    public void putMetadata(final Collection<URIMetadataRow> entries) throws IOException {
+        Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>(entries.size());
+        for (URIMetadataRow entry: entries) {
+            byte[] idb = entry.hash();
+            //String id = ASCII.String(idb);
+            if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
+            //SolrDocument sd = this.getDefaultConnector().getById(id, CollectionSchema.last_modified.getSolrFieldName(), CollectionSchema.load_date_dt.getSolrFieldName());
+            //if (sd == null || (new URIMetadataNode(sd)).isOlder(entry)) {
+                docs.add(getDefaultConfiguration().metadata2solr(entry));
+            //}
+        }
+        putDocuments(docs);
     }
 
     /**

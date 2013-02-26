@@ -34,14 +34,14 @@ public class yacysearchlatestinfo {
         // dynamically update count values
         final int offset = theSearch.query.neededResults() - theSearch.query.itemsPerPage() + 1;
         prop.put("offset", offset);
-        prop.put("itemscount",Formatter.number(offset + theSearch.query.itemsPerPage >= theSearch.query.getResultCount() ? offset + theSearch.query.getResultCount() % theSearch.query.itemsPerPage - 1 : offset + theSearch.query.itemsPerPage - 1));
+        prop.put("itemscount",Formatter.number(offset + theSearch.query.itemsPerPage >= theSearch.getResultCount() ? offset + theSearch.getResultCount() % theSearch.query.itemsPerPage - 1 : offset + theSearch.query.itemsPerPage - 1));
         prop.put("itemsperpage", theSearch.query.itemsPerPage);
-        prop.put("totalcount", Formatter.number(theSearch.query.getResultCount(), true));
-        prop.put("localResourceSize", Formatter.number(theSearch.query.local_rwi_available.get() + theSearch.query.local_solr_available.get(), true));
-        prop.put("localMissCount", Formatter.number(theSearch.query.misses.size(), true));
-        prop.put("remoteResourceSize", Formatter.number(theSearch.query.remote_stored.get(), true));
-        prop.put("remoteIndexCount", Formatter.number(theSearch.query.remote_available.get(), true));
-        prop.put("remotePeerCount", Formatter.number(theSearch.query.remote_peerCount.get(), true));
+        prop.put("totalcount", Formatter.number(theSearch.getResultCount(), true));
+        prop.put("localResourceSize", Formatter.number(theSearch.local_rwi_available.get() + theSearch.local_solr_available.get(), true));
+        prop.put("localMissCount", Formatter.number(theSearch.misses.size(), true));
+        prop.put("remoteResourceSize", Formatter.number(theSearch.remote_stored.get(), true));
+        prop.put("remoteIndexCount", Formatter.number(theSearch.remote_available.get(), true));
+        prop.put("remotePeerCount", Formatter.number(theSearch.remote_peerCount.get(), true));
         prop.putJSON("navurlBase", QueryParams.navurlBase("html", theSearch.query, null).toString());
 
         return prop;

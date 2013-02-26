@@ -210,7 +210,11 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
      */
     public final byte[] hash() {
         // in case that the object was initialized without a known url hash, compute it now
-        if (this.hash == null) this.hash = urlHashComputation();
+        if (this.hash == null) {
+            synchronized (this) {
+                if (this.hash == null) this.hash = urlHashComputation();
+            }
+        }
         return this.hash;
     }
 
@@ -394,8 +398,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     @Override
     public final boolean isLocal() {
         if (this.isFile()) return true;
-        if (this.hash == null) this.hash = urlHashComputation();
-        return domDomain(this.hash) == 7;
+        return domDomain(hash()) == 7;
     }
 
     /**

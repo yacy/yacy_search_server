@@ -83,9 +83,7 @@ public class SearchEventCache {
             event = eventEntry.getValue();
             if (event == null) continue;
             if (all || event.getEventTime() + acceptTime < System.currentTimeMillis()) {
-                if (event.workerAlive()) {
-                    event.cleanup();
-                }
+                event.cleanup();
                 i.remove();
                 cacheDelete++;
             }
@@ -104,14 +102,6 @@ public class SearchEventCache {
             cacheHit++;
         }
         return event;
-    }
-
-    private static int countAliveThreads() {
-        int alive = 0;
-        for (final SearchEvent e: lastEvents.values()) {
-            if (e.workerAlive()) alive++;
-        }
-        return alive;
     }
 
     public static SearchEvent getEvent(
@@ -146,7 +136,7 @@ public class SearchEventCache {
         }
         if (event == null) {
             // check if there are too many other searches alive now
-            Log.logInfo("SearchEventCache", "getEvent: " + lastEvents.size() + " in cache; " + countAliveThreads() + " alive");
+            Log.logInfo("SearchEventCache", "getEvent: " + lastEvents.size() + " in cache");
 
             // start a new event
             Switchboard sb = Switchboard.getSwitchboard();

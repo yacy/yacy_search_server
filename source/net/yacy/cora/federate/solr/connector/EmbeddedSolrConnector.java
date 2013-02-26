@@ -102,7 +102,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
      * because we can do this with more efficiently in a different way for embedded indexes.
      */
     @Override
-    public long getSize() {
+    public synchronized long getSize() {
         String threadname = Thread.currentThread().getName();
         Thread.currentThread().setName("solr query: size");
         EmbeddedSolrServer ess = (EmbeddedSolrServer) this.server;
@@ -154,7 +154,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         return req;
     }
     
-    public SolrQueryResponse query(SolrQueryRequest req) throws SolrException {
+    public synchronized SolrQueryResponse query(SolrQueryRequest req) throws SolrException {
         final long startTime = System.currentTimeMillis();
 
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
@@ -190,7 +190,10 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             String q = params.get("q");
             String threadname = Thread.currentThread().getName();
             if (q != null) Thread.currentThread().setName("solr query: q = " + q);
-            QueryResponse rsp = this.server.query(params);
+            QueryResponse rsp;
+            synchronized (this) {
+                rsp = this.server.query(params);
+            }
             if (q != null) Thread.currentThread().setName(threadname);
             if (rsp != null) log.info(rsp.getResults().size() + " results for q=" + q);
             return rsp;

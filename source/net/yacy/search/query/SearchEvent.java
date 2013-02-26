@@ -28,18 +28,27 @@ package net.yacy.search.query;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -61,12 +70,15 @@ import net.yacy.document.LargeNumberCache;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.RemoteSearch;
@@ -77,11 +89,17 @@ import net.yacy.repository.LoaderDispatcher;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
+import net.yacy.search.index.Segment;
+import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.snippet.ResultEntry;
+import net.yacy.search.snippet.TextSnippet;
+import net.yacy.search.snippet.TextSnippet.ResultClass;
 
 public final class SearchEvent {
     
+    private static final int max_results_preparation = 3000, max_results_preparation_special = -1; // -1 means 'no limit'
+
     private static long noRobinsonLocalRWISearch = 0;
     static {
         try {
@@ -92,26 +110,23 @@ public final class SearchEvent {
 
     public static Log log = new Log("SEARCH");
 
-    private static final long maxWaitPerResult = 30;
     public static final int SNIPPET_MAX_LENGTH = 220;
-    private final static int SNIPPET_WORKER_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors() * 2);
     private static final int MAX_TOPWORDS = 12; // default count of words for topicnavigagtor
 
     private long eventTime;
     public QueryParams query;
     public final SeedDB peers;
     final WorkTables workTables;
-    public  final RankingProcess rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
     public final SecondarySearchSuperviser secondarySearchSuperviser;
     public final List<RemoteSearch> primarySearchThreadsL;
-    protected Thread[] secondarySearchThreads;
+    public Thread[] secondarySearchThreads;
     public final SortedMap<byte[], String> preselectedPeerHashes;
     private final Thread localSearchThread;
     private final SortedMap<byte[], Integer> IACount;
     private final SortedMap<byte[], String> IAResults;
     private final SortedMap<byte[], HeuristicResult> heuristics;
     private byte[] IAmaxcounthash, IAneardhthash;
-    private final Thread localsearch;
+    public Thread rwiProcess, localsearch;
     private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences; // counter for referenced that had been sorted out for other reasons
     public final ScoreMap<String> hostNavigator; // a counter for the appearance of host names
     public final ScoreMap<String> authorNavigator; // a counter for the appearances of authors
@@ -120,18 +135,42 @@ public final class SearchEvent {
     public final ScoreMap<String> filetypeNavigator; // a counter for file types
     public final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
     private final int topicNavigatorCount; // if 0 no topicNavigator, holds expected number of terms for the topicNavigator
-    protected final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack;
-    protected final WeakPriorityBlockingQueue<ResultEntry>  result;
-    protected final LoaderDispatcher                        loader;
-    protected final HandleSet                               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
-    protected final boolean                                 deleteIfSnippetFail;
-    private   SnippetWorker[]                               workerThreads;
+    private final LoaderDispatcher                        loader;
+    private final HandleSet                               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
+    private final boolean                                 deleteIfSnippetFail;
     private long                                            urlRetrievalAllTime;
-    protected long                                          snippetComputationAllTime;
-    protected ConcurrentHashMap<String, String> snippets;
+    private long                                          snippetComputationAllTime;
+    private ConcurrentHashMap<String, String> snippets;
     private final boolean remote;
-    private boolean cleanupState;
+    private SortedMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
+    private final ScoreMap<String> ref; // reference score computation for the commonSense heuristic
+    private final long maxtime;
+    private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
+    private final int[] flagcount; // flag counter
+    private final AtomicInteger feedersAlive, feedersTerminated;
+    private boolean addRunning;
+    private final AtomicInteger receivedRemoteReferences;
+    private final ReferenceOrder order;
+    private final HandleSet urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
+    private final Map<String, String> taggingPredicates; // a map from tagging vocabulary names to tagging predicate uris
+    private final WeakPriorityBlockingQueue<WordReferenceVars> rwiStack; // thats the bag where the RWI search process writes to
+    private final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack; // thats the bag where the solr results are written to
+    private final WeakPriorityBlockingQueue<ResultEntry>  resultList; // thats the result list where the actual search result is waiting to be displayed
 
+    // the following values are filled during the search process as statistics for the search
+    public final AtomicInteger local_rwi_available;  // the number of hits generated/ranked by the local search in rwi index
+    public final AtomicInteger local_rwi_stored;     // the number of existing hits by the local search in rwi index
+    public final AtomicInteger local_solr_available; // the number of hits generated/ranked by the local search in solr
+    public final AtomicInteger local_solr_stored;    // the number of existing hits by the local search in solr
+    public final AtomicInteger remote_available;     // the number of hits imported from remote peers (rwi/solr mixed)
+    public final AtomicInteger remote_stored;        // the number of existing hits at remote site
+    public final AtomicInteger remote_peerCount;     // the number of peers which contributed to the remote search result 
+    public final SortedSet<byte[]> misses; // url hashes that had been sorted out because of constraints in postranking
+
+    public int getResultCount() {
+        return this.rwiStack.sizeQueue() + this.nodeStack.sizeQueue() + this.resultList.sizeAvailable();
+    }
+    
     protected SearchEvent(
         final QueryParams query,
         final SeedDB peers,
@@ -144,6 +183,7 @@ public final class SearchEvent {
         final int burstRobinsonPercent,
         final int burstMultiwordPercent,
         final boolean deleteIfSnippetFail) {
+        
         if (MemoryControl.available() < 1024 * 1024 * 100) SearchEventCache.cleanupEvents(false);
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.peers = peers;
@@ -151,50 +191,20 @@ public final class SearchEvent {
         this.query = query;
         this.loader = loader;
         this.nodeStack = new WeakPriorityBlockingQueue<URIMetadataNode>(300, false);
-        
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
         // prepare configured search navigation
         final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "");
-        if (navcfg.contains("authors")) {
-            this.authorNavigator = new ConcurrentScoreMap<String>();
-        } else {
-            this.authorNavigator = null;
-        }
-        if (navcfg.contains("namespace")) {
-            this.namespaceNavigator = new ConcurrentScoreMap<String>();
-        } else {
-            this.namespaceNavigator = null;
-        }
-        if (navcfg.contains("hosts")) {
-            this.hostNavigator = new ConcurrentScoreMap<String>();
-        } else {
-            this.hostNavigator = null;
-        }
-        if (navcfg.contains("protocol")) {
-            this.protocolNavigator = new ConcurrentScoreMap<String>();
-        } else {
-            this.protocolNavigator = null;
-        }
-        if (navcfg.contains("filetype")) {
-            this.filetypeNavigator = new ConcurrentScoreMap<String>();
-        } else {
-            this.filetypeNavigator = null;
-        }
-        if (navcfg.contains("topics")) {
-            topicNavigatorCount = MAX_TOPWORDS;
-        } else
-            topicNavigatorCount = 0;
-
+        this.authorNavigator = navcfg.contains("authors") ? new ConcurrentScoreMap<String>() : null;
+        this.namespaceNavigator = navcfg.contains("namespace") ? new ConcurrentScoreMap<String>() : null;
+        this.hostNavigator = navcfg.contains("hosts") ? new ConcurrentScoreMap<String>() : null;
+        this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>() : null;
+        this.filetypeNavigator = navcfg.contains("filetype") ? new ConcurrentScoreMap<String>() : null;
+        this.topicNavigatorCount = navcfg.contains("topics") ? MAX_TOPWORDS : 0;
         this.vocabularyNavigator = new ConcurrentHashMap<String, ScoreMap<String>>();
-        
-        this.snippets = new ConcurrentHashMap<String, String>();
-            
-        this.secondarySearchSuperviser =
-            (this.query.getQueryGoal().getIncludeHashes().size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
-        if ( this.secondarySearchSuperviser != null ) {
-            this.secondarySearchSuperviser.start();
-        }
+        this.snippets = new ConcurrentHashMap<String, String>(); 
+        this.secondarySearchSuperviser = (this.query.getQueryGoal().getIncludeHashes().size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
+        if (this.secondarySearchSuperviser != null) this.secondarySearchSuperviser.start();
         this.secondarySearchThreads = null;
         this.preselectedPeerHashes = preselectedPeerHashes;
         this.IAResults = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
@@ -203,28 +213,53 @@ public final class SearchEvent {
         this.IAmaxcounthash = null;
         this.IAneardhthash = null;
         this.localSearchThread = null;
-        this.remote = 
-            (peers != null && peers.sizeConnected() > 0)
-                && (this.query.domType == QueryParams.Searchdom.CLUSTER || (this.query.domType == QueryParams.Searchdom.GLOBAL && peers
-                    .mySeed()
-                    .getFlagAcceptRemoteIndex()));
+        this.remote = (peers != null && peers.sizeConnected() > 0) && (this.query.domType == QueryParams.Searchdom.CLUSTER || (this.query.domType == QueryParams.Searchdom.GLOBAL && peers.mySeed().getFlagAcceptRemoteIndex()));
+        this.local_rwi_available = new AtomicInteger(0); // the number of results in the local peer after filtering
+        this.local_rwi_stored    = new AtomicInteger(0);
+        this.local_solr_available= new AtomicInteger(0);
+        this.local_solr_stored   = new AtomicInteger(0);
+        this.remote_stored       = new AtomicInteger(0);
+        this.remote_available    = new AtomicInteger(0); // the number of result contributions from all the remote peers
+        this.remote_peerCount    = new AtomicInteger(0); // the number of remote peers that have contributed
+        this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
         final long start = System.currentTimeMillis();
 
         // do a soft commit for fresh results
-        query.getSegment().fulltext().commit(true);
+        //query.getSegment().fulltext().commit(true);
         
-        // prepare a local RWI search
-        // initialize a ranking process that is the target for data
-        // that is generated concurrently from local and global search threads
-        this.rankingProcess = new RankingProcess(this.query, remote);
+        // we collect the urlhashes and construct a list with urlEntry objects
+        // attention: if minEntries is too high, this method will not terminate within the maxTime
+        // sortorder: 0 = hash, 1 = url, 2 = ranking
+        this.localSearchInclusion = null;
+        this.ref = new ConcurrentScoreMap<String>();
+        this.maxtime = query.maxtime;
+        int stackMaxsize = query.snippetCacheStrategy == null || query.snippetCacheStrategy == CacheStrategy.CACHEONLY ? max_results_preparation_special : max_results_preparation;
+        this.rwiStack = new WeakPriorityBlockingQueue<WordReferenceVars>(stackMaxsize, false);
+        this.doubleDomCache = new ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>>();
+        this.flagcount = new int[32];
+        for ( int i = 0; i < 32; i++ ) {
+            this.flagcount[i] = 0;
+        }
+        this.feedersAlive = new AtomicInteger(0);
+        this.feedersTerminated = new AtomicInteger(0);
+        this.addRunning = true;
+        this.receivedRemoteReferences = new AtomicInteger(0);
+        this.order = new ReferenceOrder(this.query.ranking, UTF8.getBytes(this.query.targetlang));
+        this.urlhashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
+        this.taggingPredicates = new HashMap<String, String>();
+        for (Tagging t: LibraryProvider.autotagging.getVocabularies()) {
+            this.taggingPredicates.put(t.getName(), t.getPredicate());
+        }
 
         // start a local solr search
         this.localsearch = RemoteSearch.solrRemoteSearch(this, 100, null /*this peer*/, Switchboard.urlBlacklist);
 
         // start a local RWI search concurrently
-        if (this.remote || this.peers.mySeed().getBirthdate() < noRobinsonLocalRWISearch) {
+        this.rwiProcess = null;
+        if (query.getSegment().connectedRWI() && (!this.remote || this.peers.mySeed().getBirthdate() < noRobinsonLocalRWISearch)) {
             // we start the local search only if this peer is doing a remote search or when it is doing a local search and the peer is old
-            if (query.getSegment().connectedRWI()) this.rankingProcess.start();
+            rwiProcess = new RWIProcess();
+            rwiProcess.start();
         }
 
         if (this.remote) {
@@ -270,7 +305,7 @@ public final class SearchEvent {
             if ( generateAbstracts ) {
                 // we need the results now
                 try {
-                    if (query.getSegment().connectedRWI()) this.rankingProcess.join();
+                    if (rwiProcess != null && query.getSegment().connectedRWI()) rwiProcess.join();
                 } catch ( final Throwable e ) {
                 }
                 // compute index abstracts
@@ -278,9 +313,9 @@ public final class SearchEvent {
                 int maxcount = -1;
                 long mindhtdistance = Long.MAX_VALUE, l;
                 byte[] wordhash;
-                assert !query.getSegment().connectedRWI() || this.rankingProcess.searchContainerMap() != null;
-                if (this.rankingProcess.searchContainerMap() != null) {
-                    for (final Map.Entry<byte[], ReferenceContainer<WordReference>> entry : this.rankingProcess.searchContainerMap().entrySet()) {
+                assert !query.getSegment().connectedRWI() || this.searchContainerMap() != null;
+                if (this.searchContainerMap() != null) {
+                    for (final Map.Entry<byte[], ReferenceContainer<WordReference>> entry : this.searchContainerMap().entrySet()) {
                         wordhash = entry.getKey();
                         final ReferenceContainer<WordReference> container = entry.getValue();
                         assert (Base64Order.enhancedCoder.equal(container.getTermHash(), wordhash)) : "container.getTermHash() = " + ASCII.String(container.getTermHash()) + ", wordhash = " + ASCII.String(wordhash);
@@ -298,12 +333,12 @@ public final class SearchEvent {
                         this.IAResults.put(wordhash, WordReferenceFactory.compressIndex(container, null, 1000).toString());
                     }
                 }
-                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ABSTRACTS, "", this.rankingProcess.searchContainerMap() == null ? 0 : this.rankingProcess.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
+                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ABSTRACTS, "", this.searchContainerMap() == null ? 0 : this.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
             } else {
                 // give process time to accumulate a certain amount of data
                 // before a reading process wants to get results from it
                 try {
-                    if (query.getSegment().connectedRWI()) this.rankingProcess.join(100);
+                    if (rwiProcess != null && query.getSegment().connectedRWI()) rwiProcess.join(100);
                 } catch ( final Throwable e ) {
                 }
                 // this will reduce the maximum waiting time until results are available to 100 milliseconds
@@ -313,10 +348,9 @@ public final class SearchEvent {
 
         // start worker threads to fetch urls and snippets
         this.deleteIfSnippetFail = deleteIfSnippetFail;
-        this.cleanupState = false;
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
-        this.result = new WeakPriorityBlockingQueue<ResultEntry>(Math.max(1000, 10 * query.itemsPerPage()), true); // this is the result, enriched with snippets, ranked and ordered by ranking
+        this.resultList = new WeakPriorityBlockingQueue<ResultEntry>(Math.max(1000, 10 * query.itemsPerPage()), true); // this is the result, enriched with snippets, ranked and ordered by ranking
 
         // snippets do not need to match with the complete query hashes,
         // only with the query minus the stopwords which had not been used for the search
@@ -332,11 +366,6 @@ public final class SearchEvent {
             this.snippetFetchWordHashes.excludeDestructive(Switchboard.stopwordHashes);
         }
 
-        // start worker threads to fetch urls and snippets
-        this.workerThreads = null;
-        deployWorker(Math.min(SNIPPET_WORKER_THREADS, query.itemsPerPage), query.neededResults());
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(query.id(true), SearchEventType.SNIPPETFETCH_START, ((this.workerThreads == null) ? "no" : this.workerThreads.length) + " online snippet fetch threads started", 0, 0), false);
-        
         // clean up events
         SearchEventCache.cleanupEvents(false);
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.CLEANUP, "", 0, 0), false);
@@ -346,6 +375,176 @@ public final class SearchEvent {
             SearchEventCache.cleanupEvents(false);
         }
         SearchEventCache.put(this.query.id(false), this);
+    }
+
+    private class RWIProcess extends Thread {
+    
+        public RWIProcess() {
+            super();
+        }
+        
+        @Override
+        public void run() {
+    
+            if (query.getSegment().termIndex() == null) return; // nothing to do; this index is not used
+            
+            // do a search
+            oneFeederStarted();
+    
+            // sort the local containers and truncate it to a limited count,
+            // so following sortings together with the global results will be fast
+            try {
+                final long timer = System.currentTimeMillis();
+                final TermSearch<WordReference> search =
+                    SearchEvent.this.query
+                        .getSegment()
+                        .termIndex()
+                        .query(
+                                SearchEvent.this.query.getQueryGoal().getIncludeHashes(),
+                                SearchEvent.this.query.getQueryGoal().getExcludeHashes(),
+                            null,
+                            Segment.wordReferenceFactory,
+                            SearchEvent.this.query.maxDistance);
+                SearchEvent.this.localSearchInclusion = search.inclusion();
+                final ReferenceContainer<WordReference> index = search.joined();
+                EventTracker.update(
+                    EventTracker.EClass.SEARCH,
+                    new ProfilingGraph.EventSearch(
+                            SearchEvent.this.query.id(true),
+                        SearchEventType.JOIN,
+                        SearchEvent.this.query.getQueryGoal().getOriginalQueryString(false),
+                        index.size(),
+                        System.currentTimeMillis() - timer),
+                    false);
+                if ( !index.isEmpty() ) {
+                    addRWIs(index, true, "local index: " + SearchEvent.this.query.getSegment().getLocation(), -1, SearchEvent.this.maxtime);
+                    SearchEvent.this.addFinalize();
+                }
+            } catch ( final Exception e ) {
+                Log.logException(e);
+            } finally {
+                oneFeederTerminated();
+            }
+        }
+    }
+
+    public void addRWIs(
+        final ReferenceContainer<WordReference> index,
+        final boolean local,
+        final String resourceName,
+        final int fullResource,
+        final long maxtime) {
+        // we collect the urlhashes and construct a list with urlEntry objects
+        // attention: if minEntries is too high, this method will not terminate within the maxTime
+        //Log.logInfo("SearchEvent", "added a container, size = " + index.size());
+
+        this.addRunning = true;
+        assert (index != null);
+        if (index.isEmpty()) return;
+        if (local) {
+            this.local_rwi_stored.addAndGet(fullResource);
+        } else {
+            assert fullResource >= 0 : "fullResource = " + fullResource;
+            this.remote_stored.addAndGet(fullResource);
+            this.remote_peerCount.incrementAndGet();
+        }
+        long timer = System.currentTimeMillis();
+
+        // normalize entries
+        final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index, maxtime);
+        int is = index.size();
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
+            this.query.id(true),
+            SearchEventType.NORMALIZING,
+            resourceName,
+            is,
+            System.currentTimeMillis() - timer), false);
+        if (!local) this.receivedRemoteReferences.addAndGet(is);
+
+        // iterate over normalized entries and select some that are better than currently stored
+        timer = System.currentTimeMillis();
+
+        // apply all constraints
+        long timeout = System.currentTimeMillis() + maxtime;
+        try {
+            WordReferenceVars iEntry;
+            long remaining;
+            pollloop: while ( true ) {
+                remaining = timeout - System.currentTimeMillis();
+                if (remaining <= 0) {
+                    Log.logWarning("SearchEvent", "terminated 'add' loop before poll time-out = " + remaining + ", decodedEntries.size = " + decodedEntries.size());
+                    break;
+                }
+                iEntry = decodedEntries.poll(remaining, TimeUnit.MILLISECONDS);
+                if (iEntry == null) {
+                    Log.logWarning("SearchEvent", "terminated 'add' loop after poll time-out = " + remaining + ", decodedEntries.size = " + decodedEntries.size());
+                    break pollloop;
+                }
+                if (iEntry == WordReferenceVars.poison) {
+                    break pollloop;
+                }
+                assert (iEntry.urlhash().length == index.row().primaryKeyLength);
+
+                // doublecheck for urls
+                if (this.urlhashes.has(iEntry.urlhash())) continue pollloop;
+
+                // increase flag counts
+                Bitfield flags = iEntry.flags();
+                for (int j = 0; j < 32; j++) {
+                    if (flags.get(j)) this.flagcount[j]++;
+                }
+
+                // check constraints
+                if (!this.testFlags(flags)) continue pollloop;
+
+                // check document domain
+                if (this.query.contentdom.getCode() > 0 &&
+                    ((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Condenser.flag_cat_hasaudio))) || 
+                     (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Condenser.flag_cat_hasvideo))) ||
+                     (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Condenser.flag_cat_hasimage))) ||
+                     (this.query.contentdom == ContentDomain.APP && !(flags.get(Condenser.flag_cat_hasapp))))) {
+                    continue pollloop;
+                }
+
+                // count domZones
+                //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
+
+                // check site constraints
+                final String hosthash = iEntry.hosthash();
+                if ( this.query.modifier.sitehash == null ) {
+                    if (this.query.siteexcludes != null && this.query.siteexcludes.contains(hosthash)) continue pollloop;
+                } else {
+                    // filter out all domains that do not match with the site constraint
+                    if (!hosthash.equals(this.query.modifier.sitehash)) continue pollloop;
+                }
+
+                // finally extend the double-check and insert result to stack
+                this.urlhashes.putUnique(iEntry.urlhash());
+                rankingtryloop: while (true) {
+                    try {
+                        this.rwiStack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
+                        break rankingtryloop;
+                    } catch ( final ArithmeticException e ) {
+                        // this may happen if the concurrent normalizer changes values during cardinal computation
+                        continue rankingtryloop;
+                    }
+                }
+                // increase counter for statistics
+                if (local) this.local_rwi_available.incrementAndGet(); else this.remote_available.incrementAndGet();
+            }
+            if (System.currentTimeMillis() >= timeout) Log.logWarning("SearchEvent", "rwi normalization ended with timeout = " + maxtime);
+
+        } catch ( final InterruptedException e ) {
+        } catch ( final SpaceExceededException e ) {
+        }
+
+        //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
+            this.query.id(true),
+            SearchEventType.PRESORT,
+            resourceName,
+            index.size(),
+            System.currentTimeMillis() - timer), false);
     }
     
     public long getEventTime() {
@@ -357,7 +556,6 @@ public final class SearchEvent {
     }
 
     protected void cleanup() {
-        this.cleanupState = true;
 
         // stop all threads
         if ( this.primarySearchThreadsL != null ) {
@@ -379,20 +577,6 @@ public final class SearchEvent {
                             search.interrupt();
                         }
                     }
-                }
-            }
-        }
-
-        // call the worker threads and ask them to stop
-        for ( final SnippetWorker w : this.workerThreads ) {
-            if ( w != null && w.isAlive() ) {
-                w.pleaseStop();
-                w.interrupt();
-                // the interrupt may occur during a MD5 computation which is resistant against interruption
-                // therefore set some more interrupts on the process
-                int ic = 10;
-                while ( ic-- > 0 & w.isAlive() ) {
-                    w.interrupt();
                 }
             }
         }
@@ -448,47 +632,35 @@ public final class SearchEvent {
             return this.heuristics.get(urlhash);
         }
     }
-
-    protected boolean workerAlive() {
-        if ( this.workerThreads == null ) {
-            return false;
-        }
-        for ( final SnippetWorker w : this.workerThreads ) {
-            if ( w != null && w.isAlive() ) {
-                return true;
-            }
-        }
-        return false;
-    }
     
-    public void add(
-        final List<URIMetadataNode> index,
+    public void addNodes(
+        final List<URIMetadataNode> nodeList,
         final Map<String, ReversibleScoreMap<String>> facets, // a map from a field name to scored values
         final Map<String, String> solrsnippets, // a map from urlhash to snippet text
         final boolean local,
         final String resourceName,
         final int fullResource) {
 
-        this.rankingProcess.addBegin();
+        this.addBegin();
         this.snippets.putAll(solrsnippets);
-        assert (index != null);
-        if (index.isEmpty()) return;
+        assert (nodeList != null);
+        if (nodeList.isEmpty()) return;
 
         if (local) {
-            this.query.local_solr_stored.set(fullResource);
+            this.local_solr_stored.set(fullResource);
         } else {
             assert fullResource >= 0 : "fullResource = " + fullResource;
-            this.query.remote_stored.addAndGet(fullResource);
-            this.query.remote_peerCount.incrementAndGet();
+            this.remote_stored.addAndGet(fullResource);
+            this.remote_peerCount.incrementAndGet();
         }
 
         long timer = System.currentTimeMillis();
 
         // normalize entries
-        int is = index.size();
+        int is = nodeList.size();
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.NORMALIZING, resourceName, is, System.currentTimeMillis() - timer), false);
         if (!local) {
-            this.rankingProcess.receivedRemoteReferences.addAndGet(is);
+            this.receivedRemoteReferences.addAndGet(is);
         }
 
         // iterate over normalized entries and select some that are better than currently stored
@@ -556,10 +728,9 @@ public final class SearchEvent {
             }
         }
         
-        
         // apply all constraints
         try {
-            pollloop: for (URIMetadataNode iEntry: index) {
+            pollloop: for (URIMetadataNode iEntry: nodeList) {
                 
                 if ( !this.query.urlMask_isCatchall ) {
                     // check url mask
@@ -569,18 +740,18 @@ public final class SearchEvent {
                 }
                 
                 // doublecheck for urls
-                if (this.rankingProcess.urlhashes.has(iEntry.hash())) {
+                if (this.urlhashes.has(iEntry.hash())) {
                     continue pollloop;
                 }
 
                 // increase flag counts
                 for ( int j = 0; j < 32; j++ ) {
-                    if (iEntry.flags().get(j)) this.rankingProcess.flagCount()[j]++;
+                    if (iEntry.flags().get(j)) this.flagCount()[j]++;
                 }
 
                 // check constraints
                 Bitfield flags = iEntry.flags();
-                if (!this.rankingProcess.testFlags(flags)) continue pollloop;
+                if (!this.testFlags(flags)) continue pollloop;
 
                 // check document domain
                 if (this.query.contentdom.getCode() > 0 &&
@@ -603,10 +774,10 @@ public final class SearchEvent {
                 }
 
                 // finally extend the double-check and insert result to stack
-                this.rankingProcess.urlhashes.putUnique(iEntry.hash());
+                this.urlhashes.putUnique(iEntry.hash());
                 rankingtryloop: while (true) {
                     try {
-                        this.nodeStack.put(new ReverseElement<URIMetadataNode>(iEntry, this.rankingProcess.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
+                        this.nodeStack.put(new ReverseElement<URIMetadataNode>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
                         break rankingtryloop;
                     } catch ( final ArithmeticException e ) {
                         // this may happen if the concurrent normalizer changes values during cardinal computation
@@ -614,19 +785,11 @@ public final class SearchEvent {
                     }
                 }
                 // increase counter for statistics
-                if (local) this.query.local_solr_available.incrementAndGet(); else this.query.remote_available.incrementAndGet();
+                if (local) this.local_solr_available.incrementAndGet(); else this.remote_available.incrementAndGet();
             }
         } catch ( final SpaceExceededException e ) {
         }
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.PRESORT, resourceName, index.size(), System.currentTimeMillis() - timer), false);
-    }
-    
-    private long waitTimeRecommendation() {
-        return this.maxExpectedRemoteReferences.get() == 0 ? 0 :
-                Math.min(maxWaitPerResult,
-                    Math.min(
-                        maxWaitPerResult * this.expectedRemoteReferences.get() / this.maxExpectedRemoteReferences.get(),
-                        maxWaitPerResult * (100 - Math.min(100, this.rankingProcess.receivedRemoteReferences.get())) / 100));
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.PRESORT, resourceName, nodeList.size(), System.currentTimeMillis() - timer), false);
     }
     
     public void addExpectedRemoteReferences(int x) {
@@ -636,59 +799,44 @@ public final class SearchEvent {
         this.expectedRemoteReferences.addAndGet(x);
     }
 
-    private URIMetadataNode takeRWI(final boolean skipDoubleDom, final long waitingtime) {
+    /**
+     * Take one best entry from the rwiStack and create a node entry out of it.
+     * There is no waiting or blocking; if no entry is available this just returns null
+     * If the sjupDoubleDom option is selected, only different hosts are returned until no such rwi exists.
+     * Then the best entry from domain stacks are returned.
+     * @param skipDoubleDom
+     * @return a node from a rwi entry if one exist or null if not
+     */
+    private URIMetadataNode pullOneRWI(final boolean skipDoubleDom) {
 
         // returns from the current RWI list the best entry and removes this entry from the list
         WeakPriorityBlockingQueue<WordReferenceVars> m;
         WeakPriorityBlockingQueue.Element<WordReferenceVars> rwi = null;
-        WeakPriorityBlockingQueue.Element<URIMetadataNode> page;
 
-        // take one entry from the stack if there are entries on that stack or the feeding is not yet finished
-        try {
-            int loops = 0; // a loop counter to terminate the reading if all the results are from the same domain
-            // wait some time if we did not get so much remote results so far to get a better ranking over remote results
-            // we wait at most 30 milliseconds to get a maximum total waiting time of 300 milliseconds for 10 results
-            long wait = Math.min(waitingtime, waitTimeRecommendation());
-            if ( wait > 0 ) {
-                //System.out.println("*** RWIProcess extra wait: " + wait + "ms; expectedRemoteReferences = " + this.expectedRemoteReferences.get() + ", receivedRemoteReferences = " + this.receivedRemoteReferences.get() + ", initialExpectedRemoteReferences = " + this.maxExpectedRemoteReferences.get());
-                Thread.sleep(wait);
-            }
-            // loop as long as we can expect that we should get more results
-            final long timeout = System.currentTimeMillis() + waitingtime;
-            while (((!this.rankingProcess.feedingIsFinished() && this.rankingProcess.addRunning()) || this.nodeStack.sizeQueue() > 0 || this.rankingProcess.rwiQueueSize() > 0) &&
-                   (this.query.itemsPerPage < 1 || loops++ < this.query.itemsPerPage || (loops > 1000 && !this.rankingProcess.doubleDomCache.isEmpty()))) {
-                page = null;
-                rwi = null;
-                if ( waitingtime <= 0 ) {
-                    page = this.rankingProcess.addRunning() ? this.nodeStack.poll(waitingtime) : this.nodeStack.poll();
-                    if (page == null) rwi = this.rankingProcess.addRunning() ? this.rankingProcess.rwiStack.poll(waitingtime) : this.rankingProcess.rwiStack.poll();
-                } else {
-                    timeoutloop: while ( System.currentTimeMillis() < timeout ) {
-                        //System.out.println("### RWIProcess feedingIsFinished() = " + feedingIsFinished() + ", this.nodeStack.sizeQueue() = " + this.nodeStack.sizeQueue());
-                        if (this.rankingProcess.feedingIsFinished() && this.rankingProcess.rwiQueueSize() == 0 && this.nodeStack.sizeQueue() == 0) break timeoutloop;
-                        page = this.nodeStack.poll(50);
-                        if (page != null) break timeoutloop;
-                        rwi = this.rankingProcess.rwiStack.poll(50);
-                        if (rwi != null) break timeoutloop;
-                    }
-                }
-                if (page != null) return page.getElement();
-                if (rwi == null) break;
+        mainloop: while (true) {
+            int c = 0;
+            pollloop: while (this.rwiStack.sizeQueue() > 0 && c++ < 10) {
+                rwi = this.rwiStack.poll();
+                if (rwi == null) return null;
                 if (!skipDoubleDom) {
-                    return this.query.getSegment().fulltext().getMetadata(rwi.getElement(), rwi.getWeight());
+                    URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi.getElement(), rwi.getWeight());
+                    if (node == null) continue pollloop;
+                    return node;
                 }
-
+        
                 // check doubledom
                 final String hosthash = rwi.getElement().hosthash();
-                m = this.rankingProcess.doubleDomCache.get(hosthash);
+                m = this.doubleDomCache.get(hosthash);
                 if (m == null) {
-                    synchronized ( this.rankingProcess.doubleDomCache ) {
-                        m = this.rankingProcess.doubleDomCache.get(hosthash);
-                        if ( m == null ) {
+                    synchronized ( this.doubleDomCache ) {
+                        m = this.doubleDomCache.get(hosthash);
+                        if (m == null) {
                             // first appearance of dom. we create an entry to signal that one of that domain was already returned
-                            m = new WeakPriorityBlockingQueue<WordReferenceVars>(this.query.snippetCacheStrategy == null || this.query.snippetCacheStrategy == CacheStrategy.CACHEONLY ? RankingProcess.max_results_preparation_special : RankingProcess.max_results_preparation, false);
-                            this.rankingProcess.doubleDomCache.put(hosthash, m);
-                            return this.query.getSegment().fulltext().getMetadata(rwi.getElement(), rwi.getWeight());
+                            m = new WeakPriorityBlockingQueue<WordReferenceVars>(this.query.snippetCacheStrategy == null || this.query.snippetCacheStrategy == CacheStrategy.CACHEONLY ? max_results_preparation_special : max_results_preparation, false);
+                            this.doubleDomCache.put(hosthash, m);
+                            URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi.getElement(), rwi.getWeight());
+                            if (node == null) continue pollloop;
+                            return node;
                         }
                         // second appearances of dom
                         m.put(rwi);
@@ -697,59 +845,61 @@ public final class SearchEvent {
                     m.put(rwi);
                 }
             }
-        } catch ( final InterruptedException e1 ) {
-        }
-        if (this.rankingProcess.doubleDomCache.isEmpty()) {
-            //Log.logWarning("RWIProcess", "doubleDomCache.isEmpty");
-            return null;
-        }
-
-        // no more entries in sorted RWI entries. Now take Elements from the doubleDomCache
-        // find best entry from all caches
-        WeakPriorityBlockingQueue.Element<WordReferenceVars> bestEntry = null;
-        WeakPriorityBlockingQueue.Element<WordReferenceVars> o;
-        final Iterator<WeakPriorityBlockingQueue<WordReferenceVars>> i = this.rankingProcess.doubleDomCache.values().iterator();
-        while ( i.hasNext() ) {
-            try {
-                m = i.next();
-            } catch ( final ConcurrentModificationException e ) {
-                Log.logException(e);
-                continue; // not the best solution...
+    
+            // no more entries in sorted RWI entries. Now take Elements from the doubleDomCache
+            if (this.doubleDomCache.isEmpty()) {
+                //Log.logWarning("SearchEvent", "doubleDomCache.isEmpty");
+                return null;
             }
-            if (m == null) continue;
-            if (m.isEmpty()) continue;
+    
+            // find best entry from all caches
+            WeakPriorityBlockingQueue.Element<WordReferenceVars> bestEntry = null;
+            WeakPriorityBlockingQueue.Element<WordReferenceVars> o;
+            final Iterator<WeakPriorityBlockingQueue<WordReferenceVars>> i = this.doubleDomCache.values().iterator();
+            doubleloop: while (i.hasNext()) {
+                try {
+                    m = i.next();
+                } catch (final ConcurrentModificationException e) {
+                    Log.logException(e);
+                    continue mainloop; // not the best solution...
+                }
+                if (m == null) continue doubleloop;
+                if (m.isEmpty()) continue doubleloop;
+                if (bestEntry == null) {
+                    bestEntry = m.peek();
+                    continue doubleloop;
+                }
+                o = m.peek();
+                if (o == null) continue doubleloop;
+                if (o.getWeight() < bestEntry.getWeight()) bestEntry = o;
+            }
             if (bestEntry == null) {
-                bestEntry = m.peek();
-                continue;
+                //Log.logWarning("SearchEvent", "bestEntry == null (1)");
+                return null;
             }
-            o = m.peek();
-            if (o == null) continue;
-            if (o.getWeight() < bestEntry.getWeight()) bestEntry = o;
-        }
-        if (bestEntry == null) {
-            //Log.logWarning("RWIProcess", "bestEntry == null (1)");
-            return null;
-        }
-
-        // finally remove the best entry from the doubledom cache
-        m = this.rankingProcess.doubleDomCache.get(bestEntry.getElement().hosthash());
-        if (m != null) {
-            bestEntry = m.poll();
-            if (bestEntry != null && m.sizeAvailable() == 0) {
-                synchronized ( this.rankingProcess.doubleDomCache ) {
-                    if (m.sizeAvailable() == 0) {
-                        this.rankingProcess.doubleDomCache.remove(bestEntry.getElement().hosthash());
+    
+            // finally remove the best entry from the doubledom cache
+            m = this.doubleDomCache.get(bestEntry.getElement().hosthash());
+            if (m != null) {
+                bestEntry = m.poll();
+                if (bestEntry != null && m.sizeAvailable() == 0) {
+                    synchronized ( this.doubleDomCache ) {
+                        if (m.sizeAvailable() == 0) {
+                            this.doubleDomCache.remove(bestEntry.getElement().hosthash());
+                        }
                     }
                 }
             }
+            if (bestEntry == null) {
+                //Log.logWarning("SearchEvent", "bestEntry == null (2)");
+                return null;
+            }
+            URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(bestEntry.getElement(), bestEntry.getWeight());
+            if (node == null) continue mainloop;
+            return node;
         }
-        if (bestEntry == null) {
-            //Log.logWarning("RWIProcess", "bestEntry == null (2)");
-            return null;
-        }
-        return this.query.getSegment().fulltext().getMetadata(bestEntry.getElement(), bestEntry.getWeight());
     }
-
+    
     /**
      * get one metadata entry from the ranked results. This will be the 'best' entry so far according to the
      * applied ranking. If there are no more entries left or the timeout limit is reached then null is
@@ -757,33 +907,23 @@ public final class SearchEvent {
      * the future by calling this.feedingIsFinished()
      *
      * @param skipDoubleDom should be true if it is wanted that double domain entries are skipped
-     * @param waitingtime the time this method may take for a result computation
      * @return a metadata entry for a url
      */
-    public URIMetadataNode takeURL(final boolean skipDoubleDom, final long waitingtime) {
+    public URIMetadataNode pullOneFilteredFromRWI(final boolean skipDoubleDom) {
         // returns from the current RWI list the best URL entry and removes this entry from the list
-        final long timeout = System.currentTimeMillis() + Math.max(10, waitingtime);
         int p = -1;
-        long timeleft;
-        while ( (timeleft = timeout - System.currentTimeMillis()) > 0 ) {
-            //System.out.println("timeleft = " + timeleft);
-            final URIMetadataNode page = takeRWI(skipDoubleDom, timeleft);
-            if (page == null) {
-                //Log.logWarning("RWIProcess", "takeRWI returned null");
-                return null; // all time was already wasted in takeRWI to get another element
-            }
+        URIMetadataNode page;
+        while ((page = pullOneRWI(skipDoubleDom)) != null) {
 
-            if ( !this.query.urlMask_isCatchall ) {
+            if (!this.query.urlMask_isCatchall && !page.matches(this.query.urlMask)) {
                 // check url mask
-                if ( !page.matches(this.query.urlMask) ) {
-                    this.query.misses.add(page.hash());
-                    continue;
-                }
+                this.misses.add(page.hash());
+                continue;
             }
 
             // check for more errors
-            if ( page.url() == null ) {
-                this.query.misses.add(page.hash());
+            if (page.url() == null) {
+                this.misses.add(page.hash());
                 continue; // rare case where the url is corrupted
             }
 
@@ -793,29 +933,23 @@ public final class SearchEvent {
                 (this.query.contentdom == Classification.ContentDomain.AUDIO && page.url().getContentDomain() != Classification.ContentDomain.AUDIO) ||
                 (this.query.contentdom == Classification.ContentDomain.VIDEO && page.url().getContentDomain() != Classification.ContentDomain.VIDEO) ||
                 (this.query.contentdom == Classification.ContentDomain.APP && page.url().getContentDomain() != Classification.ContentDomain.APP)) && this.query.urlMask_isCatchall) {
-                this.query.misses.add(page.hash());
+                this.misses.add(page.hash());
                 continue;
             }
             
             // Check for blacklist
             if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page)) {
-                this.query.misses.add(page.hash());
+                this.misses.add(page.hash());
                 continue;
             }
 
-			// contentcontrol
-			if (Switchboard.getSwitchboard().getConfigBool(
-					"contentcontrol.enabled", false) == true) {
-
-				FilterEngine f = ContentControlFilterUpdateThread
-						.getNetworkFilter();
-				if (f != null) {
-					if (!f.isListed(page.url(), null)) {
-						this.query.misses.add(page.hash());
-						continue;
-					}
+			// content control
+			if (Switchboard.getSwitchboard().getConfigBool("contentcontrol.enabled", false)) {
+				FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
+				if (f != null && !f.isListed(page.url(), null)) {
+				    this.misses.add(page.hash());
+				    continue;
 				}
-
 			}
 
             final String pageurl = page.url().toNormalform(true);
@@ -823,27 +957,27 @@ public final class SearchEvent {
             final String pagetitle = page.dc_title().toLowerCase();
 
             // check exclusion
-            if ( !this.query.getQueryGoal().getExcludeHashes().isEmpty() &&
+            if (!this.query.getQueryGoal().getExcludeHashes().isEmpty() &&
                 ((QueryParams.anymatch(pagetitle, this.query.getQueryGoal().getExcludeHashes()))
                 || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.getQueryGoal().getExcludeHashes()))
                 || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.getQueryGoal().getExcludeHashes())))) {
-                this.query.misses.add(page.hash());
+                this.misses.add(page.hash());
                 continue;
             }
 
             // check index-of constraint
             if ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof)) && (!(pagetitle.startsWith("index of")))) {
                 final Iterator<byte[]> wi = this.query.getQueryGoal().getIncludeHashes().iterator();
-                while ( wi.hasNext() ) {
+                while (wi.hasNext()) {
                     this.query.getSegment().termIndex().removeDelayed(wi.next(), page.hash());
                 }
-                this.query.misses.add(page.hash());
+                this.misses.add(page.hash());
                 continue;
             }
 
             // check location constraint
             if ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_haslocation)) && (page.lat() == 0.0 || page.lon() == 0.0)) {
-                this.query.misses.add(page.hash());
+                this.misses.add(page.hash());
                 continue;
             }
 
@@ -854,14 +988,14 @@ public final class SearchEvent {
                 double lonDelta = this.query.lon - lon;
                 double distance = Math.sqrt(latDelta * latDelta + lonDelta * lonDelta); // pythagoras
                 if (distance > this.query.radius) {
-                    this.query.misses.add(page.hash());
+                    this.misses.add(page.hash());
                     continue;
                 }
             }
 
             // check Scanner
             if (this.query.filterscannerfail && !Scanner.acceptURL(page.url())) {
-                this.query.misses.add(page.hash());
+                this.misses.add(page.hash());
                 continue;
             }
 
@@ -882,7 +1016,6 @@ public final class SearchEvent {
 
             return page; // accept url
         }
-        Log.logWarning("RWIProcess", "loop terminated");
         return null;
     }
     
@@ -893,179 +1026,204 @@ public final class SearchEvent {
     public long getSnippetComputationTime() {
         return this.snippetComputationAllTime;
     }
-/**
- * get topic navigator terms from rankig process
- * @param count number of requestd words
- *      0 = get default number of words otherwise get 
- * @return 
- */
+    
     public ScoreMap<String> getTopicNavigator(final int count ) {
         if (this.topicNavigatorCount > 0 && count >= 0) { //topicNavigatorCount set during init, 0=no nav
-            return this.rankingProcess.getTopics(count != 0 ? count : this.topicNavigatorCount, 500);
+            return this.getTopics(count != 0 ? count : this.topicNavigatorCount, 500);
         }
         return null;
     }
 
-    public ResultEntry oneResult(final int item, final long timeout) {
-        // if there is not yet a worker alive, start one
-        if (!anyWorkerAlive()) {
-            deployWorker(Math.min(SNIPPET_WORKER_THREADS, this.query.itemsPerPage), this.query.neededResults());
+    public void drainStacksToResult() {
+        // we take one entry from both stacks at the same time
+        Element<URIMetadataNode> localEntryElement = this.nodeStack.sizeQueue() > 0 ? this.nodeStack.poll() : null;
+        URIMetadataNode localEntry = localEntryElement == null ? null : localEntryElement.getElement();
+        if (localEntry != null) addResult(getSnippet(localEntry, null));
+        if (localEntry == null) {
+            URIMetadataNode p2pEntry = pullOneFilteredFromRWI(true);
+            if (p2pEntry != null) addResult(getSnippet(p2pEntry, null));
+        } else {
+            new Thread() {
+                public void run() {
+                    URIMetadataNode p2pEntry = pullOneFilteredFromRWI(true);
+                    if (p2pEntry != null) addResult(getSnippet(p2pEntry, null));
+                }
+            }.start();
         }
-        // wait until local data is there
-        while (this.localsearch != null && this.localsearch.isAlive() && this.result.sizeAvailable() < item) try {
-            if (!anyWorkerAlive()) {
-                deployWorker(Math.min(SNIPPET_WORKER_THREADS, this.query.itemsPerPage), this.query.neededResults());
+    }
+    
+    /**
+     * place the result to the result vector and apply post-ranking
+     * @param resultEntry
+     */
+    public void addResult(ResultEntry resultEntry) {
+        if (resultEntry == null) return;
+        long ranking = resultEntry.word() == null ? 0 : Long.valueOf(this.order.cardinal(resultEntry.word()));
+        ranking += postRanking(resultEntry, new ConcurrentScoreMap<String>() /*this.snippetProcess.rankingProcess.getTopicNavigator(10)*/);
+        resultEntry.ranking = ranking;
+        this.resultList.put(new ReverseElement<ResultEntry>(resultEntry, ranking)); // remove smallest in case of overflow
+        this.addTopics(resultEntry);
+    }
+
+    private long postRanking(final ResultEntry rentry, final ScoreMap<String> topwords) {
+        long r = 0;
+
+        // for media search: prefer pages with many links
+        r += rentry.limage() << this.query.ranking.coeff_cathasimage;
+        r += rentry.laudio() << this.query.ranking.coeff_cathasaudio;
+        r += rentry.lvideo() << this.query.ranking.coeff_cathasvideo;
+        r += rentry.lapp()   << this.query.ranking.coeff_cathasapp;
+
+        // apply citation count
+        //System.out.println("POSTRANKING CITATION: references = " + rentry.referencesCount() + ", inbound = " + rentry.llocal() + ", outbound = " + rentry.lother());
+        r += (128 * rentry.referencesCount() / (1 + 2 * rentry.llocal() + rentry.lother())) << this.query.ranking.coeff_citation;
+
+        // prefer hit with 'prefer' pattern
+        if (this.query.prefer.matcher(rentry.url().toNormalform(true)).matches()) r += 256 << this.query.ranking.coeff_prefer;
+        if (this.query.prefer.matcher(rentry.title()).matches()) r += 256 << this.query.ranking.coeff_prefer;
+
+        // apply 'common-sense' heuristic using references
+        final String urlstring = rentry.url().toNormalform(true);
+        final String[] urlcomps = MultiProtocolURI.urlComps(urlstring);
+        final String[] descrcomps = MultiProtocolURI.splitpattern.split(rentry.title().toLowerCase());
+        for (final String urlcomp : urlcomps) {
+            int tc = topwords.get(urlcomp);
+            if (tc > 0) r += Math.max(1, tc) << this.query.ranking.coeff_urlcompintoplist;
+        }
+        for (final String descrcomp : descrcomps) {
+            int tc = topwords.get(descrcomp);
+            if (tc > 0) r += Math.max(1, tc) << this.query.ranking.coeff_descrcompintoplist;
+        }
+
+        // apply query-in-result matching
+        final HandleSet urlcomph = Word.words2hashesHandles(urlcomps);
+        final HandleSet descrcomph = Word.words2hashesHandles(descrcomps);
+        final Iterator<byte[]> shi = this.query.getQueryGoal().getIncludeHashes().iterator();
+        byte[] queryhash;
+        while (shi.hasNext()) {
+            queryhash = shi.next();
+            if (urlcomph.has(queryhash)) r += 256 << this.query.ranking.coeff_appurl;
+            if (descrcomph.has(queryhash)) r += 256 << this.query.ranking.coeff_app_dc_title;
+        }
+        return r;
+    }
+    
+    public ResultEntry getSnippet(URIMetadataNode page, final CacheStrategy cacheStrategy) {
+        if (page == null) return null;
+
+        String solrsnippet = this.snippets.get(ASCII.String(page.hash()));
+        if (solrsnippet != null && solrsnippet.length() > 0) {
+            final TextSnippet snippet = new TextSnippet(page.hash(), solrsnippet, true, ResultClass.SOURCE_CACHE, "");
+            return new ResultEntry(page, this.query.getSegment(), this.peers, snippet, null, 0);
+        }
+        
+        if (cacheStrategy == null) {
+            final TextSnippet snippet = new TextSnippet(
+                    null,
+                    page,
+                    this.snippetFetchWordHashes,
+                    null,
+                    ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof))),
+                    SearchEvent.SNIPPET_MAX_LENGTH,
+                    !this.query.isLocal());
+            return new ResultEntry(page, this.query.getSegment(), this.peers, snippet, null, 0); // result without snippet
+        }
+
+        // load snippet
+        if (page.url().getContentDomain() == Classification.ContentDomain.TEXT || page.url().getContentDomain() == Classification.ContentDomain.ALL) {
+            // attach text snippet
+            long startTime = System.currentTimeMillis();
+            final TextSnippet snippet = new TextSnippet(
+                    this.loader,
+                    page,
+                    this.snippetFetchWordHashes,
+                    cacheStrategy,
+                    ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof))),
+                    180,
+                    !this.query.isLocal());
+            final long snippetComputationTime = System.currentTimeMillis() - startTime;
+            SearchEvent.log.logInfo("text snippet load time for " + page.url() + ": " + snippetComputationTime + ", " + (!snippet.getErrorCode().fail() ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
+
+            if (!snippet.getErrorCode().fail()) {
+                // we loaded the file and found the snippet
+                return new ResultEntry(page, this.query.getSegment(), this.peers, snippet, null, snippetComputationTime); // result with snippet attached
+            } else if (cacheStrategy.mustBeOffline()) {
+                // we did not demand online loading, therefore a failure does not mean that the missing snippet causes a rejection of this result
+                // this may happen during a remote search, because snippet loading is omitted to retrieve results faster
+                return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, snippetComputationTime); // result without snippet
+            } else {
+                // problems with snippet fetch
+                if (this.snippetFetchWordHashes.has(Segment.catchallHash)) {
+                    // we accept that because the word cannot be on the page
+                    return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, 0);
+                }
+                final String reason = "no text snippet; errorCode = " + snippet.getErrorCode();
+                if (this.deleteIfSnippetFail) {
+                    this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.getQueryGoal().getIncludeHashes(), reason);
+                }
+                SearchEvent.log.logInfo("sorted out url " + page.url().toNormalform(true) + " during search: " + reason);
+                return null;
             }
-            this.localsearch.join(10);
-        } catch (InterruptedException e) {}
+        }
+        return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, 0); // result without snippet
+    }
+    
+    
+    public ResultEntry oneResult(final int item, final long timeout) {        
         // check if we already retrieved this item
         // (happens if a search pages is accessed a second time)
         final long finishTime = System.currentTimeMillis() + timeout;
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "started, item = " + item + ", available = " + this.result.sizeAvailable(), 0, 0), false);
-        
-        // we must wait some time until the first result page is full to get enough elements for ranking
-        final long waittimeout = System.currentTimeMillis() + 300;
-        if (this.remote && item < 10 && !this.rankingProcess.feedingIsFinished()) {
-            // the first 10 results have a very special timing to get most of the remote results ordered
-            // before they are presented on the first lines .. yes sleeps seem to be bad. but how shall we predict how long other
-            // peers will take until they respond?
-            long sleep = item == 0 ? 400 : (10 - item) * 9; // the first result takes the longest time
-            try { Thread.sleep(sleep); } catch (final InterruptedException e1) { Log.logException(e1); }
-        }
-        int thisRankingQueueSize, lastRankingQueueSize = 0;
-        if (item < 10) {
-            while (
-              ((thisRankingQueueSize = this.rankingProcess.rwiQueueSize()) > 0 || !this.rankingProcess.feedingIsFinished()) &&
-               (thisRankingQueueSize > lastRankingQueueSize || this.result.sizeAvailable() < item + 1) &&
-               System.currentTimeMillis() < waittimeout &&
-               anyWorkerAlive()
-              ) {
-                // wait a little time to get first results in the search
-                lastRankingQueueSize = thisRankingQueueSize;
-                try { Thread.sleep(20); } catch (final InterruptedException e1) {}
-            }
-        }
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "started, item = " + item + ", available = " + this.getResultCount(), 0, 0), false);
 
-        if (this.result.sizeAvailable() > item) {
+        // check if we have a success
+        if (this.resultList.sizeAvailable() > item) {
             // we have the wanted result already in the result array .. return that
-            final ResultEntry re = this.result.element(item).getElement();
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "prefetched, item = " + item + ", available = " + this.result.sizeAvailable() + ": " + re.urlstring(), 0, 0), false);
+            final ResultEntry re = this.resultList.element(item).getElement();
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "prefetched, item = " + item + ", available = " + this.getResultCount() + ": " + re.urlstring(), 0, 0), false);
             return re;
         }
 
-        // finally wait until enough results are there produced from the snippet fetch process
-        WeakPriorityBlockingQueue.Element<ResultEntry> entry = null;
-        while (System.currentTimeMillis() < finishTime) {
-            Log.logInfo("SnippetProcess", "item = " + item + "; anyWorkerAlive=" + anyWorkerAlive() + "; this.rankingProcess.isAlive() = " + this.rankingProcess.isAlive() + "; this.rankingProcess.feedingIsFinished() = " + this.rankingProcess.feedingIsFinished() + "; this.result.sizeAvailable() = " + this.result.sizeAvailable() + ", this.rankingProcess.sizeQueue() = " + this.rankingProcess.rwiQueueSize() + ", this.rankingProcess.nodeStack.sizeAvailable() = " + this.nodeStack.sizeAvailable());
-
-            if (!anyWorkerAlive() && !this.rankingProcess.isAlive() && this.result.sizeAvailable() + this.rankingProcess.rwiQueueSize() + this.nodeStack.sizeAvailable() <= item && this.rankingProcess.feedingIsFinished()) {
-                break; // the fail case
+        // we must wait some time until the first result page is full to get enough elements for ranking
+        /*
+        if (this.remote && item < 10 && !this.feedingIsFinished()) {
+            // the first 10 results have a very special timing to get most of the remote results ordered
+            // before they are presented on the first lines .. yes sleeps seem to be bad. but how shall we predict how long other
+            // peers will take until they respond?
+            long stoptime = System.currentTimeMillis() + Math.min(timeout, item == 0 ? 100 : (10 - item) * 9); // the first result takes the longest time
+            while (System.currentTimeMillis() < stoptime) { 
+                //drainStacksToResult();
+                try { Thread.sleep(10); } catch (final InterruptedException e) { Log.logException(e); }
             }
-
-            // deploy worker to get more results
-            if (!anyWorkerAlive()) {
-                deployWorker(Math.min(SNIPPET_WORKER_THREADS, this.query.itemsPerPage), this.query.neededResults());
-            }
-
-            try {entry = this.result.element(item, 50);} catch (final InterruptedException e) {break;}
-            if (entry != null) break;
+        }
+        */
+        
+        // now do this as long as needed
+        while ((!this.feedingIsFinished() || this.rwiQueueSize() > 0 || this.nodeStack.sizeQueue() > 0) &&
+               this.resultList.sizeAvailable() < item + 1 && System.currentTimeMillis() < finishTime) {
+            drainStacksToResult();
+            try { Thread.sleep(10); } catch (final InterruptedException e) { Log.logException(e); }
+        }
+        
+        // check if we have a success
+        if (this.resultList.sizeAvailable() > item) {
+            // we have the wanted result already in the result array .. return that
+            final ResultEntry re = this.resultList.element(item).getElement();
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "fetched, item = " + item + ", available = " + this.getResultCount() + ": " + re.urlstring(), 0, 0), false);
+            return re;
         }
 
-        // finally, if there is something, return the result
-        if (entry == null) {
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "not found, item = " + item + ", available = " + this.result.sizeAvailable(), 0, 0), false);
-            return null;
-        }
-        final ResultEntry re = entry.getElement();
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "retrieved, item = " + item + ", available = " + this.result.sizeAvailable() + ": " + re.urlstring(), 0, 0), false);
-        if (item == this.query.offset + this.query.itemsPerPage - 1) stopAllWorker(); // we don't need more
-        return re;
+        // no success
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "not found, item = " + item + ", available = " + this.getResultCount(), 0, 0), false);
+        return null;
     }
 
     public ArrayList<WeakPriorityBlockingQueue.Element<ResultEntry>> completeResults(final long waitingtime) {
         final long timeout = System.currentTimeMillis() + waitingtime;
-        while (this.result.sizeAvailable() < this.query.neededResults() && anyWorkerAlive() && System.currentTimeMillis() < timeout) {
-            try {Thread.sleep(10);} catch (final InterruptedException e) {}
+        int i = 0;
+        while (this.resultList.sizeAvailable() < this.query.neededResults() && System.currentTimeMillis() < timeout) {
+            oneResult(i++, timeout - System.currentTimeMillis());
         }
-        return this.result.list(Math.min(this.query.neededResults(), this.result.sizeAvailable()));
-    }
-
-
-    private void deployWorker(int deployCount, final int neededResults) {
-        if (this.cleanupState ||
-            (this.rankingProcess.feedingIsFinished() && this.rankingProcess.rwiQueueSize() == 0 && this.nodeStack.sizeAvailable() == 0) ||
-            this.result.sizeAvailable() >= neededResults) {
-            return;
-        }
-        SnippetWorker worker;
-        if (this.workerThreads == null) {
-            this.workerThreads = new SnippetWorker[deployCount];
-            synchronized(this.workerThreads) {try {
-                for (int i = 0; i < this.workerThreads.length; i++) {
-                    if (this.result.sizeAvailable() >= neededResults ||
-                        (this.rankingProcess.feedingIsFinished() && this.rankingProcess.rwiQueueSize() == 0) && this.nodeStack.sizeAvailable() == 0) {
-                        break;
-                    }
-                    worker = new SnippetWorker(this, this.query.maxtime, this.query.snippetCacheStrategy, neededResults);
-                    worker.start();
-                    this.workerThreads[i] = worker;
-                    if (this.expectedRemoteReferences.get() > 0) {
-                        long wait = this.waitTimeRecommendation();
-                        if (wait > 0) {
-                            try {Thread.sleep(wait);} catch ( InterruptedException e ) {}
-                        }
-                    }
-                }
-            } catch (OutOfMemoryError e) {}}
-        } else {
-            // there are still worker threads running, but some may be dead.
-            // if we find dead workers, reanimate them
-            synchronized(this.workerThreads) {
-                for (int i = 0; i < this.workerThreads.length; i++) {
-                    if (deployCount <= 0 ||
-                        this.result.sizeAvailable() >= neededResults ||
-                        (this.rankingProcess.feedingIsFinished() && this.rankingProcess.rwiQueueSize() == 0) && this.nodeStack.sizeAvailable() == 0) {
-                        break;
-                    }
-                    if (this.workerThreads[i] == null || !this.workerThreads[i].isAlive()) {
-                        worker = new SnippetWorker(this, this.query.maxtime, this.query.snippetCacheStrategy, neededResults);
-                        worker.start();
-                        this.workerThreads[i] = worker;
-                        deployCount--;
-                    }
-                    if (this.expectedRemoteReferences.get() > 0) {
-                        long wait = this.waitTimeRecommendation();
-                        if (wait > 0) {
-                            try {Thread.sleep(wait);} catch ( InterruptedException e ) {}
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private void stopAllWorker() {
-        synchronized(this.workerThreads) {
-            for (int i = 0; i < this.workerThreads.length; i++) {
-               if (this.workerThreads[i] == null || !this.workerThreads[i].isAlive()) {
-                continue;
-            }
-               this.workerThreads[i].pleaseStop();
-               this.workerThreads[i].interrupt();
-            }
-        }
-    }
-
-   private boolean anyWorkerAlive() {
-        if (this.workerThreads == null || this.workerThreads.length == 0) {
-            return false;
-        }
-        synchronized(this.workerThreads) {
-            for (final SnippetWorker workerThread : this.workerThreads) {
-               if ((workerThread != null) && (workerThread.isAlive()) && (workerThread.busytime() < 10000)) return true;
-            }
-        }
-        return false;
+        return this.resultList.list(Math.min(this.query.neededResults(), this.resultList.sizeAvailable()));
     }
 
     /**
@@ -1075,7 +1233,7 @@ public final class SearchEvent {
      * @return true if an entry was deleted, false otherwise
      */
     protected boolean delete(final String urlhash) {
-        final Iterator<Element<ResultEntry>> i = this.result.iterator();
+        final Iterator<Element<ResultEntry>> i = this.resultList.iterator();
         Element<ResultEntry> entry;
         while (i.hasNext()) {
             entry = i.next();
@@ -1085,6 +1243,155 @@ public final class SearchEvent {
             }
         }
         return false;
+    }
+
+    public ReferenceOrder getOrder() {
+        return this.order;
+    }
+    
+    protected boolean feedingIsFinished() {
+        return
+            this.feedersTerminated.intValue() > (this.remote ? 1 : 0) &&
+            this.feedersAlive.get() == 0;
+    }
+
+    /**
+     * method to signal the incoming stack that one feeder has terminated
+     */
+    public void oneFeederTerminated() {
+        this.feedersTerminated.incrementAndGet();
+        final int c = this.feedersAlive.decrementAndGet();
+        assert c >= 0 : "feeders = " + c;
+    }
+
+    public void oneFeederStarted() {
+        this.feedersAlive.addAndGet(1);
+    }
+    
+    public QueryParams getQuery() {
+        return this.query;
+    }
+
+    public int[] flagCount() {
+        return this.flagcount;
+    }
+
+    protected void addBegin() {
+        this.addRunning = true;
+    }
+
+    public void addFinalize() {
+        this.addRunning = false;
+    }
+
+    protected boolean addRunning() {
+        return this.addRunning;
+    }
+    
+    public boolean rwiIsEmpty() {
+        if ( !this.rwiStack.isEmpty() ) {
+            return false;
+        }
+        for ( final WeakPriorityBlockingQueue<WordReferenceVars> s : this.doubleDomCache.values() ) {
+            if ( !s.isEmpty() ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    protected int rwiQueueSize() {
+        int c = this.rwiStack.sizeQueue();
+        for ( final WeakPriorityBlockingQueue<WordReferenceVars> s : this.doubleDomCache.values() ) {
+            c += s.sizeQueue();
+        }
+        return c;
+    }
+    
+    protected boolean testFlags(final Bitfield flags) {
+        if (this.query.constraint == null) return true;
+        // test if ientry matches with filter
+        // if all = true: let only entries pass that has all matching bits
+        // if all = false: let all entries pass that has at least one matching bit
+        if (this.query.allofconstraint) {
+            for ( int i = 0; i < 32; i++ ) {
+                if ((this.query.constraint.get(i)) && (!flags.get(i))) return false;
+            }
+            return true;
+        }
+        for (int i = 0; i < 32; i++) {
+            if ((this.query.constraint.get(i)) && (flags.get(i))) return true;
+        }
+        return false;
+    }
+    
+    protected Map<byte[], ReferenceContainer<WordReference>> searchContainerMap() {
+        // direct access to the result maps is needed for abstract generation
+        // this is only available if execQuery() was called before
+        return this.localSearchInclusion;
+    }
+    
+    public ScoreMap<String> getTopics(final int maxcount, final long maxtime) {
+        // create a list of words that had been computed by statistics over all
+        // words that appeared in the url or the description of all urls
+        final ScoreMap<String> result = new ConcurrentScoreMap<String>();
+        if ( this.ref.sizeSmaller(2) ) {
+            this.ref.clear(); // navigators with one entry are not useful
+        }
+        final Map<String, Float> counts = new HashMap<String, Float>();
+        final Iterator<String> i = this.ref.keys(false);
+        String word;
+        int c;
+        float q, min = Float.MAX_VALUE, max = Float.MIN_VALUE;
+        int ic = maxcount;
+        long timeout = System.currentTimeMillis() + maxtime;
+        while ( ic-- > 0 && i.hasNext() ) {
+            word = i.next();
+            if ( word == null ) {
+                continue;
+            }
+            c = this.query.getSegment().getWordCountGuess(word);
+            if ( c > 0 ) {
+                q = ((float) this.ref.get(word)) / ((float) c);
+                min = Math.min(min, q);
+                max = Math.max(max, q);
+                counts.put(word, q);
+            }
+            if (System.currentTimeMillis() > timeout) break;
+        }
+        if ( max > min ) {
+            for ( final Map.Entry<String, Float> ce : counts.entrySet() ) {
+                result.set(ce.getKey(), (int) (((double) maxcount) * (ce.getValue() - min) / (max - min)));
+            }
+        }
+        return this.ref;
+    }
+
+    private final static Pattern lettermatch = Pattern.compile("[a-z]+");
+
+    public void addTopic(final String[] words) {
+        String word;
+        for ( final String w : words ) {
+            word = w.toLowerCase();
+            if ( word.length() > 2
+                && "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_zum_der_die_das_und_the_zur_bzw_mit_blog_wiki_aus_bei_off"
+                    .indexOf(word) < 0
+                && !this.query.getQueryGoal().getIncludeHashes().has(Word.word2hash(word))
+                && lettermatch.matcher(word).matches()
+                && !Switchboard.badwords.contains(word)
+                && !Switchboard.stopwords.contains(word) ) {
+                this.ref.inc(word);
+            }
+        }
+    }
+
+    protected void addTopics(final ResultEntry resultEntry) {
+        // take out relevant information for reference computation
+        if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;
+        final String[] descrcomps = MultiProtocolURI.splitpattern.split(resultEntry.title().toLowerCase()); // words in the description
+
+        // add references
+        addTopic(descrcomps);
     }
 
 }

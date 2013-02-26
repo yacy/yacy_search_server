@@ -63,7 +63,6 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.QueryParams;
-import net.yacy.search.query.RankingProcess;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.BlockRank;
@@ -126,7 +125,7 @@ public class IndexControlRWIs_p {
             if ( post.containsKey("keystringsearch") ) {
                 prop.put("keyhash", keyhash);
                 final SearchEvent theSearch = genSearchresult(prop, sb, segment, keyhash, null);
-                if (theSearch.query.local_rwi_available.get() == 0) {
+                if (theSearch.local_rwi_available.get() == 0) {
                     prop.put("searchresult", 1);
                     prop.putHTML("searchresult_word", keystring);
                 }
@@ -137,7 +136,7 @@ public class IndexControlRWIs_p {
                     prop.put("keystring", "&lt;" + errmsg + "&gt;");
                 }
                 final SearchEvent theSearch = genSearchresult(prop, sb, segment, keyhash, null);
-                if (theSearch.query.local_rwi_available.get() == 0) {
+                if (theSearch.local_rwi_available.get() == 0) {
                     prop.put("searchresult", 2);
                     prop.putHTML("searchresult_wordhash", ASCII.String(keyhash));
                 }
@@ -464,7 +463,7 @@ public class IndexControlRWIs_p {
         final String keyhashs = ASCII.String(keyhash);
         prop.put("genUrlList_keyHash", keyhashs);
 
-        if (theSearch.query.local_rwi_stored.get() == 0) {
+        if (theSearch.local_rwi_stored.get() == 0) {
             prop.put("genUrlList", 1);
             prop.put("genUrlList_count", 0);
             prop.put("searchresult", 2);
@@ -478,7 +477,7 @@ public class IndexControlRWIs_p {
             URIMetadataNode entry;
             String us;
             long rn = -1;
-            while ( !theSearch.rankingProcess.rwiIsEmpty() && (entry = theSearch.takeURL(false, 1000)) != null ) {
+            while (!theSearch.rwiIsEmpty() && (entry = theSearch.pullOneFilteredFromRWI(false)) != null) {
                 url = entry.url();
                 if ( url == null ) {
                     continue;
@@ -505,9 +504,9 @@ public class IndexControlRWIs_p {
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_tf", 1000.0 * entry
                     .word()
                     .termFrequency());
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_authority", (theSearch.rankingProcess.getOrder() == null)
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_authority", (theSearch.getOrder() == null)
                     ? -1
-                    : theSearch.rankingProcess.getOrder().authority(ASCII.String(entry.hash(), 6, 6)));
+                    : theSearch.getOrder().authority(ASCII.String(entry.hash(), 6, 6)));
                 prop.put(
                     "genUrlList_urlList_" + i + "_urlExists_date",
                     GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(entry.word().lastModified())));
@@ -550,7 +549,7 @@ public class IndexControlRWIs_p {
                     break;
                 }
             }
-            final Iterator<byte[]> iter = theSearch.query.misses.iterator(); // iterates url hash strings
+            final Iterator<byte[]> iter = theSearch.misses.iterator(); // iterates url hash strings
             byte[] b;
             while ( iter.hasNext() ) {
                 b = iter.next();
@@ -651,26 +650,25 @@ public class IndexControlRWIs_p {
         String khw = ASCII.String(keyhash);
         final QueryParams query = new QueryParams(khw, khw, -1, filter, segment, sb.getRanking(), "IndexControlRWIs_p");
         final SearchEvent theSearch = SearchEventCache.getEvent(query, sb.peers, sb.tables, null, false, sb.loader, Integer.MAX_VALUE, Long.MAX_VALUE, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
-        //theSearch.rankingProcess.run();
-        RankingProcess ranked = theSearch.rankingProcess;
-        if (theSearch.query.local_rwi_available.get() == 0) {
+        if (theSearch.rwiProcess != null && theSearch.rwiProcess.isAlive()) try {theSearch.rwiProcess.join();} catch (InterruptedException e) {}
+        if (theSearch.local_rwi_available.get() == 0) {
             prop.put("searchresult", 2);
             prop.put("searchresult_wordhash", keyhash);
         } else {
             prop.put("searchresult", 3);
-            prop.put("searchresult_allurl", theSearch.query.local_rwi_available.get());
+            prop.put("searchresult_allurl", theSearch.local_rwi_available.get());
             prop
-                .put("searchresult_description", ranked.flagCount()[WordReferenceRow.flag_app_dc_description]);
-            prop.put("searchresult_title", ranked.flagCount()[WordReferenceRow.flag_app_dc_title]);
-            prop.put("searchresult_creator", ranked.flagCount()[WordReferenceRow.flag_app_dc_creator]);
-            prop.put("searchresult_subject", ranked.flagCount()[WordReferenceRow.flag_app_dc_subject]);
-            prop.put("searchresult_url", ranked.flagCount()[WordReferenceRow.flag_app_dc_identifier]);
-            prop.put("searchresult_emphasized", ranked.flagCount()[WordReferenceRow.flag_app_emphasized]);
-            prop.put("searchresult_image", ranked.flagCount()[Condenser.flag_cat_hasimage]);
-            prop.put("searchresult_audio", ranked.flagCount()[Condenser.flag_cat_hasaudio]);
-            prop.put("searchresult_video", ranked.flagCount()[Condenser.flag_cat_hasvideo]);
-            prop.put("searchresult_app", ranked.flagCount()[Condenser.flag_cat_hasapp]);
-            prop.put("searchresult_indexof", ranked.flagCount()[Condenser.flag_cat_indexof]);
+                .put("searchresult_description", theSearch.flagCount()[WordReferenceRow.flag_app_dc_description]);
+            prop.put("searchresult_title", theSearch.flagCount()[WordReferenceRow.flag_app_dc_title]);
+            prop.put("searchresult_creator", theSearch.flagCount()[WordReferenceRow.flag_app_dc_creator]);
+            prop.put("searchresult_subject", theSearch.flagCount()[WordReferenceRow.flag_app_dc_subject]);
+            prop.put("searchresult_url", theSearch.flagCount()[WordReferenceRow.flag_app_dc_identifier]);
+            prop.put("searchresult_emphasized", theSearch.flagCount()[WordReferenceRow.flag_app_emphasized]);
+            prop.put("searchresult_image", theSearch.flagCount()[Condenser.flag_cat_hasimage]);
+            prop.put("searchresult_audio", theSearch.flagCount()[Condenser.flag_cat_hasaudio]);
+            prop.put("searchresult_video", theSearch.flagCount()[Condenser.flag_cat_hasvideo]);
+            prop.put("searchresult_app", theSearch.flagCount()[Condenser.flag_cat_hasapp]);
+            prop.put("searchresult_indexof", theSearch.flagCount()[Condenser.flag_cat_indexof]);
         }
         return theSearch;
     }

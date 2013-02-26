@@ -731,14 +731,14 @@ public class yacysearch {
             Log.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: "
                 + theQuery.getQueryGoal().getOriginalQueryString(false)
                 + " - "
-                + "local_rwi_available(" + theSearch.query.local_rwi_available.get() + "), "
-                + "local_rwi_stored(" + theSearch.query.local_rwi_stored.get() + "), "
-                + "local_solr_available(" + theSearch.query.local_solr_available.get() + "), "
-                + "local_solr_stored(" + theSearch.query.local_solr_stored.get() + "), "
-                + "remote_available(" + theSearch.query.remote_available.get() + "), "
-                + "remote_stored(" + theSearch.query.remote_stored.get() + "), "
-                + "remote_peerCount(" + theSearch.query.remote_peerCount.get() + "), "
-                + "local_sortout(" + theSearch.query.misses.size() + "), "
+                + "local_rwi_available(" + theSearch.local_rwi_available.get() + "), "
+                + "local_rwi_stored(" + theSearch.local_rwi_stored.get() + "), "
+                + "local_solr_available(" + theSearch.local_solr_available.get() + "), "
+                + "local_solr_stored(" + theSearch.local_solr_stored.get() + "), "
+                + "remote_available(" + theSearch.remote_available.get() + "), "
+                + "remote_stored(" + theSearch.remote_stored.get() + "), "
+                + "remote_peerCount(" + theSearch.remote_peerCount.get() + "), "
+                + "local_sortout(" + theSearch.misses.size() + "), "
                 + (System.currentTimeMillis() - timestamp)
                 + " ms");
 
@@ -746,13 +746,13 @@ public class yacysearch {
             theQuery.searchtime = System.currentTimeMillis() - timestamp;
             theQuery.urlretrievaltime = theSearch.getURLRetrievalTime();
             theQuery.snippetcomputationtime = theSearch.getSnippetComputationTime();
-            AccessTracker.add(AccessTracker.Location.local, theQuery);
+            AccessTracker.add(AccessTracker.Location.local, theQuery, theSearch.getResultCount());
 
             // check suggestions
             final int meanMax = (post != null) ? post.getInt("meanCount", 0) : 0;
 
             prop.put("meanCount", meanMax);
-            if ( meanMax > 0 && !json && !rss ) {
+            if ( meanMax > 0 && !json && !rss && sb.index.connectedRWI()) {
                 final DidYouMean didYouMean = new DidYouMean(indexSegment, new StringBuilder(querystring));
                 final Iterator<StringBuilder> meanIt = didYouMean.getSuggestions(100, 5).iterator();
                 int meanCount = 0;
@@ -822,15 +822,15 @@ public class yacysearch {
             }
 
             prop.put("num-results_offset", startRecord == 0 ? 0 : startRecord + 1);
-            prop.put("num-results_itemscount", Formatter.number(startRecord + theSearch.query.itemsPerPage > theSearch.query.getResultCount() ? startRecord + theSearch.query.getResultCount() % theSearch.query.itemsPerPage : startRecord + theSearch.query.itemsPerPage, true));
+            prop.put("num-results_itemscount", Formatter.number(startRecord + theSearch.query.itemsPerPage > theSearch.getResultCount() ? startRecord + theSearch.getResultCount() % theSearch.query.itemsPerPage : startRecord + theSearch.query.itemsPerPage, true));
             prop.put("num-results_itemsPerPage", Formatter.number(itemsPerPage));
-            prop.put("num-results_totalcount", Formatter.number(theSearch.query.getResultCount()));
+            prop.put("num-results_totalcount", Formatter.number(theSearch.getResultCount()));
             prop.put("num-results_globalresults", global && (indexReceiveGranted || clustersearch) ? "1" : "0");
-            prop.put("num-results_globalresults_localResourceSize", Formatter.number(theSearch.query.local_rwi_available.get() + theSearch.query.local_solr_available.get(), true));
-            prop.put("num-results_globalresults_localMissCount", Formatter.number(theSearch.query.misses.size(), true));
-            prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.query.remote_available.get(), true));
-            prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.query.remote_stored.get(), true));
-            prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.query.remote_peerCount.get(), true));
+            prop.put("num-results_globalresults_localResourceSize", Formatter.number(theSearch.local_rwi_available.get() + theSearch.local_solr_available.get(), true));
+            prop.put("num-results_globalresults_localMissCount", Formatter.number(theSearch.misses.size(), true));
+            prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.remote_available.get(), true));
+            prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.remote_stored.get(), true));
+            prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.remote_peerCount.get(), true));
 
             // compose page navigation
             final StringBuilder resnav = new StringBuilder(200);
@@ -844,7 +844,7 @@ public class yacysearch {
                 resnav
                     .append("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
             }
-            final int numberofpages = Math.min(10, 1 + ((theSearch.query.getResultCount() - 1) / theQuery.itemsPerPage()));
+            final int numberofpages = Math.min(10, 1 + ((theSearch.getResultCount() - 1) / theQuery.itemsPerPage()));
 
             for ( int i = 0; i < numberofpages; i++ ) {
                 if ( i == thispage ) {
@@ -873,7 +873,7 @@ public class yacysearch {
             }
             final String resnavs = resnav.toString();
             prop.put("num-results_resnav", resnavs);
-            prop.put("pageNavBottom", (theSearch.query.getResultCount() - startRecord > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
+            prop.put("pageNavBottom", (theSearch.getResultCount() - startRecord > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
             prop.put("pageNavBottom_resnav", resnavs);
 
             // generate the search result lines; the content will be produced by another servlet
