@@ -3220,23 +3220,17 @@ public final class Switchboard extends serverSwitch {
             return "no DHT distribution: not enabled (per setting)";
         }
         final Segment indexSegment = this.index;
-        long size = indexSegment.fulltext().collectionSize();
-        if ( size < 10 ) {
-            return "no DHT distribution: loadedURL.size() = " + size;
-        }
         if ( indexSegment.RWICount() < 100 ) {
             return "no DHT distribution: not enough words - wordIndex.size() = "
                 + indexSegment.RWICount();
         }
-        if ( (getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false")
-            .equalsIgnoreCase("false")) && (this.crawlQueues.noticeURL.notEmptyLocal()) ) {
+        if ( (getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) && (this.crawlQueues.noticeURL.notEmptyLocal()) ) {
             return "no DHT distribution: crawl in progress: noticeURL.stackSize() = "
                 + this.crawlQueues.noticeURL.size()
                 + ", sbQueue.size() = "
                 + getIndexingProcessorsQueueSize();
         }
-        if ( (getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "false")
-            .equalsIgnoreCase("false")) && (getIndexingProcessorsQueueSize() > 1) ) {
+        if ( (getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "false").equalsIgnoreCase("false")) && (getIndexingProcessorsQueueSize() > 1) ) {
             return "no DHT distribution: indexing in progress: noticeURL.stackSize() = "
                 + this.crawlQueues.noticeURL.size()
                 + ", sbQueue.size() = "
