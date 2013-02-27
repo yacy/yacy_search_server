@@ -52,9 +52,9 @@ public class WordReferenceFactory implements ReferenceFactory<WordReference>, Se
     }
 
     @Override
-    public WordReference produceFast(final WordReference r) {
+    public WordReference produceFast(final WordReference r, final boolean local) {
         if (r instanceof WordReferenceVars) return r;
-        return new WordReferenceVars(r);
+        return new WordReferenceVars(r, local);
     }
 
     @Override

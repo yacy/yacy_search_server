@@ -432,7 +432,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
                 assert (ie2.urlhash().length == keylength) : "ie1.urlHash() = " + ASCII.String(ie2.urlhash());
                 // this is a hit. Calculate word distance:
 
-                ie1 = factory.produceFast(ie2);
+                ie1 = factory.produceFast(ie2, true);
                 ie1.join(ie2);
                 if (ie1.distance() <= maxDistance) conj.add(ie1);
             }
@@ -472,7 +472,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
                     if (e2.hasNext()) ie2 = e2.next(); else break;
                 } else {
                     // we have found the same urls in different searches!
-                    ie1 = factory.produceFast(ie1);
+                    ie1 = factory.produceFast(ie1, true);
                     ie1.join(ie2);
                     if (ie1.distance() <= maxDistance) conj.add(ie1);
                     if (e1.hasNext()) ie1 = e1.next(); else break;
@@ -554,7 +554,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
                     if (e2.hasNext()) ie2 = e2.next(); else break;
                 } else {
                     // we have found the same urls in different searches!
-                    ie1 = factory.produceFast(ie1);
+                    ie1 = factory.produceFast(ie1, true);
                     ie1.join(ie2);
                     e1.remove();
                     if (e1.hasNext()) ie1 = e1.next(); else break;

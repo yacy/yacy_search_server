@@ -70,8 +70,9 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     private int virtualAge;
     private final Queue<Integer> positions;
     private double termFrequency;
+    private final boolean local;
 
-    public WordReferenceVars(final URIMetadataRow md) {
+    public WordReferenceVars(final URIMetadataRow md, final boolean local) {
         this.language = md.language();
         this.flags = md.flags();
         this.lastModified = md.moddate().getTime();
@@ -93,6 +94,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.wordsintext = 1;
         this.wordsintitle = 1;
         this.termFrequency = 1;
+        this.local = local;
     }
 
     public WordReferenceVars(
@@ -135,9 +137,10 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.wordsintext = wordcount;
         this.wordsintitle = titleLength;
         this.termFrequency = termfrequency;
+        this.local = true;
     }
 
-    public WordReferenceVars(final WordReference e) {
+    public WordReferenceVars(final WordReference e, boolean local) {
         this.flags = e.flags();
         //this.freshUntil = e.freshUntil();
         this.lastModified = e.lastModified();
@@ -158,6 +161,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.wordsintext = e.wordsintext();
         this.wordsintitle = e.wordsintitle();
         this.termFrequency = e.termFrequency();
+        this.local = local;
     }
 
     /**
@@ -182,6 +186,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.wordsintext = 0;
         this.wordsintitle = 0;
         this.termFrequency = 0.0;
+        this.local = true;
     }
 
     @Override
@@ -349,6 +354,10 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (this.termFrequency == 0.0) this.termFrequency = (((double) hitcount()) / ((double) (wordsintext() + wordsintitle() + 1)));
         return this.termFrequency;
     }
+    
+    public boolean local() {
+        return this.local;
+    }
 
     public final void min(final WordReferenceVars other) {
     	if (other == null) return;
@@ -448,13 +457,13 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
      * @return a blocking queue filled with WordReferenceVars that is still filled when the object is returned
      */
 
-    public static BlockingQueue<WordReferenceVars> transform(final ReferenceContainer<WordReference> container, final long maxtime) {
+    public static BlockingQueue<WordReferenceVars> transform(final ReferenceContainer<WordReference> container, final long maxtime, final boolean local) {
     	final LinkedBlockingQueue<WordReferenceVars> vars = new LinkedBlockingQueue<WordReferenceVars>();
     	if (container.size() <= 100) {
     	    // transform without concurrency to omit thread creation overhead
     	    for (final Row.Entry entry: container) {
     	        try {
-    	            vars.put(new WordReferenceVars(new WordReferenceRow(entry)));
+    	            vars.put(new WordReferenceVars(new WordReferenceRow(entry), local));
     	        } catch (final InterruptedException e) {}
     	    }
             try {
@@ -462,7 +471,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
             } catch (final InterruptedException e) {}
             return vars;
     	}
-    	final Thread distributor = new TransformDistributor(container, vars, maxtime);
+    	final Thread distributor = new TransformDistributor(container, vars, maxtime, local);
     	distributor.start();
 
     	// return the resulting queue while the processing queues are still working
@@ -474,11 +483,12 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     	private ReferenceContainer<WordReference> container;
     	private BlockingQueue<WordReferenceVars> out;
     	private long maxtime;
-
-    	private TransformDistributor(final ReferenceContainer<WordReference> container, final BlockingQueue<WordReferenceVars> out, final long maxtime) {
+    	private final boolean local;
+    	private TransformDistributor(final ReferenceContainer<WordReference> container, final BlockingQueue<WordReferenceVars> out, final long maxtime, final boolean local) {
     		this.container = container;
     		this.out = out;
     		this.maxtime = maxtime;
+    		this.local = local;
     	}
 
         @Override
@@ -487,7 +497,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         	final int cores0 = Math.min(cores, this.container.size() / 100) + 1;
         	final TransformWorker[] worker = new TransformWorker[cores0];
         	for (int i = 0; i < cores0; i++) {
-        		worker[i] = new TransformWorker(this.out, this.maxtime);
+        		worker[i] = new TransformWorker(this.out, this.maxtime, this.local);
         		worker[i].start();
         	}
         	long timeout = System.currentTimeMillis() + this.maxtime;
@@ -525,11 +535,13 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     	private BlockingQueue<Row.Entry> in;
     	private BlockingQueue<WordReferenceVars> out;
     	private long maxtime;
+    	private final boolean local;
 
-    	private TransformWorker(final BlockingQueue<WordReferenceVars> out, final long maxtime) {
+    	private TransformWorker(final BlockingQueue<WordReferenceVars> out, final long maxtime, final boolean local) {
     		this.in = new LinkedBlockingQueue<Row.Entry>();
     		this.out = out;
     		this.maxtime = maxtime;
+    		this.local = local;
     	}
 
     	private void add(final Row.Entry entry) {
@@ -545,7 +557,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         	long timeout = System.currentTimeMillis() + this.maxtime;
     		try {
 				while ((entry = this.in.take()) != WordReferenceRow.poisonRowEntry) {
-				    this.out.put(new WordReferenceVars(new WordReferenceRow(entry)));
+				    this.out.put(new WordReferenceVars(new WordReferenceRow(entry), local));
 				    if (System.currentTimeMillis() > timeout) {
 	                    Log.logWarning("TransformWorker", "normalization of row entries from row to vars ended with timeout = " + this.maxtime);
 				        break;

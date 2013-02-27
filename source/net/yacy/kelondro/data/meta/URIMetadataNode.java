@@ -40,7 +40,7 @@ import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
-import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.search.schema.CollectionSchema;
@@ -77,8 +77,8 @@ public class URIMetadataNode {
     private long ranking = -1; // during generation of a search result this value is set
     private SolrDocument doc = null;
     private String snippet = null;
-    private WordReference word = null; // this is only used if the url is transported via remote search requests
-
+    private WordReferenceVars word = null; // this is only used if the url is transported via remote search requests
+    
     public URIMetadataNode(final SolrInputDocument doc) {
         this(ClientUtils.toSolrDocument(doc));
     }
@@ -98,18 +98,18 @@ public class URIMetadataNode {
         }
     }
 
-    public URIMetadataNode(final SolrInputDocument doc, final WordReference searchedWord, final long ranking) {
+    public URIMetadataNode(final SolrInputDocument doc, final WordReferenceVars searchedWord, final long ranking) {
         this(ClientUtils.toSolrDocument(doc));
         this.word = searchedWord;
         this.ranking = ranking;
     }
 
-    public URIMetadataNode(final SolrDocument doc, final WordReference searchedWord, final long ranking) {
+    public URIMetadataNode(final SolrDocument doc, final WordReferenceVars searchedWord, final long ranking) {
         this(doc);
         this.word = searchedWord;
         this.ranking = ranking;
     }
-
+    
     public SolrDocument getDocument() {
         return this.doc;
     }
@@ -292,7 +292,7 @@ public class URIMetadataNode {
         return a.toArray(new String[a.size()]);
     }
 
-    public WordReference word() {
+    public WordReferenceVars word() {
         return this.word;
     }
     
@@ -429,6 +429,7 @@ public class URIMetadataNode {
         return core.toString();
     }
     
+    /*
     private DigestURI getURL(CollectionSchema field) {
         assert !field.isMultiValued();
         assert field.getType() == SolrType.string || field.getType() == SolrType.text_general || field.getType() == SolrType.text_en_splitting_tight;
@@ -440,7 +441,8 @@ public class URIMetadataNode {
             return null;
         }
     }
-
+    */
+    
     private int getInt(CollectionSchema field) {
         assert !field.isMultiValued();
         assert field.getType() == SolrType.num_integer;

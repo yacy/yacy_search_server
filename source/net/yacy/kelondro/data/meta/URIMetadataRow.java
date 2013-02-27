@@ -173,7 +173,7 @@ public class URIMetadataRow {
         this.snippet = crypt.simpleDecode(prop.getProperty("snippet", ""));
         this.word = null;
         if (prop.containsKey("wi")) {
-            this.word = new WordReferenceVars(new WordReferenceRow(Base64Order.enhancedCoder.decodeString(prop.getProperty("wi", ""))));
+            this.word = new WordReferenceVars(new WordReferenceRow(Base64Order.enhancedCoder.decodeString(prop.getProperty("wi", ""))), false);
         }
         this.comp = null;
     }

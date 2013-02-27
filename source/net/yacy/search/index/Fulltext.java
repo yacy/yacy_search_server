@@ -54,6 +54,7 @@ import net.yacy.cora.federate.solr.instance.ShardInstance;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.ZIPReader;
 import net.yacy.cora.storage.ZIPWriter;
 import net.yacy.document.parser.html.CharacterCoding;
@@ -61,6 +62,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
@@ -315,9 +317,13 @@ public final class Fulltext {
         }
     }
     
-    public URIMetadataNode getMetadata(WordReference wre, long weight) {
+    public URIMetadataNode getMetadata(WeakPriorityBlockingQueue.Element<WordReferenceVars> element) {
+        if (element == null) return null;
+        WordReferenceVars wre = element.getElement();
+        long weight = element.getWeight();
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
-        return getMetadata(wre.urlhash(), wre, weight);
+        URIMetadataNode node = getMetadata(wre.urlhash(), wre, weight);
+        return node;
     }
 
     public URIMetadataNode getMetadata(final byte[] urlHash) {
@@ -325,7 +331,7 @@ public final class Fulltext {
         return getMetadata(urlHash, null, 0);
     }
     
-    private URIMetadataNode getMetadata(final byte[] urlHash, WordReference wre, long weight) {
+    private URIMetadataNode getMetadata(final byte[] urlHash, WordReferenceVars wre, long weight) {
 
         // get the metadata from Solr
         try {

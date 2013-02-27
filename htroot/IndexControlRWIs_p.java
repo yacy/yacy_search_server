@@ -549,15 +549,6 @@ public class IndexControlRWIs_p {
                     break;
                 }
             }
-            final Iterator<byte[]> iter = theSearch.misses.iterator(); // iterates url hash strings
-            byte[] b;
-            while ( iter.hasNext() ) {
-                b = iter.next();
-                prop.put("genUrlList_urlList_" + i + "_urlExists", "0");
-                prop.put("genUrlList_urlList_" + i + "_urlExists_urlhxCount", i);
-                prop.putHTML("genUrlList_urlList_" + i + "_urlExists_urlhxValue", b);
-                i++;
-            }
             prop.put("genUrlList_urlList", i);
             prop.putHTML("genUrlList_keyString", keystring);
             prop.put("genUrlList_count", i);

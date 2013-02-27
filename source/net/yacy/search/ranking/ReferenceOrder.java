@@ -66,11 +66,11 @@ public class ReferenceOrder {
         this.language = language;
     }
 
-    public BlockingQueue<WordReferenceVars> normalizeWith(final ReferenceContainer<WordReference> container, long maxtime) {
+    public BlockingQueue<WordReferenceVars> normalizeWith(final ReferenceContainer<WordReference> container, long maxtime, final boolean local) {
         final LinkedBlockingQueue<WordReferenceVars> out = new LinkedBlockingQueue<WordReferenceVars>();
         int threads = cores;
         if (container.size() < 100) threads = 2;
-        final Thread distributor = new NormalizeDistributor(container, out, threads, maxtime);
+        final Thread distributor = new NormalizeDistributor(container, out, threads, maxtime, local);
         distributor.start();
 
         // return the resulting queue while the processing queues are still working
@@ -83,18 +83,20 @@ public class ReferenceOrder {
         LinkedBlockingQueue<WordReferenceVars> out;
         private final int threads;
         private final long maxtime;
-
-        public NormalizeDistributor(final ReferenceContainer<WordReference> container, final LinkedBlockingQueue<WordReferenceVars> out, final int threads, final long maxtime) {
+        private final boolean local;
+        
+        public NormalizeDistributor(final ReferenceContainer<WordReference> container, final LinkedBlockingQueue<WordReferenceVars> out, final int threads, final long maxtime, final boolean local) {
             this.container = container;
             this.out = out;
             this.threads = threads;
             this.maxtime = maxtime;
+            this.local = local;
         }
 
         @Override
         public void run() {
             // transform the reference container into a stream of parsed entries
-            final BlockingQueue<WordReferenceVars> vars = WordReferenceVars.transform(this.container, this.maxtime);
+            final BlockingQueue<WordReferenceVars> vars = WordReferenceVars.transform(this.container, this.maxtime, this.local);
 
             // start the transformation threads
             final Semaphore termination = new Semaphore(this.threads);

@@ -28,16 +28,13 @@ package net.yacy.search.query;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -98,7 +95,7 @@ import net.yacy.search.snippet.TextSnippet.ResultClass;
 
 public final class SearchEvent {
     
-    private static final int max_results_preparation = 3000, max_results_preparation_special = -1; // -1 means 'no limit'
+    private static final int max_results_rwi = 3000;
 
     private static long noRobinsonLocalRWISearch = 0;
     static {
@@ -160,15 +157,17 @@ public final class SearchEvent {
     // the following values are filled during the search process as statistics for the search
     public final AtomicInteger local_rwi_available;  // the number of hits generated/ranked by the local search in rwi index
     public final AtomicInteger local_rwi_stored;     // the number of existing hits by the local search in rwi index
+    public final AtomicInteger remote_rwi_available; // the number of hits imported from remote peers (rwi/solr mixed)
+    public final AtomicInteger remote_rwi_stored;    // the number of existing hits at remote site
+    public final AtomicInteger remote_rwi_peerCount; // the number of peers which contributed to the remote search result 
     public final AtomicInteger local_solr_available; // the number of hits generated/ranked by the local search in solr
     public final AtomicInteger local_solr_stored;    // the number of existing hits by the local search in solr
-    public final AtomicInteger remote_available;     // the number of hits imported from remote peers (rwi/solr mixed)
-    public final AtomicInteger remote_stored;        // the number of existing hits at remote site
-    public final AtomicInteger remote_peerCount;     // the number of peers which contributed to the remote search result 
-    public final SortedSet<byte[]> misses; // url hashes that had been sorted out because of constraints in postranking
-
+    public final AtomicInteger remote_solr_available;// the number of hits imported from remote peers (rwi/solr mixed)
+    public final AtomicInteger remote_solr_stored;   // the number of existing hits at remote site
+    public final AtomicInteger remote_solr_peerCount;// the number of peers which contributed to the remote search result 
+    
     public int getResultCount() {
-        return this.rwiStack.sizeQueue() + this.nodeStack.sizeQueue() + this.resultList.sizeAvailable();
+        return this.local_rwi_available.get() + local_solr_stored.get();
     }
     
     protected SearchEvent(
@@ -214,14 +213,16 @@ public final class SearchEvent {
         this.IAneardhthash = null;
         this.localSearchThread = null;
         this.remote = (peers != null && peers.sizeConnected() > 0) && (this.query.domType == QueryParams.Searchdom.CLUSTER || (this.query.domType == QueryParams.Searchdom.GLOBAL && peers.mySeed().getFlagAcceptRemoteIndex()));
-        this.local_rwi_available = new AtomicInteger(0); // the number of results in the local peer after filtering
-        this.local_rwi_stored    = new AtomicInteger(0);
-        this.local_solr_available= new AtomicInteger(0);
-        this.local_solr_stored   = new AtomicInteger(0);
-        this.remote_stored       = new AtomicInteger(0);
-        this.remote_available    = new AtomicInteger(0); // the number of result contributions from all the remote peers
-        this.remote_peerCount    = new AtomicInteger(0); // the number of remote peers that have contributed
-        this.misses = Collections.synchronizedSortedSet(new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder));
+        this.local_rwi_available  = new AtomicInteger(0); // the number of results in the local peer after filtering
+        this.local_rwi_stored     = new AtomicInteger(0);
+        this.local_solr_available = new AtomicInteger(0);
+        this.local_solr_stored    = new AtomicInteger(0);
+        this.remote_rwi_stored    = new AtomicInteger(0);
+        this.remote_rwi_available = new AtomicInteger(0); // the number of result contributions from all the remote dht peers
+        this.remote_rwi_peerCount = new AtomicInteger(0); // the number of remote dht peers that have contributed
+        this.remote_solr_stored   = new AtomicInteger(0);
+        this.remote_solr_available= new AtomicInteger(0); // the number of result contributions from all the remote solr peers
+        this.remote_solr_peerCount= new AtomicInteger(0); // the number of remote solr peers that have contributed
         final long start = System.currentTimeMillis();
 
         // do a soft commit for fresh results
@@ -233,8 +234,7 @@ public final class SearchEvent {
         this.localSearchInclusion = null;
         this.ref = new ConcurrentScoreMap<String>();
         this.maxtime = query.maxtime;
-        int stackMaxsize = query.snippetCacheStrategy == null || query.snippetCacheStrategy == CacheStrategy.CACHEONLY ? max_results_preparation_special : max_results_preparation;
-        this.rwiStack = new WeakPriorityBlockingQueue<WordReferenceVars>(stackMaxsize, false);
+        this.rwiStack = new WeakPriorityBlockingQueue<WordReferenceVars>(max_results_rwi, false);
         this.doubleDomCache = new ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>>();
         this.flagcount = new int[32];
         for ( int i = 0; i < 32; i++ ) {
@@ -445,13 +445,13 @@ public final class SearchEvent {
             this.local_rwi_stored.addAndGet(fullResource);
         } else {
             assert fullResource >= 0 : "fullResource = " + fullResource;
-            this.remote_stored.addAndGet(fullResource);
-            this.remote_peerCount.incrementAndGet();
+            this.remote_rwi_stored.addAndGet(fullResource);
+            this.remote_rwi_peerCount.incrementAndGet();
         }
         long timer = System.currentTimeMillis();
 
         // normalize entries
-        final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index, maxtime);
+        final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index, maxtime, local);
         int is = index.size();
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
             this.query.id(true),
@@ -530,7 +530,7 @@ public final class SearchEvent {
                     }
                 }
                 // increase counter for statistics
-                if (local) this.local_rwi_available.incrementAndGet(); else this.remote_available.incrementAndGet();
+                if (local) this.local_rwi_available.incrementAndGet(); else this.remote_rwi_available.incrementAndGet();
             }
             if (System.currentTimeMillis() >= timeout) Log.logWarning("SearchEvent", "rwi normalization ended with timeout = " + maxtime);
 
@@ -650,8 +650,8 @@ public final class SearchEvent {
             this.local_solr_stored.set(fullResource);
         } else {
             assert fullResource >= 0 : "fullResource = " + fullResource;
-            this.remote_stored.addAndGet(fullResource);
-            this.remote_peerCount.incrementAndGet();
+            this.remote_solr_stored.addAndGet(fullResource);
+            this.remote_solr_peerCount.incrementAndGet();
         }
 
         long timer = System.currentTimeMillis();
@@ -785,7 +785,7 @@ public final class SearchEvent {
                     }
                 }
                 // increase counter for statistics
-                if (local) this.local_solr_available.incrementAndGet(); else this.remote_available.incrementAndGet();
+                if (local) this.local_solr_available.incrementAndGet(); else this.remote_solr_available.incrementAndGet();
             }
         } catch ( final SpaceExceededException e ) {
         }
@@ -819,7 +819,7 @@ public final class SearchEvent {
                 rwi = this.rwiStack.poll();
                 if (rwi == null) return null;
                 if (!skipDoubleDom) {
-                    URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi.getElement(), rwi.getWeight());
+                    URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi);
                     if (node == null) continue pollloop;
                     return node;
                 }
@@ -832,9 +832,9 @@ public final class SearchEvent {
                         m = this.doubleDomCache.get(hosthash);
                         if (m == null) {
                             // first appearance of dom. we create an entry to signal that one of that domain was already returned
-                            m = new WeakPriorityBlockingQueue<WordReferenceVars>(this.query.snippetCacheStrategy == null || this.query.snippetCacheStrategy == CacheStrategy.CACHEONLY ? max_results_preparation_special : max_results_preparation, false);
+                            m = new WeakPriorityBlockingQueue<WordReferenceVars>(max_results_rwi, false);
                             this.doubleDomCache.put(hosthash, m);
-                            URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi.getElement(), rwi.getWeight());
+                            URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi);
                             if (node == null) continue pollloop;
                             return node;
                         }
@@ -894,8 +894,12 @@ public final class SearchEvent {
                 //Log.logWarning("SearchEvent", "bestEntry == null (2)");
                 return null;
             }
-            URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(bestEntry.getElement(), bestEntry.getWeight());
-            if (node == null) continue mainloop;
+            URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(bestEntry);
+            if (node == null) {
+                if (bestEntry.getElement().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                if (log.isFine()) log.logFine("dropped RWI: hash not in metadata");
+                continue mainloop;
+            }
             return node;
         }
     }
@@ -916,14 +920,15 @@ public final class SearchEvent {
         while ((page = pullOneRWI(skipDoubleDom)) != null) {
 
             if (!this.query.urlMask_isCatchall && !page.matches(this.query.urlMask)) {
-                // check url mask
-                this.misses.add(page.hash());
+                if (log.isFine()) log.logFine("dropped RWI: no match with urlMask");
+                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
 
             // check for more errors
             if (page.url() == null) {
-                this.misses.add(page.hash());
+                if (log.isFine()) log.logFine("dropped RWI: url == null");
+                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue; // rare case where the url is corrupted
             }
 
@@ -933,13 +938,15 @@ public final class SearchEvent {
                 (this.query.contentdom == Classification.ContentDomain.AUDIO && page.url().getContentDomain() != Classification.ContentDomain.AUDIO) ||
                 (this.query.contentdom == Classification.ContentDomain.VIDEO && page.url().getContentDomain() != Classification.ContentDomain.VIDEO) ||
                 (this.query.contentdom == Classification.ContentDomain.APP && page.url().getContentDomain() != Classification.ContentDomain.APP)) && this.query.urlMask_isCatchall) {
-                this.misses.add(page.hash());
+                if (log.isFine()) log.logFine("dropped RWI: wrong contentdom = " + this.query.contentdom + ", domain = " + page.url().getContentDomain());
+                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
             
             // Check for blacklist
             if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page)) {
-                this.misses.add(page.hash());
+                if (log.isFine()) log.logFine("dropped RWI: url is blacklisted in url blacklist");
+                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
 
@@ -947,7 +954,8 @@ public final class SearchEvent {
 			if (Switchboard.getSwitchboard().getConfigBool("contentcontrol.enabled", false)) {
 				FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
 				if (f != null && !f.isListed(page.url(), null)) {
-				    this.misses.add(page.hash());
+	                if (log.isFine()) log.logFine("dropped RWI: url is blacklisted in contentcontrol");
+	                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
 				    continue;
 				}
 			}
@@ -961,7 +969,8 @@ public final class SearchEvent {
                 ((QueryParams.anymatch(pagetitle, this.query.getQueryGoal().getExcludeHashes()))
                 || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.getQueryGoal().getExcludeHashes()))
                 || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.getQueryGoal().getExcludeHashes())))) {
-                this.misses.add(page.hash());
+                if (log.isFine()) log.logFine("dropped RWI: no match with query goal exclusion");
+                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
 
@@ -971,13 +980,15 @@ public final class SearchEvent {
                 while (wi.hasNext()) {
                     this.query.getSegment().termIndex().removeDelayed(wi.next(), page.hash());
                 }
-                this.misses.add(page.hash());
+                if (log.isFine()) log.logFine("dropped RWI: url does not match index-of constraint");
+                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
 
             // check location constraint
             if ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_haslocation)) && (page.lat() == 0.0 || page.lon() == 0.0)) {
-                this.misses.add(page.hash());
+                if (log.isFine()) log.logFine("dropped RWI: location constraint");
+                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
 
@@ -988,14 +999,16 @@ public final class SearchEvent {
                 double lonDelta = this.query.lon - lon;
                 double distance = Math.sqrt(latDelta * latDelta + lonDelta * lonDelta); // pythagoras
                 if (distance > this.query.radius) {
-                    this.misses.add(page.hash());
+                    if (log.isFine()) log.logFine("dropped RWI: radius constraint");
+                    if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                     continue;
                 }
             }
 
             // check Scanner
             if (this.query.filterscannerfail && !Scanner.acceptURL(page.url())) {
-                this.misses.add(page.hash());
+                if (log.isFine()) log.logFine("dropped RWI: url not accepted by scanner");
+                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
 

@@ -159,15 +159,31 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
     }
 
     private Element<E> takeUnsafe() {
-        final Element<E> element = this.queue.first();
+        final Element<E> element = this.queue.pollFirst();
         assert element != null;
-        this.queue.remove(element);
         if (this.drained != null && (this.maxsize == -1 || this.drained.size() < this.maxsize)) this.drained.add(element);
         assert this.queue.size() >= this.enqueued.availablePermits() : "(take) queue.size() = " + this.queue.size() + ", enqueued.availablePermits() = " + this.enqueued.availablePermits();
         return element;
     }
-
-
+    
+    /**
+     * remove a drained element
+     * @param element
+     */
+    /*
+    public void removeDrained(Element<E> element) {
+        if (element == null) return;
+        synchronized (this.drained) {
+            int p = this.drained.size() - 1;
+            if (this.drained.get(p) == element) {
+                this.drained.remove(p);
+                return;
+            }
+        }
+        this.drained.remove(element);
+    }
+    */
+    
     /**
      * return the element with the smallest weight, but do not remove it
      * @return null if no element is on the queue or the head of the queue

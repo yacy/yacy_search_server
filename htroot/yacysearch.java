@@ -733,12 +733,14 @@ public class yacysearch {
                 + " - "
                 + "local_rwi_available(" + theSearch.local_rwi_available.get() + "), "
                 + "local_rwi_stored(" + theSearch.local_rwi_stored.get() + "), "
+                + "remote_rwi_available(" + theSearch.remote_rwi_available.get() + "), "
+                + "remote_rwi_stored(" + theSearch.remote_rwi_stored.get() + "), "
+                + "remote_rwi_peerCount(" + theSearch.remote_rwi_peerCount.get() + "), "
                 + "local_solr_available(" + theSearch.local_solr_available.get() + "), "
                 + "local_solr_stored(" + theSearch.local_solr_stored.get() + "), "
-                + "remote_available(" + theSearch.remote_available.get() + "), "
-                + "remote_stored(" + theSearch.remote_stored.get() + "), "
-                + "remote_peerCount(" + theSearch.remote_peerCount.get() + "), "
-                + "local_sortout(" + theSearch.misses.size() + "), "
+                + "remote_solr_available(" + theSearch.remote_solr_available.get() + "), "
+                + "remote_solr_stored(" + theSearch.remote_solr_stored.get() + "), "
+                + "remote_solr_peerCount(" + theSearch.remote_solr_peerCount.get() + "), "
                 + (System.currentTimeMillis() - timestamp)
                 + " ms");
 
@@ -827,10 +829,9 @@ public class yacysearch {
             prop.put("num-results_totalcount", Formatter.number(theSearch.getResultCount()));
             prop.put("num-results_globalresults", global && (indexReceiveGranted || clustersearch) ? "1" : "0");
             prop.put("num-results_globalresults_localResourceSize", Formatter.number(theSearch.local_rwi_available.get() + theSearch.local_solr_available.get(), true));
-            prop.put("num-results_globalresults_localMissCount", Formatter.number(theSearch.misses.size(), true));
-            prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.remote_available.get(), true));
-            prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.remote_stored.get(), true));
-            prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.remote_peerCount.get(), true));
+            prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
+            prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get(), true));
+            prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
 
             // compose page navigation
             final StringBuilder resnav = new StringBuilder(200);

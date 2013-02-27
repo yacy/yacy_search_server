@@ -377,7 +377,7 @@ public class WebStructureGraph {
         }
 
         @Override
-        public HostReference produceFast(final HostReference e) {
+        public HostReference produceFast(final HostReference e, final boolean local) {
             return e;
         }
 

@@ -34,6 +34,6 @@ public interface ReferenceFactory<ReferenceType extends Reference> {
 
     public ReferenceType produceSlow(Row.Entry e);
     
-    public ReferenceType produceFast(ReferenceType e);
+    public ReferenceType produceFast(ReferenceType e, final boolean local);
     
 }
