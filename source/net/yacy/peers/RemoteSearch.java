@@ -127,7 +127,8 @@ public class RemoteSearch extends Thread {
 
     public static void primaryRemoteSearches(
     		final SearchEvent event,
-            final int count, final long time,
+    		final int start, final int count, 
+            final long time,
             final Blacklist blacklist,
             final SortedMap<byte[], String> clusterselection,
             final int burstRobinsonPercent,
@@ -167,7 +168,7 @@ public class RemoteSearch extends Thread {
 
         // start solr searches
         for (Seed s: nodePeers) {
-            solrRemoteSearch(event, count, s, blacklist);
+            solrRemoteSearch(event, start, count, s, blacklist);
         }
         
         // start search to YaCy DHT peers
@@ -252,6 +253,7 @@ public class RemoteSearch extends Thread {
 
     public static Thread solrRemoteSearch(
                     final SearchEvent event,
+                    final int start,
                     final int count,
                     final Seed targetPeer,
                     final Blacklist blacklist) {
@@ -263,17 +265,14 @@ public class RemoteSearch extends Thread {
         Thread solr = new Thread() {
             @Override
             public void run() {
-                int tmpoffset = 0;
-                int tmpcount = 10;
-                while (tmpoffset + tmpcount <= count && tmpcount > 0) {
                     int urls = 0;
                     try {
                         event.oneFeederStarted();
                         urls = Protocol.solrQuery(
                                         event,
-                                        tmpoffset,
-                                        tmpcount,
-                                        tmpoffset == 0,
+                                        start,
+                                        count,
+                                        start == 0,
                                         targetPeer,
                                         blacklist);
                         if (urls >= 0) {
@@ -290,10 +289,6 @@ public class RemoteSearch extends Thread {
                     } finally {
                         event.oneFeederTerminated();
                     }
-                    if (urls < tmpcount) break; // there won't be more
-                    tmpoffset += tmpcount;
-                    tmpcount = targetPeer == null ? 10 : count - tmpoffset;
-                }
             }
         };
         /*if (targetPeer == null) solr.run(); else*/ solr.start();
