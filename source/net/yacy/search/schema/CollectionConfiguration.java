@@ -328,11 +328,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 this.lazy = lc;
             } else {
                 // search the citations for references
-                try {
-                    clickdepth = getClickDepth(citations, digestURI);
-                } catch (IOException e) {
-                    add(doc, CollectionSchema.clickdepth_i, -1);
-                }
+                //try {
+                    clickdepth = -1; //getClickDepth(citations, digestURI);
+                //} catch (IOException e) {
+                //    add(doc, CollectionSchema.clickdepth_i, -1);
+                //}
                 if (clickdepth < 0 || clickdepth > 1) {
                     processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
                 }

@@ -106,11 +106,13 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             @Override
             public void run() {
                 int o = offset;
-                while (System.currentTimeMillis() < endtime) {
+                int count = 0;
+                while (System.currentTimeMillis() < endtime && count < maxcount) {
                     try {
                         SolrDocumentList sdl = query(querystring, o, pagesize, fields);
                         for (SolrDocument d: sdl) {
                             try {queue.put(d);} catch (InterruptedException e) {break;}
+                            count++;
                         }
                         if (sdl.size() < pagesize) break;
                         o += pagesize;

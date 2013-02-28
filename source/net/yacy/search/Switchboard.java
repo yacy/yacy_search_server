@@ -2257,7 +2257,7 @@ public final class Switchboard extends serverSwitch {
                 // that means we must search for those entries.
                 index.fulltext().getDefaultConnector().commit(true); // make sure that we have latest information that can be found
                 //BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery("*:*", 0, 1000, 60000, 10);
-                BlockingQueue<SolrDocument> docs = index.fulltext().getDefaultConnector().concurrentQuery(CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 1000, 60000, 10);
+                BlockingQueue<SolrDocument> docs = index.fulltext().getDefaultConnector().concurrentQuery(CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 10000, 60000, 50);
                 
                 SolrDocument doc;
                 int proccount_clickdepth = 0;
@@ -2280,7 +2280,10 @@ public final class Switchboard extends serverSwitch {
                                     Integer oldclickdepth = (Integer) doc.getFieldValue(CollectionSchema.clickdepth_i.getSolrFieldName());
                                     url = new DigestURI((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())));
                                     int clickdepth = CollectionConfiguration.getClickDepth(index.urlCitation(), url);
-                                    if (oldclickdepth == null || oldclickdepth.intValue() != clickdepth) proccount_clickdepthchange++;
+                                    if (oldclickdepth == null || oldclickdepth.intValue() != clickdepth) {
+                                        //log.logInfo("new clickdepth "  + clickdepth + " for " + url.toNormalform(true));
+                                        proccount_clickdepthchange++;
+                                    }
                                     SolrInputDocument sid = index.fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
                                     sid.setField(CollectionSchema.clickdepth_i.getSolrFieldName(), clickdepth);
                                     

@@ -178,7 +178,9 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         } catch (Throwable e) {
             // catches "version conflict for": try this again and delete the document in advance
             try {
-                this.server.deleteById((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+                synchronized (this.server) {
+                    this.server.deleteById((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+                }
             } catch (SolrServerException e1) {}
             try {
                 synchronized (this.server) {
