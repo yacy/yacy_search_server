@@ -1118,7 +1118,7 @@ public final class Protocol {
 		
         Network.log.logInfo("SEARCH (solr), returned " + docList.size() + " out of " + docList.getNumFound() + " documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
         int term = count;
-        Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>(docList.size());
+        final Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>(docList.size());
         for (final SolrDocument doc: docList) {
             if ( term-- <= 0 ) {
                 break; // do not process more that requested (in case that evil peers fill us up with rubbish)
@@ -1166,18 +1166,26 @@ public final class Protocol {
             // add the url entry to the word indexes
             container.add(urlEntry);
         }
-        try {
-            event.query.getSegment().fulltext().putDocuments(docs);
-        } catch ( final IOException e ) {
-            Network.log.logWarning("could not store search result", e);
-        }
-        
         if (localsearch) {
             event.addNodes(container, facets, snippets, true, "localpeer", (int) docList.getNumFound());
             event.addFinalize();
             event.addExpectedRemoteReferences(-count);
             Network.log.logInfo("local search (solr): localpeer sent " + container.get(0).size() + "/" + docList.size() + " references");
         } else {
+            // learn the documents
+            if (docs.size() > 0) {
+                // this can be done later, do that concurrently
+                new Thread() {
+                    public void run() {
+                        try {Thread.sleep(5000 + 3 * (System.currentTimeMillis() % 1000));} catch (InterruptedException e) {}
+                        try {
+                            event.query.getSegment().fulltext().putDocuments(docs);
+                        } catch ( final IOException e ) {
+                            Network.log.logWarning("could not store search result", e);
+                        }
+                    }
+                }.start();
+            }
             event.addNodes(container, facets, snippets, false, target.getName() + "/" + target.hash, (int) docList.getNumFound());
             event.addFinalize();
             event.addExpectedRemoteReferences(-count);

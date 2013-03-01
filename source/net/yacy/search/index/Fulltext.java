@@ -384,6 +384,7 @@ public final class Fulltext {
     }
     
     public void putDocuments(final Collection<SolrInputDocument> docs) throws IOException {
+        if (docs == null || docs.size() == 0) return;
         this.getDefaultConnector().add(docs);
         this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCache();
