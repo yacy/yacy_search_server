@@ -67,11 +67,16 @@ public class RemoteInstance implements SolrInstance {
     private final Collection<String> coreNames;
     private final Map<String, HttpSolrServer> server;
     
-    /*
-    public RemoteInstance(final String url) throws IOException {
-        this(url, null, url.endsWith("solr/") || url.endsWith("solr") ? "solr" : CollectionSchema.CORE_NAME);
+    public static ArrayList<RemoteInstance> getShardInstances(final String urlList, Collection<String> coreNames, String defaultCoreName) throws IOException {
+        urlList.replace(' ', ',');
+        String[] urls = urlList.split(",");
+        ArrayList<RemoteInstance> instances = new ArrayList<RemoteInstance>();
+        for (final String u: urls) {
+            RemoteInstance instance = new RemoteInstance(u, coreNames, defaultCoreName);
+            instances.add(instance);
+        }
+        return instances;
     }
-    */
     
     public RemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName) throws IOException {
         this.server= new HashMap<String, HttpSolrServer>();

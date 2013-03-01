@@ -100,7 +100,6 @@ import net.yacy.cora.federate.solr.Boost;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.ProcessType;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
-import net.yacy.cora.federate.solr.connector.ShardSolrConnector;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.lod.JenaTripleStore;
@@ -490,7 +489,7 @@ public final class Switchboard extends serverSwitch {
 
         if (usesolr && solrurls != null && solrurls.length() > 0) {
             try {
-                ArrayList<RemoteInstance> instances = ShardSolrConnector.getShardInstances(solrurls, null, null);
+                ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null);
                 this.index.fulltext().connectRemoteSolr(instances);
             } catch ( final IOException e ) {
                 Log.logException(e);
@@ -1329,7 +1328,7 @@ public final class Switchboard extends serverSwitch {
 
             if (usesolr && solrurls != null && solrurls.length() > 0) {
                 try {
-                    ArrayList<RemoteInstance> instances = ShardSolrConnector.getShardInstances(solrurls, null, null);
+                    ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null);
                     this.index.fulltext().connectRemoteSolr(instances);
                 } catch ( final IOException e ) {
                     Log.logException(e);

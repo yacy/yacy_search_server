@@ -18,10 +18,10 @@ network.unit.description = Public YaCy Community
 network.unit.domain = global
 
 # maximum search time for remote queries (milliseconds)
-network.unit.remotesearch.maxtime = 1000
+network.unit.remotesearch.maxtime = 3000
 
 # maximum number of results per remote query
-network.unit.remotesearch.maxcount = 100
+network.unit.remotesearch.maxcount = 10
 
 # flag to switch on dht transmission
 # if the dht transmission is set to 'false' then for a global

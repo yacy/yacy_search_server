@@ -61,7 +61,6 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.Index;

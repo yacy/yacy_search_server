@@ -21,13 +21,13 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.sorting.ReversibleScoreMap;
-import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -168,11 +168,14 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
      */
     @Override
     public void add(final SolrInputDocument solrdoc) throws IOException {
-        String id = (String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-        assert id != null;
-        if (id == null) return;
         if (this.solr0 != null) this.solr0.add(solrdoc);
         if (this.solr1 != null) this.solr1.add(solrdoc);
+    }
+    
+    @Override
+    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
+        if (this.solr0 != null) this.solr0.add(solrdocs);
+        if (this.solr1 != null) this.solr1.add(solrdocs);
     }
 
     /**

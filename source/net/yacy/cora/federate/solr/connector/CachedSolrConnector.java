@@ -21,6 +21,7 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -222,6 +223,20 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
         if (this.solr != null) this.solr.add(solrdoc);
     }
 
+    @Override
+    public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
+        for (SolrInputDocument solrdoc: solrdocs) {
+            String id = (String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName());
+            assert id != null;
+            if (id == null) continue;
+            SolrDocument doc = ClientUtils.toSolrDocument(solrdoc);
+            addToCache(doc, true);
+            this.documentCache.put(id, doc);
+            this.documentCache_Insert++;
+        }
+        if (this.solr != null) this.solr.add(solrdocs);
+    }
+    
     /**
      * get a query result from solr
      * to get all results set the query String to "*:*"

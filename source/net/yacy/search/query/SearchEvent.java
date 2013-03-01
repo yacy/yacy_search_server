@@ -146,7 +146,7 @@ public final class SearchEvent {
     private final long maxtime;
     private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     private final int[] flagcount; // flag counter
-    private final AtomicInteger feedersAlive, feedersTerminated;
+    private final AtomicInteger feedersAlive, feedersTerminated, snippetFetchAlive;
     private boolean addRunning;
     private final AtomicInteger receivedRemoteReferences;
     private final ReferenceOrder order;
@@ -245,6 +245,7 @@ public final class SearchEvent {
         }
         this.feedersAlive = new AtomicInteger(0);
         this.feedersTerminated = new AtomicInteger(0);
+        this.snippetFetchAlive = new AtomicInteger(0);
         this.addRunning = true;
         this.receivedRemoteReferences = new AtomicInteger(0);
         this.order = new ReferenceOrder(this.query.ranking, UTF8.getBytes(this.query.targetlang));
@@ -1084,17 +1085,25 @@ public final class SearchEvent {
             addResult(getSnippet(localEntry, null));
             success = true;
         }
-        if (localEntry == null) {
+        if (SearchEvent.this.snippetFetchAlive.get() >= 10) {
+            // too many concurrent processes
             URIMetadataNode p2pEntry = pullOneFilteredFromRWI(true);
             if (p2pEntry != null) {
                 addResult(getSnippet(p2pEntry, null));
                 success = true;
             }
         } else {
-            new Thread() {
+            final URIMetadataNode p2pEntry = pullOneFilteredFromRWI(true);
+            if (p2pEntry != null) new Thread() {
                 public void run() {
-                    URIMetadataNode p2pEntry = pullOneFilteredFromRWI(true);
-                    if (p2pEntry != null) addResult(getSnippet(p2pEntry, null));
+                    SearchEvent.this.oneFeederStarted();
+                    SearchEvent.this.snippetFetchAlive.incrementAndGet();
+                    try {
+                        addResult(getSnippet(p2pEntry, null));
+                    } catch (Throwable e) {} finally {
+                        SearchEvent.this.oneFeederTerminated();
+                        SearchEvent.this.snippetFetchAlive.decrementAndGet();
+                    }
                 }
             }.start();
         }
@@ -1310,7 +1319,7 @@ public final class SearchEvent {
     }
 
     public void oneFeederStarted() {
-        this.feedersAlive.addAndGet(1);
+        this.feedersAlive.incrementAndGet();
     }
     
     public QueryParams getQuery() {
