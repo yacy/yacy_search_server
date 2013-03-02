@@ -79,10 +79,6 @@ public class URIMetadataNode {
     private String snippet = null;
     private WordReferenceVars word = null; // this is only used if the url is transported via remote search requests
     
-    public URIMetadataNode(final SolrInputDocument doc) {
-        this(ClientUtils.toSolrDocument(doc));
-    }
-    
     public URIMetadataNode(final SolrDocument doc) {
         this.doc = doc;
         this.snippet = "";
@@ -96,12 +92,6 @@ public class URIMetadataNode {
             Log.logException(e);
             this.url = null;
         }
-    }
-
-    public URIMetadataNode(final SolrInputDocument doc, final WordReferenceVars searchedWord, final long ranking) {
-        this(ClientUtils.toSolrDocument(doc));
-        this.word = searchedWord;
-        this.ranking = ranking;
     }
 
     public URIMetadataNode(final SolrDocument doc, final WordReferenceVars searchedWord, final long ranking) {

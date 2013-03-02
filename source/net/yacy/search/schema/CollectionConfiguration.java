@@ -70,6 +70,7 @@ import net.yacy.kelondro.util.ByteBuffer;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 
 
 public class CollectionConfiguration extends SchemaConfiguration implements Serializable {
@@ -155,6 +156,20 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         for (String name: doc.getFieldNames()) {
             if (this.contains(name) && !omitFields.contains(name)) { // check each field if enabled in local Solr schema
                 sid.addField(name, doc.getFieldValue(name), 1.0f);
+            }
+        }
+        return sid;
+    }
+    
+    public SolrDocument toSolrDocument(SolrInputDocument doc) {
+        SolrDocument sid = new SolrDocument();
+        Set<String> omitFields = new HashSet<String>(3);
+        omitFields.add(CollectionSchema.author_sxt.getSolrFieldName());
+        omitFields.add(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
+        omitFields.add(CollectionSchema.coordinate_p_1_coordinate.getSolrFieldName());
+        for (SolrInputField field: doc) {
+            if (this.contains(field.getName()) && !omitFields.contains(field.getName())) { // check each field if enabled in local Solr schema
+                sid.setField(field.getName(), field.getValue());
             }
         }
         return sid;

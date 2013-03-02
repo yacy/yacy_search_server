@@ -836,10 +836,12 @@ public final class Protocol {
             }
         }
         
-        try {
-            event.query.getSegment().fulltext().putMetadata(storeDocs);
-        } catch ( final IOException e ) {
-            Network.log.logWarning("could not store search result", e);
+        for (URIMetadataRow entry: storeDocs) {
+            try {
+                event.query.getSegment().fulltext().putMetadataLater(entry);
+            } catch (IOException e) {
+                Log.logException(e);
+            }
         }
 
         // store remote result to local result container
@@ -1172,19 +1174,9 @@ public final class Protocol {
             event.addExpectedRemoteReferences(-count);
             Network.log.logInfo("local search (solr): localpeer sent " + container.get(0).size() + "/" + docList.size() + " references");
         } else {
-            // learn the documents
-            if (docs.size() > 0) {
-                // this can be done later, do that concurrently
-                new Thread() {
-                    public void run() {
-                        try {Thread.sleep(5000 + 3 * (System.currentTimeMillis() % 1000));} catch (InterruptedException e) {}
-                        try {
-                            event.query.getSegment().fulltext().putDocuments(docs);
-                        } catch ( final IOException e ) {
-                            Network.log.logWarning("could not store search result", e);
-                        }
-                    }
-                }.start();
+            // learn the documents, this can be done later
+            for (SolrInputDocument doc: docs) {
+                event.query.getSegment().fulltext().putDocumentLater(doc);
             }
             event.addNodes(container, facets, snippets, false, target.getName() + "/" + target.hash, (int) docList.getNumFound());
             event.addFinalize();

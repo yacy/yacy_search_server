@@ -119,10 +119,10 @@ public final class SwitchboardConstants {
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM   = null;
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP        = "62_remotetriggeredcrawl_idlesleep";
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP        = "62_remotetriggeredcrawl_busysleep";
-    // 80_indexing
+ // 70_surrogates
     /**
      * <p><code>public static final String <strong>SURROGATES</strong> = "70_surrogates"</code></p>
-     * <p>A thread that polls the SURROGATES path and puts all Documents in one surroagte file into the indexing queue.</p>
+     * <p>A thread that polls the SURROGATES path and puts all Documents in one surrogate file into the indexing queue.</p>
      */
     public static final String SURROGATES                      = "70_surrogates";
     public static final String SURROGATES_MEMPREREQ            = "70_surrogates_memprereq";
@@ -131,6 +131,18 @@ public final class SwitchboardConstants {
     public static final String SURROGATES_METHOD_START         = "surrogateProcess";
     public static final String SURROGATES_METHOD_JOBCOUNT      = "surrogateQueueSize";
     public static final String SURROGATES_METHOD_FREEMEM       = "surrogateFreeMem";
+    // 80_search_result_processing
+    /**
+     * <p><code>public static final String <strong>SEARCHRESULT</strong> = "80_searchresult"</code></p>
+     * <p>A thread that stores search results from other peers into the own index.</p>
+     */
+    public static final String SEARCHRESULT                      = "80_searchresult";
+    public static final String SEARCHRESULT_MEMPREREQ            = "80_searchresult_memprereq";
+    public static final String SEARCHRESULT_IDLESLEEP            = "80_searchresult_idlesleep";
+    public static final String SEARCHRESULT_BUSYSLEEP            = "80_searchresult_busysleep";
+    public static final String SEARCHRESULT_METHOD_START         = "searchresultProcess";
+    public static final String SEARCHRESULT_METHOD_JOBCOUNT      = "searchresultQueueSize";
+    public static final String SEARCHRESULT_METHOD_FREEMEM       = "searchresultFreeMem";
     // 90_cleanup
     /**
      * <p><code>public static final String <strong>CLEANUP</strong> = "90_cleanup"</code></p>
