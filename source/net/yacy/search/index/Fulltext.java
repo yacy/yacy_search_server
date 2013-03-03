@@ -417,6 +417,14 @@ public final class Fulltext {
     }
     
     public void putDocumentLater(final SolrInputDocument doc) {
+        if (MemoryControl.shortStatus()) {
+            try {
+                putDocument(doc);
+                return;
+            } catch (IOException ee) {
+                Log.logException(ee);
+            }
+        }
         try {
             this.pendingCollectionInputDocuments.put(doc);
         } catch (InterruptedException e) {
@@ -434,17 +442,13 @@ public final class Fulltext {
     
     public int processPendingInputDocuments(int count) throws IOException {
         if (count == 0) return 0;
-        if (count == 1) {
-            pendingRows2Docs(1);
-            SolrInputDocument doc = this.pendingCollectionInputDocuments.poll();
-            if (doc == null) return 0;
-            this.putDocument(doc);
-            return 1;
+        boolean shortMemStatus = MemoryControl.shortStatus();
+        if (!shortMemStatus || this.pendingCollectionInputDocuments.size() < count) {
+            pendingRows2Docs(count);
         }
-        pendingRows2Docs(count);
         SolrInputDocument doc;
         Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>(count);
-        while (count-- > 0 && (doc = this.pendingCollectionInputDocuments.poll()) != null) {
+        while ((shortMemStatus || count-- > 0) && (doc = this.pendingCollectionInputDocuments.poll()) != null) {
             docs.add(doc);
         }
         if (docs.size() > 0) this.putDocuments(docs);
@@ -497,29 +501,19 @@ public final class Fulltext {
     }
 
     public void putMetadataLater(final URIMetadataRow entry) throws IOException {
-        byte[] idb = entry.hash();
-        String id = ASCII.String(idb);
-        try {
-            if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-            // because node entries are richer than metadata entries we must check if they exist to prevent that they are overwritten
-            SolrDocument sd = this.getDefaultConnector().getById(id);
-            if (sd == null || (new URIMetadataNode(sd)).isOlder(entry)) {
-                SolrInputDocument doc = getDefaultConfiguration().metadata2solr(entry);
-                try {
-                    this.pendingCollectionInputDocuments.put(doc);
-                } catch (InterruptedException e) {
-                    try {
-                        putDocument(doc);
-                    } catch (IOException ee) {
-                        Log.logException(ee);
-                    }
-                }
-            }                                                                                                                     
-        } catch (SolrException e) {
-            throw new IOException(e.getMessage(), e);
+        if (MemoryControl.shortStatus()) {
+            putMetadata(entry);
+            return;
         }
-        this.statsDump = null;
-        if (MemoryControl.shortStatus()) clearCache();
+        try {
+            this.pendingCollectionInputRows.put(entry);
+        } catch (InterruptedException e) {
+            try {
+                putMetadata(entry);
+            } catch (IOException ee) {
+                Log.logException(ee);
+            }
+        }
     }
 
     /**
