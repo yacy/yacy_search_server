@@ -1082,14 +1082,14 @@ public final class SearchEvent {
         Element<URIMetadataNode> localEntryElement = this.nodeStack.sizeQueue() > 0 ? this.nodeStack.poll() : null;
         URIMetadataNode localEntry = localEntryElement == null ? null : localEntryElement.getElement();
         if (localEntry != null) {
-            addResult(getSnippet(localEntry, null));
+            addResult(getSnippet(localEntry, this.query.snippetCacheStrategy));
             success = true;
         }
         if (SearchEvent.this.snippetFetchAlive.get() >= 10) {
             // too many concurrent processes
             URIMetadataNode p2pEntry = pullOneFilteredFromRWI(true);
             if (p2pEntry != null) {
-                addResult(getSnippet(p2pEntry, null));
+                addResult(getSnippet(p2pEntry, this.query.snippetCacheStrategy));
                 success = true;
             }
         } else {
@@ -1101,7 +1101,7 @@ public final class SearchEvent {
                         if (p2pEntry != null) {
                             SearchEvent.this.snippetFetchAlive.incrementAndGet();
                             try {
-                                addResult(getSnippet(p2pEntry, null));
+                                addResult(getSnippet(p2pEntry, SearchEvent.this.query.snippetCacheStrategy));
                             } catch (Throwable e) {} finally {
                                 SearchEvent.this.snippetFetchAlive.decrementAndGet();
                             }
@@ -1240,6 +1240,7 @@ public final class SearchEvent {
 
         // wait until a local solr is finished, we must do that to be able to check if we need more
         if (this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join(100);} catch (InterruptedException e) {}}
+        if (item >= this.localsolroffset && this.local_solr_stored.get() == 0 && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (InterruptedException e) {}}
         if (item >= this.localsolroffset && this.local_solr_stored.get() >= item) {
             // load remaining solr results now
             int nextitems = item - this.localsolroffset + this.query.itemsPerPage; // example: suddenly switch to item 60, just 10 had been shown, 20 loaded.
@@ -1261,9 +1262,8 @@ public final class SearchEvent {
             final ResultEntry re = this.resultList.element(item).getElement();
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "fetched, item = " + item + ", available = " + this.getResultCount() + ": " + re.urlstring(), 0, 0), false);
 
-            if (this.local_solr_stored.get() > this.localsolroffset && (item + 1) % this.query.itemsPerPage == 0) {
+            if (!this.localsolrsearch.isAlive() && this.local_solr_stored.get() > this.localsolroffset && (item + 1) % this.query.itemsPerPage == 0) {
                 // at the end of a list, trigger a next solr search
-                if (this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (InterruptedException e) {}}
                 this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.localsolroffset, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
                 this.localsolroffset += this.query.itemsPerPage;
             }
