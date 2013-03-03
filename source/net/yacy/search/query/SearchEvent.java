@@ -1093,16 +1093,21 @@ public final class SearchEvent {
                 success = true;
             }
         } else {
-            final URIMetadataNode p2pEntry = pullOneFilteredFromRWI(true);
-            if (p2pEntry != null) new Thread() {
+            new Thread() {
                 public void run() {
                     SearchEvent.this.oneFeederStarted();
-                    SearchEvent.this.snippetFetchAlive.incrementAndGet();
                     try {
-                        addResult(getSnippet(p2pEntry, null));
+                        final URIMetadataNode p2pEntry = pullOneFilteredFromRWI(true);
+                        if (p2pEntry != null) {
+                            SearchEvent.this.snippetFetchAlive.incrementAndGet();
+                            try {
+                                addResult(getSnippet(p2pEntry, null));
+                            } catch (Throwable e) {} finally {
+                                SearchEvent.this.snippetFetchAlive.decrementAndGet();
+                            }
+                        }
                     } catch (Throwable e) {} finally {
                         SearchEvent.this.oneFeederTerminated();
-                        SearchEvent.this.snippetFetchAlive.decrementAndGet();
                     }
                 }
             }.start();
@@ -1234,13 +1239,11 @@ public final class SearchEvent {
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "started, item = " + item + ", available = " + this.getResultCount(), 0, 0), false);
 
         // wait until a local solr is finished, we must do that to be able to check if we need more
-        if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {
-            try {this.localsolrsearch.join();} catch (InterruptedException e) {}
-        }
-        this.localsolrsearch = null;
+        if (this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join(100);} catch (InterruptedException e) {}}
         if (item >= this.localsolroffset && this.local_solr_stored.get() >= item) {
             // load remaining solr results now
             int nextitems = item - this.localsolroffset + this.query.itemsPerPage; // example: suddenly switch to item 60, just 10 had been shown, 20 loaded.
+            if (this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (InterruptedException e) {}}
             this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.localsolroffset, nextitems, null /*this peer*/, Switchboard.urlBlacklist);
             this.localsolroffset += nextitems;
         }
@@ -1260,6 +1263,7 @@ public final class SearchEvent {
 
             if (this.local_solr_stored.get() > this.localsolroffset && (item + 1) % this.query.itemsPerPage == 0) {
                 // at the end of a list, trigger a next solr search
+                if (this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (InterruptedException e) {}}
                 this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.localsolroffset, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
                 this.localsolroffset += this.query.itemsPerPage;
             }

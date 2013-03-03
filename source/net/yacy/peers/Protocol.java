@@ -686,7 +686,7 @@ public final class Protocol {
                 Network.log.logInfo("remote search: peer " + target.getName() + " sent " + ac + " index abstracts for words " + whacc);
             }
         }
-        return result.urlcount;
+        return result.availableCount;
     }
 
     protected static int secondarySearch(
@@ -736,7 +736,7 @@ public final class Protocol {
             Log.logException(e);
             return -1;
         }
-        return result.urlcount;
+        return result.availableCount;
     }
 
     private static void remoteSearchProcess(
@@ -847,7 +847,7 @@ public final class Protocol {
         // store remote result to local result container
         // insert one container into the search result buffer
         // one is enough, only the references are used, not the word
-        event.addRWIs(container.get(0), false, target.getName() + "/" + target.hash, result.joincount, time);
+        event.addRWIs(container.get(0), false, target.getName() + "/" + target.hash, result.totalCount, time);
         event.addFinalize();
         event.addExpectedRemoteReferences(-count);
 
@@ -869,12 +869,12 @@ public final class Protocol {
                 event.addTopic(result.references);
             }
         }
-        Network.log.logInfo("remote search: peer " + target.getName() + " sent " + container.get(0).size() + "/" + result.joincount + " references");
+        Network.log.logInfo("remote search: peer " + target.getName() + " sent " + container.get(0).size() + "/" + result.totalCount + " references");
     }
 
     private static class SearchResult {
-        public int urlcount; // number of returned LURL's for this search
-        public int joincount; //
+        public int availableCount; // number of returned LURL's for this search
+        public int totalCount; //
         public Map<byte[], Integer> indexcount; //
         public long searchtime; // time that the peer actually spent to create the result
         public String[] references; // search hints, the top-words
@@ -974,12 +974,12 @@ public final class Protocol {
                     + resultMap.toString());
             }
             try {
-                this.joincount = Integer.parseInt(resultMap.get("joincount")); // the complete number of hits at remote site
+                this.totalCount = Integer.parseInt(resultMap.get("joincount")); // the complete number of hits at remote site; rwi+solr (via: theSearch.getResultCount())
             } catch ( final NumberFormatException e ) {
                 throw new IOException("wrong output format for joincount: " + e.getMessage());
             }
             try {
-                this.urlcount = Integer.parseInt(resultMap.get("count")); // the number of hits that are returned in the result list
+                this.availableCount = Integer.parseInt(resultMap.get("count")); // the number of hits that are returned in the result list
             } catch ( final NumberFormatException e ) {
                 throw new IOException("wrong output format for count: " + e.getMessage());
             }
@@ -997,8 +997,8 @@ public final class Protocol {
                 }
             }
             this.references = resultMap.get("references").split(",");
-            this.links = new ArrayList<URIMetadataRow>(this.urlcount);
-            for ( int n = 0; n < this.urlcount; n++ ) {
+            this.links = new ArrayList<URIMetadataRow>(this.availableCount);
+            for ( int n = 0; n < this.availableCount; n++ ) {
                 // get one single search result
                 final String resultLine = resultMap.get("resource" + n);
                 if ( resultLine == null ) {
