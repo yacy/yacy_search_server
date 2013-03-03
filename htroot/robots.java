@@ -6,6 +6,7 @@
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
@@ -36,7 +37,7 @@ public class robots {
             if (rbc.isProfileDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.PROFILE, "1");
 
             if (rbc.isLockedDisallowed() || rbc.isDirsDisallowed()) {
-                final ArrayList<String>[] p = getFiles(env.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
+                final List<String>[] p = getFiles(env.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
                 if (rbc.isLockedDisallowed()) {
                     prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.LOCKED, p[0].size());
                     for (int i=0; i<p[0].size(); i++)
@@ -54,14 +55,14 @@ public class robots {
     }
 
     @SuppressWarnings("unchecked")
-    private static ArrayList<String>[] getFiles(final String htrootPath) {
+    private static List<String>[] getFiles(final String htrootPath) {
         final File htroot = new File(htrootPath);
         if (!htroot.exists()) return null;
-        final ArrayList<String> htrootFiles = new ArrayList<String>();
-        final ArrayList<String> htrootDirs = new ArrayList<String>();
+        final List<String> htrootFiles = new ArrayList<String>();
+        final List<String> htrootDirs = new ArrayList<String>();
         final String[] htroots = htroot.list();
         File file;
-        for (int i=0, dot; i<htroots.length; i++) {
+        for (int i=0, dot; i < htroots.length; i++) {
             if (htroots[i].equals("www")) continue;
             file = new File(htroot, htroots[i]);
             if (file.isDirectory()) {
@@ -74,6 +75,6 @@ public class robots {
                 htrootFiles.add(htroots[i]);
             }
         }
-        return (ArrayList<String>[]) new Object[] { htrootFiles, htrootDirs };
+        return (List<String>[]) new Object[] { htrootFiles, htrootDirs };
     }
 }
