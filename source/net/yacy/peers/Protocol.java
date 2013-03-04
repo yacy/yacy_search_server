@@ -1156,7 +1156,16 @@ public final class Protocol {
 
             // passed all checks, store url
             if (!localsearch) {
-                docs.add(event.query.getSegment().fulltext().getDefaultConfiguration().toSolrInputDocument(doc));
+                // put the remote documents to the local index. We must convert the solr document to a solr input document:
+                SolrInputDocument sid = event.query.getSegment().fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
+
+                // after this conversion we can remove the largest and not used field text_t and synonyms_sxt from the document
+                // because that goes into a search cache and would take a lot of memory in the search cache
+                doc.removeFields(CollectionSchema.text_t.getSolrFieldName());
+                doc.removeFields(CollectionSchema.synonyms_sxt.getSolrFieldName());
+                
+                // the input document stays untouched because it contains top-level cloned objects
+                docs.add(sid);
                 ResultURLs.stack(
                     ASCII.String(urlEntry.url().hash()),
                     urlEntry.url().getHost(),
