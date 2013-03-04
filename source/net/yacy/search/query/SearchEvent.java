@@ -606,6 +606,9 @@ public final class SearchEvent {
         if (this.IACount != null) this.IACount.clear();
         if (this.IAResults != null) this.IAResults.clear();
         if (this.heuristics != null) this.heuristics.clear();
+        this.rwiStack.clear();
+        this.nodeStack.clear();
+        this.resultList.clear();
     }
 
     public String abstractsString(final byte[] hash) {

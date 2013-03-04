@@ -116,6 +116,7 @@ public class SearchEventCache {
             final int burstRobinsonPercent,
             final int burstMultiwordPercent) {
 
+        if (MemoryControl.shortStatus()) cleanupEvents(true);
         final String id = query.id(false);
         SearchEvent event = getEvent(id);
         if (Switchboard.getSwitchboard() != null && !Switchboard.getSwitchboard().crawlQueues.noticeURL.isEmpty() && event != null && System.currentTimeMillis() - event.getEventTime() > 60000) {
