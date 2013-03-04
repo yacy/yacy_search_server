@@ -46,9 +46,7 @@ import net.yacy.kelondro.util.Bitfield;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.utils.crypt;
 
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrInputDocument;
 
 
 /**

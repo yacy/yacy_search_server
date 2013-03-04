@@ -306,6 +306,24 @@ public final class Fulltext {
 
     public DigestURI getURL(final byte[] urlHash) {
         if (urlHash == null) return null;
+
+        // try to get the data from the delayed cache; this happens if we retrieve this from a fresh search result
+        String u = ASCII.String(urlHash);
+        for (URIMetadataRow entry: this.pendingCollectionInputRows) {
+            if (u.equals(ASCII.String(entry.hash()))) {
+                if (this.urlIndexFile != null) try {this.urlIndexFile.remove(urlHash);} catch (IOException e) {} // migration
+                return entry.url();
+            }
+        }
+
+        for (SolrInputDocument doc: this.pendingCollectionInputDocuments) {
+            if (u.equals(doc.getFieldValue(CollectionSchema.id.getSolrFieldName()))) {
+                if (this.urlIndexFile != null) try {this.urlIndexFile.remove(urlHash);} catch (IOException e) {} // migration
+                String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+                if (url != null) try {return new DigestURI(url);} catch (MalformedURLException e) {}
+            }
+        }
+        
         String x;
         try {
             x = (String) this.getDefaultConnector().getFieldById(ASCII.String(urlHash), CollectionSchema.sku.getSolrFieldName());
@@ -340,8 +358,7 @@ public final class Fulltext {
         
         // try to get the data from the delayed cache; this happens if we retrieve this from a fresh search result
         for (URIMetadataRow entry: this.pendingCollectionInputRows) {
-            String id = ASCII.String(entry.hash());
-            if (id != null && id.equals(u)) {
+            if (u.equals(ASCII.String(entry.hash()))) {
                 if (this.urlIndexFile != null) try {this.urlIndexFile.remove(urlHash);} catch (IOException e) {} // migration
                 SolrDocument sd = this.collectionConfiguration.toSolrDocument(getDefaultConfiguration().metadata2solr(entry));
                 return new URIMetadataNode(sd, wre, weight);
@@ -349,8 +366,7 @@ public final class Fulltext {
         }
 
         for (SolrInputDocument doc: this.pendingCollectionInputDocuments) {
-            String id = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-            if (id != null && id.equals(u)) {
+            if (u.equals(doc.getFieldValue(CollectionSchema.id.getSolrFieldName()))) {
                 if (this.urlIndexFile != null) try {this.urlIndexFile.remove(urlHash);} catch (IOException e) {} // migration
                 SolrDocument sd = this.collectionConfiguration.toSolrDocument(doc);
                 return new URIMetadataNode(sd, wre, weight);
@@ -709,12 +725,18 @@ public final class Fulltext {
 
     public boolean exists(final String urlHash) {
         if (urlHash == null) return false;
-        if (this.urlIndexFile != null && this.urlIndexFile.has(ASCII.getBytes(urlHash))) return true;
+        for (URIMetadataRow entry: this.pendingCollectionInputRows) {
+            if (urlHash.equals(ASCII.String(entry.hash()))) return true;
+        }
+        for (SolrInputDocument doc: this.pendingCollectionInputDocuments) {
+            if (urlHash.equals(doc.getFieldValue(CollectionSchema.id.getSolrFieldName()))) return true;
+        }
         try {
             if (this.getDefaultConnector().exists(CollectionSchema.id.getSolrFieldName(), urlHash)) return true;
         } catch (final Throwable e) {
             Log.logException(e);
         }
+        if (this.urlIndexFile != null && this.urlIndexFile.has(ASCII.getBytes(urlHash))) return true;
         return false;
     }
 
