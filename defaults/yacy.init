@@ -445,9 +445,13 @@ seedScpPath=
 # of the period here (minutes)
 peerCycle=2
 
-# Debug mode for YACY network: this will trigger that also local ip's are
-# accepted as peer addresses
-yacyDebugMode=false
+# debug flags
+debug.search.local.dht.on=false
+debug.search.local.solr.off=false
+debug.search.remote.dht.off=false
+debug.search.remote.dht.testlocal=false
+debug.search.remote.solr.off=false
+debug.search.remote.solr.testlocal=false
 
 #staticIP if you have a static IP, you can use this setting
 staticIP=

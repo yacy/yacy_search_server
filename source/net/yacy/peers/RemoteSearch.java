@@ -34,6 +34,8 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SecondarySearchSuperviser;
@@ -162,39 +164,44 @@ public class RemoteSearch extends Thread {
                 nodePeers.add(s);
             }
         }
-        
-        // for debugging: remove all dht peer to see if solr is working properly
-        //dhtPeers.clear(); // FOR DEBUGGING ONLY!!!
 
         // start solr searches
-        for (Seed s: nodePeers) {
-            solrRemoteSearch(event, start, count, s, blacklist);
+        if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false)) {
+            for (Seed s: nodePeers) {
+                solrRemoteSearch(event, start, count, s, blacklist);
+            }
         }
-        
+                
+        if (Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL, false)) {
+            dhtPeers.clear();
+            dhtPeers.add(event.peers.mySeed());
+        }
         // start search to YaCy DHT peers
-        final int targets = dhtPeers.size();
-        if (targets == 0) return;
-        for (int i = 0; i < targets; i++) {
-            if (dhtPeers.get(i) == null || dhtPeers.get(i).hash == null) continue;
-            try {
-                RemoteSearch rs = new RemoteSearch(
-                    event,
-                    QueryParams.hashSet2hashString(event.query.getQueryGoal().getIncludeHashes()),
-                    QueryParams.hashSet2hashString(event.query.getQueryGoal().getExcludeHashes()),
-                    event.query.targetlang == null ? "" : event.query.targetlang,
-                    event.query.contentdom == null ? "all" : event.query.contentdom.toString(),
-                    count,
-                    time,
-                    event.query.maxDistance,
-                    targets,
-                    dhtPeers.get(i),
-                    event.secondarySearchSuperviser,
-                    blacklist);
-                rs.start();
-                event.primarySearchThreadsL.add(rs);
-            } catch (final OutOfMemoryError e) {
-                Log.logException(e);
-                break;
+        if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_OFF, false)) {
+            final int targets = dhtPeers.size();
+            if (targets == 0) return;
+            for (int i = 0; i < targets; i++) {
+                if (dhtPeers.get(i) == null || dhtPeers.get(i).hash == null) continue;
+                try {
+                    RemoteSearch rs = new RemoteSearch(
+                        event,
+                        QueryParams.hashSet2hashString(event.query.getQueryGoal().getIncludeHashes()),
+                        QueryParams.hashSet2hashString(event.query.getQueryGoal().getExcludeHashes()),
+                        event.query.targetlang == null ? "" : event.query.targetlang,
+                        event.query.contentdom == null ? "all" : event.query.contentdom.toString(),
+                        count,
+                        time,
+                        event.query.maxDistance,
+                        targets,
+                        dhtPeers.get(i),
+                        event.secondarySearchSuperviser,
+                        blacklist);
+                    rs.start();
+                    event.primarySearchThreadsL.add(rs);
+                } catch (final OutOfMemoryError e) {
+                    Log.logException(e);
+                    break;
+                }
             }
         }
     }
