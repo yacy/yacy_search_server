@@ -86,6 +86,7 @@ import net.yacy.repository.LoaderDispatcher;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.schema.CollectionSchema;
@@ -256,12 +257,17 @@ public final class SearchEvent {
         }
 
         // start a local solr search
-        this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, 0, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
+        if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
+            this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, 0, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
+        }
         this.localsolroffset = this.query.itemsPerPage;
         
         // start a local RWI search concurrently
         this.rwiProcess = null;
-        if (query.getSegment().connectedRWI() && (!this.remote || this.peers.mySeed().getBirthdate() < noRobinsonLocalRWISearch)) {
+        if (query.getSegment().connectedRWI() && (
+                !this.remote ||
+                this.peers.mySeed().getBirthdate() < noRobinsonLocalRWISearch) ||
+                Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_DHT_ON, false)) {
             // we start the local search only if this peer is doing a remote search or when it is doing a local search and the peer is old
             rwiProcess = new RWIProcess();
             rwiProcess.start();
@@ -1280,7 +1286,9 @@ public final class SearchEvent {
             // load remaining solr results now
             int nextitems = item - this.localsolroffset + this.query.itemsPerPage; // example: suddenly switch to item 60, just 10 had been shown, 20 loaded.
             if (this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (InterruptedException e) {}}
-            this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.localsolroffset, nextitems, null /*this peer*/, Switchboard.urlBlacklist);
+            if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
+                this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.localsolroffset, nextitems, null /*this peer*/, Switchboard.urlBlacklist);
+            }
             this.localsolroffset += nextitems;
         }
         
@@ -1299,7 +1307,9 @@ public final class SearchEvent {
 
             if (!this.localsolrsearch.isAlive() && this.local_solr_stored.get() > this.localsolroffset && (item + 1) % this.query.itemsPerPage == 0) {
                 // at the end of a list, trigger a next solr search
-                this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.localsolroffset, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
+                if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
+                    this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.localsolroffset, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
+                }
                 this.localsolroffset += this.query.itemsPerPage;
             }
             return re;

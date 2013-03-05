@@ -448,6 +448,34 @@ public final class QueryParams {
             fq.append(" AND ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"").append(this.modifier.filetype).append('\"');
         }
         
+        if (this.contentdom == ContentDomain.IMAGE) {
+            fq.append(" AND (").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"jpg\"");
+            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tif\"");
+            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tiff\"");
+            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"png\")");
+        }
+        
+        if (this.contentdom == ContentDomain.AUDIO) {
+            fq.append(" AND (").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"aif\"");
+            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"aiff\"");
+            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"mp3\"");
+            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"ogg\")");
+        }
+        
+        if (this.contentdom == ContentDomain.VIDEO) {
+            fq.append(" AND (").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"mpg\"");
+            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"avi\"");
+            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"mp4\"");
+            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"mkv\")");
+        }
+        
+        if (this.contentdom == ContentDomain.APP) {
+            fq.append(" AND (").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"apk\"");
+            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"exe\"");
+            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"dmg\"");
+            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"gz\")");
+        }
+        
         if (this.inlink != null) {
             fq.append(" AND ").append(CollectionSchema.outboundlinks_urlstub_txt.getSolrFieldName()).append(":\"").append(this.inlink).append('\"');
         }

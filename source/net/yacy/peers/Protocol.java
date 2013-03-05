@@ -1020,7 +1020,7 @@ public final class Protocol {
             final int offset,
             final int count,
             boolean getFacets,
-            final Seed target,
+            Seed target,
             final Blacklist blacklist) {
 
         if (event.query.getQueryGoal().getOriginalQueryString(false) == null || event.query.getQueryGoal().getOriginalQueryString(false).length() == 0) {
@@ -1051,6 +1051,10 @@ public final class Protocol {
         for (CollectionSchema field: snippetFields) solrQuery.addHighlightField(field.getSolrFieldName());
         
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
+        if (localsearch &&  Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
+            target = event.peers.mySeed();
+            localsearch = false;
+        }
         SolrDocumentList docList = null;
         QueryResponse rsp = null;
         if (localsearch) {
@@ -1064,7 +1068,8 @@ public final class Protocol {
             }
         } else {
             try {
-                RemoteInstance instance = new RemoteInstance("http://" + target.getPublicAddress(), null, "solr"); // this is a 'patch configuration' which considers 'solr' as default collection
+                String address = target == event.peers.mySeed() ? "localhost:" + target.getPort() : target.getPublicAddress();
+                RemoteInstance instance = new RemoteInstance("http://" + address, null, "solr"); // this is a 'patch configuration' which considers 'solr' as default collection
                 SolrConnector solrConnector = new RemoteSolrConnector(instance, "solr");
                 rsp = solrConnector.query(solrQuery);
                 docList = rsp.getResults();
