@@ -664,6 +664,15 @@ public final class SearchEvent {
         final int fullResource) {
 
         this.addBegin();
+        
+        // check if all results have snippets
+        /*
+        for (URIMetadataNode node: nodeList) {
+            if (!facets.containsKey(ASCII.String(node.hash()))) {
+                log.logInfo("no snippet from Solr for " + node.url().toNormalform(true));
+            }
+        }
+        */
         this.snippets.putAll(solrsnippets);
         assert (nodeList != null);
         if (nodeList.isEmpty()) return;
@@ -1083,16 +1092,45 @@ public final class SearchEvent {
         // we take one entry from both stacks at the same time
         boolean success = false;
         Element<URIMetadataNode> localEntryElement = this.nodeStack.sizeQueue() > 0 ? this.nodeStack.poll() : null;
-        URIMetadataNode localEntry = localEntryElement == null ? null : localEntryElement.getElement();
-        if (localEntry != null) {
-            addResult(getSnippet(localEntry, this.query.snippetCacheStrategy));
-            success = true;
+        URIMetadataNode node = localEntryElement == null ? null : localEntryElement.getElement();
+        if (node != null) {
+            String solrsnippet = this.snippets.remove(ASCII.String(node.hash())); // we ca remove this because it's used only once
+            if (solrsnippet != null && solrsnippet.length() > 0) {
+                final TextSnippet snippet = new TextSnippet(node.hash(), solrsnippet, true, ResultClass.SOURCE_CACHE, "");
+                ResultEntry re = new ResultEntry(node, this.query.getSegment(), this.peers, snippet, null, 0);
+                addResult(re);
+                success = true;
+            } else {
+                // we don't have a snippet from solr, try to get it in our way (by reloading, if necessary)
+                if (SearchEvent.this.snippetFetchAlive.get() >= 10) {
+                    // too many concurrent processes
+                    addResult(getSnippet(node, null));
+                    success = true;
+                } else {
+                    final URIMetadataNode node1 = node;
+                    new Thread() {
+                        public void run() {
+                            SearchEvent.this.oneFeederStarted();
+                            try {
+                                SearchEvent.this.snippetFetchAlive.incrementAndGet();
+                                try {
+                                    addResult(getSnippet(node1, SearchEvent.this.query.snippetCacheStrategy));
+                                } catch (Throwable e) {} finally {
+                                    SearchEvent.this.snippetFetchAlive.decrementAndGet();
+                                }
+                            } catch (Throwable e) {} finally {
+                                SearchEvent.this.oneFeederTerminated();
+                            }
+                        }
+                    }.start();
+                }
+            }
         }
         if (SearchEvent.this.snippetFetchAlive.get() >= 10) {
             // too many concurrent processes
-            URIMetadataNode p2pEntry = pullOneFilteredFromRWI(true);
-            if (p2pEntry != null) {
-                addResult(getSnippet(p2pEntry, this.query.snippetCacheStrategy));
+            node = pullOneFilteredFromRWI(true);
+            if (node != null) {
+                addResult(getSnippet(node, null));
                 success = true;
             }
         } else {
@@ -1100,11 +1138,11 @@ public final class SearchEvent {
                 public void run() {
                     SearchEvent.this.oneFeederStarted();
                     try {
-                        final URIMetadataNode p2pEntry = pullOneFilteredFromRWI(true);
-                        if (p2pEntry != null) {
+                        final URIMetadataNode node = pullOneFilteredFromRWI(true);
+                        if (node != null) {
                             SearchEvent.this.snippetFetchAlive.incrementAndGet();
                             try {
-                                addResult(getSnippet(p2pEntry, SearchEvent.this.query.snippetCacheStrategy));
+                                addResult(getSnippet(node, SearchEvent.this.query.snippetCacheStrategy));
                             } catch (Throwable e) {} finally {
                                 SearchEvent.this.snippetFetchAlive.decrementAndGet();
                             }
@@ -1177,12 +1215,6 @@ public final class SearchEvent {
     public ResultEntry getSnippet(URIMetadataNode page, final CacheStrategy cacheStrategy) {
         if (page == null) return null;
 
-        String solrsnippet = this.snippets.get(ASCII.String(page.hash()));
-        if (solrsnippet != null && solrsnippet.length() > 0) {
-            final TextSnippet snippet = new TextSnippet(page.hash(), solrsnippet, true, ResultClass.SOURCE_CACHE, "");
-            return new ResultEntry(page, this.query.getSegment(), this.peers, snippet, null, 0);
-        }
-        
         if (cacheStrategy == null) {
             final TextSnippet snippet = new TextSnippet(
                     null,

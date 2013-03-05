@@ -490,6 +490,7 @@ public final class Fulltext {
     }
     
     public void putEdges(final Collection<SolrInputDocument> edges) throws IOException {
+        if (edges == null || edges.size() == 0) return;
         try {
             this.getWebgraphConnector().add(edges);
         } catch (SolrException e) {
