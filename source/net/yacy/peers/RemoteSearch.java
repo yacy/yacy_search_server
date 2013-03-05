@@ -166,6 +166,10 @@ public class RemoteSearch extends Thread {
         }
 
         // start solr searches
+        if (Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
+            nodePeers.clear();
+            nodePeers.add(event.peers.mySeed());
+        }
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false)) {
             for (Seed s: nodePeers) {
                 solrRemoteSearch(event, start, count, s, blacklist);

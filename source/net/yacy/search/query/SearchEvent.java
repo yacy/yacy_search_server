@@ -264,10 +264,9 @@ public final class SearchEvent {
         
         // start a local RWI search concurrently
         this.rwiProcess = null;
-        if (query.getSegment().connectedRWI() && (
-                !this.remote ||
-                this.peers.mySeed().getBirthdate() < noRobinsonLocalRWISearch) ||
-                Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_DHT_ON, false)) {
+        if (query.getSegment().connectedRWI() &&
+                //(!this.remote || this.peers.mySeed().getBirthdate() < noRobinsonLocalRWISearch) &&
+                !Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_DHT_OFF, false)) {
             // we start the local search only if this peer is doing a remote search or when it is doing a local search and the peer is old
             rwiProcess = new RWIProcess();
             rwiProcess.start();
@@ -428,7 +427,7 @@ public final class SearchEvent {
                         System.currentTimeMillis() - timer),
                     false);
                 if ( !index.isEmpty() ) {
-                    addRWIs(index, true, "local index: " + SearchEvent.this.query.getSegment().getLocation(), -1, SearchEvent.this.maxtime);
+                    addRWIs(index, true, "local index: " + SearchEvent.this.query.getSegment().getLocation(), index.size(), SearchEvent.this.maxtime);
                     SearchEvent.this.addFinalize();
                 }
             } catch ( final Exception e ) {
@@ -453,6 +452,7 @@ public final class SearchEvent {
         assert (index != null);
         if (index.isEmpty()) return;
         if (local) {
+            assert fullResource >= 0 : "fullResource = " + fullResource;
             this.local_rwi_stored.addAndGet(fullResource);
         } else {
             assert fullResource >= 0 : "fullResource = " + fullResource;
@@ -1280,12 +1280,12 @@ public final class SearchEvent {
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "started, item = " + item + ", available = " + this.getResultCount(), 0, 0), false);
 
         // wait until a local solr is finished, we must do that to be able to check if we need more
-        if (this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join(100);} catch (InterruptedException e) {}}
+        if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join(100);} catch (InterruptedException e) {}}
         if (item >= this.localsolroffset && this.local_solr_stored.get() == 0 && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (InterruptedException e) {}}
         if (item >= this.localsolroffset && this.local_solr_stored.get() >= item) {
             // load remaining solr results now
             int nextitems = item - this.localsolroffset + this.query.itemsPerPage; // example: suddenly switch to item 60, just 10 had been shown, 20 loaded.
-            if (this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (InterruptedException e) {}}
+            if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (InterruptedException e) {}}
             if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
                 this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.localsolroffset, nextitems, null /*this peer*/, Switchboard.urlBlacklist);
             }
@@ -1305,7 +1305,7 @@ public final class SearchEvent {
             final ResultEntry re = this.resultList.element(item).getElement();
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "fetched, item = " + item + ", available = " + this.getResultCount() + ": " + re.urlstring(), 0, 0), false);
 
-            if (!this.localsolrsearch.isAlive() && this.local_solr_stored.get() > this.localsolroffset && (item + 1) % this.query.itemsPerPage == 0) {
+            if (this.localsolrsearch == null || !this.localsolrsearch.isAlive() && this.local_solr_stored.get() > this.localsolroffset && (item + 1) % this.query.itemsPerPage == 0) {
                 // at the end of a list, trigger a next solr search
                 if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
                     this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.localsolroffset, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);

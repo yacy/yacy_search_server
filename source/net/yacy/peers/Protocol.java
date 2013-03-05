@@ -627,6 +627,8 @@ public final class Protocol {
         final long timestamp = System.currentTimeMillis();
         event.addExpectedRemoteReferences(count);
         SearchResult result;
+        String clusteraddress = target.getClusterAddress();
+        if (clusteraddress.equals(event.peers.mySeed().getClusterAddress())) clusteraddress = "localhost:" + event.peers.mySeed().getPort();
         try {
             result =
                 new SearchResult(
@@ -642,7 +644,7 @@ public final class Protocol {
                     maxDistance,
                     partitions,
                     target.getHexHash() + ".yacyh",
-                    target.getClusterAddress(),
+                    clusteraddress,
                     secondarySearchSuperviser
                     );
         } catch ( final IOException e ) {

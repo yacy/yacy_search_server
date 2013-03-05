@@ -446,7 +446,7 @@ seedScpPath=
 peerCycle=2
 
 # debug flags
-debug.search.local.dht.on=false
+debug.search.local.dht.off=false
 debug.search.local.solr.off=false
 debug.search.remote.dht.off=false
 debug.search.remote.dht.testlocal=false

@@ -563,7 +563,7 @@ public class Segment {
                     try {
                         container = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhash, 1);
                         container.add(ientry);
-                        searchEvent.addRWIs(container, true, sourceName, -1, 5000);
+                        searchEvent.addRWIs(container, true, sourceName, 1, 5000);
                     } catch (final SpaceExceededException e) {
                         continue;
                     }

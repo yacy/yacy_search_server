@@ -328,7 +328,7 @@ public final class SwitchboardConstants {
     /**
      * debug flags
      */
-    public static final String DEBUG_SEARCH_LOCAL_DHT_ON        = "debug.search.local.dht.on"; // =true: use the local dht/rwi index (which is not done if we do remote searches)
+    public static final String DEBUG_SEARCH_LOCAL_DHT_OFF        = "debug.search.local.dht.off"; // =true: do not use the local dht/rwi index (which is not done if we do remote searches)
     public static final String DEBUG_SEARCH_LOCAL_SOLR_OFF      = "debug.search.local.solr.off"; // =true: do not use solr
     public static final String DEBUG_SEARCH_REMOTE_DHT_OFF      = "debug.search.remote.dht.off"; // =true: do not use dht/rwi
     public static final String DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL= "debug.search.remote.dht.testlocal"; // =true: do not use dht, search local peer in a shortcut to the own server
