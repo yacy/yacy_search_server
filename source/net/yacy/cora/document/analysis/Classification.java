@@ -193,18 +193,18 @@ public class Classification {
     }
 
     public static String ext2mime(final String ext) {
-        return mimeTable.getProperty(ext, "application/" + (ext == null || ext.length() == 0 ? "octet-stream" : ext));
+        return ext == null ? "application/octet-stream" : mimeTable.getProperty(ext.toLowerCase(), "application/" + (ext == null || ext.length() == 0 ? "octet-stream" : ext));
     }
 
     public static String ext2mime(final String ext, final String dfltMime) {
-        return mimeTable.getProperty(ext, dfltMime);
+        return ext == null ? "application/octet-stream" : mimeTable.getProperty(ext.toLowerCase(), dfltMime);
     }
 
     public static String url2mime(final MultiProtocolURI url, final String dfltMime) {
-        return ext2mime(url.getFileExtension(), dfltMime);
+        return url == null ? "application/octet-stream" : ext2mime(url.getFileExtension(), dfltMime);
     }
 
     public static String url2mime(final MultiProtocolURI url) {
-        return ext2mime(url.getFileExtension());
+        return url == null ? "application/octet-stream" : ext2mime(url.getFileExtension());
     }
 }

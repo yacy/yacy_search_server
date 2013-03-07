@@ -169,7 +169,7 @@ public class Response {
         // request and response headers may be zero in case that we process surrogates
         this.requestHeader = new RequestHeader();
         this.responseHeader = new ResponseHeader(200);
-        this.responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/plain"); // tell parser how to handle the content
+        this.responseHeader.put(HeaderFramework.CONTENT_TYPE, Classification.ext2mime(request.url().getFileExtension(), "text/plain")); // tell parser how to handle the content
         if (!request.isEmpty()) this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(request.size()));
         this.profile = profile;
         this.status = QUEUE_STATE_FRESH;
