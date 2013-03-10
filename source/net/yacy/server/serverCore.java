@@ -139,7 +139,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     private long lastAutoTermination;
 
     public final void terminateOldSessions(final long minage) {
-        if (System.currentTimeMillis() - this.lastAutoTermination < 3000) return;
+        if (System.currentTimeMillis() - this.lastAutoTermination < minage) return;
         this.lastAutoTermination = System.currentTimeMillis();
         //if (serverCore.getJobCount() < maxBusySessions - 10) return; // don't panic
 
