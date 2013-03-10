@@ -284,6 +284,10 @@ public class Network {
                     boolean dark = true;
                     Seed seed;
                     final boolean complete = (post != null && post.containsKey("ip"));
+                    final boolean onlyIncomingDHT = (post != null && post.containsKey("onlydhtin"));
+                    final boolean onlyNode = (post != null && post.containsKey("onlynode"));
+                    final long onlyAgeOverDays = post == null ? 0 : post.getLong("onlyageoverdays", 0);
+                    final long onlySizeLessDocs = post == null ? Long.MAX_VALUE : post.getLong("onlysizelessdocs", Long.MAX_VALUE);
                     Iterator<Seed> e = null;
                     final boolean order = (post != null && post.get("order", "down").equals("up"));
                     final String sort = (post == null ? null : post.get("sort", null));
@@ -315,6 +319,10 @@ public class Network {
                         seed = e.next();
                         assert seed != null;
                         if (seed != null) {
+                            if (onlyIncomingDHT && !seed.getFlagAcceptRemoteIndex()) continue;
+                            if (onlyNode && !seed.getFlagRootNode()) continue;
+                            if (seed.getAge() < onlyAgeOverDays) continue;
+                            if (seed.getLinkCount() > onlySizeLessDocs) continue;
                             if((post != null && post.containsKey("search"))  && peerSearchPattern != null /*(wrongregex == null)*/) {
                                 boolean abort = true;
                                 Matcher m = peerSearchPattern.matcher (seed.getName());
