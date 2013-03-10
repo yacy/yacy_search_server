@@ -1973,7 +1973,7 @@ public final class Switchboard extends serverSwitch {
         try {
             // check surrogates
             final String[] surrogatelist = this.surrogatesInPath.list();
-            if ( surrogatelist.length > 0 ) {
+            if ( surrogatelist != null && surrogatelist.length > 0 ) {
                 // look if the is any xml inside
                 for ( final String surrogate : surrogatelist ) {
 
