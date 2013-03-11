@@ -73,7 +73,6 @@ public enum WebgraphSchema implements SchemaDeclaration {
     target_protocol_s(SolrType.string, true, true, false, "the protocol of the url (target)"),
     target_urlstub_s(SolrType.string, true, true, false, "the url without the protocol (target)"),
     target_file_ext_s(SolrType.string, true, true, false, "the file name extension (target)"),
-    target_tag_s(SolrType.string, true, true, false, "normalized (absolute URLs), as <a> - tag with anchor text and nofollow (target)"),
     target_chars_i(SolrType.num_integer, true, true, false, "number of all characters in the url (target)"),
     target_path_s(SolrType.string, true, true, false, "path of the url (target)"),
     target_path_folders_count_i(SolrType.num_integer, true, true, false, "count of all path elements in the url (target)"),
