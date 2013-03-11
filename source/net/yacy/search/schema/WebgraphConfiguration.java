@@ -195,7 +195,6 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             if (allAttr || contains(WebgraphSchema.target_linktext_wordcount_i)) add(edge, WebgraphSchema.target_linktext_wordcount_i, text.length() > 0 ? CommonPattern.SPACE.split(text).length : 0);
             String tag = "<a href=\"" + target_url.toNormalform(false) + "\"" + (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") + (name.length() > 0 ? " name=\"" + name + "\"" : "") + ">" + ((text.length() > 0) ? text : "") + "</a>";
             subgraph.tags[ioidx].add(tag);
-            if (allAttr || contains(WebgraphSchema.target_tag_s)) add(edge, WebgraphSchema.target_tag_s, tag);
             ImageEntry ientry = images.get(target_url);
             String alttext = ientry == null ? "" : ientry.alt();
             if (allAttr || contains(WebgraphSchema.target_alt_t)) add(edge, WebgraphSchema.target_alt_t, alttext);
