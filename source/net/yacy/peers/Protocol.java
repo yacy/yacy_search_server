@@ -284,7 +284,8 @@ public final class Protocol {
         } else {
             final String myIP = result.get("yourip");
             final String properIP = Seed.isProperIP(myIP);
-            mySeed.setFlagRootNode((mytype.equals(Seed.PEERTYPE_SENIOR) || mytype.equals(Seed.PEERTYPE_PRINCIPAL)) && responseTime < 1000 && Domains.isThisHostIP(myIP));
+            mySeed.setFlagRootNode((mytype.equals(Seed.PEERTYPE_SENIOR) || mytype.equals(Seed.PEERTYPE_PRINCIPAL)) && responseTime < 1000 && Domains.isThisHostIP(myIP) &&
+                    Switchboard.getSwitchboard().index.fulltext().connectedLocalSolr()); // RootNode may receive direct Solr queries, set flag only if available
             if ( properIP == null ) {
                 mySeed.setIP(myIP);
             }
