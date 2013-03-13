@@ -34,7 +34,7 @@ public class ContentAnalysis_p {
 
         // clean up all search events
         SearchEventCache.cleanupEvents(true);
-        sb.index.fulltext().clearCache(); // every time the ranking is changed we need to remove old orderings
+        sb.index.clearCache(); // every time the ranking is changed we need to remove old orderings
 
         if (post != null && post.containsKey("EnterDoublecheck")) {
             Ranking.setMinTokenLen(post.getInt("minTokenLen", 3));

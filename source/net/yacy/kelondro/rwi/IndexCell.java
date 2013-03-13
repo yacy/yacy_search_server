@@ -75,8 +75,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     private final long                                   targetFileSize, maxFileSize;
     private final int                                    writeBufferSize;
     private final Map<byte[], HandleSet>                 removeDelayedURLs; // mapping from word hashes to a list of url hashes
-    private       boolean                                cleanupShallRun;
-    private final Thread                                 cleanupThread;
+    private       boolean                                flushShallRun;
+    private final Thread                                 flushThread;
 
     public IndexCell(
             final File cellPath,
@@ -103,17 +103,17 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         this.maxFileSize = maxFileSize;
         this.writeBufferSize = writeBufferSize;
         this.removeDelayedURLs = new TreeMap<byte[], HandleSet>(URIMetadataRow.rowdef.objectOrder);
-        this.cleanupShallRun = true;
-        this.cleanupThread = new CleanupThread();
-        this.cleanupThread.start();
+        this.flushShallRun = true;
+        this.flushThread = new FlushThread();
+        this.flushThread.start();
     }
 
-    private class CleanupThread extends Thread {
+    private class FlushThread extends Thread {
         @Override
         public void run() {
-            while (IndexCell.this.cleanupShallRun) {
+            while (IndexCell.this.flushShallRun) {
                 try {
-                    cleanCache();
+                    flushBuffer();
                 } catch (final Throwable e) {
                     Log.logException(e);
                 }
@@ -121,7 +121,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             }
         }
 
-        private void cleanCache() {
+        private void flushBuffer() {
 
             // dump the cache if necessary
             final long t = System.currentTimeMillis();
@@ -542,6 +542,10 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
                 Switchboard.getSwitchboard().peers != null &&
                 Switchboard.getSwitchboard().peers.mySeed() != null) Switchboard.getSwitchboard().peers.mySeed().resetCounters();
     }
+    
+    public synchronized void clearCache() {
+        this.countCache.clear();
+    }
 
     /**
      * when a cell is closed, the current RAM is dumped to a file which will be opened as
@@ -554,8 +558,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         try {removeDelayed();} catch (final IOException e) {}
         if (!this.ram.isEmpty()) this.ram.dump(this.array.newContainerBLOBFile(), (int) Math.min(MemoryControl.available() / 3, this.writeBufferSize), true);
         // close all
-        this.cleanupShallRun = false;
-        if (this.cleanupThread != null) try { this.cleanupThread.join(); } catch (final InterruptedException e) {}
+        this.flushShallRun = false;
+        if (this.flushThread != null) try { this.flushThread.join(); } catch (final InterruptedException e) {}
         this.merger.terminate();
         this.ram.close();
         this.array.close();

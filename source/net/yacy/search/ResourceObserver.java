@@ -89,7 +89,7 @@ public class ResourceObserver {
     		}
     		if (this.normalizedMemoryFree.compareTo(Space.HIGH) < 0 ) {
     			// clear some caches - @all: are there more of these, we could clear here?
-    			this.sb.index.fulltext().clearCache();
+    			this.sb.index.clearCache();
                 SearchEventCache.cleanupEvents(true);
                 this.sb.trail.clear();
                 Switchboard.urlBlacklist.clearblacklistCache();

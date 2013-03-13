@@ -82,6 +82,7 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -2042,20 +2043,24 @@ public final class Switchboard extends serverSwitch {
 
     public boolean cleanupJob() {
         
-        if (MemoryControl.shortStatus()) {
+        try {
+            // flush caches in used libraries
+            PDFont.clearResources(); // eats up megabytes, see http://markmail.org/thread/quk5odee4hbsauhu
+            
+            // clear caches
             WordCache.clear();
             Domains.clear();
-            Digest.cleanup();
-        }
-        
-        try {
+            
+            // clean up image stack
+            ResultImages.clearQueues();
+            
         	// flush the document compressor cache
         	Cache.commit();
         	Digest.cleanup(); // don't let caches become permanent memory leaks
 
             // clear caches if necessary
-            if ( !MemoryControl.request(8000000L, false) ) {
-                this.index.fulltext().clearCache();
+            if ( !MemoryControl.request(128000000L, false) ) {
+                this.index.clearCache();
                 SearchEventCache.cleanupEvents(false);
                 this.trail.clear();
             }
@@ -2151,9 +2156,6 @@ public final class Switchboard extends serverSwitch {
                     ResultURLs.clearStack(origin);
                 }
             }
-
-            // clean up image stack
-            ResultImages.clearQueues();
 
             // clean up profiles
             checkInterruption();

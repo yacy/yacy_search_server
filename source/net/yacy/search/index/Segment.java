@@ -296,6 +296,12 @@ public class Segment {
             Log.logException(e);
         }
     }
+    
+    public void clearCache() {
+        if (this.urlCitationIndex != null) this.urlCitationIndex.clearCache();
+        if (this.termIndex != null) this.termIndex.clearCache();
+        this.fulltext.clearCache();
+    }
 
     public File getLocation() {
         return this.segmentPath;
