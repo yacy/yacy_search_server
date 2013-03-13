@@ -90,6 +90,7 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
     public void clearCache() {
         for (HitMissCache c: hitMissCache.values()) c.clearCache();
         this.documentCache.clear();
+        if (this.solr != null) this.solr.commit(true);
     }
 
     @Override

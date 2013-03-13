@@ -55,16 +55,6 @@ import org.apache.solr.common.SolrDocument;
  * Future implementations should try to replace URIMetadata objects completely by SolrDocument objects
  */
 public class URIMetadataNode {
-
-    public static CollectionSchema[] fieldList = new CollectionSchema[]{
-        CollectionSchema.audiolinkscount_i, CollectionSchema.author, CollectionSchema.collection_sxt, CollectionSchema.content_type,
-        CollectionSchema.coordinate_p, CollectionSchema.description, CollectionSchema.fresh_date_dt, CollectionSchema.host_id_s, CollectionSchema.id,
-        CollectionSchema.imagescount_i, CollectionSchema.inboundlinks_protocol_sxt, CollectionSchema.inboundlinks_urlstub_txt,
-        CollectionSchema.inboundlinkscount_i, CollectionSchema.keywords, CollectionSchema.language_s, CollectionSchema.last_modified, CollectionSchema.load_date_dt,
-        CollectionSchema.md5_s, CollectionSchema.outboundlinks_protocol_sxt, CollectionSchema.outboundlinks_urlstub_txt,
-        CollectionSchema.outboundlinkscount_i, CollectionSchema.publisher_t, CollectionSchema.referrer_id_txt, CollectionSchema.size_i, CollectionSchema.sku,
-        CollectionSchema.text_t, CollectionSchema.title, CollectionSchema.title_words_val, CollectionSchema.url_chars_i,
-        CollectionSchema.videolinkscount_i, CollectionSchema.videolinkscount_i, CollectionSchema.wordcount_i};
     
     private byte[] hash = null;
     private String urlRaw = null, keywords = null;
@@ -72,7 +62,7 @@ public class URIMetadataNode {
     private Bitfield flags = null;
     private int imagec = -1, audioc = -1, videoc = -1, appc = -1;
     private double lat = Double.NaN, lon = Double.NaN;
-    private long ranking = -1; // during generation of a search result this value is set
+    private long ranking = 0; // during generation of a search result this value is set
     private SolrDocument doc = null;
     private String snippet = null;
     private WordReferenceVars word = null; // this is only used if the url is transported via remote search requests
@@ -81,7 +71,8 @@ public class URIMetadataNode {
         this.doc = doc;
         this.snippet = "";
         this.word = null;
-        this.ranking = Long.MIN_VALUE;
+        Float score = (Float) doc.getFieldValue("score"); // this is a special field containing the ranking score of a search result
+        this.ranking = score == null ? 0 : (long) (1000000.0f * score.floatValue()); // solr score values are sometimes very low
         this.hash = ASCII.getBytes(getString(CollectionSchema.id));
         this.urlRaw = getString(CollectionSchema.sku);
         try {

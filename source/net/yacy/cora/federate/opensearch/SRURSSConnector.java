@@ -36,7 +36,6 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.SearchAccumulator;
-import net.yacy.cora.federate.SearchHub;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.http.HTTPClient;
@@ -71,24 +70,6 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
         this.result = result;
         this.query = query;
         this.timeoutInit = timeoutInit;
-        this.urlBase = urlBase;
-        this.maximumRecordsInit = maximumRecordsInit;
-        this.verify = verify;
-        this.global = global;
-        this.userAgent = userAgent;
-    }
-
-    public SRURSSConnector(
-            final SearchHub search,
-            final String urlBase,
-            final int maximumRecordsInit,
-            final CacheStrategy verify,
-            final boolean global,
-            final String userAgent) {
-        this.results = new LinkedBlockingQueue<RSSMessage>();
-        this.result = search.getAccumulation();
-        this.query = search.getQuery();
-        this.timeoutInit = search.getTimeout();
         this.urlBase = urlBase;
         this.maximumRecordsInit = maximumRecordsInit;
         this.verify = verify;

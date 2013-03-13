@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.federate.solr.Boost;
+import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -34,7 +34,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryGoal;
 import net.yacy.search.query.SearchEvent;
@@ -100,9 +99,6 @@ public class searchresult {
         if (post == null) return null;
         Log.logInfo("GSA Query", post.toString());
         sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
-
-        // update the boost values
-        Boost.RANKING.updateBoosts(sb.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_BOOST, ""));
         
         // rename post fields according to result style
         //post.put(CommonParams.Q, post.remove("q")); // same as solr
@@ -114,13 +110,17 @@ public class searchresult {
         
         // get a solr query string
         QueryGoal qg = new QueryGoal(originalQuery, originalQuery);
-        StringBuilder solrQ = qg.solrQueryString(sb.index.fulltext().getDefaultConfiguration());
+        StringBuilder solrQ = qg.collectionQueryString(sb.index.fulltext().getDefaultConfiguration());
         post.put("defType", "edismax");
         post.put(CommonParams.Q, solrQ.toString());
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 5000 : 100));
-        post.put("bq", Boost.RANKING.getBoostQuery()); // a boost query that moves double content to the back
-        post.put("bf", Boost.RANKING.getBoostFunction()); // a boost function extension
+        
+        Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(0);
+        String bq = ranking.getBoostQuery();
+        String bf = ranking.getBoostFunction();
+        if (bq.length() > 0) post.put("bq", bq); // a boost query that moves double content to the back
+        if (bf.length() > 0) post.put(ranking.getMethod() == Ranking.BoostFunctionMode.add ? "bf" : "boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
         post.put(CommonParams.FL,
                 CollectionSchema.content_type.getSolrFieldName() + ',' +
                 CollectionSchema.id.getSolrFieldName() + ',' +

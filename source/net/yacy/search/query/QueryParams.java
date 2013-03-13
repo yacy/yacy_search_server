@@ -42,7 +42,7 @@ import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
-import net.yacy.cora.federate.solr.Boost;
+import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.lod.vocabulary.Tagging;
@@ -396,10 +396,13 @@ public final class QueryParams {
         if (this.queryGoal.getIncludeStrings().size() == 0) return null;
         // construct query
         final SolrQuery params = new SolrQuery();
-        params.setQuery(this.queryGoal.solrQueryString(this.indexSegment.fulltext().getDefaultConfiguration()).toString());
+        params.setQuery(this.queryGoal.collectionQueryString(this.indexSegment.fulltext().getDefaultConfiguration()).toString());
         params.setParam("defType", "edismax");
-        params.setParam("bq", Boost.RANKING.getBoostQuery()); // a boost query that moves double content to the back
-        params.setParam("bf", Boost.RANKING.getBoostFunction()); // a boost function extension
+        Ranking ranking = indexSegment.fulltext().getDefaultConfiguration().getRanking(0);
+        String bq = ranking.getBoostQuery();
+        String bf = ranking.getBoostFunction();
+        if (bq.length() > 0) params.setParam("bq", bq); // a boost query that moves double content to the back
+        if (bf.length() > 0) params.setParam(ranking.getMethod() == Ranking.BoostFunctionMode.add ? "bf" : "boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
         params.setStart(this.offset);
         params.setRows(this.itemsPerPage);
         params.setFacet(false);

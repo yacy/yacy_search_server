@@ -949,10 +949,35 @@ WikiAccess = admin
 
 # Search Profiles
 # we will support different search profiles
-# this is currently only a single default profile
-# If this profile setting is empty, a hard-coded profile from plasmaSearchRanking is used
+# If this profile setting is empty, a hard-coded profile is used to initialise the values
 search.ranking.rwi.profile =
-search.ranking.solr.boost.tmp2=
+# The boost fields contains all fields which shall be searched together with a boost. non-mentioned fields are not searched.
+
+# Boost queries are added to all queries; functions evaluate a value which is either added or multiplied with the ranking.
+# The field boostfunctionmode can be either 'add' or 'multiply' to describe the mode.
+# All boost methods > 0 must have names to be able to select this name with a query, with the syntax /name
+search.ranking.solr.collection.boostname.tmp.0=_default
+search.ranking.solr.collection.boostfields.tmp.0=text_t^2.0,url_paths_sxt^20.0,title^100.0,synonyms_sxt^1.0
+search.ranking.solr.collection.boostquery.tmp.0=fuzzy_signature_unique_b:true^100000.0
+search.ranking.solr.collection.boostfunction.tmp.0=
+search.ranking.solr.collection.boostfunctionmode.tmp.0=add
+search.ranking.solr.collection.boostname.tmp.1=_date
+search.ranking.solr.collection.boostfields.tmp=text_t^1.0
+search.ranking.solr.collection.boostquery.tmp.1=
+search.ranking.solr.collection.boostfunction.tmp.1=recip(ms(NOW,last_modified),3.16e-11,1,1)
+search.ranking.solr.collection.boostfunctionmode.tmp.1=multiply
+search.ranking.solr.collection.boostname.tmp.2=_unused2
+search.ranking.solr.collection.boostfields.tmp.2=text_t^1.0
+search.ranking.solr.collection.boostquery.tmp.2=
+search.ranking.solr.collection.boostfunction.tmp.2=div(add(1,references_i),add(url_chars_i,pow(clickdepth_i,3)))
+search.ranking.solr.collection.boostfunctionmode.tmp.2=multiply
+search.ranking.solr.collection.boostname.tmp.3=_unused3
+search.ranking.solr.collection.boostfields.tmp.3=text_t^1.0
+search.ranking.solr.collection.boostquery.tmp.3=
+search.ranking.solr.collection.boostfunction.tmp.3=
+search.ranking.solr.collection.boostfunctionmode.tmp.3=multiply
+
+# the following values are used to identify duplicate content
 search.ranking.solr.doubledetection.minlength=3
 search.ranking.solr.doubledetection.quantrate=0.5f
 

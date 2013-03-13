@@ -60,7 +60,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     private final Segment indexSegment;
 
     // statistic objects
-    public long snippetComputationTime, ranking;
+    public long snippetComputationTime;
 
     public ResultEntry(final URIMetadataNode urlentry,
                        final Segment indexSegment,
@@ -218,5 +218,8 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     @Override
     public int compare(ResultEntry o1, ResultEntry o2) {
         return Base64Order.enhancedCoder.compare(o1.urlentry.hash(), o2.urlentry.hash());
+    }
+    public long ranking() {
+        return this.urlentry.ranking();
     }
 }

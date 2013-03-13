@@ -1053,6 +1053,8 @@ public final class Protocol {
         solrQuery.setHighlightSnippets(1);
         for (CollectionSchema field: snippetFields) solrQuery.addHighlightField(field.getSolrFieldName());
         
+        solrQuery.setFields("*", "score"); // we need the score for post-ranking
+        
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
         if (localsearch &&  Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
             target = event.peers.mySeed();

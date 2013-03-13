@@ -481,13 +481,20 @@ public final class SwitchboardConstants {
     public static final String SEARCH_VERIFY_DELETE = "search.verify.delete";
 
     /**
-     * ranking
+     * ranking+evaluation
      */
     public static final String SEARCH_RANKING_RWI_PROFILE = "search.ranking.rwi.profile"; // old rwi rankingProfile ranking
-    public static final String SEARCH_RANKING_SOLR_BOOST  = "search.ranking.solr.boost.tmp2"; // temporary until we know best default values
     public static final String SEARCH_RANKING_SOLR_DOUBLEDETECTION_MINLENGTH = "search.ranking.solr.doubledetection.minlength";
     public static final String SEARCH_RANKING_SOLR_DOUBLEDETECTION_QUANTRATE = "search.ranking.solr.doubledetection.quantrate";
-    
+
+    /**
+     * boosts for different cores (add an number to the end of the property name)
+     */
+    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTNAME_         = "search.ranking.solr.collection.boostname.tmp."; // temporary until we know best default values; add the index number (0..3) to that string
+    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_       = "search.ranking.solr.collection.boostfields.tmp.";
+    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_        = "search.ranking.solr.collection.boostquery.tmp.";
+    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_     = "search.ranking.solr.collection.boostfunction.tmp.";
+    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTIONMODE_ = "search.ranking.solr.collection.boostfunctionmode.tmp.";
     
     /**
      * system tray

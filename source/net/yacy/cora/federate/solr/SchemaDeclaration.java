@@ -43,6 +43,8 @@ public interface SchemaDeclaration {
 
     public boolean isMultiValued();
 
+    public boolean isSearchable();
+
     public boolean isOmitNorms();
 
     public String getComment();

@@ -132,9 +132,6 @@ target_urlstub_s
 ## the file name extension (target)
 target_file_ext_s
 
-## normalized (absolute URLs), as <a> - tag with anchor text and nofollow (target)
-#target_tag_s
-
 ## number of all characters in the url (target)
 #target_chars_i
 

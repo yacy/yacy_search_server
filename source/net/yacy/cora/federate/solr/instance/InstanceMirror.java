@@ -159,6 +159,7 @@ public class InstanceMirror {
     
     public void clearCache() {
         for (CachedSolrConnector csc: this.connectorCache.values()) csc.clearCache();
+        for (EmbeddedSolrConnector ssc: this.embeddedCache.values()) ssc.commit(true);
     }
     
 }

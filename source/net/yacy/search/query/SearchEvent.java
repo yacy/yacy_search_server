@@ -156,6 +156,7 @@ public final class SearchEvent {
     private final WeakPriorityBlockingQueue<WordReferenceVars> rwiStack; // thats the bag where the RWI search process writes to
     private final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack; // thats the bag where the solr results are written to
     private final WeakPriorityBlockingQueue<ResultEntry>  resultList; // thats the result list where the actual search result is waiting to be displayed
+    private final boolean pollImmediately; // if this is true, then every entry in result List is polled immediately to prevent a re-ranking in the resultList. This is usefull if there is only one index source.
 
     // the following values are filled during the search process as statistics for the search
     public final AtomicInteger local_rwi_available;  // the number of hits generated/ranked by the local search in rwi index
@@ -274,6 +275,7 @@ public final class SearchEvent {
 
         if (this.remote) {
             // start global searches
+            this.pollImmediately = false;
             final long timer = System.currentTimeMillis();
             if (this.query.getQueryGoal().getIncludeHashes().isEmpty()) {
                 this.primarySearchThreadsL = null;
@@ -312,6 +314,7 @@ public final class SearchEvent {
             }
         } else {
             this.primarySearchThreadsL = null;
+            this.pollImmediately = !query.getSegment().connectedRWI();
             if ( generateAbstracts ) {
                 // we need the results now
                 try {
@@ -824,7 +827,8 @@ public final class SearchEvent {
                 this.urlhashes.putUnique(iEntry.hash());
                 rankingtryloop: while (true) {
                     try {
-                        this.nodeStack.put(new ReverseElement<URIMetadataNode>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
+                        long score = iEntry.ranking();
+                        this.nodeStack.put(new ReverseElement<URIMetadataNode>(iEntry, score == 0 ? this.order.cardinal(iEntry) : score)); // inserts the element and removes the worst (which is smallest)
                         break rankingtryloop;
                     } catch ( final ArithmeticException e ) {
                         // this may happen if the concurrent normalizer changes values during cardinal computation
@@ -1168,10 +1172,10 @@ public final class SearchEvent {
      */
     public void addResult(ResultEntry resultEntry) {
         if (resultEntry == null) return;
-        long ranking = resultEntry.word() == null ? 0 : Long.valueOf(this.order.cardinal(resultEntry.word()));
+        long ranking = resultEntry.ranking();
         ranking += postRanking(resultEntry, new ConcurrentScoreMap<String>() /*this.snippetProcess.rankingProcess.getTopicNavigator(10)*/);
-        resultEntry.ranking = ranking;
         this.resultList.put(new ReverseElement<ResultEntry>(resultEntry, ranking)); // remove smallest in case of overflow
+        if (pollImmediately) this.resultList.poll(); // prevent re-ranking in case there is only a single index source which has already ranked entries.
         this.addTopics(resultEntry);
     }
 

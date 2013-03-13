@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.federate.solr.Boost;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
@@ -142,7 +141,6 @@ public class SearchEventCache {
             // start a new event
             Switchboard sb = Switchboard.getSwitchboard();
             final boolean delete = sb == null || Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, true);
-            if (sb != null) Boost.RANKING.updateBoosts(sb.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_BOOST, "")); // update the boost values
             event = new SearchEvent(query, peers, workTables, preselectedPeerHashes, generateAbstracts, loader, remote_maxcount, remote_maxtime, burstRobinsonPercent, burstMultiwordPercent, delete);
             MemoryControl.request(100 * 1024 * 1024, false); // this may trigger a short memory status which causes a reducing of cache space of other threads
         }

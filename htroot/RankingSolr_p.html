@@ -8,28 +8,48 @@
     #%env/templates/header.template%#
     #%env/templates/submenuSearchConfiguration.template%#
     <h2>Solr Ranking Configuration</h2>
-    <p>These are ranking attributes for Solr. This ranking applies for internal and remote Solr access.</p>
-    <form class="dsearch" action="RankingSolr_p.html" method="post" enctype="multipart/form-data">      
+    <p>These are ranking attributes for Solr. This ranking applies for internal and remote (P2P or shard) Solr access.</p>
+
+    <form class="dsearch" action="RankingSolr_p.html" method="post" enctype="multipart/form-data">
       <fieldset>
-        <legend>Solr Double Content Detection</legend><p>Double-Content detection is done using a ranking on a 'unique'-Field, named 'fuzzy_signature_unique_b'.
-      This field is set during parsing and is influenced by two attributes for the <a href="http://lucene.apache.org/solr/api-4_0_0-BETA/org/apache/solr/update/processor/TextProfileSignature.html">TextProfileSignature</a> class.</p>
+        <legend>Boost Function</legend>
+        A Boost Function can combine numeric values from the result document to produce a number which is either added or multiplied with the other boost value from the query result.
+        To see all available fields, see the <a href="IndexSchema_p.html">YaCy Solr Schema</a> and look for numeric values (these are names with suffix '_i').
+        To find out which kind of operations are possible, see the <a href="http://wiki.apache.org/solr/FunctionQuery">Solr Function Query</a> documentation.
+        Example: to order by date, use "recip(ms(NOW,last_modified),3.16e-11,1,1)", to order by clickdepth, use "div(100,add(clickdepth_i,1))".
         <dl>
-          <dt style="width:260px"><label for="minTokenLen">minTokenLen</label></dt>
-          <dd style="width:360px; float:left; display:inline;" id="dd_minTokenLen">
-            <input name="minTokenLen" id="minTokenLen" type="text" align="right" size="10" value="#[minTokenLen]#" /><br />
-            This is the minimum length of a word which shall be considered as element of the signature. Should be either 2 or 3.
+          <dt style="width:260px;margin:0;padding:0;height:1.8em;"><label for="bf" id="bf_label">#[modeKey]#</label></dt>
+          <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;" id="bf_dd">
+            <input name="bf" id="bf" type="text" align="left" size="100" value="#[bf]#" />
           </dd>
-          <dt style="width:260px"><label for="quantRate">quantRate</label></dt>
-          <dd style="width:360px; float:left; display:inline;" id="dd_quantRate">
-            <input name="quantRate" id="quantRate" type="text" align="right" size="10" value="#[quantRate]#" /><br />
-            The quantRate is a measurement for the number of words that take part in a signature computation. The higher the number, the less
-            words are used for the signature.
-            For minTokenLen = 2 the quantRate value should not be below 0.24; for minTokenLen = 3 the quantRate value must be not below 0.5.
+          <dt style="width:260px;margin:0;padding:0;height:1.8em;"><label for="bq">mode</label></dt>
+          <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;" id="bf_dd">
+            <input type="radio" name="mode" id="add" onclick="document.getElementById('bf_label').innerHTML='bf'" value="add" #(add.checked)#:: checked="checked"#(/add.checked)# />add&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="mode" id="multiply" onclick="document.getElementById('bf_label').innerHTML='boost'" value="multiply" #(multiply.checked)#:: checked="checked"#(/multiply.checked)# />multiply
           </dd>
-          <dt style="width:260px"></dt>
-          <dd style="width:360px; float:left; display:inline;">
-            <input type="submit" name="EnterDoublecheck" value="Set" />
-            <input type="submit" name="ResetDoublecheck" value="Re-Set to default" />
+          <dt style="width:260px;margin:0;padding:0;height:1.8em;"></dt>
+          <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;">
+            <input type="submit" name="EnterBF" value="Set Boost Function" />
+            <input type="submit" name="ResetBF" value="Re-Set to default" />
+          </dd>
+        </dl>
+      </fieldset>
+    </form>
+    <form class="dsearch" action="RankingSolr_p.html" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <legend>Boost Query</legend>
+        The Boost Query is attached to every query. Use this to statically boost specific content in the index.
+        Example: "fuzzy_signature_unique_b:true^100000.0f" means that documents, identified as 'double' are ranked very bad and appended to the end of all results (because the unique are ranked high).
+        To find appropriate fields for this query, see the <a href="IndexSchema_p.html">YaCy Solr Schema</a> and look for boolean values (with suffix '_b') or tags inside string fields (with suffix '_s' or '_sxt').
+        <dl>
+          <dt style="width:260px;margin:0;padding:0;height:1.8em;"><label for="bq" id="bq_label">bq</label></dt>
+          <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;" id="bq_dd">
+            <input name="bq" id="bq" type="text" align="left" size="100" value="#[bq]#" />
+          </dd>
+          <dt style="width:260px;margin:0;padding:0;height:1.8em;"></dt>
+          <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;">
+            <input type="submit" name="EnterBQ" value="Set Boost Query" />
+            <input type="submit" name="ResetBQ" value="Re-Set to default" />
           </dd>
         </dl>
       </fieldset>
@@ -37,15 +57,19 @@
     <form class="dsearch" action="RankingSolr_p.html" method="post" enctype="multipart/form-data">
       <fieldset>
         <legend>Solr Boosts</legend>
-        <dl>#{boosts}# 
-          <dt style="width:260px"><label for="boost_#[field]#">#[field]#</label></dt>
-          <dd style="width:360px; float:left; display:inline;" id="boost_dd_#[field]#">
+        This is the set of searchable fields. Entries without a boost value are not searched. Boost values make hits inside the corresponding field more important.
+        <dl style="margin:0;">#{boosts}# 
+          <dt style="width:260px;margin:0;padding:0;height:1.8em;"><label for="boost_#[field]#">#[field]#</label>
+            <input type="checkbox" id="#[field]#" name="#[field]#"#(checked)#:: checked="checked"#(/checked)#
+            onclick="if (document.getElementById('#[field]#').checked) document.getElementById('boost_#[field]#').value='1.0'; else document.getElementById('boost_#[field]#').value='';"/>
+          </dt>
+          <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;" id="boost_dd_#[field]#">
             <input name="boost_#[field]#" id="boost_#[field]#" type="text" align="right" size="10" value="#[boost]#" />
           </dd>#{/boosts}#
-          <dt style="width:260px"></dt>
-          <dd style="width:360px; float:left; display:inline;">
-            <input type="submit" name="EnterRanking" value="Set" />
-            <input type="submit" name="ResetRanking" value="Re-Set to default" />
+          <dt style="width:260px;margin:0;padding:0;height:1.8em;"></dt>
+          <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;">
+            <input type="submit" name="EnterBoosts" value="Set Field Boosts" />
+            <input type="submit" name="ResetBoosts" value="Re-Set to default" />
           </dd>
         </dl>
       </fieldset>

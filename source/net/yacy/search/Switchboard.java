@@ -96,7 +96,7 @@ import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.WordCache;
 import net.yacy.cora.document.analysis.Classification;
-import net.yacy.cora.federate.solr.Boost;
+import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.ProcessType;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
@@ -409,11 +409,6 @@ public final class Switchboard extends serverSwitch {
         this.networkRoot.mkdirs();
         this.queuesRoot.mkdirs();
 
-        // define boosts
-        Boost.RANKING.updateBoosts(this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_BOOST, "")); // must be called every time the boosts change
-        Boost.RANKING.setMinTokenLen(this.getConfigInt(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_MINLENGTH, 3));
-        Boost.RANKING.setQuantRate(this.getConfigFloat(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_QUANTRATE, 0.5f));
-        
         // prepare a solr index profile switch list
         final File solrCollectionConfigurationInitFile = new File(getAppPath(),  "defaults/" + SOLR_COLLECTION_CONFIGURATION_NAME);
         final File solrCollectionConfigurationWorkFile = new File(getDataPath(), "DATA/SETTINGS/" + SOLR_COLLECTION_CONFIGURATION_NAME);
@@ -421,19 +416,19 @@ public final class Switchboard extends serverSwitch {
         final File solrWebgraphConfigurationWorkFile   = new File(getDataPath(), "DATA/SETTINGS/" + SOLR_WEBGRAPH_CONFIGURATION_NAME);
         CollectionConfiguration solrCollectionConfigurationWork = null;
         WebgraphConfiguration solrWebgraphConfigurationWork = null;
-        
+
         // migrate the old Schema file path to a new one
         final File solrCollectionConfigurationWorkOldFile = new File(getDataPath(), "DATA/SETTINGS/" + SOLR_COLLECTION_CONFIGURATION_NAME_OLD);
         if (solrCollectionConfigurationWorkOldFile.exists() && !solrCollectionConfigurationWorkFile.exists()) solrCollectionConfigurationWorkOldFile.renameTo(solrCollectionConfigurationWorkFile);
-        
+
         // initialize the collection schema if it does not yet exist
         if (!solrCollectionConfigurationWorkFile.exists()) try {
             Files.copy(solrCollectionConfigurationInitFile, solrCollectionConfigurationWorkFile);
         } catch (IOException e) {Log.logException(e);}
-        
+
         // lazy definition of schema: do not write empty fields
         final boolean solrlazy = getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true);
-        
+
         // define collection schema
         try {
             final CollectionConfiguration solrCollectionConfigurationInit = new CollectionConfiguration(solrCollectionConfigurationInitFile, solrlazy);
@@ -467,6 +462,19 @@ public final class Switchboard extends serverSwitch {
             solrWebgraphConfigurationWork.commit();
         } catch (IOException e) {Log.logException(e);}
 
+        // define boosts
+        Ranking.setMinTokenLen(this.getConfigInt(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_MINLENGTH, 3));
+        Ranking.setQuantRate(this.getConfigFloat(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_QUANTRATE, 0.5f));
+        for (int i = 0; i <= 3; i++) {
+            // must be done every time the boosts change
+            Ranking r = solrCollectionConfigurationWork.getRanking(i);
+            r.setName(this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTNAME_ + i, "_dummy" + i));
+            r.updateBoosts(this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_ + i, "text_t^1.0"));
+            r.setBoostQuery(this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_ + i, ""));
+            r.setBoostFunction(this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_ + i, ""));
+            r.setMode(Ranking.BoostFunctionMode.valueOf(this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTIONMODE_ + i, "add")));
+        }
+
         // initialize index
         ReferenceContainer.maxReferences = getConfigInt("index.maxReferences", 0);
         final File segmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
@@ -482,7 +490,7 @@ public final class Switchboard extends serverSwitch {
             try {this.index.fulltext().connectLocalSolr();} catch (IOException e) {Log.logException(e);}
         }
         this.index.writeWebgraph(this.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false));
-        
+
         // set up the solr interface
         final String solrurls = getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr");
         final boolean usesolr = getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;

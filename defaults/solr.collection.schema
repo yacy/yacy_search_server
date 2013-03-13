@@ -242,7 +242,7 @@ outboundlinks_urlstub_txt
 #htags_i
 
 ## url inside the canonical link element, string
-#canonical_t
+#canonical_s
 
 ## flag shows if the url in canonical_t is equal to sku, boolean
 #canonical_equal_sku_b
@@ -287,13 +287,13 @@ underline_txt
 #flash_b
 
 ## list of all links to frames
-#frames_txt
+#frames_sxt
 
 ## number of attr_frames, int
 #framesscount_i
 
 ## list of all links to iframes
-#iframes_txt
+#iframes_sxt
 
 ## number of attr_iframes, int
 #iframesscount_i

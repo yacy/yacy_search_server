@@ -20,7 +20,8 @@
 
 import java.util.Map;
 
-import net.yacy.cora.federate.solr.Boost;
+import net.yacy.cora.federate.solr.Ranking;
+import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -38,30 +39,18 @@ public class RankingSolr_p {
         // clean up all search events
         SearchEventCache.cleanupEvents(true);
         sb.index.fulltext().clearCache(); // every time the ranking is changed we need to remove old orderings
-
-        if (post != null && post.containsKey("EnterDoublecheck")) {
-            Boost.RANKING.setMinTokenLen(post.getInt("minTokenLen", 3));
-            Boost.RANKING.setQuantRate(post.getFloat("quantRate", 0.5f));
-            sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_MINLENGTH, Boost.RANKING.getMinTokenLen());
-            sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_QUANTRATE, Boost.RANKING.getQuantRate());
-        }
-
-        if (post != null && post.containsKey("ResetDoublecheck")) {
-            Boost.RANKING.setMinTokenLen(3);
-            Boost.RANKING.setQuantRate(0.5f);
-            sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_MINLENGTH, Boost.RANKING.getMinTokenLen());
-            sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_QUANTRATE, Boost.RANKING.getQuantRate());
-        }
         
-        if (post != null && post.containsKey("EnterRanking")) {
+        if (post != null && post.containsKey("EnterBoosts")) {
             StringBuilder boostString = new StringBuilder(); // SwitchboardConstants.SEARCH_RANKING_SOLR_BOOST;
             for (Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getKey().startsWith("boost")) {
                     String fieldName = entry.getKey().substring(6);
                     CollectionSchema field = CollectionSchema.valueOf(fieldName);
                     if (field == null) continue;
+                    String fieldValue = entry.getValue();
+                    if (fieldValue == null || fieldValue.length() == 0) continue;
                     try {
-                        float boost = Float.parseFloat(entry.getValue());
+                        float boost = Float.parseFloat(fieldValue);
                         if (boostString.length() > 0) boostString.append(',');
                         boostString.append(field.getSolrFieldName()).append('^').append(Float.toString(boost));
                     } catch (NumberFormatException e) {
@@ -71,28 +60,75 @@ public class RankingSolr_p {
             }
             if (boostString.length() > 0) {
                 String s = boostString.toString();
-                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_BOOST, s);
-                Boost.RANKING.updateBoosts(s);
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_ + "0", s);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(0).updateBoosts(s);
             }
-            
+        }
+        if (post != null && post.containsKey("ResetBoosts")) {
+            String s = "text_t^2.0,url_paths_sxt^20.0,title^100.0,synonyms_sxt^1.0";
+            sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_ + "0", s);
+            sb.index.fulltext().getDefaultConfiguration().getRanking(0).updateBoosts(s);
         }
 
-        if (post != null && post.containsKey("ResetRanking")) {
-            Boost.RANKING.initDefaults();
+        if (post != null && post.containsKey("EnterBQ")) {
+            String bq = post.get("bq");
+            if (bq != null) {
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_ + "0", bq);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(0).setBoostQuery(bq);
+            }
+        }
+        if (post != null && post.containsKey("ResetBQ")) {
+            String bq = "fuzzy_signature_unique_b:true^100000.0";
+            if (bq != null) {
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_ + "0", bq);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(0).setBoostQuery(bq);
+            }
+        }
+
+        if (post != null && post.containsKey("EnterBF")) {
+            String bf = post.get("bf");
+            String mode = post.get("mode");
+            if (bf != null) {
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_ + "0", bf);
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTIONMODE_ + "0", mode);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(0).setBoostFunction(bf);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(0).setMode(Ranking.BoostFunctionMode.valueOf(mode));
+            }
+        }
+        if (post != null && post.containsKey("ResetBF")) {
+            String bf = ""; //"div(add(1,references_i),pow(add(1,inboundlinkscount_i),1.6))";
+            String mode = "add";
+            if (bf != null) {
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_ + "0", bf);
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTIONMODE_ + "0", mode);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(0).setBoostFunction(bf);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(0).setMode(Ranking.BoostFunctionMode.valueOf(mode));
+            }
         }
 
         final serverObjects prop = new serverObjects();
-        prop.put("minTokenLen", Boost.RANKING.getMinTokenLen());
-        prop.put("quantRate", Boost.RANKING.getQuantRate());
         int i = 0;
-        for (Map.Entry<CollectionSchema, Float> entry: Boost.RANKING.entrySet()) {
-            CollectionSchema field = entry.getKey();
-            float boost = entry.getValue();
+        
+        Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(0);
+        for (SchemaDeclaration field: CollectionSchema.values()) {
+            if (!field.isSearchable()) continue;
             prop.put("boosts_" + i + "_field", field.getSolrFieldName());
-            prop.put("boosts_" + i + "_boost", Float.toString(boost));
+            Float boost = ranking.getFieldBoost(field);
+            if (boost == null || boost.floatValue() <= 0.0f) {
+                prop.put("boosts_" + i + "_checked", 0);
+                prop.put("boosts_" + i + "_boost", "");
+            } else {
+                prop.put("boosts_" + i + "_checked", 1);
+                prop.put("boosts_" + i + "_boost", boost.toString());
+            }
             i++;
         }
         prop.put("boosts", i);
+        prop.put("bq", ranking.getBoostQuery());
+        prop.put("bf", ranking.getBoostFunction());
+        prop.put("modeKey", ranking.getMethod() == Ranking.BoostFunctionMode.add ? "bf" : "boost");
+        prop.put("add.checked", ranking.getMethod() == Ranking.BoostFunctionMode.add ? 1 : 0);
+        prop.put("multiply.checked", ranking.getMethod() == Ranking.BoostFunctionMode.add ? 0 : 1);
 
         return prop;
     }

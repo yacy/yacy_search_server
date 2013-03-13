@@ -43,6 +43,7 @@ import java.util.Set;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.FailType;
 import net.yacy.cora.federate.solr.ProcessType;
@@ -77,14 +78,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
     private static final long serialVersionUID=-499100932212840385L;
 
-
-    /**
-     * initialize with an empty ConfigurationSet which will cause that all the index
-     * attributes are used
-     */
-    public CollectionConfiguration() {
-        super();
-    }
+    private final ArrayList<Ranking> rankings;
     
     /**
      * initialize the schema with a given configuration file
@@ -96,6 +90,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     public CollectionConfiguration(final File configurationFile, boolean lazy) throws IOException {
         super(configurationFile);
         super.lazy = lazy;
+        this.rankings = new ArrayList<Ranking>(4);
+        for (int i = 0; i <= 3; i++) rankings.add(new Ranking());
         // check consistency: compare with YaCyField enum
         if (this.isEmpty()) return;
         Iterator<Entry> it = this.entryIterator();
@@ -117,6 +113,19 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 Log.logWarning("SolrCollectionWriter", " solr schema file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
         	}
         }
+    }
+    
+    public Ranking getRanking(int idx) {
+        return this.rankings.get(idx);
+    }
+    
+    public Ranking getRanking(String name) {
+        if (name == null) return null;
+        for (int i = 0; i < this.rankings.size(); i++) {
+            Ranking r = this.rankings.get(i);
+            if (name.equals(r)) return r;
+        }
+        return null;
     }
 
     /**
@@ -335,7 +344,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         String docurl = digestURI.toNormalform(true);
         add(doc, CollectionSchema.sku, docurl);
 
-        int clickdepth = -1;
+        int clickdepth = 999;
         if ((allAttr || contains(CollectionSchema.clickdepth_i)) && citations != null) {
             if (digestURI.probablyRootURL()) {
                 boolean lc = this.lazy; this.lazy = false;
@@ -344,9 +353,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             } else {
                 // search the citations for references
                 //try {
-                    clickdepth = -1; //getClickDepth(citations, digestURI);
+                    clickdepth = 999; //getClickDepth(citations, digestURI);
                 //} catch (IOException e) {
-                //    add(doc, CollectionSchema.clickdepth_i, -1);
+                //    add(doc, CollectionSchema.clickdepth_i, 999);
                 //}
                 if (clickdepth < 0 || clickdepth > 1) {
                     processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
@@ -616,7 +625,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
 
             // Frames
-            if (allAttr || contains(CollectionSchema.frames_txt)) {
+            if (allAttr || contains(CollectionSchema.frames_sxt)) {
                 final Set<DigestURI> framess = html.getFrames();
                 final String[] frames = new String[framess.size()];
                 c = 0;
@@ -626,11 +635,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     frames[c++] = u.toNormalform(false);
                 }
                 add(doc, CollectionSchema.framesscount_i, frames.length);
-                if (frames.length > 0) add(doc, CollectionSchema.frames_txt, frames);
+                if (frames.length > 0) add(doc, CollectionSchema.frames_sxt, frames);
             }
 
             // IFrames
-            if (allAttr || contains(CollectionSchema.iframes_txt)) {
+            if (allAttr || contains(CollectionSchema.iframes_sxt)) {
                 final Set<DigestURI> iframess = html.getIFrames();
                 final String[] iframes = new String[iframess.size()];
                 c = 0;
@@ -640,16 +649,16 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     iframes[c++] = u.toNormalform(false);
                 }
                 add(doc, CollectionSchema.iframesscount_i, iframes.length);
-                if (iframes.length > 0) add(doc, CollectionSchema.iframes_txt, iframes);
+                if (iframes.length > 0) add(doc, CollectionSchema.iframes_sxt, iframes);
             }
 
             // canonical tag
-            if (allAttr || contains(CollectionSchema.canonical_t)) {
+            if (allAttr || contains(CollectionSchema.canonical_s)) {
                 final DigestURI canonical = html.getCanonical();
                 if (canonical != null) {
                     inboundLinks.remove(canonical);
                     outboundLinks.remove(canonical);
-                    add(doc, CollectionSchema.canonical_t, canonical.toNormalform(false));
+                    add(doc, CollectionSchema.canonical_s, canonical.toNormalform(false));
                     // set a flag if this is equal to sku
                     if (contains(CollectionSchema.canonical_equal_sku_b) && canonical.equals(docurl)) {
                         add(doc, CollectionSchema.canonical_equal_sku_b, true);
@@ -765,7 +774,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * compute the click level using the citation reference database
      * @param citations the citation database
      * @param searchhash the hash of the url to be checked
-     * @return the clickdepth level or -1 if the root url cannot be found or a recursion limit is reached
+     * @return the clickdepth level or 999 if the root url cannot be found or a recursion limit is reached
      * @throws IOException
      */
     public static int getClickDepth(final IndexCell<CitationReference> citations, final DigestURI url) throws IOException {
@@ -817,7 +826,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             levelhashes = checknext;
         
         }
-        return -1;
+        return 999;
     }
     
     /**

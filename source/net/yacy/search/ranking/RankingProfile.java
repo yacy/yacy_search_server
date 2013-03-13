@@ -90,18 +90,18 @@ public class RankingProfile {
     public RankingProfile(final Classification.ContentDomain mediatype) {
         // set default-values
         this.coeff_appemph            = 5;
-        this.coeff_appurl             = 11;
+        this.coeff_appurl             = 12;
         this.coeff_app_dc_creator     = 1;
-        this.coeff_app_dc_description = 8;
+        this.coeff_app_dc_description = 10;
         this.coeff_app_dc_subject     = 2;
-        this.coeff_app_dc_title       = 12;
+        this.coeff_app_dc_title       = 14;
         this.coeff_authority          = 5;
         this.coeff_cathasapp          = (mediatype == ContentDomain.APP) ? 15 : 0;
         this.coeff_cathasaudio        = (mediatype == ContentDomain.AUDIO) ? 15 : 0;
         this.coeff_cathasimage        = (mediatype == ContentDomain.IMAGE) ? 15 : 0;
         this.coeff_cathasvideo        = (mediatype == ContentDomain.VIDEO) ? 15 : 0;
         this.coeff_catindexof         = (mediatype == ContentDomain.TEXT) ? 0 : 15;
-        this.coeff_date               = 7;
+        this.coeff_date               = 9;
         this.coeff_domlength          = 10;
         this.coeff_hitcount           = 1;
         this.coeff_language           = 2;
@@ -111,18 +111,18 @@ public class RankingProfile {
         this.coeff_posinphrase        = 0;
         this.coeff_posintext          = 4;
         this.coeff_posofphrase        = 0;
-        this.coeff_termfrequency      = 14;
+        this.coeff_termfrequency      = 8;
         this.coeff_urlcomps           = 7;
         this.coeff_urllength          = 6;
         this.coeff_worddistance       = 10;
         this.coeff_wordsintext        = 3;
         this.coeff_wordsintitle       = 2;
-        this.coeff_ybr                = 8;
+        this.coeff_ybr                = 0;
 
         this.coeff_urlcompintoplist   = 2;
         this.coeff_descrcompintoplist = 2;
         this.coeff_prefer             = 0;
-        this.coeff_citation           = 15;
+        this.coeff_citation           = 10;
     }
 
     public RankingProfile(final String prefix, String profile) {
