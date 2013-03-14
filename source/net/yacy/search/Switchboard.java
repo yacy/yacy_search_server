@@ -69,7 +69,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -99,8 +98,6 @@ import net.yacy.cora.document.WordCache;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
-import net.yacy.cora.federate.solr.ProcessType;
-import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.lod.JenaTripleStore;
@@ -2296,64 +2293,8 @@ public final class Switchboard extends serverSwitch {
 
             // if no crawl is running and processing is activated:
             // execute the (post-) processing steps for all entries that have a process tag assigned
-            if (this.crawlQueues.coreCrawlJobSize() == 0 && index.connectedCitation() && index.fulltext().getDefaultConfiguration().contains(CollectionSchema.process_sxt)) {
-                // that means we must search for those entries.
-                index.fulltext().getDefaultConnector().commit(true); // make sure that we have latest information that can be found
-                //BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery("*:*", 0, 1000, 60000, 10);
-                BlockingQueue<SolrDocument> docs = index.fulltext().getDefaultConnector().concurrentQuery(CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 10000, 60000, 50);
-                
-                SolrDocument doc;
-                int proccount_clickdepth = 0;
-                int proccount_clickdepthchange = 0;
-                int proccount_referencechange = 0;
-                while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                    // for each to-be-processed entry work on the process tag
-                    Collection<Object> proctags = doc.getFieldValues(CollectionSchema.process_sxt.getSolrFieldName());
-                    for (Object tag: proctags) {
-                        String tagname = (String) tag;
-                        ProcessType tagtype = ProcessType.valueOf(tagname);
-                        
-                        // switch over tag types
-                        if (tagtype == ProcessType.CLICKDEPTH) {
-                            //proctags.remove(tag);
-                            if (index.fulltext().getDefaultConfiguration().contains(CollectionSchema.clickdepth_i)) {
-                                DigestURI url;
-                                try {
-                                    // get new click depth and compare with old
-                                    Integer oldclickdepth = (Integer) doc.getFieldValue(CollectionSchema.clickdepth_i.getSolrFieldName());
-                                    url = new DigestURI((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())));
-                                    int clickdepth = CollectionConfiguration.getClickDepth(index.urlCitation(), url);
-                                    if (oldclickdepth == null || oldclickdepth.intValue() != clickdepth) {
-                                        //log.logInfo("new clickdepth "  + clickdepth + " for " + url.toNormalform(true));
-                                        proccount_clickdepthchange++;
-                                    }
-                                    SolrInputDocument sid = index.fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
-                                    sid.setField(CollectionSchema.clickdepth_i.getSolrFieldName(), clickdepth);
-                                    
-                                    // refresh the link count; it's 'cheap' to do this here
-                                    if (index.fulltext().getDefaultConfiguration().contains(CollectionSchema.references_i)) {
-                                        Integer oldreferences = (Integer) doc.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
-                                        int references = index.urlCitation().count(url.hash());
-                                        if (references > 0) {
-                                            if (oldreferences == null || oldreferences.intValue() != references) proccount_referencechange++;
-                                            sid.setField(CollectionSchema.references_i.getSolrFieldName(), references);
-                                        }
-                                    }
-                                    
-                                    // remove the processing tag
-                                    sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());
-                                    
-                                    // send back to index
-                                    index.fulltext().getDefaultConnector().add(sid);
-                                    proccount_clickdepth++;
-                                } catch (Throwable e) {
-                                    Log.logException(e);
-                                }
-                            }
-                        }
-                    }
-                }
-                log.logInfo("cleanup_processing: re-calculated " + proccount_clickdepth + " new clickdepth values, " + proccount_clickdepthchange + " clickdepth values changed, " + proccount_referencechange + " reference-count values changed.");
+            if (this.crawlQueues.coreCrawlJobSize() == 0) {
+                index.fulltext().getDefaultConfiguration().postprocessing(index);
             }
             
             return true;

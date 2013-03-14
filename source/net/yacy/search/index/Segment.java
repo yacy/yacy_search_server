@@ -61,15 +61,18 @@ import net.yacy.document.Parser;
 import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.citation.CitationReferenceFactory;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.Bitfield;
+import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.LoaderDispatcher;
@@ -201,6 +204,65 @@ public class Segment {
         return this.urlCitationIndex;
     }
 
+    /**
+     * compute the click level using the citation reference database
+     * @param citations the citation database
+     * @param searchhash the hash of the url to be checked
+     * @return the clickdepth level or 999 if the root url cannot be found or a recursion limit is reached
+     * @throws IOException
+     */
+    public int getClickDepth(final DigestURI url) throws IOException {
+
+        final byte[] searchhash = url.hash();
+        RowHandleSet rootCandidates = url.getPossibleRootHashes();
+        
+        RowHandleSet ignore = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100); // a set of urlhashes to be ignored. This is generated from all hashes that are seen during recursion to prevent enless loops
+        RowHandleSet levelhashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 1); // all hashes of a clickdepth. The first call contains the target hash only and therefore just one entry
+        try {levelhashes.put(searchhash);} catch (SpaceExceededException e) {throw new IOException(e);}
+        int leveldepth = 0; // the recursion depth and therefore the result depth-1. Shall be 0 for the first call
+        final byte[] hosthash = new byte[6]; // the host of the url to be checked
+        System.arraycopy(searchhash, 6, hosthash, 0, 6);
+        
+        long timeout = System.currentTimeMillis() + 10000;
+        for (int maxdepth = 0; maxdepth < 10 && System.currentTimeMillis() < timeout; maxdepth++) {
+            
+            RowHandleSet checknext = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
+            
+            // loop over all hashes at this clickdepth; the first call to this loop should contain only one hash and a leveldepth = 0
+            checkloop: for (byte[] urlhash: levelhashes) {
+    
+                // get all the citations for this url and iterate
+                ReferenceContainer<CitationReference> references = this.urlCitationIndex.get(urlhash, null);
+                if (references == null || references.size() == 0) continue checkloop; // don't know
+                Iterator<CitationReference> i = references.entries();
+                nextloop: while (i.hasNext()) {
+                    CitationReference ref = i.next();
+                    if (ref == null) continue nextloop;
+                    byte[] u = ref.urlhash();
+                    
+                    // check ignore
+                    if (ignore.has(u)) continue nextloop;
+                    
+                    // check if this is from the same host
+                    if (!ByteBuffer.equals(u, 6, hosthash, 0, 6)) continue nextloop;
+                    
+                    // check if the url is a root url
+                    if (rootCandidates.has(u)) {
+                        return leveldepth + 1;
+                    }
+                    
+                    // step to next depth level
+                    try {checknext.put(u);} catch (SpaceExceededException e) {}
+                    try {ignore.put(u);} catch (SpaceExceededException e) {}
+                }
+            }
+            leveldepth++;
+            levelhashes = checknext;
+        
+        }
+        return 999;
+    }
+    
     public long URLCount() {
         return this.fulltext.collectionSize();
     }
