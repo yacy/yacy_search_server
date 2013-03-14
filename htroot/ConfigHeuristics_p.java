@@ -83,10 +83,10 @@ public class ConfigHeuristics_p {
                     if (osc.discoverFromSolrIndex(sb)) {
                         osderrmsg = "started background search for target systems, refresh page after some minutes";
                     } else {
-                        osderrmsg = "Solr webgraph index needs to be available and fields target_rel_s, target_protocol_s, target_urlstub_s on";
+                        osderrmsg = "Error: webgraph Solr index not enabled";
                     }
-                } else {
-                    osderrmsg = "Error: webgraph Solr index not enabled";
+                } else {                    
+                    osderrmsg = "Solr webgraph index needs to be available and fields target_rel_s, target_protocol_s, target_urlstub_s on";
                 }
             }
 
