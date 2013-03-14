@@ -28,9 +28,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.storage.Configuration;
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.search.index.Segment;
 
 public class SchemaConfiguration extends Configuration implements Serializable {
 
@@ -66,6 +69,33 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         }
     }
 
+    public boolean postprocessing_clickdepth(Segment segment, SolrDocument doc, SolrInputDocument sid, DigestURI url, SchemaDeclaration clickdepthfield) {
+        if (!this.contains(clickdepthfield)) return false;
+        // get new click depth and compare with old
+        Integer oldclickdepth = (Integer) doc.getFieldValue(clickdepthfield.getSolrFieldName());
+        if (oldclickdepth != null && oldclickdepth.intValue() != 999) return false; // we do not want to compute that again
+        try {
+            int clickdepth = segment.getClickDepth(url);
+            if (oldclickdepth == null || oldclickdepth.intValue() != clickdepth) {
+                sid.setField(clickdepthfield.getSolrFieldName(), clickdepth);
+                return true;
+            }
+        } catch (IOException e) {
+        }
+        return false;
+    }
+
+    public boolean postprocessing_references(Segment segment, SolrDocument doc, SolrInputDocument sid, DigestURI url, SchemaDeclaration referencesfield) {
+        if (!this.contains(referencesfield)) return false;
+        Integer oldreferences = (Integer) doc.getFieldValue(referencesfield.getSolrFieldName());
+        int references = segment.urlCitation().count(url.hash());
+        if (references > 0 && (oldreferences == null || oldreferences.intValue() != references)) {
+            sid.setField(referencesfield.getSolrFieldName(), references);
+            return true;
+        }
+        return false;
+    }
+    
     public boolean contains(SchemaDeclaration field) {
         return this.contains(field.name());
     }

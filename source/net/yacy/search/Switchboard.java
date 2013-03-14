@@ -2295,6 +2295,7 @@ public final class Switchboard extends serverSwitch {
             // execute the (post-) processing steps for all entries that have a process tag assigned
             if (this.crawlQueues.coreCrawlJobSize() == 0) {
                 index.fulltext().getDefaultConfiguration().postprocessing(index);
+                index.fulltext().getWebgraphConfiguration().postprocessing(index);
             }
             
             return true;

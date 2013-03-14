@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -43,6 +45,8 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.federate.solr.ProcessType;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
+import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
+import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.CommonPattern;
@@ -51,6 +55,7 @@ import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.IndexCell;
+import net.yacy.search.index.Segment;
 
 public class WebgraphConfiguration extends SchemaConfiguration implements Serializable {
 
@@ -196,9 +201,11 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                 add(edge, WebgraphSchema.source_path_folders_count_i, paths.length);
                 add(edge, WebgraphSchema.source_path_folders_sxt, paths);
             }
-            add(edge, WebgraphSchema.source_clickdepth_i, clickdepth_source);
-            if (clickdepth_source < 0 || clickdepth_source > 1) processTypes.add(ProcessType.CLICKDEPTH);
-
+            if (this.contains(WebgraphSchema.source_protocol_s) && this.contains(WebgraphSchema.source_urlstub_s) && this.contains(WebgraphSchema.source_id_s)) {
+                add(edge, WebgraphSchema.source_clickdepth_i, clickdepth_source);
+                if (clickdepth_source < 0 || clickdepth_source > 1) processTypes.add(ProcessType.CLICKDEPTH);
+            }
+            
             // add the source attributes about the target
             if (allAttr || contains(WebgraphSchema.target_inbound_b)) add(edge, WebgraphSchema.target_inbound_b, inbound);
             if (allAttr || contains(WebgraphSchema.target_name_t)) add(edge, WebgraphSchema.target_name_t, name.length() > 0 ? name : "");
@@ -252,14 +259,16 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                 add(edge, WebgraphSchema.target_path_folders_sxt, paths);
             }
 
-            if ((allAttr || contains(WebgraphSchema.target_clickdepth_i)) && citations != null) {
-                if (target_url.probablyRootURL()) {
-                    boolean lc = this.lazy; this.lazy = false;
-                    add(edge, WebgraphSchema.target_clickdepth_i, 0);
-                    this.lazy = lc;
-                } else {
-                    add(edge, WebgraphSchema.target_clickdepth_i, 999);
-                    processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
+            if (this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
+                if ((allAttr || contains(WebgraphSchema.target_clickdepth_i)) && citations != null) {
+                    if (target_url.probablyRootURL()) {
+                        boolean lc = this.lazy; this.lazy = false;
+                        add(edge, WebgraphSchema.target_clickdepth_i, 0);
+                        this.lazy = lc;
+                    } else {
+                        add(edge, WebgraphSchema.target_clickdepth_i, 999);
+                        processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
+                    }
                 }
             }
             
@@ -271,6 +280,63 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             
             // add the edge to the subgraph
             subgraph.edges.add(edge);
+        }
+    }
+    
+    public void postprocessing(Segment segment) {
+        if (!this.contains(WebgraphSchema.process_sxt)) return;
+        if (!segment.connectedCitation()) return;
+        SolrConnector connector = segment.fulltext().getWebgraphConnector();
+        // that means we must search for those entries.
+        connector.commit(true); // make sure that we have latest information that can be found
+        //BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery("*:*", 0, 1000, 60000, 10);
+        BlockingQueue<SolrDocument> docs = connector.concurrentQuery(WebgraphSchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 100000, 60000, 50);
+        
+        SolrDocument doc;
+        String protocol, urlstub, id;
+        DigestURI url;
+        int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0;
+        try {
+            while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+                // for each to-be-processed entry work on the process tag
+                Collection<Object> proctags = doc.getFieldValues(WebgraphSchema.process_sxt.getSolrFieldName());
+                for (Object tag: proctags) {
+                    
+                    try {
+                        SolrInputDocument sid = this.toSolrInputDocument(doc);
+                        
+                        // switch over tag types
+                        ProcessType tagtype = ProcessType.valueOf((String) tag);
+                        if (tagtype == ProcessType.CLICKDEPTH) {
+                            if (this.contains(WebgraphSchema.source_protocol_s) && this.contains(WebgraphSchema.source_urlstub_s) && this.contains(WebgraphSchema.source_id_s)) {
+                                protocol = (String) doc.getFieldValue(WebgraphSchema.source_protocol_s.getSolrFieldName());
+                                urlstub = (String) doc.getFieldValue(WebgraphSchema.source_urlstub_s.getSolrFieldName());
+                                id = (String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName());
+                                url = new DigestURI(protocol + "://" + urlstub, ASCII.getBytes(id));
+                                if (postprocessing_clickdepth(segment, doc, sid, url, WebgraphSchema.source_clickdepth_i)) proccount_clickdepthchange++;
+                            }
+                            if (this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
+                                protocol = (String) doc.getFieldValue(WebgraphSchema.target_protocol_s.getSolrFieldName());
+                                urlstub = (String) doc.getFieldValue(WebgraphSchema.target_urlstub_s.getSolrFieldName());
+                                id = (String) doc.getFieldValue(WebgraphSchema.target_id_s.getSolrFieldName());
+                                url = new DigestURI(protocol + "://" + urlstub, ASCII.getBytes(id));
+                                if (postprocessing_clickdepth(segment, doc, sid, url, WebgraphSchema.target_clickdepth_i)) proccount_clickdepthchange++;
+                            }
+                        }
+                        
+                        // all processing steps checked, remove the processing tag
+                        sid.removeField(WebgraphSchema.process_sxt.getSolrFieldName());
+                        
+                        // send back to index
+                        connector.add(sid);
+                        proccount++;
+                    } catch (Throwable e1) {
+                    }
+                    
+                }
+            }
+            Log.logInfo("WebgraphConfiguration", "cleanup_processing: re-calculated " + proccount+ " new documents, " + proccount_clickdepthchange + " clickdepth values changed, " + proccount_referencechange + " reference-count values changed.");
+        } catch (InterruptedException e) {
         }
     }
 

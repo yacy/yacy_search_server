@@ -778,58 +778,38 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         BlockingQueue<SolrDocument> docs = connector.concurrentQuery(CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 10000, 60000, 50);
         
         SolrDocument doc;
-        int proccount_clickdepth = 0;
-        int proccount_clickdepthchange = 0;
-        int proccount_referencechange = 0;
+        int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0;
         try {
             while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                 // for each to-be-processed entry work on the process tag
                 Collection<Object> proctags = doc.getFieldValues(CollectionSchema.process_sxt.getSolrFieldName());
                 for (Object tag: proctags) {
-                    String tagname = (String) tag;
-                    ProcessType tagtype = ProcessType.valueOf(tagname);
                     
-                    // switch over tag types
-                    if (tagtype == ProcessType.CLICKDEPTH) {
-                        //proctags.remove(tag);
-                        if (this.contains(CollectionSchema.clickdepth_i)) {
-                            DigestURI url;
-                            try {
-                                // get new click depth and compare with old
-                                Integer oldclickdepth = (Integer) doc.getFieldValue(CollectionSchema.clickdepth_i.getSolrFieldName());
-                                url = new DigestURI((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())));
-                                int clickdepth = segment.getClickDepth(url);
-                                if (oldclickdepth == null || oldclickdepth.intValue() != clickdepth) {
-                                    //log.logInfo("new clickdepth "  + clickdepth + " for " + url.toNormalform(true));
-                                    proccount_clickdepthchange++;
-                                }
-                                SolrInputDocument sid = this.toSolrInputDocument(doc);
-                                sid.setField(CollectionSchema.clickdepth_i.getSolrFieldName(), clickdepth);
-                                
-                                // refresh the link count; it's 'cheap' to do this here
-                                if (this.contains(CollectionSchema.references_i)) {
-                                    Integer oldreferences = (Integer) doc.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
-                                    int references = segment.urlCitation().count(url.hash());
-                                    if (references > 0) {
-                                        if (oldreferences == null || oldreferences.intValue() != references) proccount_referencechange++;
-                                        sid.setField(CollectionSchema.references_i.getSolrFieldName(), references);
-                                    }
-                                }
-                                
-                                // remove the processing tag
-                                sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());
-                                
-                                // send back to index
-                                connector.add(sid);
-                                proccount_clickdepth++;
-                            } catch (Throwable e) {
-                                Log.logException(e);
-                            }
+                    try {
+                        DigestURI url = new DigestURI((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())));
+                        SolrInputDocument sid = this.toSolrInputDocument(doc);
+                        
+                        // switch over tag types
+                        ProcessType tagtype = ProcessType.valueOf((String) tag);
+                        if (tagtype == ProcessType.CLICKDEPTH) {
+                            if (postprocessing_clickdepth(segment, doc, sid, url, CollectionSchema.clickdepth_i)) proccount_clickdepthchange++;
                         }
+                        
+                        // refresh the link count; it's 'cheap' to do this here
+                        if (postprocessing_references(segment, doc, sid, url, CollectionSchema.references_i)) proccount_referencechange++;
+                        
+                        // all processing steps checked, remove the processing tag
+                        sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());
+                        
+                        // send back to index
+                        connector.add(sid);
+                        proccount++;
+                    } catch (Throwable e1) {
                     }
+                    
                 }
             }
-            Log.logInfo("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount_clickdepth + " new clickdepth values, " + proccount_clickdepthchange + " clickdepth values changed, " + proccount_referencechange + " reference-count values changed.");
+            Log.logInfo("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount+ " new documents, " + proccount_clickdepthchange + " clickdepth values changed, " + proccount_referencechange + " reference-count values changed.");
         } catch (InterruptedException e) {
         }
     }
