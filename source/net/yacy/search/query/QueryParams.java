@@ -398,7 +398,7 @@ public final class QueryParams {
         final SolrQuery params = new SolrQuery();
         params.setQuery(this.queryGoal.collectionQueryString(this.indexSegment.fulltext().getDefaultConfiguration()).toString());
         params.setParam("defType", "edismax");
-        Ranking ranking = indexSegment.fulltext().getDefaultConfiguration().getRanking(0);
+        Ranking ranking = indexSegment.fulltext().getDefaultConfiguration().getRanking(this.ranking.coeff_date == RankingProfile.COEFF_MAX ? 1 : (this.modifier.sitehash != null || this.modifier.sitehost != null) ? 2 : 0); // for a by-date ranking select different ranking profile
         String bq = ranking.getBoostQuery();
         String bf = ranking.getBoostFunction();
         if (bq.length() > 0) params.setParam("bq", bq); // a boost query that moves double content to the back
