@@ -38,6 +38,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import net.yacy.cora.federate.opensearch.OpenSearchConnector;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.schema.WebgraphSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -70,21 +72,21 @@ public class ConfigHeuristics_p {
                 OpenSearchConnector os = new OpenSearchConnector(sb, true);
                 if (os.getSize() == 0) {
                     osderrmsg = "no active search targets are configured";
-        }
-
+                }
             }
             if (post.containsKey("opensearch_off")) sb.setConfig("heuristic.opensearch", false);
             if (post.containsKey("discoverosd")) {
-                final boolean metafieldNOTavailable = sb.index.fulltext().getDefaultConfiguration().containsDisabled(CollectionSchema.outboundlinks_tag_txt.name());
-                if (!metafieldNOTavailable) {
-                OpenSearchConnector osc = new OpenSearchConnector(sb, false);
-                if (osc.discoverFromSolrIndex(sb)) {
-                    osderrmsg = "started background search for target systems, refresh page after some minutes";
+                final boolean metafieldavailable = sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_rel_s.name())
+                        && (sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_protocol_s.name()) && sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_urlstub_s.name()));
+                if (metafieldavailable) {
+                    OpenSearchConnector osc = new OpenSearchConnector(sb, false);
+                    if (osc.discoverFromSolrIndex(sb)) {
+                        osderrmsg = "started background search for target systems, refresh page after some minutes";
+                    } else {
+                        osderrmsg = "Solr webgraph index needs to be available and fields target_rel_s, target_protocol_s, target_urlstub_s on";
+                    }
                 } else {
-                    osderrmsg = "Solr index needs to be available and field outboundlinks_tag_txt on";
-                }
-                } else {
-                    osderrmsg = "Error: field outboundlinks_tag_txt needs to be activated in Solr index";
+                    osderrmsg = "Error: webgraph Solr index not enabled";
                 }
             }
 
@@ -109,22 +111,29 @@ public class ConfigHeuristics_p {
                 writeopensearchcfg (sb,post);
              }
 
-            if (post.containsKey("switchsolrfieldson")) {
-                final boolean metafieldNOTavailable = sb.index.fulltext().getDefaultConfiguration().containsDisabled(CollectionSchema.outboundlinks_tag_txt.name());
-                if (metafieldNOTavailable) {
+            if (post.containsKey("switchsolrfieldson")) {              
+                final boolean metafieldavailable = sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_rel_s.name()) 
+                    && ( sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_protocol_s.name()) && sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_urlstub_s.name()) ) ;
+                
+                if (!metafieldavailable) {
                     SchemaConfiguration.Entry entry;
-                    entry = sb.index.fulltext().getDefaultConfiguration().get(CollectionSchema.outboundlinks_tag_txt.name());
+                    entry = sb.index.fulltext().getWebgraphConfiguration().get(WebgraphSchema.target_rel_s.name());
                     if (entry != null && !entry.enabled()) {
                         entry.setEnable(true);
                     }
-                    entry = sb.index.fulltext().getDefaultConfiguration().get(CollectionSchema.inboundlinks_tag_txt.name());
+                    entry = sb.index.fulltext().getWebgraphConfiguration().get(WebgraphSchema.target_protocol_s.name());
+                    if (entry != null && !entry.enabled()) {
+                        entry.setEnable(true);
+                    }
+                    entry = sb.index.fulltext().getWebgraphConfiguration().get(WebgraphSchema.target_urlstub_s.name());
                     if (entry != null && !entry.enabled()) {
                         entry.setEnable(true);
                     }
                     try {
-                        sb.index.fulltext().getDefaultConfiguration().commit();
+                        sb.index.fulltext().getWebgraphConfiguration().commit();
                     } catch (IOException e) {
                     }
+                    sb.setConfig(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, true); 
                 }
             }
 
@@ -143,8 +152,10 @@ public class ConfigHeuristics_p {
             }
         }
 
-        final boolean showmetafieldbutton = sb.index.fulltext().getDefaultConfiguration().containsDisabled(CollectionSchema.outboundlinks_tag_txt.name());
-        if (showmetafieldbutton) prop.put("osdsolrfieldswitch",1);
+        final boolean showmetafieldbutton = sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_rel_s.name())
+                && (sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_protocol_s.name()) && sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_urlstub_s.name()))
+                && sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false);
+        if (!showmetafieldbutton) prop.put("osdsolrfieldswitch",1);
         prop.put("site.checked", sb.getConfigBool("heuristic.site", false) ? 1 : 0);
         prop.put("searchresult.checked", sb.getConfigBool("heuristic.searchresults", false) ? 1 : 0);
         prop.put("searchresultglobal.checked", sb.getConfigBool("heuristic.searchresults.crawlglobal", false) ? 1 : 0);

@@ -23,20 +23,20 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
+import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.storage.Configuration;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.parser.xml.opensearchdescriptionReader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEvent;
-import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphSchema;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -179,24 +179,27 @@ public class OpenSearchConnector {
         if (sb == null) {
             return false;
         }
-        final EmbeddedSolrConnector connector = sb.index.fulltext().getDefaultEmbeddedConnector();
+        final SolrConnector connector = sb.index.fulltext().getWebgraphConnector();
         // check if needed Solr fields are available (selected)
         if (connector == null) {
             Log.logSevere("OpenSearchConnector.Discover", "Error on connecting to embedded Solr index");
             return false;
         }
-        final boolean metafieldNOTavailable = sb.index.fulltext().getDefaultConfiguration().containsDisabled(CollectionSchema.outboundlinks_tag_txt.name());
-        if (metafieldNOTavailable) {
-            Log.logWarning("OpenSearchConnector.Discover", "Solr Schema field outboundlinks_tag_txt must be switched on");
+        final boolean metafieldavailable = sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_rel_s.name()) 
+                && ( sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_protocol_s.name()) && sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_urlstub_s.name()) ) 
+                && sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false);
+        if (!metafieldavailable) {
+            Log.logWarning("OpenSearchConnector.Discover", "webgraph option and webgraph Schema fields target_rel_s, target_protocol_s and target_urlstub_s must be switched on");
             return false;
         }
         // the solr query
-        final String solrquerystr = CollectionSchema.outboundlinks_tag_txt.getSolrFieldName() + ":\"rel=\\\"search\\\"\" OR "
-                + CollectionSchema.inboundlinks_tag_txt.getSolrFieldName() + ":\"rel=\\\"search\\\"\"&fl="
-                + CollectionSchema.sku.getSolrFieldName() + "," + CollectionSchema.outboundlinks_tag_txt.getSolrFieldName() +"," + CollectionSchema.inboundlinks_tag_txt.getSolrFieldName();
+        final String webgraphquerystr = WebgraphSchema.target_rel_s.getSolrFieldName() + ":search";
+        final String[] webgraphqueryfields = { WebgraphSchema.target_protocol_s.getSolrFieldName() , WebgraphSchema.target_urlstub_s.getSolrFieldName()};
+        // alternatively target_protocol_s + "://" +target_host_s + target_path_s
+
         final long numfound;
         try {
-            SolrDocumentList docList = connector.query(solrquerystr, 0, 1);
+            SolrDocumentList docList = connector.query(webgraphquerystr, 0, 1, webgraphqueryfields);
             numfound = docList.getNumFound();
             if (numfound == 0) {
                 Log.logInfo("OpenSearchConnector.Discover", "no results found, abort discover job");
@@ -221,7 +224,7 @@ public class OpenSearchConnector {
                     Set<String> dblmem = new HashSet<String>(); // temp memory for already checked url
                     while (doloop) {
                         Log.logInfo("OpenSearchConnector.Discover", "start Solr query loop at " + Integer.toString(loopnr * 20) + " of " + Long.toString(numfound));
-                        SolrDocumentList docList = connector.query(solrquerystr, loopnr * 20, 20); // check chunk of 20 result documents
+                        SolrDocumentList docList = connector.query(webgraphquerystr, loopnr * 20, 20,webgraphqueryfields); // check chunk of 20 result documents
                         loopnr++;
                         if (stoptime < System.currentTimeMillis()) {// stop after max 1h
                             doloop = false;
@@ -231,40 +234,22 @@ public class OpenSearchConnector {
                             Iterator<SolrDocument> docidx = docList.iterator();
                             while (docidx.hasNext()) {
                                 SolrDocument sdoc = docidx.next();
-                                Collection<Object> tagtxtlist = sdoc.getFieldValues(CollectionSchema.outboundlinks_tag_txt.getSolrFieldName());
-                                if (tagtxtlist == null) {
-                                    tagtxtlist = sdoc.getFieldValues(CollectionSchema.inboundlinks_tag_txt.getSolrFieldName());
-                                } else {
-                                    tagtxtlist.addAll(sdoc.getFieldValues(CollectionSchema.inboundlinks_tag_txt.getSolrFieldName()));
-                                }
-                                Iterator<Object> tagtxtidx = tagtxtlist.iterator();
-                                while (tagtxtidx.hasNext()) {
-                                    // check and extract links to opensearchdescription
-                                    // example: <a href="http://url/osd.xml" rel="search" name="xyz.com"></a>
-                                    String tagtxt = (String) tagtxtidx.next();
-                                    if (tagtxt.contains("search")) {
-                                        int hrefstartpos = tagtxt.indexOf("href=");
-                                        if (hrefstartpos > 0) {
-                                            String hrefendpos = tagtxt.substring(hrefstartpos + 6);
-                                            hrefstartpos = hrefendpos.indexOf('"');
-                                            String hrefurltxt = hrefendpos.substring(0, hrefstartpos); // hrefurltxt contains now url to opensearchdescription
-                                            try {
-                                                URL url = new URL(hrefurltxt);
-                                                //TODO: check Blacklist
-                                                if (dblmem.add(url.getAuthority())) { // use only main path to detect double entries
-                                                    opensearchdescriptionReader os = new opensearchdescriptionReader(hrefurltxt);
-                                                    if (os.getRSSorAtomUrl() != null) {
-                                                        // add found system to config file
-                                                        add(os.getShortName(), os.getRSSorAtomUrl(), false, os.getItem("LongName"));
-                                                        Log.logInfo("OpenSearchConnector.Discover", "added " + os.getShortName() + " " + hrefurltxt);
-                                                    } else {
-                                                        Log.logInfo("OpenSearchConnector.Discover", "osd.xml check failed (no RSS or Atom support) for " + hrefurltxt);
-                                                    }
-                                                }
-                                            } catch (MalformedURLException ex) {
-                                            }
+
+                                String hrefurltxt = sdoc.getFieldValue(WebgraphSchema.target_protocol_s.getSolrFieldName()) + "://" + sdoc.getFieldValue(WebgraphSchema.target_urlstub_s.getSolrFieldName());
+                                try {
+                                    URL url = new URL(hrefurltxt);
+                                    //TODO: check Blacklist
+                                    if (dblmem.add(url.getAuthority())) { // use only main path to detect double entries
+                                        opensearchdescriptionReader os = new opensearchdescriptionReader(hrefurltxt);
+                                        if (os.getRSSorAtomUrl() != null) {
+                                            // add found system to config file
+                                            add(os.getShortName(), os.getRSSorAtomUrl(), false, os.getItem("LongName"));
+                                            Log.logInfo("OpenSearchConnector.Discover", "added " + os.getShortName() + " " + hrefurltxt);
+                                        } else {
+                                            Log.logInfo("OpenSearchConnector.Discover", "osd.xml check failed (no RSS or Atom support) for " + hrefurltxt);
                                         }
                                     }
+                                } catch (MalformedURLException ex) {
                                 }
                             }
                         } else {
