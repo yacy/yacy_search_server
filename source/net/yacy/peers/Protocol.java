@@ -1020,6 +1020,7 @@ public final class Protocol {
     
     protected static int solrQuery(
             final SearchEvent event,
+            final SolrQuery solrQuery,
             final int offset,
             final int count,
             boolean getFacets,
@@ -1030,7 +1031,6 @@ public final class Protocol {
             return -1; // we cannot query solr only with word hashes, there is no clear text string
         }
         event.addExpectedRemoteReferences(count);
-        final SolrQuery solrQuery = event.query.solrQuery();
         solrQuery.setStart(offset);
         solrQuery.setRows(count);
         

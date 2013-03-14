@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 
+import org.apache.solr.client.solrj.SolrQuery;
+
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.kelondro.logging.Log;
@@ -171,8 +173,9 @@ public class RemoteSearch extends Thread {
             nodePeers.add(event.peers.mySeed());
         }
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false)) {
+            final SolrQuery solrQuery = event.query.solrQuery();
             for (Seed s: nodePeers) {
-                solrRemoteSearch(event, start, count, s, blacklist);
+                solrRemoteSearch(event, solrQuery, start, count, s, blacklist);
             }
         }
                 
@@ -264,6 +267,7 @@ public class RemoteSearch extends Thread {
 
     public static Thread solrRemoteSearch(
                     final SearchEvent event,
+                    final SolrQuery solrQuery,
                     final int start,
                     final int count,
                     final Seed targetPeer,
@@ -281,6 +285,7 @@ public class RemoteSearch extends Thread {
                         event.oneFeederStarted();
                         urls = Protocol.solrQuery(
                                         event,
+                                        solrQuery,
                                         start,
                                         count,
                                         start == 0,

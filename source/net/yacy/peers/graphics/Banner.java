@@ -66,7 +66,7 @@ public final class Banner {
     private static void drawBannerPicture(
             final BannerData data, final BufferedImage newLogo) {
 
-        final int exprlength = 19;
+        final int exprlength = 16;
         logo = newLogo;
         bannerPicture =
                 new RasterPlotter(
@@ -80,17 +80,17 @@ public final class Banner {
 
         // draw description
         bannerPicture.setColor(Long.parseLong(data.getTextcolor(), 16));
-        PrintTool.print(bannerPicture, 100, 12, 0, "PEER:  " + addTrailingBlanks(data.getName(), exprlength), -1);
-        PrintTool.print(bannerPicture, 100, 22, 0, "LINKS: " + addBlanksAndDots(data.getLinks(), exprlength), -1);
-        PrintTool.print(bannerPicture, 100, 32, 0, "WORDS: " + addBlanksAndDots(data.getWords(), exprlength), -1);
-        PrintTool.print(bannerPicture, 100, 42, 0, "TYPE:  " + addTrailingBlanks(data.getType(), exprlength), -1);
-        PrintTool.print(bannerPicture, 100, 52, 0, "SPEED: " + addTrailingBlanks(data.getPpm() + " PAGES/MINUTE", exprlength), -1);
+        PrintTool.print(bannerPicture, 100, 12, 0, "PEER NAME:" + addTrailingBlanks(data.getName(), exprlength), -1);
+        PrintTool.print(bannerPicture, 100, 22, 0, "DOCUMENTS:" + addBlanksAndDots(data.getLinks(), exprlength), -1);
+        PrintTool.print(bannerPicture, 100, 32, 0, "DHT WORDS:" + addBlanksAndDots(data.getWords(), exprlength), -1);
+        PrintTool.print(bannerPicture, 100, 42, 0, "TYPE:     " + addTrailingBlanks(data.getType(), exprlength), -1);
+        PrintTool.print(bannerPicture, 100, 52, 0, "SPEED:    " + addTrailingBlanks(data.getPpm() + " PAGES/MINUTE", exprlength), -1);
 
-        PrintTool.print(bannerPicture, 285, 12, 0, "NETWORK: " + addTrailingBlanks(data.getNetwork() + " [" + data.getPeers() + "]", exprlength), -1);
-        PrintTool.print(bannerPicture, 285, 22, 0, "LINKS:   " + addBlanksAndDots(data.getNlinks(), exprlength), -1);
-        PrintTool.print(bannerPicture, 285, 32, 0, "WORDS:   " + addBlanksAndDots(data.getNwords(), exprlength), -1);
-        PrintTool.print(bannerPicture, 285, 42, 0, "QUERIES: " + addTrailingBlanks(formatQpm(data.getNqph()) + " QUERIES/HOUR", exprlength), -1);
-        PrintTool.print(bannerPicture, 285, 52, 0, "SPEED:   " + addTrailingBlanks(data.getNppm() + " PAGES/MINUTE", exprlength), -1);
+        PrintTool.print(bannerPicture, 290, 12, 0, "NETWORK:  " + addTrailingBlanks(data.getNetwork() + " [" + data.getPeers() + "]", exprlength), -1);
+        PrintTool.print(bannerPicture, 290, 22, 0, "LINKS:    " + addBlanksAndDots(data.getNlinks(), exprlength), -1);
+        PrintTool.print(bannerPicture, 290, 32, 0, "WORDS:    " + addBlanksAndDots(data.getNwords(), exprlength), -1);
+        PrintTool.print(bannerPicture, 290, 42, 0, "QUERIES:  " + addTrailingBlanks(formatQpm(data.getNqph()) + " QUERIES/HOUR", exprlength), -1);
+        PrintTool.print(bannerPicture, 290, 52, 0, "SPEED:    " + addTrailingBlanks(data.getNppm() + " PAGES/MINUTE", exprlength), -1);
 
         if (logo != null) {
             final int x = (100 / 2 - logo.getWidth() / 2);
