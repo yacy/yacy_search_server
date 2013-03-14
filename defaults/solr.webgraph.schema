@@ -19,11 +19,14 @@ id
 last_modified
 
 ## time when resource was loaded
-load_date_dt
+#load_date_dt
 
 ## tags that are attached to crawls/index generation to separate the search result into user-defined subsets
 collection_sxt
 
+## needed (post-)processing steps on this metadata set, used i.e. for clickdepth-computation.
+#process_sxt
+    
 
 ##
 ## url construction information about the source

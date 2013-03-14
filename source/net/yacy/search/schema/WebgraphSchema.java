@@ -35,6 +35,7 @@ public enum WebgraphSchema implements SchemaDeclaration {
     last_modified(SolrType.date, true, true, false, false, false, "last-modified from http header"),
     load_date_dt(SolrType.date, true, true, false, false, false, "time when resource was loaded"),
     collection_sxt(SolrType.string, true, true, true, false, false, "tags that are attached to crawls/index generation to separate the search result into user-defined subsets"),
+    process_sxt(SolrType.string, true, true, true, false, false, "needed (post-)processing steps on this metadata set, used i.e. for clickdepth-computation."),
     
     // source information
     source_id_s(SolrType.string, true, true, false, false, false, "primary key of document, the URL hash (source)"),

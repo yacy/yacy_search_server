@@ -351,15 +351,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 clickdepth = 0;
                 this.lazy = lc;
             } else {
-                // search the citations for references
-                //try {
-                    clickdepth = 999; //getClickDepth(citations, digestURI);
-                //} catch (IOException e) {
-                //    add(doc, CollectionSchema.clickdepth_i, 999);
-                //}
-                if (clickdepth < 0 || clickdepth > 1) {
-                    processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
-                }
+                clickdepth = 999; 
+                processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
             }
             add(doc, CollectionSchema.clickdepth_i, clickdepth);
         }
@@ -717,7 +710,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.outboundlinksnofollowcount_i)) add(doc, CollectionSchema.outboundlinksnofollowcount_i, document.outboundLinkNofollowCount());
         
         // list all links
-        WebgraphConfiguration.Subgraph subgraph = webgraph.edges(digestURI, responseHeader, profile.collections(), clickdepth, document.getAnchors(), images, inboundLinks, outboundLinks);
+        WebgraphConfiguration.Subgraph subgraph = webgraph.edges(digestURI, responseHeader, profile.collections(), clickdepth, document.getAnchors(), images, inboundLinks, outboundLinks, citations);
         doc.webgraphDocuments.addAll(subgraph.edges);
         if (allAttr || contains(CollectionSchema.inboundlinks_tag_txt)) add(doc, CollectionSchema.inboundlinks_tag_txt, subgraph.tags[0]); // if inboundlinks_tag_txt can be removed, remove also subgraph.tags
         if (allAttr || contains(CollectionSchema.inboundlinks_protocol_sxt)) add(doc, CollectionSchema.inboundlinks_protocol_sxt, protocolList2indexedList(subgraph.urlProtocols[0]));

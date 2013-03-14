@@ -30,6 +30,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -38,14 +40,17 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.federate.solr.ProcessType;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.parser.html.ImageEntry;
+import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.rwi.IndexCell;
 
 public class WebgraphConfiguration extends SchemaConfiguration implements Serializable {
 
@@ -103,25 +108,34 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     }
     
     public Subgraph edges(
-            final DigestURI source, final ResponseHeader responseHeader, String[] collections, int clickdepth,
+            final DigestURI source, final ResponseHeader responseHeader, String[] collections, int clickdepth_source,
             final Map<DigestURI, Properties> alllinks,
             final Map<DigestURI, ImageEntry> images,
             final Set<DigestURI> inboundLinks,
-            final Set<DigestURI> outboundLinks
+            final Set<DigestURI> outboundLinks,
+            IndexCell<CitationReference> citations
             ) {
         boolean allAttr = this.isEmpty();
         Subgraph subgraph = new Subgraph(inboundLinks.size(), outboundLinks.size());
-        addEdges(subgraph, source, responseHeader, collections, clickdepth, allAttr, alllinks, images, true, inboundLinks);
-        addEdges(subgraph, source, responseHeader, collections, clickdepth, allAttr, alllinks, images, false, outboundLinks);
+        addEdges(
+                subgraph, source, responseHeader, collections, clickdepth_source,
+                allAttr, alllinks, images, true, inboundLinks, citations);
+        addEdges(
+                subgraph, source, responseHeader, collections, clickdepth_source,
+                allAttr, alllinks, images, false, outboundLinks, citations);
         return subgraph;
     }
     
     private void addEdges(
             final Subgraph subgraph,
-            final DigestURI source, final ResponseHeader responseHeader, String[] collections, int clickdepth,
+            final DigestURI source, final ResponseHeader responseHeader, String[] collections, int clickdepth_source,
             final boolean allAttr, final Map<DigestURI, Properties> alllinks, final Map<DigestURI, ImageEntry> images,
-            final boolean inbound, final Set<DigestURI> links) {
+            final boolean inbound, final Set<DigestURI> links,
+            final IndexCell<CitationReference> citations) {
         for (final DigestURI target_url: links) {
+
+            Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
+            
             final Properties p = alllinks.get(target_url);
             if (p == null) continue;
             final String name = p.getProperty("name", ""); // the name attribute
@@ -183,7 +197,8 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                 add(edge, WebgraphSchema.source_path_folders_count_i, paths.length);
                 add(edge, WebgraphSchema.source_path_folders_sxt, paths);
             }
-            add(edge, WebgraphSchema.source_clickdepth_i, clickdepth);
+            add(edge, WebgraphSchema.source_clickdepth_i, clickdepth_source);
+            if (clickdepth_source < 0 || clickdepth_source > 1) processTypes.add(ProcessType.CLICKDEPTH);
 
             // add the source attributes about the target
             if (allAttr || contains(WebgraphSchema.target_inbound_b)) add(edge, WebgraphSchema.target_inbound_b, inbound);
@@ -239,7 +254,23 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                 add(edge, WebgraphSchema.target_path_folders_count_i, paths.length);
                 add(edge, WebgraphSchema.target_path_folders_sxt, paths);
             }
-            add(edge, WebgraphSchema.target_clickdepth_i, clickdepth);
+
+            if ((allAttr || contains(WebgraphSchema.target_clickdepth_i)) && citations != null) {
+                if (target_url.probablyRootURL()) {
+                    boolean lc = this.lazy; this.lazy = false;
+                    add(edge, WebgraphSchema.target_clickdepth_i, 0);
+                    this.lazy = lc;
+                } else {
+                    add(edge, WebgraphSchema.target_clickdepth_i, 999);
+                    processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
+                }
+            }
+            
+            if (allAttr || contains(WebgraphSchema.process_sxt)) {
+                List<String> pr = new ArrayList<String>();
+                for (ProcessType t: processTypes) pr.add(t.name());
+                add(edge, WebgraphSchema.process_sxt, pr);
+            }
             
             // add the edge to the subgraph
             subgraph.edges.add(edge);
