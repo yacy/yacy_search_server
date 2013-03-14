@@ -96,11 +96,10 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     }
     
     public static class Subgraph {
-        public final ArrayList<String>[] tags, urlProtocols, urlStubs;
+        public final ArrayList<String>[] urlProtocols, urlStubs;
         public final ArrayList<SolrInputDocument> edges;
         @SuppressWarnings("unchecked")
         public Subgraph(int inboundSize, int outboundSize) {
-            this.tags = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
             this.urlProtocols = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
             this.urlStubs = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
             this.edges = new ArrayList<SolrInputDocument>(inboundSize + outboundSize);
@@ -208,8 +207,6 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             if (allAttr || contains(WebgraphSchema.target_linktext_t)) add(edge, WebgraphSchema.target_linktext_t, text.length() > 0 ? text : "");
             if (allAttr || contains(WebgraphSchema.target_linktext_charcount_i)) add(edge, WebgraphSchema.target_linktext_charcount_i, text.length());
             if (allAttr || contains(WebgraphSchema.target_linktext_wordcount_i)) add(edge, WebgraphSchema.target_linktext_wordcount_i, text.length() > 0 ? CommonPattern.SPACE.split(text).length : 0);
-            String tag = "<a href=\"" + target_url.toNormalform(false) + "\"" + (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") + (name.length() > 0 ? " name=\"" + name + "\"" : "") + ">" + ((text.length() > 0) ? text : "") + "</a>";
-            subgraph.tags[ioidx].add(tag);
             ImageEntry ientry = images.get(target_url);
             String alttext = ientry == null ? "" : ientry.alt();
             if (allAttr || contains(WebgraphSchema.target_alt_t)) add(edge, WebgraphSchema.target_alt_t, alttext);

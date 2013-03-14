@@ -712,10 +712,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // list all links
         WebgraphConfiguration.Subgraph subgraph = webgraph.edges(digestURI, responseHeader, profile.collections(), clickdepth, document.getAnchors(), images, inboundLinks, outboundLinks, citations);
         doc.webgraphDocuments.addAll(subgraph.edges);
-        if (allAttr || contains(CollectionSchema.inboundlinks_tag_txt)) add(doc, CollectionSchema.inboundlinks_tag_txt, subgraph.tags[0]); // if inboundlinks_tag_txt can be removed, remove also subgraph.tags
         if (allAttr || contains(CollectionSchema.inboundlinks_protocol_sxt)) add(doc, CollectionSchema.inboundlinks_protocol_sxt, protocolList2indexedList(subgraph.urlProtocols[0]));
         if (allAttr || contains(CollectionSchema.inboundlinks_urlstub_txt)) add(doc, CollectionSchema.inboundlinks_urlstub_txt, subgraph.urlStubs[0]);
-        if (allAttr || contains(CollectionSchema.outboundlinks_tag_txt)) add(doc, CollectionSchema.outboundlinks_tag_txt, subgraph.tags[1]); // if outboundlinks_tag_txt can be removed, remove also subgraph.tags
         if (allAttr || contains(CollectionSchema.outboundlinks_protocol_sxt)) add(doc, CollectionSchema.outboundlinks_protocol_sxt, protocolList2indexedList(subgraph.urlProtocols[1]));
         if (allAttr || contains(CollectionSchema.outboundlinks_urlstub_txt)) add(doc, CollectionSchema.outboundlinks_urlstub_txt, subgraph.urlStubs[1]);
         

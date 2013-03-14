@@ -32,7 +32,6 @@ import net.yacy.cora.storage.Configuration;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import net.yacy.search.schema.CollectionSchema;
 
 import java.io.IOException;
 import java.util.Iterator;

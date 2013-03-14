@@ -111,10 +111,8 @@ public enum CollectionSchema implements SchemaDeclaration {
     metagenerator_t(SolrType.text_general, true, true, false, false, false, "content of <meta name=\"generator\" content=#content#> tag"),
     inboundlinks_protocol_sxt(SolrType.string, true, true, true, false, false, "internal links, only the protocol"),
     inboundlinks_urlstub_txt(SolrType.text_general, true, true, true, false, false, "internal links, the url only without the protocol"),
-    inboundlinks_tag_txt(SolrType.text_general, true, true, true, false, false, "internal links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow"),
     outboundlinks_protocol_sxt(SolrType.string, true, true, true, false, false, "external links, only the protocol"),
     outboundlinks_urlstub_txt(SolrType.text_general, true, true, true, false, false, "external links, the url only without the protocol"),
-    outboundlinks_tag_txt(SolrType.text_general, true, true, true, false, false, "external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow"),
     
     images_tag_txt(SolrType.text_general, true, true, true, false, true, " all image tags, encoded as <img> tag inclusive alt- and title property"),
     images_urlstub_txt(SolrType.text_general, true, true, true, false, true, "all image links without the protocol and '://'"),
