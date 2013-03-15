@@ -164,7 +164,7 @@ public final class transferURL {
             Network.log.logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " URLs");
             EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + ", blocked " + blocked + " URLs from peer " + otherPeerName, "", otherPeer.hash));
             if (doublecheck > 0) {
-            	Network.log.logSevere("Received " + doublecheck + " double URLs from peer " + otherPeerName);
+            	Network.log.logWarning("Received " + doublecheck + "/" + urlc + " double URLs from peer " + otherPeerName); // double should not happen because we demanded only documents which we do not have yet
             	doublevalues = Integer.toString(doublecheck);
             }
             result = "ok";
