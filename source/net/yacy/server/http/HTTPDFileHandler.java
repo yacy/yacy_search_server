@@ -1215,9 +1215,9 @@ public final class HTTPDFileHandler {
                     }
                 }
             } else {
-                if (!targetFile.exists()) Log.logWarning("HTTPFileHandler", "target file " + targetFile.getAbsolutePath() + " does not exist");
-                //if (!targetFile.isFile()) Log.logWarning("HTTPFileHandler", "target file " + targetFile.getAbsolutePath() + " is not a file");
-                //if (!targetFile.canRead()) Log.logWarning("HTTPFileHandler", "target file " + targetFile.getAbsolutePath() + " cannot read");
+                if (!targetFile.exists()) Log.logWarning("HTTPDFileHandler", "target file " + targetFile.getAbsolutePath() + " does not exist");
+                //if (!targetFile.isFile()) Log.logWarning("HTTPDFileHandler", "target file " + targetFile.getAbsolutePath() + " is not a file");
+                //if (!targetFile.canRead()) Log.logWarning("HTTPDFileHandler", "target file " + targetFile.getAbsolutePath() + " cannot read");
                 HTTPDemon.sendRespondError(conProp,out,3,404,"File not Found",null,null);
                 return;
             }
