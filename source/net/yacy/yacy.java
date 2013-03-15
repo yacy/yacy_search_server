@@ -183,7 +183,7 @@ public final class yacy {
             f = new File(dataHome, "DATA/yacy.running");
             final String conf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
             if (f.exists()) {                // another instance running? VM crash? User will have to care about this
-                Log.logSevere("STARTUP", "WARNING: the file " + f + " exists, this usually means that a YaCy instance is still running");
+                Log.logSevere("STARTUP", "WARNING: the file " + f + " exists, this usually means that a YaCy instance is still running. If you want to restart YaCy, try first ./stopYACY.sh, then ./startYACY.sh. If ./stopYACY.sh fails, try ./killYACY.sh");
                 
                 // If YaCy is actually running, then we check if the server port is open.
                 // If yes, then we consider that a restart is a user mistake and then we just respond
