@@ -46,7 +46,7 @@ public class QueryGoal {
     private static char dq = '"';
     private static String seps = ".,/&_";
     
-    private String query_original, query_words;
+    private String query_original;
     private HandleSet include_hashes, exclude_hashes, all_hashes;
     private final ArrayList<String> include_words, exclude_words, all_words;
     private final ArrayList<String> include_strings, exclude_strings, all_strings;
@@ -54,13 +54,12 @@ public class QueryGoal {
 
     public QueryGoal(HandleSet include_hashes, HandleSet exclude_hashes, HandleSet all_hashes) {
         this.query_original = null;
-        this.query_words = null;
-        this.include_words = null;
-        this.exclude_words = null;
-        this.all_words = null;
-        this.include_strings = null;
-        this.exclude_strings = null;
-        this.all_strings = null;
+        this.include_words = new ArrayList<String>();
+        this.exclude_words = new ArrayList<String>();
+        this.all_words = new ArrayList<String>();
+        this.include_strings = new ArrayList<String>();
+        this.exclude_strings = new ArrayList<String>();
+        this.all_strings = new ArrayList<String>();
         this.include_hashes = include_hashes;
         this.exclude_hashes = exclude_hashes;
         this.all_hashes = all_hashes;
@@ -70,7 +69,6 @@ public class QueryGoal {
         assert query_original != null;
         assert query_words != null;
         this.query_original = query_original;
-        this.query_words = query_words;
         this.include_words = new ArrayList<String>();
         this.exclude_words = new ArrayList<String>();
         this.all_words = new ArrayList<String>();
@@ -79,16 +77,16 @@ public class QueryGoal {
         this.all_strings = new ArrayList<String>();
 
         // remove funny symbols
-        this.query_words = CharacterCoding.html2unicode(AbstractScraper.stripAllTags(this.query_words.toCharArray())).toLowerCase().trim();
+        query_words = CharacterCoding.html2unicode(AbstractScraper.stripAllTags(query_words.toCharArray())).toLowerCase().trim();
         int c;
         for (int i = 0; i < seps.length(); i++) {
-            while ((c = this.query_words.indexOf(seps.charAt(i))) >= 0) {
-                this.query_words = this.query_words.substring(0, c) + (((c + 1) < this.query_words.length()) ? (' ' + this.query_words.substring(c + 1)) : "");
+            while ((c = query_words.indexOf(seps.charAt(i))) >= 0) {
+                query_words = query_words.substring(0, c) + (((c + 1) < query_words.length()) ? (' ' + query_words.substring(c + 1)) : "");
             }
         }
 
         // parse first quoted strings
-        parseQuery(this.query_words, this.include_strings, this.exclude_strings, this.all_strings);
+        parseQuery(query_words, this.include_strings, this.exclude_strings, this.all_strings);
 
         // .. end then take these strings apart to generate word lists
         for (String s: this.include_strings) parseQuery(s, this.include_words, this.include_words, this.all_words);
@@ -145,6 +143,7 @@ public class QueryGoal {
     }
 
     public String getOriginalQueryString(final boolean encodeHTML) {
+        if (this.query_original == null) return null;
         String ret;
         if (encodeHTML){
             try {
@@ -154,19 +153,6 @@ public class QueryGoal {
             }
         } else {
             ret = this.query_original;
-        }
-        return ret;
-    }
-    public String getWordQueryString(final boolean encodeHTML) {
-        String ret;
-        if (encodeHTML){
-            try {
-                ret = URLEncoder.encode(this.query_words, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                ret = this.query_words;
-            }
-        } else {
-            ret = this.query_words;
         }
         return ret;
     }

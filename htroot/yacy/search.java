@@ -393,7 +393,7 @@ public final class search {
         prop.put("indexabstract", indexabstract.toString());
 
         // prepare result
-        int resultCount = theSearch.getResultCount();
+        int resultCount = theSearch == null ? 0 : theSearch.getResultCount(); // theSearch may be null if we searched only for abstracts
         if (resultCount == 0 || accu == null || accu.isEmpty()) {
 
             // no results
