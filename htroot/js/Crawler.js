@@ -72,13 +72,14 @@ function handleStatus(){
 	removeAllChildren(ppmNum);
 	ppmNum.appendChild(document.createTextNode(ppm));
 	
-	var ppmSpan = document.getElementById("ppmSpan");
-	removeAllChildren(ppmSpan);
-	for(i = 0; i < ppm / 25; i++){
-		img=document.createElement("img");
-		img.setAttribute("src", BAR_IMG1);
-		ppmSpan.appendChild(img);
-	}
+	// ppmBar start
+	var ppmBar = document.getElementById("ppmbar");
+	var ppmBarMaxRead = document.getElementById("customPPM");
+	
+    var ppmforppmbar = ppm.replace(/\.*/g,"");	
+	ppmBar.setAttribute("value", ppmforppmbar);
+    ppmBar.setAttribute("max", ppmBarMaxRead.value);
+	// ppmBar end
 	
 	// traffic output (no bar up to now)
     traffic = getFirstChild(statusTag, "traffic");
