@@ -206,8 +206,8 @@ import com.google.common.io.Files;
 public final class Switchboard extends serverSwitch {
 
     final static String SOLR_COLLECTION_CONFIGURATION_NAME_OLD = "solr.keys.default.list";
-    final static String SOLR_COLLECTION_CONFIGURATION_NAME = "solr.collection.schema";
-    final static String SOLR_WEBGRAPH_CONFIGURATION_NAME = "solr.webgraph.schema";
+    public final static String SOLR_COLLECTION_CONFIGURATION_NAME = "solr.collection.schema";
+    public final static String SOLR_WEBGRAPH_CONFIGURATION_NAME = "solr.webgraph.schema";
     
     // load slots
     public static int xstackCrawlSlots = 2000;
