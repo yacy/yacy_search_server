@@ -110,14 +110,16 @@
             <td align="left">Speed</td>
             <td align="left" colspan="2">
             <input #(crawlingSpeedMinChecked)#::class="TableCellDark"#(/crawlingSpeedMinChecked)# type="submit" name="crawlingPerformance" value="minimum" />
-            <input #(crawlingSpeedCustChecked)#::class="TableCellDark"#(/crawlingSpeedCustChecked)# name="customPPM" type="text" size="5" maxlength="5" value="#[customPPMdefault]#" />PPM <input type="submit" name="crawlingPerformance" value="custom" />
+            <input #(crawlingSpeedCustChecked)#::class="TableCellDark"#(/crawlingSpeedCustChecked)# id="customPPM" name="customPPM" type="text" size="5" maxlength="5" value="#[customPPMdefault]#" />PPM <input type="submit" name="crawlingPerformance" value="custom" />
             <input #(crawlingSpeedMaxChecked)#::class="TableCellDark"#(/crawlingSpeedMaxChecked)# type="submit" name="crawlingPerformance" value="maximum" />
             </td>
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">PPM (Pages Per Minute)</td>
             <td align="left" width="20"><span id="ppmNum">&nbsp;&nbsp;&nbsp;</span></td>
-            <td align="left" width="400px"><span id="ppmSpan">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="left" width="400px">
+            	<progress id="ppmbar" max="30000" value="0" style="width:94%;"/>
+            </td>
           </tr>
           <tr class="TableCellLight">
             <td align="left">Traffic (Crawler)</td>
