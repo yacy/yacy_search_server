@@ -2045,7 +2045,7 @@ public final class Switchboard extends serverSwitch {
             PDFont.clearResources(); // eats up megabytes, see http://markmail.org/thread/quk5odee4hbsauhu
             
             // clear caches
-            WordCache.clear();
+            if (WordCache.sizeCommonWords() > 1000) WordCache.clearCommonWords();
             Domains.clear();
             
             // clean up image stack

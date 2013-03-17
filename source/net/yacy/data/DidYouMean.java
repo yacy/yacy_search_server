@@ -432,7 +432,7 @@ public class DidYouMean {
                 StringBuilder s;
                 try {
                     while ((s = DidYouMean.this.guessLib.take()) != POISON_STRING) {
-                        if (s.length() >= MinimumOutputWordLength && DidYouMean.this.segment.getWordCountGuess(s.toString()) > 0) {
+                        if (s.length() >= MinimumOutputWordLength && DidYouMean.this.segment.getWordCountGuess(s.toString()) > 2) {
                             DidYouMean.this.resultSet.add(s);
                         }
                         if (System.currentTimeMillis() > DidYouMean.this.timeLimit) {

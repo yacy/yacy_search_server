@@ -58,7 +58,7 @@ public class suggest {
         final String ext = header.get("EXT", "");
         final boolean json = ext.equals("json");
         final boolean xml = ext.equals("xml");
-        final boolean more = post != null && post.containsKey("more");
+        final boolean more = sb.index.connectedRWI() || (post != null && post.containsKey("more")); // with RWIs connected the guessing is super-fast
 
         // get query
         final String originalquerystring = (post == null) ? "" : post.get("query", post.get("q", "")).trim();

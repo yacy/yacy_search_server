@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.SortedSet;
 
+import net.yacy.cora.document.WordCache;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.federate.solr.SolrType;
@@ -92,6 +93,9 @@ public class QueryGoal {
         for (String s: this.include_strings) parseQuery(s, this.include_words, this.include_words, this.all_words);
         for (String s: this.exclude_strings) parseQuery(s, this.exclude_words, this.exclude_words, this.all_words);
 
+        WordCache.learn(this.include_strings);
+        WordCache.learn(this.exclude_strings);
+        
         this.include_hashes = null;
         this.exclude_hashes = null;
         this.all_hashes = null;

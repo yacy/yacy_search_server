@@ -93,7 +93,7 @@ public class ResourceObserver {
                 SearchEventCache.cleanupEvents(true);
                 this.sb.trail.clear();
                 Switchboard.urlBlacklist.clearblacklistCache();
-                WordCache.clear();
+                WordCache.clearCommonWords();
                 Domains.clear();
     		}
     	}

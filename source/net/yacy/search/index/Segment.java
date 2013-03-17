@@ -287,15 +287,16 @@ public class Segment {
      */
     public int getWordCountGuess(String word) {
         if (word == null || word.indexOf(':') >= 0 || word.indexOf(' ') >= 0 || word.indexOf('/') >= 0) return 0;
-        if (this.termIndex == null) {
-            try {
-                return (int) this.fulltext.getDefaultConnector().getQueryCount(CollectionSchema.text_t.getSolrFieldName() + ':' + word);
-            } catch (Throwable e) {
-                Log.logException(e);
-                return 0;
-            }
+        if (this.termIndex != null) {
+            int count = this.termIndex.count(Word.word2hash(word));
+            if (count > 0) return count;
         }
-        return this.termIndex.count(Word.word2hash(word));
+        try {
+            return (int) this.fulltext.getDefaultConnector().getQueryCount(CollectionSchema.text_t.getSolrFieldName() + ':' + word);
+        } catch (Throwable e) {
+            Log.logException(e);
+            return 0;
+        }
     }
 
     public boolean exists(final String urlhash) {

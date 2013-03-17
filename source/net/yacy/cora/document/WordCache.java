@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Map;
@@ -219,7 +220,7 @@ public class WordCache {
         }
     }
 
-    public static void learn(Set<String> wordset) {
+    public static void learn(Collection<String> wordset) {
         for (String s: wordset) {
             learn(new StringBuilder(s));
         }
@@ -320,8 +321,12 @@ public class WordCache {
         }
         return size;
     }
+
+    public static int sizeCommonWords() {
+        return commonWords.size();
+    }
     
-    public static void clear() {
+    public static void clearCommonWords() {
         commonWords.clear();
     }
 
