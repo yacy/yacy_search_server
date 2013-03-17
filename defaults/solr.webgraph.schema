@@ -156,7 +156,7 @@ target_path_folders_sxt
 ## the values from key-value pairs in the search part of the url (target)
 #target_parameter_value_sxt
 
-## "depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url (target)
+## depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url (target)
 #target_clickdepth_i
 
 ## host of the url (target)

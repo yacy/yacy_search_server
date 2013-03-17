@@ -51,7 +51,7 @@ import com.ibm.icu.text.CharsetDetector;
 public class htmlParser extends AbstractParser implements Parser {
 
     private static final Pattern patternUnderline = Pattern.compile("_");
-    private static final int maxLinks = 1000;
+    private static final int maxLinks = 10000;
 
     public htmlParser() {
         super("Streaming HTML Parser");
