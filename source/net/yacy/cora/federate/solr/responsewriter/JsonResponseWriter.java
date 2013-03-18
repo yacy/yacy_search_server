@@ -107,7 +107,7 @@ public class JsonResponseWriter implements QueryResponseWriter {
         resHead.offset = response.offset(); // equal to 'start'
         resHead.numFound = response.matches();
 
-        String jsonp = request.getParams().get("jsonp"); // check for JSONP
+        String jsonp = request.getParams().get("callback"); // check for JSONP
         if (jsonp != null) {
             writer.write(jsonp.toCharArray());
             writer.write("([".toCharArray());
