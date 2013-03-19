@@ -54,7 +54,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
     private static final byte[] EMPTY_CACHE = new byte[0];
 
     public  static final long growfactorLarge100 = 140L;
-    public  static final long growfactorSmall100 = 120L;
+    public  static final long growfactorSmall100 = 110L;
     private static final int isortlimit = 20;
 
     private static final int exp_chunkcount  = 0;
@@ -246,12 +246,11 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         long allocram = needed * growfactorLarge100 / 100L;
         allocram -= allocram % this.rowdef.objectsize;
         assert allocram > 0 : "elements = " + elements + ", new = " + allocram;
-        if (allocram <= Integer.MAX_VALUE && MemoryControl.request(allocram, false)) return allocram;
+        if (allocram <= Integer.MAX_VALUE && MemoryControl.request(allocram, forcegc)) return allocram;
         allocram = needed * growfactorSmall100 / 100L;
         allocram -= allocram % this.rowdef.objectsize;
         assert allocram >= 0 : "elements = " + elements + ", new = " + allocram;
-        if (allocram <= Integer.MAX_VALUE && MemoryControl.request(allocram, forcegc)) return allocram;
-        return needed;
+        return allocram;
     }
 
     private final void ensureSize(final int elements) throws SpaceExceededException {

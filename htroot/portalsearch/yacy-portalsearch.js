@@ -207,7 +207,7 @@ function yrun() {
 
 function yacysearch(clear) {	
 	var url = yconf.url + '/yacysearch.json?callback=?'    // JSONP (cross domain) request URL
-	//var url = yconf.url + '/solr/select?wt=yjson&jsonp=?'    // JSONP (cross domain) request URL
+	//var url = yconf.url + '/solr/select?wt=yjson&callback=?'    // JSONP (cross domain) request URL
 
 	if(clear) {
 		$('#ypopup').empty();
