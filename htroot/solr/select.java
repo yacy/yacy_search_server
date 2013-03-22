@@ -177,11 +177,12 @@ public class select {
         // if this is a call to YaCys special search formats, enhance the query with field assignments
         if ((responseWriter instanceof JsonResponseWriter || responseWriter instanceof OpensearchResponseWriter) && "true".equals(post.get("hl", "true"))) {
             // add options for snippet generation
-            post.put("hl", "true");
-            post.put("hl.fl", "text_t,h1,h2");
-            post.put("hl.simple.pre", "");
-            post.put("hl.simple.post", "");
-            post.put("hl.fragsize", Integer.toString(SearchEvent.SNIPPET_MAX_LENGTH));
+            if (!post.containsKey("hl.q")) post.put("hl.q", q);
+            if (!post.containsKey("hl.fl")) post.put("hl.fl", CollectionSchema.h1_txt.getSolrFieldName() + "," + CollectionSchema.h2_txt.getSolrFieldName() + "," + CollectionSchema.text_t.getSolrFieldName());
+            if (!post.containsKey("hl.alternateField")) post.put("hl.alternateField", CollectionSchema.description.getSolrFieldName());
+            if (!post.containsKey("hl.simple.pre")) post.put("hl.simple.pre", "<b>");
+            if (!post.containsKey("hl.simple.post")) post.put("hl.simple.post", "</b>");
+            if (!post.containsKey("hl.fragsize")) post.put("hl.fragsize", Integer.toString(SearchEvent.SNIPPET_MAX_LENGTH));
         }
 
         // get the embedded connector

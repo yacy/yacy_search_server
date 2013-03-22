@@ -107,7 +107,7 @@ public class JsonResponseWriter implements QueryResponseWriter {
         resHead.offset = response.offset(); // equal to 'start'
         resHead.numFound = response.matches();
 
-        String jsonp = request.getParams().get("jsonp"); // check for JSONP
+        String jsonp = request.getParams().get("callback"); // check for JSONP
         if (jsonp != null) {
             writer.write(jsonp.toCharArray());
             writer.write("([".toCharArray());
@@ -127,6 +127,7 @@ public class JsonResponseWriter implements QueryResponseWriter {
         SolrIndexSearcher searcher = request.getSearcher();
         DocIterator iterator = response.iterator();
         for (int i = 0; i < responseCount; i++) {
+            try {
             writer.write("{\n".toCharArray());
             int id = iterator.nextDoc();
             Document doc = searcher.doc(id, OpensearchResponseWriter.SOLR_FIELDS);
@@ -216,6 +217,7 @@ public class JsonResponseWriter implements QueryResponseWriter {
             if (i < responseCount - 1) {
                 writer.write(",\n".toCharArray());
             }
+            } catch (Throwable ee) {}
         }
         writer.write("],\n".toCharArray());
         
@@ -233,7 +235,7 @@ public class JsonResponseWriter implements QueryResponseWriter {
         NamedList<Integer> authors = facetFields == null ? null : (NamedList<Integer>) facetFields.get(CollectionSchema.author_sxt.getSolrFieldName());
 
         if (domains != null) {
-            writer.write("{\"facetname\":\"domains\",\"displayname\":\"Domains\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());
+            writer.write("{\"facetname\":\"domains\",\"displayname\":\"Provider\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());
             for (int i = 0; i < domains.size(); i++) {
                 facetEntry(writer, "site", domains.getName(i), Integer.toString(domains.getVal(i)));
                 if (i < domains.size() - 1) writer.write(',');

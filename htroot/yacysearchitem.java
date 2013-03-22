@@ -104,11 +104,13 @@ public class yacysearchitem {
         prop.put("navurlBase", QueryParams.navurlBase("html", theSearch.query, null).toString());
         final String target_special_pattern = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
 
+        long timeout = item == 0 ? 10000 : (theSearch.query.isLocal() ? 1000 : 3000);
+        
         if (theSearch.query.contentdom == Classification.ContentDomain.TEXT || theSearch.query.contentdom == Classification.ContentDomain.ALL) {
             // text search
 
             // generate result object
-            final ResultEntry result = theSearch.oneResult(item, theSearch.query.isLocal() ? 1000 : 3000);
+            final ResultEntry result = theSearch.oneResult(item, timeout);
             if (result == null) return prop; // no content
             final String resultUrlstring = result.urlstring();
             final DigestURI resultURL = result.url();
@@ -261,7 +263,7 @@ public class yacysearchitem {
 
             prop.put("content", theSearch.query.contentdom.getCode() + 1); // switch on specific content
             //final MediaSnippet ms = theSearch.result().oneImage(item);
-            final ResultEntry ms = theSearch.oneResult(item, theSearch.query.isLocal() ? 1000 : 5000);
+            final ResultEntry ms = theSearch.oneResult(item, timeout);
             if (ms == null) {
                 prop.put("content_item", "0");
             } else {
@@ -297,7 +299,7 @@ public class yacysearchitem {
             // any other media content
 
             // generate result object
-            final ResultEntry ms = theSearch.oneResult(item, theSearch.query.isLocal() ? 1000 : 5000);
+            final ResultEntry ms = theSearch.oneResult(item, timeout);
             prop.put("content", theSearch.query.contentdom.getCode() + 1); // switch on specific content
             if (ms == null) {
                 prop.put("content_item", "0");

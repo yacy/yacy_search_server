@@ -164,21 +164,26 @@ public class GSAResponseWriter implements QueryResponseWriter {
         // write header
         writer.write(XML_START);
         String query = request.getParams().get("originalQuery");
-        String site  = (String) context.get("site");
+        String site  = getContextString(context, "site", "");
+        String sort  = getContextString(context, "sort", "");
+        String client  = getContextString(context, "client", "");
+        String ip  = getContextString(context, "ip", "");
+        String access  = getContextString(context, "access", "");
+        String entqr  = getContextString(context, "entqr", "");
         OpensearchResponseWriter.solitaireTag(writer, "TM", Long.toString(System.currentTimeMillis() - start));
         OpensearchResponseWriter.solitaireTag(writer, "Q", query);
-        paramTag(writer, "sort", (String) context.get("sort"));
+        paramTag(writer, "sort", sort);
         paramTag(writer, "output", "xml_no_dtd");
         paramTag(writer, "ie", "UTF-8");
         paramTag(writer, "oe", "UTF-8");
-        paramTag(writer, "client", (String) context.get("client"));
+        paramTag(writer, "client", client);
         paramTag(writer, "q", query);
         paramTag(writer, "site", site);
         paramTag(writer, "start", Integer.toString(resHead.offset));
         paramTag(writer, "num", Integer.toString(resHead.rows));
-        paramTag(writer, "ip", (String) context.get("ip"));
-        paramTag(writer, "access", (String) context.get("access")); // p - search only public content, s - search only secure content, a - search all content, both public and secure
-        paramTag(writer, "entqr", (String) context.get("entqr")); // query expansion policy; (entqr=1) -- Uses only the search appliance's synonym file, (entqr=1) -- Uses only the search appliance's synonym file, (entqr=3) -- Uses both standard and local synonym files.
+        paramTag(writer, "ip", ip);
+        paramTag(writer, "access", access); // p - search only public content, s - search only secure content, a - search all content, both public and secure
+        paramTag(writer, "entqr", entqr); // query expansion policy; (entqr=1) -- Uses only the search appliance's synonym file, (entqr=1) -- Uses only the search appliance's synonym file, (entqr=3) -- Uses both standard and local synonym files.
 
         // body introduction
         final int responseCount = response.size();
@@ -192,16 +197,16 @@ public class GSAResponseWriter implements QueryResponseWriter {
             writer.write("<NB>");
             if (prevStart >= 0) {
                 writer.write("<PU>");
-                XML.escapeCharData("/gsa/search?q=" + request.getParams().get("q") + "&site=" + (String) context.get("site") +
-                         "&lr=&ie=UTF-8&oe=UTF-8&output=xml_no_dtd&client=" + (String) context.get("client") + "&access=" + (String) context.get("access") +
-                         "&sort=" + (String) context.get("sort") + "&start=" + prevStart + "&sa=N", writer); // a relative URL pointing to the NEXT results page.
+                XML.escapeCharData("/gsa/search?q=" + request.getParams().get("q") + "&site=" + site +
+                         "&lr=&ie=UTF-8&oe=UTF-8&output=xml_no_dtd&client=" + client + "&access=" + access +
+                         "&sort=" + sort + "&start=" + prevStart + "&sa=N", writer); // a relative URL pointing to the NEXT results page.
                 writer.write("</PU>");
             }
             if (nextNum > 0) {
                 writer.write("<NU>");
-                XML.escapeCharData("/gsa/search?q=" + request.getParams().get("q") + "&site=" + (String) context.get("site") +
-                         "&lr=&ie=UTF-8&oe=UTF-8&output=xml_no_dtd&client=" + (String) context.get("client") + "&access=" + (String) context.get("access") +
-                         "&sort=" + (String) context.get("sort") + "&start=" + nextStart + "&num=" + nextNum + "&sa=N", writer); // a relative URL pointing to the NEXT results page.
+                XML.escapeCharData("/gsa/search?q=" + request.getParams().get("q") + "&site=" + site +
+                         "&lr=&ie=UTF-8&oe=UTF-8&output=xml_no_dtd&client=" + client + "&access=" + access +
+                         "&sort=" + sort + "&start=" + nextStart + "&num=" + nextNum + "&sa=N", writer); // a relative URL pointing to the NEXT results page.
                 writer.write("</NU>");
             }
             writer.write("</NB>");
@@ -296,6 +301,17 @@ public class GSAResponseWriter implements QueryResponseWriter {
         writer.write(XML_STOP);
     }
 
+    private static String getContextString(Map<Object,Object> context, String key, String dflt) {
+        Object v = context.get(key);
+        if (v == null) return dflt;
+        if (v instanceof String) return (String) v;
+        if (v instanceof String[]) {
+            String[] va = (String[]) v;
+            return va.length == 0 ? dflt : va[0];
+        }
+        return dflt;
+    }
+    
     public static void paramTag(final Writer writer, final String tagname, String value) throws IOException {
         if (value == null || value.length() == 0) return;
         writer.write("<PARAM name=\"");
