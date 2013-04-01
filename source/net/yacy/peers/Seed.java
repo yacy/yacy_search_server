@@ -919,11 +919,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     }
 
     public static Seed genLocalSeed(final SeedDB db) {
-        return genLocalSeed(db, 0, null); // an anonymous peer
-    }
-
-    public static Seed genLocalSeed(final SeedDB db, final int port, final String name) {
-        // generate a seed for the local peer
+        // generate a seed for the local peer (as anonymous peer)
         // this is the birthplace of a seed, that then will start to travel to other peers
 
         final String hashs = ASCII.String(bestGap(db));
@@ -932,8 +928,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final Seed newSeed = new Seed(hashs);
 
         // now calculate other information about the host
-        newSeed.dna.put(Seed.NAME, (name) == null ? defaultPeerName() : name);
-        newSeed.dna.put(Seed.PORT, Integer.toString((port <= 0) ? 8090 : port));
+        final long port = Switchboard.getSwitchboard().getConfigLong("port", 8090); //get port from config
+        newSeed.dna.put(Seed.NAME, defaultPeerName() );
+        newSeed.dna.put(Seed.PORT, Long.toString(port));
         return newSeed;
     }
 
