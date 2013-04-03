@@ -174,6 +174,8 @@ public class OpenSearchConnector {
      * Discover opensearch description links from local (embedded) Solr index using
      * meta data field 'outboundlinks_tag_txt' and add found systems to the
      * config file
+     *  
+     * @return true if background discover job was started, false if job not started
      */
     public boolean discoverFromSolrIndex(final Switchboard sb) {
         if (sb == null) {
@@ -182,7 +184,7 @@ public class OpenSearchConnector {
         final SolrConnector connector = sb.index.fulltext().getWebgraphConnector();
         // check if needed Solr fields are available (selected)
         if (connector == null) {
-            Log.logSevere("OpenSearchConnector.Discover", "Error on connecting to embedded Solr index");
+            Log.logSevere("OpenSearchConnector.Discover", "Error on connecting to embedded Solr webgraph index");
             return false;
         }
         final boolean metafieldavailable = sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_rel_s.name()) 
@@ -203,7 +205,7 @@ public class OpenSearchConnector {
             numfound = docList.getNumFound();
             if (numfound == 0) {
                 Log.logInfo("OpenSearchConnector.Discover", "no results found, abort discover job");
-                return false;
+                return true;
             }
             Log.logInfo("OpenSearchConnector.Discover", "start checking " + Long.toString(numfound) + " found index results");
         } catch (IOException ex) {
