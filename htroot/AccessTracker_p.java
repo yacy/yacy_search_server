@@ -184,14 +184,13 @@ public class AccessTracker_p {
                 utimeSum += query.urlretrievaltime;
                 stimeSum += query.snippetcomputationtime;
                 rtimeSum += query.searchtime;
-                /*
-                if (query.getResultCount() > 0){
-                	rcount++;
-                    utimeSum1 += query.urlretrievaltime;
+                
+                if (query.transmitcount> 0){
+                    rcount++;
+                /*  utimeSum1 += query.urlretrievaltime;
                     stimeSum1 += query.snippetcomputationtime;
-                    rtimeSum1 += query.searchtime;
-                }
-                */
+                    rtimeSum1 += query.searchtime; */
+                }                
                 m++;
             }
             prop.put("page_list", m);
