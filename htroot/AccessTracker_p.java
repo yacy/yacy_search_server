@@ -185,11 +185,11 @@ public class AccessTracker_p {
                 stimeSum += query.snippetcomputationtime;
                 rtimeSum += query.searchtime;
                 
-                if (query.transmitcount> 0){
+                if (query.transmitcount > 0){
                     rcount++;
                 /*  utimeSum1 += query.urlretrievaltime;
-                    stimeSum1 += query.snippetcomputationtime;
-                    rtimeSum1 += query.searchtime; */
+                    stimeSum1 += query.snippetcomputationtime; */
+                    rtimeSum1 += query.searchtime;
                 }                
                 m++;
             }
