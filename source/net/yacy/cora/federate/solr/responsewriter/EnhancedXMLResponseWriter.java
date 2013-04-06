@@ -37,7 +37,6 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.schema.DateField;
 import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
@@ -177,6 +176,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         writer.write(lb);
     }
 
+    @SuppressWarnings("deprecation")
     private static void writeField(final Writer writer, final FieldType type, final String name, final String value) throws IOException {
         String typeName = type.getTypeName();
         if (typeName.equals(SolrType.text_general.printName()) ||
@@ -190,7 +190,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         } else if (typeName.equals(SolrType.num_long.printName())) {
             writeTag(writer, "long", name, value, true);
         } else if (typeName.equals(SolrType.date.printName())) {
-            writeTag(writer, "date", name, DateField.formatExternal(new Date(Long.parseLong(value))), true);
+            writeTag(writer, "date", name, org.apache.solr.schema.DateField.formatExternal(new Date(Long.parseLong(value))), true); // this is declared deprecated in solr 4.2.1 but is still used as done here
         } else if (typeName.equals(SolrType.num_float.printName())) {
             writeTag(writer, "float", name, value, true);
         } else if (typeName.equals(SolrType.num_double.printName())) {

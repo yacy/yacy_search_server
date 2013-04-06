@@ -38,6 +38,7 @@ import java.util.regex.PatternSyntaxException;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
+import org.apache.solr.client.solrj.SolrQuery.SortClause;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.analysis.Classification;
@@ -509,7 +510,8 @@ public final class QueryParams {
             // set ranking
             if (this.ranking.coeff_date == RankingProfile.COEFF_MAX) {
                 // set a most-recent ordering
-                params.setSortField(CollectionSchema.last_modified.getSolrFieldName(), ORDER.desc);
+                params.setSort(new SortClause(CollectionSchema.last_modified.getSolrFieldName(), SolrQuery.ORDER.desc));
+                //params.setSortField(CollectionSchema.last_modified.getSolrFieldName(), ORDER.desc); // deprecated in Solr 4.2
             }
         }
         if (fq.length() > 0) {
