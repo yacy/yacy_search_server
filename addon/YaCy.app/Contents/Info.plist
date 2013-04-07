@@ -72,6 +72,7 @@
 			<string>$JAVAROOT/lib/lucene-analyzers-common-4.2.1.jar</string>
 			<string>$JAVAROOT/lib/lucene-analyzers-phonetic-4.2.1.jar</string>
 			<string>$JAVAROOT/lib/lucene-classification-4.2.1.jar</string>
+			<string>$JAVAROOT/lib/lucene-codecs-4.2.1.jar</string>
 			<string>$JAVAROOT/lib/lucene-core-4.2.1.jar</string>
 			<string>$JAVAROOT/lib/lucene-facet-4.2.1.jar</string>
 			<string>$JAVAROOT/lib/lucene-grouping-4.2.1.jar</string>

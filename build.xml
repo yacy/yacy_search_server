@@ -192,6 +192,7 @@
     	<pathelement location="${lib}/lucene-analyzers-common-4.2.1.jar" />
     	<pathelement location="${lib}/lucene-analyzers-phonetic-4.2.1.jar" />
     	<pathelement location="${lib}/lucene-classification-4.2.1.jar" />
+    	<pathelement location="${lib}/lucene-codecs-4.2.1.jar" />
     	<pathelement location="${lib}/lucene-core-4.2.1.jar" />
     	<pathelement location="${lib}/lucene-facet-4.2.1.jar" />
     	<pathelement location="${lib}/lucene-grouping-4.2.1.jar" />
