@@ -35,6 +35,8 @@ import java.util.List;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
@@ -62,10 +64,13 @@ import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
+import net.yacy.search.query.QueryGoal;
+import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.BlockRank;
+import net.yacy.search.ranking.RankingProfile;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -638,9 +643,36 @@ public class IndexControlRWIs_p {
         final byte[] keyhash,
         final Bitfield filter) {
         
-        String khw = ASCII.String(keyhash);
-        final QueryParams query = new QueryParams(khw, khw, -1, filter, segment, sb.getRanking(), "IndexControlRWIs_p");
-        final SearchEvent theSearch = SearchEventCache.getEvent(query, sb.peers, sb.tables, null, false, sb.loader, Integer.MAX_VALUE, Long.MAX_VALUE, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
+        final HandleSet queryhashes = QueryParams.hashes2Set(ASCII.String(keyhash));        
+        final QueryGoal qg = new QueryGoal(queryhashes, null, queryhashes);
+        final QueryParams query = new QueryParams(
+                qg,
+                new QueryModifier(),
+                Integer.MAX_VALUE,
+                "",
+                ContentDomain.ALL,
+                "", //lang
+                null,
+                CacheStrategy.IFFRESH,
+                1000, 0, //count, offset             
+                ".*", //urlmask
+                null,
+                null,
+                QueryParams.Searchdom.LOCAL,
+                -1,
+                filter,
+                false,
+                null,
+                DigestURI.TLD_any_zone_filter,
+                "", 
+                false,
+                sb.index,
+                sb.getRanking(),
+                "",//userAgent
+                false,
+                false,
+                0.0d, 0.0d, 0.0d);       
+        final SearchEvent theSearch = SearchEventCache.getEvent(query, sb.peers, sb.tables, null, false, sb.loader, Integer.MAX_VALUE, Long.MAX_VALUE, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));       
         if (theSearch.rwiProcess != null && theSearch.rwiProcess.isAlive()) try {theSearch.rwiProcess.join();} catch (InterruptedException e) {}
         if (theSearch.local_rwi_available.get() == 0) {
             prop.put("searchresult", 2);

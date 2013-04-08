@@ -314,18 +314,6 @@ public final class QueryParams {
         return keyhashes;
     }
 
-    public static HandleSet hashes2Handles(final String query) {
-        final HandleSet keyhashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-        if (query != null) {
-            for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
-                keyhashes.put(ASCII.getBytes(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)));
-            } catch (final SpaceExceededException e) {
-                Log.logException(e);
-            }
-        }
-        return keyhashes;
-    }
-
     public static String hashSet2hashString(final HandleSet hashes) {
         final byte[] bb = new byte[hashes.size() * Word.commonHashLength];
         int p = 0;
