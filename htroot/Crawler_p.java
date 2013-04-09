@@ -102,8 +102,10 @@ public class Crawler_p {
             final String queue = post.get("continue", "");
             if ("localcrawler".equals(queue)) {
                 sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                sb.setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused_cause", "");
             } else if ("remotecrawler".equals(queue)) {
                 sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL + "_isPaused_cause", "");
             }
         }
 
@@ -116,7 +118,9 @@ public class Crawler_p {
                 sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "user request in Crawler_p from " + header.refererHost());
             }
         }
-
+        String queuemessage = sb.getConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused_cause", "");
+        prop.putHTML("queuemessage", queuemessage.length() == 0 ? "" : "pause reason: " + queuemessage);
+        
     	if (post != null && post.containsKey("terminate")) try {
             final String handle = post.get("handle", "");
             // termination of a crawl: shift the crawl from active to passive
