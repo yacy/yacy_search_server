@@ -784,34 +784,16 @@ public final class Switchboard extends serverSwitch {
             getConfigInt("minimumLocalDelta", this.crawlQueues.noticeURL.getMinimumLocalDelta()),
             getConfigInt("minimumGlobalDelta", this.crawlQueues.noticeURL.getMinimumGlobalDelta()));
 
-        /*
-         * Creating sync objects and loading status for the crawl jobs
-         * a) local crawl
-         * b) remote triggered crawl
-         * c) global crawl trigger
-         */
-        this.crawlJobsStatus.put(
-            SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL,
-            new Object[] {
-                new Object(),
-                Boolean.valueOf(getConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused", "false"))
-            });
-        this.crawlJobsStatus.put(
-            SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL,
-            new Object[] {
-                new Object(),
-                Boolean.valueOf(getConfig(
-                    SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL + "_isPaused",
-                    "false"))
-            });
-        this.crawlJobsStatus.put(
-            SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER,
-            new Object[] {
-                new Object(),
-                Boolean.valueOf(getConfig(
-                    SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER + "_isPaused",
-                    "false"))
-            });
+        // on startup, resume all crawls
+        setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused", "false");
+        setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused_cause", "");
+        setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL + "_isPaused", "false");
+        setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL + "_isPaused_cause", "");
+        setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER + "_isPaused", "false");
+        setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER + "_isPaused_cause", "");
+        this.crawlJobsStatus.put(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, new Object[] {new Object(), false});
+        this.crawlJobsStatus.put(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, new Object[] {new Object(), false});
+        this.crawlJobsStatus.put(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER, new Object[] {new Object(), false});
 
         // init cookie-Monitor
         this.log.logConfig("Starting Cookie Monitor");
