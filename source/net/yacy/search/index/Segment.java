@@ -545,7 +545,7 @@ public class Segment {
         // ENRICH DOCUMENT WITH RANKING INFORMATION
         if (this.urlCitationIndex != null && this.fulltext.getDefaultConfiguration().contains(CollectionSchema.references_i)) {
             int references = this.urlCitationIndex.count(url.hash());
-            if (references > 0) vector.setField(CollectionSchema.references_i.getSolrFieldName(), references);
+            vector.setField(CollectionSchema.references_i.getSolrFieldName(), references);
         }
         
         // STORE TO SOLR

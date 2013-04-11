@@ -254,14 +254,16 @@ public class HostBrowser {
                         CollectionSchema.inboundlinks_urlstub_txt.getSolrFieldName(),
                         CollectionSchema.outboundlinks_protocol_sxt.getSolrFieldName(),
                         CollectionSchema.outboundlinks_urlstub_txt.getSolrFieldName(),
-                        CollectionSchema.clickdepth_i.getSolrFieldName()
+                        CollectionSchema.clickdepth_i.getSolrFieldName(),
+                        CollectionSchema.references_i.getSolrFieldName()
                         );
                 SolrDocument doc;
                 Set<String> storedDocs = new HashSet<String>();
                 Map<String, FailType> errorDocs = new HashMap<String, FailType>();
                 Set<String> inboundLinks = new HashSet<String>();
                 Map<String, ReversibleScoreMap<String>> outboundHosts = new HashMap<String, ReversibleScoreMap<String>>();
-                RowHandleMap clickdepth = new RowHandleMap(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 1, 100, "clickdepth");
+                RowHandleMap clickdepth = new RowHandleMap(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 2, 100, "clickdepth");
+                RowHandleMap references = new RowHandleMap(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 2, 100, "references");
                 int hostsize = 0;
                 final List<byte[]> deleteIDs = new ArrayList<byte[]>();
                 long timeout = System.currentTimeMillis() + TIMEOUT;
@@ -271,6 +273,8 @@ public class HostBrowser {
                     FailType error = errortype == null ? null : FailType.valueOf(errortype);  
                     Integer cd = (Integer) doc.getFieldValue(CollectionSchema.clickdepth_i.getSolrFieldName());
                     if (cd != null && cd.intValue() >= 0) clickdepth.add(ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())), cd.intValue());
+                    Integer rc = (Integer) doc.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
+                    if (rc != null && rc.intValue() >= 0) references.add(ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())), rc.intValue());
                     if (u.startsWith(path)) {
                         if (delete) {
                             deleteIDs.add(ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())));
@@ -407,7 +411,8 @@ public class HostBrowser {
                             prop.put("files_list_" + c + "_type_stored", type == StoreType.INDEX ? 1 : error ? 3 : loading ? 2 : 0 /*linked*/);
                             if (type == StoreType.INDEX) {
                                 long cd = clickdepth.get(uri.hash());
-                                prop.put("files_list_" + c + "_type_stored_comment", cd >= 0 ? "clickdepth = " + cd : "");
+                                long rc = references.get(uri.hash());
+                                prop.put("files_list_" + c + "_type_stored_comment", (rc >= 0 ? rc + " references" : "") + (rc >= 0 && cd >= 0 ? ", " : "") + (cd >= 0 ? "clickdepth " + cd : ""));
                             }
                             prop.put("files_list_" + c + "_type_stored_load", loadRight ? 1 : 0);
                             if (error) {

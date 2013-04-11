@@ -354,7 +354,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 clickdepth = 999; 
                 processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
             }
-            add(doc, CollectionSchema.clickdepth_i, clickdepth);
+            CollectionSchema.clickdepth_i.add(doc, clickdepth); // no lazy value checking to get a '0' into the index
         }
         
         if (allAttr || contains(CollectionSchema.ip_s)) {
