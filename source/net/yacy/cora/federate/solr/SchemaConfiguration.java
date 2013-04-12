@@ -31,9 +31,17 @@ import org.apache.log4j.Logger;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.Configuration;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.index.RowHandleSet;
+import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.search.index.Segment;
+import net.yacy.search.schema.CollectionSchema;
 
 public class SchemaConfiguration extends Configuration implements Serializable {
 
@@ -85,13 +93,50 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         return false;
     }
 
-    public boolean postprocessing_references(Segment segment, SolrDocument doc, SolrInputDocument sid, DigestURI url, SchemaDeclaration referencesfield) {
-        if (!this.contains(referencesfield)) return false;
-        Integer oldreferences = (Integer) doc.getFieldValue(referencesfield.getSolrFieldName());
-        int references = segment.urlCitation().count(url.hash());
-        if (references > 0 && (oldreferences == null || oldreferences.intValue() != references)) {
-            sid.setField(referencesfield.getSolrFieldName(), references);
-            return true;
+    public boolean postprocessing_references(Segment segment, SolrDocument doc, SolrInputDocument sid, DigestURI url) {
+        if (!(this.contains(CollectionSchema.references_i) || this.contains(CollectionSchema.references_internal_i) ||
+              this.contains(CollectionSchema.references_external_i) || this.contains(CollectionSchema.references_exthosts_i))) return false;
+        Integer all_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
+        Integer internal_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_internal_i.getSolrFieldName());
+        Integer external_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_external_i.getSolrFieldName());
+        Integer exthosts_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_exthosts_i.getSolrFieldName());
+        ReferenceContainer<CitationReference> references;
+        try {
+            int all = 0, internal = 0, external = 0;
+            references = segment.urlCitation().get(url.hash(), null);
+            if (references == null) return false; // no references at all
+            //int references = segment.urlCitation().count(url.hash());
+            byte[] uh0 = url.hash();
+            Iterator<CitationReference> ri = references.entries();
+            HandleSet exthosts = new RowHandleSet(6, Base64Order.enhancedCoder, 0);
+            while (ri.hasNext()) {
+                CitationReference ref = ri.next();
+                byte[] hh = ref.hosthash();
+                exthosts.put(hh);
+                all++;
+                if (ByteBuffer.equals(hh, 0, uh0, 6, 6)) internal++; else external++;
+            }
+            
+            boolean change = false;
+            if (all_old == null || all_old.intValue() != all) {
+                sid.setField(CollectionSchema.references_i.getSolrFieldName(), all);
+                change = true;
+            }
+            if (internal_old == null || internal_old.intValue() != internal) {
+                sid.setField(CollectionSchema.references_internal_i.getSolrFieldName(), internal);
+                change = true;
+            }
+            if (external_old == null || external_old.intValue() != external) {
+                sid.setField(CollectionSchema.references_external_i.getSolrFieldName(), external);
+                change = true;
+            }
+            if (exthosts_old == null || exthosts_old.intValue() != exthosts.size()) {
+                sid.setField(CollectionSchema.references_exthosts_i.getSolrFieldName(), exthosts.size());
+                change = true;
+            }
+            return change;
+        } catch (IOException e) {
+        } catch (SpaceExceededException e) {
         }
         return false;
     }

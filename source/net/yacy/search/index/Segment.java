@@ -543,10 +543,7 @@ public class Segment {
         }
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
-        if (this.urlCitationIndex != null && this.fulltext.getDefaultConfiguration().contains(CollectionSchema.references_i)) {
-            int references = this.urlCitationIndex.count(url.hash());
-            vector.setField(CollectionSchema.references_i.getSolrFieldName(), references);
-        }
+        this.fulltext.getDefaultConfiguration().postprocessing_references(this, null, vector, url);
         
         // STORE TO SOLR
         String error = null;

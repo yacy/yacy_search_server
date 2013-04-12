@@ -796,7 +796,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         }
                         
                         // refresh the link count; it's 'cheap' to do this here
-                        if (postprocessing_references(segment, doc, sid, url, CollectionSchema.references_i)) proccount_referencechange++;
+                        if (postprocessing_references(segment, doc, sid, url)) proccount_referencechange++;
                         
                         // all processing steps checked, remove the processing tag
                         sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());

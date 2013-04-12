@@ -63,8 +63,17 @@ httpstatus_i
 ## redirect url if the error code is 299 < httpstatus_i < 310
 #httpstatus_redirect_s
 
-## number of unique http references; used for ranking
+## number of unique http references, should be equal to references_internal_i + references_external_i
 references_i
+
+## number of unique http references from same host as referenced url
+references_internal_i
+
+## number of unique http references from external hosts
+references_external_i
+
+## number of external hosts which provide http references
+references_exthosts_i
 
 ## depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url
 clickdepth_i

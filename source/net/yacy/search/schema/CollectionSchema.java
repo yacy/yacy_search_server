@@ -49,7 +49,10 @@ public enum CollectionSchema implements SchemaDeclaration {
     failtype_s(SolrType.string, true, true, false, false, false, "fail type if a page was not loaded. This field is either empty, 'excl' or 'fail'"),
     httpstatus_i(SolrType.num_integer, true, true, false, false, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
     httpstatus_redirect_s(SolrType.num_integer, true, true, false, false, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
-    references_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references; used for ranking"),
+    references_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references, should be equal to references_internal_i + references_external_i"),
+    references_internal_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references from same host as referenced url"),
+    references_external_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references from external hosts"),
+    references_exthosts_i(SolrType.num_integer, true, true, false, false, false, "number of external hosts which provide http references"),
     clickdepth_i(SolrType.num_integer, true, true, false, false, false, "depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url"),
     process_sxt(SolrType.string, true, true, true, false, false, "needed (post-)processing steps on this metadata set"),
     

@@ -96,6 +96,13 @@ public class CitationReference implements Reference, Serializable {
     public byte[] urlhash() {
         return this.entry.getColBytes(col_urlhash, true);
     }
+    
+    public byte[] hosthash() {
+        byte[] uh = this.entry.getColBytes(col_urlhash, true);
+        byte[] hh = new byte[6];
+        System.arraycopy(uh, 6, hh, 0, 6);
+        return hh;
+    }
 
     public int virtualAge() {
         return (int) this.entry.getColLong(col_lastModified);  // this is the time in MicoDateDays format
