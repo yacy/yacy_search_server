@@ -28,6 +28,7 @@ import java.util.Map;
 import javax.servlet.ServletException;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SolrServlet;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
@@ -160,7 +161,17 @@ public class select {
         if (!post.containsKey(CommonParams.START)) post.put(CommonParams.START, post.remove("startRecord", 0)); // sru patch
         if (!post.containsKey(CommonParams.ROWS)) post.put(CommonParams.ROWS, post.remove("maximumRecords", 10)); // sru patch
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 10000 : 100));
-
+        
+        // set default ranking if this is not given in the request
+        if (!post.containsKey("sort")) {
+            if (!post.containsKey("defType")) post.put("defType", "edismax");        
+            Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(0);
+            String bq = ranking.getBoostQuery();
+            String bf = ranking.getBoostFunction();
+            if (!post.containsKey("bq") && bq.length() > 0) post.put("bq", bq); // a boost query that moves double content to the back
+            if (!(post.containsKey("bf") || post.containsKey("boost")) && bf.length() > 0) post.put(ranking.getMethod() == Ranking.BoostFunctionMode.add ? "bf" : "boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
+        }
+        
         // get a response writer for the result
         String wt = post.get(CommonParams.WT, "xml"); // maybe use /solr/select?q=*:*&start=0&rows=10&wt=exml
         QueryResponseWriter responseWriter = RESPONSE_WRITER.get(wt);

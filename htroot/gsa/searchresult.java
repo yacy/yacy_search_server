@@ -23,7 +23,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.Ranking;
@@ -116,11 +115,24 @@ public class searchresult {
         post.put(CommonParams.ROWS, post.remove("num"));
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 5000 : 100));
         
-        Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(0);
-        String bq = ranking.getBoostQuery();
-        String bf = ranking.getBoostFunction();
-        if (bq.length() > 0) post.put("bq", bq); // a boost query that moves double content to the back
-        if (bf.length() > 0) post.put(ranking.getMethod() == Ranking.BoostFunctionMode.add ? "bf" : "boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
+        // set ranking
+        if (post.containsKey("sort")) {
+            // if a gsa-style sort attribute is given, use this to set the solr sort attribute
+            GSAResponseWriter.Sort sort = new GSAResponseWriter.Sort(post.get(CommonParams.SORT, ""));
+            String sorts = sort.toSolr();
+            if (sorts == null) {
+                post.remove(CommonParams.SORT);
+            } else {
+                post.put(CommonParams.SORT, sorts);
+            }
+        } else {
+            // if no such sort attribute is given, use the ranking as configured for YaCy
+            Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(0);
+            String bq = ranking.getBoostQuery();
+            String bf = ranking.getBoostFunction();
+            if (bq.length() > 0) post.put("bq", bq); // a boost query that moves double content to the back
+            if (bf.length() > 0) post.put(ranking.getMethod() == Ranking.BoostFunctionMode.add ? "bf" : "boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
+        }
         post.put(CommonParams.FL,
                 CollectionSchema.content_type.getSolrFieldName() + ',' +
                 CollectionSchema.id.getSolrFieldName() + ',' +
@@ -137,16 +149,10 @@ public class searchresult {
         post.put("hl.simple.pre", "<b>");
         post.put("hl.simple.post", "</b>");
         post.put("hl.fragsize", Integer.toString(SearchEvent.SNIPPET_MAX_LENGTH));
-        GSAResponseWriter.Sort sort = new GSAResponseWriter.Sort(post.get(CommonParams.SORT, ""));
-        String sorts = sort.toSolr();
-        if (sorts == null) {
-            post.remove(CommonParams.SORT);
-        } else {
-            post.put(CommonParams.SORT, sorts);
-        }
+        
         String[] site = post.remove("site"); // example: col1|col2
-        String[] access = post.remove("access");
-        String[] entqr = post.remove("entqr");
+        //String[] access = post.remove("access");
+        //String[] entqr = post.remove("entqr");
 
         // add sites operator
         if (site != null && site[0].length() > 0) {
@@ -184,6 +190,7 @@ public class searchresult {
         }
 
         // set some context for the writer
+        /*
         Map<Object,Object> context = req.getContext();
         context.put("ip", header.get("CLIENTIP", ""));
         context.put("client", "vsm_frontent");
@@ -191,7 +198,8 @@ public class searchresult {
         context.put("site", site == null ? "" : site);
         context.put("access", access == null ? "p" : access[0]);
         context.put("entqr", entqr == null ? "3" : entqr[0]);
-
+        */
+        
         // write the result directly to the output stream
         Writer ow = new FastWriter(new OutputStreamWriter(out, UTF8.charset));
         try {

@@ -771,7 +771,7 @@ public final class SearchEvent {
         // apply all constraints
         try {
             pollloop: for (URIMetadataNode iEntry: nodeList) {
-                
+
                 if ( !this.query.urlMask_isCatchall ) {
                     // check url mask
                     if (!iEntry.matches(this.query.urlMask)) {
@@ -1104,7 +1104,7 @@ public final class SearchEvent {
         Element<URIMetadataNode> localEntryElement = this.nodeStack.sizeQueue() > 0 ? this.nodeStack.poll() : null;
         URIMetadataNode node = localEntryElement == null ? null : localEntryElement.getElement();
         if (node != null) {
-            String solrsnippet = this.snippets.remove(ASCII.String(node.hash())); // we ca remove this because it's used only once
+            String solrsnippet = this.snippets.remove(ASCII.String(node.hash())); // we can remove this because it's used only once
             if (solrsnippet != null && solrsnippet.length() > 0) {
                 final TextSnippet snippet = new TextSnippet(node.hash(), solrsnippet, true, ResultClass.SOURCE_CACHE, "");
                 ResultEntry re = new ResultEntry(node, this.query.getSegment(), this.peers, snippet, null, 0);
