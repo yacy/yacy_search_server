@@ -79,7 +79,9 @@ public class yacysearchtrailer {
             while (i < 10 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = theSearch.namespaceNavigator.get(name);
-                if (count == 0) break;
+                if (count == 0) {
+                    break;
+                }
                 nav = "inurl%3A" + name;
                 queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
                 p = queryStringForUrl.indexOf(nav);
@@ -104,7 +106,10 @@ public class yacysearchtrailer {
             prop.put("nav-namespace_activate", on(pos, neg, MAXLIMIT_NAV_LOW) ? 1 : 0);
             i--;
             prop.put("nav-namespace_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0) prop.put("nav-namespace", 0); // this navigation is not useful
+            if (pos == 1 && neg == 0)
+             {
+                prop.put("nav-namespace", 0); // this navigation is not useful
+            }
         }
 
         // host navigators
@@ -119,7 +124,9 @@ public class yacysearchtrailer {
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = hostNavigator.get(name);
-                if (count == 0) break;
+                if (count == 0) {
+                    break;
+                }
                 nav = "site%3A" + name;
                 queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
                 p = queryStringForUrl.indexOf(nav);
@@ -144,7 +151,10 @@ public class yacysearchtrailer {
             prop.put("nav-domains_activate", on(pos, neg, MAXLIMIT_NAV_HIGH) ? 1 : 0);
             i--;
             prop.put("nav-domains_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0) prop.put("nav-domains", 0); // this navigation is not useful
+            if (pos == 1 && neg == 0)
+             {
+                prop.put("nav-domains", 0); // this navigation is not useful
+            }
         }
 
         // author navigators
@@ -158,7 +168,9 @@ public class yacysearchtrailer {
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.authorNavigator.get(name);
-                if (count == 0) break;
+                if (count == 0) {
+                    break;
+                }
                 nav = (name.indexOf(' ', 0) < 0) ? "author%3A" + name : "author%3A%28" + name.replace(" ", "+") + "%29";
                 queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
                 p = queryStringForUrl.indexOf(nav);
@@ -183,7 +195,10 @@ public class yacysearchtrailer {
             prop.put("nav-authors_activate", neg > 0 ? 1 : 0); // by default off
             i--;
             prop.put("nav-authors_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0) prop.put("nav-authors", 0); // this navigation is not useful
+            if (pos == 1 && neg == 0)
+             {
+                prop.put("nav-authors", 0); // this navigation is not useful
+            }
         }
 
         // topics navigator
@@ -198,9 +213,13 @@ public class yacysearchtrailer {
             while (i < MAX_TOPWORDS && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = topicNavigator.get(name);
-                if (count == 0) break;
+                if (count == 0) {
+                    break;
+                }
                 queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
-                if (queryStringForUrl == null) break;
+                if (queryStringForUrl == null) {
+                    break;
+                }
                 if (name != null) {
                     prop.put("nav-topics_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-topics_element_" + i + "_modifier", name);
@@ -228,7 +247,9 @@ public class yacysearchtrailer {
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.protocolNavigator.get(name);
-                if (count == 0) break;
+                if (count == 0) {
+                    break;
+                }
                 visible = visible || "ftp,smb".indexOf(name) >= 0;
                 nav = "%2F" + name;
                 queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
@@ -254,7 +275,10 @@ public class yacysearchtrailer {
             prop.put("nav-protocols_activate", neg > 0 || visible ? 1 : 0); // by default off
             i--;
             prop.put("nav-protocols_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0) prop.put("nav-protocols", 0); // this navigation is not useful
+            if (pos == 1 && neg == 0)
+             {
+                prop.put("nav-protocols", 0); // this navigation is not useful
+            }
         }
 
         // filetype navigators
@@ -269,7 +293,9 @@ public class yacysearchtrailer {
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.filetypeNavigator.get(name);
-                if (count == 0) break;
+                if (count == 0) {
+                    break;
+                }
                 visible = visible || Classification.isMediaExtension(name) || "pdf,doc,docx".indexOf(name) >= 0;
                 nav = "filetype%3A" + name;
                 queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
@@ -295,7 +321,10 @@ public class yacysearchtrailer {
             prop.put("nav-filetypes_activate", neg > 0 || visible ? 1 : 0); // by default off
             i--;
             prop.put("nav-filetypes_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0) prop.put("nav-filetypes", 0); // this navigation is not useful
+            if (pos == 1 && neg == 0)
+             {
+                prop.put("nav-filetypes", 0); // this navigation is not useful
+            }
         }
 
         // vocabulary navigators
@@ -314,7 +343,9 @@ public class yacysearchtrailer {
                 while (i < 20 && navigatorIterator.hasNext()) {
                     name = navigatorIterator.next();
                     count = ve.getValue().get(name);
-                    if (count == 0) break;
+                    if (count == 0) {
+                        break;
+                    }
                     nav = "%2Fvocabulary%2F" + navname + "%2F" + MultiProtocolURI.escape(Tagging.encodePrintname(name)).toString();
                     queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
                     p = queryStringForUrl.indexOf(nav);
@@ -360,16 +391,17 @@ public class yacysearchtrailer {
             prop.put("cat-location", 0);
         } else {
             prop.put("cat-location", 1);
-            String uriginalQuery = theSearch.query.getQueryGoal().getOriginalQueryString(true);
-            prop.put(fileType, "cat-location_query", uriginalQuery);
-            prop.put(fileType, "cat-location_queryenc", uriginalQuery.replace(' ', '+'));
+            final String query = theSearch.query.getQueryGoal().getOriginalQueryString(false);
+            prop.put(fileType, "cat-location_query", query);
+            final String queryenc = theSearch.query.getQueryGoal().getOriginalQueryString(true).replace(' ', '+');
+            prop.put(fileType, "cat-location_queryenc", queryenc);
         }
         prop.put("num-results_totalcount", theSearch.getResultCount());
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theSearch.query.id(true), SearchEventType.FINALIZATION, "bottomline", 0, 0), false);
         return prop;
     }
 
-    private final static boolean on(int pos, int neg, int maxlimit) {
+    private static final boolean on(final int pos, final int neg, final int maxlimit) {
         return neg > 0 || (pos > 1 && pos <= maxlimit);
     }
 
