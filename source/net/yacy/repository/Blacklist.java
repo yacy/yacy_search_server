@@ -31,7 +31,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -57,15 +56,15 @@ import net.yacy.search.Switchboard;
 public class Blacklist {
 
     public enum BlacklistType {
-    	DHT, CRAWLER, PROXY, SEARCH, SURFTIPS, NEWS;
+        DHT, CRAWLER, PROXY, SEARCH, SURFTIPS, NEWS;
 
-    	@Override
-    	public final String toString () {
-    		return super.toString().toLowerCase();
-    	}
+        @Override
+        public final String toString () {
+            return super.toString().toLowerCase();
+        }
     }
 
-    public final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
+    public static final String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
 
     public static enum BlacklistError {
 
@@ -94,31 +93,29 @@ public class Blacklist {
 
     private File blacklistRootPath = null;
     private final ConcurrentMap<BlacklistType, HandleSet> cachedUrlHashs;
-    private final ConcurrentMap<BlacklistType, Map<String, List<Pattern>>> hostpaths_matchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
-    private final ConcurrentMap<BlacklistType, Map<String, List<Pattern>>> hostpaths_notmatchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
+    private final ConcurrentMap<BlacklistType, Map<String, Set<Pattern>>> hostpaths_matchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
+    private final ConcurrentMap<BlacklistType, Map<String, Set<Pattern>>> hostpaths_notmatchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
 
     public Blacklist(final File rootPath) {
 
         setRootPath(rootPath);
 
         // prepare the data structure
-        this.hostpaths_matchable = new ConcurrentHashMap<BlacklistType, Map<String, List<Pattern>>>();
-        this.hostpaths_notmatchable = new ConcurrentHashMap<BlacklistType, Map<String, List<Pattern>>>();
+        this.hostpaths_matchable = new ConcurrentHashMap<BlacklistType, Map<String, Set<Pattern>>>();
+        this.hostpaths_notmatchable = new ConcurrentHashMap<BlacklistType, Map<String, Set<Pattern>>>();
         this.cachedUrlHashs = new ConcurrentHashMap<BlacklistType, HandleSet>();
 
         for (final BlacklistType blacklistType : BlacklistType.values()) {
-            this.hostpaths_matchable.put(blacklistType, new ConcurrentHashMap<String, List<Pattern>>());
-            this.hostpaths_notmatchable.put(blacklistType, new ConcurrentHashMap<String, List<Pattern>>());
+            this.hostpaths_matchable.put(blacklistType, new ConcurrentHashMap<String, Set<Pattern>>());
+            this.hostpaths_notmatchable.put(blacklistType, new ConcurrentHashMap<String, Set<Pattern>>());
             loadDHTCache(blacklistType);
         }
     }
 
     /**
      * Close (shutdown) this "sub-system", add more here for shutdown.
-     *
-     * @return void
      */
-    public synchronized void close() {
+    public final synchronized void close() {
         Log.logFine("Blacklist", "Shutting down blacklists ...");
 
         // Save cache
@@ -143,19 +140,19 @@ public class Blacklist {
         this.blacklistRootPath = rootPath;
     }
 
-    protected Map<String, List<Pattern>> getBlacklistMap(final BlacklistType blacklistType, final boolean matchable) {
+    protected final Map<String, Set<Pattern>> getBlacklistMap(final BlacklistType blacklistType, final boolean matchable) {
         return (matchable) ? this.hostpaths_matchable.get(blacklistType) : this.hostpaths_notmatchable.get(blacklistType);
     }
 
-    protected HandleSet getCacheUrlHashsSet(final BlacklistType blacklistType) {
+    protected final HandleSet getCacheUrlHashsSet(final BlacklistType blacklistType) {
         return this.cachedUrlHashs.get(blacklistType);
     }
 
-    public void clear() {
-        for (final Map<String, List<Pattern>> entry : this.hostpaths_matchable.values()) {
+    public final void clear() {
+        for (final Map<String, Set<Pattern>> entry : this.hostpaths_matchable.values()) {
             entry.clear();
         }
-        for (final Map<String, List<Pattern>> entry : this.hostpaths_notmatchable.values()) {
+        for (final Map<String, Set<Pattern>> entry : this.hostpaths_notmatchable.values()) {
             entry.clear();
         }
         for (final HandleSet entry : this.cachedUrlHashs.values()) {
@@ -163,22 +160,22 @@ public class Blacklist {
         }
     }
 
-    public int size() {
+    public final int size() {
         int size = 0;
         for (final BlacklistType entry : this.hostpaths_matchable.keySet()) {
-            for (final List<Pattern> ientry : this.hostpaths_matchable.get(entry).values()) {
+            for (final Set<Pattern> ientry : this.hostpaths_matchable.get(entry).values()) {
                 size += ientry.size();
             }
         }
         for (final BlacklistType entry : this.hostpaths_notmatchable.keySet()) {
-            for (final List<Pattern> ientry : this.hostpaths_notmatchable.get(entry).values()) {
+            for (final Set<Pattern> ientry : this.hostpaths_notmatchable.get(entry).values()) {
                 size += ientry.size();
             }
         }
         return size;
     }
 
-    public void loadList(final BlacklistFile[] blFiles, final String sep) {
+    public final void loadList(final BlacklistFile[] blFiles, final String sep) {
         for (final BlacklistFile blf : blFiles) {
             loadList(blf.getType(), blf.getFileName(), sep);
         }
@@ -186,18 +183,18 @@ public class Blacklist {
 
     /**
      * create a blacklist from file, entries separated by 'sep'
-     * duplicit entries are removed
+     * duplicate entries are removed
      * @param blFile
      * @param sep
      */
     private void loadList(final BlacklistFile blFile, final String sep) {
-        final Map<String, List<Pattern>> blacklistMapMatch = getBlacklistMap(blFile.getType(), true);
-        final Map<String, List<Pattern>> blacklistMapNotMatch = getBlacklistMap(blFile.getType(), false);
+        final Map<String, Set<Pattern>> blacklistMapMatch = getBlacklistMap(blFile.getType(), true);
+        final Map<String, Set<Pattern>> blacklistMapNotMatch = getBlacklistMap(blFile.getType(), false);
         Set<Map.Entry<String, List<String>>> loadedBlacklist;
         Map.Entry<String, List<String>> loadedEntry;
-        List<Pattern> paths;
+        Set<Pattern> paths;
         List<String> loadedPaths;
-        List<Pattern> loadedPathsPattern;
+        Set<Pattern> loadedPathsPattern;
 
         final Set<String> fileNames = blFile.getFileNamesUnified();
         for (final String fileName : fileNames) {
@@ -212,13 +209,13 @@ public class Blacklist {
             for (final Iterator<Map.Entry<String, List<String>>> mi = loadedBlacklist.iterator(); mi.hasNext();) {
                 loadedEntry = mi.next();
                 loadedPaths = loadedEntry.getValue();
-                loadedPathsPattern = new ArrayList<Pattern>();
+                loadedPathsPattern = new HashSet<Pattern>();
                 for (String a: loadedPaths) {
                     if (a.equals("*")) {
                         loadedPathsPattern.add(Pattern.compile("(?i).*"));
                         continue;
                     }
-                    if (a.indexOf("?*",0) > 0) {
+                    if (a.indexOf("?*", 0) > 0) {
                         // prevent "Dangling meta character '*'" exception
                         Log.logWarning("Blacklist", "ignored blacklist path to prevent 'Dangling meta character' exception: " + a);
                         continue;
@@ -236,28 +233,27 @@ public class Blacklist {
                         blacklistMapNotMatch.put(loadedEntry.getKey(), loadedPathsPattern);
                     }
                 } else {
-                    // check for duplicates? (refactor List -> Set)
                     paths.addAll(new HashSet<Pattern>(loadedPathsPattern));
                 }
             }
         }
     }
 
-    public void loadList(final BlacklistType blacklistType, final String fileNames, final String sep) {
+    public final void loadList(final BlacklistType blacklistType, final String fileNames, final String sep) {
         // method for not breaking older plasmaURLPattern interface
         final BlacklistFile blFile = new BlacklistFile(fileNames, blacklistType);
         loadList(blFile, sep);
     }
 
-    public void removeAll(final BlacklistType blacklistType, final String host) {
+    public final void removeAll(final BlacklistType blacklistType, final String host) {
         getBlacklistMap(blacklistType, true).remove(host);
         getBlacklistMap(blacklistType, false).remove(host);
     }
 
-    public void remove(final BlacklistType blacklistType, final String host, final String path) {
+    public final void remove(final BlacklistType blacklistType, final String host, final String path) {
 
-        final Map<String, List<Pattern>> blacklistMap = getBlacklistMap(blacklistType, true);
-        List<Pattern> hostList = blacklistMap.get(host);
+        final Map<String, Set<Pattern>> blacklistMap = getBlacklistMap(blacklistType, true);
+        Set<Pattern> hostList = blacklistMap.get(host);
         if (hostList != null) {
             hostList.remove(path);
             if (hostList.isEmpty()) {
@@ -265,7 +261,7 @@ public class Blacklist {
             }
         }
 
-        final Map<String, List<Pattern>> blacklistMapNotMatch = getBlacklistMap(blacklistType, false);
+        final Map<String, Set<Pattern>> blacklistMapNotMatch = getBlacklistMap(blacklistType, false);
         hostList = blacklistMapNotMatch.get(host);
         if (hostList != null) {
             hostList.remove(path);
@@ -275,7 +271,7 @@ public class Blacklist {
         }
     }
 
-    public void add(final BlacklistType blacklistType, final String host, final String path) {
+    public final void add(final BlacklistType blacklistType, final String host, final String path) {
         if (host == null) {
             throw new IllegalArgumentException("host may not be null");
         }
@@ -284,21 +280,23 @@ public class Blacklist {
         }
 
         String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
-        final Map<String, List<Pattern>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
+        final Map<String, Set<Pattern>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
 
         // avoid PatternSyntaxException e
         final String h = ((!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
-        if (!p.isEmpty() && p.charAt(0) == '*') p = "." + p;
-        
-        List<Pattern> hostList;
+        if (!p.isEmpty() && p.charAt(0) == '*') {
+            p = "." + p;
+        }
+
+        Set<Pattern> hostList;
         if (!(blacklistMap.containsKey(h) && ((hostList = blacklistMap.get(h)) != null))) {
-            blacklistMap.put(h, (hostList = new ArrayList<Pattern>()));
+            blacklistMap.put(h, (hostList = new HashSet<Pattern>()));
         }
 
         hostList.add(Pattern.compile("(?i)" + p)); // add case insesitive regex
     }
 
-    public int blacklistCacheSize() {
+    public final int blacklistCacheSize() {
         int size = 0;
         final Iterator<BlacklistType> iter = this.cachedUrlHashs.keySet().iterator();
         while (iter.hasNext()) {
@@ -307,28 +305,28 @@ public class Blacklist {
         return size;
     }
 
-    public void clearblacklistCache() {
+    public final void clearblacklistCache() {
         final Iterator<BlacklistType> iter = this.cachedUrlHashs.keySet().iterator();
         while (iter.hasNext()) {
             this.cachedUrlHashs.get(iter.next()).clear();
         }
     }
 
-    public boolean hashInBlacklistedCache(final BlacklistType blacklistType, final byte[] urlHash) {
+    public final boolean hashInBlacklistedCache(final BlacklistType blacklistType, final byte[] urlHash) {
         HandleSet s = getCacheUrlHashsSet(blacklistType);
         return s != null && s.has(urlHash);
     }
 
-    public boolean contains(final BlacklistType blacklistType, final String host, final String path) {
+    public final boolean contains(final BlacklistType blacklistType, final String host, final String path) {
         boolean ret = false;
 
         if (blacklistType != null && host != null && path != null) {
-            final Map<String, List<Pattern>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
+            final Map<String, Set<Pattern>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
 
             // avoid PatternSyntaxException e
             final String h = ((!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
 
-            final List<Pattern> hostList = blacklistMap.get(h);
+            final Set<Pattern> hostList = blacklistMap.get(h);
             if (hostList != null) {
                 ret = hostList.contains(path);
             }
@@ -336,20 +334,20 @@ public class Blacklist {
         return ret;
     }
 
-    public boolean isListed(final BlacklistType blacklistType, final URIMetadataNode entry) {
+    public final boolean isListed(final BlacklistType blacklistType, final URIMetadataNode entry) {
         return isListed(blacklistType, entry.url());
     }
-    public boolean isListed(final BlacklistType blacklistType, final URIMetadataRow entry) {
+    public final boolean isListed(final BlacklistType blacklistType, final URIMetadataRow entry) {
         return isListed(blacklistType, entry.url());
     }
 
     /**
-     * Checks whether the given entry is listed in given blacklist type
+     * Checks whether the given entry is listed in given blacklist type.
      * @param blacklistType The used blacklist
-     * @param entry Entry to be checked
+     * @param url Entry to be checked
      * @return  Whether the given entry is blacklisted
      */
-    public boolean isListed(final BlacklistType blacklistType, final DigestURI url) {
+    public final boolean isListed(final BlacklistType blacklistType, final DigestURI url) {
         if (url == null) {
             throw new IllegalArgumentException("url may not be null");
         }
@@ -359,15 +357,15 @@ public class Blacklist {
         }
         HandleSet urlHashCache = getCacheUrlHashsSet(blacklistType);
         if (urlHashCache == null) {
-           urlHashCache = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
-           if (isListed(blacklistType, url.getHost().toLowerCase(), url.getFile())) {
-               try {
-                   urlHashCache.put(url.hash());
-               } catch (final SpaceExceededException e) {
-                   Log.logException(e);
-               }
-               this.cachedUrlHashs.put(blacklistType, urlHashCache);
-           }
+            urlHashCache = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            if (isListed(blacklistType, url.getHost().toLowerCase(), url.getFile())) {
+                try {
+                    urlHashCache.put(url.hash());
+                } catch (final SpaceExceededException e) {
+                    Log.logException(e);
+                }
+                this.cachedUrlHashs.put(blacklistType, urlHashCache);
+            }
         }
         if (!urlHashCache.has(url.hash())) {
             final boolean temp = isListed(blacklistType, url.getHost().toLowerCase(), url.getFile());
@@ -383,9 +381,9 @@ public class Blacklist {
         return true;
     }
 
-    private final static Pattern m1 = Pattern.compile("^[a-z0-9.-]*$");       // simple Domain (yacy.net or www.yacy.net)
-    private final static Pattern m2 = Pattern.compile("^\\*\\.[a-z0-9-.]*$"); // start with *. (not .* and * must follow a dot)
-    private final static Pattern m3 = Pattern.compile("^[a-z0-9-.]*\\.\\*$"); // ends with .* (not *. and before * must be a dot)
+    private static final Pattern m1 = Pattern.compile("^[a-z0-9.-]*$");       // simple Domain (yacy.net or www.yacy.net)
+    private static final Pattern m2 = Pattern.compile("^\\*\\.[a-z0-9-.]*$"); // start with *. (not .* and * must follow a dot)
+    private static final Pattern m3 = Pattern.compile("^[a-z0-9-.]*\\.\\*$"); // ends with .* (not *. and before * must be a dot)
     public static boolean isMatchable(final String host) {
         return (m1.matcher(host).matches() || m2.matcher(host).matches() || m3.matcher(host).matches());
     }
@@ -394,7 +392,7 @@ public class Blacklist {
         return "Default YaCy Blacklist Engine";
     }
 
-    public boolean isListed(final BlacklistType blacklistType, final String hostlow, final String path) {
+    public final boolean isListed(final BlacklistType blacklistType, final String hostlow, final String path) {
         if (hostlow == null) {
             throw new IllegalArgumentException("hostlow may not be null");
         }
@@ -403,18 +401,19 @@ public class Blacklist {
         }
 
         // getting the proper blacklist
-        final Map<String, List<Pattern>> blacklistMapMatched = getBlacklistMap(blacklistType, true);
+        final Map<String, Set<Pattern>> blacklistMapMatched = getBlacklistMap(blacklistType, true);
 
         final String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
 
-        List<Pattern> app;
+        Pattern[] app;
         boolean matched = false;
         Pattern pp; // path-pattern
 
         // try to match complete domain
-        if (!matched && (app = blacklistMapMatched.get(hostlow)) != null) {
-            for (int i = app.size() - 1; !matched && i > -1; i--) {
-                pp = app.get(i);
+        if (!matched && blacklistMapMatched.get(hostlow) != null) {
+            app = blacklistMapMatched.get(hostlow).toArray(new Pattern[0]);
+            for (int i = app.length - 1; !matched && i > -1; i--) {
+                pp = app[i];
                 matched |= pp.matcher(p).matches();
             }
         }
@@ -422,47 +421,51 @@ public class Blacklist {
         // [TL] While "." are found within the string
         int index = 0;
         while (!matched && (index = hostlow.indexOf('.', index + 1)) != -1) {
-            if ((app = blacklistMapMatched.get(hostlow.substring(0, index + 1) + "*")) != null) {
-                for (int i = app.size() - 1; !matched && i > -1; i--) {
-                    pp = app.get(i);
+            if (blacklistMapMatched.get(hostlow.substring(0, index + 1) + "*") != null) {
+                app = blacklistMapMatched.get(hostlow.substring(0, index + 1) + "*").toArray(new Pattern[0]);
+                for (int i = app.length - 1; !matched && i > -1; i--) {
+                    pp = app[i];
                     matched |= pp.matcher(p).matches();
                 }
             }
-            if ((app = blacklistMapMatched.get(hostlow.substring(0, index))) != null) {
-                for (int i = app.size() - 1; !matched && i > -1; i--) {
-                    pp = app.get(i);
+            if (blacklistMapMatched.get(hostlow.substring(0, index)) != null) {
+                app = blacklistMapMatched.get(hostlow.substring(0, index)).toArray(new Pattern[0]);
+                for (int i = app.length - 1; !matched && i > -1; i--) {
+                    pp = app[i];
                     matched |= pp.matcher(p).matches();
                 }
             }
         }
         index = hostlow.length();
         while (!matched && (index = hostlow.lastIndexOf('.', index - 1)) != -1) {
-            if ((app = blacklistMapMatched.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
-                for (int i = app.size() - 1; !matched && i > -1; i--) {
-                    pp = app.get(i);
+            if (blacklistMapMatched.get("*" + hostlow.substring(index, hostlow.length())) != null) {
+                app = blacklistMapMatched.get("*" + hostlow.substring(index, hostlow.length())).toArray(new Pattern[0]);
+                for (int i = app.length - 1; !matched && i > -1; i--) {
+                    pp = app[i];
                     matched |= pp.matcher(p).matches();
                 }
             }
-            if ((app = blacklistMapMatched.get(hostlow.substring(index + 1, hostlow.length()))) != null) {
-                for (int i = app.size() - 1; !matched && i > -1; i--) {
-                    pp = app.get(i);
+            if (blacklistMapMatched.get(hostlow.substring(index + 1, hostlow.length())) != null) {
+                app = blacklistMapMatched.get(hostlow.substring(index + 1, hostlow.length())).toArray(new Pattern[0]);
+                for (int i = app.length - 1; !matched && i > -1; i--) {
+                    pp = app[i];
                     matched |= pp.matcher(p).matches();
                 }
             }
         }
 
 
-        // loop over all Regexentrys
+        // loop over all Regex-entries
         if (!matched) {
-            final Map<String, List<Pattern>> blacklistMapNotMatched = getBlacklistMap(blacklistType, false);
+            final Map<String, Set<Pattern>> blacklistMapNotMatched = getBlacklistMap(blacklistType, false);
             String key;
-            for (final Entry<String, List<Pattern>> entry : blacklistMapNotMatched.entrySet()) {
+            for (final Entry<String, Set<Pattern>> entry : blacklistMapNotMatched.entrySet()) {
                 key = entry.getKey();
                 try {
                     if (Pattern.matches(key, hostlow)) {
-                        app = entry.getValue();
-                        for (int i = 0; i < app.size(); i++) {
-                            if (app.get(i).matcher(p).matches()) {
+                        app = entry.getValue().toArray(new Pattern[0]);
+                        for (final Pattern ap : app) {
+                            if (ap.matcher(p).matches()) {
                                 return true;
                             }
                         }
@@ -511,7 +514,7 @@ public class Blacklist {
                 }
             }
 
-            // check for double-occurences of "*" in host
+            // check for double-occurrences of "*" in host
             if (host.indexOf("*", i + 1) > -1) {
                 return BlacklistError.TWO_WILDCARDS_IN_HOST;
             }
@@ -546,12 +549,12 @@ public class Blacklist {
         return blacklist != null && blacklist.contains(newEntry);
     }
 
-    private static File DHTCacheFile(BlacklistType type) {
-    	String BLACKLIST_DHT_CACHEFILE_NAME = "DATA/LISTS/blacklist_" + type.name() + "_Cache.ser";
-    	return new File(Switchboard.getSwitchboard().dataPath, BLACKLIST_DHT_CACHEFILE_NAME);
+    private static File DHTCacheFile(final BlacklistType type) {
+        String BLACKLIST_DHT_CACHEFILE_NAME = "DATA/LISTS/blacklist_" + type.name() + "_Cache.ser";
+        return new File(Switchboard.getSwitchboard().dataPath, BLACKLIST_DHT_CACHEFILE_NAME);
     }
 
-    private final void saveDHTCache(BlacklistType type) {
+    private final void saveDHTCache(final BlacklistType type) {
         try {
             final ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(DHTCacheFile(type)));
             HandleSet s = getCacheUrlHashsSet(type);
@@ -565,9 +568,10 @@ public class Blacklist {
         }
     }
 
-    private final void loadDHTCache(BlacklistType type) {
-        	File cachefile = DHTCacheFile(type);
-            if (cachefile.exists()) try {
+    private final void loadDHTCache(final BlacklistType type) {
+        File cachefile = DHTCacheFile(type);
+        if (cachefile.exists()) {
+            try {
                 ObjectInputStream in = new ObjectInputStream(new FileInputStream(cachefile));
                 RowHandleSet rhs = (RowHandleSet) in.readObject();
                 this.cachedUrlHashs.put(type, rhs == null ? new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0) : rhs);
@@ -576,6 +580,7 @@ public class Blacklist {
             } catch (Throwable e) {
                 Log.logException(e);
             }
-            this.cachedUrlHashs.put(type, new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0));
+        }
+        this.cachedUrlHashs.put(type, new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0));
     }
 }
