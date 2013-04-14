@@ -543,8 +543,9 @@ public class Segment {
         }
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
-        this.fulltext.getDefaultConfiguration().postprocessing_references(this, null, vector, url);
-        
+        if (this.connectedCitation()) {
+            this.fulltext.getDefaultConfiguration().postprocessing_references(this, null, vector, url);
+        }
         // STORE TO SOLR
         String error = null;
         tryloop: for (int i = 0; i < 20; i++) {
