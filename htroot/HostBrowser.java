@@ -46,8 +46,6 @@ import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.graphics.WebStructureGraph.StructureEntry;
 import net.yacy.search.Switchboard;
@@ -270,29 +268,29 @@ public class HostBrowser {
                         CollectionSchema.outboundlinks_protocol_sxt.getSolrFieldName(),
                         CollectionSchema.outboundlinks_urlstub_txt.getSolrFieldName(),
                         CollectionSchema.clickdepth_i.getSolrFieldName(),
-                        CollectionSchema.references_i.getSolrFieldName()
+                        CollectionSchema.references_i.getSolrFieldName(),
+                        CollectionSchema.references_internal_i.getSolrFieldName(),
+                        CollectionSchema.references_external_i.getSolrFieldName(),
+                        CollectionSchema.references_exthosts_i.getSolrFieldName()
                         );
                 SolrDocument doc;
                 Set<String> storedDocs = new HashSet<String>();
                 Map<String, FailType> errorDocs = new HashMap<String, FailType>();
                 Set<String> inboundLinks = new HashSet<String>();
                 Map<String, ReversibleScoreMap<String>> outboundHosts = new HashMap<String, ReversibleScoreMap<String>>();
-                RowHandleMap clickdepth = new RowHandleMap(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 2, 100, "clickdepth");
-                RowHandleMap references = new RowHandleMap(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 2, 100, "references");
+                Map<String, InfoCacheEntry> infoCache = new HashMap<String, InfoCacheEntry>();
                 int hostsize = 0;
                 final List<byte[]> deleteIDs = new ArrayList<byte[]>();
                 long timeout = System.currentTimeMillis() + TIMEOUT;
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                     String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
                     String errortype = (String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName());
-                    FailType error = errortype == null ? null : FailType.valueOf(errortype);  
-                    Integer cd = (Integer) doc.getFieldValue(CollectionSchema.clickdepth_i.getSolrFieldName());
-                    if (cd != null && cd.intValue() >= 0) clickdepth.add(ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())), cd.intValue());
-                    Integer rc = (Integer) doc.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
-                    if (rc != null && rc.intValue() >= 0) references.add(ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())), rc.intValue());
+                    FailType error = errortype == null ? null : FailType.valueOf(errortype);
+                    String ids = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
+                    infoCache.put(ids, new InfoCacheEntry(doc));
                     if (u.startsWith(path)) {
                         if (delete) {
-                            deleteIDs.add(ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())));
+                            deleteIDs.add(ASCII.getBytes(ids));
                         } else {
                             if (error == null) storedDocs.add(u); else if (admin) errorDocs.put(u, error);
                         }
@@ -425,9 +423,11 @@ public class HostBrowser {
                         if (!dc) {
                             prop.put("files_list_" + c + "_type_stored", type == StoreType.INDEX ? 1 : error ? 3 : loading ? 2 : 0 /*linked*/);
                             if (type == StoreType.INDEX) {
-                                long cd = clickdepth.get(uri.hash());
-                                long rc = references.get(uri.hash());
-                                prop.put("files_list_" + c + "_type_stored_comment", (rc >= 0 ? rc + " references" : "") + (rc >= 0 && cd >= 0 ? ", " : "") + (cd >= 0 ? "clickdepth " + cd : ""));
+                                String ids = ASCII.String(uri.hash());
+                                InfoCacheEntry ice = infoCache.get(ids);
+                                prop.put("files_list_" + c + "_type_stored_comment",
+                                        (ice.references >= 0 ? "refs: " + ice.references_internal + " int, " + ice.references_external + " ext, " + ice.references_exthosts + " hosts" : "") +
+                                        (ice.references >= 0 && ice.clickdepth >= 0 ? ", " : "") + (ice.clickdepth >= 0 ? "clickdepth: " + ice.clickdepth : ""));
                             }
                             prop.put("files_list_" + c + "_type_stored_load", loadRight ? 1 : 0);
                             if (error) {
@@ -505,5 +505,20 @@ public class HostBrowser {
         return prop;
     }
 
+    public static final class InfoCacheEntry {
+        public int clickdepth, references, references_internal, references_external, references_exthosts;
+        public InfoCacheEntry(final SolrDocument doc) {
+            Integer cd = (Integer) doc.getFieldValue(CollectionSchema.clickdepth_i.getSolrFieldName());
+            Integer rc = (Integer) doc.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
+            Integer rc_internal = (Integer) doc.getFieldValue(CollectionSchema.references_internal_i.getSolrFieldName());
+            Integer rc_external = (Integer) doc.getFieldValue(CollectionSchema.references_external_i.getSolrFieldName());
+            Integer rc_exthosts = (Integer) doc.getFieldValue(CollectionSchema.references_exthosts_i.getSolrFieldName());
+            this.clickdepth = (cd == null || cd.intValue() < 0) ? 999 : cd.intValue();
+            this.references = (rc == null || rc.intValue() <= 0) ? 0 : rc.intValue();
+            this.references_internal = (rc_internal == null || rc_internal.intValue() <= 0) ? 0 : rc_internal.intValue();
+            this.references_external = (rc_external == null || rc_external.intValue() <= 0) ? 0 : rc_external.intValue();
+            this.references_exthosts = (rc_exthosts == null || rc_exthosts.intValue() <= 0) ? 0 : rc_exthosts.intValue();
+        }
+    }
 
 }
