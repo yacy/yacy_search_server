@@ -35,7 +35,6 @@ import java.util.List;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.RequestHeader;
@@ -70,7 +69,6 @@ import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.BlockRank;
-import net.yacy.search.ranking.RankingProfile;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 

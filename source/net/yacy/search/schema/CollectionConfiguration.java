@@ -351,9 +351,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 clickdepth = 0;
                 this.lazy = lc;
             } else {
-                clickdepth = 999; 
-                processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
+                clickdepth = 999;
             }
+            processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
             CollectionSchema.clickdepth_i.add(doc, clickdepth); // no lazy value checking to get a '0' into the index
         }
         
@@ -779,6 +779,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         
         SolrDocument doc;
         int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0;
+
+        Map<String, Long> hostExtentCache = new HashMap<String, Long>();
         try {
             while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                 // for each to-be-processed entry work on the process tag
@@ -796,7 +798,14 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         }
                         
                         // refresh the link count; it's 'cheap' to do this here
-                        if (postprocessing_references(segment, doc, sid, url)) proccount_referencechange++;
+                        String hosthash = url.hosthash();
+                        if (!hostExtentCache.containsKey(hosthash)) {
+                            StringBuilder q = new StringBuilder();
+                            q.append(CollectionSchema.host_id_s.getSolrFieldName()).append(":\"").append(hosthash).append("\" AND ").append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200");
+                            long count = segment.fulltext().getDefaultConnector().getQueryCount(q.toString());
+                            hostExtentCache.put(hosthash, count);
+                        }
+                        if (postprocessing_references(segment, doc, sid, url, hostExtentCache)) proccount_referencechange++;
                         
                         // all processing steps checked, remove the processing tag
                         sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());

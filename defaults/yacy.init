@@ -957,7 +957,7 @@ search.ranking.rwi.profile =
 # The field boostfunctionmode can be either 'add' or 'multiply' to describe the mode.
 # All boost methods > 0 must have names to be able to select this name with a query, with the syntax /name
 search.ranking.solr.collection.boostname.tmp.0=_default
-search.ranking.solr.collection.boostfields.tmp.0=text_t^2.0,url_paths_sxt^20.0,title^100.0,synonyms_sxt^1.0
+search.ranking.solr.collection.boostfields.tmp.0=text_t^2.0,url_paths_sxt^50.0,title^100.0,synonyms_sxt^1.0
 search.ranking.solr.collection.boostquery.tmp.0=fuzzy_signature_unique_b:true^100000.0
 search.ranking.solr.collection.boostfunction.tmp.0=
 search.ranking.solr.collection.boostfunctionmode.tmp.0=add

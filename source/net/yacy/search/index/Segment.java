@@ -292,7 +292,7 @@ public class Segment {
             if (count > 0) return count;
         }
         try {
-            return (int) this.fulltext.getDefaultConnector().getQueryCount(CollectionSchema.text_t.getSolrFieldName() + ':' + word);
+            return (int) this.fulltext.getDefaultConnector().getQueryCount(CollectionSchema.text_t.getSolrFieldName() + ":\"" + word + "\"");
         } catch (Throwable e) {
             Log.logException(e);
             return 0;
@@ -544,7 +544,7 @@ public class Segment {
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
         if (this.connectedCitation()) {
-            this.fulltext.getDefaultConfiguration().postprocessing_references(this, null, vector, url);
+            this.fulltext.getDefaultConfiguration().postprocessing_references(this, null, vector, url, null);
         }
         // STORE TO SOLR
         String error = null;

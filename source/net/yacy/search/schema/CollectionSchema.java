@@ -153,6 +153,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     host_organization_s(SolrType.string, true, true, false, false, true, "either the second level domain or, if a ccSLD is used, the third level domain"),
     host_organizationdnc_s(SolrType.string, true, true, false, false, true, "the organization and dnc concatenated with '.'"),
     host_subdomain_s(SolrType.string, true, true, false, false, true, "the remaining part of the host without organizationdnc"),
+    host_extent_i(SolrType.num_integer, true, true, false, false, false, "number of documents from the same host; can be used to measure references_internal_i for likelihood computation"),
 
     title_count_i(SolrType.num_integer, true, true, false, false, false, "number of titles (counting the 'title' field) in the document"),
     title_chars_val(SolrType.num_integer, true, true, true, false, false, "number of characters for each title"),

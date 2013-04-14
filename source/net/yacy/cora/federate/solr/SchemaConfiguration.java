@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.solr.common.SolrDocument;
@@ -93,13 +94,14 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         return false;
     }
 
-    public boolean postprocessing_references(Segment segment, SolrDocument doc, SolrInputDocument sid, DigestURI url) {
+    public boolean postprocessing_references(Segment segment, SolrDocument doc, SolrInputDocument sid, DigestURI url, Map<String, Long> hostExtentCount) {
         if (!(this.contains(CollectionSchema.references_i) || this.contains(CollectionSchema.references_internal_i) ||
               this.contains(CollectionSchema.references_external_i) || this.contains(CollectionSchema.references_exthosts_i))) return false;
         Integer all_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
         Integer internal_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_internal_i.getSolrFieldName());
         Integer external_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_external_i.getSolrFieldName());
         Integer exthosts_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_exthosts_i.getSolrFieldName());
+        Integer hostextc_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.host_extent_i.getSolrFieldName());
         ReferenceContainer<CitationReference> references;
         try {
             int all = 0, internal = 0, external = 0;
@@ -132,6 +134,11 @@ public class SchemaConfiguration extends Configuration implements Serializable {
             }
             if (exthosts_old == null || exthosts_old.intValue() != exthosts.size()) {
                 sid.setField(CollectionSchema.references_exthosts_i.getSolrFieldName(), exthosts.size());
+                change = true;
+            }
+            Long hostExtent = hostExtentCount == null ? Integer.MAX_VALUE : hostExtentCount.get(url.hosthash());
+            if (hostextc_old == null || hostextc_old.intValue() != hostExtent) {
+                sid.setField(CollectionSchema.host_extent_i.getSolrFieldName(), hostExtent.intValue());
                 change = true;
             }
             return change;

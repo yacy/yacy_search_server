@@ -337,6 +337,9 @@ host_organization_s
 ## the remaining part of the host without organizationdnc
 #host_subdomain_s
 
+## number of documents from the same host; can be used to measure references_internal_i for likelihood computation, integer
+host_extent_i
+
 ## number of titles (counting the 'title' field) in the document
 #title_count_i
 
