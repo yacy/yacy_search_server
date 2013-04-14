@@ -96,7 +96,7 @@ function updatepage(str) {
         <div class="commit" style="float:left;">&nbsp;&nbsp;&nbsp;Documents without Errors</div>
         <div class="pending" style="float:left;">&nbsp;&nbsp;&nbsp;Pending in Crawler</div>
         <div class="error" style="float:left;">&nbsp;&nbsp;&nbsp;Load Errors (exclusion/failure)</div>
-      </div>
+        </div>
     </fieldset>
     #(/hosts)#
     
@@ -174,13 +174,9 @@ function updatepage(str) {
       #{/list}#
     </fieldset>
     #(/inbound)#
-    
-    #(admin)#::
-     <form action="HostBrowser.html" method="get">
-     <fieldset><legend>Administration Options</legend>
 
-     </fieldset>
-     </form>
+    #(admin)#:: 
+    #%HostBrowserAdmin_p.html%# 
     #(/admin)#
     
     #%env/templates/footer.template%#

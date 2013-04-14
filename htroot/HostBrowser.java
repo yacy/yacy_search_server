@@ -82,7 +82,7 @@ public class HostBrowser {
         prop.putNum("ucount", fulltext.collectionSize());
         prop.put("hosts", 0);
         prop.put("files", 0);
-        prop.put("admin", 0);
+        prop.put("admin", admin ? 1 : 0);
 
         if (admin) { // show top nav to admins
             prop.put("topmenu",1);
@@ -141,6 +141,21 @@ public class HostBrowser {
                 }
             } catch (MalformedURLException e) {
                 prop.put("result", "bad url '" + load + "'");
+            }
+        }
+
+        if (admin && post.containsKey("deleteLoadErrors")) {
+            try {
+                fulltext.getDefaultConnector().deleteByQuery("-" + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200 AND " 
+                        + CollectionSchema.httpstatus_i.getSolrFieldName() + ":[* TO *]"); // make sure field exists
+                Log.logInfo ("HostBrowser:", "delete documents with httpstatus_i <> 200");
+                fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failtype_s.getSolrFieldName() + ":\"" + FailType.fail.name() + "\"" );
+                Log.logInfo ("HostBrowser:", "delete documents with failtype_s = fail");
+                fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failtype_s.getSolrFieldName() + ":\"" + FailType.excl.name() + "\"" );
+                Log.logInfo ("HostBrowser:", "delete documents with failtype_s = excl");                                               
+                return prop;
+            } catch (IOException ex) {
+                Log.logException(ex);
             }
         }
         
