@@ -44,6 +44,7 @@ import java.util.concurrent.BlockingQueue;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.analysis.EnhancedTextProfileSignature;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.FailType;
@@ -387,7 +388,13 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
 
         List<String> titles = document.titles();
-        if (allAttr || contains(CollectionSchema.title)) add(doc, CollectionSchema.title, titles);
+        if (allAttr || contains(CollectionSchema.title)) {
+            add(doc, CollectionSchema.title, titles);
+            if ((allAttr || contains(CollectionSchema.title_exact_signature_l)) && titles.size() > 0) {
+                add(doc, CollectionSchema.title_exact_signature_l, EnhancedTextProfileSignature.getSignatureLong(titles.get(0)));
+            }
+            
+        }
         if (allAttr || contains(CollectionSchema.title_count_i)) add(doc, CollectionSchema.title_count_i, titles.size());
         if (allAttr || contains(CollectionSchema.title_chars_val)) {
             ArrayList<Integer> cv = new ArrayList<Integer>(titles.size());
@@ -403,7 +410,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         String description = document.dc_description();
         List<String> descriptions = new ArrayList<String>();
         for (String s: CommonPattern.NEWLINE.split(description)) descriptions.add(s);
-        if (allAttr || contains(CollectionSchema.description)) add(doc, CollectionSchema.description, description);
+        if (allAttr || contains(CollectionSchema.description)) {
+            add(doc, CollectionSchema.description, description);
+            if ((allAttr || contains(CollectionSchema.description_exact_signature_l)) && description != null && description.length() > 0) {
+                add(doc, CollectionSchema.description_exact_signature_l, EnhancedTextProfileSignature.getSignatureLong(description));
+            }
+        }
         if (allAttr || contains(CollectionSchema.description_count_i)) add(doc, CollectionSchema.description_count_i, descriptions.size());
         if (allAttr || contains(CollectionSchema.description_chars_val)) {
             ArrayList<Integer> cv = new ArrayList<Integer>(descriptions.size());

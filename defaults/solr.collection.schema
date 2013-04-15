@@ -24,6 +24,9 @@ content_type
 ## content of title tag, text (mandatory field)
 title
 
+## the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of title, used to compute title_unique_b
+#title_exact_signature_l
+
 ## flag shows if title is unique in the whole index; if yes and another document appears with same title, the unique-flag is set to false, boolean
 #title_unique_b
 
@@ -122,6 +125,9 @@ author
 
 ## content of description-tag, text
 description
+
+## the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of description, used to compute description_unique_b
+#description_exact_signature_l
 
 ## flag shows if description is unique in the whole index; if yes and another document appears with same description, the unique-flag is set to false, boolean
 #description_unique_b

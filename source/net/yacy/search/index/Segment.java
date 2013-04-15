@@ -36,7 +36,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
@@ -511,34 +510,38 @@ public class Segment {
         }
         
         // CHECK IF TITLE AND DESCRIPTION IS UNIQUE (this is by default not switched on)
-        uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][]{
-                {CollectionSchema.title, CollectionSchema.title_unique_b},
-                {CollectionSchema.description, CollectionSchema.description_unique_b}}) {
-            CollectionSchema checkfield = checkfields[0];
-            CollectionSchema uniquefield = checkfields[1];
-            if (this.fulltext.getDefaultConfiguration().contains(checkfield) && this.fulltext.getDefaultConfiguration().contains(uniquefield)) {
-                // lookup in the index for the same title
-                String checkstring = checkfield == CollectionSchema.title ? document.dc_title() : document.dc_description();
-                if (checkstring.length() == 0) {
-                    vector.setField(uniquefield.getSolrFieldName(), false);
-                    continue uniquecheck;
-                }
-                checkstring = ClientUtils.escapeQueryChars("\"" + checkstring + "\"");
-                try {
-                    if (this.fulltext.getDefaultConnector().existsByQuery(checkfield.getSolrFieldName() + ":\"" + checkstring + "\"")) {
-                        // switch unique attribute in new document
+        if (this.fulltext.getDefaultConfiguration().contains(CollectionSchema.host_id_s)) {
+            String hostid = url.hosthash();
+            uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][]{
+                    {CollectionSchema.title, CollectionSchema.title_exact_signature_l, CollectionSchema.title_unique_b},
+                    {CollectionSchema.description, CollectionSchema.description_exact_signature_l, CollectionSchema.description_unique_b}}) {
+                CollectionSchema checkfield = checkfields[0];
+                CollectionSchema signaturefield = checkfields[1];
+                CollectionSchema uniquefield = checkfields[2];
+                if (this.fulltext.getDefaultConfiguration().contains(checkfield) && this.fulltext.getDefaultConfiguration().contains(signaturefield) && this.fulltext.getDefaultConfiguration().contains(uniquefield)) {
+                    // lookup in the index within the same hosts for the same title or description
+                    //String checkstring = checkfield == CollectionSchema.title ? document.dc_title() : document.dc_description();
+                    Long checkhash = (Long) vector.getFieldValue(signaturefield.getSolrFieldName());
+                    if (checkhash == null) {
                         vector.setField(uniquefield.getSolrFieldName(), false);
-                        // switch attribute also in all existing documents (which should be exactly only one!)
-                        SolrDocumentList docs = this.fulltext.getDefaultConnector().query(checkfield.getSolrFieldName() + ":" + checkstring + " AND " + uniquefield.getSolrFieldName() + ":true", 0, 1000);
-                        for (SolrDocument doc: docs) {
-                            SolrInputDocument sid = this.fulltext.getDefaultConfiguration().toSolrInputDocument(doc);
-                            sid.setField(uniquefield.getSolrFieldName(), false);
-                            this.fulltext.getDefaultConnector().add(sid);
-                        }
-                    } else {
-                        vector.setField(uniquefield.getSolrFieldName(), true);
+                        continue uniquecheck;
                     }
-                } catch (IOException e) {}
+                    try {
+                        if (this.fulltext.getDefaultConnector().existsByQuery(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\"")) {
+                            // switch unique attribute in new document
+                            vector.setField(uniquefield.getSolrFieldName(), false);
+                            // switch attribute also in all existing documents (which should be exactly only one!)
+                            SolrDocumentList docs = this.fulltext.getDefaultConnector().query(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\" AND " + uniquefield.getSolrFieldName() + ":true", 0, 1000);
+                            for (SolrDocument doc: docs) {
+                                SolrInputDocument sid = this.fulltext.getDefaultConfiguration().toSolrInputDocument(doc);
+                                sid.setField(uniquefield.getSolrFieldName(), false);
+                                this.fulltext.getDefaultConnector().add(sid);
+                            }
+                        } else {
+                            vector.setField(uniquefield.getSolrFieldName(), true);
+                        }
+                    } catch (IOException e) {}
+                }
             }
         }
         

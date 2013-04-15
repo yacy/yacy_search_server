@@ -38,7 +38,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 
 import org.apache.solr.common.params.MapSolrParams;
-import org.apache.solr.update.processor.Lookup3Signature;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.WordCache;
@@ -242,15 +241,9 @@ public final class Condenser {
         sp.put("minTokenLen", Integer.toString(Ranking.getMinTokenLen()));
         fuzzySignatureFactory.init(new MapSolrParams(sp));
         fuzzySignatureFactory.add(text);
-        byte[] fuzzy_signature_hash = fuzzySignatureFactory.getSignature();
-        long l = 0; for (int i = 0; i < 8; i++) l = (l << 8) + (fuzzy_signature_hash[i] & 0xff);
-        this.fuzzy_signature = l;
+        this.fuzzy_signature = EnhancedTextProfileSignature.getSignatureLong(fuzzySignatureFactory);
         this.fuzzy_signature_text = fuzzySignatureFactory.getSignatureText().toString();
-        Lookup3Signature exactSignatureFactory = new Lookup3Signature();
-        exactSignatureFactory.add(text);
-        byte[] exact_signature_hash = exactSignatureFactory.getSignature();
-        l = 0; for (int i = 0; i < 8; i++) l = (l << 8) + (exact_signature_hash[i] & 0xff);
-        this.exact_signature = l;
+        this.exact_signature = EnhancedTextProfileSignature.getSignatureLong(text);
     }
 
     private Condenser(final String text, final WordCache meaningLib, boolean doAutotagging) {

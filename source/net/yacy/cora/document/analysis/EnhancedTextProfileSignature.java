@@ -169,5 +169,18 @@ public class EnhancedTextProfileSignature extends Lookup3Signature {
       return t2.cnt - t1.cnt;
     }
   }
-
+  
+  public static long getSignatureLong(String text) {
+      Lookup3Signature sig = new Lookup3Signature();
+      sig.add(text);
+      return getSignatureLong(sig);
+  }
+  
+  public static long getSignatureLong(Lookup3Signature sig) {
+      byte[] hash = sig.getSignature();
+      long l = 0;
+      for (int i = 0; i < 8; i++) l = (l << 8) + (hash[i] & 0xff);
+      return l;
+  }
+  
 }
