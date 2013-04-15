@@ -341,7 +341,7 @@ public class Table_API_p {
         prop.put("showtable_inline", (inline) ? 1 : 0);
         prop.put("showtable_filter", typefilter.pattern());
         prop.put("showtable_query", query.pattern().replaceAll("\\.\\*", ""));
-        if (tablesize >= 50) {
+        if (tablesize >= maximumRecords) {
             prop.put("showtable_navigation", 1);
             prop.put("showtable_navigation_startRecord", startRecord);
             prop.put("showtable_navigation_to", Math.min(tablesize, startRecord + maximumRecords));
