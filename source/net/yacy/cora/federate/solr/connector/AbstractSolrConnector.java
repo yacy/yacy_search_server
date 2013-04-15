@@ -67,11 +67,14 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     }
     private final static int pagesize = 100;
 
+    public static String idQuery(String id) {
+        return CollectionSchema.id.getSolrFieldName() + ":\"" + id + "\"";
+    }
+    
     @Override
-    public boolean exists(final String fieldName, final String key) throws IOException {
-        if (fieldName == null) return false;
+    public boolean existsByQuery(final String query) throws IOException {
         try {
-            long count = getQueryCount(fieldName + ":\"" + key + "\"");
+            long count = getQueryCount(query);
             return count > 0;
         } catch (final Throwable e) {
             return false;

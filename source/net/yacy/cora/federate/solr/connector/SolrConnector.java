@@ -64,14 +64,14 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @param id the url hash of the entry
      * @throws IOException
      */
-    public void delete(final String id) throws IOException;
+    public void deleteById(final String id) throws IOException;
 
     /**
      * delete a set of entries from solr; entries are identified by their url hash
      * @param ids a list of url hashes
      * @throws IOException
      */
-    public void delete(final List<String> ids) throws IOException;
+    public void deleteByIds(final List<String> ids) throws IOException;
 
     /**
      * delete entries from solr according the given solr query string
@@ -87,7 +87,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @return true if any entry in solr exists
      * @throws IOException
      */
-    public boolean exists(final String fieldName, final String key) throws IOException;
+    public boolean existsByQuery(final String solrquery) throws IOException;
 
     /**
      * add a solr input document

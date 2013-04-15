@@ -41,7 +41,6 @@ import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
-import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -205,16 +204,15 @@ public class PerformanceMemory_p {
 
         // other caching structures
         final CachedSolrConnector solr = (CachedSolrConnector) Switchboard.getSwitchboard().index.fulltext().getDefaultConnector();
-        final CachedSolrConnector.HitMissCache hitMissCache = solr.getCache(CollectionSchema.id.getSolrFieldName());
         prop.putNum("solrcacheHit.size", solr.nameCacheHitSize());
-        prop.putNum("solrcacheHit.Hit", hitMissCache.hitCache_Hit);
-        prop.putNum("solrcacheHit.Miss", hitMissCache.hitCache_Miss);
-        prop.putNum("solrcacheHit.Insert", hitMissCache.hitCache_Insert);
+        prop.putNum("solrcacheHit.Hit", solr.hitCache_Hit);
+        prop.putNum("solrcacheHit.Miss", solr.hitCache_Miss);
+        prop.putNum("solrcacheHit.Insert", solr.hitCache_Insert);
         
         prop.putNum("solrcacheMiss.size", solr.nameCacheMissSize());
-        prop.putNum("solrcacheMiss.Hit", hitMissCache.missCache_Hit);
-        prop.putNum("solrcacheMiss.Miss", hitMissCache.missCache_Miss);
-        prop.putNum("solrcacheMiss.Insert", hitMissCache.missCache_Insert);
+        prop.putNum("solrcacheMiss.Hit", solr.missCache_Hit);
+        prop.putNum("solrcacheMiss.Miss", solr.missCache_Miss);
+        prop.putNum("solrcacheMiss.Insert", solr.missCache_Insert);
         
         prop.putNum("solrcacheDocument.size", solr.nameCacheDocumentSize());
         prop.putNum("solrcacheDocument.Hit", solr.documentCache_Hit);

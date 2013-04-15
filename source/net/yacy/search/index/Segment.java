@@ -502,7 +502,7 @@ public class Segment {
                 // lookup the document with the same signature
                 long signature = ((Long) vector.getField(checkfield.getSolrFieldName()).getValue()).longValue();
                 try {
-                    if (this.fulltext.getDefaultConnector().exists(checkfield.getSolrFieldName(), Long.toString(signature))) {
+                    if (this.fulltext.getDefaultConnector().existsByQuery(checkfield.getSolrFieldName() + ":\"" + Long.toString(signature) + "\"")) {
                         // change unique attribut in content
                         vector.setField(uniquefield.getSolrFieldName(), false);
                     }
@@ -525,7 +525,7 @@ public class Segment {
                 }
                 checkstring = ClientUtils.escapeQueryChars("\"" + checkstring + "\"");
                 try {
-                    if (this.fulltext.getDefaultConnector().exists(checkfield.getSolrFieldName(), checkstring)) {
+                    if (this.fulltext.getDefaultConnector().existsByQuery(checkfield.getSolrFieldName() + ":\"" + checkstring + "\"")) {
                         // switch unique attribute in new document
                         vector.setField(uniquefield.getSolrFieldName(), false);
                         // switch attribute also in all existing documents (which should be exactly only one!)

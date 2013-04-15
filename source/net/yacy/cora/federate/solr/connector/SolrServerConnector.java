@@ -119,7 +119,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     }
 
     @Override
-    public synchronized void delete(final String id) throws IOException {
+    public synchronized void deleteById(final String id) throws IOException {
         try {
             this.server.deleteById(id, -1);
         } catch (final Throwable e) {
@@ -128,7 +128,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     }
 
     @Override
-    public synchronized void delete(final List<String> ids) throws IOException {
+    public synchronized void deleteByIds(final List<String> ids) throws IOException {
         try {
             this.server.deleteById(ids, -1);
         } catch (final Throwable e) {

@@ -122,9 +122,9 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
      * @throws IOException
      */
     @Override
-    public void delete(final String id) throws IOException {
-        if (this.solr0 != null) this.solr0.delete(id);
-        if (this.solr1 != null) this.solr1.delete(id);
+    public void deleteById(final String id) throws IOException {
+        if (this.solr0 != null) this.solr0.deleteById(id);
+        if (this.solr1 != null) this.solr1.deleteById(id);
     }
 
     /**
@@ -133,9 +133,9 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
      * @throws IOException
      */
     @Override
-    public void delete(final List<String> ids) throws IOException {
-        if (this.solr0 != null) this.solr0.delete(ids);
-        if (this.solr1 != null) this.solr1.delete(ids);
+    public void deleteByIds(final List<String> ids) throws IOException {
+        if (this.solr0 != null) this.solr0.deleteByIds(ids);
+        if (this.solr1 != null) this.solr1.deleteByIds(ids);
     }
 
     @Override
@@ -145,8 +145,8 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     @Override
-    public boolean exists(final String fieldName, final String key) throws IOException {
-        if ((solr0 != null && solr0.exists(fieldName, key)) || (solr1 != null && solr1.exists(fieldName, key))) {
+    public boolean existsByQuery(final String query) throws IOException {
+        if ((solr0 != null && solr0.existsByQuery(query)) || (solr1 != null && solr1.existsByQuery(query))) {
             return true;
         }
         return false;
