@@ -490,10 +490,10 @@ public final class SwitchboardConstants {
     /**
      * boosts for different cores (add an number to the end of the property name)
      */
-    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTNAME_         = "search.ranking.solr.collection.boostname.tmp."; // temporary until we know best default values; add the index number (0..3) to that string
-    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_       = "search.ranking.solr.collection.boostfields.tmp.";
-    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_        = "search.ranking.solr.collection.boostquery.tmp.";
-    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_     = "search.ranking.solr.collection.boostfunction.tmp.";
+    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTNAME_         = "search.ranking.solr.collection.boostname.tmpa."; // temporary until we know best default values; add the index number (0..3) to that string
+    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_       = "search.ranking.solr.collection.boostfields.tmpa.";
+    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_        = "search.ranking.solr.collection.boostquery.tmpa.";
+    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_     = "search.ranking.solr.collection.boostfunction.tmpa.";
     
     /**
      * system tray
