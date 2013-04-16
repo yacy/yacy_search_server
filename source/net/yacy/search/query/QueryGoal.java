@@ -195,7 +195,7 @@ public class QueryGoal {
         for (final byte[] b: blues) this.include_hashes.remove(b);
     }
     
-    public StringBuilder collectionQueryString(CollectionConfiguration configuration) {
+    public StringBuilder collectionQueryString(CollectionConfiguration configuration, int rankingProfile) {
         final StringBuilder q = new StringBuilder(80);
 
         // parse special requests
@@ -222,7 +222,7 @@ public class QueryGoal {
         // combine these queries for all relevant fields
         wc = 0;
         Float boost;
-        Ranking r = configuration.getRanking(0);
+        Ranking r = configuration.getRanking(rankingProfile);
         for (Map.Entry<SchemaDeclaration,Float> entry: r.getBoostMap()) {
             SchemaDeclaration field = entry.getKey();
             boost = entry.getValue();

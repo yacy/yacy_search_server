@@ -36,13 +36,8 @@ public class Ranking {
     private static float quantRate = 0.5f; // to be filled with search.ranking.solr.doubledetection.quantrate
     private static int   minTokenLen = 3;   // to be filled with search.ranking.solr.doubledetection.minlength
     
-    public static enum BoostFunctionMode {
-        add, multiply;
-    }
-    
     private Map<SchemaDeclaration, Float> fieldBoosts;
     private String name, boostQuery, boostFunction;
-    private BoostFunctionMode mode;
     
     public Ranking() {
         super();
@@ -50,7 +45,6 @@ public class Ranking {
         this.fieldBoosts = new LinkedHashMap<SchemaDeclaration, Float>();
         this.boostQuery = "";
         this.boostFunction = "";
-        this.mode = BoostFunctionMode.add;
     }
 
 
@@ -117,15 +111,6 @@ public class Ranking {
     public String getBoostFunction() {
         return this.boostFunction;
     }
-
-    public void setMode(BoostFunctionMode method) {
-        this.mode = method;
-    }
-
-    public BoostFunctionMode getMethod() {
-        return this.mode;
-    }
-    
     
     /*
      * duplicate check static methods

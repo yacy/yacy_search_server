@@ -470,7 +470,6 @@ public final class Switchboard extends serverSwitch {
             r.updateBoosts(this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_ + i, "text_t^1.0"));
             r.setBoostQuery(this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_ + i, ""));
             r.setBoostFunction(this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_ + i, ""));
-            r.setMode(Ranking.BoostFunctionMode.valueOf(this.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTIONMODE_ + i, "add")));
         }
 
         // initialize index

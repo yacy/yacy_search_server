@@ -384,14 +384,15 @@ public final class QueryParams {
         if (this.queryGoal.getIncludeStrings().size() == 0) return null;
         // construct query
         final SolrQuery params = new SolrQuery();
-        params.setQuery(this.queryGoal.collectionQueryString(this.indexSegment.fulltext().getDefaultConfiguration()).toString());
+        int rankingProfile = this.ranking.coeff_date == RankingProfile.COEFF_MAX ? 1 : (this.modifier.sitehash != null || this.modifier.sitehost != null) ? 2 : 0;
+        params.setQuery(this.queryGoal.collectionQueryString(this.indexSegment.fulltext().getDefaultConfiguration(), rankingProfile).toString());
         params.setParam("defType", "edismax");
-        Ranking ranking = indexSegment.fulltext().getDefaultConfiguration().getRanking(0);
-        //Ranking ranking = indexSegment.fulltext().getDefaultConfiguration().getRanking(this.ranking.coeff_date == RankingProfile.COEFF_MAX ? 1 : (this.modifier.sitehash != null || this.modifier.sitehost != null) ? 2 : 0); // for a by-date ranking select different ranking profile
+        Ranking ranking = indexSegment.fulltext().getDefaultConfiguration().getRanking(rankingProfile); // for a by-date ranking select different ranking profile
+        
         String bq = ranking.getBoostQuery();
         String bf = ranking.getBoostFunction();
-        if (bq.length() > 0) params.setParam("bq", bq); // a boost query that moves double content to the back
-        if (bf.length() > 0) params.setParam(ranking.getMethod() == Ranking.BoostFunctionMode.add ? "bf" : "boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
+        if (bq.length() > 0) params.setParam("bq", bq);
+        if (bf.length() > 0) params.setParam("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
         params.setStart(this.offset);
         params.setRows(this.itemsPerPage);
         params.setFacet(false);

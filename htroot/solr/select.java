@@ -146,6 +146,9 @@ public class select {
         if (post == null) return null;
         sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
         
+        // get the ranking profile id
+        int profileNr = post.getInt("profileNr", 0);
+        
         // rename post fields according to result style
         if (!post.containsKey(CommonParams.Q) && post.containsKey("query")) {
             String querystring = post.get("query", "");
@@ -154,7 +157,7 @@ public class select {
             querystring = modifier.parse(querystring);
             modifier.apply(post);
             QueryGoal qg = new QueryGoal(querystring, querystring);
-            StringBuilder solrQ = qg.collectionQueryString(sb.index.fulltext().getDefaultConfiguration());
+            StringBuilder solrQ = qg.collectionQueryString(sb.index.fulltext().getDefaultConfiguration(), profileNr);
             post.put(CommonParams.Q, solrQ.toString()); // sru patch
         }
         String q = post.get(CommonParams.Q, "");
@@ -162,14 +165,14 @@ public class select {
         if (!post.containsKey(CommonParams.ROWS)) post.put(CommonParams.ROWS, post.remove("maximumRecords", 10)); // sru patch
         post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 10000 : 100));
         
-        // set default ranking if this is not given in the request
-        if (!post.containsKey("sort")) {
+        // set ranking according to profile number if ranking attributes are not given in the request
+        if (!post.containsKey("sort") && !post.containsKey("bq") && !post.containsKey("bf") && !post.containsKey("boost")) {
             if (!post.containsKey("defType")) post.put("defType", "edismax");        
-            Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(0);
+            Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr);
             String bq = ranking.getBoostQuery();
             String bf = ranking.getBoostFunction();
-            if (!post.containsKey("bq") && bq.length() > 0) post.put("bq", bq); // a boost query that moves double content to the back
-            if (!(post.containsKey("bf") || post.containsKey("boost")) && bf.length() > 0) post.put(ranking.getMethod() == Ranking.BoostFunctionMode.add ? "bf" : "boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
+            if (bq.length() > 0) post.put("bq", bq);
+            if (bf.length() > 0) post.put("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
         }
         
         // get a response writer for the result

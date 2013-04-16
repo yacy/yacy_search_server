@@ -109,7 +109,7 @@ public class searchresult {
         
         // get a solr query string
         QueryGoal qg = new QueryGoal(originalQuery, originalQuery);
-        StringBuilder solrQ = qg.collectionQueryString(sb.index.fulltext().getDefaultConfiguration());
+        StringBuilder solrQ = qg.collectionQueryString(sb.index.fulltext().getDefaultConfiguration(), 0);
         post.put("defType", "edismax");
         post.put(CommonParams.Q, solrQ.toString());
         post.put(CommonParams.ROWS, post.remove("num"));
@@ -130,8 +130,8 @@ public class searchresult {
             Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(0);
             String bq = ranking.getBoostQuery();
             String bf = ranking.getBoostFunction();
-            if (bq.length() > 0) post.put("bq", bq); // a boost query that moves double content to the back
-            if (bf.length() > 0) post.put(ranking.getMethod() == Ranking.BoostFunctionMode.add ? "bf" : "boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
+            if (bq.length() > 0) post.put("bq", bq);
+            if (bf.length() > 0) post.put("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
         }
         post.put(CommonParams.FL,
                 CollectionSchema.content_type.getSolrFieldName() + ',' +

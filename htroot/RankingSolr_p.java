@@ -90,22 +90,16 @@ public class RankingSolr_p {
 
         if (post != null && post.containsKey("EnterBF")) {
             String bf = post.get("bf");
-            String mode = post.get("mode");
             if (bf != null) {
                 sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_ + profileNr, bf);
-                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTIONMODE_ + profileNr, mode);
                 sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setBoostFunction(bf);
-                sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setMode(Ranking.BoostFunctionMode.valueOf(mode));
             }
         }
         if (post != null && post.containsKey("ResetBF")) {
             String bf = ""; //"div(add(1,references_i),pow(add(1,inboundlinkscount_i),1.6))";
-            String mode = "add";
             if (bf != null) {
                 sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_ + profileNr, bf);
-                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTIONMODE_ + profileNr, mode);
                 sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setBoostFunction(bf);
-                sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setMode(Ranking.BoostFunctionMode.valueOf(mode));
             }
         }
 
@@ -129,9 +123,6 @@ public class RankingSolr_p {
         prop.put("boosts", i);
         prop.put("bq", ranking.getBoostQuery());
         prop.put("bf", ranking.getBoostFunction());
-        prop.put("modeKey", ranking.getMethod() == Ranking.BoostFunctionMode.add ? "bf" : "boost");
-        prop.put("add.checked", ranking.getMethod() == Ranking.BoostFunctionMode.add ? 1 : 0);
-        prop.put("multiply.checked", ranking.getMethod() == Ranking.BoostFunctionMode.add ? 0 : 1);
 
         for (int j = 0; j < 4; j++) {
             prop.put("profiles_" + j + "_nr", j);

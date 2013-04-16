@@ -494,7 +494,6 @@ public final class SwitchboardConstants {
     public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_       = "search.ranking.solr.collection.boostfields.tmp.";
     public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_        = "search.ranking.solr.collection.boostquery.tmp.";
     public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_     = "search.ranking.solr.collection.boostfunction.tmp.";
-    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTIONMODE_ = "search.ranking.solr.collection.boostfunctionmode.tmp.";
     
     /**
      * system tray
