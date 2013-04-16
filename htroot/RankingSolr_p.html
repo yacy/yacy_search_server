@@ -10,8 +10,17 @@
     <h2>Solr Ranking Configuration</h2>
     <p>These are ranking attributes for Solr. This ranking applies for internal and remote (P2P or shard) Solr access.</p>
 
+    <form action="RankingSolr_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
+    Select a profile:
+      <select id="profile" name="profileNr" onchange='submit()'>
+          #{profiles}#
+            <option value="#[nr]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+          #{/profiles}#
+      </select>
+    </form>
     <form class="dsearch" action="RankingSolr_p.html" method="post" enctype="multipart/form-data">
       <fieldset>
+      <input type="hidden" name="profileNr" value="#[profileNr]#" />
         <legend>Boost Function</legend>
         A Boost Function can combine numeric values from the result document to produce a number which is either added or multiplied with the other boost value from the query result.
         To see all available fields, see the <a href="IndexSchema_p.html">YaCy Solr Schema</a> and look for numeric values (these are names with suffix '_i').

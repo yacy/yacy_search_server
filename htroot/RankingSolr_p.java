@@ -39,6 +39,9 @@ public class RankingSolr_p {
         // clean up all search events
         SearchEventCache.cleanupEvents(true);
         sb.index.clearCache(); // every time the ranking is changed we need to remove old orderings
+
+        int profileNr = 0;
+        if (post != null) profileNr = post.getInt("profileNr", profileNr);
         
         if (post != null && post.containsKey("EnterBoosts")) {
             StringBuilder boostString = new StringBuilder(); // SwitchboardConstants.SEARCH_RANKING_SOLR_BOOST;
@@ -60,28 +63,28 @@ public class RankingSolr_p {
             }
             if (boostString.length() > 0) {
                 String s = boostString.toString();
-                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_ + "0", s);
-                sb.index.fulltext().getDefaultConfiguration().getRanking(0).updateBoosts(s);
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_ + profileNr, s);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).updateBoosts(s);
             }
         }
         if (post != null && post.containsKey("ResetBoosts")) {
             String s = "text_t^2.0,url_paths_sxt^20.0,title^100.0,synonyms_sxt^1.0";
-            sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_ + "0", s);
-            sb.index.fulltext().getDefaultConfiguration().getRanking(0).updateBoosts(s);
+            sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_ + profileNr, s);
+            sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).updateBoosts(s);
         }
 
         if (post != null && post.containsKey("EnterBQ")) {
             String bq = post.get("bq");
             if (bq != null) {
-                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_ + "0", bq);
-                sb.index.fulltext().getDefaultConfiguration().getRanking(0).setBoostQuery(bq);
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_ + profileNr, bq);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setBoostQuery(bq);
             }
         }
         if (post != null && post.containsKey("ResetBQ")) {
             String bq = "fuzzy_signature_unique_b:true^100000.0";
             if (bq != null) {
-                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_ + "0", bq);
-                sb.index.fulltext().getDefaultConfiguration().getRanking(0).setBoostQuery(bq);
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_ + profileNr, bq);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setBoostQuery(bq);
             }
         }
 
@@ -89,27 +92,27 @@ public class RankingSolr_p {
             String bf = post.get("bf");
             String mode = post.get("mode");
             if (bf != null) {
-                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_ + "0", bf);
-                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTIONMODE_ + "0", mode);
-                sb.index.fulltext().getDefaultConfiguration().getRanking(0).setBoostFunction(bf);
-                sb.index.fulltext().getDefaultConfiguration().getRanking(0).setMode(Ranking.BoostFunctionMode.valueOf(mode));
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_ + profileNr, bf);
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTIONMODE_ + profileNr, mode);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setBoostFunction(bf);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setMode(Ranking.BoostFunctionMode.valueOf(mode));
             }
         }
         if (post != null && post.containsKey("ResetBF")) {
             String bf = ""; //"div(add(1,references_i),pow(add(1,inboundlinkscount_i),1.6))";
             String mode = "add";
             if (bf != null) {
-                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_ + "0", bf);
-                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTIONMODE_ + "0", mode);
-                sb.index.fulltext().getDefaultConfiguration().getRanking(0).setBoostFunction(bf);
-                sb.index.fulltext().getDefaultConfiguration().getRanking(0).setMode(Ranking.BoostFunctionMode.valueOf(mode));
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_ + profileNr, bf);
+                sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTIONMODE_ + profileNr, mode);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setBoostFunction(bf);
+                sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setMode(Ranking.BoostFunctionMode.valueOf(mode));
             }
         }
 
         final serverObjects prop = new serverObjects();
         int i = 0;
         
-        Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(0);
+        Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr);
         for (SchemaDeclaration field: CollectionSchema.values()) {
             if (!field.isSearchable()) continue;
             prop.put("boosts_" + i + "_field", field.getSolrFieldName());
@@ -130,6 +133,14 @@ public class RankingSolr_p {
         prop.put("add.checked", ranking.getMethod() == Ranking.BoostFunctionMode.add ? 1 : 0);
         prop.put("multiply.checked", ranking.getMethod() == Ranking.BoostFunctionMode.add ? 0 : 1);
 
+        for (int j = 0; j < 4; j++) {
+            prop.put("profiles_" + j + "_nr", j);
+            prop.put("profiles_" + j + "_name", sb.getConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTNAME_ + j, "N.N."));
+            prop.put("profiles_" + j + "_selected", profileNr == j ? 1 : 0);
+        }
+        prop.put("profiles", 4);
+        prop.put("profileNr", profileNr);
+        
         return prop;
     }
 
