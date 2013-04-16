@@ -20,7 +20,7 @@
     </form>
     <form class="dsearch" action="RankingSolr_p.html" method="post" enctype="multipart/form-data">
       <fieldset>
-      <input type="hidden" name="profileNr" value="#[profileNr]#" />
+        <input type="hidden" name="profileNr" value="#[profileNr]#" />
         <legend>Boost Function</legend>
         A Boost Function can combine numeric values from the result document to produce a number which is either added or multiplied with the other boost value from the query result.
         To see all available fields, see the <a href="IndexSchema_p.html">YaCy Solr Schema</a> and look for numeric values (these are names with suffix '_i').
@@ -46,6 +46,7 @@
     </form>
     <form class="dsearch" action="RankingSolr_p.html" method="post" enctype="multipart/form-data">
       <fieldset>
+        <input type="hidden" name="profileNr" value="#[profileNr]#" />
         <legend>Boost Query</legend>
         The Boost Query is attached to every query. Use this to statically boost specific content in the index.
         Example: "fuzzy_signature_unique_b:true^100000.0f" means that documents, identified as 'double' are ranked very bad and appended to the end of all results (because the unique are ranked high).
@@ -65,6 +66,7 @@
     </form>
     <form class="dsearch" action="RankingSolr_p.html" method="post" enctype="multipart/form-data">
       <fieldset>
+        <input type="hidden" name="profileNr" value="#[profileNr]#" />
         <legend>Solr Boosts</legend>
         This is the set of searchable fields. Entries without a boost value are not searched. Boost values make hits inside the corresponding field more important.
         <dl style="margin:0;">#{boosts}# 
