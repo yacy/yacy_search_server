@@ -1,0 +1,118 @@
+# hi.lng
+# English-->Hindi
+# -----------------------
+# This is a part of YaCy, a peer-to-peer based web search engine
+
+#File: ConfigLanguage_p.html
+#---------------------------
+<!-- lang -->default\(english\)==हिंदी
+#<!-- author -->==सारांश शर्मा
+#<!-- maintainer -->==
+#-----------------------------
+
+#File: AccessTracker_p.html
+#---------------------------
+
+Access Tracker== पहुँच खौजै
+Server Access Overview==सरवर की पहुँच निरीक्षण करे 
+This is a list of \#\[num\]\# requests to the local http server within the last hour.== यह पिछले एक घंटे के भीतर स्थानीय http सर्वर के लिए की गई अनुरोध की संख्या#[num]# की एक सूची है
+This is a list of requests to the local http server within the last hour.==यह पिछले एक घंटे के भीतर स्थानीय http सर्वर को की गई अनुरोध की एक सूची है.
+Showing \#\[num\]\# requests.==अनुरोधों को संख्या दिखा रहा है
+>Path<==>मार्ग<
+Date<==तारीख<
+Access Count During==पहुंच के दौरान गिनती 
+last second==आखिरी सेकंड
+last minute==आखिरी मिनट
+last 10 Minutes==पिछले दस मिनट
+last hour==पिछला एक घंटा
+The following hosts are registered as source for brute-force requests to protected pages==निम्नलिखित होस्ट संरक्षित पृष्ठों के लिए  brute-force अनुरोधों के लिए स्रोत के रूप में पंजीकृत हैं
+#>Host==>होस्ट
+Access Times==एक्सेस समय
+Server Access Details==	सर्वर का उपयोग विस्तार
+Local Search Log==स्थानीय खोज लोग
+Local Search Host Tracker==स्थानीय खोज होस्ट ट्रैकर
+Remote Search Log==रिमोट खोज लोग
+Total:==संपूर्ण:
+Success:==सफल:
+Remote Search Host Tracker==रिमोट खोज होस्ट ट्रैकर
+This is a list of searches that had been requested from this\' peer search interface\.?=यह इस सहकर्मी खोज इंटरफ़ेस से अनुरोध किए  गए खोजों की सूची है
+Showing \#\[num\]\# entries from a total of \#\[total\]\# requests.==यह एंट्रीज दिखा रहा है  \#\[num\]\# अनुरोध के कुल से \#\[total\]\#
+Requesting Host==होस्ट  का अनुरोध
+#Offset==ओफ़्सेट 
+Offset==ओफ़्सेट 
+Expected Results==अपेक्षित परिणाम
+Returned Results==लौटे होए  परिणाम
+Known Results==ज्ञात परिणाम
+Used Time \(ms\)==प्रयुक्त समय \(ms\)
+URL fetch \(ms\)==यूआरएल लायें \(ms\)
+Snippet comp \(ms\)==स्निपेट कंप्यूटर अनुप्रयोग \(ms\) 
+Query==क्वेरी 
+#>User Agent<==>यूजर  एजेंट<
+Search Word Hashes==हाशेस   शब्द  खोजे 
+Count</td>==काउंट </td>
+Queries Per Last Hour==पिछले घंटे की क्वेरी 
+Access Dates==एक्सेस   दिनांक
+This is a list of searches that had been requested from remote peer search interface\.?==यह रिमोट  से  की  गए  खोजो  की  सूचि  है 
+Peer Name==पीयर नाम 
+#-----------------------------
+
+
+#File: Blacklist_p.html
+#---------------------------
+Blacklist Administration==ब्लैकलिस्ट  एडमिनिस्ट्रेशन
+Used Blacklist engine:==उपयोग किया गया ब्लैकलिस्ट  इंजन : 
+This function provides an URL filter to the proxy; any blacklisted URL is blocked==इस समारोह प्रॉक्सी के लिए एक यूआरएल फिल्टर प्रदान करता है, किसी भी काली सूची में डाला यूआरएल अवरुद्ध है
+from being loaded. You can define several blacklists and activate them separately.==लोड किये जाने से . आप कई काली सूची को परिभाषित करने और उन्हें अलग से सक्रिय कर सकते हैं.
+You may also provide your blacklist to other peers by sharing them; in return you may==आप अपनी ब्लैकलिस्ट दुसरे पीअर्स के साथ शेयर कर सकते हैं और बदले में 
+collect blacklist entries from other peers.==आप दुसरे पीअर्स  की  ब्लैकलिस्ट एन्त्रिएस ले सकते हैं 
+Active list:==एक्टिव लिस्ट :
+No blacklist selected==कोई भी ब्लैकलिस्ट सेलेक्ट नहीं की हुई 
+Select list:==सेलेक्ट लिस्ट 
+not shared::shared==शेयर नहीं किया हुआ ::शेयर किया हुआ
+"select"=="सेलेक्ट"
+Create new list:==नयी लिस्ट बनाये :
+"create"=="बनाये"
+Settings for this list==इस लिस्ट की सेत्त्तिंग करे 
+"Save"=="सेव करे"
+Share/don't share this list==शेयर / शेयर ना करे इस लिस्ट को 
+Delete this list==इस लिस्ट को डिलीट करे 
+Edit this list==इस लिस्ट को एडिट करे 
+These are the domain name/path patterns in==यह बह डोमेन नाम / पथ पैटर्न है  इन 
+Blacklist Pattern==ब्लैकलिस्ट पैटर्न 
+Edit selected pattern\(s\)==सेलेक्ट किये गए पैटर्न (ओं) को एडिट करें 
+Delete selected pattern\(s\)==सिलेक्टेड पैटर्न (ओं) को डिलीट करे 
+Move selected pattern\(s\) to==सलेक्टेड पैटर्न (ओं) को हटाये 
+#You can select them here for deletion==आप इन्हें देलेतिओन के लिए सेलेक्ट कर सकते हैं 
+Add new pattern:==नया पैटर्न जोड़े :
+"Add URL pattern"=="नया यूआरएल पैटर्न जोड़े "
+The right \'\*\', after the \'\/\', can be replaced by a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a>.== दाहिने"*" के बाद "/" बदला जा सकता है <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">रेगेक्स के द्वारा </a>.
+domain.net\/fullpath<==डोमेन .नेट \/फुल्ल्पथ <
+>domain.net\/\*<==>डोमेन .नेट /* <
+\*.domain.net\/\*<==*.डोमेन .नेट /*<
+\*.sub.domain.net\/\*<==*.सुब .डोमेन .दे /*<
+#sub.domain.\*\/\*<==सुब .डोमेन .*/*<
+#domain.\*\/\*<==डोमेन .*/*<
+a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a> \(slow\)==एक पूरा   <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">रेगेक्स</a> (मगर धीरे )
+#was removed from blacklist==ब्लैकलिस्ट से हटा दिया गया था 
+#was added to the blacklist==ब्लैकलिस्ट में जोड़ा गया था 
+Activate this list for==इस लिस्ट को सक्रिय करें
+Show entries:==एन्त्रिएस देखिये/दिखाएँ :
+Entries per page:==एन्तिरेस प्रति पेज :
+"Go"=="आगे बढे"
+Edit existing pattern\(s\):==मौजूदा पैटर्न (ओं) को एडिट करें  :
+"Save URL pattern\(s\)"=="यूआरएल पैटर्न (ओं) सेव करें "
+</body>==<script>window.onload = function () {\$("label:contains('proxy')").text('प्रॉक्सी '); \$("label:contains('crawler')").text('क्रेल्वेर '); \$("label:contains('dht')").text('DHT'); \$("label:contains('search')").text('खोज'); \$("label:contains('surftips')").text('सर्फिंगटिप्स '); \$("label:contains('news')").text('समाचार');}</script></body>
+#-----------------------------
+
+#File: BlacklistCleaner_p.html
+#---------------------------
+Blacklist Cleaner==ब्लैकलिस्ट क्लीनर 
+#Blacklist Cleaner==ब्लैकलिस्ट क्लीनर 
+Here you can remove or edit illegal or double blacklist-entries.==यहाँ से आप अवैध और डबल ब्लैकलिस्टेड एन्त्रिएस हटा सकते हैं 
+Check list==चेक लिस्ट 
+"Check"=="चेक"
+Allow regular expressions in host part of blacklist entries.==रेगुलर एक्सप्रेशन को ब्लैकलिस्ट एन्त्रिएस के होस्ट पार्ट में अनुमति दे 
+The blacklist-cleaner only works for the following blacklist-engines up to now:==ब्लैक लिस्ट क्लीनर केवल अब तक का निम्न ब्लैक लिस्ट इंजन के लिए काम करता है:
+Illegal Entries in \#\[blList\]\# for==अवैध एन्त्रिएस #[blList]# के लिए  
+
+
