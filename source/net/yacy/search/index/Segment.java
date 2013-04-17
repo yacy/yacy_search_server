@@ -492,6 +492,7 @@ public class Segment {
         final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(id, profile, responseHeader, document, condenser, referrerURL, language, urlCitationIndex, this.fulltext.getWebgraphConfiguration());
         
         // FIND OUT IF THIS IS A DOUBLE DOCUMENT
+        String hostid = url.hosthash();
         for (CollectionSchema[] checkfields: new CollectionSchema[][]{
                 {CollectionSchema.exact_signature_l, CollectionSchema.exact_signature_unique_b},
                 {CollectionSchema.fuzzy_signature_l, CollectionSchema.fuzzy_signature_unique_b}}) {
@@ -501,7 +502,7 @@ public class Segment {
                 // lookup the document with the same signature
                 long signature = ((Long) vector.getField(checkfield.getSolrFieldName()).getValue()).longValue();
                 try {
-                    if (this.fulltext.getDefaultConnector().existsByQuery(checkfield.getSolrFieldName() + ":\"" + Long.toString(signature) + "\"")) {
+                    if (this.fulltext.getDefaultConnector().existsByQuery(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + checkfield.getSolrFieldName() + ":\"" + Long.toString(signature) + "\"")) {
                         // change unique attribut in content
                         vector.setField(uniquefield.getSolrFieldName(), false);
                     }
@@ -511,7 +512,6 @@ public class Segment {
         
         // CHECK IF TITLE AND DESCRIPTION IS UNIQUE (this is by default not switched on)
         if (this.fulltext.getDefaultConfiguration().contains(CollectionSchema.host_id_s)) {
-            String hostid = url.hosthash();
             uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][]{
                     {CollectionSchema.title, CollectionSchema.title_exact_signature_l, CollectionSchema.title_unique_b},
                     {CollectionSchema.description, CollectionSchema.description_exact_signature_l, CollectionSchema.description_unique_b}}) {
