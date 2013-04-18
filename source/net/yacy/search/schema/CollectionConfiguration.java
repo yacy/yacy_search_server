@@ -713,6 +713,40 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // response time
             add(doc, CollectionSchema.responsetime_i, responseHeader == null ? 0 : Integer.parseInt(responseHeader.get(HeaderFramework.RESPONSE_TIME_MILLIS, "0")));
+            
+            // hreflang link tag, see http://support.google.com/webmasters/bin/answer.py?hl=de&answer=189077
+            if (allAttr || (contains(CollectionSchema.hreflang_url_sxt) && contains(CollectionSchema.hreflang_cc_sxt))) {
+                final String[] ccs = new String[html.getHreflang().size()];
+                final String[] urls = new String[html.getHreflang().size()];
+                c = 0;
+                for (Map.Entry<String, DigestURI> e: html.getHreflang().entrySet()) {
+                    ccs[c] = e.getKey();
+                    urls[c] = e.getValue().toNormalform(true);
+                    c++;
+                }
+                add(doc, CollectionSchema.hreflang_cc_sxt, ccs);
+                add(doc, CollectionSchema.hreflang_url_sxt, urls);
+            }
+
+            // page navigation url, see http://googlewebmastercentral.blogspot.de/2011/09/pagination-with-relnext-and-relprev.html
+            if (allAttr || (contains(CollectionSchema.navigation_url_sxt) && contains(CollectionSchema.navigation_type_sxt))) {
+                final String[] navs = new String[html.getNavigation().size()];
+                final String[] urls = new String[html.getNavigation().size()];
+                c = 0;
+                for (Map.Entry<String, DigestURI> e: html.getNavigation().entrySet()) {
+                    navs[c] = e.getKey();
+                    urls[c] = e.getValue().toNormalform(true);
+                    c++;
+                }
+                add(doc, CollectionSchema.navigation_type_sxt, navs);
+                add(doc, CollectionSchema.navigation_url_sxt, urls);
+                
+            }
+
+            // publisher url as defined in http://support.google.com/plus/answer/1713826?hl=de
+            if (allAttr || contains(CollectionSchema.publisher_url_s) && html.getPublisherLink() != null) {
+                add(doc, CollectionSchema.publisher_url_s, html.getPublisherLink().toNormalform(true));
+            }
         }
 
         // statistics about the links

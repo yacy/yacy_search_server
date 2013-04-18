@@ -128,6 +128,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final Map<DigestURI, EmbedEntry> embeds; // urlhash/embed relation
     private final Map<DigestURI, ImageEntry> images; // urlhash/image relation
     private final Map<String, String> metas;
+    private final Map<String, DigestURI> hreflang, navigation;
     private LinkedHashSet<String> titles;
     //private String headline;
     private List<String>[] headlines;
@@ -136,7 +137,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final CharBuffer content;
     private final EventListenerList htmlFilterEventListeners;
     private double lon, lat;
-    private DigestURI canonical;
+    private DigestURI canonical, publisher;
     private final int maxLinks;
     private int breadcrumbs;
 
@@ -173,6 +174,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.frames = new SizeLimitedSet<DigestURI>(maxLinks);
         this.iframes = new SizeLimitedSet<DigestURI>(maxLinks);
         this.metas = new SizeLimitedMap<String, String>(maxLinks);
+        this.hreflang = new SizeLimitedMap<String, DigestURI>(maxLinks);
+        this.navigation = new SizeLimitedMap<String, DigestURI>(maxLinks);
         this.script = new SizeLimitedSet<DigestURI>(maxLinks);
         this.titles = new LinkedHashSet<String>();
         this.headlines = new ArrayList[6];
@@ -187,6 +190,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.lat = 0.0d;
         this.evaluationScores.match(Element.url, root.toNormalform(true));
         this.canonical = null;
+        this.publisher = null;
         this.breadcrumbs = 0;
     }
 
@@ -398,6 +402,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 final String rel = tagopts.getProperty("rel", EMPTY_STRING);
                 final String linktitle = tagopts.getProperty("title", EMPTY_STRING);
                 final String type = tagopts.getProperty("type", EMPTY_STRING);
+                final String hreflang = tagopts.getProperty("hreflang", EMPTY_STRING);
 
                 if (rel.equalsIgnoreCase("shortcut icon")) {
                     final ImageEntry ie = new ImageEntry(newLink, linktitle, -1, -1, -1);
@@ -407,8 +412,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     tagopts.put("name", this.titles.size() == 0 ? "" : this.titles.iterator().next());
                     mergeAnchors(newLink, tagopts);
                     this.canonical = newLink;
+                } else if (rel.equalsIgnoreCase("publisher")) {
+                    this.publisher = newLink;
+                } else if (rel.equalsIgnoreCase("top") || rel.equalsIgnoreCase("up") || rel.equalsIgnoreCase("next") || rel.equalsIgnoreCase("prev") || rel.equalsIgnoreCase("first") || rel.equalsIgnoreCase("last")) {
+                    this.navigation.put(rel, newLink);
                 } else if (rel.equalsIgnoreCase("alternate") && type.equalsIgnoreCase("application/rss+xml")) {
                     this.rss.put(newLink, linktitle);
+                } else if (rel.equalsIgnoreCase("alternate") && hreflang.length() > 0) {
+                    this.hreflang.put(hreflang, newLink);
                 } else if (rel.equalsIgnoreCase("stylesheet") && type.equalsIgnoreCase("text/css")) {
                     this.css.put(newLink, rel);
                     this.evaluationScores.match(Element.csspath, href);
@@ -706,6 +717,18 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     public DigestURI getCanonical() {
         return this.canonical;
+    }
+
+    public DigestURI getPublisherLink() {
+        return this.publisher;
+    }
+    
+    public Map<String, DigestURI> getHreflang() {
+        return this.hreflang;
+    }
+    
+    public Map<String, DigestURI> getNavigation() {
+        return this.navigation;
     }
 
     /**

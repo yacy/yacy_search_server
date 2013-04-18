@@ -142,6 +142,12 @@ public enum CollectionSchema implements SchemaDeclaration {
     iframes_sxt(SolrType.string, true, true, true, false, false, "list of all links to iframes"),
     iframesscount_i(SolrType.num_integer, true, true, false, false, false, "number of iframes_txt"),
 
+    hreflang_url_sxt(SolrType.string, true, true, true, false, false, "url of the hreflang link tag, see http://support.google.com/webmasters/bin/answer.py?hl=de&answer=189077"),
+    hreflang_cc_sxt(SolrType.string, true, true, true, false, false, "country code of the hreflang link tag, see http://support.google.com/webmasters/bin/answer.py?hl=de&answer=189077"),
+    navigation_url_sxt(SolrType.string, true, true, true, false, false, "page navigation url, see http://googlewebmastercentral.blogspot.de/2011/09/pagination-with-relnext-and-relprev.html"),
+    navigation_type_sxt(SolrType.string, true, true, true, false, false, "page navigation rel property value, can contain one of {top,up,next,prev,first,last}"),
+    publisher_url_s(SolrType.string, true, true, false, false, false, "publisher url as defined in http://support.google.com/plus/answer/1713826?hl=de"),
+    
     url_protocol_s(SolrType.string, true, true, false, false, false, "the protocol of the url"),
     url_paths_sxt(SolrType.string, true, true, true, false, true, "all path elements in the url"),
     url_file_ext_s(SolrType.string, true, true, false, false, false, "the file name extension"),

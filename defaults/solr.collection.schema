@@ -307,6 +307,21 @@ underline_txt
 ## number of attr_iframes, int
 #iframesscount_i
 
+## url of the hreflang link tag, see http://support.google.com/webmasters/bin/answer.py?hl=de&answer=189077
+#hreflang_url_sxt
+
+## country code of the hreflang link tag, see http://support.google.com/webmasters/bin/answer.py?hl=de&answer=189077
+#hreflang_cc_sxt
+
+## page navigation url, see http://googlewebmastercentral.blogspot.de/2011/09/pagination-with-relnext-and-relprev.html
+#navigation_url_sxt
+
+## page navigation rel property value, can contain one of {top,up,next,prev,first,last}
+#navigation_type_sxt
+
+## publisher url as defined in http://support.google.com/plus/answer/1713826?hl=de
+#publisher_url_s
+
 ## the protocol of the url
 url_protocol_s
 
