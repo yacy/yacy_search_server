@@ -114,5 +114,118 @@ Check list==चेक लिस्ट
 Allow regular expressions in host part of blacklist entries.==रेगुलर एक्सप्रेशन को ब्लैकलिस्ट एन्त्रिएस के होस्ट पार्ट में अनुमति दे 
 The blacklist-cleaner only works for the following blacklist-engines up to now:==ब्लैक लिस्ट क्लीनर केवल अब तक का निम्न ब्लैक लिस्ट इंजन के लिए काम करता है:
 Illegal Entries in \#\[blList\]\# for==अवैध एन्त्रिएस #[blList]# के लिए  
+Deleted \#\[delCount\]\# entries==मिटाई हुई \#\[delCount\]\# एन्त्रिएस 
+Altered \#\[alterCount\]\# entries!==बदली हुई \#\[alterCount\]\# एन्त्रिएस 
+Two wildcards in host-part==होस्ट भाग में दो वाइल्डकार्ड
+Either subdomain <u>or</u> wildcard==या तो उपडोमेन <u> या </ u>  वाइल्डकार्ड
+Path is invalid Regex== अवैध रेगेक्स का पथ 
+Wildcard not on begin or end==वाइल्डकार्ड नहीं पर  शुरू या खत्म पर
+Host contains illegal chars==होस्ट  में अवैध करैक्टर  शामिल
+Double==डबल 
+"Change Selected"=="बदलना चुना गया"
+"Delete Selected"=="मिटाना चुना गया "
+No Blacklist selected==कोई भी ब्लैकलिस्ट नहीं चुना गया 
+#-----------------------------
 
+#File: BlacklistImpExp_p.html
+#---------------------------
+#Blacklist Import==Blacklist Import
+Used Blacklist engine:==ब्लैकलिस्ट इंजन उपयोग किया गया :
+Import blacklist items from...==ब्लैकलिस्ट सूची इम्पोर्ट करें ...
+other YaCy peers:==अन्य यासी पीअर्स :
+"Load new blacklist items"=="नयी ब्लैकलिस्ट सूची लोड करैं "
+#URL:==URL:
+plain text file:<==प्लेन टेक्स्ट फाइल :<
+XML file:==क्स्म्ल फाइल :
+Upload a regular text file which contains one blacklist entry per line.==एक रेगुलर टेक्स्ट फाइल अपलोड करे जिसमे एक ब्लैकलिस्ट प्रति लाइन  में शामिल हो 
+Upload an XML file which contains one or more blacklists.==एक क्स्म्ल फाइल अपलोड करे जिसमे एक या एक से अधिक ब्लैकलिस्ट हो 
+Export blacklist items to...==ब्लैकलिस्ट सूची को एक्सपोर्ट करे ...
+Here you can export a blacklist as an XML file. This file will contain additional==यहाँ से आप ब्लैकलिस्ट एक्सपोर्ट कर सकते हैं क्स्म्ल के रूप में, यह फाइल अतिरिक्त
+information about which cases a blacklist is activated for.== जानकारी रखती है की किस मामले के लिए ब्लैकलिस्ट एक्टिवेटिड है 
+"Export list as XML"=="सूची को क्स्म्ल में एक्सपोर्ट करे "
+Here you can export a blacklist as a regular text file with one blacklist entry per line.==यहाँ से आप ब्लैकलिस्ट एक रेगुलर टेक्स्ट फाइल में एक्सपोर्ट कर सकते हैं जिसमे ,जो की ब्लैकलिस्ट प्रति एंट्री होगा  
+This file will not contain any additional information==यह फाइल कोई अत्रिकित जानकारी नहीं देगी 
+"Export list as text"=="इस सूची को टेक्स्ट में एक्सपोर्ट करे "
+
+#File: BlacklistTest_p.html
+#---------------------------
+Blacklist Test==ब्लैकलिस्ट टेस्ट 
+Used Blacklist engine:==इस्तेमाल किया हुआ ब्लैकलिस्ट इंजन :
+Test list:==टेस्ट की सूची :
+"Test"=="टेस्ट"
+The tested URL was==टेस्ट किया हुआ यूआरएल था 
+It is blocked for the following cases:==यह निम्नलिखित मामलों के लिए ब्लॉक किया गया है:
+#Crawling==क्रेव्लिंग 
+#DHT==DHT
+#News==न्यूज़ 
+#Proxy==प्रॉक्सी 
+Search==सर्च 
+Surftips==सर्फ टिप्स 
+#-----------------------------
+
+#File: Blog.html
+#---------------------------
+by==से
+Comments</a>==टिप्पणी</a>
+>edit==>एडिट 
+>delete==>डिलीट 
+Edit<==एडिट<
+previous entries==पिछली एन्त्रिएस 
+next entries==अगली एन्त्रिएस 
+new entry==नयी  एन्त्रिएस 
+import XML-File==क्स्म्ल फाइल इम्पोर्ट करे 
+export as XML==क्स्म्ल फाइल में एक्सपोर्ट करे 
+Comments</a>==टिप्पणी</a>
+Blog-Home==ब्लॉग घर
+Author:==लेखक:
+Subject:==विषय:
+#Text:==टेक्स्ट:
+You can use==आप उपयोग कर सकते हैं
+Yacy-Wiki Code==यासी -विकी कोड 
+here.==यहां.
+Comments:==टिप्पणी:
+deactivated==निष्क्रिय
+>activated==>सक्रिय
+moderated==मॉडरेटेड 
+"Submit"=="सबमिट "
+"Preview"=="प्रीव्यू "
+"Discard"=="दिस्कार्द "
+>Preview==>प्रीव्यू 
+No changes have been submitted so far!==अभी तक कोई चनगेस सबमिट नहीं हुआ !
+Access denied==ऐक्सेस डिनाइड
+To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==यदि आप नया ब्लॉग या एडिट करना चाहते है तो आपको एडमिन से लॉग इन होना होगा  या यूजर जिसके पास ब्लॉग राईट हो 
+Are you sure==क्या आप यह   
+that you want to delete== हटाना चाहते हैं:
+Confirm deletion==हटाने की पुष्टि
+Yes, delete it.==हाँ, इसे हटा दे 
+No, leave it.==नहीं ,रहने दे 
+Import was successful!==इम्पोर्ट सफल रहा !
+Import failed, maybe the supplied file was no valid blog-backup?==इम्पोर्ट असफल रहा ! शायद यह फाइल सही नहीं है 
+Please select the XML-file you want to import:==क्स्म्ल फाइल सेलेक्ट करे जो आपको इम्पोर्ट करनी है :
+#-----------------------------
+
+#File: BlogComments.html
+#---------------------------
+by==से
+Comments</a>==टिप्पणी</a>
+Login==लॉग इन 
+Blog-Home==ब्लॉग घर 
+delete</a>==डिलीट </a>
+allow</a>==अनुमति देना</a>
+Author:==लेखक:
+Subject:==विषय:
+#Text:==टेक्स्ट:
+You can use==आप उपयोग कर सकते हैं
+Yacy-Wiki Code==यासी -विकी कोड
+here.==यहां.
+"Submit"=="सबमिट"
+"Preview"=="प्रीव्यू"
+"Discard"=="दिस्कार्द"
+#-----------------------------
+
+#File: Bookmarks.html
+#---------------------------
+YaCy '#[clientname]#': Bookmarks==यासी \'\#\[क्लाइंट  का नाम\]\#\': बुकमार्क्स
+The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==यह बुकमार्क्स की सूचि आरएसएस फीड्स में  पुनः प्राप्त की जा सकती है . आप एक विशिष्ट टैग का चयन करते हैं तो यह भी किया जा सकता है..
+Click the API icon to load the RSS from the current selection.==मौजूदा चयन से आरएसएस लोड करने के लिए एपीआई आइकन पर क्लिक करें.
 
