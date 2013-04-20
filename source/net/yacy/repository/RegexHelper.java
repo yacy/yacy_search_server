@@ -40,6 +40,7 @@ public final class RegexHelper {
      * @return true if the expression is a valid regular expression, else false
      */
     public static boolean isValidRegex(final String expression) {
+        if (expression == null) return false;
         boolean ret = true;
         try {
             Pattern.compile(expression);
