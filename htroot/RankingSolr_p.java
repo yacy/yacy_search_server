@@ -68,7 +68,7 @@ public class RankingSolr_p {
             }
         }
         if (post != null && post.containsKey("ResetBoosts")) {
-            String s = "text_t^2.0,url_paths_sxt^20.0,title^100.0,synonyms_sxt^1.0";
+            String s = "url_paths_sxt^1000.0,synonyms_sxt^1.0,title^10000.0,text_t^2.0,h1_txt^1000.0,h2_txt^100.0,host_organization_s^100000.0";
             sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_ + profileNr, s);
             sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).updateBoosts(s);
         }
@@ -96,7 +96,7 @@ public class RankingSolr_p {
             }
         }
         if (post != null && post.containsKey("ResetBF")) {
-            String bf = ""; //"div(add(1,references_i),pow(add(1,inboundlinkscount_i),1.6))";
+            String bf = "product(recip(rord(last_modified),1,1000,1000),div(product(log(product(references_external_i,references_exthosts_i)),div(references_internal_i,host_extent_i)),add(clickdepth_i,1)))";
             if (bf != null) {
                 sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_ + profileNr, bf);
                 sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setBoostFunction(bf);
