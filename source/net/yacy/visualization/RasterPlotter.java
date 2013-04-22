@@ -39,6 +39,7 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.ComponentSampleModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
+import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.BufferedOutputStream;
@@ -46,6 +47,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
@@ -88,12 +91,8 @@ public class RasterPlotter {
     private final   long           backgroundCol;
     private         DrawMode       defaultMode;
     private byte[]  frame;
-    
-    public RasterPlotter(final int width, final int height, final DrawMode drawMode, final String backgroundColor) {
-        this(width, height, drawMode, Long.parseLong(backgroundColor, 16));
-    }
 
-    public RasterPlotter(final int width, final int height, final DrawMode drawMode, final long backgroundColor) {
+    public RasterPlotter(final int width, final int height, final long backgroundColor) {
         this.cc = new int[3];
         this.width = width;
         this.height = height;
@@ -101,6 +100,14 @@ public class RasterPlotter {
         this.defaultColR = 0xFF;
         this.defaultColG = 0xFF;
         this.defaultColB = 0xFF;
+    }
+    
+    public RasterPlotter(final int width, final int height, final DrawMode drawMode, final String backgroundColor) {
+        this(width, height, drawMode, Long.parseLong(backgroundColor, 16));
+    }
+
+    public RasterPlotter(final int width, final int height, final DrawMode drawMode, final long backgroundColor) {
+        this(width, height, backgroundColor);
         this.defaultMode = drawMode;
         try {
             // we need our own frame buffer to get a very, very fast transformation to png because we can omit the PixedGrabber, which is up to 800 times slower
@@ -139,8 +146,11 @@ public class RasterPlotter {
 
         if (this.frame == null) {
             final Graphics2D gr = this.image.createGraphics();
-            gr.setBackground(new Color(bgR, bgG, bgB));
+            Color c = new Color(bgR, bgG, bgB);
+            gr.setBackground(c);
             gr.clearRect(0, 0, this.width, this.height);
+            gr.setColor(c);
+            gr.fillRect(0, 0, this.width, this.height);
         } else {
             int p = 0;
             for (int i = 0; i < width; i++) {
@@ -797,6 +807,47 @@ public class RasterPlotter {
         m.setColor(BLUE);
         m.line(0, 130, 100, 130, 100); PrintTool.print(m, 0, 125, 0, "Blue", -1);
         m.line(80, 0,   80, 300, 100);
+    }
+
+    public BufferedImage toIndexed() {
+        Set<Integer> colors = new TreeSet<Integer>();
+        int[] c = new int[3];
+        for (int y = this.getHeight() - 1; y >= 0; y--) {
+            for (int x = this.getWidth() - 1; x >= 0; x--) {
+                c = getPixel(x, y, c);
+                colors.add((c[0]<<16)|(c[1]<<8)|c[2]);
+            }
+        }
+        int[] cmap = new int[colors.size()];
+        int i = 0;
+        for (Integer cc: colors) {
+            cmap[i++] = cc.intValue();
+            if (i > 255) break;
+        }
+     
+        int bitCount = 1;
+        while ((colors.size() - 1) >> bitCount != 0) bitCount *= 2;
+     
+        IndexColorModel cm = new IndexColorModel(bitCount, colors.size(), cmap, 0, DataBuffer.TYPE_BYTE, null);
+        
+        /*
+        byte [] data = null;
+        int bytesPerRow = this.getWidth()/8 + (this.getWidth()%8!=0?1:0);
+        data = new byte[this.getHeight() * bytesPerRow];  
+        DataBuffer db = new DataBufferByte(data, data.length);  
+        WritableRaster wr = Raster.createPackedRaster(db, this.getWidth(), this.getHeight(), 1, null);  
+        BufferedImage dest = new BufferedImage(cm, wr, false, null);  
+        */
+        
+        BufferedImage dest = new BufferedImage(this.getWidth(), this.getHeight(), cm.getPixelSize() < 8 ? BufferedImage.TYPE_BYTE_BINARY : BufferedImage.TYPE_BYTE_INDEXED, cm);
+        dest.createGraphics().drawImage(this.getImage(), 0, 0, null);
+        return dest;
+    }
+    
+    public static BufferedImage convertToIndexed(BufferedImage src) {
+        BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_BYTE_INDEXED);
+        dest.createGraphics().drawImage(src,0,0, null);
+        return dest;
     }
 
     public static ByteBuffer exportImage(final BufferedImage image, final String targetExt) {

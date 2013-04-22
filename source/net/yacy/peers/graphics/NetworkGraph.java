@@ -58,7 +58,7 @@ public class NetworkGraph {
     private static int longestName = 30;
 
     public  static final String COL_BACKGROUND     = "FFFFFF";
-    private static final String COL_DHTCIRCLE      = "006020";
+    public  static final String COL_DHTCIRCLE      = "006020";
     private static final String COL_HEADLINE       = "FFFFFF";
     private static final String COL_ACTIVE_DOT     = "000044";
     private static final String COL_ACTIVE_LINE    = "113322";
