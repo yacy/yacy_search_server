@@ -854,7 +854,7 @@ public final class Fulltext {
             this.failure = null;
             this.format = format;
             this.dom = dom;
-            if ((dom) && (format == 2)) dom = false;
+            //if ((dom) && (format == 2)) dom = false;
         }
 
         @Override
@@ -878,7 +878,7 @@ public final class Fulltext {
                 
                
                 if (this.dom) {
-                    Map<String, ReversibleScoreMap<String>> scores = Fulltext.this.getDefaultConnector().getFacets(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", 100000, CollectionSchema.host_s.getSolrFieldName());
+                    Map<String, ReversibleScoreMap<String>> scores = Fulltext.this.getDefaultConnector().getFacets(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", 100000000, CollectionSchema.host_s.getSolrFieldName());
                     ReversibleScoreMap<String> stats = scores.get(CollectionSchema.host_s.getSolrFieldName());
                     for (final String host: stats) {
                         if (this.pattern != null && !this.pattern.matcher(host).matches()) continue;
