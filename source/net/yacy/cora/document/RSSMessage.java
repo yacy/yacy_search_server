@@ -25,20 +25,27 @@
 package net.yacy.cora.document;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.cora.lod.vocabulary.Geo;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.document.Document;
+import net.yacy.document.parser.html.ImageEntry;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMessage> {
 
@@ -335,4 +342,29 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         size = size / 1024;
         return size + " gbyte";
     }
+    /*
+    public Document toDocument() {
+        DigestURI url = new DigestURI(this.getLink());
+        List<String> titles = new ArrayList<String>();
+        titles.add(this.getTitle());
+        return new Document(
+                url,
+                Classification.ext2mime(url.getFileExtension(), "text/plain"),
+                "UTF8",
+                null,
+                this.getLanguage(),
+                Token.subject.valueFrom(this.map, ""),
+                titles,
+                this.getAuthor(),
+                this.getCopyright(),
+                null,
+                this.getDescription(),
+                0.0d, 0.0d,
+                this.getFulltext(),
+                null,
+                null,
+                null,
+                false);
+    }
+    */
 }

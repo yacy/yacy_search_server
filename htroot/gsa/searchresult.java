@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.ArrayList;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.Ranking;
@@ -30,11 +29,11 @@ import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.util.CommonPattern;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryGoal;
+import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
@@ -150,28 +149,13 @@ public class searchresult {
         post.put("hl.simple.post", "</b>");
         post.put("hl.fragsize", Integer.toString(SearchEvent.SNIPPET_MAX_LENGTH));
         
-        String[] site = post.remove("site"); // example: col1|col2
         //String[] access = post.remove("access");
         //String[] entqr = post.remove("entqr");
 
         // add sites operator
+        String[] site = post.remove("site"); // example: col1|col2
         if (site != null && site[0].length() > 0) {
-            String[] s0 = CommonPattern.VERTICALBAR.split(site[0]);
-            ArrayList<String> sites = new ArrayList<String>(2);
-            for (String s: s0) {
-                s = s.trim().toLowerCase();
-                if (s.length() > 0) sites.add(s);
-            }
-            StringBuilder fq = new StringBuilder(20);
-            if (sites.size() > 1) {
-                fq.append(CollectionSchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(0));
-                for (int i = 1; i < sites.size(); i++) {
-                    fq.append(" OR ").append(CollectionSchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(i));
-                }
-            } else if (sites.size() == 1) {
-                fq.append(CollectionSchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(0));
-            }
-            post.put(CommonParams.FQ, fq.toString());
+            post.put(CommonParams.FQ, QueryModifier.parseCollectionExpression(site[0]));
         }
         
         // get the embedded connector
