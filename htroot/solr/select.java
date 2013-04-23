@@ -163,7 +163,7 @@ public class select {
         String q = post.get(CommonParams.Q, "");
         if (!post.containsKey(CommonParams.START)) post.put(CommonParams.START, post.remove("startRecord", 0)); // sru patch
         if (!post.containsKey(CommonParams.ROWS)) post.put(CommonParams.ROWS, post.remove("maximumRecords", 10)); // sru patch
-        post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 10000 : 100));
+        post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 100000000 : 100));
         
         // set ranking according to profile number if ranking attributes are not given in the request
         if (!post.containsKey("sort") && !post.containsKey("bq") && !post.containsKey("bf") && !post.containsKey("boost")) {
