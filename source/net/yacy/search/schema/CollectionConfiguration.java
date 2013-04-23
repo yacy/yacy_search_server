@@ -56,7 +56,6 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.CommonPattern;
-import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -329,7 +328,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     }
     
     public SolrVector yacy2solr(
-            final String id, final CrawlProfile profile, final ResponseHeader responseHeader,
+            final String id, final String[] collections, final ResponseHeader responseHeader,
             final Document document, Condenser condenser, DigestURI referrerURL, String language,
             IndexCell<CitationReference> citations,
             WebgraphConfiguration webgraph) {
@@ -362,7 +361,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             final InetAddress address = digestURI.getInetAddress();
             if (address != null) add(doc, CollectionSchema.ip_s, address.getHostAddress());
         }
-        if (allAttr || contains(CollectionSchema.collection_sxt) && profile != null) add(doc, CollectionSchema.collection_sxt, profile.collections());
+        if (allAttr || contains(CollectionSchema.collection_sxt) && collections != null && collections.length > 0) add(doc, CollectionSchema.collection_sxt, collections);
         if (allAttr || contains(CollectionSchema.url_protocol_s)) add(doc, CollectionSchema.url_protocol_s, digestURI.getProtocol());
         Map<String, String> searchpart = digestURI.getSearchpartMap();
         if (searchpart == null) {
@@ -756,7 +755,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.outboundlinksnofollowcount_i)) add(doc, CollectionSchema.outboundlinksnofollowcount_i, document.outboundLinkNofollowCount());
         
         // list all links
-        WebgraphConfiguration.Subgraph subgraph = webgraph.edges(digestURI, responseHeader, profile.collections(), clickdepth, document.getAnchors(), images, inboundLinks, outboundLinks, citations);
+        WebgraphConfiguration.Subgraph subgraph = webgraph.edges(digestURI, responseHeader, collections, clickdepth, document.getAnchors(), images, inboundLinks, outboundLinks, citations);
         doc.webgraphDocuments.addAll(subgraph.edges);
         if (allAttr || contains(CollectionSchema.inboundlinks_protocol_sxt)) add(doc, CollectionSchema.inboundlinks_protocol_sxt, protocolList2indexedList(subgraph.urlProtocols[0]));
         if (allAttr || contains(CollectionSchema.inboundlinks_urlstub_txt)) add(doc, CollectionSchema.inboundlinks_urlstub_txt, subgraph.urlStubs[0]);

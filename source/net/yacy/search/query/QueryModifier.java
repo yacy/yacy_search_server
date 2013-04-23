@@ -202,10 +202,11 @@ public class QueryModifier {
         }
         StringBuilder filterQuery = new StringBuilder(20);
         if (sites.size() > 1) {
-            filterQuery.append(CollectionSchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(0));
+            filterQuery.append('(').append(CollectionSchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(0));
             for (int i = 1; i < sites.size(); i++) {
                 filterQuery.append(" OR ").append(CollectionSchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(i));
             }
+            filterQuery.append(')');
         } else if (sites.size() == 1) {
             filterQuery.append(CollectionSchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(0));
         }

@@ -36,6 +36,7 @@ import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.retrieval.RSSLoader;
@@ -48,6 +49,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -58,6 +60,11 @@ public class Load_RSS_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard)env;
 
+        final String collection = post == null ? "user" : CommonPattern.SPACE.matcher(post.get("collection", "user").trim()).replaceAll("");
+        final String[] collections = collection.length() == 0 ? new String[0] : collection.split(",");
+        boolean collectionEnabled = sb.index.fulltext().getDefaultConfiguration().isEmpty() || sb.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.collection_sxt);
+        prop.put("showload_collectionEnabled", collectionEnabled ? 1 : 0);
+        prop.put("showload_collection", collection);
         prop.put("showload", 0);
         prop.put("showitems", 0);
         prop.put("shownewfeeds", 0);
@@ -167,7 +174,7 @@ public class Load_RSS_p {
                         continue;
                     }
                     // load feeds concurrently to get better responsibility in web interface
-                    new RSSLoader(sb, url).start();
+                    new RSSLoader(sb, url, collections).start();
                 }
             }
         }
@@ -274,7 +281,7 @@ public class Load_RSS_p {
                     final DigestURI messageurl = new DigestURI(message.getLink());
                     if (RSSLoader.indexTriggered.containsKey(messageurl.hash())) continue loop;
                     if (sb.urlExists(ASCII.String(messageurl.hash())) != null) continue loop;
-                    sb.addToIndex(messageurl, null, null);
+                    sb.addToIndex(messageurl, null, null, collections);
                     RSSLoader.indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
                 } catch (final IOException e) {
                     Log.logException(e);
@@ -287,7 +294,7 @@ public class Load_RSS_p {
         if (rss != null && post.containsKey("indexAllItemContent")) {
             record_api = true;
             final RSSFeed feed = rss.getFeed();
-            RSSLoader.indexAllRssFeed(sb, url, feed);
+            RSSLoader.indexAllRssFeed(sb, url, feed, collections);
         }
 
         if (record_api && rss != null && rss.getFeed() != null && rss.getFeed().getChannel() != null) {

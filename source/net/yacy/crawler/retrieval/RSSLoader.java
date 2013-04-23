@@ -54,10 +54,12 @@ public class RSSLoader extends Thread {
 
     DigestURI urlf;
     Switchboard sb;
+    String[] collections;
 
-    public RSSLoader(final Switchboard sb, final DigestURI urlf) {
+    public RSSLoader(final Switchboard sb, final DigestURI urlf, final String[] collections) {
         this.sb = sb;
         this.urlf = urlf;
+        this.collections = collections;
     }
 
     @Override
@@ -79,20 +81,20 @@ public class RSSLoader extends Thread {
             return;
         }
         final RSSFeed feed = rss.getFeed();
-        indexAllRssFeed(this.sb, this.urlf, feed);
+        indexAllRssFeed(this.sb, this.urlf, feed, this.collections);
 
         // add the feed also to the scheduler
         recordAPI(this.sb, null, this.urlf, feed, 7, "seldays");
     }
 
-    public static void indexAllRssFeed(final Switchboard sb, final DigestURI url, final RSSFeed feed) {
+    public static void indexAllRssFeed(final Switchboard sb, final DigestURI url, final RSSFeed feed, String[] collections) {
         int loadCount = 0;
         loop: for (final RSSMessage message: feed) {
             try {
                 final DigestURI messageurl = new DigestURI(message.getLink());
                 if (indexTriggered.containsKey(messageurl.hash())) continue loop;
                 if (sb.urlExists(ASCII.String(messageurl.hash())) != null) continue loop;
-                sb.addToIndex(messageurl, null, null);
+                sb.addToIndex(messageurl, null, null, collections);
                 indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
                 loadCount++;
             } catch (final IOException e) {

@@ -25,27 +25,20 @@
 package net.yacy.cora.document;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.cora.lod.vocabulary.Geo;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.CommonPattern;
-import net.yacy.document.Document;
-import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMessage> {
 

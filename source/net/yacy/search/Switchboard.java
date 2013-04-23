@@ -2620,6 +2620,7 @@ public final class Switchboard extends serverSwitch {
             for ( int i = 0; i < in.documents.length; i++ ) {
                 storeDocumentIndex(
                     in.queueEntry,
+                    in.queueEntry.profile().collections(),
                     in.documents[i],
                     in.condenser[i],
                     null,
@@ -2631,6 +2632,7 @@ public final class Switchboard extends serverSwitch {
 
     private void storeDocumentIndex(
         final Response queueEntry,
+        final String[] collections,
         final Document document,
         final Condenser condenser,
         final SearchEvent searchEvent,
@@ -2679,7 +2681,7 @@ public final class Switchboard extends serverSwitch {
             this.index.storeDocument(
                 url,
                 referrerURL,
-                queueEntry.profile(),
+                collections,
                 queueEntry.getResponseHeader(),
                 document,
                 condenser,
@@ -2749,12 +2751,13 @@ public final class Switchboard extends serverSwitch {
         final DigestURI url,
         final Map<DigestURI, String> links,
         final SearchEvent searchEvent,
-        final String heuristicName) {
+        final String heuristicName,
+        final String[] collections) {
 
         // add the landing page to the index. should not load that again since it should be in the cache
         if ( url != null ) {
             try {
-                addToIndex(url, searchEvent, heuristicName);
+                addToIndex(url, searchEvent, heuristicName, collections);
             } catch ( final IOException e ) {
             } catch ( final Parser.Failure e ) {
             }
@@ -2767,7 +2770,7 @@ public final class Switchboard extends serverSwitch {
         // take the matcher and load them all
         for ( final Map.Entry<DigestURI, String> entry : matcher.entrySet() ) {
             try {
-                addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent, heuristicName);
+                addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent, heuristicName, collections);
             } catch ( final IOException e ) {
             } catch ( final Parser.Failure e ) {
             }
@@ -2776,7 +2779,7 @@ public final class Switchboard extends serverSwitch {
         // take then the no-matcher and load them also
         for ( final Map.Entry<DigestURI, String> entry : links.entrySet() ) {
             try {
-                addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent, heuristicName);
+                addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent, heuristicName, collections);
             } catch ( final IOException e ) {
             } catch ( final Parser.Failure e ) {
             }
@@ -2909,7 +2912,7 @@ public final class Switchboard extends serverSwitch {
      * @throws IOException
      * @throws Parser.Failure
      */
-    public void addToIndex(final DigestURI url, final SearchEvent searchEvent, final String heuristicName)
+    public void addToIndex(final DigestURI url, final SearchEvent searchEvent, final String heuristicName, final String[] collections)
         throws IOException,
         Parser.Failure {
         if (searchEvent != null) {
@@ -2956,6 +2959,7 @@ public final class Switchboard extends serverSwitch {
                             Switchboard.this.webStructure.generateCitationReference(url, document);
                             storeDocumentIndex(
                                 response,
+                                collections,
                                 document,
                                 condenser,
                                 searchEvent,
@@ -3341,7 +3345,7 @@ public final class Switchboard extends serverSwitch {
                         }
 
                         // add all pages to the index
-                        addAllToIndex(url, links, searchEvent, "site");
+                        addAllToIndex(url, links, searchEvent, "site", new String[]{"site"});
                     }
                 } catch ( final Throwable e ) {
                     Log.logException(e);
@@ -3454,7 +3458,7 @@ public final class Switchboard extends serverSwitch {
                             + feedName
                             + "' rss feed");
                         // add all pages to the index
-                        addAllToIndex(null, links, searchEvent, feedName);
+                        addAllToIndex(null, links, searchEvent, feedName, new String[]{"rss"});
                     }
                 } catch ( final Throwable e ) {
                     //Log.logException(e);

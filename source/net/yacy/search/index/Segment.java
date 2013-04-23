@@ -51,7 +51,6 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
@@ -449,7 +448,7 @@ public class Segment {
     public SolrInputDocument storeDocument(
             final DigestURI url,
             final DigestURI referrerURL,
-            final CrawlProfile profile,
+            final String[] collections,
             final ResponseHeader responseHeader,
             final Document document,
             final Condenser condenser,
@@ -489,7 +488,7 @@ public class Segment {
         char docType = Response.docType(document.dc_format());
         
         // CREATE SOLR DOCUMENT
-        final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(id, profile, responseHeader, document, condenser, referrerURL, language, urlCitationIndex, this.fulltext.getWebgraphConfiguration());
+        final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(id, collections, responseHeader, document, condenser, referrerURL, language, urlCitationIndex, this.fulltext.getWebgraphConfiguration());
         
         // FIND OUT IF THIS IS A DOUBLE DOCUMENT
         String hostid = url.hosthash();

@@ -34,28 +34,30 @@
           <dt>Preview</dt>
           <dd><input type="submit" name="showrss" value="Show RSS Items" /></dd>
           <dt>Indexing</dt>
-          <dd>#(showload)#Available after successful loading of rss feed in preview::
-          <input type="submit" name="indexAllItemContent" value="Add All Items to Index (full content of url)" />
+          <dd>#(showload)#<input type="hidden" name="collection" id="collection" value="#[collection]#" />Available after successful loading of rss feed in preview::
           <dl>
             <dt>once<input type="radio" name="repeat" value="off" checked="checked"/></dt>
             <dd>load this feed once now</dd>
 			<dt>scheduled<input type="radio" name="repeat" value="on"/></dt>
 			<dd>repeat the feed loading every<br/>
-			<select name="repeat_time">
-              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-              <option value="7" selected="selected">7</option>
-              <option value="8">8</option><option value="9">9</option><option value="10">10</option>
-              <option value="12">12</option><option value="14">14</option><option value="21">21</option>
-              <option value="28">28</option><option value="30">30</option>
-			</select>
-			<select name="repeat_unit">
-              <option value="selminutes">minutes</option>
-              <option value="selhours">hours</option>
-              <option value="seldays" selected="selected">days</option>
-            </select> automatically.
+			  <select name="repeat_time">
+                <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                <option value="7" selected="selected">7</option>
+                <option value="8">8</option><option value="9">9</option><option value="10">10</option>
+                <option value="12">12</option><option value="14">14</option><option value="21">21</option>
+                <option value="28">28</option><option value="30">30</option>
+			  </select>
+			  <select name="repeat_unit">
+                <option value="selminutes">minutes</option>
+                <option value="selhours">hours</option>
+                <option value="seldays" selected="selected">days</option>
+              </select> automatically.
 			</dd>
+            <dt>collection</dt>
+            <dd><input name="collection" id="collection" type="text" size="60" maxlength="100" value="#[collection]#" #(collectionEnabled)#disabled="disabled"::#(/collectionEnabled)# /></dd>
           </dl>
+          <input type="submit" name="indexAllItemContent" value="Add All Items to Index (full content of url)" />
           #(/showload)#</dd>
 	      
         </dl>
