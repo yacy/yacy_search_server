@@ -20,8 +20,11 @@
 
 package net.yacy.search.query;
 
+import java.util.ArrayList;
+
 import org.apache.solr.common.params.CommonParams;
 
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
@@ -30,7 +33,7 @@ import net.yacy.server.serverObjects;
 public class QueryModifier {
 
     private final StringBuilder modifier;
-    public String sitehost, sitehash, filetype, protocol, author;
+    public String sitehost, sitehash, filetype, protocol, author, collection;
     
     public QueryModifier() {
         this.sitehash = null;
@@ -38,6 +41,7 @@ public class QueryModifier {
         this.filetype = null;
         this.protocol = null;
         this.author = null;
+        this.collection = null;
         this.modifier = new StringBuilder(20);
     }
     
@@ -181,6 +185,32 @@ public class QueryModifier {
             post.remove(CommonParams.FQ);
             post.put(CommonParams.FQ, fqs);
         }
+    }
+    
+    /**
+     * parse a GSA site description string and create a filter query string
+     * which is used to restrict the search result to collections as named with the site attributes
+     * @param collectionDescription
+     * @return a solr query string which shall be used for a filter query
+     */
+    public static String parseCollectionExpression(String collectionDescription) {
+        String[] s0 = CommonPattern.VERTICALBAR.split(collectionDescription);
+        ArrayList<String> sites = new ArrayList<String>(2);
+        for (String s: s0) {
+            s = s.trim().toLowerCase();
+            if (s.length() > 0) sites.add(s);
+        }
+        StringBuilder filterQuery = new StringBuilder(20);
+        if (sites.size() > 1) {
+            filterQuery.append(CollectionSchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(0));
+            for (int i = 1; i < sites.size(); i++) {
+                filterQuery.append(" OR ").append(CollectionSchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(i));
+            }
+        } else if (sites.size() == 1) {
+            filterQuery.append(CollectionSchema.collection_sxt.getSolrFieldName()).append(':').append(sites.get(0));
+        }
+        return filterQuery.toString();
+
     }
     
 }

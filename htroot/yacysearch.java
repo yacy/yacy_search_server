@@ -358,6 +358,9 @@ public class yacysearch {
             final RankingProfile ranking = sb.getRanking();
             final QueryModifier modifier = new QueryModifier();
             querystring = modifier.parse(querystring);
+
+            // read collection
+            modifier.collection = post.get("collection", "");
             
             int stp = querystring.indexOf('*');
             if (stp >= 0) {

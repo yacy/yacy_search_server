@@ -503,6 +503,11 @@ public final class QueryParams {
                 //params.setSortField(CollectionSchema.last_modified.getSolrFieldName(), ORDER.desc); // deprecated in Solr 4.2
             }
         }
+        
+        if (this.modifier.collection != null && this.modifier.collection.length() > 0) {
+            fq.append(" AND ").append(QueryModifier.parseCollectionExpression(this.modifier.collection));
+        }
+        
         if (fq.length() > 0) {
             params.setFilterQueries(fq.substring(5));
         }
@@ -570,15 +575,16 @@ public final class QueryParams {
             context.append(Base64Order.enhancedCoder.encodeString(this.prefer.toString())).append(asterisk);
             context.append(Base64Order.enhancedCoder.encodeString(this.urlMask.toString())).append(asterisk);
             context.append(this.modifier.sitehash).append(asterisk);
-            context.append(this.siteexcludes).append(asterisk);
             context.append(this.modifier.author).append(asterisk);
+            context.append(this.modifier.protocol).append(asterisk);
+            context.append(this.modifier.filetype).append(asterisk);
+            context.append(this.modifier.collection).append(asterisk);
+            context.append(this.modifier.toString()).append(asterisk);
+            context.append(this.siteexcludes).append(asterisk);
             context.append(this.targetlang).append(asterisk);
             context.append(this.constraint).append(asterisk);
             context.append(this.maxDistance).append(asterisk);
-            context.append(this.modifier.toString()).append(asterisk);
-            context.append(this.modifier.protocol).append(asterisk);
             context.append(this.tld).append(asterisk);
-            context.append(this.modifier.filetype).append(asterisk);
             context.append(this.inlink).append(asterisk);
             context.append(this.lat).append(asterisk).append(this.lon).append(asterisk).append(this.radius).append(asterisk);
             context.append(this.snippetCacheStrategy == null ? "null" : this.snippetCacheStrategy.name());
