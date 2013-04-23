@@ -228,4 +228,155 @@ here.==यहां.
 YaCy '#[clientname]#': Bookmarks==यासी \'\#\[क्लाइंट  का नाम\]\#\': बुकमार्क्स
 The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==यह बुकमार्क्स की सूचि आरएसएस फीड्स में  पुनः प्राप्त की जा सकती है . आप एक विशिष्ट टैग का चयन करते हैं तो यह भी किया जा सकता है..
 Click the API icon to load the RSS from the current selection.==मौजूदा चयन से आरएसएस लोड करने के लिए एपीआई आइकन पर क्लिक करें.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==एपीआई की लिस्ट देखने के लिए विजिट करे  <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">एपीआई विकी पेज </a>.
+<h3>Bookmarks==<h3>बुकमार्क्स 
+Bookmarks \(==बुकमार्क्स  \(
+#Login==लॉग इन 
+List Bookmarks==लिस्ट बुकमार्क्स 
+Add Bookmark==ऐड बुकमार्क्स 
+Import Bookmarks==इम्पोर्ट बुकमार्क्स 
+Import XML Bookmarks==इम्पोर्ट क्स्म्ल बुकमार्क्स 
+Import HTML Bookmarks==इम्पोर्ट हटमल बुकमार्क्स 
+"import"=="इम्पोर्ट "
+Default Tags:==डिफ़ॉल्ट टैग :
+imported==इम्पोर्टेड 
+#Edit Bookmark==एडिट बुकमार्क 
+#URL:==यूआरएल :
+Title:==टाइटल :
+Description:==विवरण:
+Folder \(/folder/subfolder\):==फोल्डर  (/फोल्डर /सुब्फोल्डर ):
+Tags \(comma separated\):==टैग्स (अल्पविराम अलग):
+>Public:==>सार्वजनिक:
+yes==हाँ
+no==नहीं 
+Bookmark is a newsfeed==यह बुकमार्क एक नेव्स्फीद है 
+"create"=="बनाये "
+"edit"=="एडिट "
+File:==फाइल :
+import as Public==सार्वजनिक रूप में आयात करे 
+"private bookmark"=="निजी बुकमार्क"
+"public bookmark"=="सार्वजनिक बुकमार्क"
+Tagged with==के साथ टैग:
+'Confirm deletion'=='हटाने की पुष्टि'
+Edit==एडिट 
+Delete==डिलीट 
+Folders==फ़ोल्डर्स 
+Bookmark Folder==बुकमार्क्स फोल्डर 
+#Tags==टैग्स 
+Bookmark List==बुकमार्क लिस्ट 
+previous page==पिछले पृष्ठ पर
+next page==अगले पेज पर
+All==सब
+Show==दिखा
+Bookmarks per page.==प्रति पृष्ठ बुकमार्क्स
+-----------------------------
+
+#File: Collage.html
+#---------------------------
+Image Collage==छवि कोलाज़
+Private Queue==निजी कतार
+Public Queue==सार्वजनिक कतार
+#-----------------------------
+
+#File: compare_yacy.html
+#---------------------------
+Websearch Comparison==वेब सर्च तुलना करें
+Left Search Engine==बाएं खोज इंजन
+Right Search Engine==दाएँ खोज इंजन
+Query==प्रश्न
+"Compare"=="तुलना करें" 
+Search Result==खोज के परिणाम
+#-----------------------------
+#File: ConfigAccounts_p.html
+#---------------------------
+User Accounts==उपयोगकर्ता खातों
+User Administration==उपयोगकर्ता एडमिनिस्ट्रेशन
+User created:==उपयोगकर्ता बन गया है :
+User changed:==उपयोगकर्ता बदला गया है :
+Generic error.==सामान्य एरर .
+Passwords do not match.==पासवर्ड मेल नहीं खाते.
+Username too short. Username must be \>\= 4 Characters.==उपयोगकर्ता का नाम बहुत छोटा है .उपयोगकर्ता का नाम \> \ = 4 अक्षरों का होना चाहिए.
+No password is set for the administration account.== एडमिनिस्ट्रेशन खाते के लिए कोई पासवर्ड निर्धारित नहीं है.
+Please define a password for the admin account.==एडमिनिस्ट्रेशन खाते के लिए एक पासवर्ड को परिभाषित करें.
+Admin Account==एडमिनिस्ट्रेशन खाता
+Access from localhost without account==खाते के बिना लोकलहोस्ट से एक्सेस करे.
+Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==अपने पीअर के लिए प्रवेश अपने कंप्यूटर से प्रदान किया जाता है  \(localhost access\). एडमिनिस्ट्रेशन खाता कॉन्फ़िगर करने के लिए कोई ज़रूरत नहीं है .
+Access only with qualified account==योग्य खाते के साथ ही प्रवेश है .
+You need this only if you want a remote access to your peer.== अगर आप अपने पीअर के लिए रिमोट एक्सेस करना चाहते हैं  तब ही इसका इस्तेमाल करे.
+Peer User:==पीयर यूज़र:
+New Peer Password:==नया पीयर पासवर्ड :
+Repeat Peer Password:==पीयर पासवर्ड दोहराएँ :
+"Define Administrator"=="एडमिनिस्ट्रेशन को परिभाषित करे"
+Select user==उपयोगकर्ता का चयन करें
+New user==नया उपयोगकर्ता
+Edit User==उपयोगकर्ता को एडिट  करें
+Delete User==उपयोगकर्ता को डिलीट करें
+Edit current user:==वर्तमान उपयोगकर्ता को एडिट  करें :
+Username</label>==उपयोगकर्ता का नाम</label>
+Password</label>==पासवर्ड </label>
+Repeat password==पासवर्ड दोहराएँ
+First name==पहला नाम
+Last name==पिछला नाम
+Address==पता
+Rights==अधिकार
+Timelimit==समय सीमा
+Time used==समय का इस्तेमाल
+Save User==उपयोगकर्ता सेव करें 
+#-----------------------------
+#File: ConfigAppearance_p.html
+#---------------------------
+Appearance and Integration==अप्पेअरेञ्चे और इंटीग्रेशन 
+You can change the appearance of the YaCy interface with skins.==Yacy के इंटरफ़ेस और स्किन्स को आप बदल सकते हैं,
+#You can change the appearance of YaCy with skins==Yacy के इंटरफ़ेस और स्किन्स को आप बदल सकते हैं,
+The selected skin and language also affects the appearance of the search page.==चयनित स्किन्स और भाषा भी सर्च पेज की अपीयरेंस को प्रभावित करता है.
+If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==अगर आप YaCy साथ <a href="ConfigPortal.html">एक सर्च पोर्टल बनाते हैं</a> तो आप
+change the appearance of the search page here.==यहाँ सर्च पेज के स्वरूप को बदल सकते हैं.
+#and the default icons and links on the search page can be replaced with you own.==और सर्च पेज पर डिफ़ॉल्ट चिह्न और लिंक आप के अनुसार बदला जा सकता है
+Skin Selection==स्किन चयन
+Select one of the default skins, download new skins, or create your own skin.==डिफ़ॉल्ट स्किन्स में से एक का चयन करें अथवा नए खाल डाउनलोड अथवा अपनी त्वचा बनाऐ .
+Current skin==वर्तमान स्किन
+Available Skins==उपलब्ध स्किन
+"Use"=="उपयोग"
+"Delete"=="डिलीट "
+>Skin Color Definition<==>स्किन कलर डेफिनिशन <
+The generic skin \'generic_pd\' can be configured here with custom colors:==सामान्य स्किन कस्टम कलर के साथ यहाँ कॉन्फ़िगर किया जा सकता है
+>Background<==>बैकग्राउंड<
+#>Text<==>टेक्स्ट<
+>Legend<==>लीजेंड <
+>Table&nbsp;Header<==>टेबल &nbsp; हैडर<
+>Table&nbsp;Item<==>टेबल &nbsp;आइटम<
+>Table&nbsp;Item&nbsp;2<==>टेबल &nbsp;आइटम&nbsp;2<
+>Table&nbsp;Bottom<==>टेबल&nbsp;बॉटम<
+>Border&nbsp;Line<==>बॉर्डर&nbsp;लाइन<
+>Sign&nbsp;\'bad\'<==>सिग्न&nbsp;'बुरा'<
+>Sign&nbsp;\'good\'<==>सिग्न&nbsp;'अच्छा'<
+>Sign&nbsp;\'other\'<==>सिग्न&nbsp;'अन्य'<
+>Search&nbsp;Headline<==>सर्च&nbsp;हैडर <
+>Search&nbsp;URL==>सर्च&nbsp;यू आर एल 
+"Set Colors"==" रंग निर्धारित करे "
+#>Skin Download<==>स्किन डाउनलोड<
+Skins can be installed from download locations==स्किन्स डाउनलोड स्थानों से इनस्टॉल किया जा सकता है
+Install new skin from URL==यू आर एल से नई स्किन्स इनस्टॉल करे 
+Use this skin==यह स्किन्स का उपयोग करे
+"Install"=="इनस्टॉल "
+Make sure that you only download data from trustworthy sources. The new Skin file==आप केवल भरोसेमंद सूत्रों से डेटा डाउनलोड करें. नई स्किन्स की फाइल.
+might overwrite existing data if a file of the same name exists already.==एक ही नाम की एक फ़ाइल पहले से मौजूद है तो मौजूदा डेटा ओवरराईट हो सकता है
+Unable to get URL:==>यू आर एल प्राप्त करने में असमर्थ है:
+Error saving the skin.==एरर सेविंग स्किन्स.
+#-----------------------------
+#File: ConfigBasic.html
+#---------------------------
+Access Configuration==एक्सेस कॉन्फ़िगरेशन
+Basic Configuration==बेसिक कॉन्फ़िगरेशन
+Your YaCy Peer needs some basic information to operate properly==आपकी YaCy पीअर को ठीक से संचालित करने के लिए कुछ बुनियादी जानकारी की जरूरत है
+Select a language for the interface==इंटरफेस के लिए एक भाषा का चयन करें
+Use Case: what do you want to do with YaCy:==यूज़ केस  : आप YaCy के साथ क्या करना चाहते हो :
+Community-based web search==कम्युनिटी-बेस्ड  वेब  सर्च
+Join and support the global network \'freeworld\', search the web with an uncensored user-owned search network==ग्लोबल नेटवर्क में शामिल हो और समर्थन 'freeworld', वेब खोज करे एक अनसेंसर्ड  यूजर-ओन्ड  सर्च नेटवर्क से.
+Search portal for your own web pages==अपने खुद के वेब पेजस के लिए सर्च पोर्टल
+Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==आपकी YaCy इंस्टालेशन के अन्य साथियों से स्वतंत्र रूप से व्यवहार करती है, और आप अपने खुद के वेब क्रॉलर शुरू करके अपने खुद के वेब इंडेक्स बना सकते हैं. यह अपने खुद के वेब पेजस को खोजने के लिए या एकटॉपिक -ओरिएंटेड  खोज पोर्टल को परिभाषित करने के लिए इस्तेमाल किया जा सकता है
+Files may also be shared with the YaCy server, assign a path here:==YaCy सर्वर के साथ फाइलें भी शेयर की जा सकती है ,यहाँ पाथ असाइन करे  :
+This path can be accessed at ==इस पाथ पर एक्सेस करे 
+Use that path as crawl start point.==क्रॉल स्टार्टिंग पॉइंट के रूप में उस पाथ का प्रयोग करें.
+Intranet Indexing==इंट्रानेट इंडेक्सिंग 
 
