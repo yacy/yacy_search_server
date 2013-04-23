@@ -2,10 +2,6 @@
  *  AnimationGIF
  *  Copyright 2010 by Michael Christen
  *  First released 20.11.2010 at http://yacy.net
- *  
- *  $LastChangedDate$
- *  $LastChangedRevision$
- *  $LastChangedBy$
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -49,7 +45,10 @@ import javax.imageio.stream.MemoryCacheImageOutputStream;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-
+/*
+ * for a GIF Image Metadata Format Specification, see:
+ * http://docs.oracle.com/javase/6/docs/api/javax/imageio/metadata/doc-files/gif_metadata.html
+ */
 public class AnimationGIF {
     
     private final static String formatName    = "javax_imageio_gif_image_1.0";
@@ -57,6 +56,8 @@ public class AnimationGIF {
     private final static String aeNodeName    = "ApplicationExtension";
     private final static String gceNodeName   = "GraphicControlExtension";
     private final static String delayNodeName = "delayTime";
+    private final static String transparencyFlagNodeName = "transparentColorFlag";
+    private final static String transparencyIndexNodeName = "transparentColorIndex";
 
     private int counter, loops;
     private IIOMetadata iiom;
@@ -86,10 +87,11 @@ public class AnimationGIF {
     /**
      * add an image to the animation
      * @param image the image
-     * @param duration the frame time of the image in milliseconds
+     * @param delayMillis the frame time of the image in milliseconds
+     * @param transparencyColorIndex the index of the transparent color, -1 if not used
      * @throws IOException
      */
-    public void addImage(RenderedImage image, int duration) throws IOException {
+    public void addImage(RenderedImage image, int delayMillis, int transparencyColorIndex) throws IOException {
         if (this.counter == 0) {
             iiom = writer.getDefaultImageMetadata(ImageTypeSpecifier.createFromRenderedImage(image), iwp);
             writer.prepareWriteSequence(writer.getDefaultStreamMetadata(iwp));
@@ -97,14 +99,14 @@ public class AnimationGIF {
         if (this.counter == 0 && loops >= 0) {
             IIOMetadata imageMetadata2 = writer.getDefaultImageMetadata(ImageTypeSpecifier.createFromRenderedImage(image), iwp);
             try {
-                setDelay(imageMetadata2, duration);
+                setMetadata(imageMetadata2, delayMillis, transparencyColorIndex);
                 setLoops(imageMetadata2, this.loops);
                 writer.writeToSequence(new IIOImage(image, null, imageMetadata2), iwp);
             } catch (IIOInvalidTreeException e) {
                 throw new IOException(e.getMessage());
             }
         } else try {
-            setDelay(iiom, duration);
+            setMetadata(iiom, delayMillis, transparencyColorIndex);
             writer.writeToSequence(new IIOImage(image, null, iiom), iwp);
         } catch (IIOInvalidTreeException e) {
             throw new IOException(e.getMessage());
@@ -128,7 +130,7 @@ public class AnimationGIF {
         return baos.toByteArray();
     }
     
-    private static void setDelay(IIOMetadata metaData, int delay) throws IIOInvalidTreeException {
+    private static void setMetadata(IIOMetadata metaData, int delayMillis, int transparencyColorIndex) throws IIOInvalidTreeException {
         Node tree = metaData.getAsTree(formatName);
         NodeList nodeList = tree.getChildNodes();
         Node gceNode = null;
@@ -142,7 +144,21 @@ public class AnimationGIF {
             delayNode = tree.getOwnerDocument().createAttribute(delayNodeName);
             gceNode.appendChild(delayNode);
         }
-        delayNode.setNodeValue(Integer.valueOf(delay / 10).toString());
+        delayNode.setNodeValue(Integer.valueOf(delayMillis / 10).toString());
+        if (transparencyColorIndex >= 0) {
+            Node transparencyFlagNode = gceNode.getAttributes().getNamedItem(transparencyFlagNodeName);
+            if (transparencyFlagNode == null) {
+                transparencyFlagNode = tree.getOwnerDocument().createAttribute(transparencyFlagNodeName);
+                gceNode.appendChild(transparencyFlagNode);
+            }
+            transparencyFlagNode.setNodeValue("TRUE");
+            Node transparencyIndexNode = gceNode.getAttributes().getNamedItem(transparencyIndexNodeName);
+            if (transparencyIndexNode == null) {
+                transparencyIndexNode = tree.getOwnerDocument().createAttribute(transparencyIndexNodeName);
+                gceNode.appendChild(transparencyIndexNode);
+            }
+            transparencyIndexNode.setNodeValue(Integer.valueOf(transparencyColorIndex).toString());
+        }
         metaData.setFromTree(formatName, tree);
     }
     
@@ -186,7 +202,7 @@ public class AnimationGIF {
         AnimationGIF generator = new AnimationGIF(0);
         try {
             for (int i = 0; i < framescount; i++) {
-                generator.addImage(generateTestImage(320, 160, r, i * 2 * Math.PI / framescount), 10);
+                generator.addImage(generateTestImage(320, 160, r, i * 2 * Math.PI / framescount), 10, 0);
             }
             FileOutputStream fos = new FileOutputStream(new File("/tmp/giftest.gif"));
             fos.write(generator.get());

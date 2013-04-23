@@ -52,6 +52,12 @@ public final class ByteBuffer extends OutputStream {
         this.offset = 0;
     }
 
+    public ByteBuffer(final byte[] bb) {
+        this.buffer = bb;
+        this.length = bb.length;
+        this.offset = 0;
+    }
+
     public ByteBuffer(final String s) {
         this.buffer = UTF8.getBytes(s);
         this.length = this.buffer.length;

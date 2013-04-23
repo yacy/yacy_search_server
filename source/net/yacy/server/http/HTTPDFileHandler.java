@@ -574,7 +574,7 @@ public final class HTTPDFileHandler {
             servletProperties templatePatterns = null;
             Date targetDate;
 
-            if ((targetClass != null) && (path.endsWith("png"))) {
+            if ((targetClass != null) && ((path.endsWith("png") || path.endsWith("gif")))) {
                 // call an image-servlet to produce an on-the-fly - generated image
                 Object img = null;
                 requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
