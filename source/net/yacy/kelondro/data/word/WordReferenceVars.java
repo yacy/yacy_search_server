@@ -46,6 +46,7 @@ import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ByteArray;
+import net.yacy.kelondro.workflow.WorkflowProcessor;
 
 
 public class WordReferenceVars extends AbstractReference implements WordReference, Reference, Cloneable, Comparable<WordReferenceVars>, Comparator<WordReferenceVars> {
@@ -54,7 +55,6 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 	 * object for termination of concurrent blocking queue processing
 	 */
 	public static final WordReferenceVars poison = new WordReferenceVars();
-	private static int cores = Runtime.getRuntime().availableProcessors();
 	protected static final byte[] default_language = UTF8.getBytes("en");
 
     private final Bitfield flags;
@@ -494,7 +494,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         @Override
     	public void run() {
         	// start the transformation threads
-        	final int cores0 = Math.min(cores, this.container.size() / 100) + 1;
+        	final int cores0 = Math.min(WorkflowProcessor.availableCPU, this.container.size() / 100) + 1;
         	final TransformWorker[] worker = new TransformWorker[cores0];
         	for (int i = 0; i < cores0; i++) {
         		worker[i] = new TransformWorker(this.out, this.maxtime, this.local);

@@ -53,6 +53,7 @@ import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.HandleMap;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.workflow.WorkflowProcessor;
 
 
 public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[], Long>> {
@@ -116,7 +117,7 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
     }
 
     private static final int spread(final int expectedspace) {
-        return Math.min(Runtime.getRuntime().availableProcessors(), Math.max(Runtime.getRuntime().availableProcessors(), expectedspace / 8000));
+        return Math.min(WorkflowProcessor.availableCPU, Math.max(WorkflowProcessor.availableCPU, expectedspace / 8000));
     }
 
     /**

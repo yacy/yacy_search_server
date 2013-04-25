@@ -39,7 +39,7 @@ import net.yacy.kelondro.logging.Log;
 
 public abstract class AbstractThread extends Thread implements WorkflowThread {
 
-    private static Log log = new Log("WorkflowThread");
+    private static Log log = new Log("AbstractThread");
     protected boolean running = true;
     private boolean announcedShutdown = false;
     protected long busytime = 0, memuse = 0;

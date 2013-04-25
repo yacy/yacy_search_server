@@ -30,7 +30,7 @@ import net.yacy.kelondro.util.MemoryControl;
 public abstract class AbstractBlockingThread<J extends WorkflowJob> extends AbstractThread implements BlockingThread<J> {
 
     private WorkflowProcessor<J> manager = null;
-    private final static Log log = new Log("BlockingThread");
+    private final static Log log = new Log("AbstractBlockingThread");
 
     @Override
     public void setManager(final WorkflowProcessor<J> manager) {

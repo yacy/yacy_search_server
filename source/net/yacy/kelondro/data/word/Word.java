@@ -57,10 +57,10 @@ public class Word {
     private static ARC<String, byte[]> hashCache = null;
     static {
         try {
-            hashCache = new ConcurrentARC<String, byte[]>(hashCacheSize, Math.max(32, 4 * Runtime.getRuntime().availableProcessors()));
+            hashCache = new ConcurrentARC<String, byte[]>(hashCacheSize, Math.min(32, 2 * Runtime.getRuntime().availableProcessors()));
             Log.logInfo("Word", "hashCache.size = " + hashCacheSize);
         } catch (final OutOfMemoryError e) {
-            hashCache = new ConcurrentARC<String, byte[]>(1000, Math.max(8, 2 * Runtime.getRuntime().availableProcessors()));
+            hashCache = new ConcurrentARC<String, byte[]>(1000, Math.min(8, 1 + Runtime.getRuntime().availableProcessors()));
             Log.logInfo("Word", "hashCache.size = " + 1000);
         }
     }

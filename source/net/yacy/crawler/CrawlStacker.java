@@ -151,10 +151,7 @@ public final class CrawlStacker {
 
         // DEBUG
         if (this.log.isFinest()) this.log.logFinest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + ((entry.initiator() == null) ? "" : ASCII.String(entry.initiator())) + ", name=" + entry.name() + ", appdate=" + entry.appdate() + ", depth=" + entry.depth());
-        try {
-            this.requestQueue.enQueue(entry);
-        } catch (InterruptedException e) {
-        }
+        this.requestQueue.enQueue(entry);
     }
     public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final Map<DigestURI, Properties> hyperlinks) {
         new Thread() {

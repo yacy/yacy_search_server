@@ -72,7 +72,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             final int cachesize,
             final char fillchar) throws IOException {
         this.blob = new Heap(heapFile, keylength, ordering, buffermax);
-        this.cache = new ConcurrentARC<byte[], Map<String, String>>(cachesize, Math.max(32, 4 * Runtime.getRuntime().availableProcessors()), ordering);
+        this.cache = new ConcurrentARC<byte[], Map<String, String>>(cachesize, Math.min(32, 2 * Runtime.getRuntime().availableProcessors()), ordering);
         this.fillchar = fillchar;
     }
 

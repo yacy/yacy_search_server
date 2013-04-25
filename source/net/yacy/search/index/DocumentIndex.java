@@ -40,6 +40,7 @@ import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.WebgraphConfiguration;
 
@@ -77,11 +78,10 @@ public class DocumentIndex extends Segment {
                 );
         super.fulltext().connectLocalSolr();
         super.writeWebgraph(true);
-        final int cores = Runtime.getRuntime().availableProcessors() + 1;
         this.callback = callback;
-        this.queue = new LinkedBlockingQueue<DigestURI>(cores * 300);
-        this.worker = new Worker[cores];
-        for ( int i = 0; i < cores; i++ ) {
+        this.queue = new LinkedBlockingQueue<DigestURI>(WorkflowProcessor.availableCPU * 300);
+        this.worker = new Worker[WorkflowProcessor.availableCPU];
+        for ( int i = 0; i < WorkflowProcessor.availableCPU; i++ ) {
             this.worker[i] = new Worker(i);
             this.worker[i].start();
         }

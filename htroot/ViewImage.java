@@ -44,6 +44,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -51,7 +52,7 @@ import net.yacy.server.serverSwitch;
 
 public class ViewImage {
 
-    private static Map<String, Image> iconcache = new ConcurrentARC<String, Image>(1000, Math.max(10, Math.min(32, Runtime.getRuntime().availableProcessors() * 2)));
+    private static Map<String, Image> iconcache = new ConcurrentARC<String, Image>(1000, Math.max(10, Math.min(32, WorkflowProcessor.availableCPU * 2)));
     private static String defaulticon = "htroot/env/grafics/dfltfvcn.ico";
     private static byte[] defaulticonb;
     static {
