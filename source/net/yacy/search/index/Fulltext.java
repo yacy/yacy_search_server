@@ -375,7 +375,7 @@ public final class Fulltext {
         
         // get the metadata from Solr
         try {
-            SolrDocument doc = this.getDefaultConnector().getById(u);
+            SolrDocument doc = this.getDefaultConnector().getDocumentById(u);
             if (doc != null) {
             	if (this.urlIndexFile != null) this.urlIndexFile.remove(urlHash); // migration
             	return new URIMetadataNode(doc, wre, weight);
@@ -479,7 +479,7 @@ public final class Fulltext {
             try {
                 if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
                 // because node entries are richer than metadata entries we must check if they exist to prevent that they are overwritten
-                SolrDocument sd = this.getDefaultConnector().getById(id);
+                SolrDocument sd = this.getDefaultConnector().getDocumentById(id);
                 if (sd == null || (new URIMetadataNode(sd)).isOlder(entry)) {
                     putDocumentLater(getDefaultConfiguration().metadata2solr(entry));
                 }                                                                                                                     
@@ -506,7 +506,7 @@ public final class Fulltext {
         try {
             if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
             // because node entries are richer than metadata entries we must check if they exist to prevent that they are overwritten
-            SolrDocument sd = this.getDefaultConnector().getById(id);
+            SolrDocument sd = this.getDefaultConnector().getDocumentById(id);
             if (sd == null || (new URIMetadataNode(sd)).isOlder(entry)) {
                 putDocument(getDefaultConfiguration().metadata2solr(entry));
             }                                                                                                                     
@@ -656,7 +656,7 @@ public final class Fulltext {
         final AtomicInteger count = new AtomicInteger(0);
         Thread t = new Thread(){
             public void run() {
-                final BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentQuery(collectionQuery, 0, 1000000, 600000, -1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+                final BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(collectionQuery, 0, 1000000, 600000, -1, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
                 try {
                     SolrDocument doc;
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
@@ -887,7 +887,7 @@ public final class Fulltext {
                         this.count++;
                     }
                 } else {
-                    BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentQuery(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", 0, 100000000, 10 * 60 * 60 * 1000, 100,
+                    BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", 0, 100000000, 10 * 60 * 60 * 1000, 100,
                             CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.title.getSolrFieldName(),
                             CollectionSchema.author.getSolrFieldName(), CollectionSchema.description.getSolrFieldName(), CollectionSchema.size_i.getSolrFieldName(), CollectionSchema.last_modified.getSolrFieldName());
                     SolrDocument doc;

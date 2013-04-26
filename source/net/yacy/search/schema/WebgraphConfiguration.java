@@ -290,7 +290,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         // that means we must search for those entries.
         connector.commit(true); // make sure that we have latest information that can be found
         //BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery("*:*", 0, 1000, 60000, 10);
-        BlockingQueue<SolrDocument> docs = connector.concurrentQuery(WebgraphSchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 100000, 60000, 50);
+        BlockingQueue<SolrDocument> docs = connector.concurrentDocumentsByQuery(WebgraphSchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 100000, 60000, 50);
         
         SolrDocument doc;
         String protocol, urlstub, id;

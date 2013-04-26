@@ -149,7 +149,7 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
     }
     
     @Override
-    public SolrDocument getById(final String id, final String ... fields) throws IOException {
+    public SolrDocument getDocumentById(final String id, final String ... fields) throws IOException {
         String q = idQuery(id);
         SolrDocument doc = fields.length == 0 ? this.documentCache.get(q) : null;
         if (doc != null) {
@@ -162,14 +162,14 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
             return null;
         }
         this.missCache_Miss++;
-        if (solr != null && ((doc = solr.getById(id, fields)) != null)) {
+        if (solr != null && ((doc = solr.getDocumentById(id, fields)) != null)) {
             addToCache(doc, fields.length == 0);
             return doc;
         }
         // check if there is a autocommit problem
         if (this.hitCache.containsKey(q)) {
             // the document should be there, therefore make a commit and check again
-            if (solr != null && ((doc = solr.getById(id, fields)) != null)) {
+            if (solr != null && ((doc = solr.getDocumentById(id, fields)) != null)) {
                 addToCache(doc, fields.length == 0);
             }
         }
@@ -218,23 +218,23 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
      * @throws IOException
      */
     @Override
-    public SolrDocumentList query(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
+    public SolrDocumentList getDocumentListByQuery(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
         if (offset == 0 && count == 1 && querystring.startsWith("id:")) {
             final SolrDocumentList list = new SolrDocumentList();
-            SolrDocument doc = getById(querystring.charAt(3) == '"' ? querystring.substring(4, querystring.length() - 1) : querystring.substring(3), fields);
+            SolrDocument doc = getDocumentById(querystring.charAt(3) == '"' ? querystring.substring(4, querystring.length() - 1) : querystring.substring(3), fields);
             list.add(doc);
             // no addToCache(list) here because that was already handlet in get();
             return list;
         }
         if (this.solr != null) {
-            SolrDocumentList list = this.solr.query(querystring, offset, count, fields);
+            SolrDocumentList list = this.solr.getDocumentListByQuery(querystring, offset, count, fields);
             addToCache(list, fields.length == 0);
             return list;
         }
         
         // combine both lists
         SolrDocumentList list;
-        list = this.solr.query(querystring, offset, count, fields);
+        list = this.solr.getDocumentListByQuery(querystring, offset, count, fields);
 
         // add caching
         addToCache(list, fields.length == 0);
@@ -242,14 +242,14 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     @Override
-    public QueryResponse query(ModifiableSolrParams query) throws IOException, SolrException {
-        QueryResponse list = this.solr.query(query);
+    public QueryResponse getResponseByParams(ModifiableSolrParams query) throws IOException, SolrException {
+        QueryResponse list = this.solr.getResponseByParams(query);
         return list;
     }
     
     @Override
-    public long getQueryCount(final String querystring) throws IOException {
-        return this.solr.getQueryCount(querystring);
+    public long getCountByQuery(final String querystring) throws IOException {
+        return this.solr.getCountByQuery(querystring);
     }
 
     @Override

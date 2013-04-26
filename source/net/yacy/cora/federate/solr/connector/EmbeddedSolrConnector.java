@@ -183,7 +183,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
 
     @Override
-    public QueryResponse query(ModifiableSolrParams params) throws IOException {
+    public QueryResponse getResponseByParams(ModifiableSolrParams params) throws IOException {
         if (this.server == null) throw new IOException("server disconnected");
         try {
             // during the solr query we set the thread name to the query string to get more debugging info in thread dumps

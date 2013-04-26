@@ -820,7 +820,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // that means we must search for those entries.
         connector.commit(true); // make sure that we have latest information that can be found
         //BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery("*:*", 0, 1000, 60000, 10);
-        BlockingQueue<SolrDocument> docs = connector.concurrentQuery(CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 10000, 60000, 50);
+        BlockingQueue<SolrDocument> docs = connector.concurrentDocumentsByQuery(CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 10000, 60000, 50);
         
         SolrDocument doc;
         int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0;
@@ -847,7 +847,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         if (!hostExtentCache.containsKey(hosthash)) {
                             StringBuilder q = new StringBuilder();
                             q.append(CollectionSchema.host_id_s.getSolrFieldName()).append(":\"").append(hosthash).append("\" AND ").append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200");
-                            long count = segment.fulltext().getDefaultConnector().getQueryCount(q.toString());
+                            long count = segment.fulltext().getDefaultConnector().getCountByQuery(q.toString());
                             hostExtentCache.put(hosthash, count);
                         }
                         if (postprocessing_references(segment, doc, sid, url, hostExtentCache)) proccount_referencechange++;

@@ -36,6 +36,12 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
 
 public interface SolrConnector extends Iterable<String> /* Iterable of document IDs */ {
+
+    /**
+     * get the size of the index
+     * @return number of results if solr is queries with a catch-all pattern
+     */
+    public long getSize();
     
     /**
      * force a commit
@@ -121,14 +127,14 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @return one result or null if no result exists
      * @throws IOException
      */
-    public SolrDocument getById(final String key, final String ... fields) throws IOException;
+    public SolrDocument getDocumentById(final String key, final String ... fields) throws IOException;
 
     /**
-     * get a query result from solr
+     * get a query response from solr
      * @param query
      * @throws IOException
      */
-    public QueryResponse query(final ModifiableSolrParams query) throws IOException, SolrException;
+    public QueryResponse getResponseByParams(final ModifiableSolrParams query) throws IOException, SolrException;
 
     /**
      * get a query result from solr
@@ -139,7 +145,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @param fields list of fields
      * @throws IOException
      */
-    public SolrDocumentList query(final String querystring, final int offset, final int count, final String ... fields) throws IOException, SolrException;
+    public SolrDocumentList getDocumentListByQuery(final String querystring, final int offset, final int count, final String ... fields) throws IOException, SolrException;
 
     /**
      * get the number of results when this query is done.
@@ -147,7 +153,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @param querystring
      * @return the number of results for this query
      */
-    public long getQueryCount(final String querystring) throws IOException;
+    public long getCountByQuery(final String querystring) throws IOException;
 
     /**
      * get facets of the index: a list of lists with values that are most common in a specific field
@@ -171,7 +177,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @param fields list of fields
      * @return a blocking queue which is terminated  with AbstractSolrConnector.POISON_DOCUMENT as last element
      */
-    public BlockingQueue<SolrDocument> concurrentQuery(final String querystring, final int offset, final int maxcount, final long maxtime, final int buffersize, final String ... fields);
+    public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime, final int buffersize, final String ... fields);
 
     /**
      * get a document id result stream from a solr query.
@@ -182,12 +188,6 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @param maxcount
      * @return
      */
-    public BlockingQueue<String> concurrentIDs(final String querystring, final int offset, final int maxcount, final long maxtime);
-
-    /**
-     * get the size of the index
-     * @return number of results if solr is queries with a catch-all pattern
-     */
-    public long getSize();
+    public BlockingQueue<String> concurrentIDsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime);
 
 }

@@ -258,7 +258,7 @@ public class HostBrowser {
                         q.append(" AND ").append(CollectionSchema.url_paths_sxt.getSolrFieldName()).append(":[* TO *]");
                     }
                 }
-                BlockingQueue<SolrDocument> docs = fulltext.getDefaultConnector().concurrentQuery(q.toString(), 0, 100000, TIMEOUT, 100,
+                BlockingQueue<SolrDocument> docs = fulltext.getDefaultConnector().concurrentDocumentsByQuery(q.toString(), 0, 100000, TIMEOUT, 100,
                         CollectionSchema.id.getSolrFieldName(),
                         CollectionSchema.sku.getSolrFieldName(),
                         CollectionSchema.failreason_t.getSolrFieldName(),

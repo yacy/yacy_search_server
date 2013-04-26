@@ -290,7 +290,7 @@ public class Segment {
             if (count > 0) return count;
         }
         try {
-            return (int) this.fulltext.getDefaultConnector().getQueryCount(CollectionSchema.text_t.getSolrFieldName() + ":\"" + word + "\"");
+            return (int) this.fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.text_t.getSolrFieldName() + ":\"" + word + "\"");
         } catch (Throwable e) {
             Log.logException(e);
             return 0;
@@ -310,12 +310,12 @@ public class Segment {
         final BlockingQueue<SolrDocument> docQueue;
         final String urlstub;
         if (stub == null) {
-            docQueue = this.fulltext.getDefaultConnector().concurrentQuery("*:*", 0, Integer.MAX_VALUE, maxtime, maxcount, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+            docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery("*:*", 0, Integer.MAX_VALUE, maxtime, maxcount, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
             urlstub = null;
         } else {
             final String host = stub.getHost();
             String hh = DigestURI.hosthash(host);
-            docQueue = this.fulltext.getDefaultConnector().concurrentQuery(CollectionSchema.host_id_s + ":\"" + hh + "\"", 0, Integer.MAX_VALUE, maxtime, maxcount, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+            docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(CollectionSchema.host_id_s + ":\"" + hh + "\"", 0, Integer.MAX_VALUE, maxtime, maxcount, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
             urlstub = stub.toNormalform(true);
         }
 
@@ -530,7 +530,7 @@ public class Segment {
                             // switch unique attribute in new document
                             vector.setField(uniquefield.getSolrFieldName(), false);
                             // switch attribute also in all existing documents (which should be exactly only one!)
-                            SolrDocumentList docs = this.fulltext.getDefaultConnector().query(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\" AND " + uniquefield.getSolrFieldName() + ":true", 0, 1000);
+                            SolrDocumentList docs = this.fulltext.getDefaultConnector().getDocumentListByQuery(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\" AND " + uniquefield.getSolrFieldName() + ":true", 0, 1000);
                             for (SolrDocument doc: docs) {
                                 SolrInputDocument sid = this.fulltext.getDefaultConfiguration().toSolrInputDocument(doc);
                                 sid.setField(uniquefield.getSolrFieldName(), false);

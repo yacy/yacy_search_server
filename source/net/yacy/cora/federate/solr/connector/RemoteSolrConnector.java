@@ -72,7 +72,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
     }
 
     @Override
-    public QueryResponse query(ModifiableSolrParams params) throws IOException {
+    public QueryResponse getResponseByParams(ModifiableSolrParams params) throws IOException {
             // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
             String q = params.get("q");
             String threadname = Thread.currentThread().getName();

@@ -74,7 +74,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     @Override
     public boolean existsByQuery(final String query) throws IOException {
         try {
-            long count = getQueryCount(query);
+            long count = getCountByQuery(query);
             return count > 0;
         } catch (final Throwable e) {
             return false;
@@ -83,7 +83,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     
     @Override
     public Object getFieldById(final String key, final String field) throws IOException {
-        SolrDocument doc = getById(key, field);
+        SolrDocument doc = getDocumentById(key, field);
         if (doc == null) return null;
         return doc.getFieldValue(field);
     }
@@ -100,7 +100,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
      * @return a blocking queue which is terminated  with AbstractSolrConnector.POISON_DOCUMENT as last element
      */
     @Override
-    public BlockingQueue<SolrDocument> concurrentQuery(final String querystring, final int offset, final int maxcount, final long maxtime, final int buffersize, final String ... fields) {
+    public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime, final int buffersize, final String ... fields) {
         final BlockingQueue<SolrDocument> queue = buffersize <= 0 ? new LinkedBlockingQueue<SolrDocument>() : new ArrayBlockingQueue<SolrDocument>(buffersize);
         final long endtime = System.currentTimeMillis() + maxtime;
         final Thread t = new Thread() {
@@ -110,7 +110,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                 int count = 0;
                 while (System.currentTimeMillis() < endtime && count < maxcount) {
                     try {
-                        SolrDocumentList sdl = query(querystring, o, pagesize, fields);
+                        SolrDocumentList sdl = getDocumentListByQuery(querystring, o, pagesize, fields);
                         for (SolrDocument d: sdl) {
                             try {queue.put(d);} catch (InterruptedException e) {break;}
                             count++;
@@ -131,7 +131,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     }
 
     @Override
-    public BlockingQueue<String> concurrentIDs(final String querystring, final int offset, final int maxcount, final long maxtime) {
+    public BlockingQueue<String> concurrentIDsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime) {
         final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
         final long endtime = System.currentTimeMillis() + maxtime;
         final Thread t = new Thread() {
@@ -140,7 +140,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                 int o = offset;
                 while (System.currentTimeMillis() < endtime) {
                     try {
-                        SolrDocumentList sdl = query(querystring, o, pagesize, CollectionSchema.id.getSolrFieldName());
+                        SolrDocumentList sdl = getDocumentListByQuery(querystring, o, pagesize, CollectionSchema.id.getSolrFieldName());
                         for (SolrDocument d: sdl) {
                             try {queue.put((String) d.getFieldValue(CollectionSchema.id.getSolrFieldName()));} catch (InterruptedException e) {break;}
                         }
@@ -161,7 +161,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
 
     @Override
     public Iterator<String> iterator() {
-        final BlockingQueue<String> queue = concurrentIDs("*:*", 0, Integer.MAX_VALUE, 60000);
+        final BlockingQueue<String> queue = concurrentIDsByQuery("*:*", 0, Integer.MAX_VALUE, 60000);
         return new LookAheadIterator<String>() {
             @Override
             protected String next0() {
@@ -184,7 +184,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
      * @throws IOException
      */
     @Override
-    public SolrDocumentList query(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
+    public SolrDocumentList getDocumentListByQuery(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
         // construct query
         final SolrQuery params = new SolrQuery();
         params.setQuery(querystring);
@@ -196,7 +196,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         if (fields.length > 0) params.setFields(fields);
         
         // query the server
-        QueryResponse rsp = query(params);
+        QueryResponse rsp = getResponseByParams(params);
         final SolrDocumentList docs = rsp.getResults();
         return docs;
     }
@@ -208,7 +208,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
      * @return the number of results for this query
      */
     @Override
-    public long getQueryCount(String querystring) throws IOException {
+    public long getCountByQuery(String querystring) throws IOException {
         // construct query
         final SolrQuery params = new SolrQuery();
         params.setQuery(querystring);
@@ -218,7 +218,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setFields(CollectionSchema.id.getSolrFieldName());
 
         // query the server
-        QueryResponse rsp = query(params);
+        QueryResponse rsp = getResponseByParams(params);
         final SolrDocumentList docs = rsp.getResults();
         return docs == null ? 0 : docs.getNumFound();
     }
@@ -246,7 +246,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         for (String field: fields) params.addFacetField(field);
         
         // query the server
-        QueryResponse rsp = query(params);
+        QueryResponse rsp = getResponseByParams(params);
         Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>(fields.length);
         for (String field: fields) {
             FacetField facet = rsp.getFacetField(field);
@@ -260,12 +260,12 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     }
 
     @Override
-    abstract public QueryResponse query(ModifiableSolrParams params) throws IOException;
+    abstract public QueryResponse getResponseByParams(ModifiableSolrParams params) throws IOException;
 
     private final char[] queryIDTemplate = "id:\"            \"".toCharArray();
     
     @Override
-    public SolrDocument getById(final String key, final String ... fields) throws IOException {
+    public SolrDocument getDocumentById(final String key, final String ... fields) throws IOException {
         final SolrQuery query = new SolrQuery();
         assert key.length() == 12;
         // construct query
@@ -279,7 +279,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
 
         // query the server
         try {
-            final QueryResponse rsp = query(query);
+            final QueryResponse rsp = getResponseByParams(query);
             final SolrDocumentList docs = rsp.getResults();
             if (docs.isEmpty()) return null;
             return docs.get(0);

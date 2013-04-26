@@ -201,7 +201,7 @@ public class OpenSearchConnector {
 
         final long numfound;
         try {
-            SolrDocumentList docList = connector.query(webgraphquerystr, 0, 1, webgraphqueryfields);
+            SolrDocumentList docList = connector.getDocumentListByQuery(webgraphquerystr, 0, 1, webgraphqueryfields);
             numfound = docList.getNumFound();
             if (numfound == 0) {
                 Log.logInfo("OpenSearchConnector.Discover", "no results found, abort discover job");
@@ -226,7 +226,7 @@ public class OpenSearchConnector {
                     Set<String> dblmem = new HashSet<String>(); // temp memory for already checked url
                     while (doloop) {
                         Log.logInfo("OpenSearchConnector.Discover", "start Solr query loop at " + Integer.toString(loopnr * 20) + " of " + Long.toString(numfound));
-                        SolrDocumentList docList = connector.query(webgraphquerystr, loopnr * 20, 20,webgraphqueryfields); // check chunk of 20 result documents
+                        SolrDocumentList docList = connector.getDocumentListByQuery(webgraphquerystr, loopnr * 20, 20,webgraphqueryfields); // check chunk of 20 result documents
                         loopnr++;
                         if (stoptime < System.currentTimeMillis()) {// stop after max 1h
                             doloop = false;

@@ -153,9 +153,9 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
     
     @Override
-    public SolrDocument getById(final String key, final String ... fields) throws IOException {
+    public SolrDocument getDocumentById(final String key, final String ... fields) throws IOException {
         SolrDocument doc;
-        if ((solr0 != null && ((doc = solr0.getById(key, fields)) != null)) || (solr1 != null && ((doc = solr1.getById(key, fields)) != null))) {
+        if ((solr0 != null && ((doc = solr0.getDocumentById(key, fields)) != null)) || (solr1 != null && ((doc = solr1.getDocumentById(key, fields)) != null))) {
             return doc;
         }
         return null;
@@ -185,48 +185,48 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
      * @throws IOException
      */
     @Override
-    public SolrDocumentList query(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
+    public SolrDocumentList getDocumentListByQuery(final String querystring, final int offset, final int count, final String ... fields) throws IOException {
         if (this.solr0 == null && this.solr1 == null) return new SolrDocumentList();
         if (offset == 0 && count == 1 && querystring.startsWith("id:")) {
             final SolrDocumentList list = new SolrDocumentList();
-            SolrDocument doc = getById(querystring.charAt(3) == '"' ? querystring.substring(4, querystring.length() - 1) : querystring.substring(3), fields);
+            SolrDocument doc = getDocumentById(querystring.charAt(3) == '"' ? querystring.substring(4, querystring.length() - 1) : querystring.substring(3), fields);
             list.add(doc);
             // no addToCache(list) here because that was already handlet in get();
             return list;
         }
         if (this.solr0 != null && this.solr1 == null) {
-            SolrDocumentList list = this.solr0.query(querystring, offset, count, fields);
+            SolrDocumentList list = this.solr0.getDocumentListByQuery(querystring, offset, count, fields);
             return list;
         }
         if (this.solr1 != null && this.solr0 == null) {
-            SolrDocumentList list = this.solr1.query(querystring, offset, count, fields);
+            SolrDocumentList list = this.solr1.getDocumentListByQuery(querystring, offset, count, fields);
             return list;
         }
 
         // combine both lists
         SolrDocumentList l;
-        l = this.solr0.query(querystring, offset, count, fields);
+        l = this.solr0.getDocumentListByQuery(querystring, offset, count, fields);
         if (l.size() >= count) return l;
 
         // at this point we need to know how many results are in solr0
         // compute this with a very bad hack; replace with better method later
         int size0 = 0;
         { //bad hack - TODO: replace
-            SolrDocumentList lHack = this.solr0.query(querystring, 0, Integer.MAX_VALUE, fields);
+            SolrDocumentList lHack = this.solr0.getDocumentListByQuery(querystring, 0, Integer.MAX_VALUE, fields);
             size0 = lHack.size();
         }
 
         // now use the size of the first query to do a second query
         final SolrDocumentList list = new SolrDocumentList();
         for (final SolrDocument d: l) list.add(d);
-        l = this.solr1.query(querystring, offset + l.size() - size0, count - l.size(), fields);
+        l = this.solr1.getDocumentListByQuery(querystring, offset + l.size() - size0, count - l.size(), fields);
         for (final SolrDocument d: l) list.add(d);
 
         return list;
     }
 
     @Override
-    public QueryResponse query(ModifiableSolrParams query) throws IOException, SolrException {
+    public QueryResponse getResponseByParams(ModifiableSolrParams query) throws IOException, SolrException {
         Integer count0 = query.getInt(CommonParams.ROWS);
         int count = count0 == null ? 10 : count0.intValue();
         Integer start0 = query.getInt(CommonParams.START);
@@ -234,16 +234,16 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         if (this.solr0 == null && this.solr1 == null) return new QueryResponse();
 
         if (this.solr0 != null && this.solr1 == null) {
-            QueryResponse list = this.solr0.query(query);
+            QueryResponse list = this.solr0.getResponseByParams(query);
             return list;
         }
         if (this.solr1 != null && this.solr0 == null) {
-            QueryResponse list = this.solr1.query(query);
+            QueryResponse list = this.solr1.getResponseByParams(query);
             return list;
         }
 
         // combine both lists
-        QueryResponse rsp = this.solr0.query(query);
+        QueryResponse rsp = this.solr0.getResponseByParams(query);
         final SolrDocumentList l = rsp.getResults();
         if (l.size() >= count) return rsp;
 
@@ -253,7 +253,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         { //bad hack - TODO: replace
             query.set(CommonParams.START, 0);
             query.set(CommonParams.ROWS, Integer.MAX_VALUE);
-            QueryResponse lHack = this.solr0.query(query);
+            QueryResponse lHack = this.solr0.getResponseByParams(query);
             query.set(CommonParams.START, start);
             query.set(CommonParams.ROWS, count);
             size0 = lHack.getResults().size();
@@ -262,7 +262,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         // now use the size of the first query to do a second query
         query.set(CommonParams.START, start + l.size() - size0);
         query.set(CommonParams.ROWS, count - l.size());
-        QueryResponse rsp1 = this.solr1.query(query);
+        QueryResponse rsp1 = this.solr1.getResponseByParams(query);
         query.set(CommonParams.START, start);
         query.set(CommonParams.ROWS, count);
         // TODO: combine both
@@ -270,20 +270,20 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
     
     @Override
-    public long getQueryCount(final String querystring) throws IOException {
+    public long getCountByQuery(final String querystring) throws IOException {
         if (this.solr0 == null && this.solr1 == null) return 0;
         if (this.solr0 != null && this.solr1 == null) {
-            return this.solr0.getQueryCount(querystring);
+            return this.solr0.getCountByQuery(querystring);
         }
         if (this.solr1 != null && this.solr0 == null) {
-            return this.solr1.getQueryCount(querystring);
+            return this.solr1.getCountByQuery(querystring);
         }
         final AtomicLong count = new AtomicLong(0);
         Thread t0 = new Thread() {
             @Override
             public void run() {
                 try {
-                    count.addAndGet(MirrorSolrConnector.this.solr0.getQueryCount(querystring));
+                    count.addAndGet(MirrorSolrConnector.this.solr0.getCountByQuery(querystring));
                 } catch (IOException e) {}
             }
         };
@@ -292,7 +292,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
             @Override
             public void run() {
                 try {
-                    count.addAndGet(MirrorSolrConnector.this.solr1.getQueryCount(querystring));
+                    count.addAndGet(MirrorSolrConnector.this.solr1.getCountByQuery(querystring));
                 } catch (IOException e) {}
             }
         };

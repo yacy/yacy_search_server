@@ -1065,7 +1065,7 @@ public final class Protocol {
         if (localsearch) {
             // search the local index
             try {
-                rsp = event.getQuery().getSegment().fulltext().getDefaultConnector().query(solrQuery);
+                rsp = event.getQuery().getSegment().fulltext().getDefaultConnector().getResponseByParams(solrQuery);
                 docList = rsp.getResults();
             } catch (Throwable e) {
                 Network.log.logInfo("SEARCH failed (solr), localpeer (" + e.getMessage() + ")", e);
@@ -1076,7 +1076,7 @@ public final class Protocol {
                 String address = target == event.peers.mySeed() ? "localhost:" + target.getPort() : target.getPublicAddress();
                 RemoteInstance instance = new RemoteInstance("http://" + address, null, "solr"); // this is a 'patch configuration' which considers 'solr' as default collection
                 SolrConnector solrConnector = new RemoteSolrConnector(instance, "solr");
-                rsp = solrConnector.query(solrQuery);
+                rsp = solrConnector.getResponseByParams(solrQuery);
                 docList = rsp.getResults();
                 solrConnector.close();
                 instance.close();
