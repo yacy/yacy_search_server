@@ -114,9 +114,11 @@ public class RankingSolr_p {
             if (boost == null || boost.floatValue() <= 0.0f) {
                 prop.put("boosts_" + i + "_checked", 0);
                 prop.put("boosts_" + i + "_boost", "");
+                prop.put("boosts_" + i + "_notinindexwarning", "0");
             } else {
                 prop.put("boosts_" + i + "_checked", 1);
                 prop.put("boosts_" + i + "_boost", boost.toString());
+                prop.put("boosts_" + i + "_notinindexwarning", (sb.index.fulltext().getDefaultConfiguration().contains(field.name())? "0" : "1") );
             }
             i++;
         }

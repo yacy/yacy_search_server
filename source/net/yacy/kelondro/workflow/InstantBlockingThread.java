@@ -28,6 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.yacy.kelondro.logging.Log;
 
@@ -38,11 +39,11 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
     private final Method jobExecMethod;
     private final Object environment;
     private final Long   handle;
-    private static int handleCounter = 0;
-    private static int instantThreadCounter = 0;
+    private static AtomicInteger handleCounter = new AtomicInteger(0);
+    private static AtomicInteger instantThreadCounter = new AtomicInteger(0);
     private static final ConcurrentMap<Long, String> jobs = new ConcurrentHashMap<Long, String>();
 
-    public InstantBlockingThread(final Object env, final String jobExec, final WorkflowProcessor<J> manager) {
+    public InstantBlockingThread(final WorkflowProcessor<J> manager) {
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
         // jobCount is the name of a method that returns the size of the job
 
@@ -50,9 +51,11 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
         setManager(manager);
 
         // define execution class
+        final Object env = manager.getEnvironment();
+        final String jobExec = manager.getMethodName();
         this.jobExecMethod = execMethod(env, jobExec);
         this.environment = (env instanceof Class<?>) ? null : env;
-        setName(this.jobExecMethod.getClass().getName() + "." + this.jobExecMethod.getName() + "." + handleCounter++);
+        setName(this.jobExecMethod.getClass().getName() + "." + this.jobExecMethod.getName() + "." + handleCounter.getAndIncrement());
         this.handle = Long.valueOf(System.currentTimeMillis() + getName().hashCode());
     }
 
@@ -88,7 +91,7 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
         } else {
             final long t = System.currentTimeMillis();
 
-            instantThreadCounter++;
+            instantThreadCounter.incrementAndGet();
             //System.out.println("started job " + this.handle + ": " + this.getName());
             jobs.put(this.handle, getName());
 
@@ -103,7 +106,7 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
                 if (targetException != null) Log.logException(targetException);
                 Log.logSevere(BLOCKINGTHREAD, "Runtime Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage());
             }
-            instantThreadCounter--;
+            instantThreadCounter.decrementAndGet();
             jobs.remove(this.handle);
             getManager().increaseJobTime(System.currentTimeMillis() - t);
         }

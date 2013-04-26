@@ -88,7 +88,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     public static class Cache {
         private final ARC<String, String> cache;
         public Cache() {
-            this.cache = new ConcurrentARC<String, String>(MAX_CACHE, Math.max(32, 4 * Runtime.getRuntime().availableProcessors()));
+            this.cache = new ConcurrentARC<String, String>(MAX_CACHE, Math.min(32, 2 * Runtime.getRuntime().availableProcessors()));
         }
         public void put(final String wordhashes, final String urlhash, final String snippet) {
             // generate key

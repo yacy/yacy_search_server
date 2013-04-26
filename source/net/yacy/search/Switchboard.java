@@ -884,7 +884,7 @@ public final class Switchboard extends serverSwitch {
                 "storeDocumentIndex",
                 2,
                 null,
-                1 /*Math.max(1, WorkflowProcessor.availableCPU / 2)*/);
+                1);
         this.indexingAnalysisProcessor =
             new WorkflowProcessor<IndexingQueueEntry>(
                 "webStructureAnalysis",
@@ -1790,17 +1790,11 @@ public final class Switchboard extends serverSwitch {
             return "not allowed: " + noIndexReason;
         }
 
-        // put document into the concurrent processing queue
-        try {
-            this.indexingDocumentProcessor.enQueue(new IndexingQueueEntry(
-                response,
-                null,
-                null));
-            return null;
-        } catch ( final InterruptedException e ) {
-            Log.logException(e);
-            return "interrupted: " + e.getMessage();
-        }
+        this.indexingDocumentProcessor.enQueue(new IndexingQueueEntry(
+            response,
+            null,
+            null));
+        return null;
     }
 
     public boolean processSurrogate(final String s) {
@@ -1912,13 +1906,7 @@ public final class Switchboard extends serverSwitch {
             final IndexingQueueEntry queueEntry =
                 new IndexingQueueEntry(response, new Document[] {document}, null);
 
-            // place the queue entry into the concurrent process of the condenser (document analysis)
-            try {
-                this.indexingCondensementProcessor.enQueue(queueEntry);
-            } catch ( final InterruptedException e ) {
-                Log.logException(e);
-                break;
-            }
+            this.indexingCondensementProcessor.enQueue(queueEntry);
             if (shallTerminate()) break;
         }
     }

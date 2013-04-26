@@ -77,7 +77,7 @@ public class Domains {
     
     private static final int MAX_NAME_CACHE_HIT_SIZE = 100000;
     private static final int MAX_NAME_CACHE_MISS_SIZE = 100000;
-    private static final int CONCURRENCY_LEVEL = Runtime.getRuntime().availableProcessors() + 1;
+    private static final int CONCURRENCY_LEVEL = Runtime.getRuntime().availableProcessors() * 2;
 
     // a dns cache
     private static final ARC<String, InetAddress> NAME_CACHE_HIT = new ConcurrentARC<String, InetAddress>(MAX_NAME_CACHE_HIT_SIZE, CONCURRENCY_LEVEL);

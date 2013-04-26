@@ -117,7 +117,7 @@ public class Dispatcher {
             gzipBody,
             timeout);
 
-        final int concurrentSender = Math.min(32, Math.max(10, WorkflowProcessor.availableCPU));
+        final int concurrentSender = Math.min(32, WorkflowProcessor.availableCPU * 2);
         this.indexingTransmissionProcessor = new WorkflowProcessor<Transmission.Chunk>(
                 "transferDocumentIndex",
                 "This is the RWI transmission process",
@@ -385,11 +385,7 @@ public class Dispatcher {
         }
         if (maxsize < 0) return false;
         final Transmission.Chunk chunk = this.transmissionCloud.remove(maxtarget);
-        try {
-            this.indexingTransmissionProcessor.enQueue(chunk);
-        } catch (final InterruptedException e) {
-            Log.logException(e);
-        }
+        this.indexingTransmissionProcessor.enQueue(chunk);
         return true;
     }
 
@@ -414,12 +410,7 @@ public class Dispatcher {
         if (!success) this.log.logInfo("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has failed to transmit index; marked peer as busy");
 
         if (chunk.canFinish()) {
-            try {
-                if (this.indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.enQueue(chunk);
-            } catch (final InterruptedException e) {
-                Log.logException(e);
-                return null;
-            }
+            if (this.indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.enQueue(chunk);
             return chunk;
         }
         this.log.logInfo("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has not enough targets left. This transmission has failed, putting back index to backend");
