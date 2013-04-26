@@ -64,17 +64,19 @@ public class CrawlProfileEditor_p {
 
     private static final List <eentry> labels = new ArrayList<eentry>();
     static {
-        labels.add(new eentry(CrawlProfile.NAME,                          "Name",                                 true,  eentry.STRING));
-        labels.add(new eentry(CrawlProfile.COLLECTIONS,                   "Collections (comma-separated list)",   false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.CRAWLER_URL_MUSTMATCH,         "URL Must-Match Filter",                false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.CRAWLER_URL_MUSTNOTMATCH,      "URL Must-Not-Match Filter",            false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.CRAWLER_IP_MUSTMATCH,          "IP Must-Match Filter",                 false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.CRAWLER_IP_MUSTNOTMATCH,       "IP Must-Not-Match Filter",             false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.CRAWLER_COUNTRY_MUSTMATCH,     "Country Must-Match Filter",            false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.CRAWLER_URL_NODEPTHLIMITMATCH, "URL No-Depth-Limit Must-Match Filter", false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.INDEXING_URL_MUSTMATCH,        "Indexing Must-Match Filter",           false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.INDEXING_URL_MUSTNOTMATCH,     "Indexing Must-Not-Match Filter",       false, eentry.STRING));
-        labels.add(new eentry(CrawlProfile.CACHE_STRAGEGY,  "Cache Strategy (NOCACHE,IFFRESH,IFEXIST,CACHEONLY)", false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.NAME,                          "Name",                                  true,  eentry.STRING));
+        labels.add(new eentry(CrawlProfile.COLLECTIONS,                   "Collections (comma-separated list)",    false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.CRAWLER_URL_MUSTMATCH,         "URL Must-Match Filter",                 false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.CRAWLER_URL_MUSTNOTMATCH,      "URL Must-Not-Match Filter",             false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.CRAWLER_IP_MUSTMATCH,          "IP Must-Match Filter",                  false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.CRAWLER_IP_MUSTNOTMATCH,       "IP Must-Not-Match Filter",              false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.CRAWLER_COUNTRY_MUSTMATCH,     "Country Must-Match Filter",             false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.CRAWLER_URL_NODEPTHLIMITMATCH, "URL No-Depth-Limit Must-Match Filter",  false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.INDEXING_URL_MUSTMATCH,        "Indexing URL Must-Match Filter",        false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.INDEXING_URL_MUSTNOTMATCH,     "Indexing URL Must-Not-Match Filter",    false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.INDEXING_CONTENT_MUSTMATCH,    "Indexing Content Must-Match Filter",    false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.INDEXING_CONTENT_MUSTNOTMATCH, "Indexing Content Must-Not-Match Filter",false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.CACHE_STRAGEGY,  "Cache Strategy (NOCACHE,IFFRESH,IFEXIST,CACHEONLY)",  false, eentry.STRING));
         labels.add(new eentry(CrawlProfile.DEPTH,               "Crawl Depth",           false, eentry.INTEGER));
         labels.add(new eentry(CrawlProfile.RECRAWL_IF_OLDER,    "Recrawl If Older",      false, eentry.INTEGER));
         labels.add(new eentry(CrawlProfile.DOM_MAX_PAGES,       "Domain Max. Pages",     false, eentry.INTEGER));

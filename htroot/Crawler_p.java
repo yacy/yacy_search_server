@@ -212,6 +212,8 @@ public class Crawler_p {
                 String crawlerNoDepthLimitMatch = post.get("crawlingDepthExtension", CrawlProfile.MATCH_NEVER_STRING);
                 final String indexUrlMustMatch = post.get("indexmustmatch", CrawlProfile.MATCH_ALL_STRING);
                 final String indexUrlMustNotMatch = post.get("indexmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
+                final String indexContentMustMatch = post.get("indexcontentmustmatch", CrawlProfile.MATCH_ALL_STRING);
+                final String indexContentMustNotMatch = post.get("indexcontentmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
 
                 final boolean crawlOrder = post.get("crawlOrder", "off").equals("on");
                 env.setConfig("crawlOrder", crawlOrder);
@@ -352,6 +354,8 @@ public class Crawler_p {
                         crawlerNoDepthLimitMatch,
                         indexUrlMustMatch,
                         indexUrlMustNotMatch,
+                        indexContentMustMatch,
+                        indexContentMustNotMatch,
                         newcrawlingdepth,
                         directDocByURL,
                         crawlingIfOlder,

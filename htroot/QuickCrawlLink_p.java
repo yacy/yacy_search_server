@@ -135,10 +135,12 @@ public class QuickCrawlLink_p {
                         crawlingMustNotMatch,            //crawlerUrlMustNotMatch
                         CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
                         CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
-                        "",                              //crawlerCountryMustMatch
+                        CrawlProfile.MATCH_NEVER_STRING, //crawlerCountryMustMatch
                         CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
                         CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
                         CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
+                        CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
+                        CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
                         CrawlingDepth,
                         true,
                         60 * 24 * 30, // recrawlIfOlder (minutes); here: one month

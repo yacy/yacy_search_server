@@ -36,119 +36,159 @@
     </p>
     
     <form id="Crawler" action="Crawler_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-      <table border="0" cellpadding="5" cellspacing="1">
-        <tr class="TableHeader">
-          <td><strong>Attribute</strong></td>
-          <td><strong>Value</strong></td>
-          <td><strong>Description</strong></td>
-        </tr>
-        <tr valign="top" class="TableCellSummary">
-          <td>Starting Point:</td>
-          <td>
-            <table cellpadding="0" cellspacing="0">
-              <tr>
-                <td width="160"><label for="url">One Start URL or a list of URLs:<br/>(must start with http:// https:// ftp:// smb:// file://)</label>:</td>
-                <td><input type="radio" name="crawlingMode" id="url" value="url" checked="checked" /></td>
-                <td>
-                  <textarea name="crawlingURL" id="crawlingURL" cols="42" rows="3" size="41" onkeypress="changed()" onfocus="check('url')" >#[starturl]#</textarea>
-                    &nbsp;
-                    <span id="robotsOK"></span>
-	              	<span id="title"><br/></span>
-	              	<img id="ajax" src="/env/grafics/empty.gif" alt="empty" />
-                </td>
-              </tr>
-              <tr>
-                <td></td>
-                <td></td>
-                <td>
-                  <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="46" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/>
-                </td>
-              </tr>
-              <tr>
-                <td><label for="url"><span class="nobr">From Link-List of URL</span></label>:</td>
-                <td><input type="radio" name="crawlingMode" id="sitelist" value="sitelist" disabled="disabled" onclick="document.getElementById('Crawler').rangeDomain.checked = true;"/></td>
-                <td>
-                  <div id="sitelistURLs"></div>
-                </td>              
-              </tr>
-              <tr>
-                <td><label for="url"><span class="nobr">From Sitemap</span></label>:</td>
-                <td><input type="radio" name="crawlingMode" id="sitemap" value="sitemap" disabled="disabled"/></td>
-                <td>
-                  <input name="sitemapURL" type="text" size="48" maxlength="256" value="" readonly="readonly"/>
-                </td>              
-              </tr>
-              <tr>
-                <td><label for="file"><span class="nobr">From File (enter a path<br/>within your local file system)</span></label>:</td>
-                <td><input type="radio" name="crawlingMode" id="file" value="file" onclick="document.getElementById('Crawler').rangeDomain.checked = true;"/></td>
-                <td><input type="text" name="crawlingFile" size="48" onfocus="check('file')"/><!--<input type="file" name="crawlingFile" size="18" onfocus="check('file')"/>--></td>
-              </tr>
-            </table>
-          </td>
-          <td colspan="3">
-            Define the start-url(s) here. You can submit more than one URL, each line one URL please.
+      <fieldset>
+        <legend>
+          <label>Crawl Job</label>
+        </legend>
+        <p>A Crawl Job consist of one or more start point, crawl limitations and document freshness rules.</p>
+        <fieldset>
+          <legend><label>Start Point</label></legend>
+          <dl>
+            <dt>One Start URL or a list of URLs:<br/>(must start with http:// https:// ftp:// smb:// file://)</dt>
+            <dd>
+          <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">Define the start-url(s) here. You can submit more than one URL, each line one URL please.
             Each of these URLs are the root for a crawl start, existing start URLs are always re-loaded.
             Other already visited URLs are sorted out as "double", if they are not allowed using the re-crawl option.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td>Crawling Depth:</td>
-          <td>
-            <input name="crawlingDepth" id="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#" />&nbsp;&nbsp;&nbsp;
-            <input type="checkbox" name="directDocByURL" id="directDocByURL" #(directDocByURLChecked)#::checked="checked"#(/directDocByURLChecked)# />also all linked non-parsable documents<br/>
-            Unlimited crawl depth for URLs matching with: <input name="crawlingDepthExtension" id="crawlingDepthExtension" type="text" size="40" maxlength="100" value="#[crawlingDepthExtension]#" />
-          </td>
-          <td>
+          </span></span>
+              <input type="radio" align="top" name="crawlingMode" id="url" value="url" checked="checked" />
+              <textarea name="crawlingURL" id="crawlingURL" cols="64" rows="3" size="41" onkeypress="changed()" onfocus="check('url')" >#[starturl]#</textarea>
+                &nbsp;
+                <span id="robotsOK"></span>
+	            <span id="title"><br/></span>
+	           	<img id="ajax" src="/env/grafics/empty.gif" alt="empty" />
+	        </dd>
+	        <dt></dt>
+	        <dd>
+	          <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="46" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/>
+	        </dd>
+	        <dt>From Link-List of URL</dt>
+	        <dd>
+	          <input type="radio" name="crawlingMode" id="sitelist" value="sitelist" disabled="disabled" onclick="document.getElementById('Crawler').rangeDomain.checked = true;"/><br />
+              <div id="sitelistURLs"></div>
+	        </dd>
+	        <dt>From Sitemap</dt>
+	        <dd>
+	          <input type="radio" name="crawlingMode" id="sitemap" value="sitemap" disabled="disabled"/><input name="sitemapURL" type="text" size="71" maxlength="256" value="" readonly="readonly"/>
+	        </dd>
+	        <dt>From File (enter a path<br/>within your local file system)</dt>
+	        <dd>
+	          <input type="radio" name="crawlingMode" id="file" value="file" onclick="document.getElementById('Crawler').rangeDomain.checked = true;"/><input type="text" name="crawlingFile" size="71" maxlength="256" onfocus="check('file')"/><!--<input type="file" name="crawlingFile" size="18" onfocus="check('file')"/>-->
+	        </dd>
+	      </dl>
+        </fieldset>
+        <fieldset>
+          <legend><label>Crawler Filter</label></legend>
+          <p>These are limitations on the crawl stacker. The filters will be applied before a web page is loaded.</p>
+          <dl>
+          <dt>Crawling Depth</dt>
+          <dd>
+            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             This defines how often the Crawler will follow links (of links..) embedded in websites.
             0 means that only the page you enter under "Starting Point" will be added
             to the index. 2-4 is good for normal indexing. Values over 8 are not useful, since a depth-8 crawl will
             index approximately 25.600.000.000 pages, maybe this is the whole WWW.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td><label for="mustmatch">Must-Match Filter</label>:</td>
-          <td>
-            <table border="0">
-            <tr><td width="160">on URLs for Crawling:<br/>
-			<input type="radio" name="range" id="rangeDomain" value="domain" onclick="document.getElementById('mustmatch').disabled=true;document.getElementById('deleteoldon').disabled=false;document.getElementById('deleteoldage').disabled=false;document.getElementById('deleteoldon').checked=true;"/>Restrict to start domain(s)<br />
-			<input type="radio" name="range" id="rangeSubpath" value="subpath" onclick="document.getElementById('mustmatch').disabled=true;document.getElementById('deleteoldon').disabled=false;document.getElementById('deleteoldage').disabled=false;document.getElementById('deleteoldon').checked=true;" />Restrict to sub-path(s)<br />
-			<input type="radio" name="range" id="rangeWide" value="wide" checked="checked" onclick="document.getElementById('mustmatch').disabled=false;document.getElementById('deleteoldoff').checked=true;document.getElementById('deleteoldon').disabled=true;document.getElementById('deleteoldage').disabled=true;"/>Use filter</td>
-			<td valign="bottom"><input name="mustmatch" id="mustmatch" type="text" size="55" maxlength="100000" value="#[mustmatch]#" onclick="document.getElementById('deleteoldon').disabled=false;document.getElementById('deleteoldage').disabled=false"/></td></tr>
-		    <tr><td>on IPs for Crawling:</td><td><input name="ipMustmatch" id="ipMustmatch" type="text" size="55" maxlength="100000" value="#[ipMustmatch]#" /></td></tr>
-		    <tr><td>on URLs for Indexing</td><td><input name="indexmustmatch" id="indexmustmatch" type="text" size="55" maxlength="100000" value="#[indexmustmatch]#" /></td></tr>
-			</table>
-		  </td>
-          <td>
-            The filter is a <b><a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html">regular expression</a></b>
-            that <b>must match</b> with the URLs which are used to be crawled; default is 'catch all'.
-            Example: to allow only urls that contain the word 'science', set the filter to '.*science.*'. 
+            </span></span>
+            <input name="crawlingDepth" id="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#" />&nbsp;&nbsp;&nbsp;
+            <input type="checkbox" name="directDocByURL" id="directDocByURL" #(directDocByURLChecked)#::checked="checked"#(/directDocByURLChecked)# />also all linked non-parsable documents
+          </dd>
+          <dt>Unlimited crawl depth for URLs matching with</dt>
+          <dd>
+            <input name="crawlingDepthExtension" id="crawlingDepthExtension" type="text" size="40" maxlength="100" value="#[crawlingDepthExtension]#" />
+          </dd>
+
+          <dt>Maximum Pages per Domain</dt>
+          <dd>
+            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            You can limit the maximum number of pages that are fetched and indexed from a single domain with this option.
+            You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within
+            the given depth. Domains outside the given depth are then sorted-out anyway.
+            </span></span>
+            <label for="crawlingDomMaxCheck">Use</label>:
+            <input type="checkbox" name="crawlingDomMaxCheck" id="crawlingDomMaxCheck" #(crawlingDomMaxCheck)#::checked="checked"#(/crawlingDomMaxCheck)# />&nbsp;&nbsp;
+            <label for="crawlingDomMaxPages">Page-Count</label>:
+            <input name="crawlingDomMaxPages" id="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="#[crawlingDomMaxPages]#" />
+          </dd>
+          
+          <dt><label for="crawlingQ">Accept URLs with '?' / dynamic URLs</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled.
+            However, there are sometimes web pages with static content that
+            is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.
+            </span></span>
+            <input type="checkbox" name="crawlingQ" id="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# />
+          </dd>
+	        <dt>Load Filter on URLs</dt>
+	        <dd><span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            The filter is a <b><a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html">regular expression</a></b>.
+            Example: to allow only urls that contain the word 'science', set the must-match filter to '.*science.*'. 
             You can also use an automatic domain-restriction to fully crawl a single domain.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td><label for="mustnotmatch">Must-Not-Match Filter</label>:</td>
-          <td>
+            </span></span>
             <table border="0">
-            <tr><td width="160">on URLs for Crawling:</td><td><input name="mustnotmatch" id="mustnotmatch" type="text" size="55" maxlength="100000" value="#[mustnotmatch]#" /></td></tr>
-		    <tr><td>on IPs for Crawling:</td><td><input name="ipMustnotmatch" id="ipMustnotmatch" type="text" size="55" maxlength="100000" value="#[ipMustnotmatch]#" /></td></tr>
-		    <tr><td>on URLs for Indexing:</td><td><input name="indexmustnotmatch" id="indexmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexmustnotmatch]#" /></td></tr>
+            <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td></td></tr>
+			<tr><td colspan="2"><input type="radio" name="range" id="rangeDomain" value="domain" onclick="document.getElementById('mustmatch').disabled=true;document.getElementById('deleteoldon').disabled=false;document.getElementById('deleteoldage').disabled=false;document.getElementById('deleteoldon').checked=true;"/>Restrict to start domain(s)</td></tr>
+			<tr><td colspan="2"><input type="radio" name="range" id="rangeSubpath" value="subpath" onclick="document.getElementById('mustmatch').disabled=true;document.getElementById('deleteoldon').disabled=false;document.getElementById('deleteoldage').disabled=false;document.getElementById('deleteoldon').checked=true;" />Restrict to sub-path(s)</td></tr>
+			<tr><td><input type="radio" name="range" id="rangeWide" value="wide" checked="checked" onclick="document.getElementById('mustmatch').disabled=false;document.getElementById('deleteoldoff').checked=true;document.getElementById('deleteoldon').disabled=true;document.getElementById('deleteoldage').disabled=true;"/>Use filter</td>
+			<td valign="bottom"><input name="mustmatch" id="mustmatch" type="text" size="55" maxlength="100000" value="#[mustmatch]#" onclick="document.getElementById('deleteoldon').disabled=false;document.getElementById('deleteoldage').disabled=false"/></td></tr>
+            <tr><td><img src="/env/grafics/minus.gif"> must-not-match</td><td><input name="mustnotmatch" id="mustnotmatch" type="text" size="55" maxlength="100000" value="#[mustnotmatch]#" /></td></tr>
 			</table>
-		  </td>
-          <td>
+	        </dd>
+	        <dt>Load Filter on IPs</dt>
+	        <dd>
+            <table border="0">
+            <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td><input name="ipMustmatch" id="ipMustmatch" type="text" size="55" maxlength="100000" value="#[ipMustmatch]#" /></td></tr>
+		    <tr><td><img src="/env/grafics/minus.gif"> must-not-match</td><td><input name="ipMustnotmatch" id="ipMustnotmatch" type="text" size="55" maxlength="100000" value="#[ipMustnotmatch]#" /></td></tr>
+			</table>
+	        </dd>
+          <dt><label for="crawlingCountryMustMatch">Must-Match List for Country Codes</label>
+          </dt>
+          <dd><span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            Crawls can be restricted to specific countries. This uses the country code that can be computed from
+            the IP of the server that hosts the page. The filter is not a regular expressions but a list of country codes, separated by comma.
+            </span></span>
+			<input type="radio" name="countryMustMatchSwitch" id="countryMustMatchSwitch" value="false" checked="checked" />no country code restriction<br />
+			<input type="radio" name="countryMustMatchSwitch" id="countryMustMatchSwitch" value="true" />Use filter&nbsp;&nbsp;
+			<input name="countryMustMatchList" id="countryMustMatchList" type="text" size="60" maxlength="256" value="#[countryMustMatch]#" />
+		  </dd>
+	      </dl>
+        </fieldset>
+        <fieldset>
+          <legend><label>Document Filter</label></legend>
+          <p>These are limitations on index feeder. The filters will be applied after a web page was loaded.</p>
+          <dl>
+	        <dt>Filter on URLs</dt>
+	        <dd>
+            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             The filter is a <b><a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html">regular expression</a></b>
             that <b>must not match</b> with the URLs to allow that the content of the url is indexed.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td>Document Deletion</td>
-          <td>
-            <dl>
-            <dt>No Deletion<input type="radio" name="deleteold" id="deleteoldoff" value="off" checked="checked"/></dt>
-            <dd>Do not delete any document before the crawl is started.</dd>
-            <dt>Delete sub-path<input type="radio" name="deleteold" id="deleteoldon" value="on" disabled="true"/></dt>
-            <dd>For each host in the start url list, delete all documents (in the given subpath) from that host.</dd>
-			<dt>Delete only old<input type="radio" name="deleteold" id="deleteoldage" value="age" disabled="true"/></dt>
-			<dd>Treat documents that are loaded
+            </span></span>
+            <table border="0">
+		    <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td><input name="indexmustmatch" id="indexmustmatch" type="text" size="55" maxlength="100000" value="#[indexmustmatch]#" /></td></tr>
+		    <tr><td><img src="/env/grafics/minus.gif"> must-not-match</td><td><input name="indexmustnotmatch" id="indexmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexmustnotmatch]#" /></td></tr>
+			</table>
+	        </dd>
+	        <dt>Filter on Content of Document<br/>(all visible text, including camel-case-tokenized url and title)</dt>
+	        <dd>
+            <table border="0">
+		    <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td><input name="indexcontentmustmatch" id="indexcontentmustmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustmatch]#" /></td></tr>
+		    <tr><td><img src="/env/grafics/minus.gif"> must-not-match</td><td><input name="indexcontentmustnotmatch" id="indexcontentmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustnotmatch]#" /></td></tr>
+			</table>
+	        </dd>
+	      </dl>
+        </fieldset>
+        <fieldset>
+          <legend><label>Clean-Up before Crawl Start</label></legend>
+          <dl>
+            <dt>No Deletion</dt>
+            <dd><span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            After a crawl was done in the past, document may become stale and eventually they are also deleted on the target host.
+            To remove old files from the search index it is not sufficient to just consider them for re-load but it may be necessary
+            to delete them because they simply do not exist any more. Use this in combination with re-crawl while this time should be longer.
+            </span></span><input type="radio" name="deleteold" id="deleteoldoff" value="off" checked="checked"/>Do not delete any document before the crawl is started.</dd>
+            <dt>Delete sub-path</dt>
+            <dd><input type="radio" name="deleteold" id="deleteoldon" value="on" disabled="true"/>For each host in the start url list, delete all documents (in the given subpath) from that host.</dd>
+			<dt>Delete only old</dt>
+			<dd><input type="radio" name="deleteold" id="deleteoldage" value="age" disabled="true"/>Treat documents that are loaded
 			<select name="deleteIfOlderNumber" id="deleteIfOlderNumber">
               <option value="1">1</option><option value="2">2</option><option value="3">3</option>
               <option value="4">4</option><option value="5">5</option><option value="6">6</option>
@@ -164,22 +204,19 @@
               <option value="hour">hours</option>
 			</select> ago as stale and delete them before the crawl is started.
 			</dd>
-            </dl>
-          </td>
-          <td>
-            After a crawl was done in the past, document may become stale and eventually they are also deleted on the target host.
-            To remove old files from the search index it is not sufficient to just consider them for re-load but it may be necessary
-            to delete them because they simply do not exist any more. Use this in combination with re-crawl while this time should be longer.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td>Document Double-Check</td>
-          <td>
-            <dl>
-            <dt>No&nbsp;Doubles<input type="radio" name="recrawl" value="nodoubles" checked="checked"/></dt>
-            <dd>Never load any page that is already known.<br/>Only the start-url may be loaded again.</dd>
-			<dt>Re-load<input type="radio" name="recrawl" value="reload"/></dt>
-			<dd>Treat documents that are loaded
+	      </dl>
+        </fieldset>
+        <fieldset>
+          <legend><label>Double-Check Rules</label></legend>
+          <dl>
+            <dt>No&nbsp;Doubles</dt>
+            <dd><span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,
+            then the url is treated as double when you check the 'no doubles' option. A url may be loaded again when it has reached a specific age,
+            to use that check the 're-load' option.
+            </span></span><input type="radio" name="recrawl" value="nodoubles" checked="checked"/>Never load any page that is already known. Only the start-url may be loaded again.</dd>
+			<dt>Re-load</dt>
+			<dd><input type="radio" name="recrawl" value="reload"/>Treat documents that are loaded
 			<select name="reloadIfOlderNumber" id="reloadIfOlderNumber">
               <option value="1">1</option><option value="2">2</option><option value="3">3</option>
               <option value="4">4</option><option value="5">5</option><option value="6">6</option>
@@ -195,87 +232,58 @@
               <option value="hour">hours</option>
 			</select> ago as stale and load them again. If they are younger, they are ignored.
 			</dd>
-            </dl>
-          </td>
-          <td>
-            A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,
-            then the url is treated as double when you check the 'no doubles' option. A url may be loaded again when it has reached a specific age,
-            to use that check the 're-load' option.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td><label for="crawlingCountryMustMatch">Must-Match List for Country Codes</label>:</td>
-          <td>
-			<input type="radio" name="countryMustMatchSwitch" id="countryMustMatchSwitch" value="true" />Use filter&nbsp;&nbsp;
-			<input name="countryMustMatchList" id="countryMustMatchList" type="text" size="60" maxlength="256" value="#[countryMustMatch]#" /><br />
-			<input type="radio" name="countryMustMatchSwitch" id="countryMustMatchSwitch" value="false" checked="checked" />no country code restriction
-		  </td>
-          <td>
-            Crawls can be restricted to specific countries. This uses the country code that can be computed from
-            the IP of the server that hosts the page. The filter is not a regular expressions but a list of country codes, separated by comma.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td>Maximum Pages per Domain:</td>
-          <td>
-            <label for="crawlingDomMaxCheck">Use</label>:
-            <input type="checkbox" name="crawlingDomMaxCheck" id="crawlingDomMaxCheck" #(crawlingDomMaxCheck)#::checked="checked"#(/crawlingDomMaxCheck)# />&nbsp;&nbsp;
-            <label for="crawlingDomMaxPages">Page-Count</label>:
-            <input name="crawlingDomMaxPages" id="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="#[crawlingDomMaxPages]#" />
-          </td>
-          <td>
-            You can limit the maximum number of pages that are fetched and indexed from a single domain with this option.
-            You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within
-            the given depth. Domains outside the given depth are then sorted-out anyway.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td><label for="crawlingQ">Accept URLs with '?' / dynamic URLs</label>:</td>
-          <td><input type="checkbox" name="crawlingQ" id="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# /></td>
-          <td>
-            A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that
-            is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td><label for="storeHTCache">Store to Web Cache</label>:</td>
-          <td><input type="checkbox" name="storeHTCache" id="storeHTCache" #(storeHTCacheChecked)#::checked="checked"#(/storeHTCacheChecked)# /></td>
-          <td>
+	      </dl>
+        </fieldset>
+        <fieldset>
+          <legend><label>Document Cache</label></legend>
+          <dl><dt><label for="storeHTCache">Store to Web Cache</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             This option is used by default for proxy prefetch, but is not needed for explicit crawling.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td><label for="mustmatch">Policy for usage of Web Cache</label>:</td>
-          <td>
-			<input type="radio" name="cachePolicy" value="nocache" />no&nbsp;cache&nbsp;&nbsp;&nbsp;
-			<input type="radio" name="cachePolicy" value="iffresh" checked="checked" />if&nbsp;fresh&nbsp;&nbsp;&nbsp;
-			<input type="radio" name="cachePolicy" value="ifexist" />if&nbsp;exist&nbsp;&nbsp;&nbsp;
-			<input type="radio" name="cachePolicy" value="cacheonly" />cache&nbsp;only
-		  </td>
-          <td>
+            </span></span>
+            <input type="checkbox" name="storeHTCache" id="storeHTCache" #(storeHTCacheChecked)#::checked="checked"#(/storeHTCacheChecked)# />
+          </dd>
+
+          <dt><label for="mustmatch">Policy for usage of Web Cache</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             The caching policy states when to use the cache during crawling:
               <b>no&nbsp;cache</b>: never use the cache, all content from fresh internet source;
               <b>if&nbsp;fresh</b>: use the cache if the cache exists and is fresh using the proxy-fresh rules;
               <b>if&nbsp;exist</b>: use the cache if the cache exist. Do no check freshness. Otherwise use online source;
               <b>cache&nbsp;only</b>: never go online, use all content from cache. If no cache exist, treat content as unavailable
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td>Do Local Indexing:</td>
-          <td>
+              </span></span>
+			<input type="radio" name="cachePolicy" value="nocache" />no&nbsp;cache&nbsp;&nbsp;&nbsp;
+			<input type="radio" name="cachePolicy" value="iffresh" checked="checked" />if&nbsp;fresh&nbsp;&nbsp;&nbsp;
+			<input type="radio" name="cachePolicy" value="ifexist" />if&nbsp;exist&nbsp;&nbsp;&nbsp;
+			<input type="radio" name="cachePolicy" value="cacheonly" />cache&nbsp;only
+		  </dd>
+	      </dl>
+        </fieldset>
+        <fieldset>
+          <legend><label>Index Administration</label></legend>
+          <dl>
+          <dt>Do Local Indexing</dt>
+          <dd>
+            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
+            Document Cache without indexing.
+            </span></span>
             <label for="indexText">index text</label>:
             <input type="checkbox" name="indexText" id="indexText" #(indexingTextChecked)#::checked="checked"#(/indexingTextChecked)# />&nbsp;&nbsp;&nbsp;
             <label for="indexMedia">index media</label>:
             <input type="checkbox" name="indexMedia" id="indexMedia" #(indexingMediaChecked)#::checked="checked"#(/indexingMediaChecked)# />
-          </td>
-          <td>
-            This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
-            Document Cache without indexing.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td><label for="crawlOrder">Do Remote Indexing</label>:</td>
-          <td>
+          </dd>
+
+          <dt><label for="crawlOrder">Do Remote Indexing</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
+            If you need your crawling results locally, you should switch this off.
+            Only senior and principal peers can initiate or receive remote crawls.
+            <strong>A YaCyNews message will be created to inform all peers about a global crawl</strong>,
+            so they can omit starting a crawl with the same start point.
+            </span></span>
             <table border="0" cellpadding="2" cellspacing="0">
               <tr>
                 <td>
@@ -288,28 +296,23 @@
                 </td>
               </tr>
             </table>
-          </td>
-          <td>
-            If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
-            If you need your crawling results locally, you should switch this off.
-            Only senior and principal peers can initiate or receive remote crawls.
-            <strong>A YaCyNews message will be created to inform all peers about a global crawl</strong>,
-            so they can omit starting a crawl with the same start point.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td><label for="collection">Add Crawl result to collection(s)</label>:</td>
-          <td>
+          </dd>
+
+          <dt><label for="collection">Add Crawl result to collection(s)</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            A crawl result can be tagged with names which are candidates for a collection request.
+            These tags can be selected with the <a href="/gsa/search?q=www&site=#[collection]#">GSA interface</a> using the 'site' operator.
+            To use this option, the 'collection_sxt'-field must be switched on in the <a href="/IndexFederated_p.html">Solr Schema</a>
+            </span></span>
 			<input name="collection" id="collection" type="text" size="60" maxlength="100" value="#[collection]#" #(collectionEnabled)#disabled="disabled"::#(/collectionEnabled)# />
-	      </td>
-          <td>
-            A crawl result can be tagged with names which are candidates for a collection request. These tags can be selected with the <a href="/gsa/search?q=www&site=#[collection]#">GSA interface</a> using the 'site' operator. To use this option, the 'collection_sxt'-field must be switched on in the <a href="/IndexFederated_p.html">Solr Schema</a>
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellSummary">
-          <td colspan="5"><input type="submit" name="crawlingstart" value="Start New Crawl" class="submitready"/></td>
-        </tr>
-      </table>
+	      </dd>
+	      </dl>
+        </fieldset>
+
+          <dt><input type="submit" name="crawlingstart" value="Start New Crawl Job" class="submitready"/></dt><dd></dd>
+        </dl>
+      </fieldset>
     </form>
     
     #%env/templates/footer.template%#

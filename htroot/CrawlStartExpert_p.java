@@ -49,6 +49,8 @@ public class CrawlStartExpert_p {
         prop.put("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
         prop.put("indexmustmatch", CrawlProfile.MATCH_ALL_STRING);
         prop.put("indexmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
+        prop.put("indexcontentmustmatch", CrawlProfile.MATCH_ALL_STRING);
+        prop.put("indexcontentmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
         prop.put("ipMustmatch", sb.getConfig("crawlingIPMustMatch", CrawlProfile.MATCH_ALL_STRING));
         prop.put("ipMustnotmatch", sb.getConfig("crawlingIPMustNotMatch", CrawlProfile.MATCH_NEVER_STRING));
         prop.put("countryMustMatch", sb.getConfig("crawlingCountryMustMatch", ""));

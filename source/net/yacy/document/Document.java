@@ -343,20 +343,19 @@ dc_rights
 
     public String getTextString() {
         try {
-            if (this.text == null) return "";
-            if (this.text instanceof String) {
-                return (String) this.text;
+            if (this.text == null) {
+                this.text = "";
             } else if (this.text instanceof InputStream) {
-                return UTF8.String(FileUtils.read((InputStream) this.text));
+                this.text = UTF8.String(FileUtils.read((InputStream) this.text));
             } else if (this.text instanceof File) {
-                return UTF8.String(FileUtils.read((File) this.text));
+                this.text = UTF8.String(FileUtils.read((File) this.text));
             } else if (this.text instanceof byte[]) {
-                return UTF8.String((byte[]) this.text);
+                this.text = UTF8.String((byte[]) this.text);
             } else if (this.text instanceof ByteArrayOutputStream) {
-                return UTF8.String(((ByteArrayOutputStream) this.text).toByteArray());
+                this.text = UTF8.String(((ByteArrayOutputStream) this.text).toByteArray());
             }
-            assert false : this.text.getClass().toString();
-            return null;
+            assert this.text instanceof String : this.text.getClass().toString();
+            return (String) this.text;
         } catch (final Exception e) {
             Log.logException(e);
         }

@@ -2555,17 +2555,24 @@ public final class Switchboard extends serverSwitch {
             if (this.log.isInfo()) this.log.logInfo("Not Condensed Resource '" + urls + "': indexing of this media type not wanted by crawl profile");
             return new IndexingQueueEntry(in.queueEntry, in.documents, null);
         }
-        if (!profile.indexUrlMustMatchPattern().matcher(urls).matches() ||
-             profile.indexUrlMustNotMatchPattern().matcher(urls).matches() ) {
+        if (!(profile.indexUrlMustMatchPattern() == CrawlProfile.MATCH_ALL_PATTERN || profile.indexUrlMustMatchPattern().matcher(urls).matches()) ||
+             (profile.indexUrlMustNotMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && profile.indexUrlMustNotMatchPattern().matcher(urls).matches())) {
             if (this.log.isInfo()) this.log.logInfo("Not Condensed Resource '" + urls + "': indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + profile.indexUrlMustMatchPattern().pattern() + ", indexUrlMustNotMatchPattern = " + profile.indexUrlMustNotMatchPattern().pattern());
+            addURLtoErrorDB(
+                    in.queueEntry.url(),
+                    in.queueEntry.referrerHash(),
+                    in.queueEntry.initiator(),
+                    in.queueEntry.name(),
+                    FailCategory.FINAL_PROCESS_CONTEXT,
+                    "indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + profile.indexUrlMustMatchPattern().pattern() + ", indexUrlMustNotMatchPattern = " + profile.indexUrlMustNotMatchPattern().pattern());
             return new IndexingQueueEntry(in.queueEntry, in.documents, null);
         }
         
         // check which files may take part in the indexing process
         final List<Document> doclist = new ArrayList<Document>();
-        for ( final Document document : in.documents ) {
-            if ( document.indexingDenied() ) {
-                if ( this.log.isInfo() ) this.log.logInfo("Not Condensed Resource '" + urls + "': denied by document-attached noindexing rule");
+        docloop: for (final Document document : in.documents) {
+            if (document.indexingDenied()) {
+                if (this.log.isInfo()) this.log.logInfo("Not Condensed Resource '" + urls + "': denied by document-attached noindexing rule");
                 addURLtoErrorDB(
                     in.queueEntry.url(),
                     in.queueEntry.referrerHash(),
@@ -2573,7 +2580,19 @@ public final class Switchboard extends serverSwitch {
                     in.queueEntry.name(),
                     FailCategory.FINAL_PROCESS_CONTEXT,
                     "denied by document-attached noindexing rule");
-                continue;
+                continue docloop;
+            }
+            if (!(profile.indexContentMustMatchPattern() == CrawlProfile.MATCH_ALL_PATTERN || profile.indexContentMustMatchPattern().matcher(document.getTextString()).matches()) ||
+                 (profile.indexContentMustNotMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && profile.indexContentMustNotMatchPattern().matcher(document.getTextString()).matches())) {
+                if (this.log.isInfo()) this.log.logInfo("Not Condensed Resource '" + urls + "': indexing prevented by regular expression on content; indexContentMustMatchPattern = " + profile.indexContentMustMatchPattern().pattern() + ", indexContentMustNotMatchPattern = " + profile.indexContentMustNotMatchPattern().pattern());
+                addURLtoErrorDB(
+                    in.queueEntry.url(),
+                    in.queueEntry.referrerHash(),
+                    in.queueEntry.initiator(),
+                    in.queueEntry.name(),
+                    FailCategory.FINAL_PROCESS_CONTEXT,
+                    "indexing prevented by regular expression on content; indexContentMustMatchPattern = " + profile.indexContentMustMatchPattern().pattern() + ", indexContentMustNotMatchPattern = " + profile.indexContentMustNotMatchPattern().pattern());
+                continue docloop;
             }
             doclist.add(document);
         }
