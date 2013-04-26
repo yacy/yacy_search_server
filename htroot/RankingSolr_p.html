@@ -70,7 +70,8 @@
             onclick="if (document.getElementById('#[field]#').checked) document.getElementById('boost_#[field]#').value='1.0'; else document.getElementById('boost_#[field]#').value='';"/>
           </dt>
           <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;" id="boost_dd_#[field]#">
-            <input name="boost_#[field]#" id="boost_#[field]#" type="text" align="right" size="10" value="#[boost]#" />
+            <input #(notinindexwarning)#::class="TableCellActive"#(/notinindexwarning)# name="boost_#[field]#" id="boost_#[field]#" type="text" align="right" size="10" value="#[boost]#" />
+            #(notinindexwarning)#::field not in local index (boost has no effect)#(/notinindexwarning)#    
           </dd>#{/boosts}#
           <dt style="width:260px;margin:0;padding:0;height:1.8em;"></dt>
           <dd style="width:360px;margin:0;padding:0;height:1.8em;float:left;display:inline;">
