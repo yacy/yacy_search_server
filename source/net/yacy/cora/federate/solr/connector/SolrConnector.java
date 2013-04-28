@@ -87,9 +87,16 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public void deleteByQuery(final String querystring) throws IOException;
 
     /**
-     * check if a given key exists in solr at the field fieldName
-     * @param fieldName
-     * @param key
+     * check if a given id exists
+     * @param id
+     * @return true if any entry in solr exists
+     * @throws IOException
+     */
+    public boolean existsById(final String id) throws IOException;
+    
+    /**
+     * check if a given document exists in solr
+     * @param solrquery
      * @return true if any entry in solr exists
      * @throws IOException
      */
@@ -147,6 +154,14 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      */
     public SolrDocumentList getDocumentListByQuery(final String querystring, final int offset, final int count, final String ... fields) throws IOException, SolrException;
 
+    /**
+     * get the number of results for this id.
+     * This should only be called if the actual result is never used, and only the count is interesting
+     * @param key
+     * @return the number of results for this query
+     */
+    public long getCountById(final String key) throws IOException;
+    
     /**
      * get the number of results when this query is done.
      * This should only be called if the actual result is never used, and only the count is interesting

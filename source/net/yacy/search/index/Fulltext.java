@@ -733,7 +733,7 @@ public final class Fulltext {
             if (urlHash.equals(doc.getFieldValue(CollectionSchema.id.getSolrFieldName()))) return true;
         }
         try {
-            if (this.getDefaultConnector().existsByQuery(AbstractSolrConnector.idQuery(urlHash))) return true;
+            if (this.getDefaultConnector().existsById(urlHash)) return true;
         } catch (final Throwable e) {
             Log.logException(e);
         }

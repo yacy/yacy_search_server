@@ -50,6 +50,10 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
     public long hitCache_Hit = 0, hitCache_Miss = 0, hitCache_Insert = 0; // for statistics only; do not write
     public long missCache_Hit = 0, missCache_Miss = 0, missCache_Insert = 0; // for statistics only; do not write
 
+    private static final String idQuery(String id) {
+        return CollectionSchema.id.getSolrFieldName() + ":\"" + id + "\"";
+    }
+    
     public CachedSolrConnector(SolrConnector c, int hitCacheMax, int missCacheMax, int docCacheMax) {
         this.solr = c;
         int partitions = Runtime.getRuntime().availableProcessors() * 2;

@@ -44,7 +44,6 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.FacetParams;
-import org.apache.solr.common.params.ModifiableSolrParams;
 
 public abstract class AbstractSolrConnector implements SolrConnector {
 
@@ -66,10 +65,6 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         catchSuccessQuery.setStart(0);
     }
     private final static int pagesize = 100;
-
-    public static String idQuery(String id) {
-        return CollectionSchema.id.getSolrFieldName() + ":\"" + id + "\"";
-    }
     
     @Override
     public boolean existsByQuery(final String query) throws IOException {
@@ -201,6 +196,47 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         return docs;
     }
 
+    @Override
+    public boolean existsById(String id) throws IOException {
+        // construct raw query
+        final SolrQuery params = new SolrQuery();
+        //params.setQuery(CollectionSchema.id.getSolrFieldName() + ":\"" + id + "\"");
+        params.setQuery("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id);
+        //params.set("defType", "raw");
+        params.setRows(0);
+        params.setStart(0);
+        params.setFacet(false);
+        params.setFields(CollectionSchema.id.getSolrFieldName());
+
+        // query the server
+        QueryResponse rsp = getResponseByParams(params);
+        final SolrDocumentList docs = rsp.getResults();
+        boolean exist = docs == null ? false : docs.getNumFound() > 0;
+        return exist;
+    }
+
+    /**
+     * get the number of results for this id.
+     * This should only be called if the actual result is never used, and only the count is interesting
+     * @param id
+     * @return the number of results for this query
+     */
+    public long getCountById(final String id) throws IOException {
+        // construct raw query
+        final SolrQuery params = new SolrQuery();
+        params.setQuery("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id);
+        params.setRows(0);
+        params.setStart(0);
+        params.setFacet(false);
+        params.setFields(CollectionSchema.id.getSolrFieldName());
+
+        // query the server
+        QueryResponse rsp = getResponseByParams(params);
+        final SolrDocumentList docs = rsp.getResults();
+        long count = docs == null ? 0 : docs.getNumFound();
+        return count;
+    }
+
     /**
      * get the number of results when this query is done.
      * This should only be called if the actual result is never used, and only the count is interesting
@@ -258,21 +294,13 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         }
         return facets;
     }
-
-    @Override
-    abstract public QueryResponse getResponseByParams(ModifiableSolrParams params) throws IOException;
-
-    private final char[] queryIDTemplate = "id:\"            \"".toCharArray();
     
     @Override
     public SolrDocument getDocumentById(final String key, final String ... fields) throws IOException {
         final SolrQuery query = new SolrQuery();
         assert key.length() == 12;
         // construct query
-        char[] q = new char[17];
-        System.arraycopy(this.queryIDTemplate, 0, q, 0, 17);
-        System.arraycopy(key.toCharArray(), 0, q, 4, 12);
-        query.setQuery(new String(q));
+        query.setQuery("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + key);
         query.setRows(1);
         query.setStart(0);
         if (fields.length > 0) query.setFields(fields);
