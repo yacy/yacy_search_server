@@ -22,7 +22,6 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.sorting.ReversibleScoreMap;
@@ -107,7 +106,7 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
      * @throws IOException
      */
     @Override
-    public void deleteByIds(final List<String> ids) throws IOException {
+    public void deleteByIds(final Collection<String> ids) throws IOException {
         for (String id: ids) {
             String q = idQuery(id);
             this.documentCache.remove(q);

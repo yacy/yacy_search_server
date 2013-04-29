@@ -23,7 +23,6 @@ package net.yacy.cora.federate.solr.connector;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -133,7 +132,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
      * @throws IOException
      */
     @Override
-    public void deleteByIds(final List<String> ids) throws IOException {
+    public void deleteByIds(final Collection<String> ids) throws IOException {
         if (this.solr0 != null) this.solr0.deleteByIds(ids);
         if (this.solr1 != null) this.solr1.deleteByIds(ids);
     }

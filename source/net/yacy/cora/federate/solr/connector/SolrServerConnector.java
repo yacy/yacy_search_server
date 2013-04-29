@@ -128,9 +128,11 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     }
 
     @Override
-    public synchronized void deleteByIds(final List<String> ids) throws IOException {
+    public synchronized void deleteByIds(final Collection<String> ids) throws IOException {
+        List<String> l = new ArrayList<String>();
+        for (String s: ids) l.add(s);
         try {
-            this.server.deleteById(ids, -1);
+            this.server.deleteById(l, -1);
         } catch (final Throwable e) {
             throw new IOException(e);
         }

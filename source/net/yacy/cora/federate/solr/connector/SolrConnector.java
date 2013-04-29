@@ -22,7 +22,6 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
@@ -77,7 +76,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @param ids a list of url hashes
      * @throws IOException
      */
-    public void deleteByIds(final List<String> ids) throws IOException;
+    public void deleteByIds(final Collection<String> ids) throws IOException;
 
     /**
      * delete entries from solr according the given solr query string
@@ -153,14 +152,6 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @throws IOException
      */
     public SolrDocumentList getDocumentListByQuery(final String querystring, final int offset, final int count, final String ... fields) throws IOException, SolrException;
-
-    /**
-     * get the number of results for this id.
-     * This should only be called if the actual result is never used, and only the count is interesting
-     * @param key
-     * @return the number of results for this query
-     */
-    public long getCountById(final String key) throws IOException;
     
     /**
      * get the number of results when this query is done.
@@ -196,7 +187,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
 
     /**
      * get a document id result stream from a solr query.
-     * The result queue is considered as terminated if AbstractSolrConnectro.POISON_ID is returned.
+     * The result queue is considered as terminated if AbstractSolrConnector.POISON_ID is returned.
      * The method returns immediately and feeds the search results into the queue
      * @param querystring
      * @param offset

@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.federate.solr.connector.CachedSolrConnector;
+import net.yacy.cora.federate.solr.connector.ConcurrentUpdateSolrConnector;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.connector.MirrorSolrConnector;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
@@ -142,7 +143,7 @@ public class InstanceMirror {
         if (defaultCoreName == null) return null;
         EmbeddedSolrConnector esc = this.solr0 == null ? null : new EmbeddedSolrConnector(this.solr0, defaultCoreName);
         RemoteSolrConnector rsc = this.solr1 == null ? null : new RemoteSolrConnector(this.solr1, defaultCoreName);
-        this.defaultConnector = /*new CachedSolrConnector(*/new MirrorSolrConnector(esc, rsc)/*, 10000, 1000, 100)*/;
+        this.defaultConnector = new ConcurrentUpdateSolrConnector(new MirrorSolrConnector(esc, rsc), 100, 1000000);
         this.connectorCache.put(defaultCoreName, this.defaultConnector);
         return this.defaultConnector;
     }
@@ -152,7 +153,7 @@ public class InstanceMirror {
         if (msc != null) return msc;
         EmbeddedSolrConnector esc = this.solr0 == null ? null : new EmbeddedSolrConnector(this.solr0, corename);
         RemoteSolrConnector rsc = this.solr1 == null ? null : new RemoteSolrConnector(this.solr1, corename);
-        msc = /*new CachedSolrConnector(*/new MirrorSolrConnector(esc, rsc)/*, 10000, 1000, 100)*/;
+        msc = new ConcurrentUpdateSolrConnector(new MirrorSolrConnector(esc, rsc), 100, 1000000);
         this.connectorCache.put(corename, msc);
         return msc;
     }

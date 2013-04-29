@@ -97,7 +97,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     @Override
     public BlockingQueue<SolrDocument> concurrentDocumentsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime, final int buffersize, final String ... fields) {
         final BlockingQueue<SolrDocument> queue = buffersize <= 0 ? new LinkedBlockingQueue<SolrDocument>() : new ArrayBlockingQueue<SolrDocument>(buffersize);
-        final long endtime = System.currentTimeMillis() + maxtime;
+        final long endtime = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime; // we know infinity!
         final Thread t = new Thread() {
             @Override
             public void run() {
@@ -128,7 +128,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     @Override
     public BlockingQueue<String> concurrentIDsByQuery(final String querystring, final int offset, final int maxcount, final long maxtime) {
         final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
-        final long endtime = System.currentTimeMillis() + maxtime;
+        final long endtime = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime; // we know infinity!
         final Thread t = new Thread() {
             @Override
             public void run() {
@@ -213,28 +213,6 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         final SolrDocumentList docs = rsp.getResults();
         boolean exist = docs == null ? false : docs.getNumFound() > 0;
         return exist;
-    }
-
-    /**
-     * get the number of results for this id.
-     * This should only be called if the actual result is never used, and only the count is interesting
-     * @param id
-     * @return the number of results for this query
-     */
-    public long getCountById(final String id) throws IOException {
-        // construct raw query
-        final SolrQuery params = new SolrQuery();
-        params.setQuery("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id);
-        params.setRows(0);
-        params.setStart(0);
-        params.setFacet(false);
-        params.setFields(CollectionSchema.id.getSolrFieldName());
-
-        // query the server
-        QueryResponse rsp = getResponseByParams(params);
-        final SolrDocumentList docs = rsp.getResults();
-        long count = docs == null ? 0 : docs.getNumFound();
-        return count;
     }
 
     /**
