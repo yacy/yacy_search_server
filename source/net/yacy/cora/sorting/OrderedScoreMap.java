@@ -217,11 +217,6 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         return minScore;
     }
 
-    @Override
-    public String toString() {
-        return this.map.toString();
-    }
-
     public Iterator<E> keys(final boolean up) {
         synchronized (this.map) {
             // re-organize entries
@@ -251,7 +246,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
             return r.iterator();
         }
     }
-
+    
     public static void main(String[] args) {
     	OrderedScoreMap<StringBuilder> w = new OrderedScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
     	Random r = new Random();

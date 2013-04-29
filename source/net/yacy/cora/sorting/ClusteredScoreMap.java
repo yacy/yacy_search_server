@@ -277,11 +277,6 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
     }
 
     @Override
-    public String toString() {
-        return this.map + " / " + this.pam;
-    }
-
-    @Override
     public synchronized Iterator<E> keys(final boolean up) {
         if (up) return new simpleScoreIterator<E>();
         return new reverseScoreIterator<E>();

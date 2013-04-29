@@ -445,6 +445,13 @@ public class serverObjects implements Serializable, Cloneable {
         return s.equals("true") || s.equals("on") || s.equals("1");
     }
 
+    public boolean getBoolean(final String key, final boolean dflt) {
+        String s = removeByteOrderMark(get(key));
+        if (s == null) return dflt;
+        s = s.toLowerCase();
+        return s.equals("true") || s.equals("on") || s.equals("1");
+    }
+
     // returns a set of all values where their key mappes the keyMapper
     public String[] getAll(final String keyMapper) {
         // the keyMapper may contain regular expressions as defined in String.matches

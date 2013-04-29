@@ -25,6 +25,8 @@
 package net.yacy.cora.sorting;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -71,5 +73,26 @@ public abstract class AbstractScoreMap<E> implements ScoreMap<E> {
         }
         return list;
         */
+    }
+
+    public Collection<E> keyList(final boolean up) {
+        List<E> list = new ArrayList<E>(this.size());
+        Iterator<E> i = this.keys(up);
+        while (i.hasNext()) list.add(i.next());
+        return list;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        Iterator<E> i = this.keys(false);
+        while (i.hasNext()) {
+            E e = i.next();
+            String s = e.toString();
+            sb.append(s.length() == 0 ? "\"\"" : s).append('/').append(Integer.toString(this.get(e))).append(',');
+        }
+        if (sb.length() == 1) sb.append(']'); else sb.replace(sb.length() - 1, sb.length(), "]");
+        return sb.toString();
     }
 }
