@@ -338,3 +338,47 @@ form dd, dl.pairs dd {
     background-repeat:no-repeat;
     background-position: 2px center;
 }
+
+.dangerdisarmed {
+	height:20px;
+	width:160px;
+    font-size:1.2em;
+    text-indent:9px;
+    color:white;
+	
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -khtml-border-radius: 20px;
+    border-radius: 20px;
+    border: 0px;
+	
+    background:#dddddd;
+}
+
+.dangerready {
+	height:20px;
+	width:160px;
+    font-size:1.2em;
+    text-indent:9px;
+    color:white;
+	
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -khtml-border-radius: 20px;
+    border-radius: 20px;
+    border: 0px;
+	
+    background:#ff6000;
+    background-image:url("/env/grafics/construction.gif");
+    background-size: 24px 16px;
+    background-repeat:no-repeat;
+    background-position: 4px center;
+}
+
+.dangerready:hover {
+    background:#ff0000;
+    background-image:url("/env/grafics/construction.gif");
+    background-size: 24px 16px;
+    background-repeat:no-repeat;
+    background-position: 4px center;
+}
