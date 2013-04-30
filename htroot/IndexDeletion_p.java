@@ -32,6 +32,7 @@ import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.WorkTables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.QueryModifier;
@@ -95,68 +96,6 @@ public class IndexDeletion_p {
         
         int count = post == null ? -1 : post.getInt("count", -1);
 
-        if (post != null && (post.containsKey("simulate-timedelete") || post.containsKey("engage-timedelete"))) {
-            boolean simulate = post.containsKey("simulate-timedelete");
-            Date deleteageDate = null;
-            long t = timeParser(timedelete_number, timedelete_unit); // year, month, day, hour
-            if (t > 0) deleteageDate = new Date(t);
-            final String collection1Query = (timedelete_source_loaddate_checked ? CollectionSchema.load_date_dt : CollectionSchema.last_modified).getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(deleteageDate) + "]";
-            final String webgraphQuery = (timedelete_source_loaddate_checked ? WebgraphSchema.load_date_dt : WebgraphSchema.last_modified).getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(deleteageDate) + "]";
-            if (simulate) {
-                try {
-                    count = (int) defaultConnector.getCountByQuery(collection1Query);
-                } catch (IOException e) {
-                }
-                prop.put("timedelete-active", count == 0 ? 2 : 1);
-            } else {
-                try {
-                    defaultConnector.deleteByQuery(collection1Query);
-                    webgraphConnector.deleteByQuery(webgraphQuery);
-                } catch (IOException e) {
-                }
-                prop.put("timedelete-active", 2);
-            }
-            prop.put("timedelete-active_count", count);
-        }
-        
-        if (post != null && (post.containsKey("simulate-collectiondelete") || post.containsKey("engage-collectiondelete"))) {
-            boolean simulate = post.containsKey("simulate-collectiondelete");
-            collectiondelete = collectiondelete.replaceAll(" ","").replaceAll(",", "|");
-            String query = collectiondelete_mode_unassigned_checked ? "-" + CollectionSchema.collection_sxt + ":[* TO *]" : collectiondelete.length() == 0 ? CollectionSchema.collection_sxt + ":\"\"" : QueryModifier.parseCollectionExpression(collectiondelete);
-            if (simulate) {
-                try {
-                    count = (int) defaultConnector.getCountByQuery(query);
-                } catch (IOException e) {
-                }
-                prop.put("collectiondelete-active", count == 0 ? 2 : 1);
-            } else {
-                try {
-                    defaultConnector.deleteByQuery(query);
-                } catch (IOException e) {
-                }
-                prop.put("collectiondelete-active", 2);
-            }
-            prop.put("collectiondelete-active_count", count);
-        }
-        
-        if (post != null && (post.containsKey("simulate-querydelete") || post.containsKey("engage-querydelete"))) {
-            boolean simulate = post.containsKey("simulate-querydelete");
-            if (simulate) {
-                try {
-                    count = (int) defaultConnector.getCountByQuery(querydelete);
-                } catch (IOException e) {
-                }
-                prop.put("querydelete-active", count == 0 ? 2 : 1);
-            } else {
-                try {
-                    defaultConnector.deleteByQuery(querydelete);
-                } catch (IOException e) {
-                }
-                prop.put("querydelete-active", 2);
-            }
-            prop.put("querydelete-active_count", count);
-        }
-
         if (post != null && (post.containsKey("simulate-urldelete") || post.containsKey("engage-urldelete"))) {
             boolean simulate = post.containsKey("simulate-urldelete");
             // parse the input
@@ -181,6 +120,7 @@ public class IndexDeletion_p {
                         }
                     } catch (InterruptedException e) {
                     }
+                    sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, docs matching with " + urldelete);
                 } catch (MalformedURLException e) {}
             }
             
@@ -196,6 +136,71 @@ public class IndexDeletion_p {
                 prop.put("urldelete-active", 2);
             }
             prop.put("urldelete-active_count", count);
+        }
+
+        if (post != null && (post.containsKey("simulate-timedelete") || post.containsKey("engage-timedelete"))) {
+            boolean simulate = post.containsKey("simulate-timedelete");
+            Date deleteageDate = null;
+            long t = timeParser(timedelete_number, timedelete_unit); // year, month, day, hour
+            if (t > 0) deleteageDate = new Date(t);
+            final String collection1Query = (timedelete_source_loaddate_checked ? CollectionSchema.load_date_dt : CollectionSchema.last_modified).getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(deleteageDate) + "]";
+            final String webgraphQuery = (timedelete_source_loaddate_checked ? WebgraphSchema.load_date_dt : WebgraphSchema.last_modified).getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(deleteageDate) + "]";
+            if (simulate) {
+                try {
+                    count = (int) defaultConnector.getCountByQuery(collection1Query);
+                } catch (IOException e) {
+                }
+                prop.put("timedelete-active", count == 0 ? 2 : 1);
+            } else {
+                try {
+                    defaultConnector.deleteByQuery(collection1Query);
+                    webgraphConnector.deleteByQuery(webgraphQuery);
+                    sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, docs older than " + timedelete_number + " " + timedelete_unit);
+                } catch (IOException e) {
+                }
+                prop.put("timedelete-active", 2);
+            }
+            prop.put("timedelete-active_count", count);
+        }
+        
+        if (post != null && (post.containsKey("simulate-collectiondelete") || post.containsKey("engage-collectiondelete"))) {
+            boolean simulate = post.containsKey("simulate-collectiondelete");
+            collectiondelete = collectiondelete.replaceAll(" ","").replaceAll(",", "|");
+            String query = collectiondelete_mode_unassigned_checked ? "-" + CollectionSchema.collection_sxt + ":[* TO *]" : collectiondelete.length() == 0 ? CollectionSchema.collection_sxt + ":\"\"" : QueryModifier.parseCollectionExpression(collectiondelete);
+            if (simulate) {
+                try {
+                    count = (int) defaultConnector.getCountByQuery(query);
+                } catch (IOException e) {
+                }
+                prop.put("collectiondelete-active", count == 0 ? 2 : 1);
+            } else {
+                try {
+                    defaultConnector.deleteByQuery(query);
+                    sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, collection " + collectiondelete);
+                } catch (IOException e) {
+                }
+                prop.put("collectiondelete-active", 2);
+            }
+            prop.put("collectiondelete-active_count", count);
+        }
+        
+        if (post != null && (post.containsKey("simulate-querydelete") || post.containsKey("engage-querydelete"))) {
+            boolean simulate = post.containsKey("simulate-querydelete");
+            if (simulate) {
+                try {
+                    count = (int) defaultConnector.getCountByQuery(querydelete);
+                } catch (IOException e) {
+                }
+                prop.put("querydelete-active", count == 0 ? 2 : 1);
+            } else {
+                try {
+                    defaultConnector.deleteByQuery(querydelete);
+                    sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, solr query, q = " + querydelete);
+                } catch (IOException e) {
+                }
+                prop.put("querydelete-active", 2);
+            }
+            prop.put("querydelete-active_count", count);
         }
         
         // return rewrite properties
