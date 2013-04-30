@@ -74,7 +74,7 @@ public class WordReferenceFactory implements ReferenceFactory<WordReference>, Se
      */
     public static final <ReferenceType extends WordReference> ByteBuffer compressIndex(final ReferenceContainer<WordReference> inputContainer, final ReferenceContainer<WordReference> excludeContainer, final long maxtime) {
         // collect references according to domains
-        final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
+        final long timeout = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
         final TreeMap<String, StringBuilder> doms = new TreeMap<String, StringBuilder>();
         synchronized (inputContainer) {
             final Iterator<WordReference> i = inputContainer.entries();

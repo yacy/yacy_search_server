@@ -487,7 +487,7 @@ public class WebStructureGraph {
         final long time) {
         // we iterate over all structure entries.
         // one structure entry has information that a specific host links to a list of other hosts
-        final long timeout = System.currentTimeMillis() + time;
+        final long timeout = time == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + time;
         byte[] term;
         HostReference hr;
         WebStructureGraph.StructureEntry sentry;

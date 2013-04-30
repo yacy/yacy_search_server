@@ -109,7 +109,7 @@ public class ReferenceOrder {
             // fill the queue
             WordReferenceVars iEntry;
             int p = 0;
-            long timeout = System.currentTimeMillis() + this.maxtime;
+            long timeout = this.maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + this.maxtime;
             try {
                 while ((iEntry = vars.take()) != WordReferenceVars.poison) {
                     worker[p % this.threads].add(iEntry);
@@ -163,7 +163,7 @@ public class ReferenceOrder {
                 String dom;
                 Integer count;
                 final Integer int1 = 1;
-                long timeout = System.currentTimeMillis() + this.maxtime;
+                long timeout = this.maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + this.maxtime;
                 while ((iEntry = this.decodedEntries.take()) != WordReferenceVars.poison) {
                     // find min/max
                     if (ReferenceOrder.this.min == null) ReferenceOrder.this.min = iEntry.clone(); else ReferenceOrder.this.min.min(iEntry);

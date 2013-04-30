@@ -175,7 +175,7 @@ public class Balancer {
 
         // first find a list of url hashes that shall be deleted
         final HandleSet urlHashes = new RowHandleSet(this.urlFileIndex.row().primaryKeyLength, Base64Order.enhancedCoder, 100);
-        final long terminate = (timeout > 0) ? System.currentTimeMillis() + timeout : Long.MAX_VALUE;
+        final long terminate = timeout == Long.MAX_VALUE ? Long.MAX_VALUE : (timeout > 0) ? System.currentTimeMillis() + timeout : Long.MAX_VALUE;
         synchronized (this) {
             final Iterator<Row.Entry> i = this.urlFileIndex.rows();
             Row.Entry rowEntry;
@@ -351,7 +351,7 @@ public class Balancer {
         if (domainList.isEmpty()) return new ArrayList<Request>(0);
         maxcount = Math.min(maxcount, domainList.size());
         final ArrayList<Request> cel = new ArrayList<Request>(maxcount);
-        long timeout = System.currentTimeMillis() + maxtime;
+        long timeout = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
         for (int i = 0; i < maxcount; i++) {
             final byte[] urlhash = domainList.getOne(i);
             if (urlhash == null) continue;

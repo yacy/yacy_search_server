@@ -235,7 +235,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
      */
     public Element<E> element(final int position, long time) throws InterruptedException {
         if (this.drained == null) return null;
-        long timeout = System.currentTimeMillis() + time;
+        long timeout = time == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + time;
         if (position < this.drained.size()) {
             return this.drained.get(position);
         }

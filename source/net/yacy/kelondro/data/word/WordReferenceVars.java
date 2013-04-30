@@ -500,7 +500,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         		worker[i] = new TransformWorker(this.out, this.maxtime, this.local);
         		worker[i].start();
         	}
-        	long timeout = System.currentTimeMillis() + this.maxtime;
+        	long timeout = this.maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + this.maxtime;
 
         	// fill the queue
         	int p = this.container.size();
@@ -554,7 +554,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         @Override
     	public void run() {
         	Row.Entry entry;
-        	long timeout = System.currentTimeMillis() + this.maxtime;
+        	long timeout = this.maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + this.maxtime;
     		try {
 				while ((entry = this.in.take()) != WordReferenceRow.poisonRowEntry) {
 				    this.out.put(new WordReferenceVars(new WordReferenceRow(entry), local));

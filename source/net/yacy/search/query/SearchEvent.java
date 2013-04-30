@@ -479,7 +479,7 @@ public final class SearchEvent {
         timer = System.currentTimeMillis();
 
         // apply all constraints
-        long timeout = System.currentTimeMillis() + maxtime;
+        long timeout = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
         try {
             WordReferenceVars iEntry;
             long remaining;
@@ -1280,7 +1280,7 @@ public final class SearchEvent {
     public ResultEntry oneResult(final int item, final long timeout) {        
         // check if we already retrieved this item
         // (happens if a search pages is accessed a second time)
-        final long finishTime = System.currentTimeMillis() + timeout;
+        final long finishTime = timeout == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + timeout;
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "started, item = " + item + ", available = " + this.getResultCount(), 0, 0), false);
 
         // wait until a local solr is finished, we must do that to be able to check if we need more
@@ -1325,7 +1325,7 @@ public final class SearchEvent {
     }
 
     public ArrayList<WeakPriorityBlockingQueue.Element<ResultEntry>> completeResults(final long waitingtime) {
-        final long timeout = System.currentTimeMillis() + waitingtime;
+        final long timeout = waitingtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + waitingtime;
         int i = 0;
         while (this.resultList.sizeAvailable() < this.query.neededResults() && System.currentTimeMillis() < timeout) {
             oneResult(i++, timeout - System.currentTimeMillis());
@@ -1451,7 +1451,7 @@ public final class SearchEvent {
         int c;
         float q, min = Float.MAX_VALUE, max = Float.MIN_VALUE;
         int ic = maxcount;
-        long timeout = System.currentTimeMillis() + maxtime;
+        long timeout = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
         while ( ic-- > 0 && i.hasNext() ) {
             word = i.next();
             if ( word == null ) {
