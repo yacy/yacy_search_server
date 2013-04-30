@@ -206,10 +206,17 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     public void commit(boolean softCommit) {
         this.connector.commit(softCommit);
         if (!softCommit) {
+            long timeout = System.currentTimeMillis() + 1000;
             ensureAliveDeletionHandler();
-            while (this.deleteQueue.size() > 0) try {Thread.sleep(10);} catch (InterruptedException e) {}
+            while (this.deleteQueue.size() > 0) {
+                try {Thread.sleep(10);} catch (InterruptedException e) {}
+                if (System.currentTimeMillis() > timeout) break;
+            }
             ensureAliveUpdateHandler();
-            while (this.updateQueue.size() > 0) try {Thread.sleep(10);} catch (InterruptedException e) {}
+            while (this.updateQueue.size() > 0) {
+                try {Thread.sleep(10);} catch (InterruptedException e) {}
+                if (System.currentTimeMillis() > timeout) break;
+            }
         }
     }
 
