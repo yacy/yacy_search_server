@@ -468,7 +468,7 @@ public class URIMetadataRow {
         private String urlRaw;
         private byte[] urlHash;
         private final String dc_title, dc_creator, dc_subject, dc_publisher;
-        private final String latlon; // a comma-separated tuple as "<latitude>,<longitude>" where the coordinates are given as WGS84 spatial coordinates in decimal degrees
+        private String latlon; // a comma-separated tuple as "<latitude>,<longitude>" where the coordinates are given as WGS84 spatial coordinates in decimal degrees
 
         public Components(
                 final String urlRaw,
@@ -511,11 +511,12 @@ public class URIMetadataRow {
         public double lat() {
             if (this.latlon == null || this.latlon.isEmpty()) return 0.0d;
             final int p = this.latlon.indexOf(',');
-            if (p < 0) {
-                return 0.0d;
-            }
+            if (p < 0) return 0.0d;
             try {
-                return this.latlon.charAt(0) > '9' ? 0.0d : Double.parseDouble(this.latlon.substring(0, p));
+                double lat = this.latlon.charAt(0) > '9' ? 0.0d : Double.parseDouble(this.latlon.substring(0, p));
+                if (lat >= -90.0d && lat <= 90.0d) return lat;
+                this.latlon = null; // wrong value
+                return 0.0d;
             } catch (NumberFormatException e) {
                 return 0.0d;
             }
@@ -523,11 +524,12 @@ public class URIMetadataRow {
         public double lon() {
             if (this.latlon == null || this.latlon.isEmpty()) return 0.0d;
             final int p = this.latlon.indexOf(',');
-            if (p < 0) {
-                return 0.0d;
-            }
+            if (p < 0) return 0.0d;
             try {
-                return this.latlon.charAt(p + 1) > '9' ? 0.0d : Double.parseDouble(this.latlon.substring(p + 1));
+                double lon = this.latlon.charAt(p + 1) > '9' ? 0.0d : Double.parseDouble(this.latlon.substring(p + 1));
+                if (lon >= -180.0d && lon <= 180.0d) return lon;
+                this.latlon = null; // wrong value
+                return 0.0d;
             } catch (NumberFormatException e) {
                 return 0.0d;
             }

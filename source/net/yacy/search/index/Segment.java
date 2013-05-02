@@ -74,8 +74,6 @@ import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.LoaderDispatcher;
-import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -556,8 +554,8 @@ public class Segment {
                 this.fulltext.putDocument(vector);
                 break tryloop;
             } catch ( final IOException e ) {
-                error = "failed to send " + urlNormalform + " to solr";
-                Log.logWarning("SOLR", error + e.getMessage());
+                error = "failed to send " + urlNormalform + " to solr: " + e.getMessage();
+                Log.logWarning("SOLR", error);
                 if (i == 10) this.fulltext.commit(false);
                 try {Thread.sleep(1000);} catch (InterruptedException e1) {}
                 continue tryloop;
@@ -570,8 +568,8 @@ public class Segment {
                     this.fulltext.putEdges(vector.getWebgraphDocuments());
                     break tryloop;
                 } catch ( final IOException e ) {
-                    error = "failed to send " + urlNormalform + " to solr";
-                    Log.logWarning("SOLR", error + e.getMessage());
+                    error = "failed to send " + urlNormalform + " to solr: " + e.getMessage();
+                    Log.logWarning("SOLR", error);
                     if (i == 10) this.fulltext.commit(false);
                     try {Thread.sleep(1000);} catch (InterruptedException e1) {}
                     continue tryloop;
@@ -579,10 +577,9 @@ public class Segment {
             }
         }
         if (error != null) {
-            Log.logWarning("SOLR", error + ", pausing Crawler!");
-            // pause the crawler!!!
-            Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, error);
-            Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, error);
+            Log.logSevere("SOLR", error + ", PLEASE REPORT TO bugs.yacy.net");
+            //Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, error);
+            //Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, error);
         }
         final long storageEndTime = System.currentTimeMillis();
 

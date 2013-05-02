@@ -119,8 +119,14 @@ public class Document {
         this.sections =  new LinkedList<String>() ;
         if (sections != null) this.sections.addAll(Arrays.asList(sections));
         this.description = (abstrct == null) ? new StringBuilder(0) : new StringBuilder(abstrct);
-        this.lon = lon;
-        this.lat = lat;
+        if (lat >= -90.0d && lat <= 90.0d && lon >= -180.0d && lon <= 180.0d) {
+            this.lon = lon;
+            this.lat = lat;
+        } else {
+            // we ignore false values because otherwise solr will cause an error when we input the coordinates into the index
+            this.lon = 0.0d;
+            this.lat = 0.0d;
+        }
         this.anchors = (anchors == null) ? new HashMap<DigestURI, Properties>(0) : anchors;
         this.rss = (rss == null) ? new HashMap<DigestURI, String>(0) : rss;
         this.images = (images == null) ? new HashMap<DigestURI, ImageEntry>() : images;
