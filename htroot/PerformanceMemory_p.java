@@ -203,21 +203,21 @@ public class PerformanceMemory_p {
         prop.putNum("objectMissCacheTotalMem", totalmissmem / (1024d * 1024d));
 
         // other caching structures
-        final CachedSolrConnector solr = (CachedSolrConnector) Switchboard.getSwitchboard().index.fulltext().getDefaultConnector();
-        prop.putNum("solrcacheHit.size", solr.nameCacheHitSize());
-        prop.putNum("solrcacheHit.Hit", solr.hitCache_Hit);
-        prop.putNum("solrcacheHit.Miss", solr.hitCache_Miss);
-        prop.putNum("solrcacheHit.Insert", solr.hitCache_Insert);
-        
-        prop.putNum("solrcacheMiss.size", solr.nameCacheMissSize());
-        prop.putNum("solrcacheMiss.Hit", solr.missCache_Hit);
-        prop.putNum("solrcacheMiss.Miss", solr.missCache_Miss);
-        prop.putNum("solrcacheMiss.Insert", solr.missCache_Insert);
-        
-        prop.putNum("solrcacheDocument.size", solr.nameCacheDocumentSize());
-        prop.putNum("solrcacheDocument.Hit", solr.documentCache_Hit);
-        prop.putNum("solrcacheDocument.Miss", solr.documentCache_Miss);
-        prop.putNum("solrcacheDocument.Insert", solr.documentCache_Insert);
+//        final CachedSolrConnector solr = (CachedSolrConnector) Switchboard.getSwitchboard().index.fulltext().getDefaultConnector();
+//        prop.putNum("solrcacheHit.size", solr.nameCacheHitSize());
+//        prop.putNum("solrcacheHit.Hit", solr.hitCache_Hit);
+//        prop.putNum("solrcacheHit.Miss", solr.hitCache_Miss);
+//        prop.putNum("solrcacheHit.Insert", solr.hitCache_Insert);
+//        
+//        prop.putNum("solrcacheMiss.size", solr.nameCacheMissSize());
+//        prop.putNum("solrcacheMiss.Hit", solr.missCache_Hit);
+//        prop.putNum("solrcacheMiss.Miss", solr.missCache_Miss);
+//        prop.putNum("solrcacheMiss.Insert", solr.missCache_Insert);
+//        
+//        prop.putNum("solrcacheDocument.size", solr.nameCacheDocumentSize());
+//        prop.putNum("solrcacheDocument.Hit", solr.documentCache_Hit);
+//        prop.putNum("solrcacheDocument.Miss", solr.documentCache_Miss);
+//        prop.putNum("solrcacheDocument.Insert", solr.documentCache_Insert);
         
         prop.putNum("namecacheHit.size", Domains.nameCacheHitSize());
         prop.putNum("namecacheHit.Hit", Domains.cacheHit_Hit);
