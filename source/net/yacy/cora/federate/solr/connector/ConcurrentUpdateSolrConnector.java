@@ -165,6 +165,19 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
             }
         }
     }
+
+    private void removeIdFromDeleteQueue(String id) {
+        if (this.updateQueue.size() == 0) return;
+        Iterator<String> i = this.deleteQueue.iterator();
+        while (i.hasNext()) {
+            String docID = i.next();
+            if (docID == null) break;
+            if (docID.equals(id)) {
+                i.remove();
+                break;
+            }
+        }
+    }
     
     private void updateIdCache(String id) {
         if (id == null) return;
@@ -204,7 +217,6 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
 
     @Override
     public void commit(boolean softCommit) {
-        this.connector.commit(softCommit);
         if (!softCommit) {
             long timeout = System.currentTimeMillis() + 1000;
             ensureAliveDeletionHandler();
@@ -218,6 +230,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
                 if (System.currentTimeMillis() > timeout) break;
             }
         }
+        this.connector.commit(softCommit);
     }
 
     @Override
@@ -292,7 +305,9 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
 
     @Override
     public void add(SolrInputDocument solrdoc) throws IOException, SolrException {
-        updateIdCache((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+        String id = (String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName());
+        removeIdFromDeleteQueue(id);
+        updateIdCache(id);
         try {this.updateQueue.put(solrdoc);} catch (InterruptedException e) {}
     }
 
