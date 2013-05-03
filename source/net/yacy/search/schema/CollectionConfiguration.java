@@ -926,6 +926,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         final InetAddress address = digestURI.getInetAddress();
         if (contains(CollectionSchema.ip_s) && address != null) add(solrdoc, CollectionSchema.ip_s, address.getHostAddress());
         if (contains(CollectionSchema.host_s) && digestURI.getHost() != null) add(solrdoc, CollectionSchema.host_s, digestURI.getHost());
+        if (contains(CollectionSchema.load_date_dt)) add(solrdoc, CollectionSchema.load_date_dt, new Date());
 
         // path elements of link
         if (contains(CollectionSchema.url_paths_sxt)) add(solrdoc, CollectionSchema.url_paths_sxt, digestURI.getPaths());
