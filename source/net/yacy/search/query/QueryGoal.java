@@ -31,6 +31,7 @@ import net.yacy.cora.document.WordCache;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.federate.solr.SolrType;
+import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
@@ -201,7 +202,7 @@ public class QueryGoal {
         // parse special requests
         if (include_strings.size() == 1 && exclude_strings.size() == 0) {
             String w = include_strings.get(0);
-            if (Segment.catchallString.equals(w)) return new StringBuilder("*:*");
+            if (Segment.catchallString.equals(w)) return new StringBuilder(AbstractSolrConnector.CATCHALL_TERM);
         }
         
         // add text query

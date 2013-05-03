@@ -111,7 +111,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public synchronized void clear() throws IOException {
         try {
-            this.server.deleteByQuery("*:*");
+            this.server.deleteByQuery(AbstractSolrConnector.CATCHALL_TERM);
             this.server.commit(true, true, false);
         } catch (final Throwable e) {
             throw new IOException(e);
