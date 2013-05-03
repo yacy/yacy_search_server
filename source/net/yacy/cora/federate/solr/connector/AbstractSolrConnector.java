@@ -62,6 +62,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         catchSuccessQuery.setQuery("*:*"); // failreason_t is only available for core collection1
         catchSuccessQuery.setFields(CollectionSchema.id.getSolrFieldName());
         catchSuccessQuery.clearSorts();
+        catchSuccessQuery.setIncludeScore(false);
         catchSuccessQuery.setRows(0);
         catchSuccessQuery.setStart(0);
     }
@@ -188,9 +189,8 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setStart(offset);
         params.setFacet(false);
         params.clearSorts();
-        //params.addSortField( "price", SolrQuery.ORDER.asc );
-
         if (fields.length > 0) params.setFields(fields);
+        params.setIncludeScore(false);
         
         // query the server
         QueryResponse rsp = getResponseByParams(params);
@@ -210,6 +210,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setFacet(false);
         params.clearSorts();
         params.setFields(CollectionSchema.id.getSolrFieldName());
+        params.setIncludeScore(false);
 
         // query the server
         QueryResponse rsp = getResponseByParams(params);
@@ -234,6 +235,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setFacet(false);
         params.clearSorts();
         params.setFields(CollectionSchema.id.getSolrFieldName());
+        params.setIncludeScore(false);
 
         // query the server
         QueryResponse rsp = getResponseByParams(params);
@@ -262,6 +264,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setFacetSort(FacetParams.FACET_SORT_COUNT);
         params.setFields(fields);
         params.clearSorts();
+        params.setIncludeScore(false);
         for (String field: fields) params.addFacetField(field);
         
         // query the server
@@ -288,6 +291,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         query.setRows(1);
         query.setStart(0);
         if (fields.length > 0) query.setFields(fields);
+        query.setIncludeScore(false);
 
         // query the server
         try {
