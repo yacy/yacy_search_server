@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.yacy.cora.federate.solr.SolrServlet;
-import net.yacy.cora.federate.solr.YaCySchema;
+import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphSchema;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
@@ -36,7 +36,8 @@ public class EmbeddedSolrConnectorTest {
         storage.mkdirs();
         System.out.println("setup EmeddedSolrConnector using config dir: " + solr_config.getAbsolutePath());
         try {
-            solr = new EmbeddedSolrConnector(storage, solr_config);
+            EmbeddedInstance localCollectionInstance = new EmbeddedInstance(solr_config, storage, CollectionSchema.CORE_NAME, new String[]{CollectionSchema.CORE_NAME, WebgraphSchema.CORE_NAME});
+            solr = new EmbeddedSolrConnector(localCollectionInstance);
 
             // start a server
             jetty = startServer("/solr", 8091, solr); // try http://localhost:8091/solr/select?q=*:*
@@ -65,10 +66,10 @@ public class EmbeddedSolrConnectorTest {
     public void testQuery() {
         System.out.println("adding test document to solr");
         SolrInputDocument doc = new SolrInputDocument();
-        doc.addField(YaCySchema.id.name(), "ABCD0000abcd");
-        doc.addField(YaCySchema.title.name(), "Lorem ipsum");
-        doc.addField(YaCySchema.host_s.name(), "yacy.net");
-        doc.addField(YaCySchema.text_t.name(), "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+        doc.addField(CollectionSchema.id.name(), "ABCD0000abcd");
+        doc.addField(CollectionSchema.title.name(), "Lorem ipsum");
+        doc.addField(CollectionSchema.host_s.name(), "yacy.net");
+        doc.addField(CollectionSchema.text_t.name(), "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
         try {
             solr.add(doc);
         } catch (IOException ex) {
@@ -82,7 +83,7 @@ public class EmbeddedSolrConnectorTest {
         long expResult = 1;
         SolrDocumentList result;
         try {
-            result = solr.query(YaCySchema.text_t.name() + ":tempor", 0, 10);
+            result = solr.getDocumentListByQuery(CollectionSchema.text_t.name() + ":tempor", 0, 10,"");
             assertEquals(expResult, result.getNumFound());
         } catch (IOException ex) {
             fail("Solr query no result");
@@ -146,25 +147,26 @@ public class EmbeddedSolrConnectorTest {
         File storage = new File("DATA/INDEX/webportal/SEGMENTS/text/solr/");
         storage.mkdirs();
         try {
-            EmbeddedSolrConnector solr = new EmbeddedSolrConnector(storage, solr_config);
+            EmbeddedInstance localCollectionInstance = new EmbeddedInstance(solr_config, storage, CollectionSchema.CORE_NAME, new String[]{CollectionSchema.CORE_NAME, WebgraphSchema.CORE_NAME});
+            EmbeddedSolrConnector solr = new EmbeddedSolrConnector(localCollectionInstance);
             SolrInputDocument doc = new SolrInputDocument();
-            doc.addField(YaCySchema.id.name(), "ABCD0000abcd");
-            doc.addField(YaCySchema.title.name(), "Lorem ipsum");
-            doc.addField(YaCySchema.host_s.name(), "yacy.net");
-            doc.addField(YaCySchema.text_t.name(), "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+            doc.addField(CollectionSchema.id.name(), "ABCD0000abcd");
+            doc.addField(CollectionSchema.title.name(), "Lorem ipsum");
+            doc.addField(CollectionSchema.host_s.name(), "yacy.net");
+            doc.addField(CollectionSchema.text_t.name(), "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
             solr.add(doc);
 
             // start a server
             startServer("/solr", 8091, solr); // try http://localhost:8091/solr/select?q=*:*
 
             // do a normal query
-            SolrDocumentList select = solr.query(YaCySchema.text_t.name() + ":tempor", 0, 10);
+            SolrDocumentList select = solr.getDocumentListByQuery(CollectionSchema.text_t.name() + ":tempor", 0, 10);
             for (SolrDocument d : select) {
                 System.out.println("***TEST SELECT*** " + d.toString());
             }
 
             // do a facet query
-            select = solr.query(YaCySchema.text_t.name() + ":tempor", 0, 10);
+            select = solr.getDocumentListByQuery(CollectionSchema.text_t.name() + ":tempor", 0, 10);
             for (SolrDocument d : select) {
                 System.out.println("***TEST SELECT*** " + d.toString());
             }
