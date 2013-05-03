@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.regex.Pattern;
@@ -32,6 +33,7 @@ import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
@@ -52,12 +54,7 @@ public class IndexDeletion_p {
         SolrConnector webgraphConnector = sb.index.fulltext().getWebgraphConnector();
         defaultConnector.commit(false); // we must do a commit here because the user cannot see a proper count.
         prop.put("doccount", defaultConnector.getSize());
-        try {
-            prop.put("collectionlist", defaultConnector.getFacets("*:*", 1000, CollectionSchema.collection_sxt.getSolrFieldName()).get(CollectionSchema.collection_sxt.getSolrFieldName()).toString());
-        } catch (IOException e1) {
-            prop.put("collectionlist", "[]");
-        }
-        
+
         // Delete by URL Matching
         String urldelete = post == null ? "" : post.get("urldelete", "");
         boolean urldelete_mm_subpath_checked = post == null ? true : post.get("urldelete-mm", "subpath").equals("subpath");
@@ -83,9 +80,29 @@ public class IndexDeletion_p {
         // Delete Collections
         boolean collectiondelete_mode_unassigned_checked = post == null ? true : post.get("collectiondelete-mode", "unassigned").equals("unassigned");
         String collectiondelete = post == null ? "" : post.get("collectiondelete", "");
+        if (post != null && post.containsKey("collectionlist")) {
+            collectiondelete_mode_unassigned_checked = false;
+            prop.put("collectiondelete-select", 1);
+            try {
+                ScoreMap<String> collectionMap = defaultConnector.getFacets("*:*", 1000, CollectionSchema.collection_sxt.getSolrFieldName()).get(CollectionSchema.collection_sxt.getSolrFieldName());
+                Iterator<String> i = collectionMap.iterator();
+                int c = 0;
+                while (i.hasNext()) {
+                    String collection = i.next();
+                    prop.put("collectiondelete-select_list_" + c + "_collection-name", collection + "/" + collectionMap.get(collection));
+                    prop.put("collectiondelete-select_list_" + c + "_collection-value", collection);
+                    c++;
+                }
+                prop.put("collectiondelete-select_list", c );
+            } catch (IOException e1) {
+                prop.put("collectiondelete-select", 0);
+            }
+        } else {
+            prop.put("collectiondelete-select", 0);
+        }
         prop.put("collectiondelete-mode-unassigned-checked", collectiondelete_mode_unassigned_checked ? 1 : 0);
         prop.put("collectiondelete-mode-assigned-checked", collectiondelete_mode_unassigned_checked ? 0 : 1);
-        prop.put("collectiondelete", collectiondelete);
+        prop.put("collectiondelete-select_collectiondelete", collectiondelete);
         prop.put("collectiondelete-active", 0);
         
         // Delete by Solr Query
@@ -93,6 +110,7 @@ public class IndexDeletion_p {
         String querydelete = post == null ? "" : post.get("querydelete", "");
         prop.put("querydelete", querydelete);
         prop.put("querydelete-active", 0);
+
         
         int count = post == null ? -1 : post.getInt("count", -1);
 
@@ -100,40 +118,60 @@ public class IndexDeletion_p {
             boolean simulate = post.containsKey("simulate-urldelete");
             // parse the input
             urldelete = urldelete.trim(); 
-            String[] stubURLs = urldelete.indexOf('\n') > 0 || urldelete.indexOf('\r') > 0 ? urldelete.split("[\\r\\n]+") : urldelete.split(Pattern.quote("|"));
-            Set<String> ids = new HashSet<String>();
-            for (String urlStub: stubURLs) {
-                if (urlStub == null || urlStub.length() == 0) continue;
-                int pos = urlStub.indexOf("://",0);
-                if (pos == -1) {
-                    if (urlStub.startsWith("www")) urlStub = "http://" + urlStub;
-                    if (urlStub.startsWith("ftp")) urlStub = "ftp://" + urlStub;
-                }
-                try {
-                    DigestURI u = new DigestURI(urlStub);
-                    BlockingQueue<SolrDocument> dq = defaultConnector.concurrentDocumentsByQuery(CollectionSchema.host_s.getSolrFieldName() + ":" + u.getHost(), 0, 100000000, Long.MAX_VALUE, 100, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
-                    SolrDocument doc;
-                    try {
-                        while ((doc = dq.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                            String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
-                            if (url.startsWith(urlStub)) ids.add((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
-                        }
-                    } catch (InterruptedException e) {
+            if (urldelete_mm_subpath_checked) {
+                // collect using url stubs
+                Set<String> ids = new HashSet<String>();
+                String[] stubURLs = urldelete.indexOf('\n') > 0 || urldelete.indexOf('\r') > 0 ? urldelete.split("[\\r\\n]+") : urldelete.split(Pattern.quote("|"));
+                for (String urlStub: stubURLs) {
+                    if (urlStub == null || urlStub.length() == 0) continue;
+                    int pos = urlStub.indexOf("://",0);
+                    if (pos == -1) {
+                        if (urlStub.startsWith("www")) urlStub = "http://" + urlStub;
+                        if (urlStub.startsWith("ftp")) urlStub = "ftp://" + urlStub;
                     }
-                    sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, docs matching with " + urldelete);
-                } catch (MalformedURLException e) {}
-            }
-            
-            if (simulate) {
-                count = ids.size();
-                prop.put("urldelete-active", count == 0 ? 2 : 1);
-            } else {
-                try {
-                    defaultConnector.deleteByIds(ids);
-                    //webgraphConnector.deleteByQuery(webgraphQuery);
-                } catch (IOException e) {
+                    try {
+                        DigestURI u = new DigestURI(urlStub);
+                        BlockingQueue<SolrDocument> dq = defaultConnector.concurrentDocumentsByQuery(CollectionSchema.host_s.getSolrFieldName() + ":" + u.getHost(), 0, 100000000, Long.MAX_VALUE, 100, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+                        SolrDocument doc;
+                        try {
+                            while ((doc = dq.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+                                String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+                                if (url.startsWith(urlStub)) ids.add((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+                            }
+                        } catch (InterruptedException e) {
+                        }
+                        sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, docs matching with " + urldelete);
+                    } catch (MalformedURLException e) {}
                 }
-                prop.put("urldelete-active", 2);
+                
+                if (simulate) {
+                    count = ids.size();
+                    prop.put("urldelete-active", count == 0 ? 2 : 1);
+                } else {
+                    try {
+                        defaultConnector.deleteByIds(ids);
+                        //webgraphConnector.deleteByQuery(webgraphQuery);
+                    } catch (IOException e) {
+                    }
+                    prop.put("urldelete-active", 2);
+                }
+            } else {
+                // collect using a regular expression on urls
+                String regexquery = CollectionSchema.sku.getSolrFieldName() + ":/" + urldelete + "/";
+                if (simulate) {
+                    try {
+                        count = (int) defaultConnector.getCountByQuery(regexquery);
+                    } catch (IOException e) {
+                    }
+                    prop.put("urldelete-active", count == 0 ? 2 : 1);
+                } else {
+                    try {
+                        defaultConnector.deleteByQuery(regexquery);
+                        sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, regex match = " + urldelete);
+                    } catch (IOException e) {
+                    }
+                    prop.put("urldelete-active", 2);
+                }
             }
             prop.put("urldelete-active_count", count);
         }

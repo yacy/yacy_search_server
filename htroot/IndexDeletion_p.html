@@ -22,7 +22,7 @@
         <dt>Matching Method</dt>
         <dd>
           <input type="radio" name="urldelete-mm" value="subpath" #(urldelete-mm-subpath-checked)#::checked="checked"#(/urldelete-mm-subpath-checked)# />sub-path of given URLs&nbsp;&nbsp;&nbsp;
-          <input type="radio" name="urldelete-mm" value="regexp" #(urldelete-mm-regexp-checked)#::checked="checked"#(/urldelete-mm-regexp-checked)# disabled="disabled"/>matching with regular expression
+          <input type="radio" name="urldelete-mm" value="regexp" #(urldelete-mm-regexp-checked)#::checked="checked"#(/urldelete-mm-regexp-checked)# />matching with regular expression
         <dt><input type="submit" name="simulate-urldelete" value="Simulate Deletion" class="submitready" title="no actual deletion, generates only a deletion count"/></dt>
         <dd><input type="submit" name="engage-urldelete" id="engage-urldelete" value="Engage Deletion" #(urldelete-active)#class="dangerdisarmed" disabled="disabled" title="simulate a deletion first to calculate the deletion count"::class="dangerready"::class="dangerdisarmed" disabled="disabled" title="engaged"#(/urldelete-active)#/>
           #(urldelete-active)#::<span class="pending">selected #[count]# documents for deletion</span><input type="hidden" name="count" id="count" value="#[count]#" />::<span class="commit">deleted #[count]# documents</span>#(/urldelete-active)#
@@ -81,15 +81,19 @@
     <form id="IndexDeletionCollection" action="IndexDeletion_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
       <legend><label>Delete Collections</label></legend>
-      <p>Delete all documents which are inside specific collections. This is the list of known collections: #[collectionlist]#</p>
+      <p>Delete all documents which are inside specific collections.</p>
       <dl>
         <dt>Not Assiged</dt>
         <dd><input type="radio" name="collectiondelete-mode" id="collectiondelete-mode-unassigned" value="unassigned" #(collectiondelete-mode-unassigned-checked)#::checked="checked"#(/collectiondelete-mode-unassigned-checked)# onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='dangerdisarmed';"/>Delete all documents which are not assigned to any collection
         </dd>
         
         <dt>Assigned</dt>
-        <dd><input type="radio" name="collectiondelete-mode" id="collectiondelete-mode-assigned" value="assigned" #(collectiondelete-mode-assigned-checked)#::checked="checked"#(/collectiondelete-mode-assigned-checked)# onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='dangerdisarmed';"/>Delete all documents which are assigned to the following collection(s), separated by ',' (comma) or '|' (vertical bar)<br/>
-        <input type="text" name="collectiondelete" id="collections" value="#[collectiondelete]#" size="96" maxlength="1024" onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='dangerdisarmed';document.getElementById('collectiondelete-mode-assigned').checked=true;"/>
+        <dd><input type="radio" name="collectiondelete-mode" id="collectiondelete-mode-assigned" value="assigned" #(collectiondelete-mode-assigned-checked)#::checked="checked"#(/collectiondelete-mode-assigned-checked)# onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='dangerdisarmed';"/>Delete all documents which are assigned to the following collection(s)
+        #(collectiondelete-select)#, separated by ',' (comma) or '|' (vertical bar); or <a href="IndexDeletion_p.html?collectionlist=">generate the collection list...</a><br/><input type="text" name="collectiondelete" id="collections" value="#[collectiondelete]#" size="96" maxlength="1024" onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='dangerdisarmed';document.getElementById('collectiondelete-mode-assigned').checked=true;"/>::
+        <br/><select id="collectiondelete" name="collectiondelete">
+          #{list}#<option value="#[collection-value]#" onClick="d=document.getElementById('engage-collectiondelete');d.disabled=true;d.className='dangerdisarmed';document.getElementById('collectiondelete-mode-assigned').checked=true;">#[collection-name]#</option>#{/list}#
+        </select>
+        #(/collectiondelete-select)#
         </dd>
         <dt><input type="submit" name="simulate-collectiondelete" value="Simulate Deletion" class="submitready" title="no actual deletion, generates only a deletion count"/></dt>
         <dd><input type="submit" name="engage-collectiondelete" id="engage-collectiondelete" value="Engage Deletion" #(collectiondelete-active)#class="dangerdisarmed" disabled="disabled" title="simulate a deletion first to calculate the deletion count"::class="dangerready"::class="dangerdisarmed" disabled="disabled" title="engaged"#(/collectiondelete-active)#/>
