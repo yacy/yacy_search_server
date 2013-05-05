@@ -60,10 +60,6 @@ public class migration {
             migrateWorkFiles(sb);
         }
         installSkins(sb); // FIXME: yes, bad fix for quick release 0.47
-        // add new navigation
-        if (sb.getConfig("search.navigation", "").equals("hosts,authors,namespace,topics")) {
-            sb.setConfig("search.navigation", "hosts,authors,namespace,topics,filetype,protocol");
-        }
     }
     /*
      * remove the static defaultfiles. We use them through a overlay now.
