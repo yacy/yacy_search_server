@@ -186,7 +186,7 @@ public class NetworkGraph {
         final RasterPlotter networkPicture = new RasterPlotter(width, height, drawMode, color_back);
         if (seedDB == null) return networkPicture; // no other peers known
 
-        final int maxradius = Math.min(width, height) / 2;
+        final int maxradius = Math.min(width / 2, height * 3 / 5);
         final int innerradius = maxradius * 4 / 10;
         final int outerradius = maxradius - 20;
 

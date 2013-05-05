@@ -11,7 +11,7 @@
 
   <script type="text/javascript">
   <!--
-    imagestub = "NetworkPicture.png?width=1024&height=1024&bgcolor=FFFFFF&ct=9000&coronaangle=";
+    imagestub = "NetworkPicture.png?width=1024&height=720&bgcolor=FFFFFF&ct=9000&coronaangle=";
     imageanimindex = 0;
     imageloadindex = 0;
     imagecycles = 0;
@@ -23,7 +23,7 @@
       for (j = 0; j < 6; j++) initanimationphase(j, handle);
     }
     function initanimationphase(phase, handle) {
-      imagearray[phase] = new Image(1024, 1024);
+      imagearray[phase] = new Image(1024, 720);
       angle = phase * 60;
       imagearray[phase].src = imagestub + angle + "&handle=" + handle;
     }
@@ -232,7 +232,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 
     <div class="left">
       <p>
-        <a href="NetworkPicture.png?width=1024&amp;height=1024&amp;bgcolor=FFFFFF"><img id="NetworkPicture" src="NetworkPicture.png?width=1024&amp;height=1024&amp;bgcolor=FFFFFF&amp;coronaangle=0" alt="The YaCy Network" width="1024" height="1024" /></a>
+        <a href="NetworkPicture.png?width=1024&amp;height=720&amp;bgcolor=FFFFFF"><img id="NetworkPicture" src="NetworkPicture.png?width=1024&amp;height=720&amp;bgcolor=FFFFFF&amp;coronaangle=0" alt="The YaCy Network" width="1024" height="720" /></a>
       </p>
     </div>
     <div class="left">
