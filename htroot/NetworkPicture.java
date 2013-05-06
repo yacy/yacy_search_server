@@ -73,8 +73,8 @@ public class NetworkPicture
             return buffer;
         }
 
-        int width = 1024; // 640x480 = VGA, 768x576 = SD/4:3, 1024x576 =SD/16:9 1280x720 = HD/16:9, 1920x1080 = FULL HD/16:9
-        int height = 576;
+        int width = 1280; // 640x480 = VGA, 768x576 = SD/4:3, 1024x576 =SD/16:9 1280x720 = HD/16:9, 1920x1080 = FULL HD/16:9
+        int height = 720;
         int passiveLimit = 1440; // minutes; 1440 = 1 day; 720 = 12 hours; 1440 = 24 hours, 10080 = 1 week;
         int potentialLimit = 1440;
         int maxCount = 9000;
@@ -107,12 +107,12 @@ public class NetworkPicture
         if ( height < 240 ) {
             height = 240;
         }
-        if ( height > 1080 ) {
-            height = 1080;
+        if ( height > 1280 ) {
+            height = 1280;
         }
         if ( !authorized ) {
-            width = Math.min(1024, width);
-            height = Math.min(1024, height);
+            width = Math.min(1280, width);
+            height = Math.min(1280, height);
         }
         if ( passiveLimit > 1000000 ) {
             passiveLimit = 1000000;

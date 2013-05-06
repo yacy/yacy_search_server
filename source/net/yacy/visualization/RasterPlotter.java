@@ -298,6 +298,22 @@ public class RasterPlotter {
         line(Ax, Ay, Bx, By, null, intensity, null, -1, -1, -1, -1, false);
     }
 
+    /**
+     * draw a line using Bresenham's line drawing algorithm.
+     * The line will be plotted together with dots on it, if wanted.
+     * @param Ax
+     * @param Ay
+     * @param Bx
+     * @param By
+     * @param colorLine
+     * @param intensityLine
+     * @param colorDot
+     * @param intensityDot
+     * @param dotDist
+     * @param dotPos
+     * @param dotRadius
+     * @param dotFilled
+     */
     public void line(
             int Ax, int Ay, final int Bx, final int By,
             final Long colorLine, final int intensityLine,
@@ -448,6 +464,21 @@ public class RasterPlotter {
         }
     }
 
+    /**
+     * draw a portion of a line from the center of a circle
+     * @param cx center of circle, x
+     * @param cy center of circle, y
+     * @param innerRadius inner radius of line
+     * @param outerRadius outer radius of line
+     * @param angle angle within the circle for the line
+     * @param in direction, if true: inward. This is the moving direction of dots, if dotRadius is alternated from 0 to 360
+     * @param colorLine the color of the line
+     * @param colorDot the color of the dot
+     * @param dotDist the distance of two dots
+     * @param dotPos the start position of the first dot
+     * @param dotRadius the radius of the dot
+     * @param dotFilled if true: dot is filled.
+     */
     public void arcLine(final int cx, final int cy, final int innerRadius, final int outerRadius, final double angle, final boolean in,
             final Long colorLine, final Long colorDot, final int dotDist, final int dotPos, final int dotRadius, final boolean dotFilled) {
         final double a = PI180 * angle;
@@ -480,15 +511,35 @@ public class RasterPlotter {
         dot(x, y, dotRadius, true, 100);
     }
 
+    /**
+     * draw a connecting line between two points o a circle
+     * @param cx center of circle, x
+     * @param cy center of circle, y
+     * @param arcRadius radius of circle
+     * @param angle1 position of dot 1 on circle
+     * @param angle2 position of dot 2 on circle
+     * @param in direction of dots on line; in=true means: inwards
+     * @param colorLine
+     * @param intensityLine
+     * @param colorDot
+     * @param intensityDot
+     * @param dotDist
+     * @param dotPos
+     * @param dotRadius
+     * @param dotFilled
+     */
     public void arcConnect(final int cx, final int cy, final int arcRadius, final double angle1, final double angle2, final boolean in,
             final Long colorLine, final int intensityLine,
-            final Long colorDot, final int intensityDot, final int dotDist, final int dotPos, final int dotRadius, final boolean dotFilled) {
+            final Long colorDot, final int intensityDot, final int dotDist, final int dotPos, final int dotRadius, final boolean dotFilled,
+            final String message, final Long colorMessage) {
         final double a1 = PI180 * angle1;
         final double a2 = PI180 * angle2;
+        // find positions of points
         final int x1 = cx + (int) (arcRadius * Math.cos(a1));
         final int y1 = cy - (int) (arcRadius * Math.sin(a1));
         final int x2 = cx + (int) (arcRadius * Math.cos(a2));
         final int y2 = cy - (int) (arcRadius * Math.sin(a2));
+        // draw the line
         if (in) {
             line(x1, y1, x2, y2,
                 colorLine, intensityLine,
@@ -497,6 +548,16 @@ public class RasterPlotter {
             line(x2, y2, x1, y1,
                 colorLine, intensityLine,
                 colorDot, intensityDot, dotDist, dotPos, dotRadius, dotFilled);
+        }
+        // draw a name on the line
+        if (message != null && message.length() > 0) {
+            this.setColor(colorMessage);
+            int xm = (x1 + 5 * x2) / 6;
+            int ym = (y1 + 5 * y2) / 6;
+            if (ym < cy) ym += 6; else ym -=6;
+            if (xm < cx) xm += 6; else xm -=6;
+            if (xm > cx) xm -= 6 * message.length();
+            PrintTool.print(this, xm, ym, 0, message.toUpperCase(), -1);
         }
     }
 

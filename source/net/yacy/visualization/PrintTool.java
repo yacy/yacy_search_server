@@ -110,6 +110,15 @@ public class PrintTool {
 
 
     private static final int arcDist = 8;
+    /**
+     * print a string at the distance of a circle
+     * @param matrix the RasterPlotter
+     * @param cx center of circle, x
+     * @param cy center of circle, y
+     * @param radius radius == distance of text from circle center
+     * @param angle angle == position of text on a circle in distance of radius
+     * @param message the message to be printed
+     */
     public static void arcPrint(final RasterPlotter matrix, final int cx, final int cy, final int radius, final double angle, final String message) {
         final int x = cx + (int) ((radius + 1) * Math.cos(RasterPlotter.PI180 * angle));
         final int y = cy - (int) ((radius + 1) * Math.sin(RasterPlotter.PI180 * angle));

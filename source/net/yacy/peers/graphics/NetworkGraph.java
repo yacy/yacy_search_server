@@ -312,16 +312,16 @@ public class NetworkGraph {
     }
 
     private static void drawNetworkPictureDHT(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final Seed mySeed, final Seed otherSeed, final String colorLine, final int coronaangle, final boolean out, final int cyc) {
+        // find positions (== angle) of the two peers
         final int angleMy = cyc + (int) (360.0d * Distribution.horizontalDHTPosition(ASCII.getBytes(mySeed.hash)) / DOUBLE_LONG_MAX_VALUE);
         final int angleOther = cyc + (int) (360.0d * Distribution.horizontalDHTPosition(ASCII.getBytes(otherSeed.hash)) / DOUBLE_LONG_MAX_VALUE);
-        // draw line
         Long colorLine_l = Long.parseLong(colorLine, 16);
-        img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleMy, !out,
-                colorLine_l, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
-        img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleOther, out,
-                colorLine_l, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
-        img.arcConnect(centerX, centerY, innerradius - 20, angleMy, angleOther, out,
-                colorLine_l, 100, null, 100, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
+        // paint the line from my peer to the inner border of the network circle
+        img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleMy, !out, colorLine_l, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
+        // paint the line from the other peer to the inner border of the network circle
+        img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleOther, out, colorLine_l, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
+        // paint a line between the two inner border points of my peer and the other peer
+        img.arcConnect(centerX, centerY, innerradius - 20, angleMy, angleOther, out, colorLine_l, 100, null, 100, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true, otherSeed.getName(), colorLine_l);
     }
 
     private static class drawNetworkPicturePeerJob {
