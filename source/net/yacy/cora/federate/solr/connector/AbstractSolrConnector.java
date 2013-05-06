@@ -59,8 +59,8 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     }
     public final static SolrQuery catchSuccessQuery = new SolrQuery();
     static {
-        //catchSuccessQuery.setQuery("-" + CollectionSchema.failreason_t.getSolrFieldName() + ":[* TO *]");
-        catchSuccessQuery.setQuery(CATCHALL_TERM); // failreason_t is only available for core collection1
+        //catchSuccessQuery.setQuery("-" + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
+        catchSuccessQuery.setQuery(CATCHALL_TERM); // failreason_s is only available for core collection1
         catchSuccessQuery.setFields(CollectionSchema.id.getSolrFieldName());
         catchSuccessQuery.clearSorts();
         catchSuccessQuery.setIncludeScore(false);

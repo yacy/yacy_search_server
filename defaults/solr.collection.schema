@@ -54,8 +54,8 @@ fuzzy_signature_unique_b
 ## the size of the raw source (mandatory field)
 size_i
 
-## fail reason if a page was not loaded. if the page was loaded then this field is empty, text (mandatory field)
-failreason_t
+## fail reason if a page was not loaded. if the page was loaded then this field is empty, string (mandatory field)
+failreason_s
 
 ## fail type if a page was not loaded. This field is either empty, 'excl' or 'fail'
 failtype_s
@@ -190,18 +190,18 @@ h6_txt
 #ip_s
 
 ## tags of css entries, normalized with absolute URL
-#css_tag_txt
+#css_tag_sxt
 
 ## urls of css entries, normalized with absolute URL
-#css_url_txt
+#css_url_sxt
 
 ## number of css entries, int
 #csscount_i
 
 ## urls of script entries, normalized with absolute URL
-#scripts_txt
+#scripts_sxt
 
-## number of script entries, int
+## number of entries in scripts_sxt, int
 #scriptscount_i
 
 ## encoded as binary value into an integer:
@@ -233,10 +233,10 @@ outboundlinks_protocol_sxt
 outboundlinks_urlstub_txt
 
 ## all image tags, encoded as <img> tag inclusive alt- and title property
-#images_tag_txt
+#images_tag_sxt
 
 ## all image links without the protocol and '://'
-#images_urlstub_txt
+#images_urlstub_sxt
 
 ## all image link protocols
 #images_protocol_sxt

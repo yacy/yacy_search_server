@@ -46,7 +46,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     fuzzy_signature_text_t(SolrType.text_general, true, true, false, false, false, "intermediate data produced in EnhancedTextProfileSignature: a list of word frequencies"),
     fuzzy_signature_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if fuzzy_signature_l is unique at the time of document creation, used for double-check during search"),
     size_i(SolrType.num_integer, true, true, false, false, false, "the size of the raw source"),// int size();
-    failreason_t(SolrType.text_general, true, true, false, false, false, "fail reason if a page was not loaded. if the page was loaded then this field is empty"),
+    failreason_s(SolrType.string, true, true, false, false, false, "fail reason if a page was not loaded. if the page was loaded then this field is empty"),
     failtype_s(SolrType.string, true, true, false, false, false, "fail type if a page was not loaded. This field is either empty, 'excl' or 'fail'"),
     httpstatus_i(SolrType.num_integer, true, true, false, false, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
     httpstatus_redirect_s(SolrType.num_integer, true, true, false, false, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
@@ -98,10 +98,10 @@ public enum CollectionSchema implements SchemaDeclaration {
     // optional values, not part of standard YaCy handling (but useful for external applications)
     collection_sxt(SolrType.string, true, true, true, false, false, "tags that are attached to crawls/index generation to separate the search result into user-defined subsets"),
     csscount_i(SolrType.num_integer, true, true, false, false, false, "number of entries in css_tag_txt and css_url_txt"),
-    css_tag_txt(SolrType.text_general, true, true, true, false, false, "full css tag with normalized url"),
-    css_url_txt(SolrType.text_general, true, true, true, false, false, "normalized urls within a css tag"),
-    scripts_txt(SolrType.text_general, true, true, true, false, false, "normalized urls within a scripts tag"),
-    scriptscount_i(SolrType.num_integer, true, true, false, false, false, "number of entries in scripts_txt"),
+    css_tag_sxt(SolrType.string, true, true, true, false, false, "full css tag with normalized url"),
+    css_url_sxt(SolrType.string, true, true, true, false, false, "normalized urls within a css tag"),
+    scripts_sxt(SolrType.string, true, true, true, false, false, "normalized urls within a scripts tag"),
+    scriptscount_i(SolrType.num_integer, true, true, false, false, false, "number of entries in scripts_sxt"),
     // encoded as binary value into an integer:
     // bit  0: "all" contained in html header meta
     // bit  1: "index" contained in html header meta
@@ -119,9 +119,9 @@ public enum CollectionSchema implements SchemaDeclaration {
     outboundlinks_protocol_sxt(SolrType.string, true, true, true, false, false, "external links, only the protocol"),
     outboundlinks_urlstub_txt(SolrType.text_general, true, true, true, false, false, "external links, the url only without the protocol"),
     
-    images_tag_txt(SolrType.text_general, true, true, true, false, true, " all image tags, encoded as <img> tag inclusive alt- and title property"),
-    images_urlstub_txt(SolrType.text_general, true, true, true, false, true, "all image links without the protocol and '://'"),
-    images_protocol_sxt(SolrType.text_general, true, true, true, false, false, "all image link protocols"),
+    images_tag_sxt(SolrType.string, true, true, true, false, true, " all image tags, encoded as <img> tag inclusive alt- and title property"),
+    images_urlstub_sxt(SolrType.string, true, true, true, false, true, "all image links without the protocol and '://'"),
+    images_protocol_sxt(SolrType.string, true, true, true, false, false, "all image link protocols"),
     images_alt_txt(SolrType.text_general, true, true, true, false, true, "all image link alt tag"),
     images_withalt_i(SolrType.num_integer, true, true, false, false, false, "number of image links with alt tag"),
     htags_i(SolrType.num_integer, true, true, false, false, false, "binary pattern for the existance of h1..h6 headlines"),
@@ -219,7 +219,7 @@ public enum CollectionSchema implements SchemaDeclaration {
         this.omitNorms = omitNorms;
         this.searchable = searchable;
         this.comment = comment;
-        assert type.appropriateName(this.name(), this.multiValued) : "bad configuration: " + this.name();
+        assert type.appropriateName(this) : "bad configuration: " + this.name();
     }
     
     /**

@@ -261,7 +261,7 @@ public class HostBrowser {
                 BlockingQueue<SolrDocument> docs = fulltext.getDefaultConnector().concurrentDocumentsByQuery(q.toString(), 0, 100000, TIMEOUT, 100,
                         CollectionSchema.id.getSolrFieldName(),
                         CollectionSchema.sku.getSolrFieldName(),
-                        CollectionSchema.failreason_t.getSolrFieldName(),
+                        CollectionSchema.failreason_s.getSolrFieldName(),
                         CollectionSchema.failtype_s.getSolrFieldName(),
                         CollectionSchema.inboundlinks_protocol_sxt.getSolrFieldName(),
                         CollectionSchema.inboundlinks_urlstub_txt.getSolrFieldName(),

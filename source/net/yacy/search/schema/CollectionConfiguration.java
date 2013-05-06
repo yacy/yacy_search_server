@@ -190,7 +190,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         final DigestURI digestURI = md.url();
         boolean allAttr = this.isEmpty();
 
-        if (allAttr || contains(CollectionSchema.failreason_t)) add(doc, CollectionSchema.failreason_t, "");
+        if (allAttr || contains(CollectionSchema.failreason_s)) add(doc, CollectionSchema.failreason_s, "");
         add(doc, CollectionSchema.id, ASCII.String(md.hash()));
         String us = digestURI.toNormalform(true);
         add(doc, CollectionSchema.sku, us);
@@ -340,7 +340,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
         
         add(doc, CollectionSchema.id, id);
-        if (allAttr || contains(CollectionSchema.failreason_t)) add(doc, CollectionSchema.failreason_t, ""); // overwrite a possible fail reason (in case that there was a fail reason before)
+        if (allAttr || contains(CollectionSchema.failreason_s)) add(doc, CollectionSchema.failreason_s, ""); // overwrite a possible fail reason (in case that there was a fail reason before)
         String docurl = digestURI.toNormalform(true);
         add(doc, CollectionSchema.sku, docurl);
 
@@ -587,14 +587,14 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 if (ie.alt() != null && ie.alt().length() > 0) withalt++;
             }
             if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, imgtags.size());
-            if (allAttr || contains(CollectionSchema.images_tag_txt)) add(doc, CollectionSchema.images_tag_txt, imgtags);
+            if (allAttr || contains(CollectionSchema.images_tag_sxt)) add(doc, CollectionSchema.images_tag_sxt, imgtags);
             if (allAttr || contains(CollectionSchema.images_protocol_sxt)) add(doc, CollectionSchema.images_protocol_sxt, protocolList2indexedList(imgprots));
-            if (allAttr || contains(CollectionSchema.images_urlstub_txt)) add(doc, CollectionSchema.images_urlstub_txt, imgstubs);
+            if (allAttr || contains(CollectionSchema.images_urlstub_sxt)) add(doc, CollectionSchema.images_urlstub_sxt, imgstubs);
             if (allAttr || contains(CollectionSchema.images_alt_txt)) add(doc, CollectionSchema.images_alt_txt, imgalts);
             if (allAttr || contains(CollectionSchema.images_withalt_i)) add(doc, CollectionSchema.images_withalt_i, withalt);
 
             // style sheets
-            if (allAttr || contains(CollectionSchema.css_tag_txt)) {
+            if (allAttr || contains(CollectionSchema.css_tag_sxt)) {
                 final Map<DigestURI, String> csss = html.getCSS();
                 final String[] css_tag = new String[csss.size()];
                 final String[] css_url = new String[csss.size()];
@@ -610,12 +610,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     c++;
                 }
                 add(doc, CollectionSchema.csscount_i, css_tag.length);
-                if (css_tag.length > 0) add(doc, CollectionSchema.css_tag_txt, css_tag);
-                if (css_url.length > 0) add(doc, CollectionSchema.css_url_txt, css_url);
+                if (css_tag.length > 0) add(doc, CollectionSchema.css_tag_sxt, css_tag);
+                if (css_url.length > 0) add(doc, CollectionSchema.css_url_sxt, css_url);
             }
 
             // Scripts
-            if (allAttr || contains(CollectionSchema.scripts_txt)) {
+            if (allAttr || contains(CollectionSchema.scripts_sxt)) {
                 final Set<DigestURI> scriptss = html.getScript();
                 final String[] scripts = new String[scriptss.size()];
                 c = 0;
@@ -625,7 +625,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     scripts[c++] = u.toNormalform(false);
                 }
                 add(doc, CollectionSchema.scriptscount_i, scripts.length);
-                if (scripts.length > 0) add(doc, CollectionSchema.scripts_txt, scripts);
+                if (scripts.length > 0) add(doc, CollectionSchema.scripts_sxt, scripts);
             }
 
             // Frames
@@ -933,7 +933,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (contains(CollectionSchema.url_file_ext_s)) add(solrdoc, CollectionSchema.url_file_ext_s, digestURI.getFileExtension());
         
         // fail reason and status
-        if (contains(CollectionSchema.failreason_t)) add(solrdoc, CollectionSchema.failreason_t, failReason);
+        if (contains(CollectionSchema.failreason_s)) add(solrdoc, CollectionSchema.failreason_s, failReason);
         if (contains(CollectionSchema.failtype_s)) add(solrdoc, CollectionSchema.failtype_s, failType.name());
         if (contains(CollectionSchema.httpstatus_i)) add(solrdoc, CollectionSchema.httpstatus_i, httpstatus);
         return solrdoc;

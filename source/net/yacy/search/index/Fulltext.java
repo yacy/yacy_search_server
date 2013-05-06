@@ -743,7 +743,7 @@ public final class Fulltext {
 
     public String failReason(final String urlHash) throws IOException {
         if (urlHash == null) return null;
-        String reason = (String) this.getDefaultConnector().getFieldById(urlHash, CollectionSchema.failreason_t.getSolrFieldName());
+        String reason = (String) this.getDefaultConnector().getFieldById(urlHash, CollectionSchema.failreason_s.getSolrFieldName());
         if (reason == null) return null;
         return reason == null ? null : reason.length() == 0 ? null : reason;
     }

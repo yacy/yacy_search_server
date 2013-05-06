@@ -111,7 +111,7 @@ public enum WebgraphSchema implements SchemaDeclaration {
         this.omitNorms = omitNorms;
         this.searchable = searchable;
         this.comment = comment;
-        assert type.appropriateName(this.name(), this.multiValued) : "bad configuration: " + this.name();
+        assert type.appropriateName(this) : "bad configuration: " + this.name();
     }
 
     /**

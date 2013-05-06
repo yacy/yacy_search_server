@@ -502,6 +502,12 @@ public final class Switchboard extends serverSwitch {
             }
         }
 
+        // for index migration in case of obsolete entries, delete entries now
+        try {
+            this.index.fulltext().getDefaultConnector().deleteByQuery("failreason_t:[* TO *]"); // field was renamed to failreason_s
+        } catch (IOException e1) {
+        }
+        
         // initialize network database
         final File mySeedFile = new File(this.networkRoot, SeedDB.DBFILE_OWN_SEED);
         this.peers =

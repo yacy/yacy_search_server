@@ -382,7 +382,7 @@ public class Crawler_p {
                 sb.crawlQueues.errorURL.removeHost(hosthashes, true);
                 for (byte[] hosthash: hosthashes) {
                     try {
-                        sb.index.fulltext().getDefaultConnector().deleteByQuery(CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + CollectionSchema.failreason_t.getSolrFieldName() + ":[* TO *]");
+                        sb.index.fulltext().getDefaultConnector().deleteByQuery(CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
                     } catch (IOException e) {Log.logException(e);}
                 }
                 sb.index.fulltext().commit(true);

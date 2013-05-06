@@ -242,7 +242,7 @@ public class QueryGoal {
 
         // add filter to prevent that results come from failed urls
         q.append(" AND ").append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200");
-        //q.append(" AND -").append(YaCySchema.failreason_t.getSolrFieldName()).append(":[* TO *]");
+        //q.append(" AND -").append(YaCySchema.failreason_s.getSolrFieldName()).append(":[* TO *]");
 
         return q;
     }
