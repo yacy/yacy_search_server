@@ -131,7 +131,7 @@ public final class HTTPDProxyHandler {
         isTransparentProxy = Boolean.parseBoolean(sb.getConfig("isTransparentProxy","false"));
 
         // set timeout
-        timeout = Integer.parseInt(sb.getConfig("proxy.clientTimeout", "10000"));
+        timeout = Integer.parseInt(sb.getConfig("proxy.clientTimeout", "60000"));
 
         // create a htRootPath: system pages
         htRootPath = new File(sb.getAppPath(), sb.getConfig("htRootPath","htroot"));

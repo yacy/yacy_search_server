@@ -684,7 +684,7 @@ isTransparentProxy=false
 connectionKeepAliveSupport=true
 
 # Specifies the timeout the proxy sould use
-proxy.clientTimeout = 30000
+proxy.clientTimeout = 60000
 
 # Specifies if the proxy should send the via header according to RFC
 proxy.sendViaHeader=true
