@@ -34,7 +34,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
 
-import org.apache.commons.httpclient.HttpException;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
@@ -146,14 +145,14 @@ public class RemoteInstance implements SolrInstance {
             };
             this.client.addRequestInterceptor(new HttpRequestInterceptor() {
                 @Override
-                public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
+                public void process(final HttpRequest request, final HttpContext context) throws IOException {
                     if (!request.containsHeader("Accept-Encoding")) request.addHeader("Accept-Encoding", "gzip");
                 }
 
             });
             this.client.addResponseInterceptor(new HttpResponseInterceptor() {
                 @Override
-                public void process(final HttpResponse response, final HttpContext context) throws HttpException, IOException {
+                public void process(final HttpResponse response, final HttpContext context) throws IOException {
                     HttpEntity entity = response.getEntity();
                     if (entity != null) {
                         Header ceheader = entity.getContentEncoding();

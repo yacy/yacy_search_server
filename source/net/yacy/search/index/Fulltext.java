@@ -53,6 +53,7 @@ import net.yacy.cora.federate.solr.instance.InstanceMirror;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.solr.instance.ShardInstance;
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
@@ -75,7 +76,6 @@ import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphConfiguration;
 import net.yacy.search.schema.WebgraphSchema;
 
-import org.apache.commons.httpclient.util.DateUtil;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
@@ -917,7 +917,7 @@ public final class Fulltext {
                             pw.println("<link>" + MultiProtocolURI.escape(url) + "</link>");
                             if (author != null && !author.isEmpty()) pw.println("<author>" + CharacterCoding.unicode2xml(author, true) + "</author>");
                             if (description != null && !description.isEmpty()) pw.println("<description>" + CharacterCoding.unicode2xml(description, true) + "</description>");
-                            if (date != null) pw.println("<pubDate>" + DateUtil.formatDate(date) + "</pubDate>");
+                            if (date != null) pw.println("<pubDate>" + HeaderFramework.formatRFC1123(date) + "</pubDate>");
                             if (size != null) pw.println("<yacy:size>" + size.intValue() + "</yacy:size>");
                             pw.println("<guid isPermaLink=\"false\">" + hash + "</guid>");
                             pw.println("</item>");

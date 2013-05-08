@@ -38,8 +38,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
-import org.apache.commons.httpclient.HttpMethod;
-
 
 /**
  * <p>Transparently coalesces chunks of a HTTP stream that uses
