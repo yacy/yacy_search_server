@@ -30,7 +30,6 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 
-import net.yacy.cora.federate.solr.connector.CachedSolrConnector;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.index.Cache;

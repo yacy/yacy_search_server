@@ -685,37 +685,32 @@ public final class Fulltext {
      * @param deleteIDs a list of urlhashes; each denoting a document
      * @param concurrently if true, then the method returnes immediately and runs concurrently
      */
-    public void remove(final List<byte[]> deleteIDs, final boolean concurrently) {
+    public void remove(final Collection<String> deleteIDs) {
         if (deleteIDs == null || deleteIDs.size() == 0) return;
-        Thread t = new Thread() {
-            public void run() {
-                try {
-                    synchronized (Fulltext.this.solrInstances) {
-                        for (byte[] urlHash: deleteIDs) {
-                            Fulltext.this.getDefaultConnector().deleteById(ASCII.String(urlHash));
-                            Fulltext.this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s.getSolrFieldName() + ":\"" + ASCII.String(urlHash) + "\"");
-                        }
-                        Fulltext.this.commit(true);
-                    }
-                } catch (final Throwable e) {
-                    Log.logException(e);
-                }
-                if (Fulltext.this.urlIndexFile != null) try {
-                    for (byte[] urlHash: deleteIDs) {
-                        final Row.Entry r = Fulltext.this.urlIndexFile.remove(urlHash);
-                        if (r != null) Fulltext.this.statsDump = null;
-                    }
-                } catch (final IOException e) {}
-        }};
-        if (concurrently) t.start(); else t.run();
+        try {
+            synchronized (Fulltext.this.solrInstances) {
+                this.getDefaultConnector().deleteByIds(deleteIDs);
+                this.getWebgraphConnector().deleteByIds(deleteIDs);
+                this.commit(true);
+            }
+        } catch (final Throwable e) {
+            Log.logException(e);
+        }
+        if (Fulltext.this.urlIndexFile != null) try {
+            for (String id: deleteIDs) {
+                final Row.Entry r = Fulltext.this.urlIndexFile.remove(ASCII.getBytes(id));
+                if (r != null) Fulltext.this.statsDump = null;
+            }
+        } catch (final IOException e) {}
     }
     
     public boolean remove(final byte[] urlHash) {
         if (urlHash == null) return false;
         try {
+            String id = ASCII.String(urlHash);
             synchronized (this.solrInstances) {
-                this.getDefaultConnector().deleteById(ASCII.String(urlHash));
-                this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s.getSolrFieldName() + ":\"" + ASCII.String(urlHash) + "\"");
+                this.getDefaultConnector().deleteById(id);
+                this.getWebgraphConnector().deleteById(id);
             }
         } catch (final Throwable e) {
             Log.logException(e);

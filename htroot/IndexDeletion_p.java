@@ -45,7 +45,7 @@ import net.yacy.server.serverSwitch;
 
 public class IndexDeletion_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -126,8 +126,7 @@ public class IndexDeletion_p {
                     if (urlStub == null || urlStub.length() == 0) continue;
                     int pos = urlStub.indexOf("://",0);
                     if (pos == -1) {
-                        if (urlStub.startsWith("www")) urlStub = "http://" + urlStub;
-                        if (urlStub.startsWith("ftp")) urlStub = "ftp://" + urlStub;
+                        if (urlStub.startsWith("ftp")) urlStub = "ftp://" + urlStub; else urlStub = "http://" + urlStub;
                     }
                     try {
                         DigestURI u = new DigestURI(urlStub);
@@ -140,7 +139,6 @@ public class IndexDeletion_p {
                             }
                         } catch (InterruptedException e) {
                         }
-                        sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, docs matching with " + urldelete);
                     } catch (MalformedURLException e) {}
                 }
                 
@@ -148,11 +146,8 @@ public class IndexDeletion_p {
                     count = ids.size();
                     prop.put("urldelete-active", count == 0 ? 2 : 1);
                 } else {
-                    try {
-                        defaultConnector.deleteByIds(ids);
-                        //webgraphConnector.deleteByQuery(webgraphQuery);
-                    } catch (IOException e) {
-                    }
+                    sb.remove(ids);
+                    sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, docs matching with " + urldelete);
                     prop.put("urldelete-active", 2);
                 }
             } else {

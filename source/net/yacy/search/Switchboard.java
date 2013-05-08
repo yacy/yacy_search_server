@@ -2800,6 +2800,18 @@ public final class Switchboard extends serverSwitch {
         }
     }
 
+    public void remove(final Collection<String> deleteIDs) {
+        this.index.fulltext().remove(deleteIDs);
+        for (String id: deleteIDs) {
+            this.crawlQueues.urlRemove(ASCII.getBytes(id));
+        }
+    }
+    
+    public void remove(final byte[] urlhash) {
+        this.index.fulltext().remove(urlhash);
+        this.crawlQueues.urlRemove(urlhash);
+    }
+
     public void stackURLs(Set<DigestURI> rootURLs, final CrawlProfile profile, final Set<DigestURI> successurls, final Map<DigestURI,String> failurls) {
         if (rootURLs == null || rootURLs.size() == 0) return;
         List<Thread> stackthreads = new ArrayList<Thread>(); // do this concurrently
@@ -2831,9 +2843,7 @@ public final class Switchboard extends serverSwitch {
 
         // remove url from the index to be prepared for a re-crawl
         final byte[] urlhash = url.hash();
-        this.index.fulltext().remove(urlhash);
-        this.crawlQueues.noticeURL.removeByURLHash(urlhash);
-        this.crawlQueues.errorURL.remove(urlhash);
+        remove(urlhash);
         
         // special handling of ftp protocol
         if (url.isFTP()) {

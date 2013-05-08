@@ -178,8 +178,7 @@ public class Crawler_p {
                     // add the prefix http:// if necessary
                     int pos = crawlingStart.indexOf("://",0);
                     if (pos == -1) {
-                        if (crawlingStart.startsWith("www")) crawlingStart = "http://" + crawlingStart;
-                        if (crawlingStart.startsWith("ftp")) crawlingStart = "ftp://" + crawlingStart;
+                        if (crawlingStart.startsWith("ftp")) crawlingStart = "ftp://" + crawlingStart; else crawlingStart = "http://" + crawlingStart;
                     }
                     try {
                         DigestURI crawlingStartURL = new DigestURI(crawlingStart);

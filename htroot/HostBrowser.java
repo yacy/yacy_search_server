@@ -282,7 +282,7 @@ public class HostBrowser {
                 Map<String, ReversibleScoreMap<String>> outboundHosts = new HashMap<String, ReversibleScoreMap<String>>();
                 Map<String, InfoCacheEntry> infoCache = new HashMap<String, InfoCacheEntry>();
                 int hostsize = 0;
-                final List<byte[]> deleteIDs = new ArrayList<byte[]>();
+                final List<String> deleteIDs = new ArrayList<String>();
                 long timeout = System.currentTimeMillis() + TIMEOUT;
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                     String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
@@ -292,7 +292,7 @@ public class HostBrowser {
                     infoCache.put(ids, new InfoCacheEntry(doc));
                     if (u.startsWith(path)) {
                         if (delete) {
-                            deleteIDs.add(ASCII.getBytes(ids));
+                            deleteIDs.add(ids);
                         } else {
                             if (error == null) storedDocs.add(u); else if (admin) errorDocs.put(u, error);
                         }
@@ -328,10 +328,7 @@ public class HostBrowser {
                     }
                     if (System.currentTimeMillis() > timeout) break;
                 }
-                if (deleteIDs.size() > 0) {
-                    for (byte[] b: deleteIDs) sb.crawlQueues.urlRemove(b);
-                    sb.index.fulltext().remove(deleteIDs, true);
-                }
+                if (deleteIDs.size() > 0) sb.remove(deleteIDs);
                 
                 // collect from crawler
                 List<Request> domainStackReferences = (admin) ? sb.crawlQueues.noticeURL.getDomainStackReferences(StackType.LOCAL, host, 1000, 3000) : new ArrayList<Request>(0);

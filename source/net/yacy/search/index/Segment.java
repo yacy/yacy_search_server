@@ -136,6 +136,10 @@ public class Segment {
         this.writeWebgraph = check;
     }
     
+    public boolean writeToWebgraph() {
+        return this.writeWebgraph;
+    }
+    
     public boolean connectedRWI() {
         return this.termIndex != null;
     }
