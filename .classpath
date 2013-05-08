@@ -68,8 +68,8 @@
 	<classpathentry kind="lib" path="lib/lucene-queryparser-4.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-spatial-4.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-suggest-4.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/solr-core-4.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/solr-solrj-4.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/solr-core-4.2.1.jar" sourcepath="/Volumes/Raptor/Development/sourcecode/solr-4.2.1/src/java"/>
+	<classpathentry kind="lib" path="lib/solr-solrj-4.2.1.jar" sourcepath="/Volumes/Raptor/Development/sourcecode/solr-4.2.1/src/java"/>
 	<classpathentry kind="lib" path="lib/lucene-codecs-4.2.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
