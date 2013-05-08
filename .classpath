@@ -44,9 +44,6 @@
 	<classpathentry kind="lib" path="lib/jaudiotagger-2.0.4-20111207.115108-15.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.7.jar"/>
 	<classpathentry kind="lib" path="lib/spatial4j-0.3.jar"/>
-	<classpathentry kind="lib" path="lib/pdfbox-1.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/fontbox-1.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/jempbox-1.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/jcl-over-slf4j-1.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/zookeeper-3.4.5.jar"/>
@@ -71,6 +68,9 @@
 	<classpathentry kind="lib" path="lib/solr-core-4.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/solr-solrj-4.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-codecs-4.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/pdfbox-1.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/jempbox-1.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/fontbox-1.8.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>
