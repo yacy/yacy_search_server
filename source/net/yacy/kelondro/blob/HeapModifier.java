@@ -99,6 +99,7 @@ public class HeapModifier extends HeapReader implements BLOB {
      */
     @Override
     public void delete(byte[] key) throws IOException {
+        if (this.index == null) return;
         key = normalizeKey(key);
 
         // pre-check before synchronization
