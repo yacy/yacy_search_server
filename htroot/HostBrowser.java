@@ -77,7 +77,6 @@ public class HostBrowser {
         // set default values
         prop.put("path", "");
         prop.put("result", "");
-        prop.putNum("ucount", fulltext.collectionSize());
         prop.put("hosts", 0);
         prop.put("files", 0);
         prop.put("admin", admin ? 1 : 0);
@@ -90,12 +89,14 @@ public class HostBrowser {
         
         if (!searchAllowed) {
             prop.put("result", "You are not allowed to use this page. Please ask an administrator for permission.");
+            prop.putNum("ucount", 0);
             return prop;
         }
 
         String path = post == null ? "" : post.get("path", "").trim();
         sb.index.fulltext().commit(true);
         if (post == null || env == null) {
+            prop.putNum("ucount", fulltext.collectionSize());
             return prop;
         }
 
@@ -150,7 +151,8 @@ public class HostBrowser {
                 fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failtype_s.getSolrFieldName() + ":\"" + FailType.fail.name() + "\"" );
                 Log.logInfo ("HostBrowser:", "delete documents with failtype_s = fail");
                 fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failtype_s.getSolrFieldName() + ":\"" + FailType.excl.name() + "\"" );
-                Log.logInfo ("HostBrowser:", "delete documents with failtype_s = excl");                                               
+                Log.logInfo ("HostBrowser:", "delete documents with failtype_s = excl");
+                prop.putNum("ucount", fulltext.collectionSize());
                 return prop;
             } catch (IOException ex) {
                 Log.logException(ex);
@@ -499,9 +501,8 @@ public class HostBrowser {
             }
         }
 
-        // insert constants
-        prop.putNum("ucount", fulltext.collectionSize());
         // return rewrite properties
+        prop.putNum("ucount", fulltext.collectionSize());
         return prop;
     }
 

@@ -33,6 +33,9 @@ import net.yacy.visualization.RasterPlotter;
 
 public class PerformanceGraph {
 
+    private static long indeSizeCache = 0;
+    private static long indexSizeTime = 0;
+    
     public static RasterPlotter respond(@SuppressWarnings("unused") final RequestHeader header, serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
 
@@ -42,7 +45,13 @@ public class PerformanceGraph {
         final int height = post.getInt("height", 240);
         final boolean showMemory = !post.containsKey("nomem");
 
-        return ProfilingGraph.performanceGraph(width, height, sb.index.URLCount() + " URLS / " + sb.index.RWICount() + " WORDS IN INDEX / " + sb.index.RWIBufferCount() + " WORDS IN CACHE", showMemory);
+        long t = System.currentTimeMillis();
+        if (t - indexSizeTime > 10000) {
+            indeSizeCache = sb.index.fulltext().collectionSize();
+            indexSizeTime = t;
+        }
+        RasterPlotter graph = ProfilingGraph.performanceGraph(width, height, indeSizeCache + " URLS / " + sb.index.RWICount() + " WORDS IN INDEX / " + sb.index.RWIBufferCount() + " WORDS IN CACHE", showMemory);
+        return graph;
     }
 
 }

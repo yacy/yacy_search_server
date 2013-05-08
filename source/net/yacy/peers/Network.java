@@ -144,7 +144,6 @@ public class Network
 
         if ( (this.sb.peers.lastSeedUpload_myIP.equals(this.sb.peers.mySeed().getIP()))
             && (this.sb.peers.lastSeedUpload_seedDBSize == this.sb.peers.sizeConnected())
-            && (canReachMyself())
             && (System.currentTimeMillis() - this.sb.peers.lastSeedUpload_timeStamp < 1000 * 60 * 60 * 24)
             && (this.sb.peers.mySeed().isPrincipal()) ) {
             if ( log.isFine() ) {
@@ -211,20 +210,6 @@ public class Network
                 + this.sb.peers.sizeConnected()
                 + " different peers");
         }
-    }
-
-    private boolean canReachMyself() { // TODO: check if this method is necessary - depending on the used router it will not work
-        // returns true if we can reach ourself under our known peer address
-        // if we cannot reach ourself, we call a forced publishMySeed and return false
-        final long[] callback = Protocol.queryUrlCount(this.sb.peers.mySeed());
-        if ( callback[0] >= 0 && callback[1] == magic ) {
-            this.sb.peers.mySeed().setLastSeenUTC();
-            return true;
-        }
-        log.logInfo("re-connect own seed");
-        final String oldAddress = this.sb.peers.mySeed().getPublicAddress();
-        /*final int newSeeds =*/publishMySeed(true);
-        return (oldAddress != null && oldAddress.equals(this.sb.peers.mySeed().getPublicAddress()));
     }
 
     // use our own formatter to prevent concurrency locks with other processes

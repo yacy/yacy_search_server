@@ -139,7 +139,7 @@ public final class hello {
             prop.put("yourip", reportedip);
             remoteSeed.setIP(reportedip);
             time = System.currentTimeMillis();
-            callback = Protocol.queryUrlCount(remoteSeed);
+            callback = Protocol.queryRWICount(remoteSeed, "Tq418bNZd6AO");
             time_backping = System.currentTimeMillis() - time;
             backping_method = "reportedip=" + reportedip;
         } else {
@@ -163,7 +163,7 @@ public final class hello {
                 prop.put("yourip", clientip);
                 remoteSeed.setIP(clientip);
                 time = System.currentTimeMillis();
-                callback = Protocol.queryUrlCount(remoteSeed);
+                callback = Protocol.queryRWICount(remoteSeed, "Tq418bNZd6AO"); // hash for "www"; the actual count is irrelevant, we just want to know if this works
                 time_backping = System.currentTimeMillis() - time;
                 backping_method = "clientip=" + clientip;
             }

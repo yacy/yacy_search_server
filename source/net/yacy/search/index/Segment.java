@@ -258,10 +258,6 @@ public class Segment {
         }
         return 999;
     }
-    
-    public long URLCount() {
-        return this.fulltext.collectionSize();
-    }
 
     public long RWICount() {
         if (this.termIndex == null) return 0;

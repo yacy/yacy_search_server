@@ -265,9 +265,15 @@ public final class Fulltext {
      * get the size of the default index
      * @return
      */
+    private long collectionSizeLastAccess = 0;
+    private long collectionSizeLastValue = 0;
     public long collectionSize() {
+        long t = System.currentTimeMillis();
+        if (t - this.collectionSizeLastAccess < 1000) return this.collectionSizeLastValue;
         long size = this.urlIndexFile == null ? 0 : this.urlIndexFile.size();
         size += this.getDefaultConnector().getSize();
+        this.collectionSizeLastAccess = t;
+        this.collectionSizeLastValue = size;
         return size;
     }
     

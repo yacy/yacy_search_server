@@ -3507,6 +3507,8 @@ public final class Switchboard extends serverSwitch {
         return (this.searchQueriesRobinsonFromRemote) * 60f / Math.max(uptime, 1f);
     }
 
+    private static long indeSizeCache = 0;
+    private static long indexSizeTime = 0;
     public void updateMySeed() {
         this.peers.mySeed().put(Seed.PORT, Integer.toString(serverCore.getPortNr(getConfig("port", "8090"))));
 
@@ -3515,7 +3517,13 @@ public final class Switchboard extends serverSwitch {
         this.peers.mySeed().put(Seed.ISPEED, Integer.toString(currentPPM()));
         this.peers.mySeed().put(Seed.RSPEED, Float.toString(averageQPM()));
         this.peers.mySeed().put(Seed.UPTIME, Long.toString(uptime / 60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        this.peers.mySeed().put(Seed.LCOUNT, Long.toString(this.index.URLCount())); // the number of links that the peer has stored (LURL's)
+
+        long t = System.currentTimeMillis();
+        if (t - indexSizeTime > 60000) {
+            indeSizeCache = sb.index.fulltext().collectionSize();
+            indexSizeTime = t;
+        }
+        this.peers.mySeed().put(Seed.LCOUNT, Long.toString(indeSizeCache)); // the number of links that the peer has stored (LURL's)
         this.peers.mySeed().put(Seed.NCOUNT, Integer.toString(this.crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
         this.peers.mySeed().put(
             Seed.RCOUNT,

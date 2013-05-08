@@ -66,7 +66,6 @@ public class IndexControlURLs_p {
         prop.put("urlstring", "");
         prop.put("urlhash", "");
         prop.put("result", "");
-        prop.putNum("ucount", segment.fulltext().collectionSize());
         prop.put("otherHosts", "");
         prop.put("genUrlProfile", 0);
         prop.put("statistics", 1);
@@ -117,6 +116,7 @@ public class IndexControlURLs_p {
         }
 
         if (post == null || env == null) {
+            prop.putNum("ucount", segment.fulltext().collectionSize());
             return prop; // nothing to do
         }
 

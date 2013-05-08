@@ -34,6 +34,9 @@ import net.yacy.server.serverSwitch;
 
 public class yacyinteractive {
 
+    private static long indeSizeCache = 0;
+    private static long indexSizeTime = 0;
+    
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -57,7 +60,13 @@ public class yacyinteractive {
         prop.putHTML("querys", query.replaceAll(" ", "+"));
         prop.put("serverlist", query.isEmpty() ? 1 : 0);
         prop.put("focus", focus ? 1 : 0);
-        prop.put("allowrealtime", sb.index.URLCount() < 100000 ? 1 : 0);
+
+        long t = System.currentTimeMillis();
+        if (t - indexSizeTime > 60000) {
+            indeSizeCache = sb.index.fulltext().collectionSize();
+            indexSizeTime = t;
+        }
+        prop.put("allowrealtime", indeSizeCache < 100000 ? 1 : 0);
         return prop;
     }
 }
