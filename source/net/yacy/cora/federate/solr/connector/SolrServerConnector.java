@@ -91,7 +91,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     }
 
     @Override
-    public synchronized long getSize() {
+    public long getSize() {
         try {
             final QueryResponse rsp = getResponseByParams(AbstractSolrConnector.catchSuccessQuery);
             if (rsp == null) return 0;
@@ -119,7 +119,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     }
 
     @Override
-    public synchronized void deleteById(final String id) throws IOException {
+    public void deleteById(final String id) throws IOException {
         try {
             this.server.deleteById(id, -1);
         } catch (final Throwable e) {
@@ -128,7 +128,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     }
 
     @Override
-    public synchronized void deleteByIds(final Collection<String> ids) throws IOException {
+    public void deleteByIds(final Collection<String> ids) throws IOException {
         List<String> l = new ArrayList<String>();
         for (String s: ids) l.add(s);
         try {
@@ -144,7 +144,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      * @throws IOException
      */
     @Override
-    public synchronized void deleteByQuery(final String querystring) throws IOException {
+    public  void deleteByQuery(final String querystring) throws IOException {
         try {
             this.server.deleteByQuery(querystring, -1);
         } catch (final Throwable e) {
@@ -161,9 +161,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         up.setCommitWithin(-1);
         //up.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
         try {
-            synchronized (this.server) {
-                this.server.request(up);
-            }
+            this.server.request(up);
         } catch (final Throwable e) {
             throw new IOException(e);
         }
@@ -174,20 +172,14 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         if (this.server == null) return;
         try {
             if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
-            synchronized (this.server) {
                 this.server.add(solrdoc, -1);
-            }
         } catch (Throwable e) {
             // catches "version conflict for": try this again and delete the document in advance
             try {
-                synchronized (this.server) {
-                    this.server.deleteById((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
-                }
+                this.server.deleteById((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
             } catch (SolrServerException e1) {}
             try {
-                synchronized (this.server) {
-                    this.server.add(solrdoc, -1);
-                }
+                this.server.add(solrdoc, -1);
             } catch (Throwable ee) {
                 throw new IOException(ee);
             }
@@ -201,22 +193,16 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             for (SolrInputDocument solrdoc : solrdocs) {
                 if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
             }
-            synchronized (this.server) {
-                this.server.add(solrdocs, -1);
-            }
+            this.server.add(solrdocs, -1);
         } catch (Throwable e) {
             // catches "version conflict for": try this again and delete the document in advance
             List<String> ids = new ArrayList<String>();
             for (SolrInputDocument solrdoc : solrdocs) ids.add((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
             try {
-                synchronized (this.server) {
-                    this.server.deleteById(ids);
-                }
+                this.server.deleteById(ids);
             } catch (SolrServerException e1) {}
             try {
-                synchronized (this.server) {
-                    this.server.add(solrdocs, -1);
-                }
+                this.server.add(solrdocs, -1);
             } catch (Throwable ee) {
                 log.warn(e.getMessage() + " IDs=" + ids.toString());
                 throw new IOException(ee);
