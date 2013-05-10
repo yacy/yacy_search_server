@@ -92,6 +92,9 @@ org.apache.solr.search.SolrIndexSearcher.level = INFO
 org.apache.solr.update.processor.LogUpdateProcessor.level = OFF
 org.apache.solr.update.SolrIndexWriter.level = INFO
 
+# Properties for the YaCy solr interface
+net.yacy.cora.federate.solr.connector.SolrServerConnector.level = INFO
+
 # java properties
 javax.management.misc.level = INFO
 javax.management.mbeanserver.level = INFO
