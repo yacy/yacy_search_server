@@ -60,10 +60,15 @@ bindPort =
 #    If the property keyStore is not specified, then a new keystore file 
 #    DATA/SETTINGS/myPeerKeystore will be created.
 
-keyStore =
-keyStorePassword =
+keyStore=defaults/freeworldKeystore
+keyStorePassword=freeworld
 pkcs12ImportFile = 
 pkcs12ImportPwd = 
+
+# the keyStore is only used, if server.https is set to true
+# if server.https=true, then the YaCy web interface is available at
+# https://localhost:<port>/ and not at http://localhost:<port>/
+server.https=false
 
 # property that collects the names of all servlets that had been used so far
 # that is used to track if the user has already done some configuration steps
