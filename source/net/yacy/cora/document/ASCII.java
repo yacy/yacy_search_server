@@ -125,7 +125,7 @@ public class ASCII implements Comparator<String> {
 
     public final static byte[] getBytes(final String s) {
         assert s != null;
-        assert s.length() < 3 || s.charAt(2) != '@';
+        //assert s.length() < 3 || s.charAt(2) != '@';
         int count = s.length();
         final byte[] b = new byte[count];
         for (int i = 0; i < count; i++) {

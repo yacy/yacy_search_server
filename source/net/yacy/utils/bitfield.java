@@ -4,10 +4,6 @@
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -24,6 +20,9 @@
 
 package net.yacy.utils;
 
+import net.yacy.cora.document.ASCII;
+
+
 public class bitfield {
     
     private byte[] bb;    
@@ -34,7 +33,7 @@ public class bitfield {
     
     public bitfield(final int bytelength) {
         this.bb= new byte[bytelength];
-        for (int i = 0 ; i < bytelength; i++) bb[i] = 0;
+        for (int i = 0 ; i < bytelength; i++) bb[i] = ' ';
     }
     
     public bitfield(final byte[] field) {
@@ -43,16 +42,18 @@ public class bitfield {
     
     private static byte setAtom(final byte a, final int pos) {
         if ((pos > 5) || (pos < 0)) throw new RuntimeException("atom position out of bounds: " + pos);
-        return (byte) ((64 | ((a + 16) | (1<<pos))) - 16);
+        byte b = (byte) (((a - 32) | (1<<pos)) + 32);
+        return b;
     }
     
     private static byte unsetAtom(final byte a, final int pos) {
         if ((pos > 5) || (pos < 0)) throw new RuntimeException("atom position out of bounds: " + pos);
-        return (byte) (((a + 16) & (0xff ^ (1<<pos))) - 16);
+        byte b = (byte) (((a - 32) & (0xff ^ (1<<pos))) + 32);
+        return b;
     }
     
     public void set(final int pos, final boolean value) {
-        final int slot = pos / 6;
+        final int slot = pos / 5;
         if (pos < 0) throw new RuntimeException("position out of bounds: " + pos);
         if (slot > bb.length) {
             // extend capacity
@@ -61,18 +62,19 @@ public class bitfield {
             for (int i = bb.length; i < nb.length; i++) nb[i] = 0;
             bb = nb;
         }
-        bb[slot] = (value) ? setAtom(bb[slot], pos % 6) : unsetAtom(bb[slot], pos % 6);
+        bb[slot] = (value) ? setAtom(bb[slot], pos % 5) : unsetAtom(bb[slot], pos % 5);
     }
     
     public boolean get(final int pos) {
-        final int slot = pos / 6;
+        final int slot = pos / 5;
         if (pos < 0) throw new RuntimeException("position out of bounds: " + pos);
         if (slot > bb.length) return false;
-        return (bb[slot] & (1<<(pos%6))) > 0;
+        boolean b = ((bb[slot] - 32) & (1 << (pos % 5))) > 0;
+        return b;
     }
 
     public int length() {
-        return bb.length * 6;
+        return bb.length * 5;
     }
     
     public byte[] getBytes() {
@@ -81,15 +83,25 @@ public class bitfield {
     
     @Override
     public String toString() {
-        throw new UnsupportedOperationException("testing");
-        /*
+        //throw new UnsupportedOperationException("testing");
+        
         StringBuilder sb = new StringBuilder(length());
         for (int i = length() - 1; i >= 0; i--) sb.append((get(i)) ? '1' : '0');
-        return sb.toString();
-         */
+        return ASCII.String(bb) + " " + sb.toString();
+        
     }
     
     public static void main(final String[] args) {
+        //final bitfield f = new bitfield(ASCII.getBytes(Seed.FLAGSZERO));
+        final bitfield f = new bitfield(4);
+        for (int i = 0; i < 20; i++) {
+            f.set(i, false);
+            if (f.get(i)) System.out.println("i = " + i);
+            f.set(i, true);
+            if (!f.get(i)) System.out.println("!i = " + i);
+            System.out.println(i + ":" + f.toString());
+        }
+        
         final bitfield test = new bitfield(4);
         final int l = test.length();
         System.out.println("available: " + l);

@@ -100,19 +100,27 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      */
     public static final String URL_IN = "rU";
     /**
-     * <b>substance</b> "virgin"
+     * <b>substance</b> "virgin", a peer which cannot reach any other peers
      */
     public static final String PEERTYPE_VIRGIN = "virgin";
     /**
-     * <b>substance</b> "junior"
+     * <b>substance</b> "junior", this is a peer which cannot be reached from the outside
      */
     public static final String PEERTYPE_JUNIOR = "junior";
     /**
-     * <b>substance</b> "senior"
+     * <b>substance</b> "mentee", this is a junior peer with an mentor peer attached as 'remote' server port
+     */
+    public static final String PEERTYPE_MENTEE = "mentee";
+    /**
+     * <b>substance</b> "senior", this is a peer with an open port to the public
      */
     public static final String PEERTYPE_SENIOR = "senior";
     /**
-     * <b>substance</b> "principal"
+     * <b>substance</b> "mentor", this is a senior peer which hosts server ports for mentee peers
+     */
+    public static final String PEERTYPE_MENTOR = "mentor";
+    /**
+     * <b>substance</b> "principal", a senior peer which distributes the seed list to an outside hoster (i.e. using ftp upload to a web server)
      */
     public static final String PEERTYPE_PRINCIPAL = "principal";
     /**
@@ -123,7 +131,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     /** static/dynamic (if the IP changes often for any reason) */
     private static final String IPTYPE = "IPType";
     private static final String FLAGS = "Flags";
-    private static final String FLAGSZERO = "____";
+    public static final String FLAGSZERO = "    ";
     /** the applications version */
     public static final String VERSION = "Version";
 
@@ -168,6 +176,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     private static final int FLAG_ACCEPT_REMOTE_CRAWL = 1;
     private static final int FLAG_ACCEPT_REMOTE_INDEX = 2;
     private static final int FLAG_ROOT_NODE = 3;
+    private static final int FLAG_SSL_AVAILABLE = 4;
 
     public static final String DFLT_NETWORK_UNIT = "freeworld";
     public static final String DFLT_NETWORK_GROUP = "";
@@ -758,20 +767,12 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         setFlag(FLAG_DIRECT_CONNECT, value);
     }
 
-    public final void setFlagAcceptRemoteCrawl(final boolean value) {
-        setFlag(FLAG_ACCEPT_REMOTE_CRAWL, value);
-    }
-
-    public final void setFlagAcceptRemoteIndex(final boolean value) {
-        setFlag(FLAG_ACCEPT_REMOTE_INDEX, value);
-    }
-
-    public final void setFlagRootNode(final boolean value) {
-        setFlag(FLAG_ROOT_NODE, value);
-    }
-
     public final boolean getFlagDirectConnect() {
         return getFlag(FLAG_DIRECT_CONNECT);
+    }
+
+    public final void setFlagAcceptRemoteCrawl(final boolean value) {
+        setFlag(FLAG_ACCEPT_REMOTE_CRAWL, value);
     }
 
     public final boolean getFlagAcceptRemoteCrawl() {
@@ -780,9 +781,17 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         return getFlag(FLAG_ACCEPT_REMOTE_CRAWL);
     }
 
+    public final void setFlagAcceptRemoteIndex(final boolean value) {
+        setFlag(FLAG_ACCEPT_REMOTE_INDEX, value);
+    }
+
     public final boolean getFlagAcceptRemoteIndex() {
         //if (getVersion() < 0.335) return false;
         return getFlag(FLAG_ACCEPT_REMOTE_INDEX);
+    }
+
+    public final void setFlagRootNode(final boolean value) {
+        setFlag(FLAG_ROOT_NODE, value);
     }
 
     public final boolean getFlagRootNode() {
@@ -791,8 +800,17 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         return getFlag(FLAG_ROOT_NODE);
     }
 
+    public final void setFlagSSLAvailable(final boolean value) {
+        setFlag(FLAG_SSL_AVAILABLE, value);
+    }
+
+    public final boolean getFlagSSLAvailable() {
+        if (getVersion() < 1.5) return false;
+        return getFlag(FLAG_SSL_AVAILABLE);
+    }
+
     public final void setUnusedFlags() {
-        for ( int i = 4; i < 24; i++ ) {
+        for ( int i = 4; i < 20; i++ ) {
             setFlag(i, false);
         }
     }

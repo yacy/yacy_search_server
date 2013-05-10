@@ -3524,33 +3524,35 @@ public final class Switchboard extends serverSwitch {
 
         //the speed of indexing (pages/minute) of the peer
         final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
-        this.peers.mySeed().put(Seed.ISPEED, Integer.toString(currentPPM()));
-        this.peers.mySeed().put(Seed.RSPEED, Float.toString(averageQPM()));
-        this.peers.mySeed().put(Seed.UPTIME, Long.toString(uptime / 60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
+        Seed mySeed = this.peers.mySeed();
+        
+        mySeed.put(Seed.ISPEED, Integer.toString(currentPPM()));
+        mySeed.put(Seed.RSPEED, Float.toString(averageQPM()));
+        mySeed.put(Seed.UPTIME, Long.toString(uptime / 60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
 
         long t = System.currentTimeMillis();
         if (t - indexSizeTime > 60000) {
             indeSizeCache = sb.index.fulltext().collectionSize();
             indexSizeTime = t;
         }
-        this.peers.mySeed().put(Seed.LCOUNT, Long.toString(indeSizeCache)); // the number of links that the peer has stored (LURL's)
-        this.peers.mySeed().put(Seed.NCOUNT, Integer.toString(this.crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
-        this.peers.mySeed().put(
+        mySeed.put(Seed.LCOUNT, Long.toString(indeSizeCache)); // the number of links that the peer has stored (LURL's)
+        mySeed.put(Seed.NCOUNT, Integer.toString(this.crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
+        mySeed.put(
             Seed.RCOUNT,
             Integer.toString(this.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.GLOBAL))); // the number of links that the peer provides for remote crawling (ZURL's)
-        this.peers.mySeed().put(Seed.ICOUNT, Long.toString(this.index.RWICount())); // the minimum number of words that the peer has indexed (as it says)
-        this.peers.mySeed().put(Seed.SCOUNT, Integer.toString(this.peers.sizeConnected())); // the number of seeds that the peer has stored
-        this.peers.mySeed().put(
+        mySeed.put(Seed.ICOUNT, Long.toString(this.index.RWICount())); // the minimum number of words that the peer has indexed (as it says)
+        mySeed.put(Seed.SCOUNT, Integer.toString(this.peers.sizeConnected())); // the number of seeds that the peer has stored
+        mySeed.put(
             Seed.CCOUNT,
             Float.toString(((int) ((this.peers.sizeConnected() + this.peers.sizeDisconnected() + this.peers
                 .sizePotential()) * 60.0f / (uptime + 1.01f)) * 100.0f) / 100.0f)); // the number of clients that the peer connects (as connects/hour)
-        this.peers.mySeed().put(Seed.VERSION, yacyBuildProperties.getLongVersion());
-        this.peers.mySeed().setFlagDirectConnect(true);
-        this.peers.mySeed().setLastSeenUTC();
-        this.peers.mySeed().put(Seed.UTC, GenericFormatter.UTCDiffString());
-        this.peers.mySeed().setFlagAcceptRemoteCrawl(getConfigBool("crawlResponse", true));
-        this.peers.mySeed().setFlagAcceptRemoteIndex(getConfigBool("allowReceiveIndex", true));
-        //mySeed.setFlagAcceptRemoteIndex(true);
+        mySeed.put(Seed.VERSION, yacyBuildProperties.getLongVersion());
+        mySeed.setFlagDirectConnect(true);
+        mySeed.setLastSeenUTC();
+        mySeed.put(Seed.UTC, GenericFormatter.UTCDiffString());
+        mySeed.setFlagAcceptRemoteCrawl(getConfigBool("crawlResponse", true));
+        mySeed.setFlagAcceptRemoteIndex(getConfigBool("allowReceiveIndex", true));
+        mySeed.setFlagSSLAvailable(getConfigBool("server.https", false));
     }
 
     public void loadSeedLists() {

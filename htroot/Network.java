@@ -108,6 +108,7 @@ public class Network {
                 // my-info
                 prop.putHTML("table_my-name", seed.get(Seed.NAME, "-") );
                 prop.put("table_my-hash", seed.hash );
+                prop.put("table_my-ssl", sb.peers.mySeed().getFlagSSLAvailable() ? 1 : 0);
                 if (sb.peers.mySeed().isVirgin()) {
                     prop.put("table_my-info", 0);
                 } else if(sb.peers.mySeed().isJunior()) {
@@ -378,6 +379,7 @@ public class Network {
                             prop.putHTML(STR_TABLE_LIST + conCount + "_shortname", shortname);
                             prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(Seed.NAME, "deadlink"));
                             prop.put(STR_TABLE_LIST + conCount + "_special", (seed.getFlagRootNode() && !seed.getFlagAcceptRemoteIndex()) ? 1 : 0);
+                            prop.put(STR_TABLE_LIST + conCount + "_ssl", (seed.getFlagSSLAvailable()) ? 1 : 0);
                             userAgent = null;
                             if (seed.hash != null && seed.hash.equals(sb.peers.mySeed().hash)) {
                                 userAgent = ClientIdentification.getUserAgent();
