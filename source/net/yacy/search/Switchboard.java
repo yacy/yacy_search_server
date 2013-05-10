@@ -982,7 +982,7 @@ public final class Switchboard extends serverSwitch {
             SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL,
             "Remote Crawl Job",
             "thread that performes a single crawl/indexing step triggered by a remote peer",
-            "/IndexCreateWWWRemoteQueue_p.html",
+            "/IndexCreateQueues_p.html?stack=REMOTE",
             new InstantBusyThread(
                 this.crawlQueues,
                 SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START,
@@ -1012,7 +1012,7 @@ public final class Switchboard extends serverSwitch {
             SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL,
             "Local Crawl",
             "thread that performes a single crawl step from the local crawl queue",
-            "/IndexCreateWWWLocalQueue_p.html",
+            "/IndexCreateQueues_p.html?stack=LOCAL",
             new InstantBusyThread(
                 this.crawlQueues,
                 SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_START,
