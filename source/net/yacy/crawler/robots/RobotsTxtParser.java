@@ -118,11 +118,6 @@ public final class RobotsTxtParser {
                 // parse empty line
                 if (line.isEmpty()) {
                     // we have reached the end of the rule block
-                    if (rule4ThisAgentsFound) {
-                        // stop here because other robot blocks are either not for YaCy
-                        // or global settings which shall not overwrite YaCys settings.
-                        break lineparser;
-                    }
                     continue lineparser;
                 }
 
@@ -147,12 +142,6 @@ public final class RobotsTxtParser {
 
                     if (inBlock) {
                         // we have detected the start of a new block
-                        if (rule4ThisAgentsFound) {
-                            // stop here because other robot blocks are either not for YaCy
-                            // or global settings which shall not overwrite YaCys settings.
-                            break lineparser;
-                        }
-
                         inBlock = false;
                         isRule4AllAgents = false;
                         isRule4ThisAgents = false;
