@@ -92,7 +92,8 @@
             <dl>
               <dt><label for="port">Peer Port: </label></dt>
               <dd>
-                <input type="text" name="port" id="port" value="#[defaultPort]#" size="5" maxlength="5" />
+                <input type="text" name="port" id="port" value="#[defaultPort]#" size="5" maxlength="5" />&nbsp;&nbsp;&nbsp;
+                <input type="checkbox" name="withssl" id="withssl" #(withsslenabled)#::checked="checked"#(/withsslenabled)#>with SSL (https enabled)
               </dd>
               #(upnp)#::<dt>
                 <label for="enableUpnp">Configure your router for YaCy:&nbsp;</label>
@@ -124,7 +125,7 @@
     <!-- [3]: port not proper -->
     <p>You did not open a port in your firewall or your router does not forward the server port to your peer. This is needed if you want to fully participate in the YaCy network. You can also use your peer without opening it, but this is not recomended.</p>::
     <!-- [4]: reconnect to different port -->
-    <p>The peer port was changed successfully. Your browser will be redirected to the new <a href="#(sslSupport)#http::https#(/sslSupport)#://#[host]#:#[port]#/ConfigBasic.html">location</a> in 10 seconds.</p>
+    <p>The peer port was changed successfully. Your browser will be redirected to the new <a href="#(sslSupport)#http::https#(/sslSupport)#://#[host]#:#[port]#/ConfigBasic.html">location</a> in 5 seconds.</p>
     #(/nextStep)#
     #%env/templates/footer.template%#
   </body>
