@@ -194,7 +194,7 @@ public class Status
         prop.put("host", hostIP != null ? hostIP.getHostAddress() : "Unkown IP");
 
         // ssl support
-        prop.put("sslSupport", sb.getConfig("keyStore", "").isEmpty() ? "0" : "1");
+        prop.put("sslSupport", sb.getConfig("keyStore", "").isEmpty() || !sb.getConfigBool("server.https", false) ? 0 : 1);
 
         if ( sb.getConfigBool("remoteProxyUse", false) ) {
             prop.put("remoteProxy", "1");

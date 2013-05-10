@@ -207,7 +207,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     }
 
     public boolean withSSL() {
-        return this.sslSocketFactory != null;
+        return this.sslSocketFactory != null && this.switchboard.getConfigBool("server.https", false);
     }
 
     public synchronized void init() {
@@ -367,7 +367,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                 controlSocket.setSoTimeout(this.timeout);
 
                 // wrap this socket
-                if (this.sslSocketFactory != null) {
+                if (withSSL()) {
                     controlSocket = new serverCoreSocket(controlSocket);
 
                     // if the current connection is SSL we need to do a handshake
@@ -994,10 +994,19 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         String keyStoreFileName = this.switchboard.getConfig("keyStore", "").trim();
 
         // getting the keystore pwd
-        final String keyStorePwd = this.switchboard.getConfig("keyStorePassword", "").trim();
+        String keyStorePwd = this.switchboard.getConfig("keyStorePassword", "").trim();
 
         // take a look if we have something to import
         final String pkcs12ImportFile = this.switchboard.getConfig("pkcs12ImportFile", "").trim();
+        
+        // if no keyStore and no import is defined, then set the default key
+        if (keyStoreFileName.isEmpty() && keyStorePwd.isEmpty() && pkcs12ImportFile.isEmpty()) {
+            keyStoreFileName = "defaults/freeworldKeystore";
+            keyStorePwd = "freeworld";
+            this.switchboard.setConfig("keyStore", keyStoreFileName);
+            this.switchboard.setConfig("keyStorePassword", keyStorePwd);
+        }
+        
         if (pkcs12ImportFile.length() > 0) {
             this.log.logInfo("Import certificates from import file '" + pkcs12ImportFile + "'.");
 
@@ -1092,13 +1101,10 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                        @Override
                     public void handshakeCompleted(
                           final HandshakeCompletedEvent event) {
-                          System.out.println("Handshake finished!");
-                          System.out.println(
-                          "\t CipherSuite:" + event.getCipherSuite());
-                          System.out.println(
-                          "\t SessionId " + event.getSession());
-                          System.out.println(
-                          "\t PeerHost " + event.getSession().getPeerHost());
+                          //System.out.println("Handshake finished!");
+                          //System.out.println("\t CipherSuite:" + event.getCipherSuite());
+                          //System.out.println("\t SessionId " + event.getSession());
+                          //System.out.println("\t PeerHost " + event.getSession().getPeerHost());
                        }
                     }
                  );
