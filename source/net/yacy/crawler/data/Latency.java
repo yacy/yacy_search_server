@@ -43,6 +43,7 @@ public class Latency {
     private final static int DEFAULT_AVERAGE = 300;
 
     // the map is a mapping from host names to host configurations
+    private static final int mapMaxSize = 1000;
     private static final ConcurrentHashMap<String, Host> map = new ConcurrentHashMap<String, Host>();
 
     /**
@@ -57,7 +58,7 @@ public class Latency {
         Host h = map.get(hosthash);
         if (h == null) {
             h = new Host(host, DEFAULT_AVERAGE, robotsCrawlDelay);
-            if (map.size() > 1000 || MemoryControl.shortStatus()) map.clear();
+            if (map.size() > mapMaxSize || MemoryControl.shortStatus()) map.clear();
             map.put(hosthash, h);
         }
     }
@@ -74,7 +75,7 @@ public class Latency {
         Host h = map.get(hosthash);
         if (h == null) {
             h = new Host(host, 500, 0);
-            if (map.size() > 1000 || MemoryControl.shortStatus()) map.clear();
+            if (map.size() > mapMaxSize || MemoryControl.shortStatus()) map.clear();
             map.put(hosthash, h);
         } else {
             h.update();
@@ -93,7 +94,7 @@ public class Latency {
         Host h = map.get(hosthash);
         if (h == null) {
             h = new Host(host, time, 0);
-            if (map.size() > 1000 || MemoryControl.shortStatus()) map.clear();
+            if (map.size() > mapMaxSize || MemoryControl.shortStatus()) map.clear();
             map.put(hosthash, h);
         } else {
             h.update(time);

@@ -65,6 +65,7 @@ import net.yacy.search.Switchboard;
 
 public final class LoaderDispatcher {
 
+    private final static int accessTimeMaxsize = 1000;
     private static final ConcurrentHashMap<String, Long> accessTime = new ConcurrentHashMap<String, Long>(); // to protect targets from DDoS
 
     private final Switchboard sb;
@@ -271,7 +272,10 @@ public final class LoaderDispatcher {
         }
 
         // now it's for sure that we will access the target. Remember the access time
-        if (host != null) accessTime.put(host, System.currentTimeMillis());
+        if (host != null) {
+            if (accessTime.size() > accessTimeMaxsize) accessTime.clear(); // prevent a memory leak here
+            accessTime.put(host, System.currentTimeMillis());
+        }
 
         // load resource from the internet
         Response response = null;
