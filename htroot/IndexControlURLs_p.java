@@ -279,7 +279,7 @@ public class IndexControlURLs_p {
 
         if (post.containsKey("deletedomain")) {
             final String domain = post.get("domain");
-            segment.fulltext().deleteDomainHostname(domain, null, false);
+            segment.fulltext().deleteDomainHostname(domain, null);
             // trigger the loading of the table
             post.put("statistics", "");
         }

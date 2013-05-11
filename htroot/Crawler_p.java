@@ -301,7 +301,7 @@ public class Crawler_p {
                         siteFilter = CrawlProfile.siteFilter(rootURLs);
                         if (deleteold) {
                             for (DigestURI u: rootURLs) {
-                                sb.index.fulltext().deleteDomainHashpart(u.hosthash(), deleteageDate, rootURLs.size() > 1);
+                                sb.index.fulltext().deleteDomainHashpart(u.hosthash(), deleteageDate);
                             }
                         }
                     } else if (subPath) {
@@ -310,7 +310,7 @@ public class Crawler_p {
                             for (DigestURI u: rootURLs) {
                                 String basepath = u.toNormalform(true);
                                 if (!basepath.endsWith("/")) {int p = basepath.lastIndexOf("/"); if (p > 0) basepath = basepath.substring(0, p + 1);}
-                                int count = sb.index.fulltext().remove(basepath, deleteageDate, rootURLs.size() > 1);
+                                int count = sb.index.fulltext().remove(basepath, deleteageDate);
                                 if (count > 0) Log.logInfo("Crawler_p", "deleted " + count + " documents for host " + u.getHost());
                             }
                         }

@@ -124,7 +124,7 @@ public class CrawlResults {
             if (post.containsKey("deletedomain")) {
                 final String domain = post.get("domain", null);
                 if (domain != null) {
-                    sb.index.fulltext().deleteDomainHostname(domain, null, false);
+                    sb.index.fulltext().deleteDomainHostname(domain, null);
                     ResultURLs.deleteDomain(tabletype, domain);
                 }
             }
