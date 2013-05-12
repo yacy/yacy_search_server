@@ -177,13 +177,13 @@ public class WorkflowProcessor<J extends WorkflowJob> {
         // execute concurrent in thread
         while (this.input != null) {
             try {
+                this.input.put(in);
                 if (this.input.size() > this.executorRunning.get() && this.executorRunning.get() < this.maxpoolsize) synchronized (executor) {
                     if (this.input.size() > this.executorRunning.get() && this.executorRunning.get() < this.maxpoolsize) {
                         this.executorRunning.incrementAndGet();
                         this.executor.submit(new InstantBlockingThread<J>(this));
                     }
                 }
-                this.input.put(in);
                 break;
             } catch (final Throwable e) {
                 try {Thread.sleep(10);} catch (final InterruptedException ee) {}
