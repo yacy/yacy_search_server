@@ -2844,6 +2844,16 @@ public final class Switchboard extends serverSwitch {
         // remove url from the index to be prepared for a re-crawl
         final byte[] urlhash = url.hash();
         remove(urlhash);
+        // because the removal is done concurrenlty, it is possible that the crawl
+        // stacking may fail because of double occurrences of that url. Therefore
+        // we must wait here until the url has actually disappeared
+        int t = 100;
+        while (t-- > 0 && this.index.exists(ASCII.String(urlhash))) {
+            try {Thread.sleep(100);} catch (InterruptedException e) {}
+            Log.logFine("Switchboard", "STACKURL: waiting for deletion, t=" + t);
+            if (t == 20) this.index.fulltext().commit(true);
+            if (t == 50) this.index.fulltext().commit(false);
+        }
         
         // special handling of ftp protocol
         if (url.isFTP()) {
