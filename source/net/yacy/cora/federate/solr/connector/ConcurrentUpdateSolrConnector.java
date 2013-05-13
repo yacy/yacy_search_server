@@ -291,15 +291,16 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     }
 
     @Override
-    public void deleteByQuery(String querystring) throws IOException {
-        final BlockingQueue<String> idq = this.connector.concurrentIDsByQuery(querystring,0, 100000000, Long.MAX_VALUE);
+    public void deleteByQuery(final String querystring) throws IOException {
         new Thread() {
             public void run() {
-                String id;
+                ConcurrentUpdateSolrConnector.this.idCache.clear();
                 try {
-                    while ((id = idq.take()) != AbstractSolrConnector.POISON_ID) ConcurrentUpdateSolrConnector.this.deleteQueue.put(id);
-                } catch (InterruptedException e) {}
-                // if we are finished we do a soft commit since that is what an operator wants to see in the gui
+                    ConcurrentUpdateSolrConnector.this.connector.deleteByQuery(querystring);
+                    ConcurrentUpdateSolrConnector.this.idCache.clear();
+                } catch (IOException e) {
+                    Log.logSevere("ConcurrentUpdateSolrConnector", e.getMessage(), e);
+                }
                 ConcurrentUpdateSolrConnector.this.connector.commit(true);
             }
         }.start();
