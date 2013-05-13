@@ -104,7 +104,7 @@ public final class CrawlStacker {
 
 
     public int size() {
-        return this.requestQueue.queueSize();
+        return this.requestQueue.getQueueSize();
     }
     public boolean isEmpty() {
         if (!this.requestQueue.queueIsEmpty()) return false;

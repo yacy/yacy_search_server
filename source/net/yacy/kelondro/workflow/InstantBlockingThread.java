@@ -75,7 +75,7 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
 
     @Override
     public int getJobCount() {
-        return getManager().queueSize();
+        return getManager().getQueueSize();
     }
 
     @Override

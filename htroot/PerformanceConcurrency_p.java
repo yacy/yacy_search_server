@@ -59,9 +59,10 @@ public class PerformanceConcurrency_p {
             // set values to templates
             prop.put("table_" + c + "_threadname", p.getName());
             prop.putHTML("table_" + c + "_longdescr", p.getDescription());
-            prop.put("table_" + c + "_queuesize", p.queueSize());
-            prop.put("table_" + c + "_queuesizemax", p.queueSizeMax());
-            prop.put("table_" + c + "_concurrency", p.concurrency());
+            prop.put("table_" + c + "_queuesize", p.getQueueSize());
+            prop.put("table_" + c + "_queuesizemax", p.getMaxQueueSize());
+            prop.put("table_" + c + "_concurrency", p.getMaxConcurrency());
+            prop.put("table_" + c + "_executors", p.getExecutors());
             prop.putHTML("table_" + c + "_childs", p.getChilds());
 
             blocktime = p.getBlockTime();
@@ -78,8 +79,8 @@ public class PerformanceConcurrency_p {
             // set a color for the line to show problems
             boolean problem = false;
             boolean warning = false;
-            if (p.queueSize() == p.queueSizeMax()) problem = true;
-            if (p.queueSize() > p.queueSizeMax() * 8 / 10) warning = true;
+            if (p.getQueueSize() == p.getMaxQueueSize()) problem = true;
+            if (p.getQueueSize() > p.getMaxQueueSize() * 8 / 10) warning = true;
             if (100 * blocktime / blocktime_total > 80) warning = true;
             if (100 * exectime / exectime_total > 80) warning = true;
             if (100 * passontime / passontime_total > 80) warning = true;

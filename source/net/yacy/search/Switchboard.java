@@ -1132,10 +1132,10 @@ public final class Switchboard extends serverSwitch {
     }
 
     public int getIndexingProcessorsQueueSize() {
-        return this.indexingDocumentProcessor.queueSize()
-            + this.indexingCondensementProcessor.queueSize()
-            + this.indexingAnalysisProcessor.queueSize()
-            + this.indexingStorageProcessor.queueSize();
+        return this.indexingDocumentProcessor.getQueueSize()
+            + this.indexingCondensementProcessor.getQueueSize()
+            + this.indexingAnalysisProcessor.getQueueSize()
+            + this.indexingStorageProcessor.getQueueSize();
     }
 
     public void overwriteNetworkDefinition() throws FileNotFoundException, IOException {

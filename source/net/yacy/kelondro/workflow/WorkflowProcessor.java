@@ -93,7 +93,7 @@ public class WorkflowProcessor<J extends WorkflowJob> {
         return this.methodName;
     }
     
-    public int queueSize() {
+    public int getQueueSize() {
         if (this.input == null) return 0;
         return this.input.size();
     }
@@ -102,13 +102,24 @@ public class WorkflowProcessor<J extends WorkflowJob> {
         return this.input == null || this.input.isEmpty();
     }
 
-    public int queueSizeMax() {
+    public int getMaxQueueSize() {
         if (this.input == null) return 0;
         return this.input.size() + this.input.remainingCapacity();
     }
 
-    public int concurrency() {
+    public int getMaxConcurrency() {
         return this.maxpoolsize;
+    }
+    
+    public int getExecutors() {
+        return this.executorRunning.get();
+    }
+    
+    /**
+     * the decExecutors method may only be called within the AbstractBlockingThread while loop!!
+     */
+    public void decExecutors() {
+        this.executorRunning.decrementAndGet();
     }
 
     public J take() throws InterruptedException {

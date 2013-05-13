@@ -130,7 +130,7 @@ public class Dispatcher {
     }
 
     public int transmissionSize() {
-    	return (this.indexingTransmissionProcessor == null) ? 0 : this.indexingTransmissionProcessor.queueSize();
+    	return (this.indexingTransmissionProcessor == null) ? 0 : this.indexingTransmissionProcessor.getQueueSize();
     }
 
     /**
@@ -374,7 +374,7 @@ public class Dispatcher {
      */
     public boolean dequeueContainer() {
     	if (this.transmissionCloud == null) return false;
-        if (this.indexingTransmissionProcessor.queueSize() > this.indexingTransmissionProcessor.concurrency()) return false;
+        if (this.indexingTransmissionProcessor.getQueueSize() > this.indexingTransmissionProcessor.getMaxConcurrency()) return false;
         ByteArray maxtarget = null;
         int maxsize = -1;
         for (final Map.Entry<ByteArray, Transmission.Chunk> chunk: this.transmissionCloud.entrySet()) {

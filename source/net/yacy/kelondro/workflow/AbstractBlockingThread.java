@@ -104,6 +104,7 @@ public abstract class AbstractBlockingThread<J extends WorkflowJob> extends Abst
                 busyCycles++;
             }
         }
+        this.manager.decExecutors();
         this.close();
         logSystem("thread '" + this.getName() + "' terminated.");
     }
