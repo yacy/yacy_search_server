@@ -21,6 +21,7 @@ package net.yacy;
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import net.yacy.search.index.ReindexSolrBusyThread;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -33,11 +34,25 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
 import com.google.common.io.Files;
+import static java.lang.Thread.MIN_PRIORITY;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.Semaphore;
+import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
+import net.yacy.cora.storage.Configuration.Entry;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.workflow.AbstractBusyThread;
+import net.yacy.kelondro.workflow.AbstractThread;
+import net.yacy.kelondro.workflow.BusyThread;
+import net.yacy.kelondro.workflow.InstantBusyThread;
+import net.yacy.kelondro.workflow.WorkflowThread;
 import net.yacy.search.index.Fulltext;
+import net.yacy.search.schema.CollectionConfiguration;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrInputDocument;
 
 public class migration {
     //SVN constants
@@ -45,7 +60,7 @@ public class migration {
     public static final int TAGDB_WITH_TAGHASH=1635; //tagDB keys are tagHashes instead of plain tagname.
     public static final int NEW_OVERLAYS=4422;
     public static final int IDX_HOST=7724; // api for index retrieval: host index
-
+   
     public static void migrate(final Switchboard sb, final int fromRev, final int toRev){
         if(fromRev < toRev){
             if(fromRev < TAGDB_WITH_TAGHASH){
@@ -333,5 +348,51 @@ public class migration {
             t.start();
         }
         return ret;
+    }
+    
+    /**
+     * Reindex embedded solr index
+     *   - all documents with inactive fields (according to current schema)
+     *   - all documents with obsolete fields
+     * A worker thread is initialized with fieldnames or a solr query which selects the documents for reindexing
+     * implemented via deployed BusyThread which is called repeatedly by system
+     * reindexes a fixed chunk of documents per cycle (allowing to easy interrupt process after completion of a chunck)
+     * and monitoring in default process monitor (PerformanceQueues_p.html)
+     */
+    public static int reindexToschema (final Switchboard sb) {
+
+        BusyThread bt = sb.getThread("reindexSolr");
+        // a reindex job is already running 
+        if (bt != null) {
+            return bt.getJobCount();
+        } 
+
+        ReindexSolrBusyThread  reidx = new ReindexSolrBusyThread(null); // ("*:*" would reindex all)
+
+        // add all disabled fields
+        CollectionConfiguration colcfg = Switchboard.getSwitchboard().index.fulltext().getDefaultConfiguration();
+        Iterator<Entry> itcol = colcfg.entryIterator();
+        while (itcol.hasNext()) {
+            Entry etr = itcol.next();
+            if (!etr.enabled()) {
+                reidx.addSelectFieldname(etr.key());
+            }
+        }
+
+        // add obsolete fields (not longer part of main index)
+        reidx.addSelectFieldname("inboundlinks_tag_txt");
+        reidx.addSelectFieldname("inboundlinks_relflags_val");
+        reidx.addSelectFieldname("inboundlinks_rel_sxt");
+        reidx.addSelectFieldname("inboundlinks_text_txt");
+        reidx.addSelectFieldname("inboundlinks_alttag_txt");
+
+        reidx.addSelectFieldname("outboundlinks_tag_txt");
+        reidx.addSelectFieldname("outboundlinks_relflags_val");
+        reidx.addSelectFieldname("outboundlinks_rel_sxt");
+        reidx.addSelectFieldname("outboundlinks_text_txt");
+        reidx.addSelectFieldname("outboundlinks_alttag_txt");
+        
+        sb.deployThread("reindexSolr", "Reindex Solr", "reindex documents with obsolete fields in embedded Solr index", "/IndexReIndexMonitor_p.html",reidx /*privateWorkerThread*/, 0);
+        return 0;
     }
 }

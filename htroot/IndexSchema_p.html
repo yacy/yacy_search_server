@@ -50,9 +50,22 @@
       <div>
         <input type="submit" name="set" value="Set" />
         <input style="float:right" type="submit" name="resetselectiontodefault" value="reset selection to default" />
-      </div> 
+      </div>
     </form>
-    
+    <p><br /></p>
+    <form action="IndexReIndexMonitor_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <legend><label>Reindex documents</label></legend>  
+        <p>If you unselected some fields, old documents in the index still contain the unselected fields.
+             To physically remove them from the index you need to reindex the documents.
+             Here you can reindex all documents with inactive fields.</p>
+        <div style="text-align:center ">
+          <input type="submit" name="reindexSolr" value="reindex Solr" />  
+          <input type="hidden" name="reindexnow"/>
+        </div>    
+        <p>You may monitor progress (or stop the job) under <a href="IndexReIndexMonitor_p.html">IndexReIndexMonitor_p.html</a></p> 
+      </fieldset>
+    </form>
     #%env/templates/footer.template%#
   </body>
 </html>
