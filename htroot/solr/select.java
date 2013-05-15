@@ -144,6 +144,10 @@ public class select {
 
         // check post
         if (post == null) return null;
+        if (post.size() > 100) {
+            Log.logWarning("select", "rejected bad-formed search request with " + post.size() + " properties from " + header.refererHost());
+            return null; // prevent the worst hacks here...
+        }
         sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
         
         // get the ranking profile id

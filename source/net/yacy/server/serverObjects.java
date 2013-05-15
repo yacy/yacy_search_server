@@ -112,6 +112,10 @@ public class serverObjects implements Serializable, Cloneable {
     	this.put(ACTION_AUTHENTICATE, ADMIN_AUTHENTICATE_MSG);
     }
 
+    public int size() {
+        return this.map.toNamedList().size() / 2;
+    }
+    
     public void clear() {
         this.map.getMap().clear();
     }
