@@ -24,9 +24,15 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.search.schema.CollectionConfiguration;
+import org.apache.lucene.index.FieldInfo;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.request.LukeRequest;
+import org.apache.solr.client.solrj.response.LukeResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
@@ -72,7 +78,7 @@ import org.apache.solr.common.SolrInputDocument;
             }   
             setName("reindexSolr");
             this.setPriority(Thread.MIN_PRIORITY);
-            
+
         }
 
         /**
@@ -126,14 +132,13 @@ import org.apache.solr.common.SolrInputDocument;
                         } else {
                             Log.logInfo("MIGRATION-REINDEX", "reindex docs with query=" + query + " found=" + docstoreindex + " start=" + start);
                             start = start + chunksize;
-                        }
-                        
-                        for (SolrDocument doc : xdocs) {
-                            SolrInputDocument idoc = colcfg.toSolrInputDocument(doc);
-                            Switchboard.getSwitchboard().index.fulltext().putDocument(idoc);
-                            processed++;
-                        }
-                        
+                            
+                            for (SolrDocument doc : xdocs) {
+                                SolrInputDocument idoc = colcfg.toSolrInputDocument(doc);
+                                Switchboard.getSwitchboard().index.fulltext().putDocument(idoc);
+                                processed++;
+                            }
+                        }                        
                     } catch (IOException ex) {
                         Log.logException(ex);
                     } finally {
@@ -152,11 +157,15 @@ import org.apache.solr.common.SolrInputDocument;
         }
               
       
-        @Override
-        public void terminate(final boolean waitFor) {
-            querylist.clear();
-            super.terminate(waitFor);
-        }
+         @Override
+         public void terminate(final boolean waitFor) {
+             querylist.clear();
+             // if interrupted without finished commit to reflect latest changes
+             if (docstoreindex > 0 && processed > 0) {
+                 esc.commit(true);
+             }
+             super.terminate(waitFor);
+         }
         
         /**         
          * @return total number of processed documents
@@ -168,7 +177,7 @@ import org.apache.solr.common.SolrInputDocument;
         /**
          * @return the currently processed Solr select query 
          */
-        public String getCurrentQuery() {
+        public String getCurrentQuery() {            
             return querylist.isEmpty() ? "" : querylist.get(0);
         }
         
@@ -186,6 +195,8 @@ import org.apache.solr.common.SolrInputDocument;
             if (chunksize > 2) {
                 this.chunksize = this.chunksize / 2;
             }
+            esc.commit(true);
+            start = 0;            
         }
 
     }

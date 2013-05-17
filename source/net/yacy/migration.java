@@ -24,7 +24,10 @@ package net.yacy;
 import net.yacy.search.index.ReindexSolrBusyThread;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
@@ -34,7 +37,6 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
 import com.google.common.io.Files;
-import java.util.Iterator;
 import net.yacy.cora.storage.Configuration.Entry;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.Index;
@@ -42,6 +44,10 @@ import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.schema.CollectionConfiguration;
+import net.yacy.search.schema.CollectionSchema;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.request.LukeRequest;
+import org.apache.solr.client.solrj.response.LukeResponse;
 
 public class migration {
     //SVN constants
@@ -354,34 +360,73 @@ public class migration {
         // a reindex job is already running 
         if (bt != null) {
             return bt.getJobCount();
-        } 
-
-        ReindexSolrBusyThread  reidx = new ReindexSolrBusyThread(null); // ("*:*" would reindex all)
-
-        // add all disabled fields
-        CollectionConfiguration colcfg = Switchboard.getSwitchboard().index.fulltext().getDefaultConfiguration();
-        Iterator<Entry> itcol = colcfg.entryIterator();
-        while (itcol.hasNext()) {
-            Entry etr = itcol.next();
-            if (!etr.enabled()) {
-                reidx.addSelectFieldname(etr.key());
-            }
         }
-
-        // add obsolete fields (not longer part of main index)
-        reidx.addSelectFieldname("inboundlinks_tag_txt");
-        reidx.addSelectFieldname("inboundlinks_relflags_val");
-        reidx.addSelectFieldname("inboundlinks_rel_sxt");
-        reidx.addSelectFieldname("inboundlinks_text_txt");
-        reidx.addSelectFieldname("inboundlinks_alttag_txt");
-
-        reidx.addSelectFieldname("outboundlinks_tag_txt");
-        reidx.addSelectFieldname("outboundlinks_relflags_val");
-        reidx.addSelectFieldname("outboundlinks_rel_sxt");
-        reidx.addSelectFieldname("outboundlinks_text_txt");
-        reidx.addSelectFieldname("outboundlinks_alttag_txt");
         
-        sb.deployThread("reindexSolr", "Reindex Solr", "reindex documents with obsolete fields in embedded Solr index", "/IndexReIndexMonitor_p.html",reidx /*privateWorkerThread*/, 0);
+        boolean lukeCheckok = false;
+        Set<String> omitFields = new HashSet<String>(3);
+        omitFields.add(CollectionSchema.author_sxt.getSolrFieldName()); // special fields to exclude from disabled check
+        omitFields.add(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
+        omitFields.add(CollectionSchema.coordinate_p_1_coordinate.getSolrFieldName());
+        CollectionConfiguration colcfg = Switchboard.getSwitchboard().index.fulltext().getDefaultConfiguration();
+        ReindexSolrBusyThread reidx = new ReindexSolrBusyThread(null); // ("*:*" would reindex all);
+        
+        try { // get all fields contained in index
+            LukeRequest lukeRequest = new LukeRequest();
+            lukeRequest.setNumTerms(1);
+            LukeResponse lukeResponse = lukeRequest.process(Switchboard.getSwitchboard().index.fulltext().getDefaultEmbeddedConnector().getServer());            
+
+            for (LukeResponse.FieldInfo solrfield : lukeResponse.getFieldInfo().values()) {
+                if (!colcfg.contains(solrfield.getName()) && !omitFields.contains(solrfield.getName())) { // add found fields not in config for reindexing
+                    reidx.addSelectFieldname(solrfield.getName());
+                }
+            }
+            lukeCheckok = true;
+        } catch (SolrServerException ex) {
+            Log.logException(ex);
+        } catch (IOException ex) {
+            Log.logException(ex);
+        }
+  
+        if (!lukeCheckok) {  // if luke failed alternatively use config and manual list                
+            // add all disabled fields
+            Iterator<Entry> itcol = colcfg.entryIterator();
+            while (itcol.hasNext()) { // check for disabled fields in config
+                Entry etr = itcol.next();
+                if (!etr.enabled() && !omitFields.contains(etr.key())) {
+                    reidx.addSelectFieldname(etr.key());
+                }
+            }
+
+            // add obsolete fields (not longer part of main index)
+            reidx.addSelectFieldname("author_s");
+            reidx.addSelectFieldname("css_tag_txt");
+            reidx.addSelectFieldname("css_url_txt");
+            reidx.addSelectFieldname("scripts_txt");
+            reidx.addSelectFieldname("images_tag_txt");
+            reidx.addSelectFieldname("images_urlstub_txt");
+            reidx.addSelectFieldname("canonical_t");
+            reidx.addSelectFieldname("frames_txt");
+            reidx.addSelectFieldname("iframes_txt");
+
+            reidx.addSelectFieldname("inboundlinks_tag_txt");
+            reidx.addSelectFieldname("inboundlinks_relflags_val");
+            reidx.addSelectFieldname("inboundlinks_name_txt");
+            reidx.addSelectFieldname("inboundlinks_rel_sxt");
+            reidx.addSelectFieldname("inboundlinks_text_txt");
+            reidx.addSelectFieldname("inboundlinks_text_chars_val");
+            reidx.addSelectFieldname("inboundlinks_text_words_val");
+            reidx.addSelectFieldname("inboundlinks_alttag_txt");
+
+            reidx.addSelectFieldname("outboundlinks_tag_txt");
+            reidx.addSelectFieldname("outboundlinks_relflags_val");
+            reidx.addSelectFieldname("outboundlinks_name_txt");
+            reidx.addSelectFieldname("outboundlinks_rel_sxt");
+            reidx.addSelectFieldname("outboundlinks_text_txt");
+            reidx.addSelectFieldname("outboundlinks_text_chars_val");
+            reidx.addSelectFieldname("outboundlinks_text_words_val");
+            reidx.addSelectFieldname("outboundlinks_alttag_txt");
+        }
+        sb.deployThread("reindexSolr", "Reindex Solr", "reindex documents with obsolete fields in embedded Solr index", "/IndexReIndexMonitor_p.html",reidx , 0);
         return 0;
     }
 }
