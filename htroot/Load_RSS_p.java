@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -38,11 +39,11 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.retrieval.RSSLoader;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.WorkTables;
-import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -275,20 +276,31 @@ public class Load_RSS_p {
         // index all selected items: description only
         if (rss != null && post.containsKey("indexSelectedItemContent")) {
             final RSSFeed feed = rss.getFeed();
+            List<DigestURI> list = new ArrayList<DigestURI>();
+            Map<String, RSSMessage> messages = new HashMap<String, RSSMessage>();
             loop: for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) try {
                     final RSSMessage message = feed.getMessage(entry.getValue().substring(5));
                     final DigestURI messageurl = new DigestURI(message.getLink());
                     if (RSSLoader.indexTriggered.containsKey(messageurl.hash())) continue loop;
-                    if (sb.urlExists(ASCII.String(messageurl.hash())) != null) continue loop;
-                    sb.addToIndex(messageurl, null, null, collections);
-                    RSSLoader.indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
+                    messages.put(ASCII.String(messageurl.hash()), message);
                 } catch (final IOException e) {
-                    Log.logException(e);
-                } catch (final Failure e) {
                     Log.logException(e);
                 }
             }
+            Map<String, HarvestProcess> existingurls = sb.urlExists(messages.keySet());
+            loop: for (final Map.Entry<String, RSSMessage> entry: messages.entrySet()) {
+                try {
+                    final RSSMessage message = entry.getValue();
+                    final DigestURI messageurl = new DigestURI(message.getLink());
+                    if (existingurls.get(ASCII.String(messageurl.hash())) != null) continue loop;
+                    list.add(messageurl);
+                    RSSLoader.indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
+                } catch (final IOException e) {
+                    Log.logException(e);
+                }
+            }
+            sb.addToIndex(list, null, null, collections);
         }
 
         if (rss != null && post.containsKey("indexAllItemContent")) {
@@ -318,6 +330,18 @@ public class Load_RSS_p {
             prop.putHTML("showitems_ttl", channel == null ? "" : channel.getTTL());
             prop.putHTML("showitems_docs", channel == null ? "" : channel.getDocs());
 
+            Map<String, DigestURI> urls = new HashMap<String, DigestURI>();
+            for (final Hit item: feed) {
+                try {
+                    final DigestURI messageurl = new DigestURI(item.getLink());
+                    urls.put(ASCII.String(messageurl.hash()), messageurl);
+                } catch (final MalformedURLException e) {
+                    Log.logException(e);
+                    continue;
+                }
+            }
+            Map<String, HarvestProcess> ids = sb.urlExists(urls.keySet());
+            
             int i = 0;
             for (final Hit item: feed) {
                 try {
@@ -325,7 +349,7 @@ public class Load_RSS_p {
                     author = item.getAuthor();
                     if (author == null) author = item.getCopyright();
                     pubDate = item.getPubDate();
-                    prop.put("showitems_item_" + i + "_state", sb.urlExists(ASCII.String(messageurl.hash())) != null ? 2 : RSSLoader.indexTriggered.containsKey(messageurl.hash()) ? 1 : 0);
+                    prop.put("showitems_item_" + i + "_state", ids.get(ASCII.String(messageurl.hash())) != null ? 2 : RSSLoader.indexTriggered.containsKey(messageurl.hash()) ? 1 : 0);
                     prop.put("showitems_item_" + i + "_state_count", i);
                     prop.putHTML("showitems_item_" + i + "_state_guid", item.getGuid());
                     prop.putHTML("showitems_item_" + i + "_author", author == null ? "" : author);

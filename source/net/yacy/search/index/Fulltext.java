@@ -31,9 +31,11 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -691,6 +693,7 @@ public final class Fulltext {
         return false;
     }
 
+    @Deprecated
     public boolean exists(final String urlHash) {
         if (urlHash == null) return false;
         for (URIMetadataRow entry: this.pendingCollectionInputRows) {
@@ -706,6 +709,29 @@ public final class Fulltext {
         }
         if (this.urlIndexFile != null && this.urlIndexFile.has(ASCII.getBytes(urlHash))) return true;
         return false;
+    }
+    
+    public Set<String> exists(Collection<String> ids) {
+        HashSet<String> e = new HashSet<String>();
+        if (ids == null || ids.size() == 0) return e;
+        Collection<String> idsC = new HashSet<String>();
+        for (String id: ids) {
+            for (URIMetadataRow entry: this.pendingCollectionInputRows) {
+                if (id.equals(ASCII.String(entry.hash()))) {e.add(id); continue;}
+            }
+            for (SolrInputDocument doc: this.pendingCollectionInputDocuments) {
+                if (id.equals(doc.getFieldValue(CollectionSchema.id.getSolrFieldName()))) {e.add(id); continue;}
+            }
+            if (this.urlIndexFile != null && this.urlIndexFile.has(ASCII.getBytes(id))) {e.add(id); continue;}
+            idsC.add(id);
+        }
+        try {
+            Set<String> e1 = this.getDefaultConnector().existsByIds(idsC);
+            e.addAll(e1);
+        } catch (final Throwable ee) {
+            Log.logException(ee);
+        }
+        return e;
     }
 
     public String failReason(final String urlHash) throws IOException {

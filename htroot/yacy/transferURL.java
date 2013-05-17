@@ -28,6 +28,9 @@
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
@@ -88,6 +91,7 @@ public final class transferURL {
             // read the urls from the other properties and store
             String urls;
             URIMetadataRow lEntry;
+            Map<String, URIMetadataRow> lEm = new HashMap<String, URIMetadataRow>();
             for (int i = 0; i < urlc; i++) {
                 serverCore.checkInterruption();
 
@@ -138,16 +142,16 @@ public final class transferURL {
                     continue;
                 }
 
-                // doublecheck
-                if (sb.index.exists(ASCII.String(lEntry.hash()))) {
-                	if (Network.log.isFine()) Network.log.logFine("transferURL: double URL '" + lEntry.url() + "' from peer " + otherPeerName);
-                	lEntry = null;
-                    doublecheck++;
-                    continue;
-                }
-                
+                lEm.put(ASCII.String(lEntry.hash()), lEntry);
+            }
+            
+            Set<String> nondoubles = sb.index.exists(lEm.keySet());
+            doublecheck += (lEm.size() - nondoubles.size());
+            for (String id: nondoubles) {
+                lEntry = lEm.get(id);
+
                 // write entry to database
-                if (Network.log.isFine()) Network.log.logFine("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.url().toNormalform(true));
+                if (Network.log.isFine()) Network.log.logFine("Accepting URL from peer " + otherPeerName + ": " + lEntry.url().toNormalform(true));
                 try {
                     sb.index.fulltext().putMetadataLater(lEntry);
                     ResultURLs.stack(ASCII.String(lEntry.url().hash()), lEntry.url().getHost(), iam.getBytes(), iam.getBytes(), EventOrigin.DHT_TRANSFER);

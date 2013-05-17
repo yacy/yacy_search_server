@@ -26,7 +26,14 @@ package net.yacy.crawler.retrieval;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSFeed;
@@ -38,9 +45,9 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ComparableARC;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.data.WorkTables;
-import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -89,20 +96,25 @@ public class RSSLoader extends Thread {
 
     public static void indexAllRssFeed(final Switchboard sb, final DigestURI url, final RSSFeed feed, String[] collections) {
         int loadCount = 0;
-        loop: for (final RSSMessage message: feed) {
+        List<DigestURI> list = new ArrayList<DigestURI>();
+        Map<String, DigestURI> urlmap = new HashMap<String, DigestURI>();
+        for (final RSSMessage message: feed) {
             try {
                 final DigestURI messageurl = new DigestURI(message.getLink());
-                if (indexTriggered.containsKey(messageurl.hash())) continue loop;
-                if (sb.urlExists(ASCII.String(messageurl.hash())) != null) continue loop;
-                sb.addToIndex(messageurl, null, null, collections);
-                indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
-                loadCount++;
+                if (indexTriggered.containsKey(messageurl.hash())) continue;
+                urlmap.put(ASCII.String(messageurl.hash()), messageurl);
             } catch (final IOException e) {
-                Log.logException(e);
-            } catch (final Failure e) {
                 Log.logException(e);
             }
         }
+        Map<String, HarvestProcess> existingids = sb.urlExists(urlmap.keySet());
+        for (final Map.Entry<String, DigestURI> e: urlmap.entrySet()) {
+            if (existingids.get(e.getKey()) != null) continue;
+            list.add(e.getValue());
+            indexTriggered.insertIfAbsent(ASCII.getBytes(e.getKey()), new Date());
+            loadCount++;
+        }
+        sb.addToIndex(list, null, null, collections);
         // update info for loading
 
         try {

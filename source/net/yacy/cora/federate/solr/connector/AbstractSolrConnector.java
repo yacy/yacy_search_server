@@ -21,10 +21,13 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -199,6 +202,12 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         return docs;
     }
 
+    /**
+     * check if a given document, identified by url hash as ducument id exists
+     * @param id the url hash and document id
+     * @return true if any entry in solr exists
+     * @throws IOException
+     */
     @Override
     public boolean existsById(String id) throws IOException {
         // construct raw query
@@ -220,6 +229,42 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         return exist;
     }
 
+    /**
+     * check a set of ids for existence.
+     * @param ids a collection of document ids
+     * @return a collection of a subset of the ids which exist in the index
+     * @throws IOException
+     */
+    public Set<String> existsByIds(Collection<String> ids) throws IOException {
+        if (ids == null || ids.size() == 0) return new HashSet<String>();
+        // construct raw query
+        final SolrQuery params = new SolrQuery();
+        //params.setQuery(CollectionSchema.id.getSolrFieldName() + ":\"" + id + "\"");
+        StringBuilder sb = new StringBuilder(); // construct something like "({!raw f=id}Ij7B63g-gSHA) OR ({!raw f=id}PBcGI3g-gSHA)"
+        for (String id: ids) {
+            sb.append("({!raw f=").append(CollectionSchema.id.getSolrFieldName()).append('}').append(id).append(") OR ");
+        }
+        if (sb.length() > 0) sb.setLength(sb.length() - 4); // cut off the last 'or'
+        params.setQuery(sb.toString());
+        //params.set("defType", "raw");
+        params.setRows(ids.size()); // we want all lines
+        params.setStart(0);
+        params.setFacet(false);
+        params.clearSorts();
+        params.setFields(CollectionSchema.id.getSolrFieldName());
+        params.setIncludeScore(false);
+
+        // query the server
+        QueryResponse rsp = getResponseByParams(params);
+        final SolrDocumentList docs = rsp.getResults();
+        // construct a new id list from that
+        HashSet<String> idsr = new HashSet<String>();
+        for (SolrDocument doc : docs) {
+            idsr.add((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+        }
+        return idsr;
+    }
+    
     /**
      * get the number of results when this query is done.
      * This should only be called if the actual result is never used, and only the count is interesting

@@ -62,6 +62,7 @@ public class HostBrowser {
         LINK, INDEX, EXCLUDED, FAILED;
     }
     
+    @SuppressWarnings("deprecation")
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;

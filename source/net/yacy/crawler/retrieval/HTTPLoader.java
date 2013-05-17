@@ -164,22 +164,23 @@ public final class HTTPLoader {
             }
 
     	    if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {
-                    // if we are already doing a shutdown we don't need to retry crawling
-                    if (Thread.currentThread().isInterrupted()) {
-                        this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "server shutdown", statusCode);
-                        throw new IOException("CRAWLER Retry of URL=" + requestURLString + " aborted because of server shutdown.");
-                    }
+                // if we are already doing a shutdown we don't need to retry crawling
+                if (Thread.currentThread().isInterrupted()) {
+                    this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "server shutdown", statusCode);
+                    throw new IOException("CRAWLER Retry of URL=" + requestURLString + " aborted because of server shutdown.");
+                }
 
-                    // check if the url was already indexed
-                    final HarvestProcess dbname = this.sb.urlExists(ASCII.String(redirectionUrl.hash()));
-                    if (dbname != null) { // customer request
-                        this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "redirection to double content", statusCode);
-                        throw new IOException("CRAWLER Redirection of URL=" + requestURLString + " ignored. The url appears already in db " + dbname.toString());
-                    }
+                // check if the url was already indexed
+                @SuppressWarnings("deprecation")
+                final HarvestProcess dbname = this.sb.urlExists(ASCII.String(redirectionUrl.hash()));
+                if (dbname != null) { // customer request
+                    this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "redirection to double content", statusCode);
+                    throw new IOException("CRAWLER Redirection of URL=" + requestURLString + " ignored. The url appears already in db " + dbname.toString());
+                }
 
-                    // retry crawling with new url
-                    request.redirectURL(redirectionUrl);
-                    return load(request, retryCount - 1, maxFileSize, blacklistType);
+                // retry crawling with new url
+                request.redirectURL(redirectionUrl);
+                return load(request, retryCount - 1, maxFileSize, blacklistType);
     	    }
             // we don't want to follow redirects
             this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);

@@ -34,25 +34,14 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
 import com.google.common.io.Files;
-import static java.lang.Thread.MIN_PRIORITY;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.concurrent.Semaphore;
-import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.storage.Configuration.Entry;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.workflow.AbstractBusyThread;
-import net.yacy.kelondro.workflow.AbstractThread;
 import net.yacy.kelondro.workflow.BusyThread;
-import net.yacy.kelondro.workflow.InstantBusyThread;
-import net.yacy.kelondro.workflow.WorkflowThread;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.schema.CollectionConfiguration;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrInputDocument;
 
 public class migration {
     //SVN constants

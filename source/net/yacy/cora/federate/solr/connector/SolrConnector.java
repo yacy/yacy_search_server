@@ -23,6 +23,7 @@ package net.yacy.cora.federate.solr.connector;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.sorting.ReversibleScoreMap;
@@ -65,7 +66,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public void clear() throws IOException;
 
     /**
-     * delete an entry from solr
+     * delete an entry from solr using the url hash as document id
      * @param id the url hash of the entry
      * @throws IOException
      */
@@ -86,12 +87,20 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public void deleteByQuery(final String querystring) throws IOException;
 
     /**
-     * check if a given id exists
-     * @param id
+     * check if a given document, identified by url hash as ducument id exists
+     * @param id the url hash and document id
      * @return true if any entry in solr exists
      * @throws IOException
      */
     public boolean existsById(final String id) throws IOException;
+    
+    /**
+     * check a set of ids for existence.
+     * @param ids a collection of document ids
+     * @return a collection of a subset of the ids which exist in the index
+     * @throws IOException
+     */
+    public Set<String> existsByIds(Collection<String> ids) throws IOException;
     
     /**
      * check if a given document exists in solr

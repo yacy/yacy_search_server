@@ -1988,6 +1988,9 @@ public class FTPClient {
         String reply;
 
         while (true) {
+            if (this.clientInput == null) {
+                throw new IOException("Server has presumably shut down the connection.");
+            }
             reply = this.clientInput.readLine();
 
             // sanity check

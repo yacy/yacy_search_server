@@ -234,7 +234,7 @@ public class WorkflowProcessor<J extends WorkflowJob> {
             // wait for shutdown
             try {
                 this.executor.shutdown();
-                this.executor.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+                this.executor.awaitTermination(60, TimeUnit.SECONDS);
             } catch (final InterruptedException e) {}
         }
         Log.logInfo("serverProcessor", "queue " + this.processName + ": shutdown.");

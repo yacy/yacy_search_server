@@ -22,8 +22,10 @@ package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -318,6 +320,25 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         return false;
     }
 
+    @Override
+    public Set<String> existsByIds(Collection<String> ids) throws IOException {
+        HashSet<String> e = new HashSet<String>();
+        if (ids == null || ids.size() == 0) return e;
+        Collection<String> idsC = new HashSet<String>();
+        for (String id: ids) {
+            if (this.idCache.has(ASCII.getBytes(id))) {cacheSuccessSign(); e.add(id); continue;}
+            if (existIdFromDeleteQueue(id)) {cacheSuccessSign(); continue;}
+            if (existIdFromUpdateQueue(id)) {cacheSuccessSign(); e.add(id); continue;}
+            idsC.add(id);
+        }
+        Set<String> e1 = this.connector.existsByIds(idsC);
+        for (String id1: e1) {
+            updateIdCache(id1);
+        }
+        e.addAll(e1);
+        return e;
+    }
+    
     @Override
     public boolean existsByQuery(String solrquery) throws IOException {
         // this is actually wrong but to make it right we need to wait until all queues are flushed. But that may take very long when the queues are filled again all the time.

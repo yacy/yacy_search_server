@@ -26,7 +26,6 @@
 
 package net.yacy.search.query;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -42,7 +41,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
-import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
@@ -98,6 +96,7 @@ public final class SearchEvent {
     
     private static final int max_results_rwi = 3000;
 
+    /*
     private static long noRobinsonLocalRWISearch = 0;
     static {
         try {
@@ -105,6 +104,7 @@ public final class SearchEvent {
         } catch (ParseException e) {
         }
     }
+    */
 
     public static Log log = new Log("SEARCH");
 

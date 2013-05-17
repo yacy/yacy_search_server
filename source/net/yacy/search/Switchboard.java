@@ -1570,12 +1570,29 @@ public final class Switchboard extends serverSwitch {
         return false;
     }
 
+    /**
+     * tests if hash occurs in any database.
+     * @param hash
+     * @return if it exists, the name of the database is returned, if it not exists, null is returned
+     */
+    @Deprecated
     public HarvestProcess urlExists(final String hash) {
-        // tests if hash occurrs in any database
-        // if it exists, the name of the database is returned,
-        // if it not exists, null is returned
         if (this.index.exists(hash)) return HarvestProcess.LOADED;
         return this.crawlQueues.urlExists(ASCII.getBytes(hash));
+    }
+
+    /**
+     * tests if hashes occur in any database.
+     * @param ids a collection of url hashes
+     * @return a map from the hash id to: if it exists, the name of the database, otherwise null
+     */
+    public Map<String, HarvestProcess> urlExists(final Collection<String> ids) {
+        Set<String> e = this.index.exists(ids);
+        Map<String, HarvestProcess> m = new HashMap<String, HarvestProcess>();
+        for (String id: ids) {
+            m.put(id, e.contains(id) ? HarvestProcess.LOADED : this.crawlQueues.urlExists(ASCII.getBytes(id)));
+        }
+        return m;
     }
 
     public void urlRemove(final Segment segment, final byte[] hash) {
@@ -2768,36 +2785,25 @@ public final class Switchboard extends serverSwitch {
         final String heuristicName,
         final String[] collections) {
 
+        List<DigestURI> urls = new ArrayList<DigestURI>();
         // add the landing page to the index. should not load that again since it should be in the cache
-        if ( url != null ) {
-            try {
-                addToIndex(url, searchEvent, heuristicName, collections);
-            } catch ( final IOException e ) {
-            } catch ( final Parser.Failure e ) {
-            }
-
+        if (url != null) {
+            urls.add(url);
         }
 
         // check if some of the links match with the query
         final Map<DigestURI, String> matcher = searchEvent.query.separateMatches(links);
 
         // take the matcher and load them all
-        for ( final Map.Entry<DigestURI, String> entry : matcher.entrySet() ) {
-            try {
-                addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent, heuristicName, collections);
-            } catch ( final IOException e ) {
-            } catch ( final Parser.Failure e ) {
-            }
+        for (final Map.Entry<DigestURI, String> entry : matcher.entrySet()) {
+            urls.add(new DigestURI(entry.getKey(), (byte[]) null));
         }
 
         // take then the no-matcher and load them also
-        for ( final Map.Entry<DigestURI, String> entry : links.entrySet() ) {
-            try {
-                addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent, heuristicName, collections);
-            } catch ( final IOException e ) {
-            } catch ( final Parser.Failure e ) {
-            }
+        for (final Map.Entry<DigestURI, String> entry : links.entrySet()) {
+            urls.add(new DigestURI(entry.getKey(), (byte[]) null));
         }
+        addToIndex(urls, searchEvent, heuristicName, collections);
     }
 
     public void remove(final Collection<String> deleteIDs) {
@@ -2837,6 +2843,7 @@ public final class Switchboard extends serverSwitch {
      * @param url
      * @return null if this was ok. If this failed, return a string with a fail reason
      */
+    @SuppressWarnings("deprecation")
     public String stackUrl(CrawlProfile profile, DigestURI url) {
         
         byte[] handle = ASCII.getBytes(profile.handle());
@@ -2946,73 +2953,72 @@ public final class Switchboard extends serverSwitch {
      * @throws IOException
      * @throws Parser.Failure
      */
-    public void addToIndex(final DigestURI url, final SearchEvent searchEvent, final String heuristicName, final String[] collections)
-        throws IOException,
-        Parser.Failure {
+    public void addToIndex(final Collection<DigestURI> urls, final SearchEvent searchEvent, final String heuristicName, final String[] collections) {
+        Map<String, DigestURI> urlmap = new HashMap<String, DigestURI>();
+        for (DigestURI url: urls) urlmap.put(ASCII.String(url.hash()), url);
         if (searchEvent != null) {
-            searchEvent.addHeuristic(url.hash(), heuristicName, true);
+            for (String id: urlmap.keySet()) searchEvent.addHeuristic(ASCII.getBytes(id), heuristicName, true);
         }
-        if (this.index.exists(ASCII.String(url.hash()))) {
-            return; // don't do double-work
+        final Set<String> existing = this.index.exists(urlmap.keySet());
+        final List<Request> requests = new ArrayList<Request>();
+        for (Map.Entry<String, DigestURI> e: urlmap.entrySet()) {
+            final String urlName = e.getValue().toNormalform(true);
+            if (existing.contains(e.getKey())) {
+                this.log.logInfo("addToIndex: double " + urlName);
+                continue;
+            }
+            final Request request = this.loader.request(e.getValue(), true, true);
+            final CrawlProfile profile = this.crawler.getActive(ASCII.getBytes(request.profileHandle()));
+            final String acceptedError = this.crawlStacker.checkAcceptance(e.getValue(), profile, 0);
+            if (acceptedError != null) {
+                this.log.logWarning("addToIndex: cannot load " + urlName + ": " + acceptedError);
+                continue;
+            }
+            requests.add(request);
         }
-        final Request request = this.loader.request(url, true, true);
-        final CrawlProfile profile = this.crawler.getActive(ASCII.getBytes(request.profileHandle()));
-        final String acceptedError = this.crawlStacker.checkAcceptance(url, profile, 0);
-        final String urls = url.toNormalform(true);
-        if ( acceptedError != null ) {
-            this.log.logWarning("addToIndex: cannot load "
-                + urls
-                + ": "
-                + acceptedError);
-            return;
-        }
+        
         new Thread() {
             @Override
             public void run() {
-                Thread.currentThread().setName("Switchboard.addToIndex:" + urls);
-                try {
-                    final Response response =
-                        Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
-                    if ( response == null ) {
-                        throw new IOException("response == null");
-                    }
-                    if ( response.getContent() == null ) {
-                        throw new IOException("content == null");
-                    }
-                    if ( response.getResponseHeader() == null ) {
-                        throw new IOException("header == null");
-                    }
-                    final Document[] documents = response.parse();
-                    if ( documents != null ) {
-                        for ( final Document document : documents ) {
-                            if ( document.indexingDenied() ) {
-                                throw new Parser.Failure("indexing is denied", url);
-                            }
-                            final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib, LibraryProvider.synonyms, true);
-                            ResultImages.registerImages(url, document, true);
-                            Switchboard.this.webStructure.generateCitationReference(url, document);
-                            storeDocumentIndex(
-                                response,
-                                collections,
-                                document,
-                                condenser,
-                                searchEvent,
-                                "heuristic:" + heuristicName);
-                            Switchboard.this.log.logInfo("addToIndex fill of url "
-                                + url.toNormalform(true)
-                                + " finished");
+                for (Request request: requests) {
+                    DigestURI url = request.url();
+                    String urlName = url.toNormalform(true);
+                    Thread.currentThread().setName("Switchboard.addToIndex:" + urlName);
+                    try {
+                        final Response response = Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
+                        if (response == null) {
+                            throw new IOException("response == null");
                         }
+                        if (response.getContent() == null) {
+                            throw new IOException("content == null");
+                        }
+                        if (response.getResponseHeader() == null) {
+                            throw new IOException("header == null");
+                        }
+                        final Document[] documents = response.parse();
+                        if (documents != null) {
+                            for (final Document document: documents) {
+                                if (document.indexingDenied()) {
+                                    throw new Parser.Failure("indexing is denied", url);
+                                }
+                                final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib, LibraryProvider.synonyms, true);
+                                ResultImages.registerImages(url, document, true);
+                                Switchboard.this.webStructure.generateCitationReference(url, document);
+                                storeDocumentIndex(
+                                    response,
+                                    collections,
+                                    document,
+                                    condenser,
+                                    searchEvent,
+                                    "heuristic:" + heuristicName);
+                                Switchboard.this.log.logInfo("addToIndex fill of url " + urlName + " finished");
+                            }
+                        }
+                    } catch ( final IOException e ) {
+                        Switchboard.this.log.logWarning("addToIndex: failed loading " + urlName + ": " + e.getMessage());
+                    } catch ( final Parser.Failure e ) {
+                        Switchboard.this.log.logWarning("addToIndex: failed parsing " + urlName + ": " + e.getMessage());
                     }
-                } catch ( final IOException e ) {
-                    Switchboard.this.log.logWarning("addToIndex: failed loading "
-                        + url.toNormalform(true)
-                        + ": "
-                        + e.getMessage());
-                } catch ( final Parser.Failure e ) {
-                    Switchboard.this.log.logWarning("addToIndex: failed parsing "
-                        + url.toNormalform(true)
-                        + ": "
-                        + e.getMessage());
                 }
             }
         }.start();
@@ -3026,33 +3032,30 @@ public final class Switchboard extends serverSwitch {
      * @param url the url that shall be indexed
      * @param asglobal true adds the url to global crawl queue (for remote crawling), false to the local crawler
      */
-    public void addToCrawler(final DigestURI url, final boolean asglobal) {
-
-        if (this.index.exists(ASCII.String(url.hash()))) {
-            return; // don't do double-work
-        }
-        final Request request = this.loader.request(url, true, true);
-        final CrawlProfile profile = this.crawler.getActive(ASCII.getBytes(request.profileHandle()));
-        final String acceptedError = this.crawlStacker.checkAcceptance(url, profile, 0);
-        if (acceptedError != null) {
-            this.log.logInfo("addToCrawler: cannot load "
-                    + url.toNormalform(true)
-                    + ": "
-                    + acceptedError);
-            return;
-        }
-        final String s;
-        if (asglobal) {
-            s = this.crawlQueues.noticeURL.push(StackType.GLOBAL, request, this.robots);
-        } else {
-            s = this.crawlQueues.noticeURL.push(StackType.LOCAL, request, this.robots);
-        }
-
-        if (s != null) {
-            Switchboard.this.log.logInfo("addToCrawler: failed to add "
-                    + url.toNormalform(true)
-                    + ": "
-                    + s);
+    public void addToCrawler(final Collection<DigestURI> urls, final boolean asglobal) {
+        Map<String, DigestURI> urlmap = new HashMap<String, DigestURI>();
+        for (DigestURI url: urls) urlmap.put(ASCII.String(url.hash()), url);
+        Set<String> existingids = this.index.exists(urlmap.keySet());
+        for (Map.Entry<String, DigestURI> e: urlmap.entrySet()) {
+            if (existingids.contains(e.getKey())) continue; // double
+            DigestURI url = e.getValue();
+            final Request request = this.loader.request(url, true, true);
+            final CrawlProfile profile = this.crawler.getActive(ASCII.getBytes(request.profileHandle()));
+            final String acceptedError = this.crawlStacker.checkAcceptance(url, profile, 0);
+            if (acceptedError != null) {
+                this.log.logInfo("addToCrawler: cannot load " + url.toNormalform(true) + ": " + acceptedError);
+                return;
+            }
+            final String s;
+            if (asglobal) {
+                s = this.crawlQueues.noticeURL.push(StackType.GLOBAL, request, this.robots);
+            } else {
+                s = this.crawlQueues.noticeURL.push(StackType.LOCAL, request, this.robots);
+            }
+    
+            if (s != null) {
+                Switchboard.this.log.logInfo("addToCrawler: failed to add " + url.toNormalform(true) + ": " + s);
+            }
         }
     }
 
@@ -3413,14 +3416,16 @@ public final class Switchboard extends serverSwitch {
                         if (links.size() < 1000) { // limit to 1000 to skip large index pages
                             final Iterator<DigestURI> i = links.keySet().iterator();
                             final boolean globalcrawljob = Switchboard.this.getConfigBool("heuristic.searchresults.crawlglobal",false);
+                            Collection<DigestURI> urls = new ArrayList<DigestURI>();
                             while (i.hasNext()) {
                                 url = i.next();
                                 boolean islocal = url.getHost().contentEquals(startUrl.getHost());
                                 // add all external links or links to different page to crawler
                                 if ( !islocal ) {// || (!startUrl.getPath().endsWith(url.getPath()))) {
-                                    addToCrawler(url,globalcrawljob);
+                                    urls.add(url);
                                 }
                             }
+                            addToCrawler(urls, globalcrawljob);
                         }
                     }
                 } catch (final Throwable e) {

@@ -140,8 +140,10 @@ public class serverObjects implements Serializable, Cloneable {
 
     public List<Map.Entry<String, String>> entrySet() {
         List<Map.Entry<String, String>> set = new ArrayList<Map.Entry<String, String>>(this.map.getMap().size() * 2);
-        for (Map.Entry<String, String[]> entry: this.map.getMap().entrySet()) {
-            for (String v: entry.getValue()) set.add(new AbstractMap.SimpleEntry<String, String>(entry.getKey(), v));
+        Set<Map.Entry<String, String[]>> mset = this.map.getMap().entrySet();
+        for (Map.Entry<String, String[]> entry: mset) {
+            String[] vlist = entry.getValue();
+            for (String v: vlist) set.add(new AbstractMap.SimpleEntry<String, String>(entry.getKey(), v));
         }
         return set;
     }

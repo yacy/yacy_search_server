@@ -25,9 +25,12 @@
 package net.yacy.peers;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.storage.HandleSet;
@@ -160,8 +163,9 @@ public class Transmission {
             }
             final ReferenceContainer<WordReference> c = (remaining >= container.size()) ? container : trimContainer(container, remaining);
             // iterate through the entries in the container and check if the reference is in the repository
-            final Iterator<WordReference>  i = c.entries();
             final List<byte[]> notFoundx = new ArrayList<byte[]>();
+            Collection<String> testids = new HashSet<String>();
+            Iterator<WordReference>  i = c.entries();
             while (i.hasNext()) {
                 final WordReference e = i.next();
                 if (this.references.has(e.urlhash())) continue;
@@ -169,11 +173,17 @@ public class Transmission {
                     notFoundx.add(e.urlhash());
                     continue;
                 }
-                if (!Transmission.this.segment.fulltext().exists(ASCII.String(e.urlhash()))) {
+                testids.add(ASCII.String(e.urlhash()));
+            }
+            Set<String> existingids = Transmission.this.segment.fulltext().exists(testids);
+            i = c.entries();
+            while (i.hasNext()) {
+                final WordReference e = i.next();
+                if (existingids.contains(ASCII.String(e.urlhash()))) {
+                    this.references.put(e.urlhash());
+                } else {
                     notFoundx.add(e.urlhash());
                     this.badReferences.put(e.urlhash());
-                } else {
-                    this.references.put(e.urlhash());
                 }
             }
             // now delete all references that were not found

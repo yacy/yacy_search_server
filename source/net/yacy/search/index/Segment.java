@@ -29,6 +29,7 @@ package net.yacy.search.index;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -295,8 +296,13 @@ public class Segment {
         }
     }
 
+    @Deprecated
     public boolean exists(final String urlhash) {
         return this.fulltext.exists(urlhash);
+    }
+
+    public Set<String> exists(final Collection<String> ids) {
+        return this.fulltext.exists(ids);
     }
 
     /**

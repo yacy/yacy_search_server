@@ -28,7 +28,9 @@
 
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSMessage;
@@ -37,6 +39,7 @@ import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.RowHandleSet;
@@ -156,8 +159,8 @@ public final class transferRWI {
             final ArrayList<String> wordhashes = new ArrayList<String>();
             int received = 0;
             int blocked = 0;
-            int receivedURL = 0;
             int count = 0;
+            Set<String> testids = new HashSet<String>();
             while (it.hasNext()) {
                 serverCore.checkInterruption();
                 estring = it.next();
@@ -200,17 +203,20 @@ public final class transferRWI {
                 serverCore.checkInterruption();
 
                 // check if we need to ask for the corresponding URL
-                if (!knownURL.has(urlHash) && !unknownURL.has(urlHash))  try {
-                    if (sb.index.fulltext().exists(ASCII.String(urlHash))) {
-                        knownURL.put(urlHash);
-                    } else {
-                        unknownURL.put(urlHash);
-                    }
-                    receivedURL++;
-                } catch (final Exception ex) {
-                    sb.getLog().logWarning("transferRWI: DB-Error while trying to determine if URL with hash '" + ASCII.String(urlHash) + "' is known.", ex);
-                }
+                testids.add(ASCII.String(urlHash));
                 received++;
+            }
+            Set<String> existing = sb.index.fulltext().exists(testids);
+            for (String id: testids) {
+                try {
+                    if (existing.contains(id)) {
+                        knownURL.put(ASCII.getBytes(id));
+                    } else {
+                        unknownURL.put(ASCII.getBytes(id));
+                    }
+                } catch (SpaceExceededException e) {
+                    sb.getLog().logWarning("transferRWI: DB-Error while trying to determine if URL with hash '" + id + "' is known.", e);
+                }
             }
             sb.peers.mySeed().incRI(received);
 
@@ -227,8 +233,8 @@ public final class transferRWI {
                 final String firstHash = wordhashes.get(0);
                 final String lastHash = wordhashes.get(wordhashes.size() - 1);
                 final long avdist = (Distribution.horizontalDHTDistance(firstHash.getBytes(), ASCII.getBytes(sb.peers.mySeed().hash)) + Distribution.horizontalDHTDistance(lastHash.getBytes(), ASCII.getBytes(sb.peers.mySeed().hash))) / 2;
-                sb.getLog().logInfo("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName);
-                EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName, "", otherPeer.hash));
+                sb.getLog().logInfo("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + received+ " URLs from " + otherPeerName);
+                EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + received + " URLs from " + otherPeerName, "", otherPeer.hash));
             }
             result = "ok";
 

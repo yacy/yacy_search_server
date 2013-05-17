@@ -76,6 +76,7 @@ public class IndexControlRWIs_p {
 
     private final static String errmsg = "not possible to compute word from hash";
 
+    @SuppressWarnings("deprecation")
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
