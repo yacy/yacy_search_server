@@ -197,7 +197,7 @@ public class QueryModifier {
         String[] s0 = CommonPattern.VERTICALBAR.split(collectionDescription);
         ArrayList<String> sites = new ArrayList<String>(2);
         for (String s: s0) {
-            s = s.trim().toLowerCase();
+            s = s.trim();
             if (s.length() > 0) sites.add(s);
         }
         StringBuilder filterQuery = new StringBuilder(20);
