@@ -154,7 +154,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
 
          final String mainversion = (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1));
         String revision = matcher.group(2);
-        for(int i=revision.length();i<5;++i) revision += "0";
+        for(int i=revision.length();i<4;++i) revision += "0";
         return new String[]{mainversion, revision};
     }
 

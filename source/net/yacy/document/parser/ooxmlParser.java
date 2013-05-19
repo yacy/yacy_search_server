@@ -116,21 +116,19 @@ public class ooxmlParser extends AbstractParser implements Parser {
                 	|| entryName.startsWith("xl/worksheets/sheet")) {
 
                     // create a writer for output
-                    writer = new CharBuffer(odtParser.MAX_DOCSIZE, (int)zipEntry.getSize());
-                    try {
-	                    // extract data
-	                    final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
-	                    try {
-		                    final SAXParser saxParser = getParser();
-		                    saxParser.parse(zipFileEntryStream, new ODContentHandler(writer));
+                    writer = new CharBuffer(odtParser.MAX_DOCSIZE, (int) zipEntry.getSize());
 
-		                    // close readers and writers
-	                    } finally {
-	                    	zipFileEntryStream.close();
-	                    }
+                    // extract data
+                    final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
+                    try {
+                        final SAXParser saxParser = getParser();
+                        saxParser.parse(zipFileEntryStream, new ODContentHandler(writer));
+
+                        // close readers and writers
                     } finally {
-                    	writer.close();
+                        zipFileEntryStream.close();
                     }
+   
                 } else if (entryName.equals("docProps/core.xml")) {
                     //  meta.xml contains metadata about the document
                     final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
@@ -162,7 +160,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
 
             // create the parser document
             Document[] docs = null;
-            final byte[] contentBytes = UTF8.getBytes(writer.toString());
+            final byte[] contentBytes = (writer == null) ? null : UTF8.getBytes(writer.toString());
             docs = new Document[]{new Document(
                     location,
                     mimeType,
