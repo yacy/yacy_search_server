@@ -1,15 +1,15 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
     <head>
-        <title>YaCy '#[clientname]#': ReIndex Monitor</title>
+        <title>YaCy '#[clientname]#': Field Re-Indexing</title>
         #%env/templates/metas.template%#
     </head>
     <body id="IndexReindexMonitor">
 
         #%env/templates/header.template%#
         #%env/templates/submenuIndexControl.template%#
-        <h2>ReIndex Monitor</h2>
-        <p></p>
+        <h2>Field Re-Indexing</h2>
+        <p>In case that an index schema has changed, all documents with missing field entries can be indexed again with a reindex job.</p>
         <form action="IndexReindexMonitor_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
             <fieldset> 
                 <table>
