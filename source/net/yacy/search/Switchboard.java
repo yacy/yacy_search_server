@@ -2878,7 +2878,7 @@ public final class Switchboard extends serverSwitch {
         // get a scraper to get the title
         Document scraper;
         try {
-            scraper = this.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
+            scraper = this.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
         } catch (IOException e) {
             return "scraper cannot load URL: " + e.getMessage();
         }
@@ -2985,7 +2985,7 @@ public final class Switchboard extends serverSwitch {
                     String urlName = url.toNormalform(true);
                     Thread.currentThread().setName("Switchboard.addToIndex:" + urlName);
                     try {
-                        final Response response = Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
+                        final Response response = Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                         if (response == null) {
                             throw new IOException("response == null");
                         }
@@ -3372,7 +3372,7 @@ public final class Switchboard extends serverSwitch {
                 final Map<DigestURI, String> links;
                 searchEvent.oneFeederStarted();
                 try {
-                    links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay);
+                    links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay, 2000);
                     if ( links != null ) {
                         final Iterator<DigestURI> i = links.keySet().iterator();
                         while ( i.hasNext() ) {
@@ -3411,7 +3411,7 @@ public final class Switchboard extends serverSwitch {
                 final Map<DigestURI, String> links;
                 DigestURI url;
                 try {
-                    links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay);
+                    links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay, 2000);
                     if (links != null) {
                         if (links.size() < 1000) { // limit to 1000 to skip large index pages
                             final Iterator<DigestURI> i = links.keySet().iterator();
@@ -3476,7 +3476,7 @@ public final class Switchboard extends serverSwitch {
                 searchEvent.oneFeederStarted();
                 try {
                     final Response response =
-                        Switchboard.this.loader.load(Switchboard.this.loader.request(url, true, false), CacheStrategy.NOCACHE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay);
+                        Switchboard.this.loader.load(Switchboard.this.loader.request(url, true, false), CacheStrategy.NOCACHE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                     final byte[] resource = (response == null) ? null : response.getContent();
                     //System.out.println("BLEKKO: " + UTF8.String(resource));
                     rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);

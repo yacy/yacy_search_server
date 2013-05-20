@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeonamesLocation;
 import net.yacy.cora.geo.OpenGeoDBLocation;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.retrieval.Response;
@@ -66,7 +67,7 @@ public class DictionaryLoader_p {
         if (post.containsKey("geon0Load")) {
             // load from the net
             try {
-                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay);
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEON0.file());
                 LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON0.file(), null, -1));
@@ -108,7 +109,7 @@ public class DictionaryLoader_p {
         if (post.containsKey("geon1Load")) {
             // load from the net
             try {
-                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON1.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay);
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON1.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEON1.file());
                 LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON1.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON1.file(), null, -1));
@@ -150,7 +151,7 @@ public class DictionaryLoader_p {
         if (post.containsKey("geon2Load")) {
             // load from the net
             try {
-                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON2.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay);
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON2.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEON2.file());
                 LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON2.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON2.file(), null, 100000));
@@ -192,7 +193,7 @@ public class DictionaryLoader_p {
         if (post.containsKey("geo1Load")) {
             // load from the net
             try {
-                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEODB1.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay);
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEODB1.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEODB1.file());
                 LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEODB1.nickname);
@@ -235,7 +236,7 @@ public class DictionaryLoader_p {
         if (post.containsKey("drw0Load")) {
             // load from the net
             try {
-                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.DRW0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay);
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.DRW0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.DRW0.file());
                 LibraryProvider.activateDeReWo();
@@ -279,7 +280,7 @@ public class DictionaryLoader_p {
         if (post.containsKey("pnd0Load")) {
             // load from the net
             try {
-                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.PND0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay);
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.PND0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.PND0.file());
                 LibraryProvider.activatePND();

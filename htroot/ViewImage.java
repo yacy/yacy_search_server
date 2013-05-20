@@ -33,6 +33,7 @@ import java.net.MalformedURLException;
 import java.util.Map;
 
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -104,7 +105,7 @@ public class ViewImage {
         if (image == null) {
             byte[] resourceb = null;
             if (url != null) try {
-                resourceb = sb.loader.loadContent(sb.loader.request(url, false, true), CacheStrategy.IFEXIST, BlacklistType.SEARCH, CrawlQueues.queuedMinLoadDelay);
+                resourceb = sb.loader.loadContent(sb.loader.request(url, false, true), CacheStrategy.IFEXIST, BlacklistType.SEARCH, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
             } catch (final IOException e) {
                 Log.logFine("ViewImage", "cannot load: " + e.getMessage());
             }

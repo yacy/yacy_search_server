@@ -32,6 +32,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.kelondro.data.citation.CitationReference;
@@ -97,7 +98,7 @@ public class webstructure {
                 prop.put("references", 1);
                 net.yacy.document.Document scraper = null;
                 if (url != null) try {
-                    scraper = sb.loader.loadDocument(url, CacheStrategy.IFEXIST, null, CrawlQueues.queuedMinLoadDelay);
+                    scraper = sb.loader.loadDocument(url, CacheStrategy.IFEXIST, null, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                 } catch (final IOException e) {
                     Log.logException(e);
                 }

@@ -41,6 +41,7 @@ import java.util.Set;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.BookmarkHelper;
@@ -201,7 +202,7 @@ public class Bookmarks {
                         // try to get the bookmark from the LURL database
                         final URIMetadataNode urlentry = sb.index.fulltext().getMetadata(ASCII.getBytes(urlHash));
                         if (urlentry != null) try {
-                            final Document document = Document.mergeDocuments(urlentry.url(), null, sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay));
+                            final Document document = Document.mergeDocuments(urlentry.url(), null, sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT));
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", urlentry.url().toNormalform(false));
                             prop.putHTML("mode_title", urlentry.dc_title());

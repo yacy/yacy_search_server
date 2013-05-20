@@ -41,6 +41,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -63,7 +64,7 @@ public class OAIListFriendsLoader implements Serializable {
         listFriends.putAll(moreFriends);
         if (loader != null) for (final Map.Entry<String, File> oaiFriend: listFriends.entrySet()) {
             try {
-                loader.loadIfNotExistBackground(new DigestURI(oaiFriend.getKey()), oaiFriend.getValue(), Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay);
+                loader.loadIfNotExistBackground(new DigestURI(oaiFriend.getKey()), oaiFriend.getValue(), Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
             } catch (final MalformedURLException e) {
             }
         }
@@ -88,7 +89,7 @@ public class OAIListFriendsLoader implements Serializable {
         Map<String, String> m;
         for (final Map.Entry<String, File> oaiFriend: listFriends.entrySet()) try {
             if (!oaiFriend.getValue().exists()) {
-                final Response response = loader == null ? null : loader.load(loader.request(new DigestURI(oaiFriend.getKey()), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay);
+                final Response response = loader == null ? null : loader.load(loader.request(new DigestURI(oaiFriend.getKey()), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                 if (response != null) FileUtils.copy(response.getContent(), oaiFriend.getValue());
             }
 

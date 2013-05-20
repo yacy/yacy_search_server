@@ -33,6 +33,7 @@ import java.util.EnumMap;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
@@ -98,7 +99,7 @@ public class YMarkMetadata {
 	public Document loadDocument(final LoaderDispatcher loader) throws IOException, Failure {
 		if(this.document == null) {
 			Response response = null;
-			response = loader.load(loader.request(this.uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay);
+			response = loader.load(loader.request(this.uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
 			this.document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
 		}
 		return this.document;

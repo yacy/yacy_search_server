@@ -48,6 +48,7 @@ import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.LookAheadIterator;
@@ -694,7 +695,7 @@ public class Segment {
 
         try {
             // parse the resource
-            final Document document = Document.mergeDocuments(url, null, loader.loadDocuments(loader.request(url, true, false), cacheStrategy, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay));
+            final Document document = Document.mergeDocuments(url, null, loader.loadDocuments(loader.request(url, true, false), cacheStrategy, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT));
             if (document == null) {
                 // delete just the url entry
                 fulltext().remove(urlhash);

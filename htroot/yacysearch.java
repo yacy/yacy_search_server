@@ -49,6 +49,7 @@ import net.yacy.cora.federate.opensearch.OpenSearchConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -569,7 +570,7 @@ public class yacysearch {
                             sb.loader.loadDocuments(
                                 sb.loader.request(urlentry.url(), true, false),
                                 CacheStrategy.IFEXIST,
-                                Integer.MAX_VALUE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay);
+                                Integer.MAX_VALUE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                     } catch ( final IOException e ) {
                     } catch ( final Parser.Failure e ) {
                     }

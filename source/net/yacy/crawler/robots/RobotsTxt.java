@@ -165,7 +165,7 @@ public class RobotsTxt {
                     if (log.isDebugEnabled()) log.debug("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
                     Request request = new Request(robotsURL, null);
                     try {
-                        response = this.loader.load(request, CacheStrategy.NOCACHE, null, 0);
+                        response = this.loader.load(request, CacheStrategy.NOCACHE, null, 0, 3000);
                     } catch (Throwable e) {
                         log.info("Trying to download the robots.txt file from URL '" + robotsURL + "' failed - " + e.getMessage());
                         response = null;
@@ -221,7 +221,7 @@ public class RobotsTxt {
                         if (log.isDebugEnabled()) log.debug("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
                         Request request = new Request(robotsURL, null);
                         try {
-                            response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE, null, 0);
+                            response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE, null, 0, 3000);
                         } catch (IOException e) {
                             response = null;
                         }

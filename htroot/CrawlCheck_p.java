@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.retrieval.Request;
@@ -99,7 +100,7 @@ public class CrawlCheck_p {
                     // try to load the url
                     if (robotsAllowed) try {
                         Request request = sb.loader.request(u, true, false);
-                        final Response response = sb.loader.load(request, CacheStrategy.NOCACHE, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
+                        final Response response = sb.loader.load(request, CacheStrategy.NOCACHE, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                         if (response == null) {
                             prop.put("table_list_" + row + "_access", "no response");
                         } else {

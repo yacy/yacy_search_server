@@ -132,9 +132,9 @@ public final class LoaderDispatcher {
                     0);
     }
 
-    public void load(final DigestURI url, final CacheStrategy cacheStratgy, final int maxFileSize, final File targetFile, BlacklistType blacklistType, final long minDelay) throws IOException {
+    public void load(final DigestURI url, final CacheStrategy cacheStratgy, final int maxFileSize, final File targetFile, BlacklistType blacklistType, final long minDelay, int timeout) throws IOException {
 
-        final byte[] b = load(request(url, false, true), cacheStratgy, maxFileSize, blacklistType, minDelay).getContent();
+        final byte[] b = load(request(url, false, true), cacheStratgy, maxFileSize, blacklistType, minDelay, timeout).getContent();
         if (b == null) throw new IOException("load == null");
         final File tmp = new File(targetFile.getAbsolutePath() + ".tmp");
 
@@ -145,11 +145,11 @@ public final class LoaderDispatcher {
         tmp.renameTo(targetFile);
     }
 
-    public Response load(final Request request, final CacheStrategy cacheStrategy, final BlacklistType blacklistType, final long minDelay) throws IOException {
-    	return load(request, cacheStrategy, protocolMaxFileSize(request.url()), blacklistType, minDelay);
+    public Response load(final Request request, final CacheStrategy cacheStrategy, final BlacklistType blacklistType, final long minDelay, int timeout) throws IOException {
+    	return load(request, cacheStrategy, protocolMaxFileSize(request.url()), blacklistType, minDelay, timeout);
     }
 
-    public Response load(final Request request, final CacheStrategy cacheStrategy, final int maxFileSize, final BlacklistType blacklistType, final long minDelay) throws IOException {
+    public Response load(final Request request, final CacheStrategy cacheStrategy, final int maxFileSize, final BlacklistType blacklistType, final long minDelay, int timeout) throws IOException {
         Semaphore check = this.loaderSteering.get(request.url());
         if (check != null) {
             // a loading process may be going on for that url
@@ -160,7 +160,7 @@ public final class LoaderDispatcher {
 
         this.loaderSteering.put(request.url(), new Semaphore(0));
         try {
-            final Response response = loadInternal(request, cacheStrategy, maxFileSize, blacklistType, minDelay);
+            final Response response = loadInternal(request, cacheStrategy, maxFileSize, blacklistType, minDelay, timeout);
             check = this.loaderSteering.remove(request.url());
             if (check != null) check.release(1000);
             return response;
@@ -180,7 +180,7 @@ public final class LoaderDispatcher {
      * @return the loaded entity in a Response object
      * @throws IOException
      */
-    private Response loadInternal(final Request request, CacheStrategy cacheStrategy, final int maxFileSize, final BlacklistType blacklistType, final long minDelay) throws IOException {
+    private Response loadInternal(final Request request, CacheStrategy cacheStrategy, final int maxFileSize, final BlacklistType blacklistType, final long minDelay, int timeout) throws IOException {
         // get the protocol of the next URL
         final DigestURI url = request.url();
         if (url.isFile() || url.isSMB()) cacheStrategy = CacheStrategy.NOCACHE; // load just from the file system
@@ -280,7 +280,7 @@ public final class LoaderDispatcher {
         // load resource from the internet
         Response response = null;
         if (protocol.equals("http") || protocol.equals("https")) {
-            response = this.httpLoader.load(request, maxFileSize, blacklistType);
+            response = this.httpLoader.load(request, maxFileSize, blacklistType, timeout);
         } else if (protocol.equals("ftp")) {
             response = this.ftpLoader.load(request, true);
         } else if (protocol.equals("smb")) {
@@ -335,19 +335,19 @@ public final class LoaderDispatcher {
      * @return the content as {@link byte[]}
      * @throws IOException
      */
-    public byte[] loadContent(final Request request, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final long minDelay) throws IOException {
+    public byte[] loadContent(final Request request, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final long minDelay, int timeout) throws IOException {
         // try to download the resource using the loader
-        final Response entry = load(request, cacheStrategy, blacklistType, minDelay);
+        final Response entry = load(request, cacheStrategy, blacklistType, minDelay, timeout);
         if (entry == null) return null; // not found in web
 
         // read resource body (if it is there)
         return entry.getContent();
     }
 
-    public Document[] loadDocuments(final Request request, final CacheStrategy cacheStrategy, final int maxFileSize, BlacklistType blacklistType, final long minDelay) throws IOException, Parser.Failure {
+    public Document[] loadDocuments(final Request request, final CacheStrategy cacheStrategy, final int maxFileSize, BlacklistType blacklistType, final long minDelay, int timeout) throws IOException, Parser.Failure {
 
         // load resource
-        final Response response = load(request, cacheStrategy, maxFileSize, blacklistType, minDelay);
+        final Response response = load(request, cacheStrategy, maxFileSize, blacklistType, minDelay, timeout);
         final DigestURI url = request.url();
         if (response == null) throw new IOException("no Response for url " + url);
 
@@ -358,10 +358,10 @@ public final class LoaderDispatcher {
         return response.parse();
     }
 
-    public Document loadDocument(final DigestURI location, final CacheStrategy cachePolicy, BlacklistType blacklistType, final long minDelay) throws IOException {
+    public Document loadDocument(final DigestURI location, final CacheStrategy cachePolicy, BlacklistType blacklistType, final long minDelay, int timeout) throws IOException {
         // load resource
         Request request = request(location, true, false);
-        final Response response = this.load(request, cachePolicy, blacklistType, minDelay);
+        final Response response = this.load(request, cachePolicy, blacklistType, minDelay, timeout);
         final DigestURI url = request.url();
         if (response == null) throw new IOException("no Response for url " + url);
 
@@ -384,8 +384,8 @@ public final class LoaderDispatcher {
      * @return a map from URLs to the anchor texts of the urls
      * @throws IOException
      */
-    public final Map<DigestURI, String> loadLinks(final DigestURI url, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final long minDelay) throws IOException {
-        final Response response = load(request(url, true, false), cacheStrategy, Integer.MAX_VALUE, blacklistType, minDelay);
+    public final Map<DigestURI, String> loadLinks(final DigestURI url, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final long minDelay, int timeout) throws IOException {
+        final Response response = load(request(url, true, false), cacheStrategy, Integer.MAX_VALUE, blacklistType, minDelay, timeout);
         if (response == null) throw new IOException("response == null");
         final ResponseHeader responseHeader = response.getResponseHeader();
         if (response.getContent() == null) throw new IOException("resource == null");
@@ -414,12 +414,12 @@ public final class LoaderDispatcher {
         }
     }
 
-    public void loadIfNotExistBackground(final DigestURI url, final File cache, final int maxFileSize, BlacklistType blacklistType, final long minDelay) {
-        new Loader(url, cache, maxFileSize, CacheStrategy.IFEXIST, blacklistType, minDelay).start();
+    public void loadIfNotExistBackground(final DigestURI url, final File cache, final int maxFileSize, BlacklistType blacklistType, final long minDelay, final int timeout) {
+        new Loader(url, cache, maxFileSize, CacheStrategy.IFEXIST, blacklistType, minDelay, timeout).start();
     }
 
-    public void loadIfNotExistBackground(final DigestURI url, final int maxFileSize, BlacklistType blacklistType, final long minDelay) {
-        new Loader(url, null, maxFileSize, CacheStrategy.IFEXIST, blacklistType, minDelay).start();
+    public void loadIfNotExistBackground(final DigestURI url, final int maxFileSize, BlacklistType blacklistType, final long minDelay, int timeout) {
+        new Loader(url, null, maxFileSize, CacheStrategy.IFEXIST, blacklistType, minDelay, timeout).start();
     }
 
     private class Loader extends Thread {
@@ -430,14 +430,16 @@ public final class LoaderDispatcher {
         private final CacheStrategy cacheStrategy;
         private final BlacklistType blacklistType;
         private final long minDelay;
+        private final int timeout;
 
-        public Loader(final DigestURI url, final File cache, final int maxFileSize, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final long minDelay) {
+        public Loader(final DigestURI url, final File cache, final int maxFileSize, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final long minDelay, final int timeout) {
             this.url = url;
             this.cache = cache;
             this.maxFileSize = maxFileSize;
             this.cacheStrategy = cacheStrategy;
             this.blacklistType = blacklistType;
             this.minDelay = minDelay;
+            this.timeout = timeout;
         }
 
         @Override
@@ -445,7 +447,7 @@ public final class LoaderDispatcher {
             if (this.cache != null && this.cache.exists()) return;
             try {
                 // load from the net
-                final Response response = load(request(this.url, false, true), this.cacheStrategy, this.maxFileSize, this.blacklistType, this.minDelay);
+                final Response response = load(request(this.url, false, true), this.cacheStrategy, this.maxFileSize, this.blacklistType, this.minDelay, this.timeout);
                 final byte[] b = response.getContent();
                 if (this.cache != null) FileUtils.copy(b, this.cache);
             } catch (final MalformedURLException e) {} catch (final IOException e) {}

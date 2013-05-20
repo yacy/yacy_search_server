@@ -204,7 +204,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                     final Request request = loader == null ? null : loader.request(url, true, reindexing);
                     Response response;
                     try {
-                        response = loader == null || request == null ? null : loader.load(request, CacheStrategy.CACHEONLY, BlacklistType.SEARCH, snippetMinLoadDelay);
+                        response = loader == null || request == null ? null : loader.load(request, CacheStrategy.CACHEONLY, BlacklistType.SEARCH, snippetMinLoadDelay, 3000);
                     } catch (IOException e1) {
                         response = null;
                     }
@@ -258,7 +258,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             // try to load the resource from the cache
             Response response = null;
             try {
-                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), (url.isFile() || url.isSMB()) ? CacheStrategy.NOCACHE : (cacheStrategy == null ? CacheStrategy.CACHEONLY : cacheStrategy), BlacklistType.SEARCH, snippetMinLoadDelay);
+                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), (url.isFile() || url.isSMB()) ? CacheStrategy.NOCACHE : (cacheStrategy == null ? CacheStrategy.CACHEONLY : cacheStrategy), BlacklistType.SEARCH, snippetMinLoadDelay, 3000);
             } catch (IOException e) {
                 response = null;
             }

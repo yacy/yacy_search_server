@@ -36,6 +36,7 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.SpaceExceededException;
@@ -266,7 +267,7 @@ public class Load_RSS_p {
         RSSReader rss = null;
         if (url != null) try {
             prop.put("url", url.toNormalform(true));
-            final Response response = sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
+            final Response response = sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
             final byte[] resource = response == null ? null : response.getContent();
             rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
         } catch (final IOException e) {

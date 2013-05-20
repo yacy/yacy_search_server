@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -67,7 +68,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			Log.logWarning(YMarkTables.BOOKMARKS_LOG, "loadDocument failed due to malformed url: "+url);
 			return null;
 		}
-		response = loader.load(loader.request(uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay);
+		response = loader.load(loader.request(uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
 		try {
 			return Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
 		} catch (final Failure e) {

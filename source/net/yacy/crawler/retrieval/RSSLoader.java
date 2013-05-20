@@ -39,6 +39,7 @@ import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ComparableARC;
 import net.yacy.cora.util.SpaceExceededException;
@@ -70,7 +71,7 @@ public class RSSLoader extends Thread {
     public void run() {
         RSSReader rss = null;
         try {
-            final Response response = this.sb.loader.load(this.sb.loader.request(this.urlf, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
+            final Response response = this.sb.loader.load(this.sb.loader.request(this.urlf, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
             final byte[] resource = response == null ? null : response.getContent();
             rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
         } catch (final MalformedURLException e) {

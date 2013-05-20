@@ -40,6 +40,7 @@ import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.cora.util.SpaceExceededException;
@@ -142,7 +143,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
 
         Document document;
         try {
-            document = Document.mergeDocuments(url, null, Switchboard.getSwitchboard().loader.loadDocuments(Switchboard.getSwitchboard().loader.request(url, false, reindexing), cacheStrategy, Integer.MAX_VALUE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay));
+            document = Document.mergeDocuments(url, null, Switchboard.getSwitchboard().loader.loadDocuments(Switchboard.getSwitchboard().loader.request(url, false, reindexing), cacheStrategy, Integer.MAX_VALUE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT));
         } catch (final IOException e) {
             Log.logFine("snippet fetch", "load error: " + e.getMessage());
             return new ArrayList<MediaSnippet>();

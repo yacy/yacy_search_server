@@ -37,6 +37,7 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.CrawlProfile;
@@ -280,7 +281,7 @@ public class Crawler_p {
                         // download document
                         Document scraper;
                         try {
-                            scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
+                            scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                             // get links and generate filter
                             for (DigestURI u: scraper.getAnchors().keySet()) {
                                 newRootURLs.add(u);

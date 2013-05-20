@@ -421,40 +421,40 @@ public class Balancer {
     	long sleeptime = 0;
     	Request crawlEntry = null;
     	CrawlProfile profileEntry = null;
-    	synchronized (this) {
-    	    byte[] failhash = null;
-    		while (!this.urlFileIndex.isEmpty()) {
-    		    byte[] nexthash = getbest(robots);
+	    byte[] failhash = null;
+		while (!this.urlFileIndex.isEmpty()) {
+		    byte[] nexthash = getbest(robots);
+	        synchronized (this) {
     		    if (nexthash == null) return null;
-
-		        Row.Entry rowEntry = (nexthash == null) ? null : this.urlFileIndex.remove(nexthash);
-		        if (rowEntry == null) continue;
-		        
+    
+    	        Row.Entry rowEntry = (nexthash == null) ? null : this.urlFileIndex.remove(nexthash);
+    	        if (rowEntry == null) continue;
+    	        
                 crawlEntry = new Request(rowEntry);
                 //Log.logInfo("Balancer", "fetched next url: " + crawlEntry.url().toNormalform(true, false));
-
-		        // check blacklist (again) because the user may have created blacklist entries after the queue has been filled
-		        if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, crawlEntry.url())) {
-		            Log.logFine("CRAWLER", "URL '" + crawlEntry.url() + "' is in blacklist.");
-		            continue;
-		        }
-
-		        // at this point we must check if the crawlEntry has relevance because the crawl profile still exists
-		        // if not: return null. A calling method must handle the null value and try again
-		        profileEntry = cs.getActive(UTF8.getBytes(crawlEntry.profileHandle()));
-		        if (profileEntry == null) {
-		        	Log.logWarning("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
-		        	continue;
-		        }
-		        // depending on the caching policy we need sleep time to avoid DoS-like situations
-		        sleeptime = getDomainSleepTime(robots, profileEntry, crawlEntry.url());
-
-		        assert Base64Order.enhancedCoder.equal(nexthash, rowEntry.getPrimaryKeyBytes()) : "result = " + ASCII.String(nexthash) + ", rowEntry.getPrimaryKeyBytes() = " + ASCII.String(rowEntry.getPrimaryKeyBytes());
-		        assert Base64Order.enhancedCoder.equal(nexthash, crawlEntry.url().hash()) : "result = " + ASCII.String(nexthash) + ", crawlEntry.url().hash() = " + ASCII.String(crawlEntry.url().hash());
-
-		        if (failhash != null && Base64Order.enhancedCoder.equal(failhash, nexthash)) break; // prevent endless loops
-		        break;
-	    	}
+    
+    	        // check blacklist (again) because the user may have created blacklist entries after the queue has been filled
+    	        if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, crawlEntry.url())) {
+    	            Log.logFine("CRAWLER", "URL '" + crawlEntry.url() + "' is in blacklist.");
+    	            continue;
+    	        }
+    
+    	        // at this point we must check if the crawlEntry has relevance because the crawl profile still exists
+    	        // if not: return null. A calling method must handle the null value and try again
+    	        profileEntry = cs.getActive(UTF8.getBytes(crawlEntry.profileHandle()));
+    	        if (profileEntry == null) {
+    	        	Log.logWarning("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
+    	        	continue;
+    	        }
+    	        // depending on the caching policy we need sleep time to avoid DoS-like situations
+    	        sleeptime = getDomainSleepTime(robots, profileEntry, crawlEntry.url());
+    
+    	        assert Base64Order.enhancedCoder.equal(nexthash, rowEntry.getPrimaryKeyBytes()) : "result = " + ASCII.String(nexthash) + ", rowEntry.getPrimaryKeyBytes() = " + ASCII.String(rowEntry.getPrimaryKeyBytes());
+    	        assert Base64Order.enhancedCoder.equal(nexthash, crawlEntry.url().hash()) : "result = " + ASCII.String(nexthash) + ", crawlEntry.url().hash() = " + ASCII.String(crawlEntry.url().hash());
+    
+    	        if (failhash != null && Base64Order.enhancedCoder.equal(failhash, nexthash)) break; // prevent endless loops
+    	        break;
+	        }
     	}
     	if (crawlEntry == null) return null;
 

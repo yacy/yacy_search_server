@@ -41,6 +41,7 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.NoticedURL.StackType;
@@ -653,7 +654,7 @@ public class CrawlQueues {
                     try {
                         this.request.setStatus("loading", WorkflowJob.STATUS_RUNNING);
                         final CrawlProfile e = CrawlQueues.this.sb.crawler.getActive(UTF8.getBytes(this.request.profileHandle()));
-                        final Response response = CrawlQueues.this.sb.loader.load(this.request, e == null ? CacheStrategy.IFEXIST : e.cacheStrategy(), BlacklistType.CRAWLER, queuedMinLoadDelay);
+                        final Response response = CrawlQueues.this.sb.loader.load(this.request, e == null ? CacheStrategy.IFEXIST : e.cacheStrategy(), BlacklistType.CRAWLER, queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                         if (response == null) {
                             this.request.setStatus("error", WorkflowJob.STATUS_FINISHED);
                             if (CrawlQueues.this.log.isFine()) {

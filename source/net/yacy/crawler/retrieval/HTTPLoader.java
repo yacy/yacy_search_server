@@ -70,15 +70,15 @@ public final class HTTPLoader {
         this.socketTimeout = (int) sb.getConfigLong("crawler.clientTimeout", 30000);
     }
 
-    public Response load(final Request entry, final int maxFileSize, final BlacklistType blacklistType) throws IOException {
+    public Response load(final Request entry, final int maxFileSize, final BlacklistType blacklistType, int timeout) throws IOException {
         Latency.updateBeforeLoad(entry.url());
         final long start = System.currentTimeMillis();
-        final Response doc = load(entry, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize, blacklistType);
+        final Response doc = load(entry, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize, blacklistType, timeout);
         Latency.updateAfterLoad(entry.url(), System.currentTimeMillis() - start);
         return doc;
     }
 
-    private Response load(final Request request, final int retryCount, final int maxFileSize, final BlacklistType blacklistType) throws IOException {
+    private Response load(final Request request, final int retryCount, final int maxFileSize, final BlacklistType blacklistType, int timeout) throws IOException {
 
         byte[] myHash = ASCII.getBytes(this.sb.peers.mySeed().hash);
 
@@ -127,7 +127,7 @@ public final class HTTPLoader {
         requestHeader.put(HeaderFramework.ACCEPT_ENCODING, this.sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
 
         // HTTP-Client
-        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
+        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
         client.setRedirecting(false); // we want to handle redirection ourselves, so we don't index pages twice
         client.setTimout(this.socketTimeout);
         client.setHeader(requestHeader.entrySet());
@@ -180,7 +180,7 @@ public final class HTTPLoader {
 
                 // retry crawling with new url
                 request.redirectURL(redirectionUrl);
-                return load(request, retryCount - 1, maxFileSize, blacklistType);
+                return load(request, retryCount - 1, maxFileSize, blacklistType, timeout);
     	    }
             // we don't want to follow redirects
             this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);

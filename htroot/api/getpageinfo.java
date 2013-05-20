@@ -34,6 +34,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.robots.RobotsTxtEntry;
@@ -96,7 +97,7 @@ public class getpageinfo {
                 }
                 net.yacy.document.Document scraper = null;
                 if (u != null) try {
-                    scraper = sb.loader.loadDocument(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay);
+                    scraper = sb.loader.loadDocument(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                 } catch (final IOException e) {
                     Log.logException(e);
                     // bad things are possible, i.e. that the Server responds with "403 Bad Behavior"
