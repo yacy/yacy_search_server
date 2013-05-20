@@ -183,7 +183,7 @@ public class Crawler_p {
                     try {
                         DigestURI crawlingStartURL = new DigestURI(crawlingStart);
                         rootURLs.add(crawlingStartURL);
-                        crawlName += crawlingStartURL.getHost() + ',';
+                        crawlName += ((crawlingStartURL.getHost() == null) ? crawlingStartURL.toNormalform(true) : crawlingStartURL.getHost()) + ',';
                         if (crawlingStartURL != null && (crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
                         
                     } catch (MalformedURLException e) {
