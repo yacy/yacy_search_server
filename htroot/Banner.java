@@ -73,7 +73,8 @@ public class Banner {
                 env.getConfig(
                         SwitchboardConstants.NETWORK_NAME,
                         "unspecified").toUpperCase();
-     // the '+ 1': the own peer is not included in sizeConnected()
+        
+        // the '+ 1': the own peer is not included in sizeConnected()
         final int peers = sb.peers.sizeConnected() + 1;
         long nlinks = sb.peers.countActiveURL();
         long nwords = sb.peers.countActiveRWI();
@@ -117,7 +118,7 @@ public class Banner {
                         nqph, nppm);
 
         if (!net.yacy.peers.graphics.Banner.logoIsLoaded()) {
-         // do not write a cache to disc; keep in RAM
+            // do not write a cache to disc; keep in RAM
             ImageIO.setUseCache(false);
             final BufferedImage logo = ImageIO.read(new File(pathToImage));
             return net.yacy.peers.graphics.Banner.getBannerPicture(

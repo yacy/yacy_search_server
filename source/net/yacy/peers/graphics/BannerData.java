@@ -4,9 +4,9 @@ public class BannerData {
 
     private final int width;
     private final int height;
-    private final String bgcolor;
-    private final String textcolor;
-    private final String bordercolor;
+    private final long bgcolor;
+    private final long textcolor;
+    private final long bordercolor;
     private final String name;
     private final long links;
     private final long words;
@@ -39,9 +39,13 @@ public class BannerData {
             ) {
         this.width = width;
         this.height = height;
-        this.bgcolor = bgcolor;
-        this.textcolor = textcolor;
-        this.bordercolor = bordercolor;
+        try {
+        this.bgcolor = Long.parseLong(bgcolor, 16);
+        this.textcolor = Long.parseLong(textcolor, 16);
+        this.bordercolor = Long.parseLong(bordercolor, 16);
+        } catch (final NumberFormatException ex) {
+            throw new IllegalArgumentException("Invalid color definition.", ex);
+        }
         this.name = name;
         this.links = links;
         this.words = words;
@@ -63,15 +67,15 @@ public class BannerData {
         return height;
     }
 
-    public final String getBgcolor() {
+    public final long getBgcolor() {
         return bgcolor;
     }
 
-    public final String getTextcolor() {
+    public final long getTextcolor() {
         return textcolor;
     }
 
-    public final String getBordercolor() {
+    public final long getBordercolor() {
         return bordercolor;
     }
 
