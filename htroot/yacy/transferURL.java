@@ -145,20 +145,22 @@ public final class transferURL {
                 lEm.put(ASCII.String(lEntry.hash()), lEntry);
             }
             
-            Set<String> nondoubles = sb.index.exists(lEm.keySet());
-            doublecheck += (lEm.size() - nondoubles.size());
-            for (String id: nondoubles) {
-                lEntry = lEm.get(id);
+            Set<String> doubles = sb.index.exists(lEm.keySet());
+            doublecheck = doubles.size();
+            for (String id : lEm.keySet()) {
+                if (!doubles.contains(id)) {
+                    lEntry = lEm.get(id);
 
-                // write entry to database
-                if (Network.log.isFine()) Network.log.logFine("Accepting URL from peer " + otherPeerName + ": " + lEntry.url().toNormalform(true));
-                try {
-                    sb.index.fulltext().putMetadataLater(lEntry);
-                    ResultURLs.stack(ASCII.String(lEntry.url().hash()), lEntry.url().getHost(), iam.getBytes(), iam.getBytes(), EventOrigin.DHT_TRANSFER);
-                    if (Network.log.isFine()) Network.log.logFine("transferURL: received URL '" + lEntry.url().toNormalform(false) + "' from peer " + otherPeerName);
-                    received++;
-                } catch (final IOException e) {
-                    Log.logException(e);
+                    // write entry to database
+                    if (Network.log.isFine()) Network.log.logFine("Accepting URL from peer " + otherPeerName + ": " + lEntry.url().toNormalform(true));
+                    try {
+                        sb.index.fulltext().putMetadataLater(lEntry);
+                        ResultURLs.stack(ASCII.String(lEntry.url().hash()), lEntry.url().getHost(), iam.getBytes(), iam.getBytes(), EventOrigin.DHT_TRANSFER);
+                        if (Network.log.isFine()) Network.log.logFine("transferURL: received URL '" + lEntry.url().toNormalform(false) + "' from peer " + otherPeerName);
+                        received++;
+                    } catch (final IOException e) {
+                        Log.logException(e);
+                    }
                 }
             }
 
