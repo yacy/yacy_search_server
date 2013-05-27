@@ -33,6 +33,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.blob.Tables;
+import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -154,6 +155,28 @@ public class Table_API_p {
                         Log.logException(e);
                     }
                 }
+            }
+        }
+        
+        if (post != null && !post.get("deleteold", "").isEmpty()) {
+            int days = post.getInt("deleteoldtime", 365);
+            try {
+                Iterator<Row> ri = sb.tables.iterator(WorkTables.TABLE_API_NAME);
+                Row row;
+                Date now = new Date();
+                Date limit = new Date(now.getTime() - 1000L * 60L * 60L * 24L * days);
+                List<byte[]> pkl = new ArrayList<byte[]>();
+                while (ri.hasNext()) {
+                    row = ri.next();
+                    Date d = row.get(WorkTables.TABLE_API_COL_DATE_RECORDING, now);
+                    if (d.before(limit)) {
+                        pkl.add(row.getPK());
+                    }
+                }
+                for (byte[] pk: pkl) {
+                    sb.tables.delete(WorkTables.TABLE_API_NAME, pk);
+                }
+            } catch (IOException e1) {
             }
         }
 
