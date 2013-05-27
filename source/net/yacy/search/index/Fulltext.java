@@ -711,6 +711,12 @@ public final class Fulltext {
         return false;
     }
     
+    /**
+     * Multiple-test for existing url hashes in the search index.
+     * All given ids are tested and a subset of the given ids are returned.
+     * @param ids
+     * @return a set of ids which exist in the database
+     */
     public Set<String> exists(Collection<String> ids) {
         HashSet<String> e = new HashSet<String>();
         if (ids == null || ids.size() == 0) return e;

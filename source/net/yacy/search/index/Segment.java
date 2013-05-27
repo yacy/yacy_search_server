@@ -302,6 +302,12 @@ public class Segment {
         return this.fulltext.exists(urlhash);
     }
 
+    /**
+     * Multiple-test for existing url hashes in the search index.
+     * All given ids are tested and a subset of the given ids are returned.
+     * @param ids
+     * @return a set of ids which exist in the database
+     */
     public Set<String> exists(final Collection<String> ids) {
         return this.fulltext.exists(ids);
     }
