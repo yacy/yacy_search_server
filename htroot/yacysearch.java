@@ -142,12 +142,18 @@ public class yacysearch {
         final boolean rss = EXT.equals("rss");
         final boolean json = EXT.equals("json");
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put(
-            "promoteSearchPageGreeting.homepage",
-            sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
-        prop.put(
-            "promoteSearchPageGreeting.smallImage",
-            sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+        prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
+        prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+        
+        // adding some additional properties needed for the rss feed
+        String hostName = header.get("Host", Domains.LOCALHOST);
+        if ( hostName.indexOf(':', 0) == -1 ) {
+            hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
+        }
+        prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
+        prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
+        prop.put("thisaddress", hostName);
+        
         if ( post == null || indexSegment == null || env == null || !searchAllowed ) {
             // we create empty entries for template strings
             prop.put("searchagain", "0");
@@ -916,13 +922,6 @@ public class yacysearch {
             prop.put("cat", "href");
             prop.put("depth", "0");
 
-            // adding some additional properties needed for the rss feed
-            String hostName = header.get("Host", Domains.LOCALHOST);
-            if ( hostName.indexOf(':', 0) == -1 ) {
-                hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
-            }
-            prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
-            prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
         }
 
         prop.put("searchagain", global ? "1" : "0");
