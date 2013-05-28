@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -176,7 +177,22 @@ public class Table_API_p {
                 for (byte[] pk: pkl) {
                     sb.tables.delete(WorkTables.TABLE_API_NAME, pk);
                 }
-            } catch (IOException e1) {
+                
+                // store this call as api call; clean the call a bit before
+                Iterator<Entry<String, String[]>> ei = post.getSolrParams().getMap().entrySet().iterator();
+                Entry<String, String[]> entry;
+                while (ei.hasNext()) {
+                    entry = ei.next();
+                    if (entry.getKey().startsWith("event_select")) {
+                        ei.remove();
+                    }
+                    if (entry.getKey().startsWith("repeat_select")) {
+                        ei.remove();
+                    }
+                }
+                sb.tables.recordAPICall(post, "Table_API_p.html", WorkTables.TABLE_API_TYPE_STEERING, "delete API calls older than " + days + " days");
+            } catch (IOException e) {
+                Log.logException(e);
             }
         }
 
