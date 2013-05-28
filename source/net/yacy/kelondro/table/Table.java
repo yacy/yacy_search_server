@@ -125,14 +125,17 @@ public class Table implements Index, Iterable<Row.Entry> {
             final int  records = Math.max(fileSize, initialSpace);
             final long neededRAM4table = 200L * 1024L * 1024L + records * (this.taildef.objectsize + rowdef.primaryKeyLength + 4L) * 3L / 2L;
             this.table = null;
+            
             try {
                 this.table = ((exceed134217727 || neededRAM4table < maxarraylength) &&
-            	    	      useTailCache && MemoryControl.request(neededRAM4table, true)) ? new RowSet(this.taildef, records) : null;
+            	    	      useTailCache && MemoryControl.available() > 600L * 1024L * 1024L &&
+            	    	      MemoryControl.request(neededRAM4table, true)) ? new RowSet(this.taildef, records) : null;
             } catch (SpaceExceededException e) {
             	this.table = null;
             } catch (Throwable e) {
             	this.table = null;
             }
+            
             Log.logInfo("TABLE", "initialization of " + tablefile.getName() + ". table copy: " + ((this.table == null) ? "no" : "yes") + ", available RAM: " + (MemoryControl.available() / 1024L / 1024L) + "MB, needed: " + (neededRAM4table / 1024L / 1024L) + "MB, allocating space for " + records + " entries");
             final long neededRAM4index = 100L * 1024L * 1024L + records * (rowdef.primaryKeyLength + 4L) * 3L / 2L;
             if (records > 0 && !MemoryControl.request(neededRAM4index, true)) {
