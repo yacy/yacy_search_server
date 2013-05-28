@@ -169,7 +169,7 @@ public class Dispatcher {
 
         final ArrayList<ReferenceContainer<WordReference>> containers = new ArrayList<ReferenceContainer<WordReference>>(maxContainerCount);
 
-        final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = this.segment.termIndex().referenceContainerIterator(hash, true, true, ram); // very important that rotation is true here
+        final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = this.segment.termIndex() == null ? new ArrayList<ReferenceContainer<WordReference>>().iterator() : this.segment.termIndex().referenceContainerIterator(hash, true, true, ram); // very important that rotation is true here
         ReferenceContainer<WordReference> container;
         int refcount = 0;
 
@@ -201,7 +201,7 @@ public class Dispatcher {
                 it = c.entries();
                 while (it.hasNext()) try { urlHashes.put(it.next().urlhash()); } catch (final SpaceExceededException e) { Log.logException(e); }
                 if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + ASCII.String(c.getTermHash()) + "'");
-                if (!urlHashes.isEmpty()) this.segment.termIndex().remove(c.getTermHash(), urlHashes);
+                if (this.segment.termIndex() != null && !urlHashes.isEmpty()) this.segment.termIndex().remove(c.getTermHash(), urlHashes);
             }
             rc = containers;
         } else {
@@ -209,7 +209,7 @@ public class Dispatcher {
             // but to avoid race conditions return the results from the deletes
             rc = new ArrayList<ReferenceContainer<WordReference>>(containers.size());
             for (final ReferenceContainer<WordReference> c: containers) {
-                container = this.segment.termIndex().remove(c.getTermHash()); // be aware this might be null!
+                container = this.segment.termIndex() == null ? null : this.segment.termIndex().remove(c.getTermHash()); // be aware this might be null!
                 if (container != null && !container.isEmpty()) {
                     if (this.log.isFine()) this.log.logFine("selected " + container.size() + " urls for word '" + ASCII.String(c.getTermHash()) + "'");
                     rc.add(container);

@@ -1026,8 +1026,10 @@ public final class SearchEvent {
             // check index-of constraint
             if ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_indexof)) && (!(pagetitle.startsWith("index of")))) {
                 final Iterator<byte[]> wi = this.query.getQueryGoal().getIncludeHashes().iterator();
-                while (wi.hasNext()) {
-                    this.query.getSegment().termIndex().removeDelayed(wi.next(), page.hash());
+                if (this.query.getSegment().termIndex() != null) {
+                    while (wi.hasNext()) {
+                        this.query.getSegment().termIndex().removeDelayed(wi.next(), page.hash());
+                    }
                 }
                 if (log.isFine()) log.logFine("dropped RWI: url does not match index-of constraint");
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();

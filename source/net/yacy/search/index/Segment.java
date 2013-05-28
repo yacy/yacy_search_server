@@ -713,7 +713,7 @@ public class Segment {
 
             // delete all word references
             int count = 0;
-            if (words != null) count = termIndex().remove(Word.words2hashesHandles(words), urlhash);
+            if (words != null && termIndex() != null) count = termIndex().remove(Word.words2hashesHandles(words), urlhash);
 
             // finally delete the url entry itself
             fulltext().remove(urlhash);

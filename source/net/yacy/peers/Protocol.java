@@ -394,7 +394,44 @@ public final class Protocol {
 
         return count;
     }
-
+    /*
+    private int readSeeds(String prefix) {
+        String seedStr;
+        while ( (seedStr = result.get("seed" + i++)) != null ) {
+            // integrate new seed into own database
+            // the first seed, "seed0" is the seed of the responding peer
+            if ( seedStr.length() > Seed.maxsize ) {
+                Network.log.logInfo("hello/client: rejected contacting seed; too large ("
+                    + seedStr.length()
+                    + " > "
+                    + Seed.maxsize
+                    + ")");
+            } else {
+                try {
+                    if ( i == 1 ) {
+                        final int p = address.indexOf(':');
+                        if ( p < 0 ) {
+                            return -1;
+                        }
+                        InetAddress ia = Domains.dnsResolve(address.substring(0, p));
+                        if (ia == null) continue;
+                        final String host = ia.getHostAddress();
+                        s = Seed.genRemoteSeed(seedStr, false, host);
+                    } else {
+                        s = Seed.genRemoteSeed(seedStr, false, null);
+                    }
+                    if ( peerActions.peerArrival(s, (i == 1)) ) {
+                        count++;
+                    }
+                } catch ( final IOException e ) {
+                    Network.log.logInfo("hello/client: rejected contacting seed; bad ("
+                        + e.getMessage()
+                        + ")");
+                }
+            }
+        }
+    }
+*/
     public static Seed querySeed(final Seed target, final String seedHash) {
         // prepare request
         final String salt = crypt.randomSalt();

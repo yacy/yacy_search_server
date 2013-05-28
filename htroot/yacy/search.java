@@ -258,7 +258,7 @@ public final class search {
 
             final long timer = System.currentTimeMillis();
             //final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
-            final TreeMap<byte[], ReferenceContainer<WordReference>> incc = indexSegment.termIndex().searchConjunction(theQuery.getQueryGoal().getIncludeHashes(), QueryParams.hashes2Set(urls));
+            final TreeMap<byte[], ReferenceContainer<WordReference>> incc = indexSegment.termIndex() == null ? new TreeMap<byte[], ReferenceContainer<WordReference>>() : indexSegment.termIndex().searchConjunction(theQuery.getQueryGoal().getIncludeHashes(), QueryParams.hashes2Set(urls));
 
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEventType.COLLECTION, "", incc.size(), System.currentTimeMillis() - timer), false);
             if (incc != null) {

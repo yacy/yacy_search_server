@@ -86,7 +86,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
             if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
                 // seed is not known from here
                 try {
-                    indexSegment.termIndex().remove(
+                    if (indexSegment.termIndex() != null) indexSegment.termIndex().remove(
                         Word.words2hashesHandles(Condenser.getWords(
                             ("yacyshare " +
                              path.replace('?', ' ') +
