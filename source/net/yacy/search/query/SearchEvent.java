@@ -217,7 +217,7 @@ public final class SearchEvent {
         this.IAmaxcounthash = null;
         this.IAneardhthash = null;
         this.localSearchThread = null;
-        this.remote = (peers != null && peers.sizeConnected() > 0) && (this.query.domType == QueryParams.Searchdom.CLUSTER || (this.query.domType == QueryParams.Searchdom.GLOBAL && peers.mySeed().getFlagAcceptRemoteIndex()));
+        this.remote = (peers != null && peers.sizeConnected() > 0) && (this.query.domType == QueryParams.Searchdom.CLUSTER || (this.query.domType == QueryParams.Searchdom.GLOBAL && Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false)));
         this.local_rwi_available  = new AtomicInteger(0); // the number of results in the local peer after filtering
         this.local_rwi_stored     = new AtomicInteger(0);
         this.local_solr_available = new AtomicInteger(0);
@@ -265,9 +265,7 @@ public final class SearchEvent {
         
         // start a local RWI search concurrently
         this.rwiProcess = null;
-        if (query.getSegment().connectedRWI() &&
-                //(!this.remote || this.peers.mySeed().getBirthdate() < noRobinsonLocalRWISearch) &&
-                !Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_DHT_OFF, false)) {
+        if (query.getSegment().connectedRWI() && !Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_DHT_OFF, false)) {
             // we start the local search only if this peer is doing a remote search or when it is doing a local search and the peer is old
             rwiProcess = new RWIProcess();
             rwiProcess.start();
@@ -314,7 +312,7 @@ public final class SearchEvent {
             }
         } else {
             this.primarySearchThreadsL = null;
-            this.pollImmediately = !query.getSegment().connectedRWI();
+            this.pollImmediately = !query.getSegment().connectedRWI() || !Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
             if ( generateAbstracts ) {
                 // we need the results now
                 try {
