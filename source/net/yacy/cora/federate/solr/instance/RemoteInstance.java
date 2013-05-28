@@ -51,6 +51,7 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.SolrServer;
@@ -140,6 +141,7 @@ public class RemoteInstance implements SolrInstance {
                     HttpHost targetHost = new HttpHost(u.getHost(), u.getPort(), u.getProtocol());
                     authCache.put(targetHost, basicAuth);
                     context.setAttribute(ClientContext.AUTH_CACHE, authCache);
+                    this.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false)); // no retries needed; we expect connections to fail; therefore we should not retry
                     return context;
                 }
             };

@@ -84,6 +84,7 @@ import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.params.BasicHttpParams;
@@ -197,7 +198,8 @@ public class HTTPClient {
 		((DefaultHttpClient) httpClient).addRequestInterceptor(new GzipRequestInterceptor());
 		// uncompress gzip
 		((DefaultHttpClient) httpClient).addResponseInterceptor(new GzipResponseInterceptor());
-
+		// remove retries; we expect connections to fail; therefore we should not retry
+		((DefaultHttpClient) httpClient).setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
 		if (idledConnectionEvictor == null) {
 		    idledConnectionEvictor = new IdledConnectionEvictor(clientConnectionManager);
 		    idledConnectionEvictor.start();
