@@ -314,7 +314,7 @@
          searcher to be opened to make those changes visible.
          -->
         <autoCommit>
-            <maxTime>15000</maxTime>
+            <maxTime>10000</maxTime>
             <openSearcher>false</openSearcher>
         </autoCommit>
         
@@ -325,7 +325,7 @@
          -->
         <!--
          <autoSoftCommit>
-         <maxTime>1000</maxTime>
+         <maxTime>3000</maxTime>
          </autoSoftCommit>
          -->
         

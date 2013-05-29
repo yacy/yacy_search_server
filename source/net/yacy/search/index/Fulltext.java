@@ -98,8 +98,6 @@ public final class Fulltext {
     private       InstanceMirror       solrInstances;
     private final CollectionConfiguration collectionConfiguration;
     private final WebgraphConfiguration   webgraphConfiguration;
-    private final LinkedBlockingQueue<URIMetadataRow> pendingCollectionInputRows;
-    private final LinkedBlockingQueue<SolrInputDocument> pendingCollectionInputDocuments;
 
     protected Fulltext(final File segmentPath, final CollectionConfiguration collectionConfiguration, final WebgraphConfiguration webgraphConfiguration) {
         this.segmentPath = segmentPath;
@@ -110,8 +108,6 @@ public final class Fulltext {
         this.solrInstances = new InstanceMirror();
         this.collectionConfiguration = collectionConfiguration;
         this.webgraphConfiguration = webgraphConfiguration;
-        this.pendingCollectionInputRows = new LinkedBlockingQueue<URIMetadataRow>();
-        this.pendingCollectionInputDocuments = new LinkedBlockingQueue<SolrInputDocument>();
     }
 
     /**
@@ -281,7 +277,7 @@ public final class Fulltext {
         long t = System.currentTimeMillis();
         if (t - this.collectionSizeLastAccess < 1000) return this.collectionSizeLastValue;
         long size = this.urlIndexFile == null ? 0 : this.urlIndexFile.size();
-        size += this.getDefaultConnector().getSize();
+        size += this.solrInstances.getDefaultMirrorConnector().getSize();
         this.collectionSizeLastAccess = t;
         this.collectionSizeLastValue = size;
         return size;
@@ -304,7 +300,11 @@ public final class Fulltext {
         this.solrInstances.close();
     }
     
+    private long lastCommit = 0;
     public void commit(boolean softCommit) {
+        long t = System.currentTimeMillis();
+        if (lastCommit + 10000 > t) return;
+        lastCommit = t;
         getDefaultConnector().commit(softCommit);
         getWebgraphConnector().commit(softCommit);
     }
@@ -321,24 +321,7 @@ public final class Fulltext {
     }
 
     public DigestURI getURL(final byte[] urlHash) {
-        if (urlHash == null) return null;
-
-        // try to get the data from the delayed cache; this happens if we retrieve this from a fresh search result
-        String u = ASCII.String(urlHash);
-        for (URIMetadataRow entry: this.pendingCollectionInputRows) {
-            if (u.equals(ASCII.String(entry.hash()))) {
-                if (this.urlIndexFile != null) try {this.urlIndexFile.remove(urlHash);} catch (IOException e) {} // migration
-                return entry.url();
-            }
-        }
-
-        for (SolrInputDocument doc: this.pendingCollectionInputDocuments) {
-            if (u.equals(doc.getFieldValue(CollectionSchema.id.getSolrFieldName()))) {
-                if (this.urlIndexFile != null) try {this.urlIndexFile.remove(urlHash);} catch (IOException e) {} // migration
-                String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
-                if (url != null) try {return new DigestURI(url);} catch (MalformedURLException e) {}
-            }
-        }
+        if (urlHash == null || this.getDefaultConnector() == null) return null;
         
         String x;
         try {
@@ -371,23 +354,6 @@ public final class Fulltext {
     
     private URIMetadataNode getMetadata(final byte[] urlHash, WordReferenceVars wre, long weight) {
         String u = ASCII.String(urlHash);
-        
-        // try to get the data from the delayed cache; this happens if we retrieve this from a fresh search result
-        for (URIMetadataRow entry: this.pendingCollectionInputRows) {
-            if (u.equals(ASCII.String(entry.hash()))) {
-                if (this.urlIndexFile != null) try {this.urlIndexFile.remove(urlHash);} catch (IOException e) {} // migration
-                SolrDocument sd = this.collectionConfiguration.toSolrDocument(getDefaultConfiguration().metadata2solr(entry));
-                return new URIMetadataNode(sd, wre, weight);
-            }
-        }
-
-        for (SolrInputDocument doc: this.pendingCollectionInputDocuments) {
-            if (u.equals(doc.getFieldValue(CollectionSchema.id.getSolrFieldName()))) {
-                if (this.urlIndexFile != null) try {this.urlIndexFile.remove(urlHash);} catch (IOException e) {} // migration
-                SolrDocument sd = this.collectionConfiguration.toSolrDocument(doc);
-                return new URIMetadataNode(sd, wre, weight);
-            }
-        }
         
         // get the metadata from Solr
         try {
@@ -443,63 +409,6 @@ public final class Fulltext {
         if (MemoryControl.shortStatus()) clearCache();
     }
     
-    public void putDocumentLater(final SolrInputDocument doc) {
-        if (MemoryControl.shortStatus()) {
-            try {
-                putDocument(doc);
-                return;
-            } catch (IOException ee) {
-                Log.logException(ee);
-            }
-        }
-        try {
-            this.pendingCollectionInputDocuments.put(doc);
-        } catch (InterruptedException e) {
-            try {
-                putDocument(doc);
-            } catch (IOException ee) {
-                Log.logException(ee);
-            }
-        }
-    }
-    
-    public int pendingInputDocuments() {
-        return this.pendingCollectionInputRows.size() + this.pendingCollectionInputDocuments.size();
-    }
-    
-    public int processPendingInputDocuments(int count) throws IOException {
-        if (count == 0) return 0;
-        boolean shortMemStatus = MemoryControl.shortStatus();
-        if (!shortMemStatus || this.pendingCollectionInputDocuments.size() < count) {
-            pendingRows2Docs(count);
-        }
-        SolrInputDocument doc;
-        Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>(count);
-        while ((shortMemStatus || count-- > 0) && (doc = this.pendingCollectionInputDocuments.poll()) != null) {
-            docs.add(doc);
-        }
-        if (docs.size() > 0) this.putDocuments(docs);
-        return docs.size();
-    }
-    
-    private void pendingRows2Docs(int count) throws IOException {
-        URIMetadataRow entry;
-        while (count-- > 0 && (entry = this.pendingCollectionInputRows.poll()) != null) {
-            byte[] idb = entry.hash();
-            String id = ASCII.String(idb);
-            try {
-                if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
-                // because node entries are richer than metadata entries we must check if they exist to prevent that they are overwritten
-                SolrDocument sd = this.getDefaultConnector().getDocumentById(id);
-                if (sd == null || (new URIMetadataNode(sd)).isOlder(entry)) {
-                    putDocumentLater(getDefaultConfiguration().metadata2solr(entry));
-                }                                                                                                                     
-            } catch (SolrException e) {
-                throw new IOException(e.getMessage(), e);
-            }
-        }
-    }
-    
     public void putEdges(final Collection<SolrInputDocument> edges) throws IOException {
         if (edges == null || edges.size() == 0) return;
         try {
@@ -526,22 +435,6 @@ public final class Fulltext {
         }
         this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCache();
-    }
-
-    public void putMetadataLater(final URIMetadataRow entry) throws IOException {
-        if (MemoryControl.shortStatus()) {
-            putMetadata(entry);
-            return;
-        }
-        try {
-            this.pendingCollectionInputRows.put(entry);
-        } catch (InterruptedException e) {
-            try {
-                putMetadata(entry);
-            } catch (IOException ee) {
-                Log.logException(ee);
-            }
-        }
     }
 
     /**
@@ -704,12 +597,6 @@ public final class Fulltext {
     @Deprecated
     public boolean exists(final String urlHash) {
         if (urlHash == null) return false;
-        for (URIMetadataRow entry: this.pendingCollectionInputRows) {
-            if (urlHash.equals(ASCII.String(entry.hash()))) return true;
-        }
-        for (SolrInputDocument doc: this.pendingCollectionInputDocuments) {
-            if (urlHash.equals(doc.getFieldValue(CollectionSchema.id.getSolrFieldName()))) return true;
-        }
         try {
             if (this.getDefaultConnector().existsById(urlHash)) return true;
         } catch (final Throwable e) {
@@ -729,16 +616,6 @@ public final class Fulltext {
         HashSet<String> e = new HashSet<String>();
         if (ids == null || ids.size() == 0) return e;
         Collection<String> idsC = new HashSet<String>();
-        for (String id: ids) {
-            for (URIMetadataRow entry: this.pendingCollectionInputRows) {
-                if (id.equals(ASCII.String(entry.hash()))) {e.add(id); continue;}
-            }
-            for (SolrInputDocument doc: this.pendingCollectionInputDocuments) {
-                if (id.equals(doc.getFieldValue(CollectionSchema.id.getSolrFieldName()))) {e.add(id); continue;}
-            }
-            if (this.urlIndexFile != null && this.urlIndexFile.has(ASCII.getBytes(id))) {e.add(id); continue;}
-            idsC.add(id);
-        }
         try {
             Set<String> e1 = this.getDefaultConnector().existsByIds(idsC);
             e.addAll(e1);

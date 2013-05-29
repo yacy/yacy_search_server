@@ -81,8 +81,6 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.pdfbox.cos.COSName;
-import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -950,21 +948,6 @@ public final class Switchboard extends serverSwitch {
                 10000,
                 Long.MAX_VALUE),
             60000); // all 5 Minutes, wait 1 minute until first run
-        deployThread(
-                SwitchboardConstants.SEARCHRESULT,
-                "Search Result Flush",
-                "A thread that stores search results from other peers into the own index.",
-                null,
-                new InstantBusyThread(
-                    this,
-                    SwitchboardConstants.SEARCHRESULT_METHOD_START,
-                    SwitchboardConstants.SEARCHRESULT_METHOD_JOBCOUNT,
-                    SwitchboardConstants.SEARCHRESULT_METHOD_FREEMEM,
-                    20000,
-                    Long.MAX_VALUE,
-                    0,
-                    Long.MAX_VALUE),
-                30000);
         deployThread(
             SwitchboardConstants.SURROGATES,
             "Surrogates",
@@ -1998,23 +1981,8 @@ public final class Switchboard extends serverSwitch {
         return false;
     }
 
-
-    public int searchresultQueueSize() {
-        return this.index.fulltext().pendingInputDocuments();
-    }
-
     public void searchresultFreeMem() {
         // do nothing
-    }
-
-    public boolean searchresultProcess() {
-        int count = Math.min(100, 1 + this.index.fulltext().pendingInputDocuments() / 100);
-        if (MemoryControl.shortStatus()) count = this.index.fulltext().pendingInputDocuments();
-        try {
-            return this.index.fulltext().processPendingInputDocuments(count) > 0;
-        } catch (IOException e) {
-            return false;
-        }
     }
     
     public int cleanupJobSize() {

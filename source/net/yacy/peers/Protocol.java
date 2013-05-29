@@ -860,7 +860,7 @@ public final class Protocol {
         
         for (URIMetadataRow entry: storeDocs) {
             try {
-                event.query.getSegment().fulltext().putMetadataLater(entry);
+                event.query.getSegment().fulltext().putMetadata(entry);
             } catch (IOException e) {
                 Log.logException(e);
             }
@@ -1079,6 +1079,8 @@ public final class Protocol {
             target = event.peers.mySeed();
             localsearch = false;
         }
+        RemoteInstance instance = null;
+        SolrConnector solrConnector = null;        
         SolrDocumentList docList = null;
         QueryResponse rsp = null;
         if (localsearch) {
@@ -1093,8 +1095,8 @@ public final class Protocol {
         } else {
             try {
                 String address = target == event.peers.mySeed() ? "localhost:" + target.getPort() : target.getPublicAddress();
-                RemoteInstance instance = new RemoteInstance("http://" + address, null, "solr"); // this is a 'patch configuration' which considers 'solr' as default collection
-                SolrConnector solrConnector = new RemoteSolrConnector(instance, "solr");
+                instance = new RemoteInstance("http://" + address, null, "solr"); // this is a 'patch configuration' which considers 'solr' as default collection
+                solrConnector = new RemoteSolrConnector(instance, "solr");
                 rsp = solrConnector.getResponseByParams(solrQuery);
                 docList = rsp.getResults();
                 solrConnector.close();
@@ -1105,7 +1107,7 @@ public final class Protocol {
                 return -1;
             }
         }
-
+        
         // evaluate facets
         Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>(event.query.facetfields.size());
         for (String field: event.query.facetfields) {
@@ -1149,7 +1151,7 @@ public final class Protocol {
 		
         Network.log.logInfo("SEARCH (solr), returned " + docList.size() + " out of " + docList.getNumFound() + " documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
         int term = count;
-        final Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>(docList.size());
+        Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>(docList.size());
         for (final SolrDocument doc: docList) {
             if ( term-- <= 0 ) {
                 break; // do not process more that requested (in case that evil peers fill us up with rubbish)
@@ -1213,15 +1215,22 @@ public final class Protocol {
             Network.log.logInfo("local search (solr): localpeer sent " + container.get(0).size() + "/" + docList.size() + " references");
         } else {
             // learn the documents, this can be done later
-            for (SolrInputDocument doc: docs) {
-                event.query.getSegment().fulltext().putDocumentLater(doc);
+            try {
+                event.query.getSegment().fulltext().putDocuments(docs); docs.clear(); docs = null;
+                event.addNodes(container, facets, snippets, false, target.getName() + "/" + target.hash, (int) docList.getNumFound());
+                event.addFinalize();
+                event.addExpectedRemoteReferences(-count);
+                Network.log.logInfo("remote search (solr): peer " + target.getName() + " sent " + (container.size() == 0 ? 0 : container.get(0).size()) + "/" + docList.size() + " references");
+            } catch (IOException e) {
+                Log.logException(e);
             }
-            event.addNodes(container, facets, snippets, false, target.getName() + "/" + target.hash, (int) docList.getNumFound());
-            event.addFinalize();
-            event.addExpectedRemoteReferences(-count);
-            Network.log.logInfo("remote search (solr): peer " + target.getName() + " sent " + (container.size() == 0 ? 0 : container.get(0).size()) + "/" + docList.size() + " references");
         }
-        return docList.size();
+        final int dls = docList.size();
+        docList.clear();
+        docList = null;
+        if (solrConnector != null) solrConnector.close();
+        if (instance != null) instance.close();
+        return dls;
     }
 
     public static Map<String, String> permissionMessage(final SeedDB seedDB, final String targetHash) {

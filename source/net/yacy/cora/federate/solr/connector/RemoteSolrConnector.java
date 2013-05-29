@@ -82,10 +82,13 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
             ResponseParser responseParser = new XMLResponseParser();
             request.setResponseParser(responseParser);
             long t = System.currentTimeMillis();
-            NamedList<Object> result;
+            NamedList<Object> result = null;
             try {
                 result = server.request(request);
             } catch (Throwable e) {
+                throw new IOException(e.getMessage());
+                /*
+                Log.logException(e);
                 server = instance.getServer(this.corename);
                 super.init(server);
                 try {
@@ -93,6 +96,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
                 } catch (Throwable e1) {
                     throw new IOException(e1.getMessage());
                 }
+                */
             }
             QueryResponse response = new QueryResponse(result, server);
             response.setElapsedTime(System.currentTimeMillis() - t);

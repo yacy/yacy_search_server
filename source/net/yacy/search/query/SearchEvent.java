@@ -194,7 +194,7 @@ public final class SearchEvent {
         this.workTables = workTables;
         this.query = query;
         this.loader = loader;
-        this.nodeStack = new WeakPriorityBlockingQueue<URIMetadataNode>(300, false);
+        this.nodeStack = new WeakPriorityBlockingQueue<URIMetadataNode>(100, false);
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
         // prepare configured search navigation
