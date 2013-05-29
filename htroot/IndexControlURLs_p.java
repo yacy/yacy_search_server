@@ -270,11 +270,17 @@ public class IndexControlURLs_p {
             final File dump = segment.fulltext().dumpSolr();
             prop.put("indexdump", 1);
             prop.put("indexdump_dumpfile", dump.getAbsolutePath());
+            sb.tables.recordAPICall(post, "IndexControlURLs_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr dump generation");
         }
 
         if (post.containsKey("indexrestore")) {
             final File dump = new File(post.get("dumpfile", ""));
             segment.fulltext().restoreSolr(dump);
+        }
+
+        if (post.containsKey("rebootsolr")) {
+            segment.fulltext().rebootSolr();
+            sb.tables.recordAPICall(post, "IndexControlURLs_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr reboot");
         }
 
         if (post.containsKey("deletedomain")) {

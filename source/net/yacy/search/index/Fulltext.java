@@ -221,11 +221,15 @@ public final class Fulltext {
     }
     
     public SolrConnector getDefaultConnector() {
-        return this.solrInstances.getDefaultMirrorConnector();
+        synchronized (this.solrInstances) {
+            return this.solrInstances.getDefaultMirrorConnector();
+        }
     }
     
     public SolrConnector getWebgraphConnector() {
-        return this.solrInstances.getMirrorConnector(WebgraphSchema.CORE_NAME);
+        synchronized (this.solrInstances) {
+            return this.solrInstances.getMirrorConnector(WebgraphSchema.CORE_NAME);
+        }
     }
 
     public void clearCache() {
@@ -247,20 +251,24 @@ public final class Fulltext {
     }
 
     public void clearLocalSolr() throws IOException {
-        EmbeddedInstance instance = this.solrInstances.getSolr0();
-        if (instance != null) {
-            for (String name: instance.getCoreNames()) new EmbeddedSolrConnector(instance, name).clear();
+        synchronized (this.solrInstances) {
+            EmbeddedInstance instance = this.solrInstances.getSolr0();
+            if (instance != null) {
+                for (String name: instance.getCoreNames()) new EmbeddedSolrConnector(instance, name).clear();
+            }
+            this.commit(false);
+            this.solrInstances.clearCache();
         }
-        this.commit(false);
-        this.solrInstances.clearCache();
     }
 
     public void clearRemoteSolr() throws IOException {
-        ShardInstance instance = this.solrInstances.getSolr1();
-        if (instance != null) {
-            for (String name: instance.getCoreNames()) new RemoteSolrConnector(instance, name).clear();
+        synchronized (this.solrInstances) {
+            ShardInstance instance = this.solrInstances.getSolr1();
+            if (instance != null) {
+                for (String name: instance.getCoreNames()) new RemoteSolrConnector(instance, name).clear();
+            }
+            this.solrInstances.clearCache();
         }
-        this.solrInstances.clearCache();
     }
 
     /**
@@ -818,6 +826,22 @@ public final class Fulltext {
                 } catch (IOException e) {
                     Log.logException(e);
                 }
+            }
+        }
+    }
+    
+    /**
+     * reboot solr (experimental to check resource management
+     */
+    public void rebootSolr() {
+        synchronized (this.solrInstances) {
+            this.disconnectLocalSolr();
+            this.solrInstances.close();
+            this.solrInstances = new InstanceMirror();
+            try {
+                this.connectLocalSolr();
+            } catch (IOException e) {
+                Log.logException(e);
             }
         }
     }
