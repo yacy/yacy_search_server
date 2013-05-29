@@ -444,7 +444,7 @@ public final class Protocol {
                 return new long[] {-1, -1};
             }
         } catch ( final Exception e ) {
-            Network.log.logWarning("yacyClient.queryRWICount error:" + e.getMessage());
+            if (Network.log.isFine()) Network.log.logFine("yacyClient.queryRWICount error:" + e.getMessage());
             return new long[] {-1, -1};
         }
     }
