@@ -37,44 +37,43 @@ public class robots {
             if (rbc.isProfileDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.PROFILE, "1");
 
             if (rbc.isLockedDisallowed() || rbc.isDirsDisallowed()) {
-                final List<String>[] p = getFiles(env.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
+                final String htrootPath = env.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
+                final List<String> htrootFiles = new ArrayList<String>();
+                final List<String> htrootDirs = new ArrayList<String>();
+                final File htroot = new File(htrootPath);
+                if (htroot.exists()) {
+                    final String[] htroots = htroot.list();
+                    File file;
+                    for (int i=0, dot; i < htroots.length; i++) {
+                        if (htroots[i].equals("www")) continue;
+                        file = new File(htroot, htroots[i]);
+                        if (file.isDirectory()) {
+                            htrootDirs.add(htroots[i]);
+                        } else if (
+                            ((dot = htroots[i].lastIndexOf('.')) < 2 ||
+                             htroots[i].charAt(dot - 2) == '_' && htroots[i].charAt(dot - 1) == 'p') &&
+                             !(htroots[i].endsWith("java") || htroots[i].endsWith("class"))
+                        ) {
+                            htrootFiles.add(htroots[i]);
+                        }
+                    }
+                }
+                
                 if (rbc.isLockedDisallowed()) {
-                    prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.LOCKED, p[0].size());
-                    for (int i=0; i<p[0].size(); i++)
-                        prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.LOCKED + "_" + i + "_page", p[0].get(i));
+                    prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.LOCKED, htrootFiles.size());
+                    for (int i = 0; i < htrootFiles.size(); i++) {
+                        prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.LOCKED + "_" + i + "_page", htrootFiles.get(i));
+                    }
                 }
                 if (rbc.isDirsDisallowed()) {
-                    prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.DIRS, p[1].size());
-                    for (int i=0; i<p[1].size(); i++)
-                        prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.DIRS + "_" + i + "_dir", p[1].get(i));
+                    prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.DIRS, htrootDirs.size());
+                    for (int i = 0; i < htrootDirs.size(); i++) {
+                        prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.DIRS + "_" + i + "_dir", htrootDirs.get(i));
+                    }
                 }
             }
         }
 
         return prop;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static List<String>[] getFiles(final String htrootPath) {
-        final File htroot = new File(htrootPath);
-        if (!htroot.exists()) return null;
-        final List<String> htrootFiles = new ArrayList<String>();
-        final List<String> htrootDirs = new ArrayList<String>();
-        final String[] htroots = htroot.list();
-        File file;
-        for (int i=0, dot; i < htroots.length; i++) {
-            if (htroots[i].equals("www")) continue;
-            file = new File(htroot, htroots[i]);
-            if (file.isDirectory()) {
-                htrootDirs.add(htroots[i]);
-            } else if (
-                    ((dot = htroots[i].lastIndexOf('.')) < 2 ||
-                    htroots[i].charAt(dot - 2) == '_' && htroots[i].charAt(dot - 1) == 'p') &&
-                    !(htroots[i].endsWith("java") || htroots[i].endsWith("class"))
-            ) {
-                htrootFiles.add(htroots[i]);
-            }
-        }
-        return (List<String>[]) new Object[] { htrootFiles, htrootDirs };
     }
 }
