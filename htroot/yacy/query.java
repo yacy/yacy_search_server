@@ -95,7 +95,7 @@ public final class query {
         if (obj.equals("rwiurlcount")) try {
             // the total number of different urls in the rwi is returned
             // <env> shall contain a word hash, the number of assigned lurls to this hash is returned
-            prop.put("response", sb.index.termIndex().get(env.getBytes(), null).size());
+            prop.put("response", sb.index.termIndex() == null ? 0 : sb.index.termIndex().get(env.getBytes(), null).size());
             return prop;
         } catch (final IOException e) {
             Log.logException(e);

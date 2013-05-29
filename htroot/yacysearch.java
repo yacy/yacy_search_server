@@ -540,7 +540,7 @@ public class yacysearch {
 
                     // delete the index entry locally
                     final String delHash = post.get("deleteref", ""); // urlhash
-                    indexSegment.termIndex().remove(qg.getIncludeHashes(), delHash.getBytes());
+                    if (indexSegment.termIndex() != null) indexSegment.termIndex().remove(qg.getIncludeHashes(), delHash.getBytes());
 
                     // make new news message with negative voting
                     if ( !sb.isRobinsonMode() ) {

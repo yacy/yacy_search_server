@@ -31,6 +31,8 @@ import java.util.Map;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
@@ -132,6 +134,7 @@ public class PerformanceQueues_p {
         	sb.setConfig("performanceSpeed", post.getInt("profileSpeed", 100));
         }
 
+        IndexCell<WordReference> rwi = indexSegment.termIndex();
         while (threads.hasNext()) {
             threadName = threads.next();
             thread = sb.getThread(threadName);
@@ -215,7 +218,7 @@ public class PerformanceQueues_p {
             // prop.put("table_" + c + "_disabled", /*(threadName.endsWith("_indexing")) ? 1 :*/ "0");
             prop.put("table_" + c + "_disabled", threadName.equals("10_httpd") ? "1" : "0" ); // httpd hardcoded defaults
             prop.put("table_" + c + "_recommendation", threadName.endsWith("_indexing") ? "1" : "0");
-            prop.putNum("table_" + c + "_recommendation_value", threadName.endsWith("_indexing") ? (indexSegment.termIndex().minMem() / 1024) : 0);
+            prop.putNum("table_" + c + "_recommendation_value", rwi == null ? 0 : threadName.endsWith("_indexing") ? (rwi.minMem() / 1024) : 0);
             c++;
         }
         prop.put("table", c);
@@ -245,7 +248,7 @@ public class PerformanceQueues_p {
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
             final int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);
             sb.setConfig(SwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
-            indexSegment.termIndex().setBufferMaxWordCount(wordCacheMaxCount);
+            if (rwi != null) rwi.setBufferMaxWordCount(wordCacheMaxCount);
         }
 
         if ((post != null) && (post.containsKey("poolConfig"))) {
@@ -301,10 +304,10 @@ public class PerformanceQueues_p {
 
         // table cache settings
         prop.putNum("wordCacheSize", indexSegment.RWIBufferCount());
-        prop.putNum("wordCacheSizeKBytes", indexSegment.termIndex().getBufferSizeBytes()/1024);
-        prop.putNum("maxURLinCache", indexSegment.termIndex().getBufferMaxReferences());
-        prop.putNum("maxAgeOfCache", indexSegment.termIndex().getBufferMaxAge() / 1000 / 60); // minutes
-        prop.putNum("minAgeOfCache", indexSegment.termIndex().getBufferMinAge() / 1000 / 60); // minutes
+        prop.putNum("wordCacheSizeKBytes", rwi == null ? 0 : rwi.getBufferSizeBytes()/1024);
+        prop.putNum("maxURLinCache", rwi == null ? 0 : rwi.getBufferMaxReferences());
+        prop.putNum("maxAgeOfCache", rwi == null ? 0 : rwi.getBufferMaxAge() / 1000 / 60); // minutes
+        prop.putNum("minAgeOfCache", rwi == null ? 0 : rwi.getBufferMinAge() / 1000 / 60); // minutes
         prop.putNum("maxWaitingWordFlush", sb.getConfigLong("maxWaitingWordFlush", 180));
         prop.put("wordCacheMaxCount", sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000));
         prop.put("crawlPauseProxy", sb.getConfigLong(SwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, 30000));
