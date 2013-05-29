@@ -29,6 +29,7 @@ package net.yacy.kelondro.data.word;
 import java.util.Collection;
 import java.util.Locale;
 
+import net.yacy.cora.document.WordCache;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.storage.ARC;
@@ -86,6 +87,10 @@ public class Word {
         this.flags = null;
     }
 
+    public static void clearCache() {
+        hashCache.clear();
+    }
+    
     public void inc() {
         this.count++;
     }

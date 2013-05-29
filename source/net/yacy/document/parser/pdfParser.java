@@ -40,7 +40,18 @@ import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.BadSecurityHandlerException;
 import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
+import org.apache.pdfbox.pdmodel.font.PDCIDFont;
+import org.apache.pdfbox.pdmodel.font.PDCIDFontType0Font;
+import org.apache.pdfbox.pdmodel.font.PDCIDFontType2Font;
 import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDMMType1Font;
+import org.apache.pdfbox.pdmodel.font.PDSimpleFont;
+import org.apache.pdfbox.pdmodel.font.PDTrueTypeFont;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
+import org.apache.pdfbox.pdmodel.font.PDType1AfmPfbFont;
+import org.apache.pdfbox.pdmodel.font.PDType1CFont;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.PDType3Font;
 import org.apache.pdfbox.util.PDFTextStripper;
 
 import net.yacy.cora.document.MultiProtocolURI;
@@ -75,12 +86,12 @@ public class pdfParser extends AbstractParser implements Parser {
             throw new Parser.Failure("Not enough Memory available for pdf parser: " + MemoryControl.available(), location);
 
         // create a pdf parser
-        final PDDocument pdfDoc;
+        PDDocument pdfDoc;
         //final PDFParser pdfParser;
         try {
-            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+            Thread.currentThread().setPriority(Thread.MIN_PRIORITY); // the pdfparser is a big pain
             pdfDoc = PDDocument.load(source);
-            //pdfParser = new PDFParser(source);
+            //PDFParser pdfParser = new PDFParser(source);
             //pdfParser.parse();
             //pdfDoc = pdfParser.getPDDocument();
         } catch (final IOException e) {
@@ -108,7 +119,7 @@ public class pdfParser extends AbstractParser implements Parser {
         }
 
         // extracting some metadata
-        final PDDocumentInformation info = pdfDoc.getDocumentInformation();
+        PDDocumentInformation info = pdfDoc.getDocumentInformation();
         String docTitle = null, docSubject = null, docAuthor = null, docPublisher = null, docKeywordStr = null;
         if (info != null) {
             docTitle = info.getTitle();
@@ -122,6 +133,7 @@ public class pdfParser extends AbstractParser implements Parser {
             // info.getCreationDate());
             // info.getModificationDate();
         }
+        info = null;
 
         if (docTitle == null || docTitle.isEmpty()) {
             docTitle = MultiProtocolURI.unescape(location.getFileName());
@@ -139,12 +151,13 @@ public class pdfParser extends AbstractParser implements Parser {
             stripper.setStartPage(4); // continue with page 4 (terminated, resulting in no text)
             stripper.setEndPage(Integer.MAX_VALUE); // set to default
             // we start the pdf parsing in a separate thread to ensure that it can be terminated
+            final PDDocument pdfDocC = pdfDoc;
             final Thread t = new Thread() {
                 @Override
                 public void run() {
                     Thread.currentThread().setName("pdfParser.getText:" + location);
                     try {
-                        writer.append(stripper.getText(pdfDoc));
+                        writer.append(stripper.getText(pdfDocC));
                     } catch (final Throwable e) {}
                 }
             };
@@ -181,8 +194,9 @@ public class pdfParser extends AbstractParser implements Parser {
         // COSStream, COSString, COSName, COSDocument, COSInteger[], COSNull
         // the great number of these objects can easily be seen in Java Visual VM
         // we try to get this shit out of the memory here by forced clear calls, hope the best the rubbish gets out.
-        COSName.clearResources();
-        PDFont.clearResources();
+        pdfDoc = null;
+        clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes();
+        
         return new Document[]{new Document(
                 location,
                 mimeType,
@@ -203,6 +217,26 @@ public class pdfParser extends AbstractParser implements Parser {
                 false)};
     }
 
+    @SuppressWarnings("static-access")
+    public static void clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes() {
+        // thank you very much, PDFParser hackers, this font cache will occupy >80MB RAM for a single pdf and then stays forever
+        // AND I DO NOT EVEN NEED A FONT HERE TO PARSE THE TEXT!
+        // Don't be so ignorant, just google once "PDFParser OutOfMemoryError" to feel the pain.
+        PDFont.clearResources();
+        COSName.clearResources();
+        PDType1Font.clearResources();
+        PDTrueTypeFont.clearResources();
+        PDType0Font.clearResources();
+        PDType1AfmPfbFont.clearResources();
+        PDType3Font.clearResources();
+        PDType1CFont.clearResources();
+        PDCIDFont.clearResources();
+        PDCIDFontType0Font.clearResources();
+        PDCIDFontType2Font.clearResources();
+        PDMMType1Font.clearResources();
+        PDSimpleFont.clearResources();
+    }
+    
     /**
      * test
      * @param args

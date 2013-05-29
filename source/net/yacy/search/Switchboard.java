@@ -81,6 +81,7 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -151,6 +152,7 @@ import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.parser.audioTagParser;
+import net.yacy.document.parser.pdfParser;
 import net.yacy.document.parser.html.Evaluation;
 import net.yacy.gui.Tray;
 import net.yacy.kelondro.blob.Tables;
@@ -2035,10 +2037,11 @@ public final class Switchboard extends serverSwitch {
         
         try {
             // flush caches in used libraries
-            PDFont.clearResources(); // eats up megabytes, see http://markmail.org/thread/quk5odee4hbsauhu
+            pdfParser.clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes(); // eats up megabytes, see http://markmail.org/thread/quk5odee4hbsauhu
             
             // clear caches
             if (WordCache.sizeCommonWords() > 1000) WordCache.clearCommonWords();
+            Word.clearCache();
             Domains.clear();
             
             // clean up image stack
