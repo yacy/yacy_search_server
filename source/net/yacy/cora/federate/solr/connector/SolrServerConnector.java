@@ -172,7 +172,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         if (this.server == null) return;
         try {
             if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
-                this.server.add(solrdoc, -1);
+            this.server.add(solrdoc, -1);
         } catch (Throwable e) {
             // catches "version conflict for": try this again and delete the document in advance
             try {
@@ -181,7 +181,12 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             try {
                 this.server.add(solrdoc, -1);
             } catch (Throwable ee) {
-                throw new IOException(ee);
+                try {
+                    this.server.commit();
+                    this.server.add(solrdoc, -1);
+                } catch (Throwable eee) {
+                    throw new IOException(eee);
+                }
             }
         }
     }
