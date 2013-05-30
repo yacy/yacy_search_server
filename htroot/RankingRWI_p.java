@@ -73,8 +73,7 @@ public class RankingRWI_p {
         rankingParameters.put(RankingProfile.WORDDISTANCE, "Word Distance;a higher ranking level prefers documents where the search words appear close together. This ranking parameter works like a NEAR operator in more-than-one word searches.");
         rankingParameters.put(RankingProfile.WORDSINTEXT, "Words In Text;a higher ranking level prefers documents with a large number of words. Be aware that this is a compensation of the term frequency parameter.");
         rankingParameters.put(RankingProfile.WORDSINTITLE, "Words In Title;a higher ranking level prefers documents with a large number of words in the document title.");
-        rankingParameters.put(RankingProfile.YBR, "YaCy Block Rank;a higher ranking level prefers documents with a higher, statically assigned ranking value on domains. This is like a 'moderated ranking'. The ranking on domains (blocks) was computed using a link analyses on large link graphs.");
-
+        
         rankingParameters.put(RankingProfile.URLCOMPINTOPLIST, "URL Component Appears In Toplist;a higher ranking level prefers documents with words in the url path that match words in the toplist. The toplist is generated dynamically from the search results using a statistic of the most used words. The toplist is a top-10 list of the most used words in URLs and document titles.");
         rankingParameters.put(RankingProfile.DESCRCOMPINTOPLIST, "Description Comp. Appears In Toplist;a higher ranking level prefers documents with words in the document description that match words in the toplist. The toplist is generated dynamically from the search results using a statistic of the most used words. The toplist is a top-10 list of the most used words in URLs and document titles.");
         rankingParameters.put(RankingProfile.PREFER, "Application Of Prefer Pattern;a higher ranking level prefers documents where the url matches the prefer pattern given in a search request.");

@@ -34,7 +34,6 @@ import java.util.Map;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.order.Base64Order;
-import net.yacy.cora.order.Digest;
 import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.util.SpaceExceededException;
@@ -43,7 +42,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.rwi.ReferenceIterator;
-import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
@@ -54,10 +52,6 @@ import net.yacy.search.index.Segment;
 
 
 public class BlockRank {
-
-    public static BinSearch[] ybrTables = null; // block-rank tables
-    private static File rankingPath;
-    private static int count;
 
     /**
      * collect host index information from other peers. All peers in the seed database are asked
@@ -211,94 +205,6 @@ public class BlockRank {
         // re-use the new table for a recursion
         if (recusions == 0) return newTables;
         return evaluate(index, hostHashResolver, newTables, --recusions); // one recursion step
-    }
-
-    public static void analyse(final WebStructureGraph myGraph, final Map<String, HostStat> hostHash2hostName) {
-        byte[] hosth = new byte[6];
-        String hosths, hostn;
-        HostStat hs;
-        ensureLoaded();
-        for (int ybr = 0; ybr < ybrTables.length; ybr++) {
-            row: for (int i = 0; i < ybrTables[ybr].size(); i++) {
-                hosth = ybrTables[ybr].get(i, hosth);
-                hosths = ASCII.String(hosth);
-                hostn = myGraph.hostHash2hostName(hosths);
-                if (hostn == null) {
-                    hs = hostHash2hostName.get(hostn);
-                    if (hs != null) hostn = hs.hostname;
-                }
-                if (hostn == null) {
-                    //Log.logInfo("BlockRank", "Ranking for Host: ybr = " + ybr + ", hosthash = " + hosths);
-                    continue row;
-                }
-                Log.logInfo("BlockRank", "Ranking for Host: ybr = " + ybr + ", hosthash = " + hosths + ", hostname = " + hostn);
-            }
-        }
-    }
-
-
-    /**
-     * load YaCy Block Rank tables
-     * These tables have a very simple structure: every file is a sequence of Domain hashes, ordered by b64.
-     * Each Domain hash has a length of 6 bytes and there is no separation character between the hashes
-     * @param rankingPath
-     * @param count
-     */
-    public static void loadBlockRankTable(final File rankingPath0, final int count0) {
-    	// lazy initialization to save memory during startup phase
-    	rankingPath = rankingPath0;
-    	count = count0;
-    }
-
-    public static void ensureLoaded() {
-        if (ybrTables != null) return;
-        ybrTables = new BinSearch[count];
-        String ybrName;
-        File f;
-        Log.logInfo("BlockRank", "loading block rank table from " + rankingPath.toString());
-        try {
-            for (int i = 0; i < count; i++) {
-                ybrName = "YBR-4-" + Digest.encodeHex(i, 2) + ".idx";
-                f = new File(rankingPath, ybrName);
-                if (f.exists()) {
-                    ybrTables[i] = new BinSearch(FileUtils.read(f), 6);
-                } else {
-                    ybrTables[i] = null;
-                }
-            }
-        } catch (final IOException e) {
-        }
-    }
-
-    public static void storeBlockRankTable(final File rankingPath) {
-        String ybrName;
-        File f;
-        try {
-            // first delete all old files
-            for (int i = 0; i < 16; i++) {
-                ybrName = "YBR-4-" + Digest.encodeHex(i, 2) + ".idx";
-                f = new File(rankingPath, ybrName);
-                if (!f.exists()) continue;
-                if (!f.canWrite()) return;
-                f.delete();
-            }
-            // write new files
-            for (int i = 0; i < Math.min(12, ybrTables.length); i++) {
-                ybrName = "YBR-4-" + Digest.encodeHex(i, 2) + ".idx";
-                f = new File(rankingPath, ybrName);
-                ybrTables[i].write(f);
-            }
-        } catch (final IOException e) {
-        }
-    }
-
-    /**
-     * returns the YBR ranking value in a range of 0..15, where 0 means best ranking and 15 means worst ranking
-     * @param hash
-     * @return
-     */
-    public static int ranking(final byte[] hash) {
-        return ranking(hash, ybrTables);
     }
 
     public static int ranking(final byte[] hash, final BinSearch[] rankingTable) {

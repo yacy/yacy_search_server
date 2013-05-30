@@ -68,7 +68,6 @@ import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
-import net.yacy.search.ranking.BlockRank;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -496,43 +495,26 @@ public class IndexControlRWIs_p {
                 prop.putHTML("genUrlList_urlList_" + i + "_urlExists_keyString", keystring);
                 prop.put("genUrlList_urlList_" + i + "_urlExists_keyHash", keyhashs);
                 prop.putHTML("genUrlList_urlList_" + i + "_urlExists_urlString", us);
-                prop.put(
-                    "genUrlList_urlList_" + i + "_urlExists_urlStringShort",
-                    (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20, 40) + "...") : ((us
-                        .length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
+                prop.put("genUrlList_urlList_" + i + "_urlExists_urlStringShort",
+                    (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20, 40) + "...") : ((us.length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_ranking", (entry.ranking() - rn));
-                prop.putNum(
-                    "genUrlList_urlList_" + i + "_urlExists_domlength",
-                    DigestURI.domLengthEstimation(entry.hash()));
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_ybr", BlockRank.ranking(entry.hash()));
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_tf", 1000.0 * entry
-                    .word()
-                    .termFrequency());
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_authority", (theSearch.getOrder() == null)
-                    ? -1
-                    : theSearch.getOrder().authority(ASCII.String(entry.hash(), 6, 6)));
-                prop.put(
-                    "genUrlList_urlList_" + i + "_urlExists_date",
-                    GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(entry.word().lastModified())));
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_wordsintitle", entry
-                    .word()
-                    .wordsintitle());
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_domlength", DigestURI.domLengthEstimation(entry.hash()));
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_tf", 1000.0 * entry.word().termFrequency());
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_authority", (theSearch.getOrder() == null) ? -1 : theSearch.getOrder().authority(ASCII.String(entry.hash(), 6, 6)));
+                prop.put("genUrlList_urlList_" + i + "_urlExists_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(entry.word().lastModified())));
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_wordsintitle", entry.word().wordsintitle());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_wordsintext", entry.word().wordsintext());
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_phrasesintext", entry
-                    .word()
-                    .phrasesintext());
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_phrasesintext", entry.word().phrasesintext());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_llocal", entry.word().llocal());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_lother", entry.word().lother());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_hitcount", entry.word().hitcount());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_worddistance", 0);
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_ybr", BlockRank.ranking(entry.hash()));
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_pos", entry.word().minposition());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_phrase", entry.word().posofphrase());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_posinphrase", entry.word().posinphrase());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_urlcomps", entry.word().urlcomps());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_urllength", entry.word().urllength());
-                prop
-                    .put(
+                prop.put(
                         "genUrlList_urlList_" + i + "_urlExists_props",
                         ((entry.word().flags().get(Condenser.flag_cat_indexof)) ? "appears on index page, " : "")
                             + ((entry.word().flags().get(Condenser.flag_cat_hasimage)) ? "contains images, " : "")

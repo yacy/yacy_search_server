@@ -187,7 +187,6 @@ import net.yacy.search.index.Segment;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
-import net.yacy.search.ranking.BlockRank;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -623,10 +622,6 @@ public final class Switchboard extends serverSwitch {
                 + " entries, "
                 + ppRamString(stopwordsFile.length() / 1024));
         }
-
-        // load ranking from distribution
-        final File rankingPath = new File(this.appPath, "ranking/YBR".replace('/', File.separatorChar));
-        BlockRank.loadBlockRankTable(rankingPath, 16);
 
         // start a cache manager
         this.log.logConfig("Starting HT Cache Manager");

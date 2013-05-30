@@ -230,7 +230,6 @@ public class ReferenceOrder {
         final int minminpos = this.min.minposition();
         final long r =
              ((256 - DigestURI.domLengthNormalized(t.urlhash())) << this.ranking.coeff_domlength)
-           + ((this.ranking.coeff_ybr > 12) ? ((256 - (BlockRank.ranking(t.urlhash()) << 4)) << this.ranking.coeff_ybr) : 0)
            + ((this.max.urlcomps()      == this.min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - this.min.urlcomps()     ) << 8) / (this.max.urlcomps()     - this.min.urlcomps())     )) << this.ranking.coeff_urlcomps)
            + ((this.max.urllength()     == this.min.urllength()  )   ? 0 : (256 - (((t.urllength()    - this.min.urllength()    ) << 8) / (this.max.urllength()    - this.min.urllength())    )) << this.ranking.coeff_urllength)
            + ((maxmaxpos == minminpos)                               ? 0 : (256 - (((t.minposition() - minminpos) << 8) / (maxmaxpos - minminpos))) << this.ranking.coeff_posintext)
@@ -272,7 +271,6 @@ public class ReferenceOrder {
         assert this.ranking != null;
         final long r =
              ((256 - DigestURI.domLengthNormalized(t.hash())) << this.ranking.coeff_domlength)
-           + ((this.ranking.coeff_ybr > 12) ? ((256 - (BlockRank.ranking(t.hash()) << 4)) << this.ranking.coeff_ybr) : 0)
            + ((256 - (t.urllength() << 8)) << this.ranking.coeff_urllength)
            + (t.virtualAge()  << this.ranking.coeff_date)
            + (t.wordsintitle()<< this.ranking.coeff_wordsintitle)

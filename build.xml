@@ -50,7 +50,6 @@
   <property name="langstats" location="langstats"/>
   <property name="locales" location="locales"/>
   <property name="skins" location="skins"/>
-  <property name="ranking" location="ranking"/>
   <property name="release" location="RELEASE"/>
   <property name="htdocsWWW" location="${data}/HTDOCS/www"/>
   <property name="release_main" location="${release}/MAIN"/>
@@ -401,13 +400,6 @@
       </fileset>
     </copy>
 
-    <!-- copy ranking files -->
-    <copy todir="${release_main}/ranking">
-      <fileset dir="${ranking}">
-        <include name="**/*"/>
-      </fileset>
-    </copy>
-
     <!-- copy development tools -->
     <copy todir="${release_main}">
       <fileset dir=".">
@@ -592,13 +584,6 @@
       <fileset dir="${htroot}">
         <include name="yacy/seedUpload/yacySeedUploadFile.html"/>
         <include name="yacy/seedUpload/yacySeedUploadFtp.html"/>
-      </fileset>
-    </copy>
-
-    <!-- copy ranking files -->
-    <copy todir="${DESTDIR}/usr/share/yacy/ranking">
-      <fileset dir="${ranking}">
-        <include name="**/*"/>
       </fileset>
     </copy>
 

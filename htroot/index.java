@@ -28,13 +28,11 @@
 // javac -classpath .:../classes index.java
 // if the shell's current path is HTROOT
 
-
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.ranking.BlockRank;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -43,7 +41,6 @@ public class index {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        BlockRank.ensureLoaded(); // lazy initialization of block rank tables
 
         final String forwardTarget = sb.getConfig(SwitchboardConstants.INDEX_FORWARD, "");
         if (forwardTarget.length() > 0) {

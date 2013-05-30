@@ -66,7 +66,6 @@ public class RankingProfile {
     public static final String WORDDISTANCE       = "worddistance";
     public static final String WORDSINTEXT        = "wordsintext";
     public static final String WORDSINTITLE       = "wordsintitle";
-    public static final String YBR                = "ybr";
 
     // post-sort predicates
     public static final String URLCOMPINTOPLIST   = "urlcompintoplist";
@@ -79,7 +78,7 @@ public class RankingProfile {
     public static final int COEFF_MAX = 15;
 
     public int
-        coeff_domlength, coeff_ybr, coeff_date, coeff_wordsintitle, coeff_wordsintext, coeff_phrasesintext,
+        coeff_domlength, coeff_date, coeff_wordsintitle, coeff_wordsintext, coeff_phrasesintext,
         coeff_llocal, coeff_lother, coeff_urllength, coeff_urlcomps, coeff_hitcount,
         coeff_posintext, coeff_posofphrase, coeff_posinphrase, coeff_authority, coeff_worddistance,
         coeff_appurl, coeff_app_dc_title, coeff_app_dc_creator, coeff_app_dc_subject, coeff_app_dc_description, coeff_appemph,
@@ -117,7 +116,6 @@ public class RankingProfile {
         this.coeff_worddistance       = 10;
         this.coeff_wordsintext        = 3;
         this.coeff_wordsintitle       = 2;
-        this.coeff_ybr                = 0;
 
         this.coeff_urlcompintoplist   = 2;
         this.coeff_descrcompintoplist = 2;
@@ -154,7 +152,6 @@ public class RankingProfile {
                 }
             }
             this.coeff_domlength          = parseMap(coeff, DOMLENGTH, this.coeff_domlength);
-            this.coeff_ybr                = parseMap(coeff, YBR, this.coeff_ybr);
             this.coeff_date               = parseMap(coeff, DATE, this.coeff_date);
             this.coeff_wordsintitle       = parseMap(coeff, WORDSINTITLE, this.coeff_wordsintitle);
             this.coeff_wordsintext        = parseMap(coeff, WORDSINTEXT, this.coeff_wordsintext);
@@ -201,7 +198,6 @@ public class RankingProfile {
      */
     public void allZero() {
         this.coeff_domlength          = 0;
-        this.coeff_ybr                = 0;
         this.coeff_date               = 0;
         this.coeff_wordsintitle       = 0;
         this.coeff_wordsintext        = 0;
@@ -279,7 +275,6 @@ public class RankingProfile {
             ext.put(WORDDISTANCE, Integer.toString(this.coeff_worddistance));
             ext.put(WORDSINTEXT, Integer.toString(this.coeff_wordsintext));
             ext.put(WORDSINTITLE, Integer.toString(this.coeff_wordsintitle));
-            ext.put(YBR, Integer.toString(this.coeff_ybr));
         } else {
             ext.put(prefix + APPEMPH, Integer.toString(this.coeff_appemph));
             ext.put(prefix + APPURL, Integer.toString(this.coeff_appurl));
@@ -309,7 +304,6 @@ public class RankingProfile {
             ext.put(prefix + WORDDISTANCE, Integer.toString(this.coeff_worddistance));
             ext.put(prefix + WORDSINTEXT, Integer.toString(this.coeff_wordsintext));
             ext.put(prefix + WORDSINTITLE, Integer.toString(this.coeff_wordsintitle));
-            ext.put(prefix + YBR, Integer.toString(this.coeff_ybr));
         }
         return ext;
     }
