@@ -29,7 +29,6 @@ package net.yacy.kelondro.data.word;
 import java.util.Collection;
 import java.util.Locale;
 
-import net.yacy.cora.document.WordCache;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.storage.ARC;

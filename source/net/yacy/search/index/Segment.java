@@ -75,7 +75,9 @@ import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.repository.LoaderDispatcher;
+import net.yacy.search.StorageQueueEntry;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -114,6 +116,7 @@ public class Segment {
     protected       IndexCell<WordReference>       termIndex;
     protected       IndexCell<CitationReference>   urlCitationIndex;
     protected boolean writeWebgraph;
+    private   WorkflowProcessor<StorageQueueEntry> indexingPutDocumentProcessor;
 
     /**
      * create a new Segment
@@ -132,8 +135,18 @@ public class Segment {
         this.termIndex = null;
         this.urlCitationIndex = null;
         this.writeWebgraph = false;
-    }
 
+        this.indexingPutDocumentProcessor = new WorkflowProcessor<StorageQueueEntry>(
+                "putDocument",
+                "solr document put queueing",
+                new String[] {},
+                this,
+                "putDocument",
+                10,
+                null,
+                1);
+    }
+    
     public void writeWebgraph(boolean check) {
         this.writeWebgraph = check;
     }
@@ -402,6 +415,7 @@ public class Segment {
     }
 
     public synchronized void close() {
+        this.indexingPutDocumentProcessor.shutdown();
     	if (this.termIndex != null) this.termIndex.close();
         if (this.fulltext != null) this.fulltext.close();
         if (this.urlCitationIndex != null) this.urlCitationIndex.close();
@@ -455,6 +469,31 @@ public class Segment {
 
     public void storeRWI(final byte[] termHash, final WordReference entry) throws IOException, SpaceExceededException {
         if (this.termIndex != null) this.termIndex.add(termHash, entry);
+    }
+
+    /**
+     * putDocument should not be called directly; instead, put queueEntries to
+     * indexingPutDocumentProcessor
+     * (this must be public, otherwise the WorkflowProcessor - calling by reflection - does not work)
+     * ATTENTION: do not remove! profiling tools will show that this is not called, which is not true (using reflection)
+     * @param queueEntry
+     * @throws IOException
+     */
+    public void putDocument(final StorageQueueEntry queueEntry) {
+        try {
+            this.fulltext().putDocument(queueEntry.queueEntry);
+        } catch (IOException e) {
+            Log.logException(e);
+        }
+    }
+    
+    /**
+     * put a solr document into the index. This is the right point to call when enqueueing of solr document is wanted.
+     * This method exist to prevent that solr is filled concurrently with data which makes it fail or throw strange exceptions.
+     * @param queueEntry
+     */
+    public void putDocumentInQueue(final SolrInputDocument queueEntry) {
+        this.indexingPutDocumentProcessor.enQueue(new StorageQueueEntry(queueEntry));
     }
 
     public SolrInputDocument storeDocument(
@@ -546,7 +585,8 @@ public class Segment {
                             for (SolrDocument doc: docs) {
                                 SolrInputDocument sid = this.fulltext.getDefaultConfiguration().toSolrInputDocument(doc);
                                 sid.setField(uniquefield.getSolrFieldName(), false);
-                                this.fulltext.getDefaultConnector().add(sid);
+                                this.putDocumentInQueue(sid);
+                                //this.fulltext.getDefaultConnector().add(sid);
                             }
                         } else {
                             vector.setField(uniquefield.getSolrFieldName(), true);
@@ -562,19 +602,7 @@ public class Segment {
         }
         // STORE TO SOLR
         String error = null;
-        tryloop: for (int i = 0; i < 20; i++) {
-            try {
-                error = null;
-                this.fulltext.putDocument(vector);
-                break tryloop;
-            } catch ( final IOException e ) {
-                error = "failed to send " + urlNormalform + " to solr: " + e.getMessage();
-                Log.logWarning("SOLR", error);
-                if (i == 10) this.fulltext.commit(false);
-                try {Thread.sleep(1000);} catch (InterruptedException e1) {}
-                continue tryloop;
-            }
-        }
+        this.putDocumentInQueue(vector);
         if (this.writeWebgraph) {
             tryloop: for (int i = 0; i < 20; i++) {
                 try {

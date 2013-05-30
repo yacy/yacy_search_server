@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -387,6 +386,8 @@ public final class Fulltext {
         SolrConnector connector = this.getDefaultConnector();
         if (connector == null) return;
         String id = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
+        String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+        Log.logInfo("Fulltext", "indexing: " + id + " " + url);
         byte[] idb = ASCII.getBytes(id);
         try {
             if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
@@ -398,13 +399,6 @@ public final class Fulltext {
         } catch (SolrException e) {
             throw new IOException(e.getMessage(), e);
         }
-        this.statsDump = null;
-        if (MemoryControl.shortStatus()) clearCache();
-    }
-    
-    public void putDocuments(final Collection<SolrInputDocument> docs) throws IOException {
-        if (docs == null || docs.size() == 0) return;
-        this.getDefaultConnector().add(docs);
         this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCache();
     }

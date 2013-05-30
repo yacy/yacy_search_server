@@ -147,7 +147,14 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
         } catch (final IOException e) {}
     }
-
+    
+    private final static Set<String> omitFields = new HashSet<String>(3);
+    static {
+        omitFields.add(CollectionSchema.author_sxt.getSolrFieldName());
+        omitFields.add(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
+        omitFields.add(CollectionSchema.coordinate_p_1_coordinate.getSolrFieldName());
+    }
+    
     /**
      * Convert a SolrDocument to a SolrInputDocument.
      * This is useful if a document from the search index shall be modified and indexed again.
@@ -158,10 +165,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      */
     public SolrInputDocument toSolrInputDocument(SolrDocument doc) {
         SolrInputDocument sid = new SolrInputDocument();
-        Set<String> omitFields = new HashSet<String>(3);
-        omitFields.add(CollectionSchema.author_sxt.getSolrFieldName());
-        omitFields.add(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
-        omitFields.add(CollectionSchema.coordinate_p_1_coordinate.getSolrFieldName());
         for (String name: doc.getFieldNames()) {
             if (this.contains(name) && !omitFields.contains(name)) { // check each field if enabled in local Solr schema
                 sid.addField(name, doc.getFieldValue(name), 1.0f);
@@ -171,17 +174,13 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     }
     
     public SolrDocument toSolrDocument(SolrInputDocument doc) {
-        SolrDocument sid = new SolrDocument();
-        Set<String> omitFields = new HashSet<String>(3);
-        omitFields.add(CollectionSchema.author_sxt.getSolrFieldName());
-        omitFields.add(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
-        omitFields.add(CollectionSchema.coordinate_p_1_coordinate.getSolrFieldName());
+        SolrDocument sd = new SolrDocument();
         for (SolrInputField field: doc) {
             if (this.contains(field.getName()) && !omitFields.contains(field.getName())) { // check each field if enabled in local Solr schema
-                sid.setField(field.getName(), field.getValue());
+                sd.setField(field.getName(), field.getValue());
             }
         }
-        return sid;
+        return sd;
     }
     
     public SolrInputDocument metadata2solr(final URIMetadataRow md) {

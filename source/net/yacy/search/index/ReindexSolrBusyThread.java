@@ -24,15 +24,9 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.search.schema.CollectionConfiguration;
-import org.apache.lucene.index.FieldInfo;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.request.LukeRequest;
-import org.apache.solr.client.solrj.response.LukeResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
@@ -135,7 +129,7 @@ import org.apache.solr.common.SolrInputDocument;
                             
                             for (SolrDocument doc : xdocs) {
                                 SolrInputDocument idoc = colcfg.toSolrInputDocument(doc);
-                                Switchboard.getSwitchboard().index.fulltext().putDocument(idoc);
+                                Switchboard.getSwitchboard().index.putDocumentInQueue(idoc);
                                 processed++;
                             }
                         }                        

@@ -1192,7 +1192,7 @@ public final class Protocol {
 
                 // after this conversion we can remove the largest and not used field text_t and synonyms_sxt from the document
                 // because that goes into a search cache and would take a lot of memory in the search cache
-                doc.removeFields(CollectionSchema.text_t.getSolrFieldName());
+                //doc.removeFields(CollectionSchema.text_t.getSolrFieldName());
                 doc.removeFields(CollectionSchema.synonyms_sxt.getSolrFieldName());
                 
                 // the input document stays untouched because it contains top-level cloned objects
@@ -1214,16 +1214,14 @@ public final class Protocol {
             event.addExpectedRemoteReferences(-count);
             Network.log.logInfo("local search (solr): localpeer sent " + container.get(0).size() + "/" + docList.size() + " references");
         } else {
-            // learn the documents, this can be done later
-            try {
-                event.query.getSegment().fulltext().putDocuments(docs); docs.clear(); docs = null;
-                event.addNodes(container, facets, snippets, false, target.getName() + "/" + target.hash, (int) docList.getNumFound());
-                event.addFinalize();
-                event.addExpectedRemoteReferences(-count);
-                Network.log.logInfo("remote search (solr): peer " + target.getName() + " sent " + (container.size() == 0 ? 0 : container.get(0).size()) + "/" + docList.size() + " references");
-            } catch (IOException e) {
-                Log.logException(e);
+            for (SolrInputDocument doc: docs) {
+                event.query.getSegment().putDocumentInQueue(doc);
             }
+            docs.clear(); docs = null;
+            event.addNodes(container, facets, snippets, false, target.getName() + "/" + target.hash, (int) docList.getNumFound());
+            event.addFinalize();
+            event.addExpectedRemoteReferences(-count);
+            Network.log.logInfo("remote search (solr): peer " + target.getName() + " sent " + (container.size() == 0 ? 0 : container.get(0).size()) + "/" + docList.size() + " references");
         }
         final int dls = docList.size();
         docList.clear();
