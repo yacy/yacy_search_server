@@ -486,45 +486,6 @@ public final class Protocol {
         }
     }
 
-    /**
-     * check the status of a remote peer
-     * This method is a bit deprecated since we do not use it any more because of high CPU load during url count computation
-     * @param target
-     * @return an array of two long: [0] is the count of urls, [1] is a magic
-     */
-    public static long[] queryUrlCount(final Seed target) {
-        if (target == null) return new long[] {-1, -1};
-
-        // prepare request
-        final String salt = crypt.randomSalt();
-
-        // send request
-        try {
-            final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
-            parts.put("object", UTF8.StringBody("lurlcount"));
-            parts.put("ttl", UTF8.StringBody("0"));
-            parts.put("env", UTF8.StringBody(""));
-            final byte[] content = postToFile(target, "query.html", parts, 6000);
-            final Map<String, String> result = FileUtils.table(content);
-
-            if (result == null || result.isEmpty()) return new long[] {-1, -1};
-            final String resp = result.get("response");
-            if (resp == null) return new long[] {-1, -1};
-            String magic = result.get("magic");
-            if (magic == null) magic = "0";
-            try {
-                return new long[] {Long.parseLong(resp), Long.parseLong(magic)};
-            } catch ( final NumberFormatException e ) {
-                return new long[] {-1, -1};
-            }
-        } catch ( final IOException e ) {
-            if ( Network.log.isFine() ) {
-                Network.log.logFine("yacyClient.queryUrlCount error asking peer '" + target.getName() + "':" + e.toString());
-            }
-            return new long[] {-1, -1};
-        }
-    }
-
     public static RSSFeed queryRemoteCrawlURLs(
         final SeedDB seedDB,
         final Seed target,
@@ -898,7 +859,7 @@ public final class Protocol {
         public int availableCount; // number of returned LURL's for this search
         public int totalCount; //
         public Map<byte[], Integer> indexcount; //
-        public long searchtime; // time that the peer actually spent to create the result
+        //public long searchtime; // time that the peer actually spent to create the result
         public String[] references; // search hints, the top-words
         public List<URIMetadataRow> links; // LURLs of search
         public Map<byte[], String> indexabstract; // index abstracts, a collection of url-hashes per word
@@ -987,6 +948,7 @@ public final class Protocol {
             if ( resultMap == null || resultMap.isEmpty() ) {
                 throw new IOException("resultMap is NULL");
             }
+            /*
             try {
                 this.searchtime = Integer.parseInt(resultMap.get("searchtime"));
             } catch ( final NumberFormatException e ) {
@@ -995,6 +957,7 @@ public final class Protocol {
                     + ", map = "
                     + resultMap.toString());
             }
+            */
             try {
                 this.totalCount = Integer.parseInt(resultMap.get("joincount")); // the complete number of hits at remote site; rwi+solr (via: theSearch.getResultCount())
             } catch ( final NumberFormatException e ) {

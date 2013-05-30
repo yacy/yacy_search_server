@@ -128,7 +128,7 @@ public class IndexControlRWIs_p {
 
             if ( post.containsKey("keystringsearch") ) {
                 prop.put("keyhash", keyhash);
-                final SearchEvent theSearch = genSearchresult(prop, sb, segment, keyhash, null);
+                final SearchEvent theSearch = genSearchresult(prop, sb, keyhash, null);
                 if (theSearch.local_rwi_available.get() == 0) {
                     prop.put("searchresult", 1);
                     prop.putHTML("searchresult_word", keystring);
@@ -139,7 +139,7 @@ public class IndexControlRWIs_p {
                 if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
                     prop.put("keystring", "&lt;" + errmsg + "&gt;");
                 }
-                final SearchEvent theSearch = genSearchresult(prop, sb, segment, keyhash, null);
+                final SearchEvent theSearch = genSearchresult(prop, sb, keyhash, null);
                 if (theSearch.local_rwi_available.get() == 0) {
                     prop.put("searchresult", 2);
                     prop.putHTML("searchresult_wordhash", ASCII.String(keyhash));
@@ -235,7 +235,7 @@ public class IndexControlRWIs_p {
                 }
                 final Bitfield flags = compileFlags(post);
                 final int count = (post.get("lines", "all").equals("all")) ? -1 : post.getInt("lines", -1);
-                final SearchEvent theSearch = genSearchresult(prop, sb, segment, keyhash, flags);
+                final SearchEvent theSearch = genSearchresult(prop, sb, keyhash, flags);
                 genURLList(prop, keyhash, keystring, theSearch, flags, count);
             }
 
@@ -638,7 +638,6 @@ public class IndexControlRWIs_p {
     public static SearchEvent genSearchresult(
         final serverObjects prop,
         final Switchboard sb,
-        final Segment segment,
         final byte[] keyhash,
         final Bitfield filter) {
         
