@@ -139,7 +139,6 @@ public class RemoteSearch extends Thread {
             final int burstMultiwordPercent) {
         // check own peer status
         //if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
-
         // prepare seed targets and threads
         final List<Seed> dhtPeers =
             (clusterselection == null) ?
@@ -175,7 +174,8 @@ public class RemoteSearch extends Thread {
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false)) {
             final SolrQuery solrQuery = event.query.solrQuery();
             for (Seed s: nodePeers) {
-                solrRemoteSearch(event, solrQuery, start, count, s, blacklist);
+                Thread t = solrRemoteSearch(event, solrQuery, start, count, s, blacklist);
+                event.nodeSearchThreads.add(t);
             }
         }
                 

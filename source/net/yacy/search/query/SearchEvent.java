@@ -117,6 +117,7 @@ public final class SearchEvent {
     final WorkTables workTables;
     public final SecondarySearchSuperviser secondarySearchSuperviser;
     public final List<RemoteSearch> primarySearchThreadsL;
+    public final List<Thread> nodeSearchThreads;
     public Thread[] secondarySearchThreads;
     public final SortedMap<byte[], String> preselectedPeerHashes;
     private final Thread localSearchThread;
@@ -187,8 +188,24 @@ public final class SearchEvent {
         final int burstRobinsonPercent,
         final int burstMultiwordPercent,
         final boolean deleteIfSnippetFail) {
+
+        long ab = MemoryControl.available();
+        if (ab < 1024 * 1024 * 200) {
+            int eb = SearchEventCache.size(); 
+            SearchEventCache.cleanupEvents(false);
+            int en = SearchEventCache.size();
+            if (en < eb) {
+                log.logInfo("Cleaned up search event cache (1) " + eb + "->" + en + ", " + (ab - MemoryControl.available()) / 1024 / 1024 + " MB freed");
+            }
+        }
+        ab = MemoryControl.available();
+        int eb = SearchEventCache.size(); 
+        SearchEventCache.cleanupEvents(Math.max(1, (int) (MemoryControl.available() / (1024 * 1024 * 120))));
+        int en = SearchEventCache.size();
+        if (en < eb) {
+            log.logInfo("Cleaned up search event cache (2) " + eb + "->" + en + ", " + (ab - MemoryControl.available()) / 1024 / 1024 + " MB freed");
+        }
         
-        if (MemoryControl.available() < 1024 * 1024 * 100) SearchEventCache.cleanupEvents(false);
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.peers = peers;
         this.workTables = workTables;
@@ -277,8 +294,10 @@ public final class SearchEvent {
             final long timer = System.currentTimeMillis();
             if (this.query.getQueryGoal().getIncludeHashes().isEmpty()) {
                 this.primarySearchThreadsL = null;
+                this.nodeSearchThreads = null;
             } else {
                 this.primarySearchThreadsL = new ArrayList<RemoteSearch>();
+                this.nodeSearchThreads = new ArrayList<Thread>();
                 // start this concurrently because the remote search needs an enumeration
                 // of the remote peers which may block in some cases when i.e. DHT is active
                 // at the same time.
@@ -312,6 +331,7 @@ public final class SearchEvent {
             }
         } else {
             this.primarySearchThreadsL = null;
+            this.nodeSearchThreads = null;
             this.pollImmediately = !query.getSegment().connectedRWI() || !Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
             if ( generateAbstracts ) {
                 // we need the results now
@@ -584,25 +604,27 @@ public final class SearchEvent {
     protected void cleanup() {
 
         // stop all threads
-        if ( this.primarySearchThreadsL != null ) {
-            for ( final RemoteSearch search : this.primarySearchThreadsL ) {
-                if ( search != null ) {
-                    synchronized ( search ) {
-                        if ( search.isAlive() ) {
-                            search.interrupt();
-                        }
-                    }
+        if (this.localsolrsearch != null) {
+            if (localsolrsearch.isAlive()) synchronized (this.localsolrsearch) {this.localsolrsearch.interrupt();}
+        }
+        if (this.nodeSearchThreads != null) {
+            for (final Thread search : this.nodeSearchThreads) {
+                if (search != null) {
+                    synchronized (search) {if (search.isAlive()) {search.interrupt();}}
                 }
             }
         }
-        if ( this.secondarySearchThreads != null ) {
-            for ( final Thread search : this.secondarySearchThreads ) {
-                if ( search != null ) {
-                    synchronized ( search ) {
-                        if ( search.isAlive() ) {
-                            search.interrupt();
-                        }
-                    }
+        if (this.primarySearchThreadsL != null) {
+            for (final RemoteSearch search : this.primarySearchThreadsL) {
+                if (search != null) {
+                    synchronized (search) {if (search.isAlive()) {search.interrupt();}}
+                }
+            }
+        }
+        if (this.secondarySearchThreads != null) {
+            for (final Thread search : this.secondarySearchThreads ) {
+                if (search != null) {
+                    synchronized (search) {if (search.isAlive()) {search.interrupt();}}
                 }
             }
         }

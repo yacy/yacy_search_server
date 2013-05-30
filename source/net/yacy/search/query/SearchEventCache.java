@@ -27,9 +27,9 @@
 package net.yacy.search.query;
 
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.logging.Log;
@@ -41,7 +41,7 @@ import net.yacy.search.SwitchboardConstants;
 
 public class SearchEventCache {
 
-    private volatile static Map<String, SearchEvent> lastEvents = new ConcurrentHashMap<String, SearchEvent>(); // a cache for objects from this class: re-use old search requests
+    private volatile static LinkedHashMap<String, SearchEvent> lastEvents = new LinkedHashMap<String, SearchEvent>(); // a cache for objects from this class: re-use old search requests
     private static final long eventLifetimeBigMem = 600000; // the time an event will stay in the cache when available memory is high, 10 Minutes
     private static final long eventLifetimeMediumMem = 60000; // the time an event will stay in the cache when available memory is medium, 1 Minute
     private static final long eventLifetimeShortMem = 10000; // the time an event will stay in the cache when memory is low, 10 seconds
@@ -57,13 +57,17 @@ public class SearchEventCache {
     protected static void put(final String eventID, final SearchEvent event) {
         if (MemoryControl.shortStatus()) cleanupEvents(false);
         lastEventID = eventID;
-        final SearchEvent oldEvent = lastEvents.put(eventID, event);
-        if (oldEvent == null) cacheInsert++;
+        synchronized (lastEvents) {
+            final SearchEvent oldEvent = lastEvents.put(eventID, event);
+            if (oldEvent == null) cacheInsert++;
+        }
     }
 
     public static boolean delete(final String urlhash) {
-        for (final SearchEvent event: lastEvents.values()) {
-            if (event.delete(urlhash)) return true;
+        synchronized (lastEvents) {
+            for (final SearchEvent event: lastEvents.values()) {
+                if (event.delete(urlhash)) return true;
+            }
         }
         return false;
     }
@@ -75,16 +79,40 @@ public class SearchEventCache {
         final long memx = MemoryControl.available();
         final long acceptTime = memx > memlimitHigh ? eventLifetimeBigMem : memx > memlimitMedium ? eventLifetimeMediumMem : eventLifetimeShortMem;
         Map.Entry<String, SearchEvent> eventEntry;
-        final Iterator<Map.Entry<String, SearchEvent>> i = lastEvents.entrySet().iterator();
-        SearchEvent event;
-        while (i.hasNext()) {
-            eventEntry = i.next();
-            event = eventEntry.getValue();
-            if (event == null) continue;
-            if (all || event.getEventTime() + acceptTime < System.currentTimeMillis()) {
+        synchronized (lastEvents) {
+            final Iterator<Map.Entry<String, SearchEvent>> i = lastEvents.entrySet().iterator();
+            SearchEvent event;
+            while (i.hasNext()) {
+                eventEntry = i.next();
+                event = eventEntry.getValue();
+                if (event == null) continue;
+                if (all || event.getEventTime() + acceptTime < System.currentTimeMillis()) {
+                    event.cleanup();
+                    i.remove();
+                    cacheDelete++;
+                }
+            }
+        }
+    }
+    
+    public static void cleanupEvents(int maxsize) {
+        // remove old events in the event cache
+        if (MemoryControl.shortStatus()) {cleanupEvents(true); return;}
+        Map.Entry<String, SearchEvent> eventEntry;
+        synchronized (lastEvents) {
+            final Iterator<Map.Entry<String, SearchEvent>> i = lastEvents.entrySet().iterator(); // iterates in order of entry
+            int dc = lastEvents.size() - maxsize;
+            if (dc <= 0) return;
+            SearchEvent event;
+            while (i.hasNext()) {
+                eventEntry = i.next();
+                event = eventEntry.getValue();
+                if (event == null) continue;
                 event.cleanup();
                 i.remove();
                 cacheDelete++;
+                dc--;
+                if (dc <= 0) break;            
             }
         }
     }
@@ -122,7 +150,9 @@ public class SearchEventCache {
             // if a local crawl is ongoing, don't use the result from the cache to use possibly more results that come from the current crawl
             // to prevent that this happens during a person switches between the different result pages, a re-search happens no more than
             // once a minute
-            lastEvents.remove(id);
+            synchronized (lastEvents) {
+                lastEvents.remove(id);
+            }
             cacheDelete++;
             event = null;
         } else {
@@ -136,8 +166,10 @@ public class SearchEventCache {
         }
         if (event == null) {
             // check if there are too many other searches alive now
-            Log.logInfo("SearchEventCache", "getEvent: " + lastEvents.size() + " in cache");
-
+            synchronized (lastEvents) {
+                Log.logInfo("SearchEventCache", "getEvent: " + lastEvents.size() + " in cache");
+            }
+            
             // start a new event
             Switchboard sb = Switchboard.getSwitchboard();
             final boolean delete = sb == null || Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, true);
