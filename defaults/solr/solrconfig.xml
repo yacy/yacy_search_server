@@ -133,7 +133,7 @@
          <filter class="solr.LimitTokenCountFilterFactory" maxTokenCount="10000"/>
          -->
         <!-- Maximum time to wait for a write lock (ms) for an IndexWriter. Default: 1000 -->
-        <!-- <writeLockTimeout>1000</writeLockTimeout>  -->
+        <writeLockTimeout>20000</writeLockTimeout>
         
         <!-- Expert: Enabling compound file will use less files for the index,
          using fewer file descriptors on the expense of performance decrease.

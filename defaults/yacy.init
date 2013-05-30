@@ -803,7 +803,7 @@ search.excludehosth=
 search.verify.delete = true
 
 # remote search details
-remotesearch.maxcount = 20
+remotesearch.maxcount = 10
 remotesearch.maxtime = 1000
 
 # specifies if yacy should set it's own referer if no referer URL

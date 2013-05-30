@@ -623,6 +623,7 @@ public final class yacy {
 	        if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) headless = false;
 	        System.setProperty("java.awt.headless", headless ? "true" : "false");
             System.setProperty("java.net.preferIPv4Stack", "true");
+            System.setProperty("solr.directoryFactory","solr.MMapDirectoryFactory"); // should prevent ClosedChannelException
 
 	        String s = ""; for (final String a: args) s += a + " ";
 	        yacyRelease.startParameter = s.trim();
