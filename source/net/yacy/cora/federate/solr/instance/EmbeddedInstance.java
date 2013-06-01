@@ -39,7 +39,7 @@ import com.google.common.io.Files;
 public class EmbeddedInstance implements SolrInstance {
     
     private final static String[] confFiles = {"solrconfig.xml", "schema.xml", "stopwords.txt", "synonyms.txt", "protwords.txt", "currency.xml", "elevate.xml", "xslt/example.xsl", "xslt/json.xsl", "lang/"};
-
+                                              // additional a optional   solrcore.properties     (or solrcore.x86.properties for 32bit systems is copied
     private CoreContainer coreContainer;
     private String defaultCoreName;
     private SolrCore defaultCore;
@@ -92,7 +92,7 @@ public class EmbeddedInstance implements SolrInstance {
             throw new IOException("cannot get the default core; available = " + MemoryControl.available() + ", free = " + MemoryControl.free());
         }
         this.defaultCoreServer = new EmbeddedSolrServer(this.coreContainer, this.defaultCoreName);
-        
+
         // initialize core cache
         this.cores = new ConcurrentHashMap<String, SolrCore>();
         this.cores.put(this.defaultCoreName, this.defaultCore);
@@ -129,13 +129,37 @@ public class EmbeddedInstance implements SolrInstance {
             } else {
                 target = new File(conf, cf);
                 target.getParentFile().mkdirs();
-                try {
+                try {                                       
                     Files.copy(source, target);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
+        
+        // copy the solrcore.properties
+        // for 32bit systems (os.arch name not containing '64') take the solrcore.x86.properties as solrcore.properties if exists
+        String os = System.getProperty("os.arch");            
+        if (os.contains("64")) {
+            source = new File(solr_config, "solrcore.properties");
+        } else {
+            source = new File(solr_config, "solrcore.x86.properties");
+            if (source.exists()) {
+                source = new File(solr_config, "solrcore.properties");
+            }
+        }
+        // solr alwasy reads the solrcore.properties file if exists in core/conf directory
+        target = new File(conf, "solrcore.properties");
+
+        if (source.exists()) {
+            try {
+                Files.copy(source, target);
+                Log.logFine("initializeCoreConf", "overwrite " + target.getAbsolutePath() + " with " + source.getAbsolutePath());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+      
     }
     
     public File getContainerPath() {

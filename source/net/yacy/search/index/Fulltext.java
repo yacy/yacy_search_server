@@ -328,9 +328,9 @@ public final class Fulltext {
     
     public URIMetadataNode getMetadata(WeakPriorityBlockingQueue.Element<WordReferenceVars> element) {
         if (element == null) return null;
-        WordReferenceVars wre = element.getElement();
-        long weight = element.getWeight();
+        WordReferenceVars wre = element.getElement();        
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
+        long weight = element.getWeight();
         URIMetadataNode node = getMetadata(wre.urlhash(), wre, weight);
         return node;
     }
@@ -612,7 +612,7 @@ public final class Fulltext {
         if (urlHash == null) return null;
         String reason = (String) this.getDefaultConnector().getFieldById(urlHash, CollectionSchema.failreason_s.getSolrFieldName());
         if (reason == null) return null;
-        return reason == null ? null : reason.length() == 0 ? null : reason;
+        return reason.length() == 0 ? null : reason;
     }
     
     public List<File> dumpFiles() {
