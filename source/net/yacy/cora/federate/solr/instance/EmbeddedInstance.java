@@ -144,7 +144,7 @@ public class EmbeddedInstance implements SolrInstance {
             source = new File(solr_config, "solrcore.properties");
         } else {
             source = new File(solr_config, "solrcore.x86.properties");
-            if (source.exists()) {
+            if (!source.exists()) {
                 source = new File(solr_config, "solrcore.properties");
             }
         }
