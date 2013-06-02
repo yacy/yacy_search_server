@@ -580,12 +580,12 @@ public final class Fulltext {
     @Deprecated
     public boolean exists(final String urlHash) {
         if (urlHash == null) return false;
+        if (this.urlIndexFile != null && this.urlIndexFile.has(ASCII.getBytes(urlHash))) return true;
         try {
             if (this.getDefaultConnector().existsById(urlHash)) return true;
         } catch (final Throwable e) {
             Log.logException(e);
         }
-        if (this.urlIndexFile != null && this.urlIndexFile.has(ASCII.getBytes(urlHash))) return true;
         return false;
     }
     
@@ -599,6 +599,18 @@ public final class Fulltext {
         HashSet<String> e = new HashSet<String>();
         if (ids == null || ids.size() == 0) return e;
         Collection<String> idsC = new HashSet<String>();
+        idsC.addAll(ids);
+        if (this.urlIndexFile != null) {
+            Iterator<String> idsi = idsC.iterator();
+            String h;
+            while (idsi.hasNext()) {
+                h = idsi.next();
+                if (this.urlIndexFile.has(ASCII.getBytes(h))) {
+                    idsi.remove();
+                    e.add(h);
+                }
+            }
+        }
         try {
             Set<String> e1 = this.getDefaultConnector().existsByIds(idsC);
             e.addAll(e1);
