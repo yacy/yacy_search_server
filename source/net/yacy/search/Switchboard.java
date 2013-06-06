@@ -112,7 +112,6 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
-import net.yacy.cora.storage.HandleSet;
 import net.yacy.crawler.CrawlStacker;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.HarvestProcess;
@@ -218,9 +217,9 @@ public final class Switchboard extends serverSwitch {
     public static SortedSet<String> badwords = new TreeSet<String>(NaturalOrder.naturalComparator);
     public static SortedSet<String> stopwords = new TreeSet<String>(NaturalOrder.naturalComparator);
     public static SortedSet<String> blueList = null;
-    public static HandleSet badwordHashes = null;
-    public static HandleSet blueListHashes = null;
-    public static HandleSet stopwordHashes = null;
+//    public static HandleSet badwordHashes = null; // not used 2013-06-06
+//    public static HandleSet blueListHashes = null; // not used 2013-06-06
+    public static SortedSet<byte[]> stopwordHashes = null;
     public static Blacklist urlBlacklist = null;
 
     public static WikiParser wikiParser = null;
@@ -579,7 +578,7 @@ public final class Switchboard extends serverSwitch {
             } else {
                 blueList = new TreeSet<String>();
             }
-            blueListHashes = Word.words2hashesHandles(blueList);
+ //         blueListHashes = Word.words2hashesHandles(blueList);
             this.log.logConfig("loaded blue-list from file "
                 + plasmaBlueListFile.getName()
                 + ", "
@@ -601,7 +600,7 @@ public final class Switchboard extends serverSwitch {
         if ( badwords == null || badwords.isEmpty() ) {
             final File badwordsFile = new File(appPath, SwitchboardConstants.LIST_BADWORDS_DEFAULT);
             badwords = SetTools.loadList(badwordsFile, NaturalOrder.naturalComparator);
-            badwordHashes = Word.words2hashesHandles(badwords);
+//          badwordHashes = Word.words2hashesHandles(badwords);
             this.log.logConfig("loaded badwords from file "
                 + badwordsFile.getName()
                 + ", "
@@ -614,7 +613,20 @@ public final class Switchboard extends serverSwitch {
         if ( stopwords == null || stopwords.isEmpty() ) {
             final File stopwordsFile = new File(appPath, SwitchboardConstants.LIST_STOPWORDS_DEFAULT);
             stopwords = SetTools.loadList(stopwordsFile, NaturalOrder.naturalComparator);
-            stopwordHashes = Word.words2hashesHandles(stopwords);
+            // append locale language stopwords using setting of interface language (file yacy.stopwords.xx)
+            //TODO: append / share Solr stopwords.txt
+            final File stopwordsFilelocale = new File (stopwordsFile.getAbsolutePath()+"."+this.getConfig("locale.language","default"));
+            if (stopwordsFilelocale.exists()) {
+                stopwords.addAll(SetTools.loadList(stopwordsFilelocale, NaturalOrder.naturalComparator));
+            }
+           
+            if (!stopwords.isEmpty()) {
+                stopwordHashes = new TreeSet<byte[]>(NaturalOrder.naturalOrder);
+                for (final String wordstr : stopwords) {
+                    stopwordHashes.add(Word.word2hash(wordstr));
+                }
+            }
+            
             this.log.logConfig("loaded stopwords from file "
                 + stopwordsFile.getName()
                 + ", "

@@ -36,6 +36,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.Set;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
@@ -329,10 +330,17 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
     }
 
     @Override
-    public void excludeDestructive(final HandleSet other) {
-        excludeDestructive(this, other);
-    }
+    public void excludeDestructive (final Set<byte[]> other) {
+        if (other == null) return;
+        if (other.isEmpty()) return;
 
+        if (other.size() > this.size()) {
+            for (byte[] b: this) {if (other.contains(b)) this.remove(b);}   
+        } else {
+            for (byte[] b: other) {this.remove(b) ;}
+        }
+    }
+/*   not used 2013-06-06 
     private static void excludeDestructive(final HandleSet set1, final HandleSet set2) {
         if (set1 == null) return;
         if (set2 == null) return;
@@ -354,7 +362,7 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
         final Iterator<byte[]> si = small.iterator();
         while (si.hasNext()) large.remove(si.next());
     }
-
+*/
     public static void main(String[] args) {
         HandleSet s = new RowHandleSet(8, NaturalOrder.naturalOrder, 100);
         try {

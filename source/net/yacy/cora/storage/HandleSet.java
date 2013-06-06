@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.Set;
 
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
@@ -88,8 +89,9 @@ public interface HandleSet extends Iterable<byte[]>, Cloneable, Serializable {
 
     public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey);
 
-    public void excludeDestructive(final HandleSet other);
-
+  //  public void excludeDestructive(final HandleSet other);
+    public void excludeDestructive(final Set<byte[]> other); // used for stopwordhashes etc.
+    
     @Override
     public Iterator<byte[]> iterator();
 

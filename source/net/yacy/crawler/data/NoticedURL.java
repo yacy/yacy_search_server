@@ -48,7 +48,7 @@ import net.yacy.kelondro.logging.Log;
 public class NoticedURL {
 
     public enum StackType {
-        LOCAL, GLOBAL, OVERHANG, REMOTE, NOLOAD;
+        LOCAL, GLOBAL, REMOTE, NOLOAD;
     }
 
     private static final int minimumLocalDeltaInit  =  10; // the minimum time difference between access of the same local domain
@@ -152,7 +152,6 @@ public class NoticedURL {
             case NOLOAD:    return (this.noloadStack == null) ? 0 : this.noloadStack.size();
             case LOCAL:     return (this.coreStack == null) ? 0 : this.coreStack.size();
             case GLOBAL:    return (this.limitStack == null) ? 0 : this.limitStack.size();
-            case OVERHANG: return 0;
             case REMOTE:   return (this.remoteStack == null) ? 0 : this.remoteStack.size();
             default: return -1;
         }

@@ -384,16 +384,18 @@ public final class SearchEvent {
         this.resultList = new WeakPriorityBlockingQueue<ResultEntry>(Math.max(1000, 10 * query.itemsPerPage()), true); // this is the result, enriched with snippets, ranked and ordered by ranking
 
         // snippets do not need to match with the complete query hashes,
-        // only with the query minus the stopwords which had not been used for the search
-        HandleSet filtered;
-        try {
-            filtered = RowHandleSet.joinConstructive(query.getQueryGoal().getIncludeHashes(), Switchboard.stopwordHashes);
-        } catch (final SpaceExceededException e) {
-            Log.logException(e);
-            filtered = new RowHandleSet(query.getQueryGoal().getIncludeHashes().keylen(), query.getQueryGoal().getIncludeHashes().comparator(), 0);
+        // only with the query minus the stopwords which had not been used for the search       
+        boolean filtered = false;
+        // check if query contains stopword
+        Iterator<byte[]> it = query.getQueryGoal().getIncludeHashes().iterator();
+        while (it.hasNext()) {
+            if (Switchboard.stopwordHashes.contains((it.next()))) {
+                filtered = true;
+                break;
+            }
         }
-        this.snippetFetchWordHashes = query.getQueryGoal().getIncludeHashes().clone();
-        if (filtered != null && !filtered.isEmpty()) {
+        this.snippetFetchWordHashes = query.getQueryGoal().getIncludeHashes().clone();        
+        if (filtered) { // remove stopwords
             this.snippetFetchWordHashes.excludeDestructive(Switchboard.stopwordHashes);
         }
 

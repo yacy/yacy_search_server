@@ -527,10 +527,11 @@ public final class SetTools {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             String line;
             while ((line = br.readLine()) != null) {
+                int i = line.indexOf("|"); // ignore text after char (Solr stopwordfile syntax allows for # and | )
+                if (i>0) line = line.substring(0,i-1);
                 line = line.trim();
                 if (!line.isEmpty() && line.charAt(0) != '#') list.add(line.trim().toLowerCase());
             }
-            br.close();
         } catch (final IOException e) {
         } finally {
             if (br != null) try{br.close();}catch(final Exception e){}

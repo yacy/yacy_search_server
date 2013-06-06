@@ -1,0 +1,3 @@
+# Default stopword list (always loaded)
+# a configured language specific stopword list is appended (like: yacy.stopwords.de)
+# 

@@ -256,8 +256,7 @@ public class CrawlQueues {
             final String stats = "LOCALCRAWL[" +
                 this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD) + ", " +
                 this.noticeURL.stackSize(NoticedURL.StackType.LOCAL) + ", " +
-                this.noticeURL.stackSize(NoticedURL.StackType.GLOBAL) + ", " +
-                this.noticeURL.stackSize(NoticedURL.StackType.OVERHANG) +
+                this.noticeURL.stackSize(NoticedURL.StackType.GLOBAL) + 
                 ", " + this.noticeURL.stackSize(NoticedURL.StackType.REMOTE) + "]";
             try {
                 if (this.noticeURL.stackSize(NoticedURL.StackType.NOLOAD) > 0) {
@@ -585,7 +584,7 @@ public class CrawlQueues {
         }
 
         // we don't want to crawl a global URL globally, since WE are the global part. (from this point of view)
-        final String stats = "REMOTETRIGGEREDCRAWL[" + this.noticeURL.stackSize(NoticedURL.StackType.LOCAL) + ", " + this.noticeURL.stackSize(NoticedURL.StackType.GLOBAL) + ", " + this.noticeURL.stackSize(NoticedURL.StackType.OVERHANG) + ", "
+        final String stats = "REMOTETRIGGEREDCRAWL[" + this.noticeURL.stackSize(NoticedURL.StackType.LOCAL) + ", " + this.noticeURL.stackSize(NoticedURL.StackType.GLOBAL) + ", "
                         + this.noticeURL.stackSize(NoticedURL.StackType.REMOTE) + "]";
         try {
             final Request urlEntry = this.noticeURL.pop(NoticedURL.StackType.REMOTE, true, this.sb.crawler, this.sb.robots);
