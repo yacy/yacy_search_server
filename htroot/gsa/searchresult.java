@@ -155,7 +155,10 @@ public class searchresult {
         // add sites operator
         String[] site = post.remove("site"); // example: col1|col2
         if (site != null && site[0].length() > 0) {
-            post.put(CommonParams.FQ, QueryModifier.parseCollectionExpression(site[0]));
+            String origfq = post.get(CommonParams.FQ);
+            String sitefq = QueryModifier.parseCollectionExpression(site[0]);
+            post.put(CommonParams.FQ, origfq == null || origfq.length() == 0 ? sitefq :
+                "(" + origfq + ") AND (" + sitefq + ")");
         }
         
         // get the embedded connector
