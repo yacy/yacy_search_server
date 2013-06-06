@@ -387,11 +387,13 @@ public final class SearchEvent {
         // only with the query minus the stopwords which had not been used for the search       
         boolean filtered = false;
         // check if query contains stopword
-        Iterator<byte[]> it = query.getQueryGoal().getIncludeHashes().iterator();
-        while (it.hasNext()) {
-            if (Switchboard.stopwordHashes.contains((it.next()))) {
-                filtered = true;
-                break;
+        if (Switchboard.stopwordHashes != null) {
+            Iterator<byte[]> it = query.getQueryGoal().getIncludeHashes().iterator();
+            while (it.hasNext()) {
+                if (Switchboard.stopwordHashes.contains((it.next()))) {
+                    filtered = true;
+                    break;
+                }
             }
         }
         this.snippetFetchWordHashes = query.getQueryGoal().getIncludeHashes().clone();        
