@@ -186,9 +186,9 @@ public class URIMetadataNode {
     }
 
     public byte[] referrerHash() {
-        ArrayList<String>  referrer = getStringList(CollectionSchema.referrer_id_txt);
-        if (referrer == null || referrer.size() == 0) return null;
-        return ASCII.getBytes(referrer.get(0));
+        String  referrer = getString(CollectionSchema.referrer_id_s);
+        if (referrer == null || referrer.length() == 0) return null;
+        return ASCII.getBytes(referrer);
     }
 
     public int size() {

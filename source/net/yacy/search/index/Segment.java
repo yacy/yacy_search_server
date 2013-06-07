@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.solr.common.SolrDocument;
@@ -45,6 +46,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
+import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
@@ -82,6 +84,7 @@ import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphConfiguration;
+import net.yacy.search.schema.WebgraphSchema;
 
 public class Segment {
 
@@ -278,6 +281,108 @@ public class Segment {
         return 999;
     }
 
+    public ReferenceReportCache getReferenceReportCache()  {
+        return new ReferenceReportCache();
+    }
+    
+    public class ReferenceReportCache {
+        Map<byte[], ReferenceReport> cache;
+        public ReferenceReportCache() {
+            this.cache = new TreeMap<byte[], ReferenceReport>(Base64Order.enhancedCoder);
+        }
+        public ReferenceReport getReferenceReport(final byte[] id, final boolean acceptSelfReference) throws IOException {
+            ReferenceReport rr = cache.get(id);
+            if (rr != null) return rr;
+            try {
+                rr = new ReferenceReport(id, acceptSelfReference);
+                cache.put(id, rr);
+                return rr;
+            } catch (SpaceExceededException e) {
+                Log.logException(e);
+                throw new IOException(e.getMessage());
+            }
+        }
+    }
+    
+    /**
+     * A ReferenceReport object is a container for all referenced to a specific url.
+     * The class stores the number of links from domain-internal and domain-external backlinks,
+     * and the host hashes of all externally linking documents,
+     * all IDs from external hosts and all IDs from the same domain.
+     */
+    public final class ReferenceReport {
+        private int internal, external;
+        private HandleSet externalHosts, externalIDs, internalIDs;
+        public ReferenceReport(final byte[] id, final boolean acceptSelfReference) throws IOException, SpaceExceededException {
+            this.internal = 0;
+            this.external = 0;
+            this.externalHosts = new RowHandleSet(6, Base64Order.enhancedCoder, 0);
+            this.internalIDs = new RowHandleSet(12, Base64Order.enhancedCoder, 0);
+            this.externalIDs = new RowHandleSet(12, Base64Order.enhancedCoder, 0);
+            if (writeToWebgraph()) {
+                // reqd the references from the webgraph
+                SolrConnector webgraph = Segment.this.fulltext.getWebgraphConnector();
+                webgraph.commit(true);
+                BlockingQueue<SolrDocument> docs = webgraph.concurrentDocumentsByQuery(WebgraphSchema.target_id_s.getSolrFieldName() + ":\"" + ASCII.String(id) + "\"", 0, 10000000, 600000, 100, WebgraphSchema.source_id_s.getSolrFieldName());
+                SolrDocument doc;
+                try {
+                    while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+                        String refid = (String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName());
+                        if (refid == null) continue;
+                        byte[] refidh = ASCII.getBytes(refid);
+                        byte[] hh = new byte[6]; // host hash
+                        System.arraycopy(refidh, 6, hh, 0, 6);
+                        if (ByteBuffer.equals(hh, 0, id, 6, 6)) {
+                            if (acceptSelfReference || !ByteBuffer.equals(refidh, id)) {
+                                internalIDs.put(refidh);
+                                internal++;
+                            }
+                        } else {
+                            externalHosts.put(hh);
+                            externalIDs.put(refidh);
+                            external++;
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    Log.logException(e);
+                }
+            } else {
+                // read the references from the citation index
+                ReferenceContainer<CitationReference> references;
+                references = urlCitation().get(id, null);
+                if (references == null) return; // no references at all
+                Iterator<CitationReference> ri = references.entries();
+                while (ri.hasNext()) {
+                    CitationReference ref = ri.next();
+                    byte[] hh = ref.hosthash(); // host hash
+                    if (ByteBuffer.equals(hh, 0, id, 6, 6)) {
+                        internalIDs.put(ref.urlhash());
+                        internal++;
+                    } else {
+                        externalHosts.put(hh);
+                        externalIDs.put(ref.urlhash());
+                        external++;
+                    }
+                }
+            }
+        }
+        public int getInternalCount() {
+            return this.internal;
+        }
+        public int getExternalCount() {
+            return this.external;
+        }
+        public HandleSet getExternalHostIDs() {
+            return this.externalHosts;
+        }
+        public HandleSet getExternalIDs() {
+            return this.externalIDs;
+        }
+        public HandleSet getInternallIDs() {
+            return this.internalIDs;
+        }
+    }
+    
     public long RWICount() {
         if (this.termIndex == null) return 0;
         return this.termIndex.sizesMax();
@@ -598,7 +703,7 @@ public class Segment {
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
         if (this.connectedCitation()) {
-            this.fulltext.getDefaultConfiguration().postprocessing_references(this, null, vector, url, null);
+            this.fulltext.getDefaultConfiguration().postprocessing_references(this.fulltext, this.getReferenceReportCache(), null, vector, url, null);
         }
         // STORE TO SOLR
         String error = null;

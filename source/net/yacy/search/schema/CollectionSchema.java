@@ -51,7 +51,9 @@ public enum CollectionSchema implements SchemaDeclaration {
     httpstatus_i(SolrType.num_integer, true, true, false, false, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
     httpstatus_redirect_s(SolrType.num_integer, true, true, false, false, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
     references_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references, should be equal to references_internal_i + references_external_i"),
-    references_internal_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references from same host as referenced url"),
+    references_internal_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references from same host to referenced url"),
+    references_internal_id_sxt(SolrType.string, true, true, true, false, true, "ids of unique http references from same host to referenced url"),
+    references_internal_url_sxt(SolrType.string, true, true, true, false, true, "urls of unique http references from same host to referenced url"),
     references_external_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references from external hosts"),
     references_exthosts_i(SolrType.num_integer, true, true, false, false, false, "number of external hosts which provide http references"),
     clickdepth_i(SolrType.num_integer, true, true, false, false, false, "depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url"),
@@ -60,7 +62,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     // optional but recommended, part of index distribution
     load_date_dt(SolrType.date, true, true, false, false, false, "time when resource was loaded"),
     fresh_date_dt(SolrType.date, true, true, false, false, false, "date until resource shall be considered as fresh"),
-    referrer_id_txt(SolrType.string, true, true, true, false, false, "ids of referrer to this document"),// byte[] referrerHash();
+    referrer_id_s(SolrType.string, true, true, false, false, false, "id of the referrer to this document, discovered during crawling"),// byte[] referrerHash();
     publisher_t(SolrType.text_general, true, true, false, false, true, "the name of the publisher of the document"),// String dc_publisher();
     language_s(SolrType.string, true, true, false, false, false, "the language used in the document"),// byte[] language();
     audiolinkscount_i(SolrType.num_integer, true, true, false, false, false, "number of links to audio resources"),// int laudio();
@@ -183,6 +185,11 @@ public enum CollectionSchema implements SchemaDeclaration {
     opengraph_type_s(SolrType.text_general, true, true, false, false, false, "Open Graph Metadata from og:type metadata field, see http://ogp.me/ns#"),
     opengraph_url_s(SolrType.text_general, true, true, false, false, false, "Open Graph Metadata from og:url metadata field, see http://ogp.me/ns#"),
     opengraph_image_s(SolrType.text_general, true, true, false, false, false, "Open Graph Metadata from og:image metadata field, see http://ogp.me/ns#"),
+    
+    // link structure for ranking
+    cr_host_count_i(SolrType.num_integer, true, true, false, false, false, "the number of documents within a single host"),
+    cr_host_chance_d(SolrType.num_double, true, true, false, false, false, "the chance to click on this page when randomly clicking on links within on one host"),
+    cr_host_norm_i(SolrType.num_integer, true, true, false, false, false, "normalization of chance: 0 for lower halve of cr_host_count_i urls, 1 for 1/2 of the remaining and so on. the maximum number is 10"),
     
     // special values; can only be used if '_val' type is defined in schema file; this is not standard
     bold_val(SolrType.num_integer, true, true, true, false, false, "number of occurrences of texts in bold_txt"),

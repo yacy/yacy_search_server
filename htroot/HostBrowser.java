@@ -21,6 +21,7 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -273,8 +274,12 @@ public class HostBrowser {
                         CollectionSchema.clickdepth_i.getSolrFieldName(),
                         CollectionSchema.references_i.getSolrFieldName(),
                         CollectionSchema.references_internal_i.getSolrFieldName(),
+                        CollectionSchema.references_internal_id_sxt.getSolrFieldName(),
+                        CollectionSchema.references_internal_url_sxt.getSolrFieldName(),
                         CollectionSchema.references_external_i.getSolrFieldName(),
-                        CollectionSchema.references_exthosts_i.getSolrFieldName()
+                        CollectionSchema.references_exthosts_i.getSolrFieldName(),
+                        CollectionSchema.cr_host_chance_d.getSolrFieldName(),
+                        CollectionSchema.cr_host_norm_i.getSolrFieldName()   
                         );
                 SolrDocument doc;
                 Set<String> storedDocs = new HashSet<String>();
@@ -290,7 +295,7 @@ public class HostBrowser {
                     String errortype = (String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName());
                     FailType error = errortype == null ? null : FailType.valueOf(errortype);
                     String ids = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-                    infoCache.put(ids, new InfoCacheEntry(doc));
+                    infoCache.put(ids, new InfoCacheEntry(sb.index.fulltext(), doc));
                     if (u.startsWith(path)) {
                         if (delete) {
                             deleteIDs.add(ids);
@@ -425,9 +430,7 @@ public class HostBrowser {
                             if (type == StoreType.INDEX) {
                                 String ids = ASCII.String(uri.hash());
                                 InfoCacheEntry ice = infoCache.get(ids);
-                                prop.put("files_list_" + c + "_type_stored_comment",
-                                        (ice.references >= 0 ? "refs: " + ice.references_internal + " int, " + ice.references_external + " ext, " + ice.references_exthosts + " hosts" : "") +
-                                        (ice.references >= 0 && ice.clickdepth >= 0 ? ", " : "") + (ice.clickdepth >= 0 ? "clickdepth: " + ice.clickdepth : ""));
+                                prop.put("files_list_" + c + "_type_stored_comment", ice.toString()); // ice.toString() contains html, therefore do not use putHTML here
                             }
                             prop.put("files_list_" + c + "_type_stored_load", loadRight ? 1 : 0);
                             if (error) {
@@ -505,18 +508,51 @@ public class HostBrowser {
     }
 
     public static final class InfoCacheEntry {
+        public Integer cr_n;
+        public Double  cr_c;
         public int clickdepth, references, references_internal, references_external, references_exthosts;
-        public InfoCacheEntry(final SolrDocument doc) {
+        public List<String> references_internal_urls;
+        private final Fulltext fulltext;
+        public InfoCacheEntry(final Fulltext fulltext, final SolrDocument doc) {
+            this.fulltext = fulltext;
+            this.cr_c = (Double) doc.getFieldValue(CollectionSchema.cr_host_chance_d.getSolrFieldName());
+            this.cr_n = (Integer) doc.getFieldValue(CollectionSchema.cr_host_norm_i.getSolrFieldName());            
             Integer cd = (Integer) doc.getFieldValue(CollectionSchema.clickdepth_i.getSolrFieldName());
             Integer rc = (Integer) doc.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
             Integer rc_internal = (Integer) doc.getFieldValue(CollectionSchema.references_internal_i.getSolrFieldName());
+            Collection<Object> rc_internal_id = doc.getFieldValues(CollectionSchema.references_internal_id_sxt.getSolrFieldName());
+            Collection<Object> rc_internal_url = doc.getFieldValues(CollectionSchema.references_internal_url_sxt.getSolrFieldName());
             Integer rc_external = (Integer) doc.getFieldValue(CollectionSchema.references_external_i.getSolrFieldName());
             Integer rc_exthosts = (Integer) doc.getFieldValue(CollectionSchema.references_exthosts_i.getSolrFieldName());
             this.clickdepth = (cd == null || cd.intValue() < 0) ? 999 : cd.intValue();
             this.references = (rc == null || rc.intValue() <= 0) ? 0 : rc.intValue();
             this.references_internal = (rc_internal == null || rc_internal.intValue() <= 0) ? 0 : rc_internal.intValue();
+            // calculate the url reference list
+            this.references_internal_urls = new ArrayList<String>();
+            if (rc_internal_url != null) {
+                for (Object o: rc_internal_url) references_internal_urls.add((String) o);
+            } else if (rc_internal_id != null) {
+                for (Object o: rc_internal_id) {
+                    DigestURI u = fulltext.getURL(ASCII.getBytes((String) o));
+                    if (u != null) references_internal_urls.add(u.toNormalform(true));
+                }
+            }
             this.references_external = (rc_external == null || rc_external.intValue() <= 0) ? 0 : rc_external.intValue();
             this.references_exthosts = (rc_exthosts == null || rc_exthosts.intValue() <= 0) ? 0 : rc_exthosts.intValue();
+        }
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            for (String s: references_internal_urls) sb.append("<a href='").append(s).append("' target='_blank'><img src='env/grafics/i16.gif' alt='info' title='" + s + "' width='12' height='12'/></a>");
+            if (sb.length() == 0 && !fulltext.getDefaultConfiguration().contains(CollectionSchema.references_internal_id_sxt))  sb.append("<a href='/IndexSchema_p.html'><img src='env/grafics/i16.gif' alt='info' title='activate references_internal_id_sxt in IndexSchema_p.html to see all backlinks' width='12' height='12'/></a>");
+            return
+                    (this.clickdepth >= 0 ?
+                            "clickdepth: " + this.clickdepth :
+                            "") +
+                    (this.cr_c != null ? ", cr=" + (Math.round(this.cr_c * 1000.0d) / 1000.0d) : "") +
+                    (this.cr_n != null ? ", crn=" + this.cr_n : "") +
+                    (this.references >= 0 ?
+                            ", refs: " + this.references_exthosts + " hosts, " + this.references_external + " ext, " + this.references_internal + " int" + (sb.length() > 0 ? " " + sb.toString() + "" : "") :
+                            "");
         }
     }
 

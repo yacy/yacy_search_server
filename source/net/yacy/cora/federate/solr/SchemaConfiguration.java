@@ -23,6 +23,8 @@ package net.yacy.cora.federate.solr;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -32,16 +34,14 @@ import org.apache.log4j.Logger;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
-import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.storage.Configuration;
 import net.yacy.cora.storage.HandleSet;
-import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.rwi.ReferenceContainer;
-import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segment.ReferenceReport;
+import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.schema.CollectionSchema;
 
 public class SchemaConfiguration extends Configuration implements Serializable {
@@ -94,56 +94,72 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         return false;
     }
 
-    public boolean postprocessing_references(Segment segment, SolrDocument doc, SolrInputDocument sid, DigestURI url, Map<String, Long> hostExtentCount) {
-        if (!(this.contains(CollectionSchema.references_i) || this.contains(CollectionSchema.references_internal_i) ||
+    public boolean postprocessing_references(Fulltext fulltext, ReferenceReportCache rrCache, SolrDocument doc, SolrInputDocument sid, DigestURI url, Map<String, Long> hostExtentCount) {
+        if (!(this.contains(CollectionSchema.references_i) ||
+              this.contains(CollectionSchema.references_internal_i) ||
+              this.contains(CollectionSchema.references_internal_id_sxt) || this.contains(CollectionSchema.references_internal_url_sxt) ||
               this.contains(CollectionSchema.references_external_i) || this.contains(CollectionSchema.references_exthosts_i))) return false;
         Integer all_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
         Integer internal_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_internal_i.getSolrFieldName());
+        Collection<Object> internal_ids_old = doc == null ? null : doc.getFieldValues(CollectionSchema.references_internal_id_sxt.getSolrFieldName());
+        Collection<Object> internal_urls_old = doc == null ? null : doc.getFieldValues(CollectionSchema.references_internal_url_sxt.getSolrFieldName());
         Integer external_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_external_i.getSolrFieldName());
         Integer exthosts_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_exthosts_i.getSolrFieldName());
         Integer hostextc_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.host_extent_i.getSolrFieldName());
-        ReferenceContainer<CitationReference> references;
         try {
-            int all = 0, internal = 0, external = 0;
-            references = segment.urlCitation().get(url.hash(), null);
-            if (references == null) return false; // no references at all
-            //int references = segment.urlCitation().count(url.hash());
-            byte[] uh0 = url.hash();
-            Iterator<CitationReference> ri = references.entries();
-            HandleSet exthosts = new RowHandleSet(6, Base64Order.enhancedCoder, 0);
-            while (ri.hasNext()) {
-                CitationReference ref = ri.next();
-                byte[] hh = ref.hosthash();
-                exthosts.put(hh);
-                all++;
-                if (ByteBuffer.equals(hh, 0, uh0, 6, 6)) internal++; else external++;
+            ReferenceReport rr = rrCache.getReferenceReport(url.hash(), false);
+            List<String> internalIDs = new ArrayList<String>();
+            HandleSet iids = rr.getInternallIDs();
+            for (byte[] b: iids) internalIDs.add(ASCII.String(b));
+            List<String> internalURLs = new ArrayList<String>();
+            if (this.contains(CollectionSchema.references_internal_url_sxt)) {
+                // get all urls from the index and store them here
+                for (String id: internalIDs) {
+                    DigestURI u = fulltext.getURL(ASCII.getBytes(id));
+                    if (u != null) internalURLs.add(u.toNormalform(true));
+                }
             }
             
             boolean change = false;
-            if (all_old == null || all_old.intValue() != all) {
+            int all = rr.getExternalCount() + rr.getInternalCount();
+            if (this.contains(CollectionSchema.references_i) &&
+                (all_old == null || all_old.intValue() != all)) {
                 sid.setField(CollectionSchema.references_i.getSolrFieldName(), all);
                 change = true;
             }
-            if (internal_old == null || internal_old.intValue() != internal) {
-                sid.setField(CollectionSchema.references_internal_i.getSolrFieldName(), internal);
+            if (this.contains(CollectionSchema.references_internal_i) &&
+                (internal_old == null || internal_old.intValue() != rr.getInternalCount())) {
+                sid.setField(CollectionSchema.references_internal_i.getSolrFieldName(), rr.getInternalCount());
                 change = true;
             }
-            if (external_old == null || external_old.intValue() != external) {
-                sid.setField(CollectionSchema.references_external_i.getSolrFieldName(), external);
+            if (this.contains(CollectionSchema.references_internal_id_sxt) &&
+                (internal_ids_old == null || internal_ids_old.size() != internalIDs.size())) {
+                sid.setField(CollectionSchema.references_internal_id_sxt.getSolrFieldName(), internalIDs);
                 change = true;
             }
-            if (exthosts_old == null || exthosts_old.intValue() != exthosts.size()) {
-                sid.setField(CollectionSchema.references_exthosts_i.getSolrFieldName(), exthosts.size());
+            if (this.contains(CollectionSchema.references_internal_url_sxt) &&
+                (internal_urls_old == null || internal_urls_old.size() != internalURLs.size())) {
+                sid.setField(CollectionSchema.references_internal_url_sxt.getSolrFieldName(), internalURLs);
+                change = true;
+            }
+            if (this.contains(CollectionSchema.references_external_i) &&
+                (external_old == null || external_old.intValue() != rr.getExternalCount())) {
+                sid.setField(CollectionSchema.references_external_i.getSolrFieldName(), rr.getExternalCount());
+                change = true;
+            }
+            if (this.contains(CollectionSchema.references_exthosts_i) &&
+                (exthosts_old == null || exthosts_old.intValue() != rr.getExternalHostIDs().size())) {
+                sid.setField(CollectionSchema.references_exthosts_i.getSolrFieldName(), rr.getExternalHostIDs().size());
                 change = true;
             }
             Long hostExtent = hostExtentCount == null ? Integer.MAX_VALUE : hostExtentCount.get(url.hosthash());
-            if (hostextc_old == null || hostextc_old.intValue() != hostExtent) {
+            if (this.contains(CollectionSchema.host_extent_i) &&
+                (hostextc_old == null || hostextc_old.intValue() != hostExtent)) {
                 sid.setField(CollectionSchema.host_extent_i.getSolrFieldName(), hostExtent.intValue());
                 change = true;
             }
             return change;
         } catch (IOException e) {
-        } catch (SpaceExceededException e) {
         }
         return false;
     }

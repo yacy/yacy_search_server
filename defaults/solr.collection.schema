@@ -69,8 +69,14 @@ httpstatus_i
 ## number of unique http references, should be equal to references_internal_i + references_external_i
 references_i
 
-## number of unique http references from same host as referenced url
+## number of unique http references from same host to referenced url
 references_internal_i
+
+## ids of unique http references from same host to referenced url
+#references_internal_id_sxt
+
+## urls of unique http references from same host to referenced url
+#references_internal_url_sxt
 
 ## number of unique http references from external hosts
 references_external_i
@@ -93,8 +99,8 @@ load_date_dt
 ## date until resource shall be considered as fresh
 fresh_date_dt
 
-## ids of referrer to this document
-referrer_id_txt
+## id of the referrer to this document, discovered during crawling
+referrer_id_s
 
 ## the name of the publisher of the document
 publisher_t
@@ -395,6 +401,19 @@ host_extent_i
 #opengraph_type_s
 #opengraph_url_s
 #opengraph_image_s
+
+
+## citation ranking
+
+## the number of documents within a single host
+#cr_host_count_i
+
+## the chance to click on this page when randomly clicking on links within on one host
+#cr_host_chance_d
+
+## normalization of chance: 0 for lower halve of cr_host_count_i urls, 1 for 1/2 of the remaining and so on. the maximum number is 10
+#cr_host_norm_i
+   
 
 ## names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias
 #ext_cms_txt

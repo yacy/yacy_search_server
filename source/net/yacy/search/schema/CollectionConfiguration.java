@@ -39,6 +39,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.document.ASCII;
@@ -52,10 +53,15 @@ import net.yacy.cora.federate.solr.ProcessType;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -64,10 +70,13 @@ import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.search.index.Segment;
+import net.yacy.search.index.Segment.ReferenceReport;
+import net.yacy.search.index.Segment.ReferenceReportCache;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -87,7 +96,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param configurationFile
      * @throws IOException 
      */
-    public CollectionConfiguration(final File configurationFile, boolean lazy) throws IOException {
+    public CollectionConfiguration(final File configurationFile, final boolean lazy) throws IOException {
         super(configurationFile);
         super.lazy = lazy;
         this.rankings = new ArrayList<Ranking>(4);
@@ -115,11 +124,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
     }
     
-    public Ranking getRanking(int idx) {
+    public Ranking getRanking(final int idx) {
         return this.rankings.get(idx);
     }
     
-    public Ranking getRanking(String name) {
+    public Ranking getRanking(final String name) {
         if (name == null) return null;
         for (int i = 0; i < this.rankings.size(); i++) {
             Ranking r = this.rankings.get(i);
@@ -163,7 +172,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param doc the solr document
      * @return a solr input document
      */
-    public SolrInputDocument toSolrInputDocument(SolrDocument doc) {
+    public SolrInputDocument toSolrInputDocument(final SolrDocument doc) {
         SolrInputDocument sid = new SolrInputDocument();
         for (String name: doc.getFieldNames()) {
             if (this.contains(name) && !omitFields.contains(name)) { // check each field if enabled in local Solr schema
@@ -173,7 +182,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         return sid;
     }
     
-    public SolrDocument toSolrDocument(SolrInputDocument doc) {
+    public SolrDocument toSolrDocument(final SolrInputDocument doc) {
         SolrDocument sd = new SolrDocument();
         for (SolrInputField field: doc) {
             if (this.contains(field.getName()) && !omitFields.contains(field.getName())) { // check each field if enabled in local Solr schema
@@ -280,7 +289,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.load_date_dt)) add(doc, CollectionSchema.load_date_dt, md.loaddate());
         if (allAttr || contains(CollectionSchema.fresh_date_dt)) add(doc, CollectionSchema.fresh_date_dt, md.freshdate());
         if (allAttr || contains(CollectionSchema.host_id_s)) add(doc, CollectionSchema.host_id_s, md.hosthash());
-        if ((allAttr || contains(CollectionSchema.referrer_id_txt)) && md.referrerHash() != null) add(doc, CollectionSchema.referrer_id_txt, new String[]{ASCII.String(md.referrerHash())});
+        if ((allAttr || contains(CollectionSchema.referrer_id_s)) && md.referrerHash() != null) add(doc, CollectionSchema.referrer_id_s, ASCII.String(md.referrerHash()));
         if (allAttr || contains(CollectionSchema.md5_s)) add(doc, CollectionSchema.md5_s, md.md5());
         if (allAttr || contains(CollectionSchema.publisher_t)) add(doc, CollectionSchema.publisher_t, md.dc_publisher());
         if ((allAttr || contains(CollectionSchema.language_s)) && md.language() != null) add(doc, CollectionSchema.language_s, UTF8.String(md.language()));
@@ -328,9 +337,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     
     public SolrVector yacy2solr(
             final String id, final String[] collections, final ResponseHeader responseHeader,
-            final Document document, Condenser condenser, DigestURI referrerURL, String language,
-            IndexCell<CitationReference> citations,
-            WebgraphConfiguration webgraph) {
+            final Document document, final Condenser condenser, final DigestURI referrerURL, final String language,
+            final IndexCell<CitationReference> citations,
+            final WebgraphConfiguration webgraph) {
         // we use the SolrCell design as index schema
         SolrVector doc = new SolrVector();
         final DigestURI digestURI = document.dc_source();
@@ -354,6 +363,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
             processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
             CollectionSchema.clickdepth_i.add(doc, clickdepth); // no lazy value checking to get a '0' into the index
+        }
+        
+        if (allAttr || (contains(CollectionSchema.cr_host_chance_d) && contains(CollectionSchema.cr_host_count_i) && contains(CollectionSchema.cr_host_norm_i))) {
+            processTypes.add(ProcessType.CITATION); // postprocessing needed
         }
         
         if (allAttr || contains(CollectionSchema.ip_s)) {
@@ -778,7 +791,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.load_date_dt)) add(doc, CollectionSchema.load_date_dt, loadDate);
         if (allAttr || contains(CollectionSchema.fresh_date_dt)) add(doc, CollectionSchema.fresh_date_dt, new Date(loadDate.getTime() + Math.max(0, loadDate.getTime() - modDate.getTime()) / 2)); // freshdate, computed with Proxy-TTL formula
         if (allAttr || contains(CollectionSchema.host_id_s)) add(doc, CollectionSchema.host_id_s, document.dc_source().hosthash());
-        if ((allAttr || contains(CollectionSchema.referrer_id_txt)) && referrerURL != null) add(doc, CollectionSchema.referrer_id_txt, new String[]{ASCII.String(referrerURL.hash())});
+        if ((allAttr || contains(CollectionSchema.referrer_id_s)) && referrerURL != null) add(doc, CollectionSchema.referrer_id_s, ASCII.String(referrerURL.hash()));
         //if (allAttr || contains(SolrField.md5_s)) add(solrdoc, SolrField.md5_s, new byte[0]);
         if (allAttr || contains(CollectionSchema.publisher_t)) add(doc, CollectionSchema.publisher_t, document.dc_publisher());
         if ((allAttr || contains(CollectionSchema.language_s)) && language != null) add(doc, CollectionSchema.language_s, language);
@@ -812,58 +825,262 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param urlCitation
      * @return
      */
-    public void postprocessing(Segment segment) {
+    public void postprocessing(final Segment segment) {
         if (!this.contains(CollectionSchema.process_sxt)) return;
         if (!segment.connectedCitation()) return;
         SolrConnector connector = segment.fulltext().getDefaultConnector();
-        // that means we must search for those entries.
         connector.commit(true); // make sure that we have latest information that can be found
-        //BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery("*:*", 0, 1000, 60000, 10);
-        BlockingQueue<SolrDocument> docs = connector.concurrentDocumentsByQuery(CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 10000, 60000, 50);
+        ReferenceReportCache rrCache = segment.getReferenceReportCache();
+        Map<byte[], CRV> ranking = new TreeMap<byte[], CRV>(Base64Order.enhancedCoder);
+        try {
+            // collect hosts from index which shall take part in citation computation
+            ReversibleScoreMap<String> hostscore = connector.getFacets(CollectionSchema.process_sxt.getSolrFieldName() + ":" + ProcessType.CITATION.toString(), 10000, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
+            if (hostscore == null) hostscore = new ClusteredScoreMap<String>();
+            // for each host, do a citation rank computation
+            for (String host: hostscore.keyList(true)) {
+                if (hostscore.get(host) <= 0) continue;
+                // select all documents for each host
+                CRHost crh = new CRHost(segment, rrCache, host, 0.85d, 6);
+                int convergence_attempts = 0;
+                while (convergence_attempts++ < 30) {
+                    if (crh.convergenceStep()) break;
+                }
+                Log.logInfo("CollectionConfiguration.CRHost", "convergence for host " + host + " after " + convergence_attempts + " steps");
+                // we have now the cr for all documents of a specific host; we store them for later use
+                Map<byte[], CRV> crn = crh.normalize();
+                crh.log(crn);
+                ranking.putAll(crn); // accumulate this here for usage in document update later
+            }
+        } catch (IOException e2) {
+        }
         
+        // process all documents
+        BlockingQueue<SolrDocument> docs = connector.concurrentDocumentsByQuery(CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 10000, 60000, 50);
         SolrDocument doc;
-        int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0;
-
-        Map<String, Long> hostExtentCache = new HashMap<String, Long>();
+        int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0, proccount_citationchange = 0;
+        Map<String, Long> hostExtentCache = new HashMap<String, Long>(); // a mapping from the host id to the number of documents which contain this host-id
         try {
             while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                 // for each to-be-processed entry work on the process tag
                 Collection<Object> proctags = doc.getFieldValues(CollectionSchema.process_sxt.getSolrFieldName());
-                for (Object tag: proctags) {
+                
+                try {
+                    DigestURI url = new DigestURI((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())));
+                    byte[] id = url.hash();
+                    SolrInputDocument sid = this.toSolrInputDocument(doc);
                     
-                    try {
-                        DigestURI url = new DigestURI((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())));
-                        SolrInputDocument sid = this.toSolrInputDocument(doc);
+                    for (Object tag: proctags) {
                         
                         // switch over tag types
                         ProcessType tagtype = ProcessType.valueOf((String) tag);
                         if (tagtype == ProcessType.CLICKDEPTH) {
                             if (postprocessing_clickdepth(segment, doc, sid, url, CollectionSchema.clickdepth_i)) proccount_clickdepthchange++;
                         }
-                        
-                        // refresh the link count; it's 'cheap' to do this here
-                        String hosthash = url.hosthash();
-                        if (!hostExtentCache.containsKey(hosthash)) {
-                            StringBuilder q = new StringBuilder();
-                            q.append(CollectionSchema.host_id_s.getSolrFieldName()).append(":\"").append(hosthash).append("\" AND ").append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200");
-                            long count = segment.fulltext().getDefaultConnector().getCountByQuery(q.toString());
-                            hostExtentCache.put(hosthash, count);
+
+                        if (tagtype == ProcessType.CITATION) {
+                            CRV crv = ranking.get(id);
+                            if (crv != null) {
+                                sid.setField(CollectionSchema.cr_host_count_i.getSolrFieldName(), crv.count);
+                                sid.setField(CollectionSchema.cr_host_chance_d.getSolrFieldName(), crv.cr);
+                                sid.setField(CollectionSchema.cr_host_norm_i.getSolrFieldName(), crv.crn);
+                                proccount_citationchange++;
+                            }
                         }
-                        if (postprocessing_references(segment, doc, sid, url, hostExtentCache)) proccount_referencechange++;
                         
-                        // all processing steps checked, remove the processing tag
-                        sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());
-                        
-                        // send back to index
-                        connector.add(sid);
-                        proccount++;
-                    } catch (Throwable e1) {
                     }
                     
+                    // refresh the link count; it's 'cheap' to do this here
+                    String hosthash = url.hosthash();
+                    if (!hostExtentCache.containsKey(hosthash)) {
+                        StringBuilder q = new StringBuilder();
+                        q.append(CollectionSchema.host_id_s.getSolrFieldName()).append(":\"").append(hosthash).append("\" AND ").append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200");
+                        long count = segment.fulltext().getDefaultConnector().getCountByQuery(q.toString());
+                        hostExtentCache.put(hosthash, count);
+                    }
+                    if (postprocessing_references(segment.fulltext(), rrCache, doc, sid, url, hostExtentCache)) proccount_referencechange++;
+                    
+                    // all processing steps checked, remove the processing tag
+                    sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());
+                    
+                    // send back to index
+                    //connector.deleteById(ASCII.String(id));
+                    connector.add(sid);
+                    proccount++;
+                } catch (Throwable e1) {
                 }
             }
-            Log.logInfo("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount+ " new documents, " + proccount_clickdepthchange + " clickdepth values changed, " + proccount_referencechange + " reference-count values changed.");
+            Log.logInfo("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount+ " new documents, " +
+                        proccount_clickdepthchange + " clickdepth changes, " +
+                        proccount_referencechange + " reference-count changes," +
+                        proccount_citationchange + " citation ranking changes.");
         } catch (InterruptedException e) {
+        }
+    }
+
+    private static final class CRV {
+        public double cr;
+        public int crn, count;
+        public CRV(final int count, final double cr, final int crn) {this.count = count; this.cr = cr; this.crn = crn;}
+        public String toString() {
+            return "count=" + count + ", cr=" + cr + ", crn=" + crn;
+        }
+    }
+    
+    /**
+     * The CRHost class is a container for all ranking values of a specific host.
+     * Objects of that class are needed as an environment for repeated convergenceStep() computations,
+     * which are iterative citation rank computations that are repeated until the ranking values
+     * converge to stable values.
+     * The class also contains normalization methods to compute simple integer ranking values out of the
+     * double relevance values.
+     */
+    private static final class CRHost {
+        private final Segment segment;
+        private final Map<byte[], double[]> crt;
+        private final int cr_host_count;
+        private final RowHandleMap internal_links_counter;
+        private double damping;
+        private int converge_eq_factor;
+        private ReferenceReportCache rrCache;
+        public CRHost(final Segment segment, final ReferenceReportCache rrCache, final String host, final double damping, final int converge_digits) {
+            this.segment = segment;
+            this.damping = damping;
+            this.rrCache = rrCache;
+            this.converge_eq_factor = (int) Math.pow(10.0d, converge_digits);
+            SolrConnector connector = segment.fulltext().getDefaultConnector();
+            this.crt = new TreeMap<byte[], double[]>(Base64Order.enhancedCoder);
+            try {
+                // select all documents for each host
+                BlockingQueue<String> ids = connector.concurrentIDsByQuery(CollectionSchema.host_s.getSolrFieldName() + ":\"" + host + "\"", 0, 1000000, 600000);
+                String id;
+                while ((id = ids.take()) != AbstractSolrConnector.POISON_ID) {
+                    crt.put(ASCII.getBytes(id), new double[]{0.0d,0.0d}); //{old value, new value}
+                }
+            } catch (InterruptedException e2) {
+            }
+            this.cr_host_count = crt.size();
+            double initval = 1.0d / cr_host_count;
+            for (Map.Entry<byte[], double[]> entry: this.crt.entrySet()) entry.getValue()[0] = initval;
+            this.internal_links_counter = new RowHandleMap(12, Base64Order.enhancedCoder, 8, 100, "internal_links_counter");
+        }
+        /**
+         * produce a map from IDs to CRV records, normalization entries containing the values that are stored to solr.
+         * @return
+         */
+        public Map<byte[], CRV> normalize() {
+            TreeMap<Double, List<byte[]>> reorder = new TreeMap<Double, List<byte[]>>();
+            for (Map.Entry<byte[], double[]> entry: crt.entrySet()) {
+                Double d = entry.getValue()[0];
+                List<byte[]> ds = reorder.get(d);
+                if (ds == null) {ds = new ArrayList<byte[]>(); reorder.put(d, ds);}
+                ds.add(entry.getKey());
+            }
+            int nextcount = (this.cr_host_count + 1) / 2;
+            int nextcrn = 0;
+            Map<byte[], CRV> r = new TreeMap<byte[], CRV>(Base64Order.enhancedCoder);
+            while (reorder.size() > 0) {
+                int count = nextcount;
+                while (reorder.size() > 0 && count > 0) {
+                    Map.Entry<Double, List<byte[]>> next = reorder.pollFirstEntry();
+                    List<byte[]> ids = next.getValue();
+                    count -= ids.size();
+                    double cr = next.getKey();
+                    for (byte[] id: ids) r.put(id, new CRV(this.cr_host_count, cr, nextcrn));
+                }
+                nextcrn++;
+                nextcount = Math.max(1, (nextcount + count + 1) / 2);
+            }
+            // finally, increase the crn number in such a way that the maximum is always 10
+            int inc = 11 - nextcrn; // nextcrn is +1
+            for (Map.Entry<byte[], CRV> entry: r.entrySet()) entry.getValue().crn += inc;
+            return r;
+        }
+        /**
+         * log out a complete CRHost set of urls and ranking values
+         * @param rm
+         */
+        public void log(final Map<byte[], CRV> rm) {
+            // print out all urls with their cr-values
+            SolrConnector connector = segment.fulltext().getDefaultConnector();
+            for (Map.Entry<byte[], CRV> entry: rm.entrySet()) {
+                try {
+                    String url = (String) connector.getDocumentById(ASCII.String(entry.getKey()), CollectionSchema.sku.getSolrFieldName()).getFieldValue(CollectionSchema.sku.getSolrFieldName());
+                    Log.logInfo("CollectionConfiguration.CRHost", "CR for " + url);
+                    Log.logInfo("CollectionConfiguration.CRHost", ">> " + entry.getValue().toString());
+                } catch (IOException e) {
+                    Log.logException(e);
+                }
+            }
+        }
+        /**
+         * Calculate the number of internal links from a specific document, denoted by the document ID.
+         * This is a very important attribute for the ranking computation because it is the dividend for the previous ranking attribute.
+         * The internalLinks value will be requested several times for the same id during the convergenceStep()-steps; therefore it should use a cache.
+         * This cache is part of the CRHost data structure.
+         * @param id
+         * @return the number of links from the document, denoted by the ID to documents within the same domain
+         */
+        public int getInternalLinks(final byte[] id) {
+            int il = (int) this.internal_links_counter.get(id);
+            if (il >= 0) return il;
+            try {
+                SolrDocument doc = this.segment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(id), CollectionSchema.inboundlinkscount_i.getSolrFieldName());
+                if (doc == null) {
+                    this.internal_links_counter.put(id, 0);
+                    return 0;
+                }
+                Object x = doc.getFieldValue(CollectionSchema.inboundlinkscount_i.getSolrFieldName());
+                il = (x == null) ? 0 : (x instanceof Integer) ? ((Integer) x).intValue() : (x instanceof Long) ? ((Long) x).intValue() : 0;
+                this.internal_links_counter.put(id, il);
+                return il;
+            } catch (IOException e) {
+                Log.logException(e);
+            } catch (SpaceExceededException e) {
+                Log.logException(e);
+            }
+            try {this.internal_links_counter.put(id, 0);} catch (SpaceExceededException e) {}
+            return 0;
+        }
+        /**
+         * Use the crt cache to compute the next generation of crt values.
+         * @return
+         */
+        public boolean convergenceStep() {
+            boolean convergence = true;
+            double df = (1.0d - damping) / this.cr_host_count;
+            try {
+                for (Map.Entry<byte[], double[]> entry: crt.entrySet()) {
+                    byte[] id = entry.getKey();
+                    ReferenceReport rr = this.rrCache.getReferenceReport(id, false);
+                    // sum up the cr of the internal links
+                    HandleSet iids = rr.getInternallIDs();
+                    double ncr = 0.0d;
+                    for (byte[] iid: iids) {
+                        int ilc = getInternalLinks(iid);
+                        if (ilc > 0) { // if (ilc == 0) then the reference report is wrong!
+                            ncr += this.crt.get(iid)[0] / ilc;
+                        }
+                    }
+                    ncr = df + damping * ncr;
+                    if (convergence && !eqd(ncr, entry.getValue()[0])) convergence = false;
+                    entry.getValue()[1] = ncr;
+                }
+                // after the loop, replace the old value with the new value in crt
+                for (Map.Entry<byte[], double[]> entry: crt.entrySet()) {
+                    entry.getValue()[0] = entry.getValue()[1];
+                }
+            } catch (IOException e) {
+            }
+            return convergence;
+        }
+        /**
+         * helper method to check if two doubles are equal using a specific number of digits
+         * @param a
+         * @param b
+         * @return
+         */
+        private boolean eqd(final double a, final double b) {
+            return ((int) (a * this.converge_eq_factor)) == ((int) (b * this.converge_eq_factor));
         }
     }
     
@@ -876,7 +1093,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param protocol
      * @return a list of indexed protocol entries
      */
-    private static List<String> protocolList2indexedList(List<String> protocol) {
+    private static List<String> protocolList2indexedList(final List<String> protocol) {
         List<String> a = new ArrayList<String>();
         String p;
         for (int i = 0; i < protocol.size(); i++) {

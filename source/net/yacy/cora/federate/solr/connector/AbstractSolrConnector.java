@@ -321,7 +321,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
             List<Count> values = facet.getValues();
             if (values == null) continue;
-            for (Count ff: values) result.set(ff.getName(), (int) ff.getCount());
+            for (Count ff: values) if (ff.getCount() > 0) result.set(ff.getName(), (int) ff.getCount());
             facets.put(field, result);
         }
         return facets;
