@@ -89,7 +89,7 @@ public final class Cache {
         }
         // open the cache file
         try {
-            fileDBunbuffered = new ArrayStack(new File(cachePath, FILE_DB_NAME), prefix, Base64Order.enhancedCoder, 12, 1024 * 1024 * 2, false);
+            fileDBunbuffered = new ArrayStack(new File(cachePath, FILE_DB_NAME), prefix, Base64Order.enhancedCoder, 12, 1024 * 1024 * 2, false, true);
             fileDBunbuffered.setMaxSize(maxCacheSize);
             fileDB = new Compressor(fileDBunbuffered, 6 * 1024 * 1024);
         } catch (final IOException e) {

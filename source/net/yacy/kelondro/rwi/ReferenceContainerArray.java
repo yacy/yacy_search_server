@@ -71,6 +71,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             termOrder,
             termSize,
             0,
+            true,
             true);
     }
 

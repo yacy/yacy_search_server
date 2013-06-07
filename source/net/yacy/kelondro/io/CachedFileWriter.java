@@ -87,7 +87,7 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
         long available = this.RAFile.length() - seek;
         if (available == -seek) return; // we don't know how this happens but we just silently ignore it by now TODO:fixme
         //System.out.println("*** available = " + available);
-        if (available < len) throw new IOException("EOF, available = " + available + ", requested = " + len + ", this.RAFile.length() = " + this.RAFile.length() + ", seek = " + seek);
+        if (available < len) throw new IOException("EOF in " + this.file.getName() + ", available = " + available + ", requested = " + len + ", this.RAFile.length() = " + this.RAFile.length() + ", seek = " + seek);
         if (this.cachestart + this.cachelen == seek && this.cache.length - this.cachelen >= len) {
             this.RAFile.readFully(this.cache, this.cachelen, len);
             //System.out.println("*** DEBUG FileRA " + this.file.getName() + ": append fill " + len + " bytes");

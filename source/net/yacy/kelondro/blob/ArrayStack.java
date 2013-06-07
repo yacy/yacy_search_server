@@ -111,7 +111,8 @@ public class ArrayStack implements BLOB {
             final ByteOrder ordering,
             final int keylength,
             final int buffersize,
-            final boolean trimall) throws IOException {
+            final boolean trimall,
+            final boolean deleteonfail) throws IOException {
         this.keylength = keylength;
         this.prefix = prefix;
         this.ordering = ordering;
@@ -200,13 +201,22 @@ public class ArrayStack implements BLOB {
                    d = my_SHORT_MILSEC_FORMATTER.parse(file.substring(this.prefix.length() + 1, this.prefix.length() + 18));
                    f = new File(heapLocation, file);
                    time = d.getTime();
-                   if (time == maxtime && !trimall) {
-                       oneBlob = new Heap(f, keylength, ordering, buffersize);
-                   } else {
-                       oneBlob = new HeapModifier(f, keylength, ordering);
-                       oneBlob.trim(); // no writings here, can be used with minimum memory
+                   try {
+                       if (time == maxtime && !trimall) {
+                           oneBlob = new Heap(f, keylength, ordering, buffersize);
+                       } else {
+                           oneBlob = new HeapModifier(f, keylength, ordering);
+                           oneBlob.trim(); // no writings here, can be used with minimum memory
+                       }
+                       sortedItems.put(Long.valueOf(time), new blobItem(d, f, oneBlob));
+                   } catch (IOException e) {
+                       if (deleteonfail) {
+                           Log.logWarning("ArrayStack", "cannot read file " + f.getName() + ", deleting it (smart fail; alternative would be: crash; required user action would be same as deletion)");
+                           f.delete();
+                       } else {
+                           throw new IOException(e.getMessage(), e);
+                       }
                    }
-                   sortedItems.put(Long.valueOf(time), new blobItem(d, f, oneBlob));
                } catch (final ParseException e) {continue;}
             }
         }
@@ -1155,7 +1165,7 @@ public class ArrayStack implements BLOB {
         final File f = new File("/Users/admin/blobarraytest");
         try {
             //f.delete();
-            final ArrayStack heap = new ArrayStack(f, "test", NaturalOrder.naturalOrder, 12, 512 * 1024, false);
+            final ArrayStack heap = new ArrayStack(f, "test", NaturalOrder.naturalOrder, 12, 512 * 1024, false, true);
             heap.insert("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
             heap.insert("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
             heap.insert("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());
