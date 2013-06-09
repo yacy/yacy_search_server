@@ -33,6 +33,7 @@ import net.yacy.cora.federate.solr.SolrServlet;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
+import net.yacy.cora.federate.solr.responsewriter.HTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.JsonResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -83,6 +84,7 @@ public class select {
         xsltWriter.init(initArgs);
         RESPONSE_WRITER.put("xslt", xsltWriter); // try i.e. http://localhost:8090/solr/select?q=*:*&start=0&rows=10&wt=xslt&tr=json.xsl
         RESPONSE_WRITER.put("exml", new EnhancedXMLResponseWriter());
+        RESPONSE_WRITER.put("html", new HTMLResponseWriter());
         RESPONSE_WRITER.put("rss", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
         RESPONSE_WRITER.put("opensearch", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
         RESPONSE_WRITER.put("yjson", new JsonResponseWriter()); //try http://localhost:8090/solr/select?wt=json&q=olympia&hl=true&hl.fl=text_t,h1,h2
@@ -107,7 +109,7 @@ public class select {
         if ("exml".equals(wt)) return "application/rss+xml";
         if ("json".equals(wt)) return "application/json";
         if ("yjson".equals(wt)) return "application/json";
-        if ("python".equals(wt)) return "text/html";
+        if ("html".equals(wt) || "python".equals(wt)) return "text/html";
         if ("php".equals(wt) || "phps".equals(wt)) return "application/x-httpd-php";
         if ("ruby".equals(wt)) return "text/html";
         if ("raw".equals(wt)) return "application/octet-stream";

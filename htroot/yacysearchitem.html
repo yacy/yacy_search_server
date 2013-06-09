@@ -26,7 +26,7 @@
   <p class="urlinfo">
   #(showDate)#::#[date]##(/showDate)#
   #(showSize)#::&nbsp;|&nbsp;#[sizename]##(/showSize)#
-  #(showMetadata)#::&nbsp;|&nbsp;<a href="api/yacydoc.html?urlhash=#[urlhash]#" target="_blank" onclick="return hs.htmlExpand(this, { objectType: 'ajax'} )">Metadata</a>#(/showMetadata)#
+  #(showMetadata)#::&nbsp;|&nbsp;<a href="/solr/select?q=id:%22#[urlhash]#%22&defType=edismax&start=0&rows=1&core=collection1&wt=html" target="_blank" onclick="return hs.htmlExpand(this, { objectType: 'ajax'} )">Metadata</a>#(/showMetadata)#
   #(showParser)#::&nbsp;|&nbsp;<a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#" target="_blank">Parser</a>#(/showParser)#
   #(showPictures)#::&nbsp;|&nbsp;<a href="yacysearch.html?cat=image&amp;url=#[link]#&amp;query=#[former]#">Pictures</a>#(/showPictures)#
   #(showCache)#::&nbsp;|&nbsp;<a href="CacheResource_p.html?url=#[link]#" target="_blank">Cache</a>#(/showCache)#

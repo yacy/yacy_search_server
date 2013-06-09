@@ -216,9 +216,9 @@ function updatepage(str) {
     
     #(genUrlProfile)#
     ::No entry found for URL-hash #[urlhash]#
-    ::<iframe src="/api/yacydoc.html?urlhash=#[urlhash]#" width="100%" height="420" frameborder="0" scrolling="no"></iframe><br />
+    ::<iframe src="/solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[urlhash]#%22" width="100%" height="420" frameborder="0" scrolling="no"></iframe><br />
     <div id="api">
-    <a href="/api/yacydoc.html?urlhash=#[urlhash]#">
+    <a href="/solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[urlhash]#%22">
     <img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
     <span>These document details can be retrieved as <a href="http://www.w3.org/TR/xhtml-rdfa-primer/">XHTML+RDFa</a>
     document containg <a href="http://www.w3.org/RDF/">RDF</a> annotations in <a href="http://dublincore.org/">Dublin Core</a> vocabulary.
