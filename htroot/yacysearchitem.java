@@ -37,6 +37,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
+import net.yacy.crawler.data.Cache;
 import net.yacy.data.URLLicense;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -133,7 +134,7 @@ public class yacysearchitem {
             prop.put("content_showMetadata", sb.getConfigBool("search.result.show.metadata", true) ? 1 : 0);
             prop.put("content_showParser", sb.getConfigBool("search.result.show.parser", true) ? 1 : 0);
             prop.put("content_showPictures", sb.getConfigBool("search.result.show.pictures", true) ? 1 : 0);
-            prop.put("content_showCache", sb.getConfigBool("search.result.show.cache", true) ? 1 : 0);
+            prop.put("content_showCache", sb.getConfigBool("search.result.show.cache", true) && Cache.has(resultURL.hash()) ? 1 : 0);
             prop.put("content_showProxy", sb.getConfigBool("search.result.show.proxy", true) ? 1 : 0);
             prop.put("content_showHostBrowser", sb.getConfigBool("search.result.show.hostbrowser", true) ? 1 : 0);
             prop.put("content_showTags", sb.getConfigBool("search.result.show.tags", false) ? 1 : 0);
