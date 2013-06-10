@@ -140,7 +140,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         writer.write("</form>\n");
     }
     
-    private static final LinkedHashMap<String, String> translateDoc(final IndexSchema schema, final Document doc) {
+    static final LinkedHashMap<String, String> translateDoc(final IndexSchema schema, final Document doc) {
         List<IndexableField> fields = doc.getFields();
         int sz = fields.size();
         int fidx1 = 0, fidx2 = 0;
