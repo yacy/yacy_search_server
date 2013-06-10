@@ -285,7 +285,7 @@ parser.enableAudioTags=false
 # These strings appear in the Web Mask of the YACY search client
 # Set these Strings to cusomize your peer and give any message to
 # other peer users
-promoteSearchPageGreeting = P2P Web Search
+promoteSearchPageGreeting = Web Search by the People, for the People
 # if the following property is set to true, the network name is used as greeting
 promoteSearchPageGreeting.useNetworkName = false
 # the following attributes can be used to define a custom image and home page on the search page
