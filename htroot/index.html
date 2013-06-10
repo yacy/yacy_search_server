@@ -91,8 +91,13 @@
           #(resource-select)#::
           <td><label for="resource">Resource</label>:</td>
           <td>
-            <input type="radio" name="resource" id="rglobal" value="global" #(global)#::checked="checked"#(/global)# #(global-disabled)#::disabled="disabled"#(/global-disabled)#/><label for="rglobal">the peer-to-peer network</label>
-            <input type="radio" name="resource" id="rlocal" value="local" #(local)#::checked="checked"#(/local)#/><label for="rlocal">only the local index</label>
+            <input type="radio" name="resource" id="rglobal" value="global" checked="checked" /><label for="rglobal">the peer-to-peer network</label>
+            <input type="radio" name="resource" id="rlocal" value="local"><label for="rlocal">only the local index</label>
+          </td>::
+          <td><label for="resource">Resource</label>:</td>
+          <td>
+            <input type="radio" name="resource" id="rglobal" value="global"/><label for="rglobal">the peer-to-peer network</label>
+            <input type="radio" name="resource" id="rlocal" value="local" checked="checked"/><label for="rlocal">only the local index</label>
           </td>
           #(/resource-select)#
         </tr>

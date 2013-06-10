@@ -153,6 +153,13 @@ public class yacysearch {
         prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
         prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
         prop.put("thisaddress", hostName);
+        final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
+        final boolean indexReceiveGranted =
+            sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true)
+                || sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true)
+                || clustersearch;
+        boolean global = post == null || (post.get("resource", "local").equals("global") && sb.peers.sizeConnected() > 0 && indexReceiveGranted);
+        prop.put("topmenu_resource-select", (sb.peers == null || sb.peers.sizeConnected() == 0 || !indexReceiveGranted) ? 0 : global ? 1 : 2);
         
         if ( post == null || indexSegment == null || env == null || !searchAllowed ) {
             // we create empty entries for template strings
@@ -222,7 +229,6 @@ public class yacysearch {
                 post.getInt("maximumRecords", post.getInt("count", post.getInt("rows", 10)))); // SRU syntax with old property as alternative
         int startRecord = post.getInt("startRecord", post.getInt("offset", post.getInt("start", 0)));
 
-        boolean global = post.get("resource", "local").equals("global") && sb.peers.sizeConnected() > 0;
         final boolean indexof = (post != null && post.get("indexof", "").equals("on"));
 
         String prefermask = (post == null) ? "" : post.get("prefermaskfilter", "");
@@ -240,12 +246,6 @@ public class yacysearch {
         }
 
         // SEARCH
-        final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
-        final boolean indexReceiveGranted =
-            sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true)
-                || sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true)
-                || clustersearch;
-        global = global && indexReceiveGranted; // if the user does not want indexes from remote peers, it cannot be a global searchnn
         final boolean intranetMode = sb.isIntranetMode() || sb.isAllIPMode();
 
         // increase search statistic counter
