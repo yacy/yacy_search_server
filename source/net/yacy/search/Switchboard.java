@@ -3397,7 +3397,7 @@ public final class Switchboard extends serverSwitch {
                             Collection<DigestURI> urls = new ArrayList<DigestURI>();
                             while (i.hasNext()) {
                                 url = i.next();
-                                boolean islocal = url.getHost().contentEquals(startUrl.getHost());
+                                boolean islocal = (url.getHost() == null && startUrl.getHost() == null) || (url.getHost() != null && startUrl.getHost() != null && url.getHost().contentEquals(startUrl.getHost()));
                                 // add all external links or links to different page to crawler
                                 if ( !islocal ) {// || (!startUrl.getPath().endsWith(url.getPath()))) {
                                     urls.add(url);
