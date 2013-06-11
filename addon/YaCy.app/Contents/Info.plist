@@ -21,7 +21,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleIconFile</key>
-	<string>YaCyLogo2008.icns</string>
+	<string>YaCy_2013_Icon.icns</string>
 	<key>Java</key>
 	<dict>
 		<key>VMOptions</key>
