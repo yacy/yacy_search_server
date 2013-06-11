@@ -78,6 +78,10 @@ public class pdfParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("text/x-pdf");
     }
 
+    static {
+        clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes(); // must be called here to get that into the class loader; it will block other threads otherwise;
+    }
+    
     @Override
     public Document[] parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
 
