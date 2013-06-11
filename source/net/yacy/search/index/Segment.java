@@ -619,6 +619,7 @@ public class Segment {
             // do a 'hard' commit to flush index caches
             this.fulltext.commit(false);
         } else {
+            /*
             if (
                 (this.fulltext.getDefaultConfiguration().contains(CollectionSchema.exact_signature_l) && this.fulltext.getDefaultConfiguration().contains(CollectionSchema.exact_signature_unique_b)) ||
                 (this.fulltext.getDefaultConfiguration().contains(CollectionSchema.fuzzy_signature_l) && this.fulltext.getDefaultConfiguration().contains(CollectionSchema.fuzzy_signature_unique_b)) ||
@@ -627,6 +628,7 @@ public class Segment {
                ) {
                 this.fulltext.getDefaultConnector().commit(true); // make sure that we have latest information for the postprocessing steps
             }
+            */
         }
         
         // CREATE INDEX
