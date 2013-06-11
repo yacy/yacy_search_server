@@ -28,3 +28,7 @@ network.unit.access.blacklist =
 
 # optional user agent to keep activities from out of a intranet environment secret
 #network.unit.tenant.agent=Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)
+
+# greedy learning: fast information acquisition heuristic for new peers 
+greedylearning.enabled = false
+greedylearning.limit.doccount = 15000
