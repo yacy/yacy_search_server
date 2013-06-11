@@ -171,7 +171,7 @@
          will be allowed before they are merged into one.
          Default is 10 for both merge policies.
          -->
-         <mergeFactor>4</mergeFactor>
+         <mergeFactor>20</mergeFactor>
         
         <!-- Expert: Merge Scheduler
          The Merge Scheduler in Lucene controls how merges are
