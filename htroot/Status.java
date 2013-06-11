@@ -117,7 +117,7 @@ public class Status
         }
 
         // update seed info
-        sb.updateMySeed();
+        //sb.updateMySeed(); // don't do this here. if Solr is stuck, this makes it worse. And it prevents that we can click on the Thread Dump menu.
 
         final boolean adminaccess = sb.adminAuthenticated(header) >= 2;
         if ( adminaccess ) {

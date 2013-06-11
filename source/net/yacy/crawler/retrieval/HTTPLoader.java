@@ -33,7 +33,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.crawler.HarvestProcess;
+import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.Latency;
 import net.yacy.crawler.data.ZURL.FailCategory;
@@ -170,12 +170,10 @@ public final class HTTPLoader {
                     throw new IOException("CRAWLER Retry of URL=" + requestURLString + " aborted because of server shutdown.");
                 }
 
-                // check if the url was already indexed
-                @SuppressWarnings("deprecation")
-                final HarvestProcess dbname = this.sb.urlExists(ASCII.String(redirectionUrl.hash()));
-                if (dbname != null) { // customer request
+                // check if the url was already loaded
+                if (Cache.has(redirectionUrl.hash())) { // customer request
                     this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "redirection to double content", statusCode);
-                    throw new IOException("CRAWLER Redirection of URL=" + requestURLString + " ignored. The url appears already in db " + dbname.toString());
+                    throw new IOException("CRAWLER Redirection of URL=" + requestURLString + " ignored. The url appears already in htcache");
                 }
 
                 // retry crawling with new url
