@@ -1,5 +1,5 @@
 <div class="head">
-	<h1>YaCy - Distributed Search Engine</h1>
+	<h1>YaCy Administration</h1>
 	#%env/templates/portalinput.template%#
 </div>
 
