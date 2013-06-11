@@ -337,7 +337,7 @@ public final class HTTPDFileHandler {
             if (!accessGranted) {
                 final boolean accessFromLocalhost = Domains.isLocalhost(clientIP) && (refererHost == null || refererHost.isEmpty() || Domains.isLocalhost(refererHost));
                 accessGranted = accessFromLocalhost && realmValue != null && realmProp.length() > 6 && (adminAccountBase64MD5.equals(realmValue));
-                if (!accessGranted) Log.logInfo("HTTPDFileHandler", "access blocked, clientIP=" + clientIP);
+                //if (!accessGranted) Log.logInfo("HTTPDFileHandler", "access blocked, clientIP=" + clientIP + ", path=" + path);
             }
 
             // -5- a password is configured and access comes with matching http-authentify
