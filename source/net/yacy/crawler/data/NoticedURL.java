@@ -87,12 +87,12 @@ public class NoticedURL {
         this.noloadStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
     }
 
-    protected void clear() {
+    public void clear() {
     	Log.logInfo("NoticedURL", "CLEARING ALL STACKS");
-        this.coreStack.clear();
-        this.limitStack.clear();
-        this.remoteStack.clear();
-        this.noloadStack.clear();
+    	if (this.coreStack != null) this.coreStack.clear();
+    	if (this.limitStack != null) this.limitStack.clear();
+    	if (this.remoteStack != null) this.remoteStack.clear();
+    	if (this.noloadStack != null) this.noloadStack.clear();
     }
 
     protected void close() {
@@ -137,7 +137,7 @@ public class NoticedURL {
         // this does not count the overhang stack size
         return ((this.coreStack == null) ? 0 : this.coreStack.size()) + ((this.limitStack == null) ? 0 : this.limitStack.size()) + ((this.remoteStack == null) ? 0 : this.remoteStack.size());
     }
-
+    
     public boolean isEmpty() {
         if (this.coreStack == null) return true;
         if (!this.coreStack.isEmpty()) return false;
