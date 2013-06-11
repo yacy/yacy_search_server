@@ -29,3 +29,7 @@ network.unit.protocol.control = uncontrolled
 # white/blacklists
 network.unit.access.whitelist = 10\..*,127\..*,172\.(1[6-9]|2[0-9]|3[0-1])\..*,169\.254\..*,192\.168\..*,localhost
 network.unit.access.blacklist =
+
+# greedy learning: fast information acquisition heuristic for new peers 
+greedylearning.enabled = false
+greedylearning.limit.doccount = 15000

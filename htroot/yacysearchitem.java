@@ -255,7 +255,17 @@ public class yacysearchitem {
                 prop.put("content_loc_lat", result.lat());
                 prop.put("content_loc_lon", result.lon());
             }
-            if (sb.getConfigBool("heuristic.searchresults",false)) sb.heuristicSearchResults(resultUrlstring);
+            final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
+            final boolean indexReceiveGranted =
+                sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true)
+                    || sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true)
+                    || clustersearch;
+            boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
+            boolean global = post == null || (post.get("resource", "local").equals("global") && p2pmode);
+            boolean stealthmode = p2pmode && !global;
+            if ((sb.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS, false) ||
+                    (sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ACTIVE, false) && sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ENABLED, false))) &&
+                 !stealthmode) sb.heuristicSearchResults(resultUrlstring);
             theSearch.query.transmitcount = item + 1;
             return prop;
         }

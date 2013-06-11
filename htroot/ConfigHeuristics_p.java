@@ -55,25 +55,25 @@ public class ConfigHeuristics_p {
             // store this call as api call
             sb.tables.recordAPICall(post, "ConfigHeuristics.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "heuristic settings");
 
-            if (post.containsKey("site_on")) sb.setConfig("heuristic.site", true);
-            if (post.containsKey("site_off")) sb.setConfig("heuristic.site", false);
-            if (post.containsKey("searchresult_on")) sb.setConfig("heuristic.searchresults", true);
-            if (post.containsKey("searchresult_off")) sb.setConfig("heuristic.searchresults", false);
-            if (post.containsKey("searchresultglobal_on")) sb.setConfig("heuristic.searchresults.crawlglobal", true);
-            if (post.containsKey("searchresultglobal_off")) sb.setConfig("heuristic.searchresults.crawlglobal", false);
-            if (post.containsKey("blekko_on")) sb.setConfig("heuristic.blekko", true);
-            if (post.containsKey("blekko_off")) sb.setConfig("heuristic.blekko", false);
-            if (post.containsKey("twitter_on")) sb.setConfig("heuristic.twitter", true);
-            if (post.containsKey("twitter_off")) sb.setConfig("heuristic.twitter", false);
+            if (post.containsKey("site_on")) sb.setConfig(SwitchboardConstants.HEURISTIC_SITE, true);
+            if (post.containsKey("site_off")) sb.setConfig(SwitchboardConstants.HEURISTIC_SITE, false);
+            if (post.containsKey("searchresult_on")) sb.setConfig(SwitchboardConstants.HEURISTIC_SEARCHRESULTS, true);
+            if (post.containsKey("searchresult_off")) sb.setConfig(SwitchboardConstants.HEURISTIC_SEARCHRESULTS, false);
+            if (post.containsKey("searchresultglobal_on")) sb.setConfig(SwitchboardConstants.HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL, true);
+            if (post.containsKey("searchresultglobal_off")) sb.setConfig(SwitchboardConstants.HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL, false);
+            if (post.containsKey("blekko_on")) sb.setConfig(SwitchboardConstants.HEURISTIC_BLEKKO, true);
+            if (post.containsKey("blekko_off")) sb.setConfig(SwitchboardConstants.HEURISTIC_BLEKKO, false);
+            if (post.containsKey("twitter_on")) sb.setConfig(SwitchboardConstants.HEURISTIC_TWITTER, true);
+            if (post.containsKey("twitter_off")) sb.setConfig(SwitchboardConstants.HEURISTIC_TWITTER, false);
             if (post.containsKey("opensearch_on")) {
-                sb.setConfig("heuristic.opensearch", true);
+                sb.setConfig(SwitchboardConstants.HEURISTIC_OPENSEARCH, true);
                 // re-read config (and create work table)
                 OpenSearchConnector os = new OpenSearchConnector(sb, true);
                 if (os.getSize() == 0) {
                     osderrmsg = "no active search targets are configured";
                 }
             }
-            if (post.containsKey("opensearch_off")) sb.setConfig("heuristic.opensearch", false);
+            if (post.containsKey("opensearch_off")) sb.setConfig(SwitchboardConstants.HEURISTIC_OPENSEARCH, false);
             if (post.containsKey("discoverosd")) {
                 final boolean metafieldavailable = sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_rel_s.name())
                         && (sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_protocol_s.name()) && sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_urlstub_s.name()));
@@ -155,12 +155,12 @@ public class ConfigHeuristics_p {
                 && (sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_protocol_s.name()) && sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_urlstub_s.name()))
                 && sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false);
         if (!showmetafieldbutton) prop.put("osdsolrfieldswitch",1);
-        prop.put("site.checked", sb.getConfigBool("heuristic.site", false) ? 1 : 0);
-        prop.put("searchresult.checked", sb.getConfigBool("heuristic.searchresults", false) ? 1 : 0);
-        prop.put("searchresultglobal.checked", sb.getConfigBool("heuristic.searchresults.crawlglobal", false) ? 1 : 0);
-        prop.put("blekko.checked", sb.getConfigBool("heuristic.blekko", false) ? 1 : 0);
-        prop.put("twitter.checked", sb.getConfigBool("heuristic.twitter", false) ? 1 : 0);
-        prop.put("opensearch.checked", sb.getConfigBool("heuristic.opensearch", false) ? 1 : 0);
+        prop.put("site.checked", sb.getConfigBool(SwitchboardConstants.HEURISTIC_SITE, false) ? 1 : 0);
+        prop.put("searchresult.checked", sb.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS, false) ? 1 : 0);
+        prop.put("searchresultglobal.checked", sb.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL, false) ? 1 : 0);
+        prop.put("blekko.checked", sb.getConfigBool(SwitchboardConstants.HEURISTIC_BLEKKO, false) ? 1 : 0);
+        prop.put("twitter.checked", sb.getConfigBool(SwitchboardConstants.HEURISTIC_TWITTER, false) ? 1 : 0);
+        prop.put("opensearch.checked", sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false) ? 1 : 0);
 
         // display config file content
         final File f = new File (sb.getDataPath(),"DATA/SETTINGS/heuristicopensearch.conf");
@@ -238,7 +238,7 @@ public class ConfigHeuristics_p {
         }
         
         // re-read config (and create/update work table)
-        if (sb.getConfigBool("heuristic.opensearch", true)) {
+        if (sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, true)) {
             OpenSearchConnector os = new OpenSearchConnector(sb, true);
         }
     }

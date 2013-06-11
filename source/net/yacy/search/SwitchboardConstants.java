@@ -498,8 +498,25 @@ public final class SwitchboardConstants {
     /**
      * system tray
      */
-	public static final String TRAY_ICON_ENABLED	 = "tray.icon.enabled";
-	public static final String TRAY_ICON_FORCED		 = "tray.icon.force";
-	public static final String TRAY_ICON_LABEL		 = "tray.icon.label";
-	public static final String TRAY_MENU_ENABLED	 = "tray.menu.enabled";
+	public static final String TRAY_ICON_ENABLED                   = "tray.icon.enabled";
+	public static final String TRAY_ICON_FORCED                    = "tray.icon.force";
+	public static final String TRAY_ICON_LABEL                     = "tray.icon.label";
+	public static final String TRAY_MENU_ENABLED                   = "tray.menu.enabled";
+	
+	/*
+	 * search heuristics
+	 */
+    public static final String HEURISTIC_SITE                      = "heuristic.site";
+    public static final String HEURISTIC_SEARCHRESULTS             = "heuristic.searchresults";
+    public static final String HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL = "heuristic.searchresults.crawlglobal";
+    public static final String HEURISTIC_BLEKKO                    = "heuristic.blekko";
+    public static final String HEURISTIC_TWITTER                   = "heuristic.twitter";
+    public static final String HEURISTIC_OPENSEARCH                = "heuristic.opensearch";
+	
+	/*
+	 * automatic learning heuristic
+	 */
+    public static final String GREEDYLEARNING_ENABLED              = "greedylearning.enabled";
+    public static final String GREEDYLEARNING_LIMIT_DOCCOUNT       = "greedylearning.limit.doccount";
+    public static final String GREEDYLEARNING_ACTIVE               = "greedylearning.active";
 }

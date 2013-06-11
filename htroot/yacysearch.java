@@ -158,10 +158,13 @@ public class yacysearch {
             sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true)
                 || sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true)
                 || clustersearch;
-        boolean global = post == null || (post.get("resource", "local").equals("global") && sb.peers.sizeConnected() > 0 && indexReceiveGranted);
-        prop.put("topmenu_resource-select", (sb.peers == null || sb.peers.sizeConnected() == 0 || !indexReceiveGranted) ? 0 : global ? 1 : 2);
+        boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
+        boolean global = post == null || (post.get("resource", "local").equals("global") && p2pmode);
+        boolean stealthmode = p2pmode && !global;
+        prop.put("topmenu_resource-select", stealthmode ? 2 : global ? 1 : 0);
         
         if ( post == null || indexSegment == null || env == null || !searchAllowed ) {
+            if (indexSegment == null) Log.logInfo("yacysearch", "indexSegment == null");
             // we create empty entries for template strings
             prop.put("searchagain", "0");
             prop.put("former", "");
@@ -483,7 +486,7 @@ public class yacysearch {
             }
             
             final int heuristicTwitter = querystring.indexOf("/heuristic/twitter", 0);
-            if ( heuristicBlekko >= 0 ) {
+            if ( heuristicTwitter >= 0 ) {
                 querystring = querystring.replace("/heuristic/twitter", "");
                 modifier.add("/heuristic/twitter");
             }
@@ -723,16 +726,16 @@ public class yacysearch {
                     (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
 
             if ( startRecord == 0 ) {
-                if ( modifier.sitehost != null && sb.getConfigBool("heuristic.site", false) && authenticated ) {
+                if ( modifier.sitehost != null && sb.getConfigBool(SwitchboardConstants.HEURISTIC_SITE, false) && authenticated && !stealthmode) {
                     sb.heuristicSite(theSearch, modifier.sitehost);
                 }
-                if ( (heuristicBlekko >= 0 || sb.getConfigBool("heuristic.blekko", false)) && authenticated ) {
+                if ( (heuristicBlekko >= 0 || sb.getConfigBool(SwitchboardConstants.HEURISTIC_BLEKKO, false)) && authenticated && !stealthmode ) {
                     sb.heuristicRSS("http://blekko.com/ws/$+/rss", theSearch, "blekko");
                 }
-                if ( (heuristicTwitter >= 0 || sb.getConfigBool("heuristic.twitter", false)) && authenticated ) {
+                if ( (heuristicTwitter >= 0 || sb.getConfigBool(SwitchboardConstants.HEURISTIC_TWITTER, false)) && authenticated && !stealthmode ) {
                     sb.heuristicRSS("http://search.twitter.com/search.rss?rpp=50&q=$", theSearch, "twitter");
                 }
-                if (sb.getConfigBool("heuristic.opensearch", false) && authenticated) {
+                if (sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false) && authenticated && !stealthmode) {
                     OpenSearchConnector.query(sb, theSearch);
                 }
             }

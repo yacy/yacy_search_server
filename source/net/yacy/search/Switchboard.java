@@ -1303,9 +1303,9 @@ public final class Switchboard extends serverSwitch {
             ResultURLs.clearStacks();
 
             // remove heuristics
-            setConfig("heuristic.site", false);
-            setConfig("heuristic.blekko", false);
-            setConfig("heuristic.twitter", false);
+            setConfig(SwitchboardConstants.HEURISTIC_SITE, false);
+            setConfig(SwitchboardConstants.HEURISTIC_BLEKKO, false);
+            setConfig(SwitchboardConstants.HEURISTIC_TWITTER, false);
 
             // relocate
             this.peers.relocate(
@@ -2041,6 +2041,15 @@ public final class Switchboard extends serverSwitch {
                 setConfig("adminAccount", "");
             }
 
+            // stop greedylearning if limit is reached
+            if (getConfigBool(SwitchboardConstants.GREEDYLEARNING_ACTIVE, false)) {
+                long cs = this.index.fulltext().collectionSize();
+                if (cs > getConfigInt(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, 0)) {
+                    setConfig(SwitchboardConstants.GREEDYLEARNING_ACTIVE, false);
+                    log.logInfo("finishing greedy learning phase, size=" +cs);
+                }
+            }
+            
             // refresh recrawl dates
             try {
                 CrawlProfile selentry;
@@ -2265,6 +2274,7 @@ public final class Switchboard extends serverSwitch {
             // if no crawl is running and processing is activated:
             // execute the (post-) processing steps for all entries that have a process tag assigned
             if (this.crawlQueues.coreCrawlJobSize() == 0) {
+                if (this.crawlQueues.noticeURL.isEmpty()) this.crawlQueues.noticeURL.clear(); // flushes more caches                
                 index.fulltext().getDefaultConfiguration().postprocessing(index);
                 index.fulltext().getWebgraphConfiguration().postprocessing(index);
             }
@@ -3371,7 +3381,7 @@ public final class Switchboard extends serverSwitch {
         }.start();
     }
 
-    public final void heuristicSearchResults(final String host) {
+    public final void heuristicSearchResults(final String url) {
         new Thread() {
 
             @Override
@@ -3380,7 +3390,7 @@ public final class Switchboard extends serverSwitch {
                 // get the links for a specific site
                 final DigestURI startUrl;
                 try {
-                    startUrl = new DigestURI(host);
+                    startUrl = new DigestURI(url);
                 } catch (final MalformedURLException e) {
                     Log.logException(e);
                     return;
@@ -3393,7 +3403,7 @@ public final class Switchboard extends serverSwitch {
                     if (links != null) {
                         if (links.size() < 1000) { // limit to 1000 to skip large index pages
                             final Iterator<DigestURI> i = links.keySet().iterator();
-                            final boolean globalcrawljob = Switchboard.this.getConfigBool("heuristic.searchresults.crawlglobal",false);
+                            final boolean globalcrawljob = Switchboard.this.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL,false);
                             Collection<DigestURI> urls = new ArrayList<DigestURI>();
                             while (i.hasNext()) {
                                 url = i.next();

@@ -91,9 +91,9 @@ public class ConfigNetwork_p
                 boolean indexReceive = "on".equals(post.get("indexReceive", ""));
                 if ( !indexReceive ) {
                     // remove heuristics
-                    sb.setConfig("heuristic.site", false);
-                    sb.setConfig("heuristic.blekko", false);
-                    sb.setConfig("heuristic.twitter", false);
+                    sb.setConfig(SwitchboardConstants.HEURISTIC_SITE, false);
+                    sb.setConfig(SwitchboardConstants.HEURISTIC_BLEKKO, false);
+                    sb.setConfig(SwitchboardConstants.HEURISTIC_TWITTER, false);
                 }
                 final boolean robinsonmode = "robinson".equals(post.get("network", ""));
                 if ( robinsonmode ) {

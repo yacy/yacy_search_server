@@ -1156,3 +1156,14 @@ interaction.autocrawler.categoryfilter = .*
 # host browser settings
 browser.autoload = false
 browser.load4everyone = false
+
+
+# greedy learning: fast information acquisition heuristic for new peers 
+# to make greedy learning work, it must be enabled in the network definition
+# the user may switch it off at any time, but if the automatic learning limit is reached
+# then the active flag is set to false automatically and this will switch to that state
+# automatically by the cleanup process each time if the user switches it on again.
+# While the switch in on, it will cause that the user-submitted search will be done along
+# with some heuristics like: loading linked documents and adding a twitter search.
+# When the learning mode is finished, the user may switch on individual heuristics by himself.
+greedylearning.active = true
