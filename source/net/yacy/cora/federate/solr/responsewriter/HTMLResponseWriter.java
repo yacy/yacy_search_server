@@ -90,7 +90,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         paramsList.remove("wt");
         String xmlquery = dqp.matcher("/solr/select?" + SolrParams.toSolrParams(paramsList).toString()).replaceAll("%22");
         writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
-        writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see an example call to the search rss API.</div>\n");
+        writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see this page as XML.</div>\n");
         
         DocList response = ((ResultContext) values.get("response")).docs;
         final int sz = response.size();

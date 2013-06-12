@@ -23,17 +23,12 @@ package net.yacy.cora.federate.solr.responsewriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.federate.solr.connector.SolrConnector;
-import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.document.SentenceReader;
-import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.lucene.document.Document;
@@ -86,11 +81,10 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
         assert values.get("responseHeader") != null;
         assert values.get("response") != null;
 
-        writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
+        writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n");
         writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/env/base.css\" />\n");
         writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"/env/style.css\" />\n");
         SolrParams params = request.getOriginalParams();
-        boolean discover = params.getBool("discover", false);
         String grep = params.get("grep");
         String query = "";
         String q = params.get("q"); if (q == null) q = "";
@@ -112,8 +106,6 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
         NamedList<Object> paramsList = params.toNamedList();
         paramsList.remove("wt");
         String xmlquery = dqp.matcher("/solr/select?" + SolrParams.toSolrParams(paramsList).toString()).replaceAll("%22");
-        writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
-        writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see an example call to the search rss API.</div>\n");
         
         DocList response = ((ResultContext) values.get("response")).docs;
         final int sz = response.size();
@@ -121,10 +113,10 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
             SolrIndexSearcher searcher = request.getSearcher();
             DocIterator iterator = response.iterator();
             IndexSchema schema = request.getSchema();
-            writer.write("<title>Document Grep for query \"" + query + "\" and grep phrase \"" + grep + "\"</title>\n</head><body>\n");
-            
-            LinkedHashMap<String,  ArrayList<String>> sentenceCache = new LinkedHashMap<String,  ArrayList<String>>();
-
+            String h1 = "Document Grep for query \"" + query + "\" and grep phrase \"" + grep + "\"";
+            writer.write("<title>" + h1 + "</title>\n</head><body>\n<h1>" + h1 + "</h1>\n");
+            writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
+            writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see an example call to the search rss API.</span>\n");
             for (int i = 0; i < sz; i++) {
                 int id = iterator.nextDoc();
                 Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
@@ -141,24 +133,7 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
                     line = sr.next();
                     if (line.length() > 0) sentences.add(line.toString());
                 }
-                sentenceCache.put(sku, sentences);
-            }
-
-            OrderedScoreMap<String> scores = null;
-            if (discover) {
-                // for each line make a statistic about the number of occurrences somewhere else
-                SolrConnector connector = Switchboard.getSwitchboard().index.fulltext().getDefaultConnector();
-                scores = new OrderedScoreMap<String>(null);
-                for (Map.Entry<String,  ArrayList<String>> entry: sentenceCache.entrySet()) {
-                    for (String line: entry.getValue()) {
-                        long count = connector.getCountByQuery("text_t:\"" + line + "\"");
-                        if (count > 0) scores.inc(entry.getKey());
-                    }
-                }
-            }
-            
-            for (Map.Entry<String,  ArrayList<String>> entry: sentenceCache.entrySet()) {
-                writeDoc(writer, entry.getKey(), entry.getValue(), grep, scores);
+                writeDoc(writer, sku, sentences, grep);
             }
         } else {
             writer.write("<title>No Document Found</title>\n</head><body>\n");
@@ -167,7 +142,7 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
         writer.write("</body></html>\n");
     }
 
-    private static final void writeDoc(Writer writer, String url, ArrayList<String> sentences, String grep, OrderedScoreMap<String> scores) throws IOException {
+    private static final void writeDoc(Writer writer, String url, ArrayList<String> sentences, String grep) throws IOException {
         writer.write("<form name=\"yacydoc" + url + "\" method=\"post\" action=\"#\" enctype=\"multipart/form-data\" accept-charset=\"UTF-8\">\n");
         writer.write("<fieldset>\n");
         writer.write("<h1><a href=\"" + url + "\">" + url + "</a></h1>\n");
@@ -180,29 +155,19 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
                 if (grep == null || grep.length() == 0) writer.write("all lines in document"); else {writer.write("matches for grep phrase \"");writer.write(grep);writer.write("\"");}
             }
             writer.write("</dt>");
-            writedd(writer, line, scores);
-        }
-        if (scores != null) {
-            Collection<String> discoveries = scores.keyList(false);
-            writer.write("<dt>Citations:</dt><dd></dd>");
-            for (String u: discoveries) {
-                writer.write("<dt>");
-                writer.write(Integer.toString(scores.get(u)));
-                writer.write(" citations</dt><dd>");
-                writedd(writer, u, scores);
-            }
+            writedd(writer, line, grep);
         }
         writer.write("</dl>\n");
         writer.write("</fieldset>\n");
         writer.write("</form>\n");
     }
     
-    private static void writedd(Writer writer, String line, OrderedScoreMap<String> scores) throws IOException {
+    private static void writedd(Writer writer, String line, String grep) throws IOException {
         writer.write("<dd><a href=\"/solr/select?q=text_t:%22");
         XML.escapeAttributeValue(line, writer);
-        writer.write("%22&rows=100&discover=");
-        writer.write(scores != null ? "true" : "false");
-        writer.write("&wt=grephtml\">");
+        writer.write("%22&rows=100&grep=%22");
+        XML.escapeAttributeValue(grep, writer);
+        writer.write("%22&wt=grephtml\">");
         XML.escapeAttributeValue(line, writer);
         writer.write("</a></dd>\n");
     }

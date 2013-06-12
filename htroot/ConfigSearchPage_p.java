@@ -72,6 +72,7 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.result.show.size", post.getBoolean("search.result.show.size"));
                 sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata"));
                 sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser"));
+                sb.setConfig("search.result.show.citation", post.getBoolean("search.result.show.citation"));
                 sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures"));
                 sb.setConfig("search.result.show.cache", post.getBoolean("search.result.show.cache"));
                 sb.setConfig("search.result.show.proxy", post.getBoolean("search.result.show.proxy"));
@@ -124,6 +125,7 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.result.show.size", config.getProperty("search.result.show.size","false"));
                 sb.setConfig("search.result.show.metadata", config.getProperty("search.result.show.metadata","false"));
                 sb.setConfig("search.result.show.parser", config.getProperty("search.result.show.parser","false"));
+                sb.setConfig("search.result.show.citation", config.getProperty("search.result.show.citation","false"));
                 sb.setConfig("search.result.show.pictures", config.getProperty("search.result.show.pictures","false"));
                 sb.setConfig("search.result.show.cache", config.getProperty("search.result.show.cache","true"));
                 sb.setConfig("search.result.show.proxy", config.getProperty("search.result.show.proxy","false"));
@@ -150,6 +152,7 @@ public class ConfigSearchPage_p {
         prop.put("search.result.show.size", sb.getConfigBool("search.result.show.size", false) ? 1 : 0);
         prop.put("search.result.show.metadata", sb.getConfigBool("search.result.show.metadata", false) ? 1 : 0);
         prop.put("search.result.show.parser", sb.getConfigBool("search.result.show.parser", false) ? 1 : 0);
+        prop.put("search.result.show.citation", sb.getConfigBool("search.result.show.citation", false) ? 1 : 0);
         prop.put("search.result.show.pictures", sb.getConfigBool("search.result.show.pictures", false) ? 1 : 0);
         prop.put("search.result.show.cache", sb.getConfigBool("search.result.show.cache", false) ? 1 : 0);
         prop.put("search.result.show.proxy", sb.getConfigBool("search.result.show.proxy", false) ? 1 : 0);

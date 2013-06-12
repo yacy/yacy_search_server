@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>YaCy '#[clientname]#': Document Citations for url #[url]#</title>
+#%env/templates/metas.template%#
+</head>
+<body>
+#%env/templates/embeddedheader.template%#
+  <h1>Document Citations for<br><a href="#[url]#">#[url]#</a></h1>
+  #(similar)#::
+  <h3>Similar documents from different hosts:</h3>
+  <ul>#{links}#
+    <li><a href="#[url]#">#[url]#</a></li>
+  #{/links}#</ul>
+  #(/similar)#
+  <form action="#" name="" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset>
+    <legend><label>List of Sentences in #[url]#</label></legend>
+    <dl>#{sentences}#
+    <dt>#[dt]#</dt><dd>#[dd]#</dd>
+    #{/sentences}#</dl>
+    </fieldset>
+  </form>
+  <form action="#" name="" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset>
+    <legend><label>List of other web pages with citations</label></legend>
+    <dl>#{citations}#
+    <dt>#[dt]#</dt><dd>#[dd]#</dd>
+    #{/citations}#</dl>
+    </fieldset>
+  </form>
+#%env/templates/embeddedfooter.template%#
+</body>
+</html>

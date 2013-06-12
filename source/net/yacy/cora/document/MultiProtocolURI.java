@@ -755,6 +755,14 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         }
         return this.host;
     }
+    
+    public String getOrganization() {
+        String dnc = Domains.getDNC(host);
+        String subdomOrga = host.length() - dnc.length() <= 0 ? "" : host.substring(0, host.length() - dnc.length() - 1);
+        int p = subdomOrga.lastIndexOf('.');
+        String orga = (p < 0) ? subdomOrga : subdomOrga.substring(p + 1);
+        return orga;
+    }
 
     public String getTLD() {
         if (this.host == null) return "";

@@ -769,6 +769,7 @@ search.result.show.date = true
 search.result.show.size = false
 search.result.show.metadata = false
 search.result.show.parser = false
+search.result.show.citation = true
 search.result.show.pictures = false
 search.result.show.cache = true
 search.result.show.proxy = false
