@@ -163,6 +163,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
             score = this.map.get(obj);
             if (score == null) {
                 this.map.put(obj, new AtomicInteger(incrementScore));
+                return;
             }
         }
         score.addAndGet(incrementScore);
