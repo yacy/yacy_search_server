@@ -73,42 +73,43 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
 
     @Override
     public QueryResponse getResponseByParams(ModifiableSolrParams params) throws IOException {
-            // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
-            String q = params.get("q");
-            String threadname = Thread.currentThread().getName();
-            if (q != null) Thread.currentThread().setName("solr query: q = " + q);
-            
-            QueryRequest request = new QueryRequest(params);
-            ResponseParser responseParser = new XMLResponseParser();
-            request.setResponseParser(responseParser);
-            long t = System.currentTimeMillis();
-            NamedList<Object> result = null;
+        // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
+        String q = params.get("q");
+        String threadname = Thread.currentThread().getName();
+        if (q != null) Thread.currentThread().setName("solr query: q = " + q);
+        
+        QueryRequest request = new QueryRequest(params);
+        ResponseParser responseParser = new XMLResponseParser();
+        request.setResponseParser(responseParser);
+        long t = System.currentTimeMillis();
+        NamedList<Object> result = null;
+        try {
+            result = this.server.request(request);
+        } catch (Throwable e) {
+            //Log.logException(e);
+            throw new IOException(e.getMessage());
+            /*
+            Log.logException(e);
+            server = instance.getServer(this.corename);
+            super.init(server);
             try {
                 result = server.request(request);
-            } catch (Throwable e) {
-                throw new IOException(e.getMessage());
-                /*
-                Log.logException(e);
-                server = instance.getServer(this.corename);
-                super.init(server);
-                try {
-                    result = server.request(request);
-                } catch (Throwable e1) {
-                    throw new IOException(e1.getMessage());
-                }
-                */
+            } catch (Throwable e1) {
+                throw new IOException(e1.getMessage());
             }
-            QueryResponse response = new QueryResponse(result, server);
-            response.setElapsedTime(System.currentTimeMillis() - t);
+            */
+        }
+        QueryResponse response = new QueryResponse(result, this.server);
+        response.setElapsedTime(System.currentTimeMillis() - t);
 
-            if (q != null) Thread.currentThread().setName(threadname);
-            return response;
+        if (q != null) Thread.currentThread().setName(threadname);
+        return response;
     }
 
     public static void main(final String args[]) {
         RemoteSolrConnector solr;
         try {
-            RemoteInstance instance = new RemoteInstance("http://127.0.0.1:8983/solr/", null, "collection1");
+            RemoteInstance instance = new RemoteInstance("http://127.0.0.1:8983/solr/", null, "collection1", 10000);
             ArrayList<RemoteInstance> instances = new ArrayList<RemoteInstance>();
             instances.add(instance);
             solr = new RemoteSolrConnector(new ShardInstance(instances, ShardSelection.Method.MODULO_HOST_MD5), "solr");

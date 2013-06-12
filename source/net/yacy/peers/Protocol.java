@@ -1058,7 +1058,7 @@ public final class Protocol {
         } else {
             try {
                 String address = target == event.peers.mySeed() ? "localhost:" + target.getPort() : target.getPublicAddress();
-                instance = new RemoteInstance("http://" + address, null, "solr"); // this is a 'patch configuration' which considers 'solr' as default collection
+                instance = new RemoteInstance("http://" + address, null, "solr", 3000); // this is a 'patch configuration' which considers 'solr' as default collection
                 solrConnector = new RemoteSolrConnector(instance, "solr");
                 rsp = solrConnector.getResponseByParams(solrQuery);
                 docList = rsp.getResults();
@@ -1175,7 +1175,7 @@ public final class Protocol {
             event.addNodes(container, facets, snippets, true, "localpeer", (int) docList.getNumFound());
             event.addFinalize();
             event.addExpectedRemoteReferences(-count);
-            Network.log.logInfo("local search (solr): localpeer sent " + container.get(0).size() + "/" + docList.size() + " references");
+            Network.log.logInfo("local search (solr): localpeer sent " + container.size() + "/" + docList.getNumFound() + " references");
         } else {
             for (SolrInputDocument doc: docs) {
                 event.query.getSegment().putDocumentInQueue(doc);
@@ -1184,7 +1184,7 @@ public final class Protocol {
             event.addNodes(container, facets, snippets, false, target.getName() + "/" + target.hash, (int) docList.getNumFound());
             event.addFinalize();
             event.addExpectedRemoteReferences(-count);
-            Network.log.logInfo("remote search (solr): peer " + target.getName() + " sent " + (container.size() == 0 ? 0 : container.get(0).size()) + "/" + docList.size() + " references");
+            Network.log.logInfo("remote search (solr): peer " + target.getName() + " sent " + (container.size() == 0 ? 0 : container.size()) + "/" + docList.getNumFound() + " references");
         }
         final int dls = docList.size();
         docList.clear();

@@ -103,6 +103,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
      */
     @Override
     public long getSize() {
+        if (this.server == null) return 0;
         String threadname = Thread.currentThread().getName();
         Thread.currentThread().setName("solr query: size");
         EmbeddedSolrServer ess = (EmbeddedSolrServer) this.server;
@@ -185,12 +186,12 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     @Override
     public QueryResponse getResponseByParams(ModifiableSolrParams params) throws IOException {
         if (this.server == null) throw new IOException("server disconnected");
+        // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
+        String q = params.get("q");
+        String threadname = Thread.currentThread().getName();
+        if (q != null) Thread.currentThread().setName("solr query: q = " + q);
+        QueryResponse rsp;
         try {
-            // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
-            String q = params.get("q");
-            String threadname = Thread.currentThread().getName();
-            if (q != null) Thread.currentThread().setName("solr query: q = " + q);
-            QueryResponse rsp;
             rsp = this.server.query(params);
             if (q != null) Thread.currentThread().setName(threadname);
             if (rsp != null) log.debug(rsp.getResults().getNumFound() + " results for q=" + q);

@@ -129,7 +129,7 @@ public class IndexFederated_p {
                 final boolean usesolr = sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;
                 try {
                     if (usesolr) {
-                        ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null);
+                        ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null, 10000);
                         sb.index.fulltext().connectRemoteSolr(instances);
                     } else {
                         sb.index.fulltext().disconnectRemoteSolr();

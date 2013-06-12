@@ -68,19 +68,21 @@ public class RemoteInstance implements SolrInstance {
     private final HttpSolrServer defaultServer;
     private final Collection<String> coreNames;
     private final Map<String, HttpSolrServer> server;
+    private final int timeout;
     
-    public static ArrayList<RemoteInstance> getShardInstances(final String urlList, Collection<String> coreNames, String defaultCoreName) throws IOException {
+    public static ArrayList<RemoteInstance> getShardInstances(final String urlList, Collection<String> coreNames, String defaultCoreName, final int timeout) throws IOException {
         urlList.replace(' ', ',');
         String[] urls = urlList.split(",");
         ArrayList<RemoteInstance> instances = new ArrayList<RemoteInstance>();
         for (final String u: urls) {
-            RemoteInstance instance = new RemoteInstance(u, coreNames, defaultCoreName);
+            RemoteInstance instance = new RemoteInstance(u, coreNames, defaultCoreName, timeout);
             instances.add(instance);
         }
         return instances;
     }
     
-    public RemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName) throws IOException {
+    public RemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName, final int timeout) throws IOException {
+        this.timeout = timeout;
         this.server= new HashMap<String, HttpSolrServer>();
         this.solrurl = url == null ? "http://127.0.0.1:8983/solr/" : url; // that should work for the example configuration of solr 4.x.x
         this.coreNames = coreNames == null ? new ArrayList<String>() : coreNames;
@@ -148,8 +150,8 @@ public class RemoteInstance implements SolrInstance {
                 }
             };
             HttpParams params = this.client.getParams();
-            HttpConnectionParams.setConnectionTimeout(params, 10000);
-            HttpConnectionParams.setSoTimeout(params, 10000);
+            HttpConnectionParams.setConnectionTimeout(params, timeout);
+            HttpConnectionParams.setSoTimeout(params, timeout);
             this.client.addRequestInterceptor(new HttpRequestInterceptor() {
                 @Override
                 public void process(final HttpRequest request, final HttpContext context) throws IOException {
@@ -236,9 +238,9 @@ public class RemoteInstance implements SolrInstance {
             s = new HttpSolrServer(this.solrurl + name);
         }
         s.setAllowCompression(true);
-        s.setConnectionTimeout(60000);
+        s.setConnectionTimeout(this.timeout);
         s.setMaxRetries(1); // Solr-Doc: No more than 1 recommended (depreciated)
-        s.setSoTimeout(60000);
+        s.setSoTimeout(this.timeout);
         this.server.put(name, s);
         return s;
     }

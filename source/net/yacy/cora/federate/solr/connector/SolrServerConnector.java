@@ -30,6 +30,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.analysis.NumericTokenStream;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -42,7 +43,12 @@ import org.apache.solr.common.SolrInputDocument;
 public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
     protected final static Logger log = Logger.getLogger(SolrServerConnector.class);
-    
+    public final static NumericTokenStream classLoaderSynchro = new NumericTokenStream();
+    // pre-instantiate this object to prevent sun.misc.Launcher$AppClassLoader deadlocks
+    // this is a very nasty problem; solr instantiates objects dynamically which can cause deadlocks
+    static {
+        assert classLoaderSynchro != null;
+    }
     protected SolrServer server;
 
     protected SolrServerConnector() {
@@ -58,13 +64,14 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     }
 
     @Override
-    public synchronized void commit(final boolean softCommit) {
-        //if (this.server instanceof HttpSolrServer) ((HttpSolrServer) this.server).getHttpClient().getConnectionManager().closeExpiredConnections();
-        try {
-            this.server.commit(true, true, softCommit);
-            //if (this.server instanceof HttpSolrServer) ((HttpSolrServer) this.server).shutdown();
-        } catch (Throwable e) {
-            //Log.logException(e);
+    public void commit(final boolean softCommit) {
+        synchronized (this.server) {
+            try {
+                this.server.commit(true, true, softCommit);
+                //if (this.server instanceof HttpSolrServer) ((HttpSolrServer) this.server).shutdown();
+            } catch (Throwable e) {
+                //Log.logException(e);
+            }
         }
     }
 
@@ -72,18 +79,22 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      * force an explicit merge of segments
      * @param maxSegments the maximum number of segments. Set to 1 for maximum optimization
      */
-    public synchronized void optimize(int maxSegments) {
-        try {
-            this.server.optimize(true, true, maxSegments);
-        } catch (Throwable e) {
-            Log.logException(e);
+    public void optimize(int maxSegments) {
+        if (this.server == null) return;
+        synchronized (this.server) {
+            try {
+                this.server.optimize(true, true, maxSegments);
+            } catch (Throwable e) {
+                Log.logException(e);
+            }
         }
     }
 
     @Override
-    public synchronized void close() {
+    public void close() {
+        if (this.server == null) return;
         try {
-            if (this.server != null && this.server instanceof EmbeddedSolrServer) synchronized (this.server) {this.server.commit(true, true, false);}
+            if (this.server instanceof EmbeddedSolrServer) synchronized (this.server) {this.server.commit(true, true, false);}
             this.server = null;
         } catch (Throwable e) {
             Log.logException(e);
@@ -92,6 +103,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
 
     @Override
     public long getSize() {
+        if (this.server == null) return 0;
         try {
             final QueryResponse rsp = getResponseByParams(AbstractSolrConnector.catchSuccessQuery);
             if (rsp == null) return 0;
@@ -109,32 +121,41 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      * @throws IOException
      */
     @Override
-    public synchronized void clear() throws IOException {
-        try {
-            this.server.deleteByQuery(AbstractSolrConnector.CATCHALL_TERM);
-            this.server.commit(true, true, false);
-        } catch (final Throwable e) {
-            throw new IOException(e);
+    public void clear() throws IOException {
+        if (this.server == null) return;
+        synchronized (this.server) {
+            try {
+                this.server.deleteByQuery(AbstractSolrConnector.CATCHALL_TERM);
+                this.server.commit(true, true, false);
+            } catch (final Throwable e) {
+                throw new IOException(e);
+            }
         }
     }
 
     @Override
     public void deleteById(final String id) throws IOException {
-        try {
-            this.server.deleteById(id, -1);
-        } catch (final Throwable e) {
-            throw new IOException(e);
+        if (this.server == null) return;
+        synchronized (this.server) {
+            try {
+                this.server.deleteById(id, -1);
+            } catch (final Throwable e) {
+                throw new IOException(e);
+            }
         }
     }
 
     @Override
     public void deleteByIds(final Collection<String> ids) throws IOException {
+        if (this.server == null) return;
         List<String> l = new ArrayList<String>();
         for (String s: ids) l.add(s);
-        try {
-            this.server.deleteById(l, -1);
-        } catch (final Throwable e) {
-            throw new IOException(e);
+        synchronized (this.server) {
+            try {
+                this.server.deleteById(l, -1);
+            } catch (final Throwable e) {
+                throw new IOException(e);
+            }
         }
     }
 
@@ -145,10 +166,13 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      */
     @Override
     public  void deleteByQuery(final String querystring) throws IOException {
-        try {
-            this.server.deleteByQuery(querystring, -1);
-        } catch (final Throwable e) {
-            throw new IOException(e);
+        if (this.server == null) return;
+        synchronized (this.server) {
+            try {
+                this.server.deleteByQuery(querystring, -1);
+            } catch (final Throwable e) {
+                throw new IOException(e);
+            }
         }
     }
 
@@ -170,22 +194,29 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
         if (this.server == null) return;
-        try {
-            if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
-            this.server.add(solrdoc, -1);
-        } catch (Throwable e) {
-            // catches "version conflict for": try this again and delete the document in advance
+        synchronized (this.server) {
             try {
-                this.server.deleteById((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
-            } catch (SolrServerException e1) {}
-            try {
+                if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
                 this.server.add(solrdoc, -1);
-            } catch (Throwable ee) {
+            } catch (Throwable e) {
+                Log.logException(e);
+                // catches "version conflict for": try this again and delete the document in advance
                 try {
-                    this.server.commit();
+                    this.server.deleteById((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+                } catch (SolrServerException e1) {
+                    Log.logException(e1);
+                }
+                try {
                     this.server.add(solrdoc, -1);
-                } catch (Throwable eee) {
-                    throw new IOException(eee);
+                } catch (Throwable ee) {
+                    Log.logException(ee);
+                    try {
+                        this.server.commit();
+                        this.server.add(solrdoc, -1);
+                    } catch (Throwable eee) {
+                        Log.logException(eee);
+                        throw new IOException(eee);
+                    }
                 }
             }
         }
@@ -194,23 +225,29 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
         if (this.server == null) return;
-        try {
-            for (SolrInputDocument solrdoc : solrdocs) {
-                if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
-            }
-            this.server.add(solrdocs, -1);
-        } catch (Throwable e) {
-            // catches "version conflict for": try this again and delete the document in advance
-            List<String> ids = new ArrayList<String>();
-            for (SolrInputDocument solrdoc : solrdocs) ids.add((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+        synchronized (this.server) {
             try {
-                this.server.deleteById(ids);
-            } catch (SolrServerException e1) {}
-            try {
+                for (SolrInputDocument solrdoc : solrdocs) {
+                    if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
+                }
                 this.server.add(solrdocs, -1);
-            } catch (Throwable ee) {
-                log.warn(e.getMessage() + " IDs=" + ids.toString());
-                throw new IOException(ee);
+            } catch (Throwable e) {
+                Log.logException(e);
+                // catches "version conflict for": try this again and delete the document in advance
+                List<String> ids = new ArrayList<String>();
+                for (SolrInputDocument solrdoc : solrdocs) ids.add((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+                try {
+                    this.server.deleteById(ids);
+                } catch (SolrServerException e1) {
+                    Log.logException(e1);
+                    }
+                try {
+                    this.server.add(solrdocs, -1);
+                } catch (Throwable ee) {
+                    Log.logException(ee);
+                    log.warn(e.getMessage() + " IDs=" + ids.toString());
+                    throw new IOException(ee);
+                }
             }
         }
     }

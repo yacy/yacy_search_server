@@ -493,7 +493,7 @@ public final class Switchboard extends serverSwitch {
 
         if (usesolr && solrurls != null && solrurls.length() > 0) {
             try {
-                ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null);
+                ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null, 10000);
                 this.index.fulltext().connectRemoteSolr(instances);
             } catch ( final IOException e ) {
                 Log.logException(e);
@@ -1329,7 +1329,7 @@ public final class Switchboard extends serverSwitch {
 
             if (usesolr && solrurls != null && solrurls.length() > 0) {
                 try {
-                    ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null);
+                    ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null, 10000);
                     this.index.fulltext().connectRemoteSolr(instances);
                 } catch ( final IOException e ) {
                     Log.logException(e);
