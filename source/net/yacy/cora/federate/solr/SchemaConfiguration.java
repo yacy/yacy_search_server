@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -38,7 +37,6 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.storage.Configuration;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
@@ -94,15 +92,12 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         return false;
     }
 
-    public boolean postprocessing_references(Fulltext fulltext, ReferenceReportCache rrCache, SolrDocument doc, SolrInputDocument sid, DigestURI url, Map<String, Long> hostExtentCount) {
+    public boolean postprocessing_references(ReferenceReportCache rrCache, SolrDocument doc, SolrInputDocument sid, DigestURI url, Map<String, Long> hostExtentCount) {
         if (!(this.contains(CollectionSchema.references_i) ||
               this.contains(CollectionSchema.references_internal_i) ||
-              this.contains(CollectionSchema.references_internal_id_sxt) || this.contains(CollectionSchema.references_internal_url_sxt) ||
               this.contains(CollectionSchema.references_external_i) || this.contains(CollectionSchema.references_exthosts_i))) return false;
         Integer all_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
         Integer internal_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_internal_i.getSolrFieldName());
-        Collection<Object> internal_ids_old = doc == null ? null : doc.getFieldValues(CollectionSchema.references_internal_id_sxt.getSolrFieldName());
-        Collection<Object> internal_urls_old = doc == null ? null : doc.getFieldValues(CollectionSchema.references_internal_url_sxt.getSolrFieldName());
         Integer external_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_external_i.getSolrFieldName());
         Integer exthosts_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.references_exthosts_i.getSolrFieldName());
         Integer hostextc_old = doc == null ? null : (Integer) doc.getFieldValue(CollectionSchema.host_extent_i.getSolrFieldName());
@@ -111,14 +106,6 @@ public class SchemaConfiguration extends Configuration implements Serializable {
             List<String> internalIDs = new ArrayList<String>();
             HandleSet iids = rr.getInternallIDs();
             for (byte[] b: iids) internalIDs.add(ASCII.String(b));
-            List<String> internalURLs = new ArrayList<String>();
-            if (this.contains(CollectionSchema.references_internal_url_sxt)) {
-                // get all urls from the index and store them here
-                for (String id: internalIDs) {
-                    DigestURI u = fulltext.getURL(ASCII.getBytes(id));
-                    if (u != null) internalURLs.add(u.toNormalform(true));
-                }
-            }
             
             boolean change = false;
             int all = rr.getExternalCount() + rr.getInternalCount();
@@ -130,16 +117,6 @@ public class SchemaConfiguration extends Configuration implements Serializable {
             if (this.contains(CollectionSchema.references_internal_i) &&
                 (internal_old == null || internal_old.intValue() != rr.getInternalCount())) {
                 sid.setField(CollectionSchema.references_internal_i.getSolrFieldName(), rr.getInternalCount());
-                change = true;
-            }
-            if (this.contains(CollectionSchema.references_internal_id_sxt) &&
-                (internal_ids_old == null || internal_ids_old.size() != internalIDs.size())) {
-                sid.setField(CollectionSchema.references_internal_id_sxt.getSolrFieldName(), internalIDs);
-                change = true;
-            }
-            if (this.contains(CollectionSchema.references_internal_url_sxt) &&
-                (internal_urls_old == null || internal_urls_old.size() != internalURLs.size())) {
-                sid.setField(CollectionSchema.references_internal_url_sxt.getSolrFieldName(), internalURLs);
                 change = true;
             }
             if (this.contains(CollectionSchema.references_external_i) &&

@@ -705,7 +705,7 @@ public class Segment {
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
         if (this.connectedCitation()) {
-            this.fulltext.getDefaultConfiguration().postprocessing_references(this.fulltext, this.getReferenceReportCache(), null, vector, url, null);
+            this.fulltext.getDefaultConfiguration().postprocessing_references(this.getReferenceReportCache(), null, vector, url, null);
         }
         // STORE TO SOLR
         String error = null;

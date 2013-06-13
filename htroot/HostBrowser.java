@@ -21,7 +21,6 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,6 +41,7 @@ import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.Request;
@@ -51,6 +51,8 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.graphics.WebStructureGraph.StructureEntry;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
+import net.yacy.search.index.Segment.ReferenceReport;
+import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -274,8 +276,6 @@ public class HostBrowser {
                         CollectionSchema.clickdepth_i.getSolrFieldName(),
                         CollectionSchema.references_i.getSolrFieldName(),
                         CollectionSchema.references_internal_i.getSolrFieldName(),
-                        CollectionSchema.references_internal_id_sxt.getSolrFieldName(),
-                        CollectionSchema.references_internal_url_sxt.getSolrFieldName(),
                         CollectionSchema.references_external_i.getSolrFieldName(),
                         CollectionSchema.references_exthosts_i.getSolrFieldName(),
                         CollectionSchema.cr_host_chance_d.getSolrFieldName(),
@@ -289,13 +289,15 @@ public class HostBrowser {
                 Map<String, InfoCacheEntry> infoCache = new HashMap<String, InfoCacheEntry>();
                 int hostsize = 0;
                 final List<String> deleteIDs = new ArrayList<String>();
-                long timeout = System.currentTimeMillis() + TIMEOUT;
+                long timeoutList = System.currentTimeMillis() + TIMEOUT;
+                long timeoutReferences = System.currentTimeMillis() + 3000;
+                ReferenceReportCache rrCache = sb.index.getReferenceReportCache();
                 while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                     String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
                     String errortype = (String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName());
                     FailType error = errortype == null ? null : FailType.valueOf(errortype);
                     String ids = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-                    infoCache.put(ids, new InfoCacheEntry(sb.index.fulltext(), doc));
+                    infoCache.put(ids, new InfoCacheEntry(sb.index.fulltext(), rrCache, doc, ids, System.currentTimeMillis() < timeoutReferences));
                     if (u.startsWith(path)) {
                         if (delete) {
                             deleteIDs.add(ids);
@@ -315,7 +317,7 @@ public class HostBrowser {
                             if ((complete || u.startsWith(path)) && !storedDocs.contains(u)) inboundLinks.add(u);
                         }
                         
-                        // collect outboundlinks to browse to the outbound
+                        // collect referrer links
                         links = URIMetadataNode.getLinks(doc, false);
                         while (links.hasNext()) {
                             u = links.next();
@@ -332,7 +334,7 @@ public class HostBrowser {
                             } catch (MalformedURLException e) {}
                         }
                     }
-                    if (System.currentTimeMillis() > timeout) break;
+                    if (System.currentTimeMillis() > timeoutList) break;
                 }
                 if (deleteIDs.size() > 0) sb.remove(deleteIDs);
                 
@@ -511,17 +513,13 @@ public class HostBrowser {
         public Integer cr_n;
         public Double  cr_c;
         public int clickdepth, references, references_internal, references_external, references_exthosts;
-        public List<String> references_internal_urls;
-        private final Fulltext fulltext;
-        public InfoCacheEntry(final Fulltext fulltext, final SolrDocument doc) {
-            this.fulltext = fulltext;
+        public List<String> references_internal_urls, references_external_urls;
+        public InfoCacheEntry(final Fulltext fulltext, final ReferenceReportCache rrCache, final SolrDocument doc, final String urlhash, boolean fetchReferences) {
             this.cr_c = (Double) doc.getFieldValue(CollectionSchema.cr_host_chance_d.getSolrFieldName());
             this.cr_n = (Integer) doc.getFieldValue(CollectionSchema.cr_host_norm_i.getSolrFieldName());            
             Integer cd = (Integer) doc.getFieldValue(CollectionSchema.clickdepth_i.getSolrFieldName());
             Integer rc = (Integer) doc.getFieldValue(CollectionSchema.references_i.getSolrFieldName());
             Integer rc_internal = (Integer) doc.getFieldValue(CollectionSchema.references_internal_i.getSolrFieldName());
-            Collection<Object> rc_internal_id = doc.getFieldValues(CollectionSchema.references_internal_id_sxt.getSolrFieldName());
-            Collection<Object> rc_internal_url = doc.getFieldValues(CollectionSchema.references_internal_url_sxt.getSolrFieldName());
             Integer rc_external = (Integer) doc.getFieldValue(CollectionSchema.references_external_i.getSolrFieldName());
             Integer rc_exthosts = (Integer) doc.getFieldValue(CollectionSchema.references_exthosts_i.getSolrFieldName());
             this.clickdepth = (cd == null || cd.intValue() < 0) ? 999 : cd.intValue();
@@ -529,21 +527,52 @@ public class HostBrowser {
             this.references_internal = (rc_internal == null || rc_internal.intValue() <= 0) ? 0 : rc_internal.intValue();
             // calculate the url reference list
             this.references_internal_urls = new ArrayList<String>();
-            if (rc_internal_url != null) {
-                for (Object o: rc_internal_url) references_internal_urls.add((String) o);
-            } else if (rc_internal_id != null) {
-                for (Object o: rc_internal_id) {
-                    DigestURI u = fulltext.getURL(ASCII.getBytes((String) o));
-                    if (u != null) references_internal_urls.add(u.toNormalform(true));
+            this.references_external_urls = new ArrayList<String>();
+            if (fetchReferences) {
+                // get the references from the citation index
+                try {
+                    ReferenceReport rr = rrCache.getReferenceReport(ASCII.getBytes(urlhash), false);
+                    List<String> internalIDs = new ArrayList<String>();
+                    List<String> externalIDs = new ArrayList<String>();
+                    HandleSet iids = rr.getInternallIDs();
+                    for (byte[] b: iids) internalIDs.add(ASCII.String(b));
+                    HandleSet eids = rr.getExternalIDs();
+                    for (byte[] b: eids) externalIDs.add(ASCII.String(b));
+                    // get all urls from the index and store them here
+                    for (String id: internalIDs) {
+                        if (id.equals(urlhash)) continue; // no self-references
+                        DigestURI u = fulltext.getURL(ASCII.getBytes(id));
+                        if (u != null) references_internal_urls.add(u.toNormalform(true));
+                    }
+                    for (String id: externalIDs) {
+                        if (id.equals(urlhash)) continue; // no self-references
+                        DigestURI u = fulltext.getURL(ASCII.getBytes(id));
+                        if (u != null) references_external_urls.add(u.toNormalform(true));
+                    }
+                } catch (IOException e) {
                 }
+                
             }
             this.references_external = (rc_external == null || rc_external.intValue() <= 0) ? 0 : rc_external.intValue();
             this.references_exthosts = (rc_exthosts == null || rc_exthosts.intValue() <= 0) ? 0 : rc_exthosts.intValue();
         }
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            for (String s: references_internal_urls) sb.append("<a href='").append(s).append("' target='_blank'><img src='env/grafics/i16.gif' alt='info' title='" + s + "' width='12' height='12'/></a>");
-            if (sb.length() == 0 && !fulltext.getDefaultConfiguration().contains(CollectionSchema.references_internal_id_sxt))  sb.append("<a href='/IndexSchema_p.html'><img src='env/grafics/i16.gif' alt='info' title='activate references_internal_id_sxt in IndexSchema_p.html to see all backlinks' width='12' height='12'/></a>");
+            StringBuilder sbi = new StringBuilder();
+            int c = 0;
+            for (String s: references_internal_urls) {
+                sbi.append("<a href='").append(s).append("' target='_blank'><img src='env/grafics/i16.gif' alt='info' title='" + s + "' width='12' height='12'/></a>");
+                c++;
+                if (c % 80 == 0) sbi.append("<br/>");
+            }
+            if (sbi.length() > 0) sbi.insert(0, "<br/>internal referrer:</br>");
+            StringBuilder sbe = new StringBuilder();
+            c = 0;
+            for (String s: references_external_urls) {
+                sbe.append("<a href='").append(s).append("' target='_blank'><img src='env/grafics/i16.gif' alt='info' title='" + s + "' width='12' height='12'/></a>");
+                c++;
+                if (c % 80 == 0) sbe.append("<br/>");
+            }
+            if (sbe.length() > 0) sbe.insert(0, "<br/>external referrer:</br>");
             return
                     (this.clickdepth >= 0 ?
                             "clickdepth: " + this.clickdepth :
@@ -551,7 +580,7 @@ public class HostBrowser {
                     (this.cr_c != null ? ", cr=" + (Math.round(this.cr_c * 1000.0d) / 1000.0d) : "") +
                     (this.cr_n != null ? ", crn=" + this.cr_n : "") +
                     (this.references >= 0 ?
-                            ", refs: " + this.references_exthosts + " hosts, " + this.references_external + " ext, " + this.references_internal + " int" + (sb.length() > 0 ? " " + sb.toString() + "" : "") :
+                            ", refs: " + this.references_exthosts + " hosts, " + this.references_external + " ext, " + this.references_internal + " int" + sbi.toString() + sbe.toString() :
                             "");
         }
     }

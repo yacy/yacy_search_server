@@ -52,8 +52,6 @@ public enum CollectionSchema implements SchemaDeclaration {
     httpstatus_redirect_s(SolrType.num_integer, true, true, false, false, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
     references_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references, should be equal to references_internal_i + references_external_i"),
     references_internal_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references from same host to referenced url"),
-    references_internal_id_sxt(SolrType.string, true, true, true, false, true, "ids of unique http references from same host to referenced url"),
-    references_internal_url_sxt(SolrType.string, true, true, true, false, true, "urls of unique http references from same host to referenced url"),
     references_external_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references from external hosts"),
     references_exthosts_i(SolrType.num_integer, true, true, false, false, false, "number of external hosts which provide http references"),
     clickdepth_i(SolrType.num_integer, true, true, false, false, false, "depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url"),

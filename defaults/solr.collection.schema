@@ -72,12 +72,6 @@ references_i
 ## number of unique http references from same host to referenced url
 references_internal_i
 
-## ids of unique http references from same host to referenced url
-#references_internal_id_sxt
-
-## urls of unique http references from same host to referenced url
-#references_internal_url_sxt
-
 ## number of unique http references from external hosts
 references_external_i
 

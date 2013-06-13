@@ -897,7 +897,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         long count = segment.fulltext().getDefaultConnector().getCountByQuery(q.toString());
                         hostExtentCache.put(hosthash, count);
                     }
-                    if (postprocessing_references(segment.fulltext(), rrCache, doc, sid, url, hostExtentCache)) proccount_referencechange++;
+                    if (postprocessing_references(rrCache, doc, sid, url, hostExtentCache)) proccount_referencechange++;
                     
                     // all processing steps checked, remove the processing tag
                     sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());
