@@ -87,6 +87,10 @@ public class citation {
         }
         if (uri == null && hash.length() > 0) {
             uri = sb.getURL(ASCII.getBytes(hash));
+            if (uri == null) {
+                connector.commit(true); // try again, that url can be fresh
+                uri = sb.getURL(ASCII.getBytes(hash));
+            }
         }
         if (uri == null) return prop; // no proper url addressed
         url = uri.toNormalform(true);
