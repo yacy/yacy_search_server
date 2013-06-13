@@ -136,6 +136,9 @@ public class ViewFile {
         // get the urlEntry that belongs to the url hash
         //boolean ue = urlHash.length() > 0 && indexSegment.exists(ASCII.getBytes(urlHash));
         //if (ue) Log.logInfo("ViewFile", "exists(" + urlHash + ")");
+        if (urlHash.length() > 0 && (urlEntry = indexSegment.fulltext().getMetadata(ASCII.getBytes(urlHash))) == null) {
+            indexSegment.fulltext().commit(true);
+        }
         if (urlHash.length() > 0 && (urlEntry = indexSegment.fulltext().getMetadata(ASCII.getBytes(urlHash))) != null) {
             // get the url that belongs to the entry
             if (urlEntry == null || urlEntry.url() == null) {
