@@ -114,6 +114,7 @@ function updatepage(str) {
               <option value="sentences"#(vMode-sentences)#:: selected="selected"#(/vMode-sentences)#>Parsed Sentences</option>
               <option value="words"#(vMode-words)#:: selected="selected"#(/vMode-words)#>Parsed Tokens/Words</option>
               <option value="links"#(vMode-links)#:: selected="selected"#(/vMode-links)#>Link List</option>
+              <option value="iframeCitations"#(vMode-iframeCitations)#:: selected="selected"#(/vMode-iframeCitations)#>Citation Report</option>
             </select>
             <noscript><input type="submit" name="show" value="Show" /></noscript>
           </dd>
@@ -204,6 +205,10 @@ function updatepage(str) {
 	  <ol>#{words}#
 		<li class="tt"><tt>#[word]#</tt></li>#{/words}#
 	  </ol>
+	</fieldset>
+:: <!-- 8 -->
+	<fieldset><legend>CitationReport</legend>
+	  <iframe src="/api/citation.html?url=#[url]#" width="800" height="400" />
 	</fieldset>
 #(/viewMode)#
 </td></tr></table>

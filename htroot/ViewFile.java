@@ -75,6 +75,7 @@ public class ViewFile {
     public static final int VIEW_MODE_AS_IFRAME_FROM_CACHE = 5;
     public static final int VIEW_MODE_AS_LINKLIST = 6;
     public static final int VIEW_MODE_AS_PARSED_WORDS = 7;
+    public static final int VIEW_MODE_AS_IFRAME_FROM_CITATION_REPORT = 8;
 
     private static final String HIGHLIGHT_CSS = "searchHighlight";
     private static final int MAX_HIGHLIGHTS = 6;
@@ -218,6 +219,9 @@ public class ViewFile {
                 prop.put("viewMode_html", 1);
                 prop.put("viewMode_html_url", url.toNormalform(true));
             }
+        } else if (viewMode.equals("iframeCitations")) {
+            prop.put("viewMode", VIEW_MODE_AS_IFRAME_FROM_CITATION_REPORT);
+            prop.put("viewMode_url", url.toNormalform(true));
         } else if (viewMode.equals("parsed") || viewMode.equals("sentences")  || viewMode.equals("words") || viewMode.equals("links")) {
             // parsing the resource content
             Document document = null;
