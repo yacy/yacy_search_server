@@ -331,7 +331,7 @@ public final class CrawlStacker {
             entry.url().getContentDomain() == ContentDomain.VIDEO ||
             entry.url().getContentDomain() == ContentDomain.CTRL) {
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry, this.robots);
-            //if (warning != null) this.log.logWarning("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
+            //if (warning != null && this.log.isFine()) this.log.logFine("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
             return null;
         }
         
@@ -355,7 +355,7 @@ public final class CrawlStacker {
         } else if (remote) {
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.REMOTE, entry, this.robots);
         }
-        if (warning != null) this.log.logWarning("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true) + " - not pushed: " + warning);
+        if (warning != null && this.log.isFine()) this.log.logFine("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true) + " - not pushed: " + warning);
 
         return null;
     }
