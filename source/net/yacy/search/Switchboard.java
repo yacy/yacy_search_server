@@ -3578,7 +3578,7 @@ public final class Switchboard extends serverSwitch {
             }
             c++;
             if ( seedListFileURL.startsWith("http://") || seedListFileURL.startsWith("https://") ) {
-                loadSeedListConcurrently(this.peers, seedListFileURL, scc, (int) getConfigLong("bootstrapLoadTimeout", 10000));
+                loadSeedListConcurrently(this.peers, seedListFileURL, scc, (int) getConfigLong("bootstrapLoadTimeout", 20000));
             }
         }
     }
@@ -3651,7 +3651,7 @@ public final class Switchboard extends serverSwitch {
 
                 } catch ( final IOException e ) {
                     // this is when wget fails, commonly because of timeout
-                    Network.log.logWarning("BOOTSTRAP: failed (1) to load seeds from seed-list URL "
+                    Network.log.logInfo("BOOTSTRAP: failed (1) to load seeds from seed-list URL "
                         + seedListFileURL + ": " + e.getMessage());
                 } catch ( final Exception e ) {
                     // this is when wget fails; may be because of missing internet connection
