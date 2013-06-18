@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Date;
 
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
@@ -132,6 +134,20 @@ public class searchresult {
             if (bq.length() > 0) post.put("bq", bq);
             if (bf.length() > 0) post.put("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
         }
+        String daterange[] = post.remove("daterange");
+        if (daterange != null) {
+            String origfq = post.get(CommonParams.FQ);
+            String datefq = "";
+            for (String dr: daterange) {
+                String from_to[] = dr.split("\\.\\.");
+                if (from_to.length != 2) continue;
+                Date from = HeaderFramework.parseGSAFS(from_to[0]); if (from == null) continue;
+                Date to = HeaderFramework.parseGSAFS(from_to[1]); if (to == null) continue;
+                String z = CollectionSchema.last_modified.getSolrFieldName() + ":[" + ISO8601Formatter.FORMATTER.format(from) + " TO " + ISO8601Formatter.FORMATTER.format(to) + "]";
+                datefq = datefq.length() == 0 ? z : " OR " + z;
+            }
+            if (datefq.length() > 0) post.put(CommonParams.FQ, origfq == null || origfq.length() == 0 ? datefq : "(" + origfq + ") AND (" + datefq + ")");
+        }
         post.put(CommonParams.FL,
                 CollectionSchema.content_type.getSolrFieldName() + ',' +
                 CollectionSchema.id.getSolrFieldName() + ',' +
@@ -157,8 +173,7 @@ public class searchresult {
         if (site != null && site[0].length() > 0) {
             String origfq = post.get(CommonParams.FQ);
             String sitefq = QueryModifier.parseCollectionExpression(site[0]);
-            post.put(CommonParams.FQ, origfq == null || origfq.length() == 0 ? sitefq :
-                "(" + origfq + ") AND (" + sitefq + ")");
+            post.put(CommonParams.FQ, origfq == null || origfq.length() == 0 ? sitefq : "(" + origfq + ") AND (" + sitefq + ")");
         }
         
         // get the embedded connector
