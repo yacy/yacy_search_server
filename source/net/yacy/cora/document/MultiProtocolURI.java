@@ -36,6 +36,7 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -832,18 +833,16 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
      * resulting words are not ordered by appearance, but all
      * @return
      */
-    private static String toTokens(String s) {
-        // unesape string
-        String t = s;
-
+    private static String toTokens(final String s) {
         // remove all non-character & non-number
-        final StringBuilder sb = new StringBuilder(t.length());
+        final StringBuilder sb = new StringBuilder(s.length());
         char c;
-        for (int i = 0; i < t.length(); i++) {
-            c = t.charAt(i);
+        for (int i = 0; i < s.length(); i++) {
+            c = s.charAt(i);
             if ((c >= '0' && c <='9') || (c >= 'a' && c <='z') || (c >= 'A' && c <='Z')) sb.append(c); else sb.append(' ');
         }
-        t = sb.toString();
+
+        String t = sb.toString();
 
         // remove all double-spaces
         int p;
@@ -851,39 +850,39 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
         // split the string into tokens and add all camel-case splitting
         final String[] u = CommonPattern.SPACE.split(t);
-        final Map<String, Object> token = new LinkedHashMap<String, Object>();
+        final Set<String> token = new LinkedHashSet<String>();
         for (final String r: u) {
-            token.putAll(parseCamelCase(r));
+            token.addAll(parseCamelCase(r));
         }
 
         // construct a String again
-        for (final String v: token.keySet()) if (v.length() > 1) s += " " + v;
-        return s;
+        for (final String v: token) if (v.length() > 1) t += ' ' + v;
+        return t;
     }
 
     public static enum CharType { low, high, number; }
 
-    public static Map<String, Object> parseCamelCase(String s) {
-        final Map<String, Object> token = new LinkedHashMap<String, Object>();
+    public static Set<String> parseCamelCase(String s) {
+        final Set<String> token = new LinkedHashSet<String>();
         if (s.isEmpty()) return token;
         int p = 0;
         CharType type = charType(s.charAt(0)), nct = type;
         while (p < s.length()) {
             // search for first appearance of an character that is a upper-case
             while (p < s.length() && (nct = charType(s.charAt(p))) == type) p++;
-            if (p >= s.length()) { token.put(s, new Object()); break; }
+            if (p >= s.length()) { token.add(s); break; }
             if (nct == CharType.low) {
                 type = CharType.low;
                 p++; continue;
             }
 
             // the char type has changed
-            token.put(s.substring(0, p), new Object());
+            token.add(s.substring(0, p));
             s = s.substring(p);
             p = 0;
             type = nct;
         }
-        token.put(s, new Object());
+        token.add(s);
         return token;
     }
 

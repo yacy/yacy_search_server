@@ -443,6 +443,9 @@ public final class Switchboard extends serverSwitch {
                 }) {
                 SchemaConfiguration.Entry entry = solrCollectionConfigurationWork.get(field.name()); entry.setEnable(true); solrCollectionConfigurationWork.put(field.name(), entry);
             }
+            
+            // activate some fields that are necessary here
+            solrCollectionConfigurationWork.get(CollectionSchema.images_urlstub_sxt.getSolrFieldName()).setEnable(true);
             solrCollectionConfigurationWork.commit();
         } catch (IOException e) {Log.logException(e);}
         

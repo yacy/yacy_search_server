@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,7 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
+import net.yacy.document.SentenceReader;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.citation.CitationReference;
@@ -590,6 +592,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             final String[] imgalts  = new String[imagesc.size()];
             int withalt = 0;
             int i = 0;
+            LinkedHashSet<String> images_text_map = new LinkedHashSet<String>();
             for (final ImageEntry ie: imagesc) {
                 final MultiProtocolURI uri = ie.url();
                 inboundLinks.remove(uri);
@@ -601,9 +604,16 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 imgprots.add(protocol);
                 imgstubs[i] = uri.toString().substring(protocol.length() + 3);
                 imgalts[i] = ie.alt();
-                if (ie.alt() != null && ie.alt().length() > 0) withalt++;
+                for (String it: uri.toTokens().split(" ")) images_text_map.add(it);
+                if (ie.alt() != null && ie.alt().length() > 0) {
+                    SentenceReader sr = new SentenceReader(ie.alt());
+                    while (sr.hasNext()) images_text_map.add(sr.next().toString());
+                    withalt++;
+                }
                 i++;
             }
+            StringBuilder images_text = new StringBuilder(images_text_map.size() * 6 + 1);
+            for (String s: images_text_map) images_text.append(s.trim()).append(' ');
             if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, imagesc.size());
             if (allAttr || contains(CollectionSchema.images_protocol_sxt)) add(doc, CollectionSchema.images_protocol_sxt, protocolList2indexedList(imgprots));
             if (allAttr || contains(CollectionSchema.images_urlstub_sxt)) add(doc, CollectionSchema.images_urlstub_sxt, imgstubs);
@@ -612,6 +622,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             if (allAttr || contains(CollectionSchema.images_width_val)) add(doc, CollectionSchema.images_width_val, imgwidths);
             if (allAttr || contains(CollectionSchema.images_pixel_val)) add(doc, CollectionSchema.images_pixel_val, imgpixels);
             if (allAttr || contains(CollectionSchema.images_withalt_i)) add(doc, CollectionSchema.images_withalt_i, withalt);
+            if (allAttr || contains(CollectionSchema.images_text_t)) add(doc, CollectionSchema.images_text_t, images_text.toString().trim());
 
             // style sheets
             if (allAttr || contains(CollectionSchema.css_tag_sxt)) {

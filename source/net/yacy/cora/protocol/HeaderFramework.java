@@ -297,6 +297,14 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             return s;
         }
     }
+    
+    public static final Date parseGSAFS(final String datestring) {
+        try {
+            return FORMAT_GSAFS.parse(datestring);
+        } catch (ParseException e) {
+            return null;
+        }
+    }
 
     /** Initialization of static formats */
     static {
