@@ -232,17 +232,26 @@ outboundlinks_protocol_sxt
 ## external links, the url only without the protocol
 outboundlinks_urlstub_txt
 
-## all image tags, encoded as <img> tag inclusive alt- and title property
-#images_tag_sxt
+## all text/words appearing in image alt texts or the tokenized url
+images_text_t
 
 ## all image links without the protocol and '://'
-#images_urlstub_sxt
+images_urlstub_sxt
 
 ## all image link protocols
-#images_protocol_sxt
+images_protocol_sxt
 
 ## all image link alt tag
-#images_alt_txt
+images_alt_sxt
+
+## size of images:height
+images_height_val
+
+## size of images:width
+images_width_val
+
+## size of images as number of pixels (easier for ranking than using with and height)
+images_pixel_val
 
 ## number of image links with alt tag
 #images_withalt_i

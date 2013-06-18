@@ -582,27 +582,35 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // images
             final Collection<ImageEntry> imagesc = images.values();
-            final List<String> imgtags  = new ArrayList<String>(imagesc.size());
-            final List<String> imgprots = new ArrayList<String>(imagesc.size());
-            final List<String> imgstubs = new ArrayList<String>(imagesc.size());
-            final List<String> imgalts  = new ArrayList<String>(imagesc.size());
+            final ArrayList<String> imgprots = new ArrayList<String>(imagesc.size());
+            final Integer[] imgheights = new Integer[imagesc.size()];
+            final Integer[] imgwidths = new Integer[imagesc.size()];
+            final Integer[] imgpixels = new Integer[imagesc.size()];
+            final String[] imgstubs = new String[imagesc.size()];
+            final String[] imgalts  = new String[imagesc.size()];
             int withalt = 0;
+            int i = 0;
             for (final ImageEntry ie: imagesc) {
                 final MultiProtocolURI uri = ie.url();
                 inboundLinks.remove(uri);
                 outboundLinks.remove(uri);
-                imgtags.add(ie.toString());
+                imgheights[i] = ie.height();
+                imgwidths[i] = ie.width();
+                imgpixels[i] = ie.height() < 0 || ie.width() < 0 ? -1 : ie.height() * ie.width();
                 String protocol = uri.getProtocol();
                 imgprots.add(protocol);
-                imgstubs.add(uri.toString().substring(protocol.length() + 3));
-                imgalts.add(ie.alt());
+                imgstubs[i] = uri.toString().substring(protocol.length() + 3);
+                imgalts[i] = ie.alt();
                 if (ie.alt() != null && ie.alt().length() > 0) withalt++;
+                i++;
             }
-            if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, imgtags.size());
-            if (allAttr || contains(CollectionSchema.images_tag_sxt)) add(doc, CollectionSchema.images_tag_sxt, imgtags);
+            if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, imagesc.size());
             if (allAttr || contains(CollectionSchema.images_protocol_sxt)) add(doc, CollectionSchema.images_protocol_sxt, protocolList2indexedList(imgprots));
             if (allAttr || contains(CollectionSchema.images_urlstub_sxt)) add(doc, CollectionSchema.images_urlstub_sxt, imgstubs);
-            if (allAttr || contains(CollectionSchema.images_alt_txt)) add(doc, CollectionSchema.images_alt_txt, imgalts);
+            if (allAttr || contains(CollectionSchema.images_alt_sxt)) add(doc, CollectionSchema.images_alt_sxt, imgalts);
+            if (allAttr || contains(CollectionSchema.images_height_val)) add(doc, CollectionSchema.images_height_val, imgheights);
+            if (allAttr || contains(CollectionSchema.images_width_val)) add(doc, CollectionSchema.images_width_val, imgwidths);
+            if (allAttr || contains(CollectionSchema.images_pixel_val)) add(doc, CollectionSchema.images_pixel_val, imgpixels);
             if (allAttr || contains(CollectionSchema.images_withalt_i)) add(doc, CollectionSchema.images_withalt_i, withalt);
 
             // style sheets
