@@ -304,7 +304,7 @@ public final class HTTPDFileHandler {
                 path = "/api/bookmarks/" + path.substring(11);
             }
             // another patch for the gsa interface
-            if (path.startsWith("/gsa/search")) {
+            if (path.startsWith("/gsa/search") && !path.startsWith("/gsa/searchresult")) {
                 path = "/gsa/searchresult" + path.substring(11);
             }
 
