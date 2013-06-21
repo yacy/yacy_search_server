@@ -143,6 +143,7 @@ public class searchresult {
                 if (from_to.length != 2) continue;
                 Date from = HeaderFramework.parseGSAFS(from_to[0]); if (from == null) continue;
                 Date to = HeaderFramework.parseGSAFS(from_to[1]); if (to == null) continue;
+                to.setTime(to.getTime() + 24L * 60L * 60L * 1000L); // we add a day because the day is inclusive
                 String z = CollectionSchema.last_modified.getSolrFieldName() + ":[" + ISO8601Formatter.FORMATTER.format(from) + " TO " + ISO8601Formatter.FORMATTER.format(to) + "]";
                 datefq = datefq.length() == 0 ? z : " OR " + z;
             }
