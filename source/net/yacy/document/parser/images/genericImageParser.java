@@ -100,7 +100,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         String keywords = null;
         String description = null;
         if (mimeType.equals("image/bmp") ||
-            location.getFileExtension().equals("bmp")) {
+            location.getFileExtension().equalsIgnoreCase("bmp")) {
             byte[] b;
             try {
                 b = FileUtils.read(sourceStream);
@@ -110,10 +110,10 @@ public class genericImageParser extends AbstractParser implements Parser {
             }
             final IMAGEMAP imap = bmpParser.parse(b);
             ii = parseJavaImage(location, imap.getImage());
-        } else if (mimeType.equals("image/jpg") ||
-                   location.getFileExtension().equals("jpg") ||
-                   location.getFileExtension().equals("jpeg") ||
-                   location.getFileExtension().equals("jpe")) {
+        } else if (mimeType.equals("image/jpeg") ||
+                   location.getFileExtension().equalsIgnoreCase("jpg") ||
+                   location.getFileExtension().equalsIgnoreCase("jpeg") ||
+                   location.getFileExtension().equalsIgnoreCase("jpe")) {
             // use the exif parser from
             // http://www.drewnoakes.com/drewnoakes.com/code/exif/
             // javadoc is at: http://www.drewnoakes.com/drewnoakes.com/code/exif/javadoc/
