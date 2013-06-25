@@ -83,7 +83,7 @@
 			<string>$JAVAROOT/lib/lucene-queryparser-4.3.0.jar</string>
 			<string>$JAVAROOT/lib/lucene-spatial-4.3.0.jar</string>
 			<string>$JAVAROOT/lib/lucene-suggest-4.3.0.jar</string>
-			<string>$JAVAROOT/lib/metadata-extractor-2.4.0-beta-1.jar</string>
+			<string>$JAVAROOT/lib/metadata-extractor-2.6.2.jar</string>
 			<string>$JAVAROOT/lib/mysql-connector-java-5.1.12-bin.jar</string>
 			<string>$JAVAROOT/lib/noggit-0.5.jar</string>
 			<string>$JAVAROOT/lib/pdfbox-1.8.1.jar</string>
