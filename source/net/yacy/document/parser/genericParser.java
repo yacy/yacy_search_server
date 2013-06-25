@@ -47,7 +47,7 @@ public class genericParser extends AbstractParser implements Parser {
     public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source1)
             throws Parser.Failure, InterruptedException {
-
+        String filename = location.getFileName();
         final Document[] docs = new Document[]{new Document(
                 location,
                 mimeType,
@@ -55,7 +55,7 @@ public class genericParser extends AbstractParser implements Parser {
                 this,
                 null,
                 null,
-                singleList(location.getFileName().isEmpty() ? location.toTokens() : MultiProtocolURI.unescape(location.getFileName())), // title
+                singleList(filename.isEmpty() ? location.toTokens() : MultiProtocolURI.unescape(filename)), // title
                 "", // author
                 location.getHost(),
                 null,

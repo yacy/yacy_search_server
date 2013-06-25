@@ -204,7 +204,7 @@ public class Latency {
         // for CGI accesses, we double the minimum time
         // mostly there is a database access in the background
         // which creates a lot of unwanted IO on target site
-        if (url.isCGI()) waiting = waiting * 2;
+        if (MultiProtocolURI.isCGI(url.getFileName())) waiting = waiting * 2;
 
         // if we have accessed the domain many times, get slower (the flux factor)
         if (!local) waiting += host.flux(waiting);
@@ -238,7 +238,7 @@ public class Latency {
         // for CGI accesses, we double the minimum time
         // mostly there is a database access in the background
         // which creates a lot of unwanted IO on target site
-        if (url.isCGI()) { waiting = waiting * 2; s.append(", isCGI = true -> double"); }
+        if (MultiProtocolURI.isCGI(url.getFileName())) { waiting = waiting * 2; s.append(", isCGI = true -> double"); }
 
         // if we have accessed the domain many times, get slower (the flux factor)
         int flux = host.flux(waiting);

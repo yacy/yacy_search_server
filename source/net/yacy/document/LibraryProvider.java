@@ -90,7 +90,7 @@ public class LibraryProvider {
 
         private Dictionary(final String nickname, final String url) {
             try {
-                this.filename = new MultiProtocolURI(url).getFileName();
+                this.filename = (new MultiProtocolURI(url)).getFileName();
             } catch ( final MalformedURLException e ) {
                 assert false;
             }

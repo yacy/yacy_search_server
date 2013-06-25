@@ -113,7 +113,7 @@ public class SMBLoader {
         }
 
         // create response header
-        String mime = Classification.ext2mime(url.getFileExtension());
+        String mime = Classification.ext2mime(MultiProtocolURI.getFileExtension(url.getFileName()));
         ResponseHeader responseHeader = new ResponseHeader(200);
         responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date(url.lastModified())));
         responseHeader.put(HeaderFramework.CONTENT_TYPE, mime);

@@ -201,10 +201,10 @@ public class Classification {
     }
 
     public static String url2mime(final MultiProtocolURI url, final String dfltMime) {
-        return url == null ? "application/octet-stream" : ext2mime(url.getFileExtension(), dfltMime);
+        return url == null ? "application/octet-stream" : ext2mime(MultiProtocolURI.getFileExtension(url.getFileName()), dfltMime);
     }
 
     public static String url2mime(final MultiProtocolURI url) {
-        return url == null ? "application/octet-stream" : ext2mime(url.getFileExtension());
+        return url == null ? "application/octet-stream" : ext2mime(MultiProtocolURI.getFileExtension(url.getFileName()));
     }
 }

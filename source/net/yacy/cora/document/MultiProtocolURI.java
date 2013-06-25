@@ -269,7 +269,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     public final ContentDomain getContentDomain() {
         if (this.contentDomain == null) {
-            this.contentDomain = Classification.getContentDomain(this.getFileExtension());
+            this.contentDomain = Classification.getContentDomain(getFileExtension(this.getFileName()));
         }
         return this.contentDomain;
     }
@@ -711,14 +711,10 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return this.path.substring(p + 1); // the 'real' file name
     }
 
-    public String getFileExtension() {
-        return getFileExtension(getFileName());
-    }
-
     public static String getFileExtension(final String fileName) {
         final int p = fileName.lastIndexOf('.');
         if (p < 0) return "";
-        return fileName.substring(p + 1);
+        return fileName.substring(p + 1).toLowerCase();
     }
 
     public String getPath() {
@@ -726,7 +722,12 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     public String[] getPaths() {
-        return this.path == null ? null : this.path.charAt(0) == '/' ? CommonPattern.SLASH.split(this.path.substring(1)) : CommonPattern.SLASH.split(this.path);
+        String s = this.path == null ? "" : this.path.charAt(0) == '/' ? this.path.substring(1) : this.path;
+        int p = s.lastIndexOf('/');
+        if (p < 0) return new String[0];
+        s = s.substring(0, p); // the paths do not contain the last part, which is considered as the getFileName() part.
+        String[] paths = CommonPattern.SLASH.split(s);
+        return paths;
     }
 
     /**
@@ -973,15 +974,12 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return (this.searchpart != null) && (this.searchpart.length() > 0);
     }
 
-    public final boolean isCGI() {
-        final String ls = unescape(this.path.toLowerCase());
-        return ls.indexOf(".cgi",0) >= 0 ||
-               ls.indexOf(".exe",0) >= 0;
+    public static final boolean isCGI(final String extension) {
+        return "cgi.exe.jpg.jpeg".indexOf(extension.toLowerCase()) >= 0;
     }
 
-    public final boolean isImage() {
-        final String ext = getFileExtension().toLowerCase();
-        return "png.gif.jpg.jpeg".indexOf(ext) >= 0;
+    public static final boolean isImage(final String extension) {
+        return "png.gif.jpg.jpeg".indexOf(extension.toLowerCase()) >= 0;
     }
 
     public final boolean isIndividual() {

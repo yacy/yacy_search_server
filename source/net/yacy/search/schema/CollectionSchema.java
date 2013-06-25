@@ -152,8 +152,9 @@ public enum CollectionSchema implements SchemaDeclaration {
     publisher_url_s(SolrType.string, true, true, false, false, false, "publisher url as defined in http://support.google.com/plus/answer/1713826?hl=de"),
     
     url_protocol_s(SolrType.string, true, true, false, false, false, "the protocol of the url"),
-    url_paths_sxt(SolrType.string, true, true, true, false, true, "all path elements in the url"),
+    url_file_name_s(SolrType.string, true, true, false, false, false, "the file name (which is the string after the last '/' and before the query part from '?' on) without the file extension"),
     url_file_ext_s(SolrType.string, true, true, false, false, false, "the file name extension"),
+    url_paths_sxt(SolrType.string, true, true, true, false, true, "all path elements in the url hpath (see: http://www.ietf.org/rfc/rfc1738.txt) without the file name"),
     url_parameter_i(SolrType.num_integer, true, true, false, false, false, "number of key-value pairs in search part of the url"),
     url_parameter_key_sxt(SolrType.string, true, true, true, false, false, "the keys from key-value pairs in the search part of the url"),
     url_parameter_value_sxt(SolrType.string, true, true, true, false, false, "the values from key-value pairs in the search part of the url"),

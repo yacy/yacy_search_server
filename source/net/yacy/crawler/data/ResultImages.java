@@ -74,7 +74,7 @@ public class ResultImages {
                 image.height() > 100 &&
                 image.width() < 1200 &&
                 image.height() < 1000 &&
-                !"gif".equals(image.url().getFileExtension())) {
+                !"gif".equals(MultiProtocolURI.getFileExtension(image.url().getFileName()))) {
                 // && ((urlString.lastIndexOf(".jpg") != -1)) ||
                 // ((urlString.lastIndexOf(".png") != -1)){
 

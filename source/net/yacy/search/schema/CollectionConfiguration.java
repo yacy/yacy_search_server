@@ -35,10 +35,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
@@ -79,6 +79,7 @@ import net.yacy.kelondro.util.Bitfield;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
+import net.yacy.search.schema.WebgraphConfiguration.Subgraph;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -256,8 +257,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             add(doc, CollectionSchema.description_words_val, cv);
         }
 
+        String filename = digestURI.getFileName();
+        String extension = MultiProtocolURI.getFileExtension(filename);
         if (allAttr || contains(CollectionSchema.author)) add(doc, CollectionSchema.author, md.dc_creator());
-        if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, Response.doctype2mime(digestURI.getFileExtension(), md.doctype()));
+        if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, Response.doctype2mime(extension, md.doctype()));
         if (allAttr || contains(CollectionSchema.last_modified)) add(doc, CollectionSchema.last_modified, md.moddate());
         if (allAttr || contains(CollectionSchema.wordcount_i)) add(doc, CollectionSchema.wordcount_i, md.wordCount());
 
@@ -274,7 +277,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
         // path elements of link
         if (allAttr || contains(CollectionSchema.url_paths_sxt)) add(doc, CollectionSchema.url_paths_sxt, digestURI.getPaths());
-        if (allAttr || contains(CollectionSchema.url_file_ext_s)) add(doc, CollectionSchema.url_file_ext_s, digestURI.getFileExtension());
+        if (allAttr || contains(CollectionSchema.url_file_name_s)) add(doc, CollectionSchema.url_file_name_s, filename.toLowerCase().endsWith("." + extension) ? filename.substring(0, filename.length() - extension.length() - 1) : filename);
+        if (allAttr || contains(CollectionSchema.url_file_ext_s)) add(doc, CollectionSchema.url_file_ext_s, extension);
 
         if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, md.limage());
         if (allAttr || contains(CollectionSchema.inboundlinkscount_i)) add(doc, CollectionSchema.inboundlinkscount_i, md.llocal());
@@ -474,8 +478,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         add(doc, CollectionSchema.fuzzy_signature_unique_b, true); // this must be corrected afterwards!
 
         // path elements of link
+        String filename = digestURI.getFileName();
+        String extension = MultiProtocolURI.getFileExtension(filename);
         if (allAttr || contains(CollectionSchema.url_paths_sxt)) add(doc, CollectionSchema.url_paths_sxt, digestURI.getPaths());
-        if (allAttr || contains(CollectionSchema.url_file_ext_s)) add(doc, CollectionSchema.url_file_ext_s, digestURI.getFileExtension());
+        if (allAttr || contains(CollectionSchema.url_file_name_s)) add(doc, CollectionSchema.url_file_name_s, filename.toLowerCase().endsWith("." + extension) ? filename.substring(0, filename.length() - extension.length() - 1) : filename);
+        if (allAttr || contains(CollectionSchema.url_file_ext_s)) add(doc, CollectionSchema.url_file_ext_s, extension);
 
         // get list of all links; they will be shrinked by urls that appear in other fields of the solr schema
         Set<DigestURI> inboundLinks = document.inboundLinks();
@@ -695,8 +702,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     outboundLinks.remove(canonical);
                     add(doc, CollectionSchema.canonical_s, canonical.toNormalform(false));
                     // set a flag if this is equal to sku
-                    if (contains(CollectionSchema.canonical_equal_sku_b) && canonical.equals(docurl)) {
-                        add(doc, CollectionSchema.canonical_equal_sku_b, true);
+                    if (contains(CollectionSchema.canonical_equal_sku_b)) {
+                        add(doc, CollectionSchema.canonical_equal_sku_b, canonical.equals(docurl));
                     }
                 }
             }
@@ -784,9 +791,16 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.inboundlinksnofollowcount_i)) add(doc, CollectionSchema.inboundlinksnofollowcount_i, document.inboundLinkNofollowCount());
         if (allAttr || contains(CollectionSchema.outboundlinkscount_i)) add(doc, CollectionSchema.outboundlinkscount_i, outboundLinks.size());
         if (allAttr || contains(CollectionSchema.outboundlinksnofollowcount_i)) add(doc, CollectionSchema.outboundlinksnofollowcount_i, document.outboundLinkNofollowCount());
+        Map<DigestURI, Properties> alllinks = document.getAnchors();
         
+        // create a subgraph
+        Subgraph subgraph = new Subgraph(inboundLinks.size(), outboundLinks.size());
+        //if () {
+            webgraph.addEdges(subgraph, digestURI, responseHeader, collections, clickdepth, alllinks, images, true, inboundLinks, citations);
+            webgraph.addEdges(subgraph, digestURI, responseHeader, collections, clickdepth, alllinks, images, false, outboundLinks, citations);
+        //}
+            
         // list all links
-        WebgraphConfiguration.Subgraph subgraph = webgraph.edges(digestURI, responseHeader, collections, clickdepth, document.getAnchors(), images, inboundLinks, outboundLinks, citations);
         doc.webgraphDocuments.addAll(subgraph.edges);
         if (allAttr || contains(CollectionSchema.inboundlinks_protocol_sxt)) add(doc, CollectionSchema.inboundlinks_protocol_sxt, protocolList2indexedList(subgraph.urlProtocols[0]));
         if (allAttr || contains(CollectionSchema.inboundlinks_urlstub_txt)) add(doc, CollectionSchema.inboundlinks_urlstub_txt, subgraph.urlStubs[0]);
@@ -1164,8 +1178,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (contains(CollectionSchema.load_date_dt)) add(solrdoc, CollectionSchema.load_date_dt, new Date());
 
         // path elements of link
+        String filename = digestURI.getFileName();
+        String extension = MultiProtocolURI.getFileExtension(filename);
         if (contains(CollectionSchema.url_paths_sxt)) add(solrdoc, CollectionSchema.url_paths_sxt, digestURI.getPaths());
-        if (contains(CollectionSchema.url_file_ext_s)) add(solrdoc, CollectionSchema.url_file_ext_s, digestURI.getFileExtension());
+        if (contains(CollectionSchema.url_file_name_s)) add(solrdoc, CollectionSchema.url_file_name_s, filename.toLowerCase().endsWith("." + extension) ? filename.substring(0, filename.length() - extension.length() - 1) : filename);
+        if (contains(CollectionSchema.url_file_ext_s)) add(solrdoc, CollectionSchema.url_file_ext_s, extension);
         
         // fail reason and status
         if (contains(CollectionSchema.failreason_s)) add(solrdoc, CollectionSchema.failreason_s, failReason);

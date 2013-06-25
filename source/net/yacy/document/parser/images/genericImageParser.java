@@ -99,8 +99,9 @@ public class genericImageParser extends AbstractParser implements Parser {
         String author = null;
         String keywords = null;
         String description = null;
-        if (mimeType.equals("image/bmp") ||
-            location.getFileExtension().equalsIgnoreCase("bmp")) {
+        String filename = location.getFileName();
+        String ext = MultiProtocolURI.getFileExtension(filename);
+        if (mimeType.equals("image/bmp") || ext.equalsIgnoreCase("bmp")) {
             byte[] b;
             try {
                 b = FileUtils.read(sourceStream);
@@ -110,10 +111,7 @@ public class genericImageParser extends AbstractParser implements Parser {
             }
             final IMAGEMAP imap = bmpParser.parse(b);
             ii = parseJavaImage(location, imap.getImage());
-        } else if (mimeType.equals("image/jpeg") ||
-                   location.getFileExtension().equalsIgnoreCase("jpg") ||
-                   location.getFileExtension().equalsIgnoreCase("jpeg") ||
-                   location.getFileExtension().equalsIgnoreCase("jpe")) {
+        } else if (mimeType.equals("image/jpeg") || ext.equalsIgnoreCase("jpg") || ext.equalsIgnoreCase("jpeg") || ext.equalsIgnoreCase("jpe")) {
             // use the exif parser from
             // http://www.drewnoakes.com/drewnoakes.com/code/exif/
             // javadoc is at: http://www.drewnoakes.com/drewnoakes.com/code/exif/javadoc/
@@ -190,7 +188,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         final String infoString = ii.info.toString();
         images.put(ii.location, new ImageEntry(location, "", ii.width, ii.height, -1));
 
-        if (title == null || title.isEmpty()) title = MultiProtocolURI.unescape(location.getFileName());
+        if (title == null || title.isEmpty()) title = MultiProtocolURI.unescape(filename);
 
         return new Document[]{new Document(
              location,
@@ -297,7 +295,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         DigestURI uri;
         try {
             uri = new DigestURI("http://localhost/" + image.getName());
-            final Document[] document = parser.parse(uri, "image/" + uri.getFileExtension(), "UTF-8", new FileInputStream(image));
+            final Document[] document = parser.parse(uri, "image/" + MultiProtocolURI.getFileExtension(uri.getFileName()), "UTF-8", new FileInputStream(image));
             System.out.println(document[0].toString());
         } catch (final MalformedURLException e) {
             e.printStackTrace();

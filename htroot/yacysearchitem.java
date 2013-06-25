@@ -29,6 +29,7 @@ import java.util.List;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
@@ -189,6 +190,7 @@ public class yacysearchitem {
 //            prop.putHTML("content_value", Interaction.TripleGet(result.urlstring(), "http://virtual.x/hasvalue", "anonymous"));
 // END interaction
 
+            String resultFileName = resultURL.getFileName();
             prop.putHTML("content_target", target);
             if (faviconURL != null && fileType == FileType.HTML) sb.loader.loadIfNotExistBackground(faviconURL, 1024 * 1024 * 10, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
             prop.putHTML("content_faviconCode", URLLicense.aquireLicense(faviconURL)); // acquire license for favicon url loading
@@ -210,7 +212,7 @@ public class yacysearchitem {
             prop.putHTML("content_sizename", RSSMessage.sizename(result.filesize()));
             prop.putHTML("content_showSize_sizename", RSSMessage.sizename(result.filesize()));
             prop.putHTML("content_host", resultURL.getHost() == null ? "" : resultURL.getHost());
-            prop.putHTML("content_file", resultURL.getFileName());
+            prop.putHTML("content_file", resultFileName);
             prop.putHTML("content_path", resultURL.getPath());
             prop.put("content_nl", (item == theSearch.query.offset) ? 0 : 1);
             prop.putHTML("content_publisher", result.publisher());
@@ -243,7 +245,7 @@ public class yacysearchitem {
                 prop.put("content_heuristic_name", heuristic.heuristicName);
             }
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theSearch.query.id(true), SearchEventType.FINALIZATION, "" + item, 0, 0), false);
-            final String ext = resultURL.getFileExtension().toLowerCase();
+            final String ext = MultiProtocolURI.getFileExtension(resultFileName).toLowerCase();
             if (ext.equals("png") || ext.equals("jpg") || ext.equals("gif")) {
                 final String license = URLLicense.aquireLicense(resultURL);
                 prop.put("content_code", license);

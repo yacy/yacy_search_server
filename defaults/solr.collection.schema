@@ -334,11 +334,14 @@ underline_txt
 ## the protocol of the url
 url_protocol_s
 
-## all path elements in the url
-url_paths_sxt
+## the file name (which is the string after the last '/' and before the query part from '?' on) without the file extension
+url_file_name_s
 
 ## the file name extension
 url_file_ext_s
+
+## all path elements in the url hpath (see: http://www.ietf.org/rfc/rfc1738.txt) without the file name
+url_paths_sxt
 
 ## number of key-value pairs in search part of the url
 #url_parameter_i

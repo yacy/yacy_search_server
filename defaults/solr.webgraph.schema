@@ -41,6 +41,9 @@ source_id_s
 ## the url without the protocol (source)
 #source_urlstub_s
 
+## the file name without the extension (source)
+#source_file_name_s
+
 ## the file name extension (source)
 #source_file_ext_s
 
@@ -53,7 +56,7 @@ source_id_s
 ## count of all path elements in the url (source)
 #source_path_folders_count_i
 
-## all path elements in the url (source)
+## all path elements in the url without the file name (source)
 #source_path_folders_sxt
 
 ## number of key-value pairs in search part of the url (source)
@@ -132,6 +135,9 @@ target_protocol_s
 ## the url without the protocol (target)
 target_urlstub_s
 
+## the file name without the extension (target)
+target_file_name_s
+
 ## the file name extension (target)
 target_file_ext_s
 
@@ -144,7 +150,7 @@ target_file_ext_s
 ## count of all path elements in the url (target)
 #target_path_folders_count_i
 
-## all path elements in the url (target)
+## all path elements in the url without the file name (target)
 target_path_folders_sxt
 
 ## number of key-value pairs in search part of the url (target)

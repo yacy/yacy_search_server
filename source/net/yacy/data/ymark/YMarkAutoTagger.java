@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.crawler.retrieval.Response;
@@ -161,7 +162,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			}
 			final String clean =  YMarkUtil.cleanTagsString(buffer.toString());
 			if(clean.equals(YMarkEntry.BOOKMARK.TAGS.deflt())) {
-				return document.getFileExtension();
+				return MultiProtocolURI.getFileExtension(document.dc_source().getFileName());
 			}
 			return clean;
 		} finally {

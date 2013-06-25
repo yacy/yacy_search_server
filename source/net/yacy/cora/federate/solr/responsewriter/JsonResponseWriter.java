@@ -148,14 +148,16 @@ public class JsonResponseWriter implements QueryResponseWriter {
                     solitaireTag(writer, stag, value.stringValue());
                     continue;
                 }
-                
                 // some special handling here
                 if (CollectionSchema.sku.getSolrFieldName().equals(fieldName)) {
                     String u = value.stringValue();
                     try {
                         url = new MultiProtocolURI(u);
+                        String filename = url.getFileName();
                         solitaireTag(writer, "link", u);
-                        solitaireTag(writer, "file", url.getFileName());
+                        solitaireTag(writer, "file", filename);
+                        // get image license
+                        if (MultiProtocolURI.isImage(filename)) URLLicense.aquireLicense(urlhash, url.toNormalform(true));
                     } catch (MalformedURLException e) {}
                     continue;
                 }
@@ -205,9 +207,6 @@ public class JsonResponseWriter implements QueryResponseWriter {
 
                 //missing: "code","faviconCode"
             }
-            
-            // get image license
-            if (url.isImage()) URLLicense.aquireLicense(urlhash, url.toNormalform(true));
             
             // compute snippet from texts            
             solitaireTag(writer, "path", path.toString());

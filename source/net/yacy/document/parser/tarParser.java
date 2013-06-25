@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -64,7 +65,7 @@ public class tarParser extends AbstractParser implements Parser {
 
         final List<Document> docacc = new ArrayList<Document>();
         Document[] subDocs = null;
-        final String ext = url.getFileExtension().toLowerCase();
+        final String ext = MultiProtocolURI.getFileExtension(url.getFileName()).toLowerCase();
         if (ext.equals("gz") || ext.equals("tgz")) {
             try {
                 source = new GZIPInputStream(source);

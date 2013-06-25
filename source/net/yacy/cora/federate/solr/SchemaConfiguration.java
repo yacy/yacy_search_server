@@ -146,43 +146,43 @@ public class SchemaConfiguration extends Configuration implements Serializable {
     }
 
     public void add(final SolrInputDocument doc, final SchemaDeclaration key, final String value) {
-        assert !key.isMultiValued();
+        assert !key.isMultiValued() : "key = " + key.getSolrFieldName();
         if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && !value.isEmpty()))) key.add(doc, value);
     }
 
     public void add(final SolrInputDocument doc, final SchemaDeclaration key, final Date value) {
-        assert !key.isMultiValued();
+        assert !key.isMultiValued() : "key = " + key.getSolrFieldName();
         if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.getTime() > 0))) key.add(doc, value);
     }
 
     public void add(final SolrInputDocument doc, final SchemaDeclaration key, final String[] value) {
-        assert key.isMultiValued();
+        assert key.isMultiValued() : "key = " + key.getSolrFieldName();
         if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.length > 0))) key.add(doc, value);
     }
 
     public void add(final SolrInputDocument doc, final SchemaDeclaration key, final Integer[] value) {
-        assert key.isMultiValued();
+        assert key.isMultiValued() : "key = " + key.getSolrFieldName();
         if ((isEmpty() || contains(key)) && (!this.lazy || (value != null && value.length > 0))) key.add(doc, value);
     }
 
     public void add(final SolrInputDocument doc, final SchemaDeclaration key, final List<?> values) {
-        assert key.isMultiValued();
+        assert key.isMultiValued() : "key = " + key.getSolrFieldName();
         if ((isEmpty() || contains(key)) && (!this.lazy || (values != null && !values.isEmpty()))) key.add(doc, values);
     }
 
     public void add(final SolrInputDocument doc, final SchemaDeclaration key, final int value) {
-        assert !key.isMultiValued();
+        assert !key.isMultiValued() : "key = " + key.getSolrFieldName();
         if ((isEmpty() || contains(key)) && (!this.lazy || value != 0)) key.add(doc, value);
     }
 
     public void add(final SolrInputDocument doc, final SchemaDeclaration key, final long value) {
-        assert !key.isMultiValued();
+        assert !key.isMultiValued() : "key = " + key.getSolrFieldName();
         if ((isEmpty() || contains(key)) && (!this.lazy || value != 0)) key.add(doc, value);
     }
 
     public void add(final SolrInputDocument doc, final SchemaDeclaration key, final boolean value) {
-        assert !key.isMultiValued();
-        if (isEmpty() || contains(key)) key.add(doc, value);
+        assert !key.isMultiValued() : "key = " + key.getSolrFieldName();
+        if ((isEmpty() || contains(key)) && (!this.lazy || value)) key.add(doc, value);
     }
 
     public static Date getDate(SolrInputDocument doc, final SchemaDeclaration key) {

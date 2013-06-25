@@ -473,10 +473,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String href = tagopts.getProperty("href", EMPTY_STRING);
             DigestURI url;
             if ((href.length() > 0) && ((url = absolutePath(href)) != null)) {
-                final String f = url.getFileName();
-                final int p = f.lastIndexOf('.');
-                final String type = (p < 0) ? EMPTY_STRING : f.substring(p + 1);
-                if (type.equals("png") || type.equals("gif") || type.equals("jpg") || type.equals("jpeg") || type.equals("tiff") || type.equals("tif")) {
+                final String ext = MultiProtocolURI.getFileExtension(url.getFileName());
+                if (ext.equals("png") || ext.equals("gif") || ext.equals("jpg") || ext.equals("jpeg") || ext.equals("tiff") || ext.equals("tif")) {
                     // special handling of such urls: put them to the image urls
                     final ImageEntry ie = new ImageEntry(url, recursiveParse(text), -1, -1, -1);
                     addImage(this.images, ie);
@@ -656,7 +654,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         String ext;
         ArrayList<DigestURI> f = new ArrayList<DigestURI>();
         for (final DigestURI url: this.anchors.keySet()) {
-            ext = url.getFileExtension();
+            ext = MultiProtocolURI.getFileExtension(url.getFileName());
             if (ext == null) continue;
             if (ext.equals("swf")) f.add(url);
         }
@@ -666,7 +664,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     public boolean containsFlash() {
         String ext;
         for (final MultiProtocolURI url: this.anchors.keySet()) {
-            ext = url.getFileExtension();
+            ext = MultiProtocolURI.getFileExtension(url.getFileName());
             if (ext == null) continue;
             if (ext.equals("swf")) return true;
         }

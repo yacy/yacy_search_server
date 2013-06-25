@@ -42,6 +42,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.solr.ProcessType;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
@@ -111,31 +112,13 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         }
     }
     
-    public Subgraph edges(
-            final DigestURI source, final ResponseHeader responseHeader, String[] collections, int clickdepth_source,
-            final Map<DigestURI, Properties> alllinks,
-            final Map<DigestURI, ImageEntry> images,
-            final Set<DigestURI> inboundLinks,
-            final Set<DigestURI> outboundLinks,
-            IndexCell<CitationReference> citations
-            ) {
-        boolean allAttr = this.isEmpty();
-        Subgraph subgraph = new Subgraph(inboundLinks.size(), outboundLinks.size());
-        addEdges(
-                subgraph, source, responseHeader, collections, clickdepth_source,
-                allAttr, alllinks, images, true, inboundLinks, citations);
-        addEdges(
-                subgraph, source, responseHeader, collections, clickdepth_source,
-                allAttr, alllinks, images, false, outboundLinks, citations);
-        return subgraph;
-    }
-    
-    private void addEdges(
+    public void addEdges(
             final Subgraph subgraph,
             final DigestURI source, final ResponseHeader responseHeader, String[] collections, int clickdepth_source,
-            final boolean allAttr, final Map<DigestURI, Properties> alllinks, final Map<DigestURI, ImageEntry> images,
+            final Map<DigestURI, Properties> alllinks, final Map<DigestURI, ImageEntry> images,
             final boolean inbound, final Set<DigestURI> links,
             final IndexCell<CitationReference> citations) {
+        boolean allAttr = this.isEmpty();
         for (final DigestURI target_url: links) {
 
             Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
@@ -194,7 +177,12 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                 if (allAttr || contains(WebgraphSchema.source_host_organizationdnc_s)) add(edge, WebgraphSchema.source_host_organizationdnc_s, orga + '.' + dnc);
                 if (allAttr || contains(WebgraphSchema.source_host_subdomain_s)) add(edge, WebgraphSchema.source_host_subdomain_s, subdom);
             }
-            if (allAttr || contains(WebgraphSchema.source_file_ext_s)) add(edge, WebgraphSchema.source_file_ext_s, source.getFileExtension());
+            if (allAttr || contains(WebgraphSchema.source_file_ext_s) || contains(WebgraphSchema.source_file_name_s)) {
+                String source_file_name = source.getFileName();
+                String source_file_ext = MultiProtocolURI.getFileExtension(source_file_name);
+                add(edge, WebgraphSchema.source_file_name_s, source_file_name.toLowerCase().endsWith("." + source_file_ext) ? source_file_name.substring(0, source_file_name.length() - source_file_ext.length() - 1) : source_file_name);
+                add(edge, WebgraphSchema.source_file_ext_s, source_file_ext);
+            }
             if (allAttr || contains(WebgraphSchema.source_path_s)) add(edge, WebgraphSchema.source_path_s, source.getPath());
             if (allAttr || contains(WebgraphSchema.source_path_folders_count_i) || contains(WebgraphSchema.source_path_folders_sxt)) {
                 String[] paths = source.getPaths();
@@ -251,7 +239,12 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                 if (allAttr || contains(WebgraphSchema.target_host_organizationdnc_s)) add(edge, WebgraphSchema.target_host_organizationdnc_s, orga + '.' + dnc);
                 if (allAttr || contains(WebgraphSchema.target_host_subdomain_s)) add(edge, WebgraphSchema.target_host_subdomain_s, subdom);
             }
-            if (allAttr || contains(WebgraphSchema.target_file_ext_s)) add(edge, WebgraphSchema.target_file_ext_s, target_url.getFileExtension());
+            if (allAttr || contains(WebgraphSchema.target_file_ext_s) || contains(WebgraphSchema.target_file_name_s)) {
+                String target_file_name = target_url.getFileName();
+                String target_file_ext = MultiProtocolURI.getFileExtension(target_file_name);
+                add(edge, WebgraphSchema.target_file_name_s, target_file_name.toLowerCase().endsWith("." + target_file_ext) ? target_file_name.substring(0, target_file_name.length() - target_file_ext.length() - 1) : target_file_name);
+                add(edge, WebgraphSchema.target_file_ext_s, target_file_ext);
+            }
             if (allAttr || contains(WebgraphSchema.target_path_s)) add(edge, WebgraphSchema.target_path_s, target_url.getPath());
             if (allAttr || contains(WebgraphSchema.target_path_folders_count_i) || contains(WebgraphSchema.target_path_folders_sxt)) {
                 String[] paths = target_url.getPaths();

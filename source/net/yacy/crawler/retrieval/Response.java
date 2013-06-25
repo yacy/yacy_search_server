@@ -70,7 +70,7 @@ public class Response {
 
     // doctype calculation
     public static char docType(final MultiProtocolURI url) {
-        String ext = url.getFileExtension();
+        String ext = MultiProtocolURI.getFileExtension(url.getFileName());
         if (ext == null) return DT_UNKNOWN;
         if (ext.equals(".gif"))  return DT_IMAGE;
         if (ext.equals(".ico"))  return DT_IMAGE;
@@ -169,7 +169,7 @@ public class Response {
         // request and response headers may be zero in case that we process surrogates
         this.requestHeader = new RequestHeader();
         this.responseHeader = new ResponseHeader(200);
-        this.responseHeader.put(HeaderFramework.CONTENT_TYPE, Classification.ext2mime(request.url().getFileExtension(), "text/plain")); // tell parser how to handle the content
+        this.responseHeader.put(HeaderFramework.CONTENT_TYPE, Classification.ext2mime(MultiProtocolURI.getFileExtension(request.url().getFileName()), "text/plain")); // tell parser how to handle the content
         if (!request.isEmpty()) this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(request.size()));
         this.profile = profile;
         this.status = QUEUE_STATE_FRESH;
@@ -291,7 +291,7 @@ public class Response {
             return "dynamic_post";
         }
 
-        if (url().isCGI()) {
+        if (MultiProtocolURI.isCGI(MultiProtocolURI.getFileExtension(url().getFileName()))) {
             return "dynamic_cgi";
         }
 
@@ -390,7 +390,7 @@ public class Response {
         if (url().isPOST()) {
             return false;
         }
-        if (url().isCGI()) {
+        if (MultiProtocolURI.isCGI(MultiProtocolURI.getFileExtension(url().getFileName()))) {
             return false;
         }
 
@@ -541,7 +541,7 @@ public class Response {
             if (url().isPOST()) {
                 return "Dynamic_(POST)";
             }
-            if (url().isCGI()) {
+            if (MultiProtocolURI.isCGI(MultiProtocolURI.getFileExtension(url().getFileName()))) {
                 return "Dynamic_(CGI)";
             }
         }
@@ -684,7 +684,7 @@ public class Response {
         // CGI access makes the page very individual, and therefore not usable in caches
         if (!profile().crawlingQ()) {
             if (url().isPOST()) { return "Dynamic_(POST)"; }
-            if (url().isCGI()) { return "Dynamic_(CGI)"; }
+            if (MultiProtocolURI.isCGI(MultiProtocolURI.getFileExtension(url().getFileName()))) { return "Dynamic_(CGI)"; }
         }
 
         // -authorization cases in request

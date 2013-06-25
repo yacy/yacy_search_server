@@ -72,8 +72,9 @@ public class audioTagParser extends AbstractParser implements Parser {
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
 
-    	final String filename = location.getFileName().isEmpty() ? location.toTokens() : MultiProtocolURI.unescape(location.getFileName());
-   	    final String fileext = '.'+location.getFileExtension();
+        String filename = location.getFileName();
+        final String fileext = '.' + MultiProtocolURI.getFileExtension(filename);
+        filename = filename.isEmpty() ? location.toTokens() : MultiProtocolURI.unescape(filename);
     	String mime = mimeType;
    	    
     	// fix mimeType
@@ -190,7 +191,7 @@ public class audioTagParser extends AbstractParser implements Parser {
 	                this,
 	                null,
 	                null,
-	                singleList(location.getFileName().isEmpty() ? location.toTokens() : MultiProtocolURI.unescape(location.getFileName())), // title
+	                singleList(filename), // title
 	                "", // author
 	                location.getHost(),
 	                null,

@@ -153,8 +153,8 @@ public class Document {
         return this.languages;
     }
 
-    public String getFileExtension() {
-    	return this.source.getFileExtension();
+    public String getFileName() {
+    	return this.source.getFileName();
     }
 
     public Map<String, Set<String>> getGenericFacets() {
