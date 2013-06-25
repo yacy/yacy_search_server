@@ -1036,6 +1036,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             // print out all urls with their cr-values
             SolrConnector connector = segment.fulltext().getDefaultConnector();
             for (Map.Entry<byte[], CRV> entry: rm.entrySet()) {
+                if (entry == null || entry.getValue() == null) continue;
                 try {
                     String url = (String) connector.getDocumentById(ASCII.String(entry.getKey()), CollectionSchema.sku.getSolrFieldName()).getFieldValue(CollectionSchema.sku.getSolrFieldName());
                     Log.logInfo("CollectionConfiguration.CRHost", "CR for " + url);
