@@ -140,12 +140,10 @@ public class genericImageParser extends AbstractParser implements Parser {
                 // alternative to above: to read all included jpeg tags and metadata 
                 // final Metadata metadata = JpegMetadataReader.readMetadata(new ByteArrayInputStream(b));                
                 
-                @SuppressWarnings("unchecked")
                 final Iterator<Directory> directories = metadata.getDirectories().iterator();
                 final HashMap<String, String> props = new HashMap<String, String>();
                 while (directories.hasNext()) {
-                    final Directory directory = directories.next();
-                    @SuppressWarnings("unchecked")                    
+                    final Directory directory = directories.next();               
                     final Iterator<Tag> tags = directory.getTags().iterator();
                     while (tags.hasNext()) {
                         final Tag tag = tags.next();
