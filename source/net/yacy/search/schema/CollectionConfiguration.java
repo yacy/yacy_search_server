@@ -1181,6 +1181,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // path elements of link
         String filename = digestURI.getFileName();
         String extension = MultiProtocolURI.getFileExtension(filename);
+        if (contains(CollectionSchema.url_protocol_s)) add(solrdoc, CollectionSchema.url_protocol_s, digestURI.getProtocol());
         if (contains(CollectionSchema.url_paths_sxt)) add(solrdoc, CollectionSchema.url_paths_sxt, digestURI.getPaths());
         if (contains(CollectionSchema.url_file_name_s)) add(solrdoc, CollectionSchema.url_file_name_s, filename.toLowerCase().endsWith("." + extension) ? filename.substring(0, filename.length() - extension.length() - 1) : filename);
         if (contains(CollectionSchema.url_file_ext_s)) add(solrdoc, CollectionSchema.url_file_ext_s, extension);
