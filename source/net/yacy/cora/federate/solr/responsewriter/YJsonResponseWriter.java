@@ -53,7 +53,7 @@ import org.apache.solr.search.SolrIndexSearcher;
  * write the opensearch result in YaCys special way to include as much as in opensearch is included.
  * This will also include YaCy facets.
  */
-public class JsonResponseWriter implements QueryResponseWriter {
+public class YJsonResponseWriter implements QueryResponseWriter {
 
     // define a list of simple YaCySchema -> json Token matchings
     private static final Map<String, String> field2tag = new HashMap<String, String>();
@@ -65,7 +65,7 @@ public class JsonResponseWriter implements QueryResponseWriter {
      
     private String title;
 
-    public JsonResponseWriter() {
+    public YJsonResponseWriter() {
         super();
     }
 

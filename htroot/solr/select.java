@@ -35,7 +35,7 @@ import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.GrepHTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.HTMLResponseWriter;
-import net.yacy.cora.federate.solr.responsewriter.JsonResponseWriter;
+import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -89,7 +89,7 @@ public class select {
         RESPONSE_WRITER.put("grephtml", new GrepHTMLResponseWriter());
         RESPONSE_WRITER.put("rss", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
         RESPONSE_WRITER.put("opensearch", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
-        RESPONSE_WRITER.put("yjson", new JsonResponseWriter()); //try http://localhost:8090/solr/select?wt=json&q=olympia&hl=true&hl.fl=text_t,h1,h2
+        RESPONSE_WRITER.put("yjson", new YJsonResponseWriter()); //try http://localhost:8090/solr/select?wt=json&q=olympia&hl=true&hl.fl=text_t,h1,h2
         RESPONSE_WRITER.put("gsa", new GSAResponseWriter());
     }
 
@@ -197,7 +197,7 @@ public class select {
         }
         
         // if this is a call to YaCys special search formats, enhance the query with field assignments
-        if ((responseWriter instanceof JsonResponseWriter || responseWriter instanceof OpensearchResponseWriter) && "true".equals(post.get("hl", "true"))) {
+        if ((responseWriter instanceof YJsonResponseWriter || responseWriter instanceof OpensearchResponseWriter) && "true".equals(post.get("hl", "true"))) {
             // add options for snippet generation
             if (!post.containsKey("hl.q")) post.put("hl.q", q);
             if (!post.containsKey("hl.fl")) post.put("hl.fl", CollectionSchema.h1_txt.getSolrFieldName() + "," + CollectionSchema.h2_txt.getSolrFieldName() + "," + CollectionSchema.text_t.getSolrFieldName());
