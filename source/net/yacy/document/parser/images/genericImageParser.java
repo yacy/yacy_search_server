@@ -55,10 +55,12 @@ import net.yacy.kelondro.util.FileUtils;
 import com.drew.imaging.jpeg.JpegProcessingException;
 import com.drew.imaging.jpeg.JpegSegmentReader;
 import com.drew.lang.ByteArrayReader;
+import com.drew.lang.GeoLocation;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 import com.drew.metadata.exif.ExifReader;
+import com.drew.metadata.exif.GpsDirectory;
 import com.drew.metadata.iptc.IptcReader;
 
 public class genericImageParser extends AbstractParser implements Parser {
@@ -101,7 +103,9 @@ public class genericImageParser extends AbstractParser implements Parser {
         String description = null;
         String filename = location.getFileName();
         String ext = MultiProtocolURI.getFileExtension(filename);
-        if (mimeType.equals("image/bmp") || ext.equalsIgnoreCase("bmp")) {
+        double gpslat = 0;
+        double gpslon = 0;        
+        if (mimeType.equals("image/bmp") || ext.equals("bmp")) {
             byte[] b;
             try {
                 b = FileUtils.read(sourceStream);
@@ -111,7 +115,7 @@ public class genericImageParser extends AbstractParser implements Parser {
             }
             final IMAGEMAP imap = bmpParser.parse(b);
             ii = parseJavaImage(location, imap.getImage());
-        } else if (mimeType.equals("image/jpeg") || ext.equalsIgnoreCase("jpg") || ext.equalsIgnoreCase("jpeg") || ext.equalsIgnoreCase("jpe")) {
+        } else if (mimeType.equals("image/jpeg") || ext.equals("jpg") || ext.equals("jpeg") || ext.equals("jpe")) {
             // use the exif parser from
             // http://www.drewnoakes.com/drewnoakes.com/code/exif/
             // javadoc is at: http://www.drewnoakes.com/drewnoakes.com/code/exif/javadoc/
@@ -143,35 +147,43 @@ public class genericImageParser extends AbstractParser implements Parser {
                 final Iterator<Directory> directories = metadata.getDirectories().iterator();
                 final HashMap<String, String> props = new HashMap<String, String>();
                 while (directories.hasNext()) {
-                    final Directory directory = directories.next();               
-                    final Iterator<Tag> tags = directory.getTags().iterator();
-                    while (tags.hasNext()) {
-                        final Tag tag = tags.next();
-                        // ! startswith "Unknown tag"
-                        if (!tag.getTagName().startsWith("Unknown")) { // filter out returned TagName of "Unknown tag"
-                            props.put(tag.getTagName(), tag.getDescription());
-                            ii.info.append(tag.getTagName() + ": " + tag.getDescription() + " .\n");
-                        } 
+                    final Directory directory = directories.next();
+                    if (directory instanceof GpsDirectory) { // extracting GPS location                    
+                        GeoLocation geoloc = ((GpsDirectory) directory).getGeoLocation();
+                        if (geoloc != null) {
+                            gpslat = geoloc.getLatitude();
+                            gpslon = geoloc.getLongitude();
+                        }
+                    } else {
+                        final Iterator<Tag> tags = directory.getTags().iterator();
+                        while (tags.hasNext()) {
+                            final Tag tag = tags.next();
+                            if (!tag.getTagName().startsWith("Unknown")) { // filter out returned TagName of "Unknown tag"
+                                props.put(tag.getTagName(), tag.getDescription());
+                                ii.info.append(tag.getTagName() + ": " + tag.getDescription() + " .\n");
+                            }
+                        }
                     }
-                    title = props.get("Image Description");
-                    if (title == null || title.isEmpty()) title = props.get("Headline");
-                    if (title == null || title.isEmpty()) title = props.get("Object Name");
-
-                    author = props.get("Artist");
-                    if (author == null || author.isEmpty()) author = props.get("Writer/Editor");
-                    if (author == null || author.isEmpty()) author = props.get("By-line");
-                    if (author == null || author.isEmpty()) author = props.get("Credit");
-                    if (author == null || author.isEmpty()) author = props.get("Make");
-
-                    keywords = props.get("Keywords");
-                    if (keywords == null || keywords.isEmpty()) keywords = props.get("Category");
-                    if (keywords == null || keywords.isEmpty()) keywords = props.get("Supplemental Category(s)");
-
-                    description = props.get("Caption/Abstract");
-                    if (description == null || description.isEmpty()) description = props.get("Country/Primary Location");
-                    if (description == null || description.isEmpty()) description = props.get("Province/State");
-                    if (description == null || description.isEmpty()) description = props.get("Copyright Notice");
                 }
+                title = props.get("Image Description");
+                if (title == null || title.isEmpty()) title = props.get("Headline");
+                if (title == null || title.isEmpty()) title = props.get("Object Name");
+
+                author = props.get("Artist");
+                if (author == null || author.isEmpty()) author = props.get("Writer/Editor");
+                if (author == null || author.isEmpty()) author = props.get("By-line");
+                if (author == null || author.isEmpty()) author = props.get("Credit");
+                if (author == null || author.isEmpty()) author = props.get("Make");
+
+                keywords = props.get("Keywords");
+                if (keywords == null || keywords.isEmpty()) keywords = props.get("Category");
+                if (keywords == null || keywords.isEmpty()) keywords = props.get("Supplemental Category(s)");
+
+                description = props.get("Caption/Abstract");
+                if (description == null || description.isEmpty()) description = props.get("Country/Primary Location");
+                if (description == null || description.isEmpty()) description = props.get("Province/State");
+                if (description == null || description.isEmpty()) description = props.get("Copyright Notice");
+                
             } catch (final JpegProcessingException e) {
                 //Log.logException(e);
                 // just ignore
@@ -201,7 +213,7 @@ public class genericImageParser extends AbstractParser implements Parser {
              location.getHost(), // Publisher
              new String[]{}, // sections
              description == null ? "" : description, // description
-             0.0f, 0.0f, // TODO parse location
+             gpslon, gpslat, //  location
              infoString, // content text
              anchors, // anchors
              null,
