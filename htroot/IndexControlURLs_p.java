@@ -78,6 +78,7 @@ public class IndexControlURLs_p {
         prop.put("dumprestore", 1);
         List<File> dumpFiles =  segment.fulltext().dumpFiles();
         prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
+        prop.put("dumprestore_optimizemax", 10);
         prop.put("cleanup", post == null ? 1 : 0);
         prop.put("cleanup_solr", segment.fulltext().connectedRemoteSolr() ? 1 : 0);
         prop.put("cleanup_rwi", segment.termIndex() != null && !segment.termIndex().isEmpty() ? 1 : 0);
@@ -276,6 +277,12 @@ public class IndexControlURLs_p {
         if (post.containsKey("indexrestore")) {
             final File dump = new File(post.get("dumpfile", ""));
             segment.fulltext().restoreSolr(dump);
+        }
+        
+        if (post.containsKey("optimizesolr")) {
+        	final int size = post.getInt("optimizemax", 10);
+        	segment.fulltext().optimize(size);
+            sb.tables.recordAPICall(post, "IndexControlURLs_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr optimize " + size);
         }
 
         if (post.containsKey("rebootsolr")) {

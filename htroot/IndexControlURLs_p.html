@@ -163,6 +163,16 @@ function updatepage(str) {
     </fieldset>
     </form>
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset><legend>Optimize Solr</legend>
+      <dl>
+        <dt class="TableCellLight">&nbsp;</dt>
+        <dd>merge to max. <input type="text" name="optimizemax" value="#[optimizemax]#" size="6" maxlength="6" /> segments
+        <input type="submit" name="optimizesolr" value="Optimize Solr" class="submitready" style="width:240px;"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Reboot Solr Core</legend>
       <dl>
         <dt class="TableCellLight">&nbsp;</dt>
