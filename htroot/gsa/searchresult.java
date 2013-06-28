@@ -80,7 +80,7 @@ public class searchresult {
      * @param out
      * @return
      */
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env, final OutputStream out) {
+    public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env, final OutputStream out) {
 
         // this uses the methods in the jetty servlet environment and can be removed if jetty in implemented
         Switchboard sb = (Switchboard) env;
@@ -96,7 +96,7 @@ public class searchresult {
         if (!searchAllowed) return null;
 
         // check post
-        if (post == null) return null;
+        if (post == null) {post = new serverObjects(); post.put("q", ""); post.put("num", "0");}
         Log.logInfo("GSA Query", post.toString());
         sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
         
