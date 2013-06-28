@@ -701,9 +701,19 @@ public final class Fulltext {
             }
         }
     }
+
+    /**
+     * optimize solr (experimental to check resource management)
+     * @param size
+     */
+    public void optimize(final int size) {
+        if (size < 1) return;
+        getDefaultConnector().optimize(size);
+        getWebgraphConnector().optimize(size);
+    }
     
     /**
-     * reboot solr (experimental to check resource management
+     * reboot solr (experimental to check resource management)
      */
     public void rebootSolr() {
         synchronized (this.solrInstances) {
