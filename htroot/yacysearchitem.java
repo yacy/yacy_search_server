@@ -265,8 +265,7 @@ public class yacysearchitem {
                     || sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true)
                     || clustersearch;
             boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
-            boolean global = post == null || (post.get("resource", "local").equals("global") && p2pmode);
-            boolean stealthmode = p2pmode && !global;
+            boolean stealthmode = p2pmode && theSearch.query.isLocal();
             if ((sb.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS, false) ||
                     (sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ACTIVE, false) && sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ENABLED, false))) &&
                  !stealthmode) sb.heuristicSearchResults(resultUrlstring);
