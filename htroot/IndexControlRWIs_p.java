@@ -639,7 +639,6 @@ public class IndexControlRWIs_p {
                 null,
                 null,
                 QueryParams.Searchdom.LOCAL,
-                -1,
                 filter,
                 false,
                 null,

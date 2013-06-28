@@ -655,10 +655,7 @@ public class yacysearch {
                     itemsPerPage,
                     startRecord,
                     urlmask, tld, inlink,
-                    clustersearch && global ? QueryParams.Searchdom.CLUSTER : (global && indexReceiveGranted
-                        ? QueryParams.Searchdom.GLOBAL
-                        : QueryParams.Searchdom.LOCAL),
-                    20,
+                    clustersearch && global ? QueryParams.Searchdom.CLUSTER : (global && indexReceiveGranted ? QueryParams.Searchdom.GLOBAL : QueryParams.Searchdom.LOCAL),
                     constraint,
                     true,
                     DigestURI.hosthashess(sb.getConfig("search.excludehosth", "")),

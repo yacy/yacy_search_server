@@ -192,7 +192,6 @@ public final class QueryParams {
         final String tld,
         final String inlink,
         final Searchdom domType,
-        final int domMaxTargets,
         final Bitfield constraint,
         final boolean allofconstraint,
         final Set<String> siteexcludes,
