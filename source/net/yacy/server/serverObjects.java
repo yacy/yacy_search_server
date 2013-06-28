@@ -195,7 +195,7 @@ public class serverObjects implements Serializable, Cloneable {
             return;
         }
         for (int i = 0; i < a.length; i++) {
-            if (a[i].equals(value)) return;
+            if (a[i].equals(value)) return; // double-check
         }
         String[] aa = new String[a.length + 1];
         System.arraycopy(a, 0, aa, 0, a.length);

@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -101,10 +102,10 @@ public class select {
      * @return
      */
     public static String mime(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        String wt = post.get(CommonParams.WT, "xml");
+        String wt = post == null ? "xml" : post.get(CommonParams.WT, "xml");
         if (wt == null || wt.length() == 0 || "xml".equals(wt) || "exml".equals(wt)) return "text/xml";
         if ("xslt".equals(wt)) {
-            String tr = post.get("tr","");
+            String tr = post == null ? "" : post.get("tr","");
             if (tr.indexOf("json") >= 0) return "application/json";
         }
         if ("rss".equals(wt)) return "application/rss+xml";
@@ -131,7 +132,7 @@ public class select {
      * @param out
      * @return
      */
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env, final OutputStream out) {
+    public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env, final OutputStream out) {
 
         // this uses the methods in the jetty servlet environment and can be removed if jetty in implemented
         Switchboard sb = (Switchboard) env;
@@ -147,7 +148,7 @@ public class select {
         if (!searchAllowed) return null;
 
         // check post
-        if (post == null) return null;
+        if (post == null) {post = new serverObjects(); post.put(CommonParams.Q, ""); post.put(CommonParams.ROWS, "0");}
         if (post.size() > 100) {
             Log.logWarning("select", "rejected bad-formed search request with " + post.size() + " properties from " + header.refererHost());
             return null; // prevent the worst hacks here...
