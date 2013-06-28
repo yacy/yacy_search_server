@@ -44,6 +44,7 @@ import net.yacy.server.serverSwitch;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.util.FastWriter;
@@ -189,6 +190,8 @@ public class searchresult {
         if (response != null) e = response.getException();
         if (e != null) {
             Log.logException(e);
+            if (req != null) req.close();
+            SolrRequestInfo.clearRequestInfo();
             return null;
         }
 
@@ -211,6 +214,7 @@ public class searchresult {
         } catch (IOException e1) {
         } finally {
             req.close();
+            SolrRequestInfo.clearRequestInfo();
             try {ow.close();} catch (IOException e1) {}
         }
 

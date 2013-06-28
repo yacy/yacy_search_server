@@ -58,6 +58,7 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
@@ -222,6 +223,8 @@ public class select {
         if (response != null) e = response.getException();
         if (e != null) {
             Log.logException(e);
+            if (req != null) req.close();
+            SolrRequestInfo.clearRequestInfo();
             return null;
         }
 
@@ -233,6 +236,7 @@ public class select {
         } catch (IOException e1) {
         } finally {
             req.close();
+            SolrRequestInfo.clearRequestInfo();
             try {ow.close();} catch (IOException e1) {}
         }
 
