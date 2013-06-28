@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -38,6 +38,7 @@ import java.util.regex.PatternSyntaxException;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
+import org.apache.solr.common.params.FacetParams;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.analysis.Classification;
@@ -119,7 +120,7 @@ public final class QueryParams {
     public final String userAgent;
     protected boolean filterfailurls, filterscannerfail;
     protected double lat, lon, radius;
-    public List<String> facetfields;
+    public LinkedHashSet<String> facetfields;
     public int maxfacets;
     private SolrQuery cachedQuery;
     private CollectionConfiguration solrSchema;
@@ -165,7 +166,7 @@ public final class QueryParams {
         this.lat = 0.0d;
         this.lon = 0.0d;
         this.radius = 0.0d;
-        this.facetfields = new ArrayList<String>();
+        this.facetfields = new LinkedHashSet<String>();
 
         this.solrSchema = indexSegment.fulltext().getDefaultConfiguration();
         for (CollectionSchema f: defaultfacetfields) {
@@ -266,7 +267,7 @@ public final class QueryParams {
         this.lat = Math.floor(lat * this.kmNormal) / this.kmNormal;
         this.lon = Math.floor(lon * this.kmNormal) / this.kmNormal;
         this.radius = Math.floor(radius * this.kmNormal + 1) / this.kmNormal;
-        this.facetfields = new ArrayList<String>();
+        this.facetfields = new LinkedHashSet<String>();
         
         this.solrSchema = indexSegment.fulltext().getDefaultConfiguration();
         for (CollectionSchema f: defaultfacetfields) {
@@ -376,7 +377,7 @@ public final class QueryParams {
     	return SetTools.anymatch(wordhashes, keyhashes);
     }
 
-    public SolrQuery solrQuery() {
+    public SolrQuery solrQuery(boolean getFacets) {
         if (this.cachedQuery != null) {
             this.cachedQuery.setStart(this.offset);
             return this.cachedQuery;
@@ -511,6 +512,21 @@ public final class QueryParams {
         if (fq.length() > 0) {
             params.setFilterQueries(fq.substring(5));
         }
+        
+        params.setStart(offset);
+        params.setRows(itemsPerPage);
+        
+        // set facet query attributes
+        if (getFacets && this.facetfields.size() > 0) {
+            params.setFacet(true);
+            params.setFacetLimit(this.maxfacets);
+            params.setFacetSort(FacetParams.FACET_SORT_COUNT);
+            for (String field: this.facetfields) params.addFacetField(field);
+        } else {
+            params.setFacet(false);
+        }
+        
+        params.setFields("*", "score"); // we need the score for post-ranking
         
         // prepare result
         Log.logInfo("Protocol", "SOLR QUERY: " + params.toString());

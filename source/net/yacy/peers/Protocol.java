@@ -1005,7 +1005,6 @@ public final class Protocol {
             final SolrQuery solrQuery,
             final int offset,
             final int count,
-            boolean getFacets,
             Seed target,
             final Blacklist blacklist) {
 
@@ -1013,18 +1012,9 @@ public final class Protocol {
             return -1; // we cannot query solr only with word hashes, there is no clear text string
         }
         event.addExpectedRemoteReferences(count);
+        
         solrQuery.setStart(offset);
         solrQuery.setRows(count);
-        
-        // set facet query attributes
-        if (getFacets && event.query.facetfields.size() > 0) {
-            solrQuery.setFacet(true);
-            solrQuery.setFacetLimit(event.query.maxfacets);
-            solrQuery.setFacetSort(FacetParams.FACET_SORT_COUNT);
-            for (String field: event.query.facetfields) solrQuery.addFacetField(field);
-        } else {
-            solrQuery.setFacet(false);
-        }
         
         // set highlighting query attributes
         solrQuery.setHighlight(true);
@@ -1034,8 +1024,6 @@ public final class Protocol {
         solrQuery.setHighlightSimplePre("<b>");
         solrQuery.setHighlightSnippets(1);
         for (CollectionSchema field: snippetFields) solrQuery.addHighlightField(field.getSolrFieldName());
-        
-        solrQuery.setFields("*", "score"); // we need the score for post-ranking
         
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
         if (localsearch &&  Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
@@ -1083,7 +1071,7 @@ public final class Protocol {
                 if (c == 0) continue;
                 result.set(ff.getName(), c);
             }
-            facets.put(field, result);
+            if (result.size() > 0) facets.put(field, result);
         }
         
         // evaluate snippets
@@ -1112,7 +1100,7 @@ public final class Protocol {
 		    return 0;
 		}
 		
-        Network.log.logInfo("SEARCH (solr), returned " + docList.size() + " out of " + docList.getNumFound() + " documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
+        Network.log.logInfo("SEARCH (solr), returned " + docList.size() + " out of " + docList.getNumFound() + " documents and " + facets.size() + " facets " + facets.keySet().toString() + " from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
         int term = count;
         Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>(docList.size());
         for (final SolrDocument doc: docList) {
