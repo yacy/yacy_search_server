@@ -89,23 +89,6 @@ public class ConfigPortal {
 
                 sb.setConfig("interaction.userlogon.enabled", post.getBoolean("interaction.userlogon"));
 
-                sb.setConfig("search.text", post.getBoolean("search.text"));
-                sb.setConfig("search.image", post.getBoolean("search.image"));
-                sb.setConfig("search.audio", post.getBoolean("search.audio"));
-                sb.setConfig("search.video", post.getBoolean("search.video"));
-                sb.setConfig("search.app", post.getBoolean("search.app"));
-
-                sb.setConfig("search.result.show.date", post.getBoolean("search.result.show.date"));
-                sb.setConfig("search.result.show.size", post.getBoolean("search.result.show.size"));
-                sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata"));
-                sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser"));
-                sb.setConfig("search.result.show.citation", post.getBoolean("search.result.show.citation"));
-                sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures"));
-                sb.setConfig("search.result.show.cache", post.getBoolean("search.result.show.cache"));
-                sb.setConfig("search.result.show.proxy", post.getBoolean("search.result.show.proxy"));
-                sb.setConfig("search.result.show.hostbrowser", post.getBoolean("search.result.show.hostbrowser"));
-                sb.setConfig("search.result.show.tags", post.getBoolean("search.result.show.tags"));
-
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, post.get("search.verify", "ifexist"));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, post.getBoolean("search.verify.delete"));
 
@@ -115,14 +98,6 @@ public class ConfigPortal {
                 String excludehosts = post.get("search.excludehosts", "");
                 sb.setConfig("search.excludehosts", excludehosts);
                 sb.setConfig("search.excludehosth", DigestURI.hosthashes(excludehosts));
-
-                // construct navigation String
-                String nav = "";
-                if (post.getBoolean("search.navigation.hosts")) nav += "hosts,";
-                if (post.getBoolean("search.navigation.authors")) nav += "authors,";
-                if (post.getBoolean("search.navigation.namespace")) nav += "namespace,";
-                if (post.getBoolean("search.navigation.topics")) nav += "topics,";
-                if (nav.endsWith(",")) nav = nav.substring(0, nav.length() - 1); sb.setConfig("search.navigation", nav);
             }
             if (post.containsKey("searchpage_default")) {
                 // load defaults from defaults/yacy.init file
@@ -162,21 +137,6 @@ public class ConfigPortal {
                 sb.setConfig("search.navigation", config.getProperty("search.navigation","hosts,authors,namespace,topics"));
                 sb.setConfig("search.options", config.getProperty("search.options","true"));
                 sb.setConfig("interaction.userlogon.enabled", config.getProperty("interaction.userlogon.enabled","false"));
-                sb.setConfig("search.text", config.getProperty("search.text","true"));
-                sb.setConfig("search.image", config.getProperty("search.image","true"));
-                sb.setConfig("search.audio", config.getProperty("search.audio","false"));
-                sb.setConfig("search.video", config.getProperty("search.video","false"));
-                sb.setConfig("search.app", config.getProperty("search.app","false"));
-                sb.setConfig("search.result.show.date", config.getProperty("search.result.show.date","true"));
-                sb.setConfig("search.result.show.size", config.getProperty("search.result.show.size","false"));
-                sb.setConfig("search.result.show.metadata", config.getProperty("search.result.show.metadata","false"));
-                sb.setConfig("search.result.show.parser", config.getProperty("search.result.show.parser","false"));
-                sb.setConfig("search.result.show.citation", config.getProperty("search.result.show.citation","false"));
-                sb.setConfig("search.result.show.pictures", config.getProperty("search.result.show.pictures","false"));
-                sb.setConfig("search.result.show.cache", config.getProperty("search.result.show.cache","true"));
-                sb.setConfig("search.result.show.proxy", config.getProperty("search.result.show.proxy","false"));
-                sb.setConfig("search.result.show.hostbrowser", config.getProperty("search.result.show.hostbrowser","true"));
-                sb.setConfig("search.result.show.tags", config.getProperty("search.result.show.tags","false"));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, config.getProperty(SwitchboardConstants.SEARCH_VERIFY,"iffresh"));
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, config.getProperty(SwitchboardConstants.SEARCH_VERIFY_DELETE,"true"));
                 sb.setConfig("about.headline", config.getProperty("about.headline",""));
@@ -196,23 +156,6 @@ public class ConfigPortal {
         prop.put("search.options", sb.getConfigBool("search.options", false) ? 1 : 0);
 
         prop.put("interaction.userlogon", sb.getConfigBool("interaction.userlogon.enabled", false) ? 1 : 0);
-
-        prop.put("search.text", sb.getConfigBool("search.text", false) ? 1 : 0);
-        prop.put("search.image", sb.getConfigBool("search.image", false) ? 1 : 0);
-        prop.put("search.audio", sb.getConfigBool("search.audio", false) ? 1 : 0);
-        prop.put("search.video", sb.getConfigBool("search.video", false) ? 1 : 0);
-        prop.put("search.app", sb.getConfigBool("search.app", false) ? 1 : 0);
-
-        prop.put("search.result.show.date", sb.getConfigBool("search.result.show.date", false) ? 1 : 0);
-        prop.put("search.result.show.size", sb.getConfigBool("search.result.show.size", false) ? 1 : 0);
-        prop.put("search.result.show.metadata", sb.getConfigBool("search.result.show.metadata", false) ? 1 : 0);
-        prop.put("search.result.show.parser", sb.getConfigBool("search.result.show.parser", false) ? 1 : 0);
-        prop.put("search.result.show.citation", sb.getConfigBool("search.result.show.citation", false) ? 1 : 0);
-        prop.put("search.result.show.pictures", sb.getConfigBool("search.result.show.pictures", false) ? 1 : 0);
-        prop.put("search.result.show.cache", sb.getConfigBool("search.result.show.cache", false) ? 1 : 0);
-        prop.put("search.result.show.proxy", sb.getConfigBool("search.result.show.proxy", false) ? 1 : 0);
-        prop.put("search.result.show.hostbrowser", sb.getConfigBool("search.result.show.hostbrowser", false) ? 1 : 0);
-        prop.put("search.result.show.tags", sb.getConfigBool("search.result.show.tags", false) ? 1 : 0);
 
         prop.put("search.navigation.hosts", sb.getConfig("search.navigation", "").indexOf("hosts",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.authors", sb.getConfig("search.navigation", "").indexOf("authors",0) >= 0 ? 1 : 0);
