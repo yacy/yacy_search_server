@@ -64,6 +64,11 @@
           <input type="radio" name="search.verify" value="false" #(search.verify.false)#::checked="checked"#(/search.verify.false)# onclick="document.getElementById('search_verify_delete').disabled=true;document.getElementById('search_verify_delete').checked=false;"/>FALSE: no link verification and not snippet generation: all search results are valid without verification
           </dd>
           
+          <dt>Greedy Learning Mode</dt>
+          <dd>
+          <input type="checkbox" name="greedylearning.active" value="true" #(greedylearning.active)#::checked="checked"#(/greedylearning.active)# />load documents linked in search results, will be deactivated automatically when index size > #[greedylearning.limit.doccount]#
+          </dd>
+          
           <dt>Default Pop-Up Page</dt>
           <dd>
           <input type="radio" name="popup" value="status" #(popupStatus)#::checked="checked"#(/popupStatus)# />Status Page&nbsp;
