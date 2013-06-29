@@ -536,7 +536,7 @@ indexMedia=true
 # Filter for crawling; may be used to restrict a crawl to a specific domain
 # URLs are only indexed and further crawled if they match this filter
 crawlingFilter=.*
-crawlingQ=false
+crawlingQ=true
 storeHTCache=true
 storeTXCache=true
 
