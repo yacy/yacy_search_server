@@ -488,6 +488,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         Set<DigestURI> inboundLinks = document.inboundLinks();
         Set<DigestURI> outboundLinks = document.outboundLinks();
 
+        Subgraph subgraph = new Subgraph(inboundLinks.size(), outboundLinks.size());
+        Map<DigestURI, Properties> alllinks = document.getAnchors();
         int c = 0;
         final Object parser = document.getParserObject();
         Map<DigestURI, ImageEntry> images = new HashMap<DigestURI, ImageEntry>();
@@ -677,7 +679,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     frames[c++] = u.toNormalform(false);
                 }
                 add(doc, CollectionSchema.framesscount_i, frames.length);
-                if (frames.length > 0) add(doc, CollectionSchema.frames_sxt, frames);
+                if (frames.length > 0) {
+                    add(doc, CollectionSchema.frames_sxt, frames);
+                    //webgraph.addEdges(subgraph, digestURI, responseHeader, collections, clickdepth, alllinks, images, true, framess, citations); // add here because links have been removed from remaining inbound/outbound
+                }
             }
 
             // IFrames
@@ -691,7 +696,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     iframes[c++] = u.toNormalform(false);
                 }
                 add(doc, CollectionSchema.iframesscount_i, iframes.length);
-                if (iframes.length > 0) add(doc, CollectionSchema.iframes_sxt, iframes);
+                if (iframes.length > 0) {
+                    add(doc, CollectionSchema.iframes_sxt, iframes);
+                    //webgraph.addEdges(subgraph, digestURI, responseHeader, collections, clickdepth, alllinks, images, true, iframess, citations); // add here because links have been removed from remaining inbound/outbound
+                }
             }
 
             // canonical tag
@@ -791,10 +799,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.inboundlinksnofollowcount_i)) add(doc, CollectionSchema.inboundlinksnofollowcount_i, document.inboundLinkNofollowCount());
         if (allAttr || contains(CollectionSchema.outboundlinkscount_i)) add(doc, CollectionSchema.outboundlinkscount_i, outboundLinks.size());
         if (allAttr || contains(CollectionSchema.outboundlinksnofollowcount_i)) add(doc, CollectionSchema.outboundlinksnofollowcount_i, document.outboundLinkNofollowCount());
-        Map<DigestURI, Properties> alllinks = document.getAnchors();
         
         // create a subgraph
-        Subgraph subgraph = new Subgraph(inboundLinks.size(), outboundLinks.size());
         //if () {
             webgraph.addEdges(subgraph, digestURI, responseHeader, collections, clickdepth, alllinks, images, true, inboundLinks, citations);
             webgraph.addEdges(subgraph, digestURI, responseHeader, collections, clickdepth, alllinks, images, false, outboundLinks, citations);

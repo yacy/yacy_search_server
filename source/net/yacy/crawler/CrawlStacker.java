@@ -54,8 +54,10 @@ import net.yacy.crawler.retrieval.HTTPLoader;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.SMBLoader;
 import net.yacy.crawler.robots.RobotsTxt;
+import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.peers.SeedDB;
 import net.yacy.repository.Blacklist.BlacklistType;
@@ -133,6 +135,15 @@ public final class CrawlStacker {
         // this is the method that is called by the busy thread from outside
         if (entry == null) return null;
 
+        // record the link graph for this request
+        byte[] anchorhash = entry.url().hash();
+        IndexCell<CitationReference> urlCitationIndex = this.indexSegment.urlCitation();
+        if (urlCitationIndex != null) try {
+            urlCitationIndex.add(anchorhash, new CitationReference(entry.referrerhash(), entry.appdate().getTime()));
+        } catch (final Exception e) {
+            Log.logException(e);
+        }
+        
         try {
             final String rejectReason = stackCrawl(entry);
 
