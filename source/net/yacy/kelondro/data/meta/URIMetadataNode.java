@@ -137,7 +137,7 @@ public class URIMetadataNode {
     }
 
     public double lat() {
-        if (this.lat == Double.NaN) {
+        if (Double.isNaN(this.lat)) {
             this.lon = 0.0d;
             this.lat = 0.0d;
             String latlon = (String) this.doc.getFieldValue(CollectionSchema.coordinate_p.getSolrFieldName());
@@ -153,7 +153,7 @@ public class URIMetadataNode {
     }
 
     public double lon() {
-        if (this.lon == Double.NaN) lat();
+        if (Double.isNaN(this.lon)) lat();
         return this.lon;
     }
 
