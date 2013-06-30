@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
@@ -498,27 +497,6 @@ public class Segment {
         return this.segmentPath;
     }
 
-    private int addCitationIndex(final DigestURI url, final Date urlModified, final Map<DigestURI, Properties> anchors) {
-    	if (anchors == null) return 0;
-    	int refCount = 0;
-
-        // iterate over all outgoing links, this will create a context for those links
-        final byte[] urlhash = url.hash();
-        final long urldate = urlModified.getTime();
-        for (Map.Entry<DigestURI, Properties> anchorEntry: anchors.entrySet()) {
-            DigestURI anchor = anchorEntry.getKey();
-        	byte[] refhash = anchor.hash();
-        	//System.out.println("*** addCitationIndex: urlhash = " + ASCII.String(urlhash) + ", refhash = " + ASCII.String(refhash) + ", urldate = " + urlModified.toString());
-        	if (this.urlCitationIndex != null) try {
-                this.urlCitationIndex.add(refhash, new CitationReference(urlhash, urldate));
-            } catch (final Exception e) {
-                Log.logException(e);
-            }
-            refCount++;
-        }
-        return refCount;
-    }
-
     public synchronized void close() {
         this.indexingPutDocumentProcessor.shutdown();
     	if (this.termIndex != null) this.termIndex.close();
@@ -795,9 +773,6 @@ public class Segment {
             }
         }
 
-        // STORE PAGE REFERENCES INTO CITATION INDEX
-        final int refs = addCitationIndex(url, modDate, document.getAnchors());
-
         // finish index time
         final long indexingEndTime = System.currentTimeMillis();
 
@@ -807,7 +782,7 @@ public class Segment {
                     "\n\tDescription:  " + dc_title +
                     "\n\tMimeType: "  + document.dc_format() + " | Charset: " + document.getCharset() + " | " +
                     "Size: " + document.getTextLength() + " bytes | " +
-                    "Anchors: " + refs +
+                    //"Anchors: " + refs +
                     "\n\tLinkStorageTime: " + (storageEndTime - startTime) + " ms | " +
                     "indexStorageTime: " + (indexingEndTime - storageEndTime) + " ms");
         }
