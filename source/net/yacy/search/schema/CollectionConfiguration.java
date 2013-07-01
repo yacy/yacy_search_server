@@ -490,9 +490,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
         Subgraph subgraph = new Subgraph(inboundLinks.size(), outboundLinks.size());
         Map<DigestURI, Properties> alllinks = document.getAnchors();
+        Map<DigestURI, ImageEntry> images = new HashMap<DigestURI, ImageEntry>();
         int c = 0;
         final Object parser = document.getParserObject();
-        Map<DigestURI, ImageEntry> images = new HashMap<DigestURI, ImageEntry>();
         if (parser instanceof ContentScraper) {
             final ContentScraper html = (ContentScraper) parser;
             images = html.getImages();
