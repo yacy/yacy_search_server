@@ -26,7 +26,6 @@
 package net.yacy.crawler.data;
 
 import java.text.DateFormat;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -546,19 +545,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return new StringBuilder(u.length() + 5).append(Pattern.quote(u)).append(".*").toString();
     }
 
-    public static final Set<String> ignoreNames = new HashSet<String>();
-    static {
-        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_PROXY);
-        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_REMOTE);
-        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA);
-        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT);
-        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA);
-        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT);
-        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE);
-        ignoreNames.add(CrawlSwitchboard.DBFILE_ACTIVE_CRAWL_PROFILES);
-        ignoreNames.add(CrawlSwitchboard.DBFILE_PASSIVE_CRAWL_PROFILES);
-    }
-
     public void putProfileEntry(
     		final String CRAWL_PROFILE_PREFIX,
             final serverObjects prop,
@@ -569,7 +555,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
 
         prop.put(CRAWL_PROFILE_PREFIX + count + "_dark", dark ? "1" : "0");
         prop.put(CRAWL_PROFILE_PREFIX + count + "_name", this.collectionName());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton", (!active || ignoreNames.contains(this.name())) ? "0" : "1");
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton", (!active || CrawlSwitchboard.DEFAULT_PROFILES.contains(this.name())) ? "0" : "1");
         prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton_handle", this.handle());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton", (active) ? "0" : "1");
         prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton_handle", this.handle());

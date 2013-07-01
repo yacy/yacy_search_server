@@ -40,6 +40,7 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.data.ZURL.FailCategory;
@@ -532,7 +533,7 @@ public class Crawler_p {
         String hosts = "";
         for (final byte[] h: sb.crawler.getActive()) {
             profile = sb.crawler.getActive(h);
-        	if (CrawlProfile.ignoreNames.contains(profile.name())) continue;
+        	if (CrawlSwitchboard.DEFAULT_PROFILES.contains(profile.name())) continue;
             profile.putProfileEntry("crawlProfilesShow_list_", prop, true, dark, count, domlistlength);
             prop.put("crawlProfilesShow_list_" + count + "_debug", debug ? 1 : 0);
             if (debug) {

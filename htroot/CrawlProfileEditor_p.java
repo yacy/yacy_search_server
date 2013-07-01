@@ -32,6 +32,7 @@ import java.util.TreeMap;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
@@ -124,7 +125,7 @@ public class CrawlProfileEditor_p {
         final Map<String, String> orderdHandles = new TreeMap<String, String>();
         for (final byte[] h : sb.crawler.getActive()) {
             selentry = sb.crawler.getActive(h);
-            if (selentry != null && !CrawlProfile.ignoreNames.contains(selentry.name())) {
+            if (selentry != null && !CrawlSwitchboard.DEFAULT_PROFILES.contains(selentry.name())) {
                 orderdHandles.put(selentry.collectionName(), selentry.handle());
             }
         }

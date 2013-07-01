@@ -60,16 +60,30 @@ public final class CrawlSwitchboard {
     public static final String CRAWL_PROFILE_REMOTE = "remote";
     public static final String CRAWL_PROFILE_SNIPPET_LOCAL_TEXT = "snippetLocalText";
     public static final String CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT = "snippetGlobalText";
+    public static final String CRAWL_PROFILE_GREEDY_LEARNING_TEXT = "snippetGreedyLearningText";
     public static final String CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA = "snippetLocalMedia";
     public static final String CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA = "snippetGlobalMedia";
     public static final String CRAWL_PROFILE_SURROGATE = "surrogates";
 
+    public static Set<String> DEFAULT_PROFILES = new HashSet<String>();
+    static {
+        DEFAULT_PROFILES.add(CRAWL_PROFILE_PROXY);
+        DEFAULT_PROFILES.add(CRAWL_PROFILE_REMOTE);
+        DEFAULT_PROFILES.add(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT);
+        DEFAULT_PROFILES.add(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT);
+        DEFAULT_PROFILES.add(CRAWL_PROFILE_GREEDY_LEARNING_TEXT);
+        DEFAULT_PROFILES.add(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA);
+        DEFAULT_PROFILES.add(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA);
+        DEFAULT_PROFILES.add(CRAWL_PROFILE_SURROGATE);
+    }
+    
     public static final String DBFILE_ACTIVE_CRAWL_PROFILES = "crawlProfilesActive.heap";
     public static final String DBFILE_PASSIVE_CRAWL_PROFILES = "crawlProfilesPassive.heap";
 
     public static final long CRAWL_PROFILE_PROXY_RECRAWL_CYCLE = 60L * 24L;
     public static final long CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L;
     public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L;
+    public static final long CRAWL_PROFILE_GREEDY_LEARNING_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L;
     public static final long CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
     public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
     public static final long CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE = 60L * 24L * 30L;
@@ -82,6 +96,7 @@ public final class CrawlSwitchboard {
     public CrawlProfile defaultProxyProfile;
     public CrawlProfile defaultRemoteProfile;
     public CrawlProfile defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
+    public CrawlProfile defaultTextGreedyLearningProfile;
     public CrawlProfile defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
     public CrawlProfile defaultSurrogateProfile;
     private final File queuesRoot;
@@ -344,6 +359,34 @@ public final class CrawlSwitchboard {
             UTF8.getBytes(this.defaultTextSnippetGlobalProfile.handle()),
             this.defaultTextSnippetGlobalProfile);
         this.defaultTextSnippetGlobalProfile.setCacheStrategy(CacheStrategy.IFEXIST);
+        // generate new default entry for greedy learning
+        this.defaultTextGreedyLearningProfile =
+            new CrawlProfile(
+                CRAWL_PROFILE_GREEDY_LEARNING_TEXT,
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerUrlMustNotMatch
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerCountryMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
+                CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
+                CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
+                CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
+                0,
+                false,
+                CrawlProfile.getRecrawlDate(CRAWL_PROFILE_GREEDY_LEARNING_TEXT_RECRAWL_CYCLE),
+                -1,
+                true,
+                false,
+                false,
+                true,
+                false,
+                CacheStrategy.IFEXIST,
+                "robot_" + CRAWL_PROFILE_GREEDY_LEARNING_TEXT);
+        this.profilesActiveCrawls.put(
+            UTF8.getBytes(this.defaultTextSnippetGlobalProfile.handle()),
+            this.defaultTextSnippetGlobalProfile);
         // generate new default entry for snippet fetch and optional crawling
         this.defaultMediaSnippetLocalProfile =
             new CrawlProfile(
@@ -465,13 +508,7 @@ public final class CrawlSwitchboard {
                 } catch ( final SpaceExceededException e ) {
                     continue;
                 }
-                if ( !((entry.name().equals(CRAWL_PROFILE_PROXY))
-                    || (entry.name().equals(CRAWL_PROFILE_REMOTE))
-                    || (entry.name().equals(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT))
-                    || (entry.name().equals(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT))
-                    || (entry.name().equals(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA))
-                    || (entry.name().equals(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA)) || (entry.name()
-                    .equals(CRAWL_PROFILE_SURROGATE))) ) {
+                if (!DEFAULT_PROFILES.contains(entry.name())) {
                     final CrawlProfile p = new CrawlProfile(entry);
                     this.profilesPassiveCrawls.put(UTF8.getBytes(p.handle()), p);
                     this.profilesActiveCrawls.remove(handle);
@@ -494,13 +531,7 @@ public final class CrawlSwitchboard {
         for (final byte[] handle: this.getActive()) {
             CrawlProfile entry;
             entry = new CrawlProfile(this.getActive(handle));
-            if (!((entry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY))
-                || (entry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE))
-                || (entry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT))
-                || (entry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT))
-                || (entry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA))
-                || (entry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA))
-                || (entry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE)))) {
+            if (!CrawlSwitchboard.DEFAULT_PROFILES.contains(entry.name())) {
                 deletionCandidate.add(ASCII.String(handle));
             }
         }

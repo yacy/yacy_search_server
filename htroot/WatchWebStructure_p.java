@@ -56,14 +56,7 @@ public class WatchWebStructure_p {
         	CrawlProfile e;
             for (final byte[] handle: sb.crawler.getActive()) {
                 e = sb.crawler.getActive(handle);
-                if (e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY) ||
-                    e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE) ||
-                    e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)  ||
-                    e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT) ||
-                    e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ||
-                    e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA) ||
-                    e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE))
-                   continue;
+                if (CrawlSwitchboard.DEFAULT_PROFILES.contains(e.name())) continue;
                 host = e.name();
                 break; // take the first one
             }

@@ -2076,6 +2076,10 @@ public final class Switchboard extends serverSwitch {
                         selentry.put(CrawlProfile.RECRAWL_IF_OLDER, Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE)));
                         insert = true;
                     }
+                    if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_GREEDY_LEARNING_TEXT) ) {
+                        selentry.put(CrawlProfile.RECRAWL_IF_OLDER, Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_GREEDY_LEARNING_TEXT_RECRAWL_CYCLE)));
+                        insert = true;
+                    }
                     if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ) {
                         selentry.put(CrawlProfile.RECRAWL_IF_OLDER, Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE)));
                         insert = true;
@@ -2484,7 +2488,7 @@ public final class Switchboard extends serverSwitch {
            ) {
             // get the hyperlinks
             final Map<DigestURI, String> hl = Document.getHyperlinks(documents);
-
+            
             // add all media links also to the crawl stack. They will be re-sorted to the NOLOAD queue and indexed afterwards as pure links
             if (response.profile().directDocByURL()) {
                 hl.putAll(Document.getImagelinks(documents));

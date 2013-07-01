@@ -68,14 +68,7 @@ public class IndexCreateQueues_p {
                             for (final byte[] handle: sb.crawler.getActive()) {
                                 entry = sb.crawler.getActive(handle);
                                 final String name = entry.name();
-                                if (name.equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY) ||
-                                        name.equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE) ||
-                                        name.equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)  ||
-                                        name.equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT)  ||
-                                        name.equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ||
-                                        name.equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA) ||
-                                        name.equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE))
-                                    continue;
+                                if (CrawlSwitchboard.DEFAULT_PROFILES.contains(name)) continue;
                                 if (compiledPattern.matcher(name).find()) sb.crawler.removeActive(entry.handle().getBytes());
                             }
                         } else {
