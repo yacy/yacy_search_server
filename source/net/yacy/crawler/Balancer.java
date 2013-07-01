@@ -571,6 +571,7 @@ public class Balancer {
                 Map.Entry<String, byte[]> hosthash;
                 while (k.hasNext()) {
                     hosthash = k.next();
+                    if (failoverCandidates.get(hosthash) > 1000) break; // thats too long; we want a second chance for this!
                     besthost = hosthash.getKey();
                     besturlhash = hosthash.getValue();
                     removeHashFromDomainStacks(besthost, besturlhash);
