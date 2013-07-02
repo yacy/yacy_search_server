@@ -521,25 +521,31 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // noindex and nofollow attributes
             // from HTML (meta-tag in HTML header: robots)
-            // and HTTP header (x-robots property)
+            // and HTTP header (X-Robots-Tag property)
             // coded as binary value:
             // bit  0: "all" contained in html header meta
             // bit  1: "index" contained in html header meta
-            // bit  2: "noindex" contained in html header meta
-            // bit  3: "nofollow" contained in html header meta
-            // bit  8: "noarchive" contained in http header properties
-            // bit  9: "nosnippet" contained in http header properties
-            // bit 10: "noindex" contained in http header properties
-            // bit 11: "nofollow" contained in http header properties
-            // bit 12: "unavailable_after" contained in http header properties
+            // bit  2: "follow" contained in html header meta
+            // bit  3: "noindex" contained in html header meta
+            // bit  4: "nofollow" contained in html header meta
+            // bit  8: "all" contained in http header X-Robots-Tag
+            // bit  9: "noindex" contained in http header X-Robots-Tag
+            // bit 10: "nofollow" contained in http header X-Robots-Tag
+            // bit 11: "noarchive" contained in http header X-Robots-Tag
+            // bit 12: "nosnippet" contained in http header X-Robots-Tag
+            // bit 13: "noodp" contained in http header X-Robots-Tag
+            // bit 14: "notranslate" contained in http header X-Robots-Tag
+            // bit 15: "noimageindex" contained in http header X-Robots-Tag
+            // bit 16: "unavailable_after" contained in http header X-Robots-Tag
             int b = 0;
             final String robots_meta = html.getMetas().get("robots");
-            // this tag may have values: all, index, noindex, nofollow
+            // this tag may have values: all, index, noindex, nofollow; see http://www.robotstxt.org/meta.html
             if (robots_meta != null) {
                 if (robots_meta.indexOf("all",0) >= 0) b += 1;      // set bit 0
                 if (robots_meta.indexOf("index",0) == 0 || robots_meta.indexOf(" index",0) >= 0 || robots_meta.indexOf(",index",0) >= 0 ) b += 2; // set bit 1
-                if (robots_meta.indexOf("noindex",0) >= 0) b += 4;  // set bit 2
-                if (robots_meta.indexOf("nofollow",0) >= 0) b += 8; // set bit 3
+                if (robots_meta.indexOf("follow",0) == 0 || robots_meta.indexOf(" follow",0) >= 0 || robots_meta.indexOf(",follow",0) >= 0 ) b += 4; // set bit 2
+                if (robots_meta.indexOf("noindex",0) >= 0) b += 8;  // set bit 3
+                if (robots_meta.indexOf("nofollow",0) >= 0) b += 16; // set bit 4
             }
             String x_robots_tag = "";
             if (responseHeader != null) {
@@ -549,12 +555,16 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 }
             }
             if (!x_robots_tag.isEmpty()) {
-                // this tag may have values: noarchive, nosnippet, noindex, unavailable_after
-                if (x_robots_tag.indexOf("noarchive",0) >= 0) b += 256;         // set bit 8
-                if (x_robots_tag.indexOf("nosnippet",0) >= 0) b += 512;         // set bit 9
-                if (x_robots_tag.indexOf("noindex",0) >= 0) b += 1024;          // set bit 10
-                if (x_robots_tag.indexOf("nofollow",0) >= 0) b += 2048;         // set bit 11
-                if (x_robots_tag.indexOf("unavailable_after",0) >=0) b += 4096; // set bit 12
+                // this tag may have values: all, noindex, nofollow, noarchive, nosnippet, noodp, notranslate, noimageindex, unavailable_after, none; see https://developers.google.com/webmasters/control-crawl-index/docs/robots_meta_tag?hl=de
+                if (x_robots_tag.indexOf("all",0) >= 0) b += 1<<8;                // set bit 8
+                if (x_robots_tag.indexOf("noindex",0) >= 0||x_robots_tag.indexOf("none",0) >= 0) b += 1<<9;   // set bit 9
+                if (x_robots_tag.indexOf("nofollow",0) >= 0||x_robots_tag.indexOf("none",0) >= 0) b += 1<<10; // set bit 10
+                if (x_robots_tag.indexOf("noarchive",0) >= 0) b += 1<<11;         // set bit 11
+                if (x_robots_tag.indexOf("nosnippet",0) >= 0) b += 1<<12;         // set bit 12
+                if (x_robots_tag.indexOf("noodp",0) >= 0) b += 1<<13;             // set bit 13
+                if (x_robots_tag.indexOf("notranslate",0) >= 0) b += 1<<14;       // set bit 14
+                if (x_robots_tag.indexOf("noimageindex",0) >= 0) b += 1<<15;      // set bit 15
+                if (x_robots_tag.indexOf("unavailable_after",0) >= 0) b += 1<<16; // set bit 16
             }
             add(doc, CollectionSchema.robots_i, b);
 
