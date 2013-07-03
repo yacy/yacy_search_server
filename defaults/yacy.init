@@ -537,6 +537,8 @@ indexMedia=true
 # URLs are only indexed and further crawled if they match this filter
 crawlingFilter=.*
 crawlingQ=true
+followFrames=true
+obeyHtmlRobotsNoindex=true
 storeHTCache=true
 storeTXCache=true
 

@@ -493,6 +493,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         Map<DigestURI, ImageEntry> images = new HashMap<DigestURI, ImageEntry>();
         int c = 0;
         final Object parser = document.getParserObject();
+        boolean containsCanonical = false;
         if (parser instanceof ContentScraper) {
             final ContentScraper html = (ContentScraper) parser;
             images = html.getImages();
@@ -715,7 +716,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             // canonical tag
             if (allAttr || contains(CollectionSchema.canonical_s)) {
                 final DigestURI canonical = html.getCanonical();
-                if (canonical != null) {
+                if (canonical != null && !ASCII.String(canonical.hash()).equals(id)) {
+                    containsCanonical = true;
                     inboundLinks.remove(canonical);
                     outboundLinks.remove(canonical);
                     add(doc, CollectionSchema.canonical_s, canonical.toNormalform(false));
@@ -811,10 +813,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.outboundlinksnofollowcount_i)) add(doc, CollectionSchema.outboundlinksnofollowcount_i, document.outboundLinkNofollowCount());
         
         // create a subgraph
-        //if () {
+        if (!containsCanonical) {
+            // a document with canonical tag should not get a webgraph relation, because that belongs to the canonical document
             webgraph.addEdges(subgraph, digestURI, responseHeader, collections, clickdepth, alllinks, images, true, inboundLinks, citations);
             webgraph.addEdges(subgraph, digestURI, responseHeader, collections, clickdepth, alllinks, images, false, outboundLinks, citations);
-        //}
+        }
             
         // list all links
         doc.webgraphDocuments.addAll(subgraph.edges);

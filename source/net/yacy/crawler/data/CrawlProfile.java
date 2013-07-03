@@ -61,6 +61,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String RECRAWL_IF_OLDER = "recrawlIfOlder";
     public static final String DOM_MAX_PAGES    = "domMaxPages";
     public static final String CRAWLING_Q       = "crawlingQ";
+    public static final String FOLLOW_FRAMES    = "followFrames";
+    public static final String OBEY_HTML_ROBOTS_NOINDEX = "obeyHtmlRobotsNoindex";
     public static final String INDEX_TEXT       = "indexText";
     public static final String INDEX_MEDIA      = "indexMedia";
     public static final String STORE_HTCACHE    = "storeHTCache";
@@ -127,7 +129,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final boolean directDocByURL,
                  final long recrawlIfOlder /*date*/,
                  final int domMaxPages,
-                 final boolean crawlingQ,
+                 final boolean crawlingQ, final boolean followFrames, final boolean obeyHtmlRobotsNoindex,
                  final boolean indexText,
                  final boolean indexMedia,
                  final boolean storeHTCache,
@@ -158,6 +160,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(RECRAWL_IF_OLDER, recrawlIfOlder);
         put(DOM_MAX_PAGES,    domMaxPages);
         put(CRAWLING_Q,       crawlingQ); // crawling of urls with '?'
+        put(FOLLOW_FRAMES,    followFrames); // load pages contained in frames or ifames
+        put(OBEY_HTML_ROBOTS_NOINDEX, obeyHtmlRobotsNoindex); // if false, then a meta robots tag containing 'noindex' is ignored
         put(INDEX_TEXT,       indexText);
         put(INDEX_MEDIA,      indexMedia);
         put(STORE_HTCACHE,    storeHTCache);
@@ -487,6 +491,18 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
 
     public boolean crawlingQ() {
         final String r = get(CRAWLING_Q);
+        if (r == null) return false;
+        return (r.equals(Boolean.TRUE.toString()));
+    }
+
+    public boolean followFrames() {
+        final String r = get(FOLLOW_FRAMES);
+        if (r == null) return false;
+        return (r.equals(Boolean.TRUE.toString()));
+    }
+
+    public boolean obeyHtmlRobotsNoindex() {
+        final String r = get(OBEY_HTML_ROBOTS_NOINDEX);
         if (r == null) return false;
         return (r.equals(Boolean.TRUE.toString()));
     }

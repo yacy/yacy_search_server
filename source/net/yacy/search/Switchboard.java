@@ -2476,7 +2476,6 @@ public final class Switchboard extends serverSwitch {
         }
 
         final long parsingEndTime = System.currentTimeMillis();
-
         // put anchors on crawl stack
         final long stackStartTime = System.currentTimeMillis();
         if ((processCase == EventOrigin.PROXY_LOAD || processCase == EventOrigin.LOCAL_CRAWLING) &&
@@ -2578,7 +2577,7 @@ public final class Switchboard extends serverSwitch {
         // check which files may take part in the indexing process
         final List<Document> doclist = new ArrayList<Document>();
         docloop: for (final Document document : in.documents) {
-            if (document.indexingDenied()) {
+            if (document.indexingDenied() && profile.obeyHtmlRobotsNoindex()) {
                 if (this.log.isInfo()) this.log.logInfo("Not Condensed Resource '" + urls + "': denied by document-attached noindexing rule");
                 addURLtoErrorDB(
                     in.queueEntry.url(),
@@ -2671,8 +2670,9 @@ public final class Switchboard extends serverSwitch {
         final DigestURI url = document.dc_source();
         final DigestURI referrerURL = queueEntry.referrerURL();
         EventOrigin processCase = queueEntry.processCase(this.peers.mySeed().hash);
+        CrawlProfile profile = queueEntry.profile();
 
-        if ( condenser == null || document.indexingDenied() ) {
+        if (condenser == null || (document.indexingDenied() && profile.obeyHtmlRobotsNoindex())) {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by rule in document, process case=" + processCase);
             addURLtoErrorDB(
                 url,
@@ -2684,7 +2684,7 @@ public final class Switchboard extends serverSwitch {
             return;
         }
 
-        if ( !queueEntry.profile().indexText() && !queueEntry.profile().indexMedia() ) {
+        if ( !profile.indexText() && !profile.indexMedia() ) {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
             addURLtoErrorDB(
                 url,
@@ -2695,7 +2695,7 @@ public final class Switchboard extends serverSwitch {
                 "denied by profile rule, process case="
                     + processCase
                     + ", profile name = "
-                    + queueEntry.profile().collectionName());
+                    + profile.collectionName());
             return;
         }
 
@@ -2993,7 +2993,8 @@ public final class Switchboard extends serverSwitch {
                         final Document[] documents = response.parse();
                         if (documents != null) {
                             for (final Document document: documents) {
-                                if (document.indexingDenied()) {
+                                final CrawlProfile profile = crawler.getActive(ASCII.getBytes(request.profileHandle()));
+                                if (document.indexingDenied() && (profile == null || profile.obeyHtmlRobotsNoindex())) {
                                     throw new Parser.Failure("indexing is denied", url);
                                 }
                                 final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib, LibraryProvider.synonyms, true);

@@ -183,7 +183,7 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 		                CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE),
 		                -1,
 		                crawlingQ,
-		                true, true, true, false,
+		                true, true, true, true, true, false,
 		                CacheStrategy.IFFRESH,
 		                "robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA); // TODO: make this a default profile in CrawlSwitchboard
 		sb.crawler.putActive(pe.handle().getBytes(), pe);

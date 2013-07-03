@@ -62,6 +62,8 @@ public class CrawlStartExpert_p {
         prop.put("crawlingDomMaxCheck", (crawlingDomMaxPages == -1) ? "0" : "1");
         prop.put("crawlingDomMaxPages", (crawlingDomMaxPages == -1) ? 10000 : crawlingDomMaxPages);
         prop.put("crawlingQChecked", env.getConfigBool("crawlingQ", true) ? "1" : "0");
+        prop.put("followFramesChecked", env.getConfigBool("followFrames", true) ? "1" : "0");
+        prop.put("obeyHtmlRobotsNoindexChecked", env.getConfigBool("obeyHtmlRobotsNoindex", true) ? "1" : "0");
         prop.put("storeHTCacheChecked", env.getConfigBool("storeHTCache", true) ? "1" : "0");
         prop.put("indexingTextChecked", env.getConfigBool("indexText", true) ? "1" : "0");
         prop.put("indexingMediaChecked", env.getConfigBool("indexMedia", true) ? "1" : "0");

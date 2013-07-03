@@ -246,13 +246,19 @@ public class Crawler_p {
                 final int crawlingDomMaxPages = (crawlingDomMaxCheck) ? post.getInt("crawlingDomMaxPages", -1) : -1;
                 env.setConfig("crawlingDomMaxPages", Integer.toString(crawlingDomMaxPages));
 
-                boolean crawlingQ = "on".equals(post.get("crawlingQ", "off"));
+                boolean crawlingQ = "on".equals(post.get("crawlingQ", "on"));
                 env.setConfig("crawlingQ", crawlingQ);
+                
+                boolean followFrames = "on".equals(post.get("followFrames", "on"));
+                env.setConfig("followFrames", followFrames);
+                
+                boolean obeyHtmlRobotsNoindex = "on".equals(post.get("obeyHtmlRobotsNoindex", "on"));
+                env.setConfig("obeyHtmlRobotsNoindex", obeyHtmlRobotsNoindex);
 
-                final boolean indexText = "on".equals(post.get("indexText", "off"));
+                final boolean indexText = "on".equals(post.get("indexText", "on"));
                 env.setConfig("indexText", indexText);
 
-                final boolean indexMedia = "on".equals(post.get("indexMedia", "off"));
+                final boolean indexMedia = "on".equals(post.get("indexMedia", "on"));
                 env.setConfig("indexMedia", indexMedia);
 
                 env.setConfig("storeHTCache", storeHTCache);
@@ -361,7 +367,7 @@ public class Crawler_p {
                         directDocByURL,
                         crawlingIfOlder,
                         crawlingDomMaxPages,
-                        crawlingQ,
+                        crawlingQ, followFrames, obeyHtmlRobotsNoindex,
                         indexText,
                         indexMedia,
                         storeHTCache,

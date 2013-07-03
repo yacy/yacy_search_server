@@ -407,13 +407,13 @@ public final class CrawlStacker {
         }
 
         // deny cgi
-        if (url.isIndividual() && !(profile.crawlingQ()))  { // TODO: make special property for crawlingIndividual
+        if (url.isIndividual() && !profile.crawlingQ())  { // TODO: make special property for crawlingIndividual
             if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' is CGI URL.");
             return "individual url (sessionid etc) not wanted";
         }
 
         // deny post properties
-        if (url.isPOST() && !(profile.crawlingQ()))  {
+        if (url.isPOST() && !profile.crawlingQ())  {
             if (this.log.isFine()) this.log.logFine("URL '" + urlstring + "' is post URL.");
             return "post url not allowed";
         }

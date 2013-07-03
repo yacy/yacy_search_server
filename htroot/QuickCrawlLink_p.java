@@ -97,7 +97,9 @@ public class QuickCrawlLink_p {
         final String crawlingMustMatch  = post.get("mustmatch", CrawlProfile.MATCH_ALL_STRING);
         final String crawlingMustNotMatch  = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
         final int CrawlingDepth      = post.getInt("crawlingDepth", 0);
-        final boolean crawlDynamic   = post.get("crawlingQ", "").equals("on");
+        final boolean crawlingQ      = post.get("crawlingQ", "").equals("on");
+        final boolean followFrames   = post.get("followFrames", "").equals("on");
+        final boolean obeyHtmlRobotsNoindex = post.get("obeyHtmlRobotsNoindex", "").equals("on");
         final boolean indexText      = post.get("indexText", "off").equals("on");
         final boolean indexMedia     = post.get("indexMedia", "off").equals("on");
         final boolean storeHTCache   = post.get("storeHTCache", "").equals("on");
@@ -145,11 +147,9 @@ public class QuickCrawlLink_p {
                         true,
                         60 * 24 * 30, // recrawlIfOlder (minutes); here: one month
                         -1, // domMaxPages, if negative: no count restriction
-                        crawlDynamic,
-                        indexText,
-                        indexMedia,
-                        storeHTCache,
-                        remoteIndexing,
+                        crawlingQ, followFrames, obeyHtmlRobotsNoindex,
+                        indexText, indexMedia,
+                        storeHTCache, remoteIndexing,
                         CacheStrategy.IFFRESH,
                         collection);
                 sb.crawler.putActive(pe.handle().getBytes(), pe);
