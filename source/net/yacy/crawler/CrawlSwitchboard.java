@@ -53,6 +53,8 @@ import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 public final class CrawlSwitchboard {
 
@@ -247,6 +249,7 @@ public final class CrawlSwitchboard {
     
     private void initActiveCrawlProfiles() {
         // generate new default entry for proxy crawling
+    	final Switchboard sb = Switchboard.getSwitchboard();
         this.defaultProxyProfile =
             new CrawlProfile(
                 CRAWL_PROFILE_PROXY,
@@ -260,15 +263,15 @@ public final class CrawlSwitchboard {
                 CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
                 CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
                 CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
-                0 /*Integer.parseInt(getConfig(PROXY_PREFETCH_DEPTH, "0"))*/,
+                Integer.parseInt(sb.getConfig(SwitchboardConstants.PROXY_PREFETCH_DEPTH, "0")),
                 true,
                 CrawlProfile.getRecrawlDate(CRAWL_PROFILE_PROXY_RECRAWL_CYCLE),
                 -1,
-                false, true, true,
-                true /*getConfigBool(PROXY_INDEXING_LOCAL_TEXT, true)*/,
-                true /*getConfigBool(PROXY_INDEXING_LOCAL_MEDIA, true)*/,
+				false, true, true,
+                sb.getConfigBool(SwitchboardConstants.PROXY_INDEXING_LOCAL_TEXT, true),
+                sb.getConfigBool(SwitchboardConstants.PROXY_INDEXING_LOCAL_MEDIA, true),
                 true,
-                false /*getConfigBool(PROXY_INDEXING_REMOTE, false)*/,
+                sb.getConfigBool(SwitchboardConstants.PROXY_INDEXING_REMOTE, false),
                 CacheStrategy.IFFRESH,
                 "robot_" + CRAWL_PROFILE_PROXY);
         this.profilesActiveCrawls.put(
