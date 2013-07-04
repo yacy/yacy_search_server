@@ -85,7 +85,7 @@ public final class ProxySettings {
      */
     public static boolean useForHost(final String host, Protocol protocol) {
         assert protocol != null;
-        if (protocol == Protocol.HTTP && !use) return false;
+        if (!use) return false;
         if (protocol == Protocol.HTTPS && !use4ssl) return false;
         if (protocol == Protocol.YACY && !use4YaCy) return false;
         if (allowProxy.containsKey(host)) return true;
