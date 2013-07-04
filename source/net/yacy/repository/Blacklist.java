@@ -28,15 +28,18 @@ package net.yacy.repository;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
@@ -44,6 +47,7 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.data.ListManager;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -92,6 +96,7 @@ public class Blacklist {
     }
 
     private File blacklistRootPath = null;
+    private Map<BlacklistType, String> blacklistFiles = new TreeMap<BlacklistType, String>();
     private final ConcurrentMap<BlacklistType, HandleSet> cachedUrlHashs;
     private final ConcurrentMap<BlacklistType, Map<String, Set<Pattern>>> hostpaths_matchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
     private final ConcurrentMap<BlacklistType, Map<String, Set<Pattern>>> hostpaths_notmatchable; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
@@ -148,6 +153,14 @@ public class Blacklist {
         return this.cachedUrlHashs.get(blacklistType);
     }
 
+    public final String getFileName(BlacklistType type) {
+    	return blacklistFiles.get(type);
+    }
+    
+    public final File getRootPath() {
+    	return blacklistRootPath;
+    }
+    
     public final void clear() {
         for (final Map<String, Set<Pattern>> entry : this.hostpaths_matchable.values()) {
             entry.clear();
@@ -158,6 +171,9 @@ public class Blacklist {
         for (final HandleSet entry : this.cachedUrlHashs.values()) {
             entry.clear();
         }
+        blacklistFiles.clear();
+        blacklistRootPath = null;
+        
     }
 
     public final int size() {
@@ -177,7 +193,7 @@ public class Blacklist {
 
     public final void loadList(final BlacklistFile[] blFiles, final String sep) {
         for (final BlacklistFile blf : blFiles) {
-            loadList(blf.getType(), blf.getFileName(), sep);
+            loadList(blf, sep);
         }
     }
 
@@ -188,6 +204,10 @@ public class Blacklist {
      * @param sep
      */
     private void loadList(final BlacklistFile blFile, final String sep) {
+    	if (!blacklistFiles.containsKey(blFile.getType())) {
+    		blacklistFiles.put(blFile.getType(), blFile.getFileName());
+    	}
+    	
         final Map<String, Set<Pattern>> blacklistMapMatch = getBlacklistMap(blFile.getType(), true);
         final Map<String, Set<Pattern>> blacklistMapNotMatch = getBlacklistMap(blFile.getType(), false);
         Set<Map.Entry<String, List<String>>> loadedBlacklist;
@@ -250,6 +270,15 @@ public class Blacklist {
         getBlacklistMap(blacklistType, false).remove(host);
     }
 
+    /**
+     * Removes entry for all blacklist types.
+     */
+    public final void remove(final String host, final String path) {
+        for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
+            Switchboard.urlBlacklist.remove(supportedBlacklistType, host, path);
+        }    	
+    }
+    
     public final void remove(final BlacklistType blacklistType, final String host, final String path) {
 
         final Map<String, Set<Pattern>> blacklistMap = getBlacklistMap(blacklistType, true);
@@ -269,9 +298,35 @@ public class Blacklist {
                 blacklistMapNotMatch.remove(host);
             }
         }
+
+        // load blacklist data from file
+        final List<String> list = FileUtils.getListArray(new File(ListManager.listsPath, getFileName(blacklistType)));
+        
+        // delete the old entry from file
+        if (list != null) {
+            for (final String e : list) {
+                if (e.equals(host + "/" + path)) {
+                    list.remove(e);
+                    break;
+                }
+            }
+            FileUtils.writeList(new File(ListManager.listsPath, getFileName(blacklistType)), list.toArray(new String[list.size()]));
+        }
+    }
+    
+    /**
+     * Adds a new blacklist entry for all types.
+     */
+    public final void add(final String host, final String path) {
+        for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
+	    	add(supportedBlacklistType, host, path);	    	
+        }
     }
 
     public final void add(final BlacklistType blacklistType, final String host, final String path) {
+    	if (contains(blacklistType, host, path)) {
+    		return;
+    	}
         if (host == null) {
             throw new IllegalArgumentException("host may not be null");
         }
@@ -292,8 +347,31 @@ public class Blacklist {
         if (!(blacklistMap.containsKey(h) && ((hostList = blacklistMap.get(h)) != null))) {
             blacklistMap.put(h, (hostList = new HashSet<Pattern>()));
         }
+        
+        // Create add case insesitive regex
+        Pattern pattern = Pattern.compile("(?i)" + p); 
+        
+        hostList.add(pattern); 
+        
+        // append the line to the file
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(new FileWriter(new File(blacklistRootPath, getFileName(blacklistType)), true));
+            pw.println(pattern);
+            pw.close();
+        } catch (final IOException e) {
+            Log.logException(e);
+        } finally {
+            if (pw != null) {
+                try {
+                    pw.close();
+                } catch (final Exception e) {
+                    Log.logWarning("Blacklist", "could not close stream to " + 
+                    		getFileName(blacklistType) + "! " + e.getMessage());
+                }
 
-        hostList.add(Pattern.compile("(?i)" + p)); // add case insesitive regex
+            }
+        }
     }
 
     public final int blacklistCacheSize() {
