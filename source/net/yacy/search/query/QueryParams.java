@@ -520,6 +520,7 @@ public final class QueryParams {
             params.setFacet(true);
             params.setFacetLimit(this.maxfacets);
             params.setFacetSort(FacetParams.FACET_SORT_COUNT);
+            params.setParam(FacetParams.FACET_METHOD, FacetParams.FACET_METHOD_fcs);
             for (String field: this.facetfields) params.addFacetField(field);
         } else {
             params.setFacet(false);

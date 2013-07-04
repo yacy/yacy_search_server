@@ -308,6 +308,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setFacet(true);
         params.setFacetLimit(maxresults);
         params.setFacetSort(FacetParams.FACET_SORT_COUNT);
+        params.setParam(FacetParams.FACET_METHOD, FacetParams.FACET_METHOD_fcs);
         params.setFields(fields);
         params.clearSorts();
         params.setIncludeScore(false);
