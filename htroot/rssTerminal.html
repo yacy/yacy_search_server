@@ -50,13 +50,13 @@ alert(maxlines);
 }
 
 function addLine(line) {
-  if (typeof query.cf!=='undefined') {
+  //if (typeof query.cf!=='undefined') {
     for (var i=0;i<setcolors.length;i++) {
       if (line.match(setcolors[i].split(":")[0])) {
           fntcolor = setcolors[i].split(":")[1];
       }
     }
-  }
+  //}
   while (line.length > maxwidth) {
     lines.push("<font style=\"color:#" + fntcolor + ";\">" + line.substring(0, maxwidth) + "</font>");
     line = tab + line.substring(maxwidth);
