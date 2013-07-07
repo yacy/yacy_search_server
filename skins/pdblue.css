@@ -313,9 +313,9 @@ form dd, dl.pairs dd {
 
 .submitready {
 	height:20px;
-	width:160px;
+	min-width:160px;
     font-size:1.2em;
-    text-indent:9px;
+    padding-left:1.2em;
     color:white;
 	
     -webkit-border-radius: 20px;
@@ -341,9 +341,9 @@ form dd, dl.pairs dd {
 
 .dangerdisarmed {
 	height:20px;
-	width:160px;
+	min-width:160px;
     font-size:1.2em;
-    text-indent:9px;
+    padding-left:2em;
     color:white;
 	
     -webkit-border-radius: 20px;
@@ -357,9 +357,9 @@ form dd, dl.pairs dd {
 
 .dangerready {
 	height:20px;
-	width:160px;
+	min-width:160px;
     font-size:1.2em;
-    text-indent:9px;
+    padding-left:2em;
     color:white;
 	
     -webkit-border-radius: 20px;
