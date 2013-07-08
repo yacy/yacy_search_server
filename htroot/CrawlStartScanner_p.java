@@ -18,27 +18,33 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
+import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.protocol.Scanner.Access;
+import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -66,11 +72,20 @@ public class CrawlStartScanner_p
         timeout = post == null ? timeout : post.getInt("timeout", timeout);
 
         // make a scanhosts entry
-        String hosts = post == null ? "" : post.get("scanhosts", "");
+        String hostt = post == null ? "" : post.get("scanhosts", "").trim();
+        boolean listall = false;
+        if (hostt.equals("*")) {
+            hostt = "";
+            listall = true;
+        }
+        String[] hosts0 = hostt.indexOf('\n') > 0 || hostt.indexOf('\r') > 0 ? hostt.split("[\\r\\n]+") : hostt.split(Pattern.quote(","));
+        Set<String> hostSet = new LinkedHashSet<String>();
+        for (String s: hosts0) if (s != null && s.length() > 0) hostSet.add(s);
+        
         final Set<InetAddress> ips = Domains.myIntranetIPs();
         prop.put("intranethosts", ips.toString());
         prop.put("intranetHint", sb.isIntranetMode() ? 0 : 1);
-        if ( hosts.isEmpty() ) {
+        if ( hostSet.isEmpty() ) {
             InetAddress ip;
             if ( sb.isIntranetMode() ) {
                 if ( !ips.isEmpty() ) {
@@ -85,11 +100,23 @@ public class CrawlStartScanner_p
                 }
             }
             if ( ip != null ) {
-                hosts = ip.getHostAddress();
+                hostSet.add(ip.getHostAddress());
             }
         }
-        prop.put("scanhosts", hosts);
+        String hos = ""; for (String s: hostSet) hos += s + "\n";
+        prop.put("scanhosts", hos.trim());
 
+        if (listall) {
+            // get a list of all hosts in the index
+            ReversibleScoreMap<String> hostscore = null;
+            try {
+                hostscore = sb.index.fulltext().getDefaultConnector().getFacets(AbstractSolrConnector.CATCHALL_TERM, 1000, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
+            } catch (IOException e) {}
+            if (hostscore != null) {
+                for (String s: hostscore) hostSet.add(s);
+            }
+        }
+        
         // parse post requests
         if ( post != null ) {
             int repeat_time = 0;
@@ -105,18 +132,35 @@ public class CrawlStartScanner_p
 
             // scan a range of ips
             if (post.containsKey("scan")) {
+
+                boolean scanftp = "on".equals(post.get("scanftp", ""));
+                boolean scanhttp = "on".equals(post.get("scanhttp", ""));
+                boolean scanhttps = "on".equals(post.get("scanhttps", ""));
+                boolean scansmb = "on".equals(post.get("scansmb", ""));
+                
                 final Set<InetAddress> scanbase = new HashSet<InetAddress>();
                 
                 // select host base to scan
                 if ("hosts".equals(post.get("source", ""))) {
-                    for (String host: hosts.split(",")) {
+                    for (String host: hostSet) {
                         if (host.startsWith("http://")) host = host.substring(7);
                         if (host.startsWith("https://")) host = host.substring(8);
                         if (host.startsWith("ftp://")) host = host.substring(6);
                         if (host.startsWith("smb://")) host = host.substring(6);
                         final int p = host.indexOf('/', 0);
                         if (p >= 0) host = host.substring(0, p);
-                        if (host.length() > 0) scanbase.add(Domains.dnsResolve(host));
+                        InetAddress ip;
+                        if (host.length() > 0) {
+                            ip = Domains.dnsResolve(host); if (ip != null) scanbase.add(ip);
+                            if (scanftp && !hostSet.contains("ftp." + host)) {
+                                ip = Domains.dnsResolve("ftp." + host);
+                                if (ip != null) scanbase.add(ip);
+                            }
+                            if ((scanhttp || scanhttps) && !hostSet.contains("www." + host)) {
+                                ip = Domains.dnsResolve("www." + host);
+                                if (ip != null) scanbase.add(ip);
+                            }
+                        }
                     }
                 }
                 if ("intranet".equals(post.get("source", ""))) {
@@ -124,12 +168,12 @@ public class CrawlStartScanner_p
                 }
                 
                 // start a scanner
-                final Scanner scanner = new Scanner(scanbase, CONCURRENT_RUNNER, timeout);
-                List<InetAddress> addresses = scanner.genlist(subnet);
-                if ("on".equals(post.get("scanftp", ""))) scanner.addFTP(addresses);
-                if ("on".equals(post.get("scanhttp", ""))) scanner.addHTTP(addresses);
-                if ("on".equals(post.get("scanhttps", ""))) scanner.addHTTPS(addresses);
-                if ("on".equals(post.get("scansmb", ""))) scanner.addSMB(addresses);
+                final Scanner scanner = new Scanner(CONCURRENT_RUNNER, timeout);
+                List<InetAddress> addresses = Scanner.genlist(scanbase, subnet);
+                if (scanftp) scanner.addFTP(addresses);
+                if (scanhttp) scanner.addHTTP(addresses);
+                if (scanhttps) scanner.addHTTPS(addresses);
+                if (scansmb) scanner.addSMB(addresses);
                 scanner.start();
                 scanner.terminate();
                 if ("on".equals(post.get("accumulatescancache", "")) && !"scheduler".equals(post.get("rescan", ""))) {
@@ -183,7 +227,7 @@ public class CrawlStartScanner_p
                         post,
                         "CrawlStartScanner_p.html",
                         WorkTables.TABLE_API_TYPE_CRAWLER,
-                        "network scanner for hosts: " + hosts,
+                        "network scanner for hosts: " + hostSet.toString(),
                         repeat_time,
                         repeat_unit.substring(3));
                 }

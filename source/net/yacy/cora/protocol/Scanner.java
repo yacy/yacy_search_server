@@ -29,13 +29,12 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -121,9 +120,6 @@ public class Scanner extends Thread {
     }
 
     private final static Map<Service, Access> scancache = new ConcurrentHashMap<Service, Access>();
-    //private       static long scancacheUpdateTime = 0;
-    //private       static long scancacheValidUntilTime = Long.MAX_VALUE;
-    private       static Set<InetAddress> scancacheScanrange = new HashSet<InetAddress>();
 
     public static int scancacheSize() {
         return scancache.size();
@@ -132,9 +128,6 @@ public class Scanner extends Thread {
     public static void scancacheReplace(final Scanner newScanner) {
         scancache.clear();
         scancache.putAll(newScanner.services());
-        //scancacheUpdateTime = System.currentTimeMillis();
-        //scancacheValidUntilTime = validTime == Long.MAX_VALUE ? Long.MAX_VALUE : scancacheUpdateTime + validTime;
-        scancacheScanrange = newScanner.scanrange;
     }
 
     public static void scancacheExtend(final Scanner newScanner) {
@@ -145,9 +138,6 @@ public class Scanner extends Thread {
             if (entry.getValue() != Access.granted) i.remove();
         }
         scancache.putAll(newScanner.services());
-        //scancacheUpdateTime = System.currentTimeMillis();
-        //scancacheValidUntilTime = validTime == Long.MAX_VALUE ? Long.MAX_VALUE : scancacheUpdateTime + validTime;
-        scancacheScanrange = newScanner.scanrange;
     }
 
     public static Iterator<Map.Entry<Service, Scanner.Access>> scancacheEntries() {
@@ -163,18 +153,17 @@ public class Scanner extends Thread {
      */
     public static boolean acceptURL(final MultiProtocolURI url) {
         // if the scan range is empty, then all urls are accepted
-        if (scancacheScanrange == null || scancacheScanrange.isEmpty()) return true;
+        if (scancache == null || scancache.isEmpty()) return true;
 
         //if (System.currentTimeMillis() > scancacheValidUntilTime) return true;
         final InetAddress a = url.getInetAddress(); // try to avoid that!
         if (a == null) return true;
-        final InetAddress n = normalize(a);
-        if (!scancacheScanrange.contains(n)) return true;
         final Access access = scancache.get(new Service(url.getProtocol(), a));
         if (access == null) return false;
         return access == Access.granted;
     }
-
+ 
+    /*
     private static InetAddress normalize(final InetAddress a) {
         if (a == null) return null;
         final byte[] b = a.getAddress();
@@ -186,26 +175,20 @@ public class Scanner extends Thread {
             return a;
         }
     }
-
+     */
+    
     private final int runnerCount;
-    private final Set<InetAddress> scanrange;
     private final BlockingQueue<Service> scanqueue;
     private final Map<Service, Access> services;
     private final Map<Runner, Object> runner;
     private final int timeout;
 
-    public Scanner(final Set<InetAddress> scanrange, final int concurrentRunner, final int timeout) {
+    public Scanner(final int concurrentRunner, final int timeout) {
         this.runnerCount = concurrentRunner;
-        this.scanrange = new HashSet<InetAddress>();
-        for (final InetAddress a: scanrange) this.scanrange.add(normalize(a));
         this.scanqueue = new LinkedBlockingQueue<Service>();
         this.services = Collections.synchronizedMap(new HashMap<Service, Access>());
         this.runner = new ConcurrentHashMap<Runner, Object>();
         this.timeout = timeout;
-    }
-
-    public Scanner(final int concurrentRunner, final int timeout) {
-        this(Domains.myIntranetIPs(), concurrentRunner, timeout);
     }
 
     @Override
@@ -332,23 +315,37 @@ public class Scanner extends Thread {
      * @param subnet the subnet: 24 will generate 254 addresses, 16 will generate 256 * 254; must be >= 16 and <= 24
      * @return
      */
-    public final List<InetAddress> genlist(final int subnet) {
-        final ArrayList<InetAddress> c = new ArrayList<InetAddress>(10);
-        for (final InetAddress i: this.scanrange) {
-            int ul = subnet >= 24 ? i.getAddress()[2] : (1 << (24 - subnet)) - 1;
-            for (int br = subnet >= 24 ? i.getAddress()[2] : 0; br <= ul; br++) {
-                for (int j = 1; j < 255; j++) {
-                    final byte[] address = i.getAddress();
-                    address[2] = (byte) br;
-                    address[3] = (byte) j;
-                    try {
-                        c.add(InetAddress.getByAddress(address));
-                    } catch (final UnknownHostException e) {
+    public static final List<InetAddress> genlist(Collection<InetAddress> base, final int subnet) {
+        final ArrayList<InetAddress> c = new ArrayList<InetAddress>(1);
+        for (final InetAddress i: base) {
+            genlist(c, i, subnet);
+        }
+        return c;
+    }
+    public static final List<InetAddress> genlist(InetAddress base, final int subnet) {
+        final ArrayList<InetAddress> c = new ArrayList<InetAddress>(1);
+        genlist(c, base, subnet);
+        return c;
+    }
+    private static final void genlist(ArrayList<InetAddress> c, InetAddress base, final int subnet) {
+            if (subnet == 31) {
+                try {
+                    c.add(InetAddress.getByAddress(base.getAddress()));
+                } catch (UnknownHostException e) {}
+            } else {
+                int ul = subnet >= 24 ? base.getAddress()[2] : (1 << (24 - subnet)) - 1;
+                for (int br = subnet >= 24 ? base.getAddress()[2] : 0; br <= ul; br++) {
+                    for (int j = 1; j < 255; j++) {
+                        final byte[] address = base.getAddress();
+                        address[2] = (byte) br;
+                        address[3] = (byte) j;
+                        try {
+                            c.add(InetAddress.getByAddress(address));
+                        } catch (final UnknownHostException e) {
+                        }
                     }
                 }
             }
-        }
-        return c;
     }
 
     public Map<Service, Access> services() {
@@ -365,7 +362,7 @@ public class Scanner extends Thread {
     public static void main(final String[] args) {
         //try {System.out.println("192.168.1.91: " + ping(new MultiProtocolURI("smb://192.168.1.91/"), 1000));} catch (MalformedURLException e) {}
         final Scanner scanner = new Scanner(100, 10);
-        List<InetAddress> addresses = scanner.genlist(20);
+        List<InetAddress> addresses = genlist(Domains.myIntranetIPs(), 20);
         scanner.addFTP(addresses);
         scanner.addHTTP(addresses);
         scanner.addHTTPS(addresses);
