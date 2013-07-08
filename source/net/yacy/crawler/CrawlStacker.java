@@ -138,7 +138,7 @@ public final class CrawlStacker {
         // record the link graph for this request
         byte[] anchorhash = entry.url().hash();
         IndexCell<CitationReference> urlCitationIndex = this.indexSegment.urlCitation();
-        if (urlCitationIndex != null) try {
+        if (urlCitationIndex != null && entry.referrerhash() != null) try {
             urlCitationIndex.add(anchorhash, new CitationReference(entry.referrerhash(), entry.appdate().getTime()));
         } catch (final Exception e) {
             Log.logException(e);
