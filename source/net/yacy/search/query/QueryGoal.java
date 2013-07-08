@@ -125,6 +125,7 @@ public class QueryGoal {
             // parse phrase
             boolean inc = true;
             if (s.charAt(0) == '-') {inc = false; s = s.substring(1);}
+            if (s.charAt(0) == '+') {inc = true; s = s.substring(1);}
             if (s.length() == 0) return;
             
             // parse string
