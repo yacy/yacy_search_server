@@ -45,7 +45,8 @@
         <input type="radio" name="source" id="sourcehost" value="hosts"#(intranet.checked)# checked="checked"::#(/intranet.checked)# />Scan sub-range with given host
         <textarea name="scanhosts" id="scanhosts" value="#[scanhosts]#"  cols="64" rows="3" size="41"></textarea><br/><br/>
         <input type="radio" name="source" id="sourcenet" value="intranet"#(intranet.checked)#:: checked="checked"#(/intranet.checked)# />Full Intranet Scan: #[intranethosts]#<br/>
-        #(intranetHint)#::<div class="info">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Do not use intranet scan results, you are not in an intranet environment!</div>#(/intranetHint)#
+        #(intranetHint)#::<div class="info">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Do not use intranet scan results, you are not in an intranet environment!</div>#(/intranetHint)#<br/><br/>
+        <input type="radio" name="source" id="sourceall" value="all" />All known hosts in the search index (/31 subnet recommended!)
     </dd>
     <dt>Subnet</dt>
     <dd>
