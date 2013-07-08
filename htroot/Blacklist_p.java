@@ -30,9 +30,7 @@
 // if the shell's current path is HTROOT
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
@@ -251,7 +249,7 @@ public class Blacklist_p {
                 if (selectedBlacklistEntries.length > 0) {
                     String temp = null;
                     for (final String selectedBlacklistEntry : selectedBlacklistEntries) {
-                        if ((temp = deleteBlacklistEntry(blacklistToUse, selectedBlacklistEntry, header, BlacklistType.values())) != null) {
+                        if ((temp = deleteBlacklistEntry(blacklistToUse, selectedBlacklistEntry, header)) != null) {
                             prop.put("LOCATION", temp);
                             return prop;
                         }
@@ -273,7 +271,7 @@ public class Blacklist_p {
                 // store this call as api call
                 ListManager.switchboard.tables.recordAPICall(post, "Blacklist_p.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "add to blacklist: " + blentry);
 
-                final String temp = addBlacklistEntry(blacklistToUse, blentry, header, BlacklistType.values());
+                final String temp = addBlacklistEntry(blacklistToUse, blentry, header);
                 if (temp != null) {
                     prop.put("LOCATION", temp);
                     return prop;
@@ -300,12 +298,12 @@ public class Blacklist_p {
                         !targetBlacklist.equals(blacklistToUse)) {
                     String temp;
                     for (final String selectedBlacklistEntry : selectedBlacklistEntries) {
-                        if ((temp = addBlacklistEntry(targetBlacklist, selectedBlacklistEntry, header, BlacklistType.values())) != null) {
+                        if ((temp = addBlacklistEntry(targetBlacklist, selectedBlacklistEntry, header)) != null) {
                             prop.put("LOCATION", temp);
                             return prop;
                         }
 
-                        if ((temp = deleteBlacklistEntry(blacklistToUse, selectedBlacklistEntry, header, BlacklistType.values())) != null) {
+                        if ((temp = deleteBlacklistEntry(blacklistToUse, selectedBlacklistEntry, header)) != null) {
                             prop.put("LOCATION", temp);
                             return prop;
 
@@ -342,12 +340,12 @@ public class Blacklist_p {
 
                         if (!selectedBlacklistEntries[i].equals(editedBlacklistEntries[i])) {
 
-                            if ((temp = deleteBlacklistEntry(blacklistToUse, selectedBlacklistEntries[i], header, BlacklistType.values())) != null) {
+                            if ((temp = deleteBlacklistEntry(blacklistToUse, selectedBlacklistEntries[i], header)) != null) {
                                 prop.put("LOCATION", temp);
                                 return prop;
                             }
 
-                            if ((temp = addBlacklistEntry(blacklistToUse, editedBlacklistEntries[i], header, BlacklistType.values())) != null) {
+                            if ((temp = addBlacklistEntry(blacklistToUse, editedBlacklistEntries[i], header)) != null) {
                                 prop.put("LOCATION", temp);
                                 return prop;
                             }
@@ -519,49 +517,19 @@ public class Blacklist_p {
         return prop;
     }
 
-
-
     /**
-     * This method adds a new entry to the chosen blacklist.
-     * @param blacklistToUse the name of the blacklist the entry is to be added to
-     * @param newEntry the entry that is to be added
+     * This method deletes a blacklist entry.
+     * @param blacklistToUse the name of the blacklist the entry is to be deleted from
+     * @param entry the entry that is to be deleted
      * @param header
      * @param supportedBlacklistTypes
      * @return null if no error occurred, else a String to put into LOCATION
      */
-    private static String addBlacklistEntry(
-            final String blacklistToUse,
-            final String newEntry,
-            final RequestHeader header,
-            final BlacklistType[] supportedBlacklistTypes) {
-
-        if (blacklistToUse == null || blacklistToUse.isEmpty()) {
-            return "";
-        }
-
-        if (newEntry == null || newEntry.isEmpty()) {
-            return header.get(HeaderFramework.CONNECTION_PROP_PATH) + "?selectList=&selectedListName=" + blacklistToUse;
-        }
-
-        addBlacklistEntry(ListManager.listsPath, blacklistToUse, newEntry, supportedBlacklistTypes);
-        SearchEventCache.cleanupEvents(true);
-        return null;
-    }
-
-
-    /**
-     * This method deletes a blacklist entry.
-     * @param blacklistToUse the name of the blacklist the entry is to be deleted from
-     * @param oldEntry the entry that is to be deleted
-     * @param header
-     * @param supportedBlacklistTypes
-     * @return null if no error occured, else a String to put into LOCATION
-     */
     private static String deleteBlacklistEntry(
             final String blacklistToUse,
-            final String oldEntry,
-            final RequestHeader header,
-            final BlacklistType[] supportedBlacklistTypes) {
+            final String entry,
+            final RequestHeader header) {
+    	String oldEntry = entry;
 
         if (blacklistToUse == null || blacklistToUse.isEmpty()) {
             return "";
@@ -571,69 +539,59 @@ public class Blacklist_p {
             return header.get(HeaderFramework.CONNECTION_PROP_PATH) + "?selectList=&selectedListName=" + blacklistToUse;
         }
 
-        deleteBlacklistEntry(ListManager.listsPath, blacklistToUse, oldEntry, supportedBlacklistTypes);
-        SearchEventCache.cleanupEvents(true);
-        return null;
-    }
-
-    /**
-     * This method deletes a blacklist entry.
-     * @param blacklistToUse the name of the blacklist the entry is to be deleted from
-     * @param oldEntry the entry that is to be deleted
-     * @param supportedBlacklistTypes
-     */
-    private static void deleteBlacklistEntry(
-            final File listsPath,
-            final String blacklistToUse,
-            String oldEntry,
-            final BlacklistType[] supportedBlacklistTypes) {
-
-        // load blacklist data from file
-        final List<String> list = FileUtils.getListArray(new File(listsPath, blacklistToUse));
-
-        // delete the old entry from file
-        if (list != null) {
-            for (final String entry : list) {
-                if (entry.equals(oldEntry)) {
-                    list.remove(entry);
-                    break;
-                }
-            }
-            FileUtils.writeList(new File(listsPath, blacklistToUse), list.toArray(new String[list.size()]));
-        }
 
         // remove the entry from the running blacklist engine
         int pos = oldEntry.indexOf('/',0);
-        if (pos < 0) {
-            // add default empty path pattern
-            pos = oldEntry.length();
-            oldEntry = oldEntry + "/.*";
+        String host = oldEntry.substring(0, pos);
+        String path = "";
+        if (pos > 0) {
+            path = oldEntry.substring(pos + 1);
         }
-        for (final BlacklistType supportedBlacklistType : supportedBlacklistTypes) {
-            if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists",blacklistToUse)) {
-                Switchboard.urlBlacklist.remove(supportedBlacklistType,oldEntry.substring(0, pos), oldEntry.substring(pos + 1));
+        if (Switchboard.urlBlacklist.getFileName(BlacklistType.DHT) == blacklistToUse) {
+        	Switchboard.urlBlacklist.remove(host, path);
+        }
+        
+        for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
+            if (Switchboard.urlBlacklist.getFileName(supportedBlacklistType) != blacklistToUse) {
+            	continue;
             }
+            
+            Blacklist bl = new Blacklist(ListManager.listsPath);
+        	bl.loadList(supportedBlacklistType, blacklistToUse, "/");
+        	
+        	bl.remove(host, path);
         }
+        
+        SearchEventCache.cleanupEvents(true);
+        return null;
     }
-
-
-
+    
     /**
      * This method adds a new entry to the chosen blacklist.
      * @param blacklistToUse the name of the blacklist the entry is to be added to
      * @param newEntry the entry that is to be added
+     * @param header
      * @param supportedBlacklistTypes
+     * @return null if no error occurred, else a String to put into LOCATION
      */
-    private static void addBlacklistEntry(
-            final File listsPath,
-            final String blacklistToUse,
-            String newEntry,
-            final BlacklistType[] supportedBlacklistTypes) {
+	private static String addBlacklistEntry(
+	        final String blacklistToUse,
+	        final String entry,
+	        final RequestHeader header) {
+    	String newEntry = entry;
+
+        if (blacklistToUse == null || blacklistToUse.isEmpty()) {
+            return "";
+        }
+
+        if (newEntry == null || newEntry.isEmpty()) {
+            return header.get(HeaderFramework.CONNECTION_PROP_PATH) + "?selectList=&selectedListName=" + blacklistToUse;
+        }
 
         // ignore empty entries
         if(newEntry == null || newEntry.isEmpty()) {
             Log.logWarning("Blacklist", "skipped adding an empty entry");
-            return;
+            return "";
         }
 
         if (newEntry.startsWith("http://") ){
@@ -645,8 +603,8 @@ public class Blacklist_p {
         if (newEntry.indexOf("*") < 0) {
             // user did not use any wild cards and just submitted a word
 
-            addBlacklistEntry0(listsPath, blacklistToUse, ".*" + newEntry + ".*/.*", supportedBlacklistTypes);
-            addBlacklistEntry0(listsPath, blacklistToUse, ".*.*/.*" + newEntry + ".*", supportedBlacklistTypes);
+            newEntry = ".*" + newEntry + ".*/.*";
+            newEntry =  ".*.*/.*" + newEntry + ".*";
 
         } else {
 
@@ -655,44 +613,29 @@ public class Blacklist_p {
                 // add default empty path pattern
                 newEntry = newEntry + "/.*";
             }
-
-            addBlacklistEntry0(listsPath, blacklistToUse, newEntry, supportedBlacklistTypes);
         }
-    }
 
-    private static void addBlacklistEntry0(
-            final File listsPath,
-            final String blacklistToUse,
-            String newEntry,
-            final BlacklistType[] supportedBlacklistTypes) {
+        int pos = newEntry.indexOf('/',0);
+        String host = newEntry.substring(0, pos);
+        String path = newEntry.substring(pos + 1);
 
-        if (!Blacklist.blacklistFileContains(listsPath, blacklistToUse, newEntry)) {
-            // append the line to the file
-            PrintWriter pw = null;
-            try {
-                pw = new PrintWriter(new FileWriter(new File(listsPath, blacklistToUse), true));
-                pw.println(newEntry);
-                pw.close();
-            } catch (final IOException e) {
-                Log.logException(e);
-            } finally {
-                if (pw != null) {
-                    try {
-                        pw.close();
-                    } catch (final Exception e) {
-                        Log.logWarning("Blacklist", "could not close stream to " + blacklistToUse + "! " + e.getMessage());
-                    }
-
-                }
-            }
-
-            // add to blacklist
-            int pos = newEntry.indexOf('/',0);
-            for (final BlacklistType supportedBlacklistType : supportedBlacklistTypes) {
-                if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists", blacklistToUse)) {
-                    Switchboard.urlBlacklist.add(supportedBlacklistType, newEntry.substring(0, pos), newEntry.substring(pos + 1));
-                }
-            }
+        if (Switchboard.urlBlacklist.getFileName(BlacklistType.DHT) == blacklistToUse) {
+        	Switchboard.urlBlacklist.add(host, path);	
         }
+        
+        for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
+            if (Switchboard.urlBlacklist.getFileName(supportedBlacklistType) != blacklistToUse) {
+            	continue;
+            }
+            
+	    	Blacklist bl = new Blacklist(ListManager.listsPath);
+	    	bl.loadList(supportedBlacklistType, blacklistToUse, "/");
+	    	
+	    	bl.add(supportedBlacklistType, host, path);    	
+        }
+        
+        SearchEventCache.cleanupEvents(true);
+        return null;
     }
+    
 }
