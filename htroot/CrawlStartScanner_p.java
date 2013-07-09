@@ -155,6 +155,16 @@ public class CrawlStartScanner_p
                         Collection<InetAddress> scanbase = new ArrayList<InetAddress>();
                         if (host.length() > 0) {
                             ip = Domains.dnsResolve(host); if (ip != null) scanbase.add(ip);
+                            if (host.startsWith("ftp.") || host.startsWith("www.") ||
+                                host.startsWith("blog.") || host.startsWith("wiki.") ||
+                                host.startsWith("forum.") || host.startsWith("forums.") ||
+                                host.startsWith("events.") || host.startsWith("bugs.")) {
+                                host = host.substring(host.indexOf('.') + 1);
+                                if (!hostSet.contains(host)) {
+                                    ip = Domains.dnsResolve(host);
+                                    if (ip != null) scanbase.add(ip);
+                                }
+                            }
                             if (scanftp && !hostSet.contains("ftp." + host)) {
                                 ip = Domains.dnsResolve("ftp." + host);
                                 if (ip != null) scanbase.add(ip);

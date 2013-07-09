@@ -212,6 +212,11 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                     Log.logException(ee);
                     try {
                         this.server.commit();
+                    } catch (Throwable eee) {
+                        Log.logException(eee);
+                        // a time-out may occur here
+                    }
+                    try {
                         this.server.add(solrdoc, -1);
                     } catch (Throwable eee) {
                         Log.logException(eee);
@@ -240,7 +245,13 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                     this.server.deleteById(ids);
                 } catch (SolrServerException e1) {
                     Log.logException(e1);
-                    }
+                }
+                try {
+                    this.server.commit();
+                } catch (Throwable eee) {
+                    Log.logException(eee);
+                    // a time-out may occur here
+                }
                 try {
                     this.server.add(solrdocs, -1);
                 } catch (Throwable ee) {
