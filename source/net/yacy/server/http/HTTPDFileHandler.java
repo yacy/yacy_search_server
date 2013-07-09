@@ -102,13 +102,13 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.data.UserDB;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ScraperInputStream;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -151,7 +151,7 @@ public final class HTTPDFileHandler {
 
     //private Properties connectionProperties = null;
     // creating a logger
-    private static final Log theLogger = new Log("FILEHANDLER");
+    private static final ConcurrentLog theLogger = new ConcurrentLog("FILEHANDLER");
 
     static {
         final serverSwitch theSwitchboard = Switchboard.getSwitchboard();
@@ -165,7 +165,7 @@ public final class HTTPDFileHandler {
             if (Classification.countMimes() == 0) {
                 // load the mime table
                 final String mimeTablePath = theSwitchboard.getConfig("mimeTable","");
-                Log.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
+                ConcurrentLog.config("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
                 Classification.init(new File(theSwitchboard.getAppPath(), mimeTablePath));
             }
 
@@ -347,7 +347,7 @@ public final class HTTPDFileHandler {
 
             // in case that we are still not granted we ask for a password
             if (!accessGranted) {
-                Log.logInfo("HTTPD", "Wrong log-in for path '" + path + "' from host '" + clientIP + "'");
+                ConcurrentLog.info("HTTPD", "Wrong log-in for path '" + path + "' from host '" + clientIP + "'");
                 final Integer attempts = serverCore.bfHost.get(clientIP);
                 if (attempts == null)
                     serverCore.bfHost.put(clientIP, Integer.valueOf(1));
@@ -680,7 +680,7 @@ public final class HTTPDFileHandler {
                             HeaderFramework.http1_1.get(
                                     Integer.toString(403)),
                             null);
-                    Log.logWarning(
+                    ConcurrentLog.warn(
                             "HTTPD",
                             "CGI script " + targetFile.getPath()
                             + " could not be executed due to "
@@ -818,7 +818,7 @@ public final class HTTPDFileHandler {
                                                 Integer.parseInt(
                                                         value.substring(0, 3));
                                     } catch (final NumberFormatException ex) {
-                                        Log.logWarning(
+                                        ConcurrentLog.warn(
                                                 "HTTPD",
                                                 "CGI script " + targetFile.getPath()
                                                 + " returned illegal status code \""
@@ -869,14 +869,14 @@ public final class HTTPDFileHandler {
                                 HeaderFramework.http1_1.get(
                                         Integer.toString(statusCode)),
                                 null);
-                        Log.logWarning(
+                        ConcurrentLog.warn(
                                 "HTTPD",
                                 "CGI script " + targetFile.getPath()
                                 + " returned exit value " + exitValue
                                 + ", body empty: "
                                 + (cgiBody == null || cgiBody.isEmpty()));
                         if (error.length() > 0) {
-                            Log.logWarning("HTTPD", "Reported error: " + error);
+                            ConcurrentLog.warn("HTTPD", "Reported error: " + error);
                         }
                     }
                 }
@@ -963,7 +963,7 @@ public final class HTTPDFileHandler {
                         if (templatePatterns.containsKey(serverObjects.ACTION_AUTHENTICATE)) {
                             // handle brute-force protection
                             if (realmProp != null) {
-                                Log.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
+                                ConcurrentLog.info("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
                                 final Integer attempts = serverCore.bfHost.get(clientIP);
                                 if (attempts == null)
                                     serverCore.bfHost.put(clientIP, Integer.valueOf(1));
@@ -1033,9 +1033,9 @@ public final class HTTPDFileHandler {
                             ref = new SoftReference<TemplateCacheEntry>(templateCacheEntry);
                             if (MemoryControl.shortStatus()) templateCache.clear();
                             templateCache.put(targetFile, ref);
-                            if (theLogger.isFinest()) theLogger.logFinest("Cache MISS for file " + targetFile);
+                            if (theLogger.isFinest()) theLogger.finest("Cache MISS for file " + targetFile);
                         } else {
-                            if (theLogger.isFinest()) theLogger.logFinest("Cache HIT for file " + targetFile);
+                            if (theLogger.isFinest()) theLogger.finest("Cache HIT for file " + targetFile);
                         }
 
                         // creating an inputstream needed by the template
@@ -1154,7 +1154,7 @@ public final class HTTPDFileHandler {
                             header.put(HeaderFramework.ETAG, targetMD5);
                         }
                     } catch (final IOException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
 
                     if (requestHeader.containsKey(HeaderFramework.RANGE)) {
@@ -1215,7 +1215,7 @@ public final class HTTPDFileHandler {
                     }
                 }
             } else {
-                if (!targetFile.exists()) Log.logWarning("HTTPDFileHandler", "target file " + targetFile.getAbsolutePath() + " does not exist");
+                if (!targetFile.exists()) ConcurrentLog.warn("HTTPDFileHandler", "target file " + targetFile.getAbsolutePath() + " does not exist");
                 //if (!targetFile.isFile()) Log.logWarning("HTTPDFileHandler", "target file " + targetFile.getAbsolutePath() + " is not a file");
                 //if (!targetFile.canRead()) Log.logWarning("HTTPDFileHandler", "target file " + targetFile.getAbsolutePath() + " cannot read");
                 HTTPDemon.sendRespondError(conProp,out,3,404,"File not Found",null,null);
@@ -1225,7 +1225,7 @@ public final class HTTPDFileHandler {
             try {
                 // error handling
                 if (e instanceof NullPointerException) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
                 int httpStatusCode = 400;
                 final String httpStatusText = null;
@@ -1273,7 +1273,7 @@ public final class HTTPDFileHandler {
 
                 // if it is an unexpected error we log it
                 if (httpStatusCode == 500) {
-                    theLogger.logWarning(errorMessage.toString(), e);
+                    theLogger.warn(errorMessage.toString(), e);
                 }
 
             } catch (final Exception ee) {
@@ -1305,7 +1305,7 @@ public final class HTTPDFileHandler {
             }
             ret.add(targetFile.getAbsolutePath());
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } finally {
             try {br.close();} catch (IOException e) {}
         }
@@ -1404,10 +1404,10 @@ public final class HTTPDFileHandler {
             }
 
         } catch (final ClassNotFoundException e) {
-            Log.logSevere("HTTPDFileHandler", "class " + classFile + " is missing:" + e.getMessage());
+            ConcurrentLog.severe("HTTPDFileHandler", "class " + classFile + " is missing:" + e.getMessage());
             throw new InvocationTargetException(e, "class " + classFile + " is missing:" + e.getMessage());
         } catch (final NoSuchMethodException e) {
-            Log.logSevere("HTTPDFileHandler", "method 'respond' not found in class " + classFile + ": " + e.getMessage());
+            ConcurrentLog.severe("HTTPDFileHandler", "method 'respond' not found in class " + classFile + ": " + e.getMessage());
             throw new InvocationTargetException(e, "method 'respond' not found in class " + classFile + ": " + e.getMessage());
         }
         return m;
@@ -1420,13 +1420,13 @@ public final class HTTPDFileHandler {
             }
             return rewriteMethod(targetClass, "respond").invoke(null, new Object[] {request, args, switchboard, os});
         } catch (final Throwable e) {
-            theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
+            theLogger.severe("INTERNAL ERROR: " + e.toString() + ":" +
                             e.getMessage() +
                             " target exception at " + targetClass + ": " +
                             "; java.awt.graphicsenv='" + System.getProperty("java.awt.graphicsenv","") + "'");
-            Log.logException(e);
-            Log.logException(e.getCause());
-            if (e instanceof InvocationTargetException) Log.logException(((InvocationTargetException) e).getTargetException());
+            ConcurrentLog.logException(e);
+            ConcurrentLog.logException(e.getCause());
+            if (e instanceof InvocationTargetException) ConcurrentLog.logException(((InvocationTargetException) e).getTargetException());
             return null;
         }
     }
@@ -1435,13 +1435,13 @@ public final class HTTPDFileHandler {
         try {
             return (String) rewriteMethod(targetClass, "mime").invoke(null, new Object[] {request, args, switchboard});
         } catch (final Throwable e) {
-            theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
+            theLogger.severe("INTERNAL ERROR: " + e.toString() + ":" +
                             e.getMessage() +
                             " target exception at " + targetClass + ": " +
                             "; java.awt.graphicsenv='" + System.getProperty("java.awt.graphicsenv","") + "'");
-            Log.logException(e);
-            Log.logException(e.getCause());
-            if (e instanceof InvocationTargetException) Log.logException(((InvocationTargetException) e).getTargetException());
+            ConcurrentLog.logException(e);
+            ConcurrentLog.logException(e.getCause());
+            if (e instanceof InvocationTargetException) ConcurrentLog.logException(((InvocationTargetException) e).getTargetException());
             return dflt;
         }
     }

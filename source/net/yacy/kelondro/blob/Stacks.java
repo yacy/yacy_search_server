@@ -29,8 +29,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 
 public class Stacks {
 
@@ -62,7 +62,7 @@ public class Stacks {
                 si = new StackInstance(new File(this.stacksLocation, s));
                 this.stacks.put(si.name, si);
             } catch (IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -95,7 +95,7 @@ public class Stacks {
                 this.stacks.put(stack, si);
                 return si.stack;
             } catch (IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 return null;
             }
         }

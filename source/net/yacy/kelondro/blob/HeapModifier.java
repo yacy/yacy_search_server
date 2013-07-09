@@ -30,9 +30,9 @@ import java.util.SortedMap;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.io.CachedFileWriter;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -120,7 +120,7 @@ public class HeapModifier extends HeapReader implements BLOB {
             //assert seek + size + 4 <= this.file.length() : heapFile.getName() + ": too long size " + size + " in record at " + seek;
             long filelength = this.file.length(); // put in separate variable for debugging
             if (seek + size + 4 > filelength) {
-                Log.logSevere("BLOBHeap", this.heapFile.getName() + ": too long size " + size + " in record at " + seek);
+                ConcurrentLog.severe("BLOBHeap", this.heapFile.getName() + ": too long size " + size + " in record at " + seek);
                 throw new IOException(this.heapFile.getName() + ": too long size " + size + " in record at " + seek);
             }
             super.deleteFingerprint();
@@ -237,7 +237,7 @@ public class HeapModifier extends HeapReader implements BLOB {
                 this.free.remove(seek);
             }
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 

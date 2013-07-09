@@ -31,7 +31,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Properties;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 public class Browser {
 
@@ -162,7 +162,7 @@ public class Browser {
 
     private static void logBrowserFail(final String url) {
         //if (e != null) Log.logException(e);
-        Log.logInfo("Browser", "please start your browser and open the following location: " + url);
+        ConcurrentLog.info("Browser", "please start your browser and open the following location: " + url);
     }
 
     private static String errorResponse(final Process p) {
@@ -179,7 +179,7 @@ public class Browser {
             try {
                 err.close();
             } catch (IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }

@@ -37,8 +37,8 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.logging.GuiHandler;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.logging.LogalizerHandler;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -96,7 +96,7 @@ public class ViewLog_p {
             final Pattern filterPattern = Pattern.compile(filter,Pattern.MULTILINE);
             filterMatcher = filterPattern.matcher("");
         } catch (final PatternSyntaxException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         int level = 0;

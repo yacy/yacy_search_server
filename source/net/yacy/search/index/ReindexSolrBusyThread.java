@@ -20,11 +20,11 @@ package net.yacy.search.index;
  */
 
 import java.io.IOException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.search.schema.CollectionConfiguration;
 import org.apache.solr.common.SolrDocument;
@@ -124,7 +124,7 @@ import org.apache.solr.common.SolrInputDocument;
                                 chunksize = chunksize + 10;
                             }
                         } else {
-                            Log.logInfo("MIGRATION-REINDEX", "reindex docs with query=" + query + " found=" + docstoreindex + " start=" + start);
+                            ConcurrentLog.info("MIGRATION-REINDEX", "reindex docs with query=" + query + " found=" + docstoreindex + " start=" + start);
                             start = start + chunksize;
                             
                             for (SolrDocument doc : xdocs) {
@@ -134,7 +134,7 @@ import org.apache.solr.common.SolrInputDocument;
                             }
                         }                        
                     } catch (IOException ex) {
-                        Log.logException(ex);
+                        ConcurrentLog.logException(ex);
                     } finally {
                         sem.release();
                     }

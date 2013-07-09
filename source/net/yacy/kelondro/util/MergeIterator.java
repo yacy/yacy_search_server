@@ -31,7 +31,7 @@ import java.util.Iterator;
 
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.Order;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public class MergeIterator<E> implements CloneableIterator<E> {
@@ -117,14 +117,14 @@ public class MergeIterator<E> implements CloneableIterator<E> {
                 s = (E) this.merger.invoke(null, new Object[]{this.na, this.nb});
                 //System.out.println("RESULT IS " + s.toString());
             } catch (final IllegalArgumentException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 s = null;
             } catch (final IllegalAccessException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 s = null;
             } catch (final InvocationTargetException e) {
-                Log.logException(e);
-                Log.logException(e.getCause());
+                ConcurrentLog.logException(e);
+                ConcurrentLog.logException(e.getCause());
                 s = null;
             }
             nexta();

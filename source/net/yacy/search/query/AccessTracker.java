@@ -37,7 +37,7 @@ import java.util.LinkedList;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.WordCache;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 
 public class AccessTracker {
@@ -158,9 +158,9 @@ public class AccessTracker {
                     }
                     logCopy.clear();
                 } catch (final FileNotFoundException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 } finally {
                     if (raf != null) try {raf.close();} catch (IOException e) {}
                 }

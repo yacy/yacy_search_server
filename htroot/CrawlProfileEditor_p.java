@@ -31,10 +31,10 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.CrawlProfile;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -107,7 +107,7 @@ public class CrawlProfileEditor_p {
                 sb.crawler.removeActive(handle.getBytes());
                 sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000);
             } catch (final SpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             if (post.containsKey("delete")) {
                 // deletion of a terminated crawl profile
@@ -159,7 +159,7 @@ public class CrawlProfileEditor_p {
                         }
                     }
                 } catch (final Exception ex) {
-                    Log.logException(ex);
+                    ConcurrentLog.logException(ex);
                     prop.put("error", "1");
                     prop.putHTML("error_message", ex.getMessage());
                 }

@@ -26,7 +26,7 @@
 
 package net.yacy.search;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 
 public class MemoryTracker extends Thread {
@@ -61,7 +61,7 @@ public class MemoryTracker extends Thread {
     			}
         	}
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 

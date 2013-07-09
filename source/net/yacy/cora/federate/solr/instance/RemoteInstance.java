@@ -30,7 +30,7 @@ import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
 
@@ -231,10 +231,10 @@ public class RemoteInstance implements SolrInstance {
             int port = u.getPort();
             String solrpath = u.getPath();
             String p = "http://" + host + ":" + port + solrpath;
-            Log.logInfo("RemoteSolrConnector", "connecting Solr authenticated with url:" + p);
+            ConcurrentLog.info("RemoteSolrConnector", "connecting Solr authenticated with url:" + p);
             s = new HttpSolrServer(p, client);
         } else {
-            Log.logInfo("RemoteSolrConnector", "connecting Solr with url:" + this.solrurl + name);
+            ConcurrentLog.info("RemoteSolrConnector", "connecting Solr with url:" + this.solrurl + name);
             s = new HttpSolrServer(this.solrurl + name);
         }
         s.setAllowCompression(true);

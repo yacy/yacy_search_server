@@ -26,7 +26,7 @@ import java.util.List;
 
 import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.cora.federate.solr.instance.SolrInstance;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
@@ -142,9 +142,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
 
     @Override
     public synchronized void close() {
-        try {this.commit(false);} catch (Throwable e) {Log.logException(e);}
-        try {super.close();} catch (Throwable e) {Log.logException(e);}
-        try {this.core.close();} catch (Throwable e) {Log.logException(e);}
+        try {this.commit(false);} catch (Throwable e) {ConcurrentLog.logException(e);}
+        try {super.close();} catch (Throwable e) {ConcurrentLog.logException(e);}
+        try {this.core.close();} catch (Throwable e) {ConcurrentLog.logException(e);}
     }
 
     public SolrQueryRequest request(final SolrParams params) {

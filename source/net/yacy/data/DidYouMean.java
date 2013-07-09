@@ -10,9 +10,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.StringBuilderComparator;
 import net.yacy.document.LibraryProvider;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.index.Segment;
 
 
@@ -144,7 +144,7 @@ public class DidYouMean {
         }
         final SortedSet<StringBuilder> preSorted = getSuggestions(timeout);
         if (System.currentTimeMillis() > timelimit) {
-            Log.logInfo("DidYouMean", "found and returned " + preSorted.size() + " unsorted suggestions (1); execution time: "
+            ConcurrentLog.info("DidYouMean", "found and returned " + preSorted.size() + " unsorted suggestions (1); execution time: "
                 + (System.currentTimeMillis() - startTime) + "ms");
             return preSorted;
         }
@@ -177,11 +177,11 @@ public class DidYouMean {
 
         // finished
         if (countSorted.isEmpty()) {
-            Log.logInfo("DidYouMean", "found and returned " + preSorted.size() + " unsorted suggestions (2); execution time: "
+            ConcurrentLog.info("DidYouMean", "found and returned " + preSorted.size() + " unsorted suggestions (2); execution time: "
                     + (System.currentTimeMillis() - startTime) + "ms");
                 return preSorted;
         }
-        Log.logInfo("DidYouMean", "found " + preSorted.size() + " unsorted terms, returned " + countSorted.size() + " sorted suggestions; execution time: "
+        ConcurrentLog.info("DidYouMean", "found " + preSorted.size() + " unsorted terms, returned " + countSorted.size() + " sorted suggestions; execution time: "
                         + (System.currentTimeMillis() - startTime) + "ms");
 
         return countSorted;

@@ -941,7 +941,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         // this is the birthplace of a seed, that then will start to travel to other peers
 
         final String hashs = ASCII.String(bestGap(db));
-        Network.log.logInfo("init: OWN SEED = " + hashs);
+        Network.log.info("init: OWN SEED = " + hashs);
 
         final Seed newSeed = new Seed(hashs);
 

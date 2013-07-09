@@ -34,6 +34,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
 import net.yacy.cora.sorting.ConcurrentScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -41,7 +42,6 @@ import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ByteBuffer;
@@ -115,7 +115,7 @@ public class ReferenceOrder {
                     worker[p % this.threads].add(iEntry);
                     p++;
                     if (System.currentTimeMillis() > timeout) {
-                        Log.logWarning("NormalizeDistributor", "adding of decoded rows to workers ended with timeout = " + this.maxtime);
+                        ConcurrentLog.warn("NormalizeDistributor", "adding of decoded rows to workers ended with timeout = " + this.maxtime);
                     }
                 }
             } catch (final InterruptedException e) {
@@ -179,7 +179,7 @@ public class ReferenceOrder {
                     }
 
                     if (System.currentTimeMillis() > timeout) {
-                        Log.logWarning("NormalizeWorker", "normlization of decoded rows ended with timeout = " + this.maxtime);
+                        ConcurrentLog.warn("NormalizeWorker", "normlization of decoded rows ended with timeout = " + this.maxtime);
                         break;
                     }
                 }
@@ -193,9 +193,9 @@ public class ReferenceOrder {
                 }
                 if (!ReferenceOrder.this.doms.isEmpty()) ReferenceOrder.this.maxdomcount = ReferenceOrder.this.doms.getMaxScore();
             } catch (final InterruptedException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch (final Exception e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } finally {
                 // insert poison to signal the termination to next queue
                 try {

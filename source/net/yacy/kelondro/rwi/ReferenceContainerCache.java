@@ -40,11 +40,11 @@ import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.sorting.Rating;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.HeapWriter;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -59,7 +59,7 @@ import net.yacy.kelondro.util.FileUtils;
  */
 public final class ReferenceContainerCache<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType>, IndexReader<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
 
-    private static final Log log = new Log("ReferenceContainerCache");
+    private static final ConcurrentLog log = new ConcurrentLog("ReferenceContainerCache");
 
     private final int termSize;
     private final ByteOrder termOrder;
@@ -119,14 +119,14 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public void dump(final File heapFile, final int writeBuffer, final boolean destructive) {
         assert this.cache != null;
         if (this.cache == null) return;
-        log.logInfo("creating rwi heap dump '" + heapFile.getName() + "', " + this.cache.size() + " rwi's");
+        log.info("creating rwi heap dump '" + heapFile.getName() + "', " + this.cache.size() + " rwi's");
         if (heapFile.exists()) FileUtils.deletedelete(heapFile);
         final File tmpFile = new File(heapFile.getParentFile(), heapFile.getName() + ".prt");
         HeapWriter dump;
         try {
             dump = new HeapWriter(tmpFile, heapFile, this.termSize, this.termOrder, writeBuffer);
         } catch (final IOException e1) {
-            Log.logException(e1);
+            ConcurrentLog.logException(e1);
             return;
         }
         final long startTime = System.currentTimeMillis();
@@ -153,9 +153,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                 try {
                     dump.add(term, container.exportCollection());
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 } catch (final SpaceExceededException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
                 if (destructive) container.clear(); // this memory is not needed any more
                 urlcount += container.size();
@@ -164,9 +164,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
         try {
             dump.close(true);
-            log.logInfo("finished rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
+            log.info("finished rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
         } catch (final IOException e) {
-            log.logSevere("failed rwi heap dump: " + e.getMessage(), e);
+            log.severe("failed rwi heap dump: " + e.getMessage(), e);
         } finally {
             dump = null;
         }
@@ -286,7 +286,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                 try {
                     return c.topLevelClone();
                 } catch (final SpaceExceededException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     return null;
                 }
             }
@@ -303,7 +303,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                 try {
                     return c.topLevelClone();
                 } catch (final SpaceExceededException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     return null;
                 }
             }
@@ -447,7 +447,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             }
             return c1;
         } catch (final SpaceExceededException e2) {
-            Log.logException(e2);
+            ConcurrentLog.logException(e2);
         }
         return null;
     }

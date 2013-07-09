@@ -1,13 +1,13 @@
 import java.io.IOException;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
 import net.yacy.data.ymark.YMarkEntry;
 import net.yacy.data.ymark.YMarkTables;
 import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -41,10 +41,10 @@ public class add_ymark {
 					prop.put("status", "1");
 				} catch (final IOException e) {
 					// TODO Auto-generated catch block
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				} catch (final Failure e) {
 					// TODO Auto-generated catch block
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				}
 
             } else if(post.containsKey(YMarkEntry.BOOKMARK.URL.key())) {
@@ -72,7 +72,7 @@ public class add_ymark {
 	            try {
 					sb.tables.bookmarks.addBookmark(bmk_user, bmk, false, false);
 					} catch (final IOException e) {
-					    Log.logException(e);
+					    ConcurrentLog.logException(e);
 					}
 	            prop.put("status", "1");
             } else {

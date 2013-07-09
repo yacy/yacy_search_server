@@ -35,7 +35,8 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -127,7 +128,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
             final SAXParser saxParser = getParser();
             saxParser.parse(path, this);
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
@@ -137,7 +138,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
             final SAXParser saxParser = getParser();
             saxParser.parse(stream, this);
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
@@ -150,7 +151,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
             saxParser.parse(www.getContentstream(), this);
             www.finish();
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
@@ -177,7 +178,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
             www.finish();
             return true;
         } catch (final Exception e) {
-            Log.logWarning("opensearchdescriptionReader", "parse exception: " + e);
+            ConcurrentLog.warn("opensearchdescriptionReader", "parse exception: " + e);
             return false;
         }
     }

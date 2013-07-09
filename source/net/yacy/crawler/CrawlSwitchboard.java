@@ -41,6 +41,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlQueues;
@@ -50,7 +51,6 @@ import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 import net.yacy.search.Switchboard;
@@ -90,7 +90,7 @@ public final class CrawlSwitchboard {
     public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
     public static final long CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE = 60L * 24L * 30L;
 
-    private final Log log;
+    private final ConcurrentLog log;
     private MapHeap profilesActiveCrawls;
     private final MapHeap profilesPassiveCrawls;
     private final Map<byte[], CrawlProfile> profilesActiveCrawlsCache; //TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
@@ -103,12 +103,12 @@ public final class CrawlSwitchboard {
     public CrawlProfile defaultSurrogateProfile;
     private final File queuesRoot;
 
-    public CrawlSwitchboard(final String networkName, final Log log, final File queuesRoot) {
+    public CrawlSwitchboard(final String networkName, final ConcurrentLog log, final File queuesRoot) {
 
-        log.logInfo("Initializing Word Index for the network '" + networkName + "'.");
+        log.info("Initializing Word Index for the network '" + networkName + "'.");
 
         if ( networkName == null || networkName.isEmpty() ) {
-            log.logSevere("no network name given - shutting down");
+            log.severe("no network name given - shutting down");
             System.exit(0);
         }
         this.log = log;
@@ -118,7 +118,7 @@ public final class CrawlSwitchboard {
         // make crawl profiles database and default profiles
         this.queuesRoot = queuesRoot;
         this.queuesRoot.mkdirs();
-        this.log.logConfig("Initializing Crawl Profiles");
+        this.log.config("Initializing Crawl Profiles");
 
         final File profilesActiveFile = new File(queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
         this.profilesActiveCrawls = loadFromDB(profilesActiveFile);
@@ -136,7 +136,7 @@ public final class CrawlSwitchboard {
             }
         }
         initActiveCrawlProfiles();
-        log.logInfo("Loaded active crawl profiles from file "
+        log.info("Loaded active crawl profiles from file "
             + profilesActiveFile.getName()
             + ", "
             + this.profilesActiveCrawls.size()
@@ -148,14 +148,14 @@ public final class CrawlSwitchboard {
             CrawlProfile p;
             try {
                 p = new CrawlProfile(this.profilesPassiveCrawls.get(handle));
-                Log.logInfo("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.collectionName());
+                ConcurrentLog.info("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.collectionName());
             } catch ( final IOException e ) {
                 continue;
             } catch ( final SpaceExceededException e ) {
                 continue;
             }
         }
-        log.logInfo("Loaded passive crawl profiles from file "
+        log.info("Loaded passive crawl profiles from file "
             + profilesPassiveFile.getName()
             + ", "
             + this.profilesPassiveCrawls.size()
@@ -486,7 +486,7 @@ public final class CrawlSwitchboard {
             this.profilesActiveCrawls =
                 new MapHeap(pdb, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
         } catch ( final IOException e1 ) {
-            Log.logException(e1);
+            ConcurrentLog.logException(e1);
             this.profilesActiveCrawls = null;
         }
         initActiveCrawlProfiles();
@@ -593,14 +593,14 @@ public final class CrawlSwitchboard {
         try {
             ret = new MapHeap(file, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
         } catch ( final IOException e ) {
-            Log.logException(e);
-            Log.logException(e);
+            ConcurrentLog.logException(e);
+            ConcurrentLog.logException(e);
             FileUtils.deletedelete(file);
             try {
                 ret =
                     new MapHeap(file, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
             } catch ( final IOException e1 ) {
-                Log.logException(e1);
+                ConcurrentLog.logException(e1);
                 ret = null;
             }
         }

@@ -15,8 +15,8 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import net.yacy.yacy;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.parser.rdfa.IRDFaTriple;
-import net.yacy.kelondro.logging.Log;
 
 public class RDFaTripleImpl{
 
@@ -50,7 +50,7 @@ public class RDFaTripleImpl{
 				TransformerFactory aFactory = TransformerFactory.newInstance();
 				templates = aFactory.newTemplates(aSource);
 			} catch(Exception e){
-				Log.logSevere("RDFA PARSER", "XSL template could not be loaded from " + f.toString());
+				ConcurrentLog.severe("RDFA PARSER", "XSL template could not be loaded from " + f.toString());
 			}
 		}
 		this.aTransformer = templates.newTransformer();
@@ -64,7 +64,7 @@ public class RDFaTripleImpl{
 		try {
 			this.aTransformer.transform(new StreamSource(this.in), new StreamResult(System.out));
 		} catch (TransformerException e) {
-			Log.logWarning("RDFA PARSER", "Error while reading RDFa");
+			ConcurrentLog.warn("RDFA PARSER", "Error while reading RDFa");
 //			e.printStackTrace();
 		}
 

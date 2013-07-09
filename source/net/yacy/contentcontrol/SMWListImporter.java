@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 import org.json.simple.parser.ContentHandler;
 import org.json.simple.parser.JSONParser;
@@ -88,7 +88,7 @@ public class SMWListImporter implements Runnable, ContentHandler{
 				this.listEntries.put(this.row);
 				//this.count++;
 			} catch (InterruptedException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 			}
 			this.obj.clear();
 			this.row = new SMWListRow();
@@ -134,20 +134,20 @@ public class SMWListImporter implements Runnable, ContentHandler{
 	@Override
     public void run() {
 		try {
-			Log.logInfo("SMWLISTSYNC", "Importer run()");
+			ConcurrentLog.info("SMWLISTSYNC", "Importer run()");
 			this.parser.parse(this.importFile, this, true);
 
 		} catch (IOException e) {
-			Log.logException(e);
+			ConcurrentLog.logException(e);
 		} catch (ParseException e) {
-			Log.logException(e);
+			ConcurrentLog.logException(e);
 		} finally {
 
 			try {
-				Log.logInfo("SMWLISTSYNC", "Importer inserted poison pill in queue");
+				ConcurrentLog.info("SMWLISTSYNC", "Importer inserted poison pill in queue");
 				this.listEntries.put(SMWListRow.POISON);
 			} catch (InterruptedException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 			}
 		}
 	}
@@ -156,7 +156,7 @@ public class SMWListImporter implements Runnable, ContentHandler{
         try {
             return this.listEntries.take();
         } catch (InterruptedException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }

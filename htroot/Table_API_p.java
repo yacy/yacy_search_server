@@ -32,10 +32,10 @@ import java.util.regex.Pattern;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.QueryParams;
@@ -144,7 +144,7 @@ public class Table_API_p {
                     WorkTables.calculateAPIScheduler(row, false);
                     sb.tables.update(WorkTables.TABLE_API_NAME, row);
                 }
-            } catch (Throwable e) { Log.logException(e); }
+            } catch (Throwable e) { ConcurrentLog.logException(e); }
         }
         
         if (post != null && !post.get("deleterows", "").isEmpty()) {
@@ -153,7 +153,7 @@ public class Table_API_p {
                     try {
                         sb.tables.delete(WorkTables.TABLE_API_NAME, entry.getValue().substring(5).getBytes());
                     } catch (IOException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 }
             }
@@ -192,7 +192,7 @@ public class Table_API_p {
                 }
                 sb.tables.recordAPICall(post, "Table_API_p.html", WorkTables.TABLE_API_TYPE_STEERING, "delete API calls older than " + days + " days");
             } catch (IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
 
@@ -369,7 +369,7 @@ public class Table_API_p {
                 prop.put("showschedulerhint", 0);
             }
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         prop.put("showtable_list", count);
         prop.put("showtable_num", count);

@@ -46,7 +46,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowThread;
@@ -62,7 +62,7 @@ public class serverSwitch
     public final File dataPath;
     public final File appPath;
     protected boolean firstInit;
-    protected Log log;
+    protected ConcurrentLog log;
     protected int serverJobs;
     private ConcurrentMap<String, String> configProps;
     private final ConcurrentMap<String, String> configRemoved;
@@ -159,11 +159,11 @@ public class serverSwitch
     }
 
     // a logger for this switchboard
-    public void setLog(final Log log) {
+    public void setLog(final ConcurrentLog log) {
         this.log = log;
     }
 
-    public Log getLog() {
+    public ConcurrentLog getLog() {
         return this.log;
     }
 

@@ -29,11 +29,11 @@ package net.yacy.document.parser;
 
 import java.io.InputStream;
 
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
 import org.apache.poi.hssf.eventusermodel.HSSFListener;
@@ -136,7 +136,7 @@ public class xlsParser extends AbstractParser implements Parser {
                 /*
                  * an unexpected error occurred, log it and throw a Parser.Failure
                  */
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 final String errorMsg = "Unable to parse the xls document '" + location + "':" + e.getMessage();
                 throw new Parser.Failure(errorMsg, location);
             }

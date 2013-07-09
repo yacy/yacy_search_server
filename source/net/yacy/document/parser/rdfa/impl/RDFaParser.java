@@ -15,13 +15,13 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.rdfa.IRDFaTriple;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 
 /**
  * @author fgandon
@@ -75,7 +75,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 			allTriples = triple.parse();
 
 		} catch (Exception e) {
-			Log.logWarning("RDFA PARSER", "Triple extraction failed");
+			ConcurrentLog.warn("RDFA PARSER", "Triple extraction failed");
 		}
 
 		Document doc = new Document(url, mimeType, charset, null, null, null, singleList(""), "",
@@ -87,7 +87,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 						allTriples);
 
 		} catch (Exception e) {
-			Log.logWarning("RDFA PARSER",
+			ConcurrentLog.warn("RDFA PARSER",
 					"Conversion triple to document failed");
 		}
 		return doc;
@@ -103,7 +103,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 			source.reset();
 
 		} catch (IOException e1) {
-			Log.logWarning("RDFA PARSER", "Super call failed");
+			ConcurrentLog.warn("RDFA PARSER", "Super call failed");
 		}
 		return htmlDocs;
 	}

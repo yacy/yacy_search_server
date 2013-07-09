@@ -42,9 +42,9 @@ import javax.xml.parsers.SAXParserFactory;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.snippet.TextSnippet;
@@ -76,7 +76,7 @@ public class OAIListFriendsLoader implements Serializable {
         try {
             p.loadFromXML(new FileInputStream(initFile));
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return m;
         }
         for (final Entry<Object, Object> e: p.entrySet()) m.put((String) e.getKey(), new File(dataPath, (String) e.getValue()));
@@ -142,16 +142,16 @@ public class OAIListFriendsLoader implements Serializable {
                 this.saxParser = getParser();
                 this.saxParser.parse(this.stream, this);
             } catch (final SAXException e) {
-                Log.logException(e);
-                Log.logWarning("OAIListFriendsLoader.Parser", "OAIListFriends was not parsed:\n" + UTF8.String(b));
+                ConcurrentLog.logException(e);
+                ConcurrentLog.warn("OAIListFriendsLoader.Parser", "OAIListFriends was not parsed:\n" + UTF8.String(b));
             } catch (final IOException e) {
-                Log.logException(e);
-                Log.logWarning("OAIListFriendsLoader.Parser", "OAIListFriends was not parsed:\n" + UTF8.String(b));
+                ConcurrentLog.logException(e);
+                ConcurrentLog.warn("OAIListFriendsLoader.Parser", "OAIListFriends was not parsed:\n" + UTF8.String(b));
             } finally {
                 try {
                     this.stream.close();
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }

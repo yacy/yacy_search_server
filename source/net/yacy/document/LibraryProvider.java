@@ -53,8 +53,8 @@ import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
 import net.yacy.cora.storage.Files;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.URLRewriterLibrary;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -220,7 +220,7 @@ public class LibraryProvider {
             try {
                 writeWords(derewoOutput, derewo);
             } catch ( final IOException e ) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -244,14 +244,14 @@ public class LibraryProvider {
             try {
             	JenaTripleStore.LoadNTriples(Files.read(dictInput));
             } catch ( final IOException e ) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
         // read the triplestore and generate a vocabulary
         Map<String, SOTuple> map = new HashMap<String, SOTuple>();
-        Log.logInfo("LibraryProvider", "retrieving PND data from triplestore");
+        ConcurrentLog.info("LibraryProvider", "retrieving PND data from triplestore");
         Iterator<Resource> i = JenaTripleStore.getSubjects("http://dbpedia.org/ontology/individualisedPnd");
-        Log.logInfo("LibraryProvider", "creating vocabulary map from PND triplestore");
+        ConcurrentLog.info("LibraryProvider", "creating vocabulary map from PND triplestore");
         String objectspace = "";
         while (i.hasNext()) {
         	Resource resource = i.next();
@@ -272,10 +272,10 @@ public class LibraryProvider {
         	map.put(term, new SOTuple(Tagging.normalizeTerm(term), subject));
         }
         if (!map.isEmpty()) try {
-            Log.logInfo("LibraryProvider", "adding vocabulary to autotagging");
+            ConcurrentLog.info("LibraryProvider", "adding vocabulary to autotagging");
 			Tagging pndVoc = new Tagging("Persons", null, objectspace, map);
 			autotagging.addVocabulary(pndVoc);
-            Log.logInfo("LibraryProvider", "added pnd vocabulary to autotagging");
+            ConcurrentLog.info("LibraryProvider", "added pnd vocabulary to autotagging");
 		} catch (IOException e) {
 		}
     }
@@ -336,10 +336,10 @@ public class LibraryProvider {
             final ZipFile zip = new ZipFile(file);
             derewoTxtEntry = zip.getInputStream(zip.getEntry("derewo-v-100000t-2009-04-30-0.1"));
         } catch ( final ZipException e ) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return list;
         } catch ( final IOException e ) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return list;
         }
 
@@ -379,7 +379,7 @@ public class LibraryProvider {
             }
             reader.close();
         } catch ( final IOException e ) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } finally {
             if ( reader != null ) {
                 try {

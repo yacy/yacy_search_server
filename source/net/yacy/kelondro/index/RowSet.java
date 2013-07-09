@@ -39,8 +39,8 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 
 
@@ -102,7 +102,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         }
         //assert b.length - exportOverheadSize == size * rowdef.objectsize : "b.length = " + b.length + ", size * rowdef.objectsize = " + size * rowdef.objectsize;
         if (b.length - exportOverheadSize != alloc) {
-            Log.logSevere("RowSet", "exportOverheadSize wrong: b.length = " + b.length + ", size * rowdef.objectsize = " + size * rowdef.objectsize);
+            ConcurrentLog.severe("RowSet", "exportOverheadSize wrong: b.length = " + b.length + ", size * rowdef.objectsize = " + size * rowdef.objectsize);
             return new RowSet(rowdef, 0);
         }
         System.arraycopy(b, (int) exportOverheadSize, chunkcache, 0, chunkcache.length);
@@ -505,13 +505,13 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
         try {
         	c0.sort();
         } catch (final Throwable e) {
-        	Log.logSevere("RowSet", "collection corrupted. cleaned. " + e.getMessage(), e);
+        	ConcurrentLog.severe("RowSet", "collection corrupted. cleaned. " + e.getMessage(), e);
         	c0.clear();
         }
         try {
         	c1.sort();
         } catch (final Throwable e) {
-        	Log.logSevere("RowSet", "collection corrupted. cleaned. " + e.getMessage(), e);
+        	ConcurrentLog.severe("RowSet", "collection corrupted. cleaned. " + e.getMessage(), e);
         	c1.clear();
         }
         int c0i = 0, c1i = 0;

@@ -43,12 +43,12 @@ import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.storage.HandleMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.io.CachedFileWriter;
 import net.yacy.kelondro.io.Writer;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.RotateIterator;
@@ -58,7 +58,7 @@ public class HeapReader {
 
     //public final static long keepFreeMem = 20 * 1024 * 1024;
 
-	private final static Log log = new Log("HeapReader");
+	private final static ConcurrentLog log = new ConcurrentLog("HeapReader");
 
     // input values
     protected int                keylength;  // the length of the primary key
@@ -107,10 +107,10 @@ public class HeapReader {
                 }
             }
             if (!ok) {
-                log.logWarning("verification of idx file for " + heapFile.toString() + " failed, re-building index");
+                log.warn("verification of idx file for " + heapFile.toString() + " failed, re-building index");
                 initIndexReadFromHeap();
             } else {
-                log.logInfo("using a dump of the index of " + heapFile.toString() + ".");
+                log.info("using a dump of the index of " + heapFile.toString() + ".");
             }
         } else {
             // if we did not have a dump, create a new index
@@ -161,7 +161,7 @@ public class HeapReader {
         // if this is successful, return true; otherwise false
         String fingerprint = fingerprintFileHash(this.heapFile);
         if (fingerprint == null) {
-            log.logSevere("cannot generate a fingerprint for " + this.heapFile + ": null");
+            log.severe("cannot generate a fingerprint for " + this.heapFile + ": null");
             return false;
         }
         this.fingerprintFileIdx = HeapWriter.fingerprintIndexFile(this.heapFile, fingerprint);
@@ -178,17 +178,17 @@ public class HeapReader {
         try {
             this.index = new RowHandleMap(this.keylength, this.ordering, 8, this.fingerprintFileIdx);
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return false;
         } catch (SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return false;
         }
 
         // check saturation
         if (this.index instanceof RowHandleMap) {
         int[] saturation = ((RowHandleMap) this.index).saturation(); // {<the maximum length of consecutive equal-beginning bytes in the key>, <the minimum number of leading zeros in the second column>}
-        log.logInfo("saturation of " + this.fingerprintFileIdx.getName() + ": keylength = " + saturation[0] + ", vallength = " + saturation[1] + ", size = " + this.index.size() +
+        log.info("saturation of " + this.fingerprintFileIdx.getName() + ": keylength = " + saturation[0] + ", vallength = " + saturation[1] + ", size = " + this.index.size() +
                     ", maximum saving for index-compression = " + (saturation[0] * this.index.size() / 1024 / 1024) + " MB" +
                     ", exact saving for value-compression = " + (saturation[1] * this.index.size() / 1024 / 1024) + " MB");
         }
@@ -197,7 +197,7 @@ public class HeapReader {
         try {
             this.free = new Gap(this.fingerprintFileGap);
         } catch (IOException e) {
-        	Log.logException(e);
+        	ConcurrentLog.logException(e);
             return false;
         }
 
@@ -249,7 +249,7 @@ public class HeapReader {
 
     private void initIndexReadFromHeap() throws IOException {
         // this initializes the this.index object by reading positions from the heap file
-        log.logInfo("generating index for " + this.heapFile.toString() + ", " + (this.file.length() / 1024 / 1024) + " MB. Please wait.");
+        log.info("generating index for " + this.heapFile.toString() + ", " + (this.file.length() / 1024 / 1024) + " MB. Please wait.");
 
         this.free = new Gap();
         RowHandleMap.initDataConsumer indexready = RowHandleMap.asynchronusInitializer(this.name() + ".initializer", this.keylength, this.ordering, 8, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))));
@@ -268,7 +268,7 @@ public class HeapReader {
                 //assert reclen > 0 : " reclen == 0 at seek pos " + seek;
                 if (reclen == 0) {
                     // very bad file inconsistency
-                    log.logSevere("reclen == 0 at seek pos " + seek + " in file " + this.heapFile);
+                    log.severe("reclen == 0 at seek pos " + seek + " in file " + this.heapFile);
                     this.file.setLength(seek); // delete everything else at the remaining of the file :-(
                     break loop;
                 }
@@ -295,7 +295,7 @@ public class HeapReader {
                     this.file.seek(seek + 4);
                     Arrays.fill(key, (byte) 0);
                     this.file.write(key); // mark the place as empty record
-                    log.logWarning("BLOB " + this.heapFile.getName() + ": skiped not wellformed key " + UTF8.String(key) + " at seek pos " + seek);
+                    log.warn("BLOB " + this.heapFile.getName() + ": skiped not wellformed key " + UTF8.String(key) + " at seek pos " + seek);
                 }
             }
             // new seek position
@@ -308,11 +308,11 @@ public class HeapReader {
         try {
             this.index = indexready.result();
         } catch (InterruptedException e) {
-        	Log.logException(e);
+        	ConcurrentLog.logException(e);
         } catch (ExecutionException e) {
-        	Log.logException(e);
+        	ConcurrentLog.logException(e);
         }
-        log.logInfo("finished index generation for " + this.heapFile.toString() + ", " + this.index.size() + " entries, " + this.free.size() + " gaps.");
+        log.info("finished index generation for " + this.heapFile.toString() + ", " + this.index.size() + " entries, " + this.free.size() + " gaps.");
     }
 
     private void mergeFreeEntries() throws IOException {
@@ -340,7 +340,7 @@ public class HeapReader {
                     lastFree = nextFree;
                 }
             }
-            log.logInfo("BLOB " + this.heapFile.toString() + ": merged " + merged + " free records");
+            log.info("BLOB " + this.heapFile.toString() + ": merged " + merged + " free records");
             if (merged > 0) deleteFingerprint();
         }
     }
@@ -360,7 +360,7 @@ public class HeapReader {
     public int size() {
         assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
         if (this.index == null) {
-            log.logSevere("this.index == null in size(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            log.severe("this.index == null in size(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
             return 0;
         }
         synchronized (this.index) {
@@ -371,7 +371,7 @@ public class HeapReader {
     public boolean isEmpty() {
         assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
         if (this.index == null) {
-            log.logSevere("this.index == null in isEmpty(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            log.severe("this.index == null in isEmpty(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
             return true;
         }
         synchronized (this.index) {
@@ -387,7 +387,7 @@ public class HeapReader {
     public boolean containsKey(byte[] key) {
         assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
         if (this.index == null) {
-            log.logSevere("this.index == null in containsKey(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            log.severe("this.index == null in containsKey(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
             return false;
         }
         key = normalizeKey(key);
@@ -412,7 +412,7 @@ public class HeapReader {
     protected synchronized byte[] firstKey() throws IOException {
         assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
         if (this.index == null) {
-            log.logSevere("this.index == null in firstKey(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            log.severe("this.index == null in firstKey(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
             return null;
         }
         synchronized (this.index) {
@@ -430,7 +430,7 @@ public class HeapReader {
     protected byte[] first() throws IOException, SpaceExceededException {
         assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
         if (this.index == null) {
-            log.logSevere("this.index == null in first(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            log.severe("this.index == null in first(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
             return null;
         }
         synchronized (this.index) {
@@ -450,7 +450,7 @@ public class HeapReader {
     protected byte[] lastKey() throws IOException {
         assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
         if (this.index == null) {
-            log.logSevere("this.index == null in lastKey(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            log.severe("this.index == null in lastKey(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
             return null;
         }
         if (this.index == null) return null;
@@ -469,7 +469,7 @@ public class HeapReader {
     protected byte[] last() throws IOException, SpaceExceededException {
         assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
         if (this.index == null) {
-            log.logSevere("this.index == null in last(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            log.severe("this.index == null in last(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
             return null;
         }
         synchronized (this.index) {
@@ -488,7 +488,7 @@ public class HeapReader {
     public byte[] get(byte[] key) throws IOException, SpaceExceededException {
         assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
         if (this.index == null) {
-            log.logSevere("this.index == null in get(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            log.severe("this.index == null in get(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
             return null;
         }
         key = normalizeKey(key);
@@ -503,7 +503,7 @@ public class HeapReader {
             final int len = this.file.readInt() - this.keylength;
             if (len < 0) {
                 // database file may be corrupted and should be deleted :-((
-                log.logSevere("file " + this.file.file() + " corrupted at " + pos + ": negative len. len = " + len + ", pk.len = " + this.keylength);
+                log.severe("file " + this.file.file() + " corrupted at " + pos + ": negative len. len = " + len + ", pk.len = " + this.keylength);
                 // to get lazy over that problem (who wants to tell the user to stop operation and delete the file???) we work on like the entry does not exist
                 this.index.remove(key);
                 return null;
@@ -523,7 +523,7 @@ public class HeapReader {
             this.file.readFully(keyf, 0, keyf.length);
             if (!this.ordering.equal(key, keyf)) {
                 // verification of the indexed access failed. we must re-read the index
-                log.logSevere("indexed verification access failed for " + this.heapFile.toString());
+                log.severe("indexed verification access failed for " + this.heapFile.toString());
                 // this is a severe operation, it should never happen.
                 // remove entry from index because keeping that element in the index would not make sense
                 this.index.remove(key);
@@ -552,9 +552,9 @@ public class HeapReader {
         try {
             return get((byte[]) key);
         } catch (IOException e) {
-        	Log.logException(e);
+        	ConcurrentLog.logException(e);
         } catch (SpaceExceededException e) {
-        	Log.logException(e);
+        	ConcurrentLog.logException(e);
         }
         return null;
     }
@@ -579,7 +579,7 @@ public class HeapReader {
     public long length(byte[] key) throws IOException {
         assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
         if (this.index == null) {
-            log.logSevere("this.index == null in length(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            log.severe("this.index == null in length(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
             return 0;
         }
         key = normalizeKey(key);
@@ -605,7 +605,7 @@ public class HeapReader {
     			try {
     				this.file.close();
     			} catch (IOException e) {
-    				Log.logException(e);
+    				ConcurrentLog.logException(e);
     			}
             this.file = null;
             if (writeIDX && this.index != null && this.free != null && (this.index.size() > 3 || this.free.size() > 3)) {
@@ -614,17 +614,17 @@ public class HeapReader {
                 try {
                     String fingerprint = fingerprintFileHash(this.heapFile);
                     if (fingerprint == null) {
-                        log.logSevere("cannot write a dump for " + this.heapFile.getName()+ ": fingerprint is null");
+                        log.severe("cannot write a dump for " + this.heapFile.getName()+ ": fingerprint is null");
                     } else {
                         File newFingerprintFileGap = HeapWriter.fingerprintGapFile(this.heapFile, fingerprint);
                         if (this.fingerprintFileGap != null &&
                             this.fingerprintFileGap.getName().equals(newFingerprintFileGap.getName()) &&
                             this.fingerprintFileGap.exists()) {
-                            log.logInfo("using existing gap dump instead of writing a new one: " + this.fingerprintFileGap.getName());
+                            log.info("using existing gap dump instead of writing a new one: " + this.fingerprintFileGap.getName());
                         } else {
                             long start = System.currentTimeMillis();
                             this.free.dump(newFingerprintFileGap);
-                            log.logInfo("wrote a dump for the " + this.free.size() +  " gap entries of " + this.heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                            log.info("wrote a dump for the " + this.free.size() +  " gap entries of " + this.heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
                         }
                     }
                     this.free.clear();
@@ -634,17 +634,17 @@ public class HeapReader {
                         if (this.fingerprintFileIdx != null &&
                             this.fingerprintFileIdx.getName().equals(newFingerprintFileIdx.getName()) &&
                             this.fingerprintFileIdx.exists()) {
-                            log.logInfo("using existing idx dump instead of writing a new one: " + this.fingerprintFileIdx.getName());
+                            log.info("using existing idx dump instead of writing a new one: " + this.fingerprintFileIdx.getName());
                         } else {
                             long start = System.currentTimeMillis();
                             this.index.dump(newFingerprintFileIdx);
-                            log.logInfo("wrote a dump for the " + this.index.size() +  " index entries of " + this.heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                            log.info("wrote a dump for the " + this.index.size() +  " index entries of " + this.heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
                         }
                     }
                     this.index.close();
                     this.index = null;
                 } catch (IOException e) {
-                	Log.logException(e);
+                	ConcurrentLog.logException(e);
                 }
             }
             if (this.free != null) this.free.clear();
@@ -652,7 +652,7 @@ public class HeapReader {
             if (this.index != null) this.index.close();
             this.index = null;
             this.closeDate = new Date();
-            log.logInfo("close HeapFile " + this.heapFile.getName() + "; trace: " + Log.stackTrace());
+            log.info("close HeapFile " + this.heapFile.getName() + "; trace: " + ConcurrentLog.stackTrace());
         }
     }
 
@@ -683,7 +683,7 @@ public class HeapReader {
     public CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
         assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
         if (this.index == null) {
-            log.logSevere("this.index == null in keys(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            log.severe("this.index == null in keys(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
             return null;
         }
         synchronized (this.index) {
@@ -701,7 +701,7 @@ public class HeapReader {
     public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
         if (this.index == null) {
-            log.logSevere("this.index == null in keys(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            log.severe("this.index == null in keys(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
             return null;
         }
         synchronized (this.index) {
@@ -712,7 +712,7 @@ public class HeapReader {
     public long length() {
         assert (this.index != null) : "index == null; closeDate=" + this.closeDate + ", now=" + new Date();
         if (this.index == null) {
-            log.logSevere("this.index == null in length(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
+            log.severe("this.index == null in length(); closeDate=" + this.closeDate + ", now=" + new Date() + this.heapFile == null ? "" : (" file = " + this.heapFile.toString()));
             return 0;
         }
         synchronized (this.index) {
@@ -752,7 +752,7 @@ public class HeapReader {
             try {
                 return new entries(this.blobFile, this.keylen);
             } catch (IOException e) {
-            	Log.logException(e);
+            	ConcurrentLog.logException(e);
                 return null;
             }
         }
@@ -774,7 +774,7 @@ public class HeapReader {
                         // read some more bytes to consume the empty record
                         if (len > 1) {
                         	if (len - 1 != this.is.skipBytes(len - 1)) {   // all that is remaining
-	                            log.logWarning("problem skiping " +  + len + " bytes in " + this.blobFile.getName());
+	                            log.warn("problem skiping " +  + len + " bytes in " + this.blobFile.getName());
 	                            try {this.is.close();} catch (IOException e) {}
 	                            return null;
                         	}
@@ -805,7 +805,7 @@ public class HeapReader {
                         // the allocation of memory for the payload may fail
                         // this is bad because we must interrupt the iteration here but the
                         // process that uses the iteration may think that the iteraton has just been completed
-                        log.logSevere("out of memory in LookAheadIterator.next0", ee);
+                        log.severe("out of memory in LookAheadIterator.next0", ee);
                         try {this.is.close();} catch (IOException e) {}
                         return null;
                     }
@@ -817,7 +817,7 @@ public class HeapReader {
 
         @Override
         public synchronized void close() {
-            if (this.is != null) try { this.is.close(); } catch (final IOException e) {Log.logException(e);}
+            if (this.is != null) try { this.is.close(); } catch (final IOException e) {ConcurrentLog.logException(e);}
             this.is = null;
         }
     }
@@ -859,7 +859,7 @@ public class HeapReader {
                 System.out.println(ASCII.String(entry.getKey()) + ":" + UTF8.String(entry.getValue()));
             }
         } catch (IOException e) {
-        	Log.logException(e);
+        	ConcurrentLog.logException(e);
         }
 
     }

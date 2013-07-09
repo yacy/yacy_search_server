@@ -28,13 +28,13 @@ import java.io.File;
 
 import net.yacy.cora.document.WordCache;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.query.SearchEventCache;
 
 public class ResourceObserver {
 
-    public static final Log log = new Log("RESOURCE OBSERVER");
+    public static final ConcurrentLog log = new ConcurrentLog("RESOURCE OBSERVER");
 
     // return values for available disk/memory
     public enum Space implements Comparable<Space> {
@@ -50,7 +50,7 @@ public class ResourceObserver {
     public ResourceObserver(final Switchboard sb) {
         this.sb = sb;
         this.path = sb.getDataPath(SwitchboardConstants.INDEX_PRIMARY_PATH, "");
-        log.logInfo("path for disc space measurement: " + this.path);
+        log.info("path for disc space measurement: " + this.path);
     }
 
     public static void initThread() {
@@ -73,16 +73,16 @@ public class ResourceObserver {
             if (this.normalizedDiskFree.compareTo(Space.HIGH) < 0) reason += " not enough disk space, " + this.path.getUsableSpace();
             if (this.normalizedMemoryFree.compareTo(Space.HIGH) < 0 ) reason += " not enough memory space";
 			if (!this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
-				log.logInfo("pausing local crawls");
+				log.info("pausing local crawls");
 				this.sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, "resource observer:" + reason);
 			}
 			if (!this.sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
-				log.logInfo("pausing remote triggered crawls");
+				log.info("pausing remote triggered crawls");
 				this.sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "resource observer:" + reason);
 			}
 
     		if ((this.normalizedDiskFree == Space.LOW || this.normalizedMemoryFree.compareTo(Space.HIGH) < 0) && this.sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false)) {
-    			log.logInfo("disabling index receive");
+    			log.info("disabling index receive");
     			this.sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
     			this.sb.peers.mySeed().setFlagAcceptRemoteIndex(false);
     			this.sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true);
@@ -100,12 +100,12 @@ public class ResourceObserver {
 
     	else {
     		if(this.sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, false)) { // we were wrong!
-    			log.logInfo("enabling index receive");
+    			log.info("enabling index receive");
     			this.sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
     			this.sb.peers.mySeed().setFlagAcceptRemoteIndex(true);
     			this.sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, false);
     		}
-    		log.logInfo("resources ok");
+    		log.info("resources ok");
     	}
     }
 
@@ -124,11 +124,11 @@ public class ResourceObserver {
     	Space ret = Space.HIGH;
 
     	if (currentSpace < getMinFreeDiskSpace()) {
-    		log.logWarning("Volume " + this.path.toString() + ": free space (" + (currentSpace / 1024 / 1024) + " MB) is low (< " + (getMinFreeDiskSpace() / 1024 / 1024) + " MB)");
+    		log.warn("Volume " + this.path.toString() + ": free space (" + (currentSpace / 1024 / 1024) + " MB) is low (< " + (getMinFreeDiskSpace() / 1024 / 1024) + " MB)");
     		ret = Space.MEDIUM;
     	}
     	if (currentSpace < getMinFreeDiskSpace_hardlimit()) {
-            log.logWarning("Volume " + this.path.toString() + ": free space (" + (currentSpace / 1024 / 1024) + " MB) is too low (< " + (getMinFreeDiskSpace() / 1024 / 1024) + " MB)");
+            log.warn("Volume " + this.path.toString() + ": free space (" + (currentSpace / 1024 / 1024) + " MB) is too low (< " + (getMinFreeDiskSpace() / 1024 / 1024) + " MB)");
     		ret = Space.LOW;
     	}
     	return ret;

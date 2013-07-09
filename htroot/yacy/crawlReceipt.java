@@ -31,11 +31,11 @@ import java.io.IOException;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
 import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist.BlacklistType;
@@ -59,7 +59,7 @@ public final class crawlReceipt {
             return prop;
         }
 
-        final Log log = sb.getLog();
+        final ConcurrentLog log = sb.getLog();
 
         //int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
         //int crawlingDepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));
@@ -117,13 +117,13 @@ public final class crawlReceipt {
         // generating a new loaded URL entry
         final URIMetadataRow entry = URIMetadataRow.importEntry(propStr);
         if (entry == null) {
-            if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + iam + "\n\tURL properties: "+ propStr);
+            if (log.isWarn()) log.warn("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");
             return prop;
         }
 
         if (entry.url() == null) {
-            if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + ASCII.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
+            if (log.isWarn()) log.warn("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + ASCII.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");
             return prop;
         }
@@ -131,7 +131,7 @@ public final class crawlReceipt {
         // check if the entry is in our network domain
         final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(entry.url());
         if (urlRejectReason != null) {
-            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + ASCII.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
+            log.warn("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + ASCII.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "9999");
             return prop;
         }
@@ -139,7 +139,7 @@ public final class crawlReceipt {
         // Check URL against DHT blacklist
         if (Switchboard.urlBlacklist.isListed(BlacklistType.DHT, entry)) {
             // URL is blacklisted
-            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (URL is blacklisted) for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false) + " from peer " + iam);
+            log.warn("crawlReceipt: RECEIVED wrong RECEIPT (URL is blacklisted) for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false) + " from peer " + iam);
             prop.put("delay", "9999");
             return prop;
         }
@@ -149,13 +149,13 @@ public final class crawlReceipt {
             sb.index.fulltext().putMetadata(entry);
             ResultURLs.stack(ASCII.String(entry.url().hash()), entry.url().getHost(), youare.getBytes(), iam.getBytes(), EventOrigin.REMOTE_RECEIPTS);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
-            if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false));
+            if (log.isInfo()) log.info("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false));
 
             // ready for more
             prop.put("delay", "10");
             return prop;
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             prop.put("delay", "3600");
             return prop;
         }

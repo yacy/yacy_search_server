@@ -8,7 +8,7 @@ import java.net.URL;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 
 public class SMWListSyncThread {
@@ -85,7 +85,7 @@ public class SMWListSyncThread {
 							this.currentmax = Integer.parseInt(overallcount);
 
 							if (this.currentmax > 0) {
-								Log.logInfo("SMWLISTSYNC",
+								ConcurrentLog.info("SMWLISTSYNC",
 										"import job counts "
 												+ this.currentmax
 												+ " new elements between "
@@ -99,7 +99,7 @@ public class SMWListSyncThread {
 								this.offset = 0;
 							}
 						} else {
-							Log.logWarning("SMWLISTSYNC",
+							ConcurrentLog.warn("SMWLISTSYNC",
 									"No SMWimport URL defined");
 						}
 					} catch (MalformedURLException e) {
@@ -114,7 +114,7 @@ public class SMWListSyncThread {
 				} else {
 					
 					// there are new elements to be imported
-					Log.logInfo("SMWLISTSYNC",
+					ConcurrentLog.info("SMWLISTSYNC",
 							"importing max. " + this.limit
 									+ " elements at " + this.offset + " of "
 									+ this.currentmax + ", since "
@@ -146,7 +146,7 @@ public class SMWListSyncThread {
 								reader = new InputStreamReader(
 										urlImport.openStream(), "UTF-8");
 							} catch (Exception e) {
-								Log.logException(e);
+								ConcurrentLog.logException(e);
 								this.runningjob = false;
 							}
 
@@ -157,7 +157,7 @@ public class SMWListSyncThread {
 											reader, 200);
 								} catch (final Exception e) {
 									// TODO: display an error message
-									Log.logException(e);
+									ConcurrentLog.logException(e);
 									this.runningjob = false;
 								}
 								Thread t;

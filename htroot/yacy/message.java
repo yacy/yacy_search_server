@@ -39,8 +39,8 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.MessageBoard;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Network;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
@@ -153,7 +153,7 @@ public final class message {
             try {
                 Files.copy(notifierSource, notifierDest);
             } catch (final IOException e) {
-            	Log.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
+            	ConcurrentLog.severe("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
 
             }
         }
@@ -212,7 +212,7 @@ public final class message {
             email.print(emailTxt.toString());
             email.close();
         } catch (final Exception e) {
-            Network.log.logWarning("message: message forwarding via email failed. ",e);
+            Network.log.warn("message: message forwarding via email failed. ",e);
         }
 
     }

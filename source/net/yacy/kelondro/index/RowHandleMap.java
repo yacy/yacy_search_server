@@ -51,8 +51,8 @@ import java.util.zip.GZIPOutputStream;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.HandleMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 
 
@@ -474,7 +474,7 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
                     }
                 }
             } catch (final SpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             return this.map;
         }

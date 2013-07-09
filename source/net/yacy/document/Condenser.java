@@ -47,12 +47,12 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.language.synonyms.SynonymLibrary;
 import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.language.Identificator;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.SetTools;
 
@@ -479,9 +479,9 @@ public final class Condenser {
             sb.append("}\n");
             System.out.println(sb.toString());
         } catch (final FileNotFoundException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
     }

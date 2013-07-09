@@ -92,12 +92,12 @@ public class zipParser extends AbstractParser implements Parser {
                     if (docs == null) continue;
                     for (final Document d: docs) docacc.add(d);
                 } catch (final Parser.Failure e) {
-                    AbstractParser.log.logWarning("ZIP parser entry " + name + ": " + e.getMessage());
+                    AbstractParser.log.warn("ZIP parser entry " + name + ": " + e.getMessage());
                 } finally {
                     if (tmp != null) FileUtils.deletedelete(tmp);
                 }
             } catch (final IOException e) {
-                AbstractParser.log.logWarning("ZIP parser:" + e.getMessage());
+                AbstractParser.log.warn("ZIP parser:" + e.getMessage());
                 break;
             }
         }

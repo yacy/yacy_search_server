@@ -27,7 +27,7 @@
 import java.util.concurrent.Semaphore;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.peers.graphics.NetworkGraph;
 import net.yacy.search.Switchboard;
@@ -52,7 +52,7 @@ public class NetworkPicture
 
         final long timeSeconds = System.currentTimeMillis() / 1000;
         if ( buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2 ) {
-            Log.logInfo("NetworkPicture", "cache hit (1); authorized = "
+            ConcurrentLog.info("NetworkPicture", "cache hit (1); authorized = "
                 + authorized
                 + ", timeSeconds - lastAccessSeconds = "
                 + (timeSeconds - lastAccessSeconds));
@@ -65,7 +65,7 @@ public class NetworkPicture
         sync.acquireUninterruptibly();
 
         if ( buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2 ) {
-            Log.logInfo("NetworkPicture", "cache hit (2); authorized = "
+            ConcurrentLog.info("NetworkPicture", "cache hit (2); authorized = "
                 + authorized
                 + ", timeSeconds - lastAccessSeconds = "
                 + (timeSeconds - lastAccessSeconds));

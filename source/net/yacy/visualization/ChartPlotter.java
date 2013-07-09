@@ -29,7 +29,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public class ChartPlotter extends RasterPlotter {
@@ -185,7 +185,7 @@ public class ChartPlotter extends RasterPlotter {
             //ImageIO.write(ip.getImage(), "png", fos);
             fos.close();
         } catch (final IOException e) {}
-        Log.shutdown();
+        ConcurrentLog.shutdown();
     }
 
 }

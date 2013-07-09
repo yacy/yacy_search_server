@@ -34,9 +34,9 @@ import net.yacy.cora.order.Digest;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -58,10 +58,10 @@ public class Word {
     static {
         try {
             hashCache = new ConcurrentARC<String, byte[]>(hashCacheSize, Math.min(32, 2 * Runtime.getRuntime().availableProcessors()));
-            Log.logInfo("Word", "hashCache.size = " + hashCacheSize);
+            ConcurrentLog.info("Word", "hashCache.size = " + hashCacheSize);
         } catch (final OutOfMemoryError e) {
             hashCache = new ConcurrentARC<String, byte[]>(1000, Math.min(8, 1 + Runtime.getRuntime().availableProcessors()));
-            Log.logInfo("Word", "hashCache.size = " + 1000);
+            ConcurrentLog.info("Word", "hashCache.size = " + 1000);
         }
     }
     /*
@@ -155,7 +155,7 @@ public class Word {
             try {
                 hashes.put(word2hash(word));
             } catch (final SpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 return hashes;
             }
         return hashes;
@@ -167,7 +167,7 @@ public class Word {
             try {
                 hashes.put(word2hash(word));
             } catch (final SpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 return hashes;
             }
         return hashes;

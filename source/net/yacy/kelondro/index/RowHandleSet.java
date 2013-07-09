@@ -43,8 +43,8 @@ import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.SetTools;
 
 
@@ -63,7 +63,7 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
             try {
                 this.index = new RowSet(this.rowdef, 0);
             } catch (SpaceExceededException ee) {
-                Log.logException(ee);
+                ConcurrentLog.logException(ee);
                 this.index = null;
             }
         }
@@ -395,7 +395,7 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
             e.printStackTrace();
         }
         s.close();
-        Log.shutdown();
+        ConcurrentLog.shutdown();
     }
 
 }

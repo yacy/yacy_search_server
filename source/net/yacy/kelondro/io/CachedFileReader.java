@@ -25,7 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 
 
@@ -79,7 +79,7 @@ public final class CachedFileReader extends AbstractReader implements Reader {
             try{RAFile.getChannel().close();} catch (IOException e) {}
             RAFile.close();
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         this.cache = null;
     }

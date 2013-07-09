@@ -28,11 +28,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 public abstract class AbstractParser implements Parser {
 
-    public final static Log log = new Log("PARSER");
+    public final static ConcurrentLog log = new ConcurrentLog("PARSER");
     protected final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
     protected final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     private   final String name;

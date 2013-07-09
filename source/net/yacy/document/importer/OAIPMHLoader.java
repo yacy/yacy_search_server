@@ -27,9 +27,9 @@ import java.io.IOException;
 
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.snippet.TextSnippet;
@@ -50,7 +50,7 @@ public class OAIPMHLoader {
         this.source = source;
 
         // load the file from the net
-        Log.logInfo("OAIPMHLoader", "loading record from " + source.toNormalform(true));
+        ConcurrentLog.info("OAIPMHLoader", "loading record from " + source.toNormalform(true));
         Response response = null;
         IOException ee = null;
         for (int i = 0; i < 5; i++) {
@@ -59,7 +59,7 @@ public class OAIPMHLoader {
                 response = loader.load(loader.request(source, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                 break;
             } catch (IOException e) {
-                Log.logWarning("OAIPMHLoader", "loading failed at attempt " + (i + 1) + ": " + source.toNormalform(true));
+                ConcurrentLog.warn("OAIPMHLoader", "loading failed at attempt " + (i + 1) + ": " + source.toNormalform(true));
                 ee = e;
                 continue;
             }

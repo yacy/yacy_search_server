@@ -31,7 +31,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import net.yacy.cora.protocol.Domains;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.upnp.DiscoveryAdvertisement;
@@ -42,7 +42,7 @@ import net.yacy.upnp.messages.UPNPResponseException;
 
 public class UPnP {
 	
-	public final static Log log = new Log("UPNP");
+	public final static ConcurrentLog log = new ConcurrentLog("UPNP");
 	private static Switchboard sb = Switchboard.getSwitchboard();
 	
 	private final static int discoveryTimeout = 5000; // seconds to receive a response from devices
@@ -73,18 +73,18 @@ public class UPnP {
 		try {
 			if (IGDs == null) IGDs = InternetGatewayDevice.getDevices(discoveryTimeout);
 			localHostIP = Domains.myPublicLocalIP().getHostAddress();
-			if (localHostIP.startsWith("127.")) log.logWarning("found odd local address: " + localHostIP + "; UPnP may fail");
+			if (localHostIP.startsWith("127.")) log.warn("found odd local address: " + localHostIP + "; UPnP may fail");
 		} catch (IOException e) {
 			init = false;
 		}
 		if (IGDs != null) {
 			for (InternetGatewayDevice IGD : IGDs) {
-				log.logInfo("found device: " + IGD.getIGDRootDevice().getFriendlyName());
+				log.info("found device: " + IGD.getIGDRootDevice().getFriendlyName());
 			}
 		} else {
-			log.logInfo("no device found");
+			log.info("no device found");
 			init = false;
-			log.logInfo("listening for device");
+			log.info("listening for device");
 			Listener.register();
 		}
 		
@@ -118,11 +118,11 @@ public class UPnP {
 					boolean mapped = IGD.addPortMapping(mappedName, getRemoteHost(), port, port, localHostIP, 0, mappedProtocol);
 					String msg = "port " + port + " on device "+ IGD.getIGDRootDevice().getFriendlyName();
 					if (mapped) {
-						log.logInfo("mapped " + msg);
+						log.info("mapped " + msg);
 						mappedPort = port;
 					}
-					else log.logWarning("could not map " + msg);
-				} catch (IOException e) {} catch (UPNPResponseException e) { log.logSevere("mapping error: " + e.getMessage()); }
+					else log.warn("could not map " + msg);
+				} catch (IOException e) {} catch (UPNPResponseException e) { log.severe("mapping error: " + e.getMessage()); }
 			}
 		}
 	}
@@ -136,9 +136,9 @@ public class UPnP {
 				try {
 					boolean unmapped = IGD.deletePortMapping(getRemoteHost(), mappedPort, mappedProtocol);
 					String msg = "port " + mappedPort + " on device "+ IGD.getIGDRootDevice().getFriendlyName();
-					if (unmapped) log.logInfo("unmapped " + msg);
-					else log.logWarning("could not unmap " + msg);
-				} catch (IOException e) {} catch (UPNPResponseException e) { log.logSevere("unmapping error: " + e.getMessage()); }
+					if (unmapped) log.info("unmapped " + msg);
+					else log.warn("could not unmap " + msg);
+				} catch (IOException e) {} catch (UPNPResponseException e) { log.severe("unmapping error: " + e.getMessage()); }
 			}
 			mappedPort = 0; // reset mapped port
 		}
@@ -199,9 +199,9 @@ public class UPnP {
 					errorMsg = e.getMessage();
 				}
 				if (error && errorMsg != null)
-					log.logSevere("eventSSDPAlive: " + errorMsg);
+					log.severe("eventSSDPAlive: " + errorMsg);
 				if (newIGD[0] == null) return;
-				log.logInfo("discovered device: " + newIGD[0].getIGDRootDevice().getFriendlyName());
+				log.info("discovered device: " + newIGD[0].getIGDRootDevice().getFriendlyName());
 				if (UPnP.setIGDs(newIGD) &&
 					Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.UPNP_ENABLED, false))
 						UPnP.addPortMapping();

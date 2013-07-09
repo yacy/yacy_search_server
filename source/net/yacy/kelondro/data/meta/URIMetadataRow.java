@@ -40,13 +40,13 @@ import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.io.CharBuffer;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.MapTools;
@@ -180,14 +180,14 @@ public class URIMetadataRow {
     
     public static URIMetadataRow importEntry(final String propStr) {
         if (propStr == null || propStr.isEmpty() || propStr.charAt(0) != '{' || !propStr.endsWith("}")) {
-            Log.logSevere("URIMetadataRow", "importEntry: propStr is not proper: " + propStr);
+            ConcurrentLog.severe("URIMetadataRow", "importEntry: propStr is not proper: " + propStr);
             return null;
         }
         try {
             return new URIMetadataRow(MapTools.s2p(propStr.substring(1, propStr.length() - 1)));
         } catch (final kelondroException e) {
             // wrong format
-            Log.logSevere("URIMetadataRow", e.getMessage());
+            ConcurrentLog.severe("URIMetadataRow", e.getMessage());
             return null;
         }
     }
@@ -427,7 +427,7 @@ public class URIMetadataRow {
             }
             return s;
         } catch (final Throwable e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }

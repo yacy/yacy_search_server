@@ -49,6 +49,7 @@ import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
@@ -56,7 +57,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.Seed;
@@ -307,7 +307,7 @@ public final class QueryParams {
             for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
                 keyhashes.put(ASCII.getBytes(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)));
             } catch (final SpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
         return keyhashes;
@@ -529,7 +529,7 @@ public final class QueryParams {
         params.setFields("*", "score"); // we need the score for post-ranking
         
         // prepare result
-        Log.logInfo("Protocol", "SOLR QUERY: " + params.toString());
+        ConcurrentLog.info("Protocol", "SOLR QUERY: " + params.toString());
         this.cachedQuery = params;
         return params;
     }

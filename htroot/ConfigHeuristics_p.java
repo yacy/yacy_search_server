@@ -29,8 +29,8 @@ import com.google.common.io.Files;
 import java.io.File;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.Configuration;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 
 import java.io.IOException;
@@ -187,7 +187,7 @@ public class ConfigHeuristics_p {
             }
             prop.put("osdcfg", c);
         } catch (IOException e1) {
-            Log.logException(e1);
+            ConcurrentLog.logException(e1);
             prop.put("osdcfg", 0);
         }
         prop.putHTML("osderrmsg",osderrmsg);
@@ -234,7 +234,7 @@ public class ConfigHeuristics_p {
                 }
             }
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         
         // re-read config (and create/update work table)

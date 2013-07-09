@@ -43,6 +43,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.Order;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.index.Cache;
@@ -51,7 +52,6 @@ import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.index.RowCollection;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MergeIterator;
 import net.yacy.kelondro.util.StackIterator;
@@ -120,7 +120,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         for (final Index oi: this.tables.values()) try {
             keysort.put(oi.smallestKey());
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return keysort.smallestKey();
     }
@@ -131,7 +131,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         for (final Index oi: this.tables.values()) try {
             keysort.put(oi.largestKey());
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return keysort.largestKey();
     }
@@ -175,7 +175,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
                 try {
                     d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(element.substring(this.prefix.length() + 1, this.prefix.length() + 18));
                 } catch (final ParseException e) {
-                    Log.logSevere("SplitTable", "", e);
+                    ConcurrentLog.severe("SplitTable", "", e);
                     continue;
                 }
                 time = d.getTime();
@@ -212,7 +212,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
             // open next biggest table
             t.remove(maxf);
             f = new File(this.path, maxf);
-            Log.logInfo("kelondroSplitTable", "opening partial eco table " + f);
+            ConcurrentLog.info("kelondroSplitTable", "opening partial eco table " + f);
             Table table;
             try {
                 table = new Table(f, this.rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727, false);
@@ -220,7 +220,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
                 try {
                     table = new Table(f, this.rowdef, 0, 0, false, this.exceed134217727, false);
                 } catch (final SpaceExceededException ee) {
-                    Log.logSevere("SplitTable", "Table " + f.toString() + " cannot be initialized: " + ee.getMessage(), ee);
+                    ConcurrentLog.severe("SplitTable", "Table " + f.toString() + " cannot be initialized: " + ee.getMessage(), ee);
                     continue maxfind;
                 }
             }
@@ -349,7 +349,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
             try {
                 table = new Table(f, this.rowdef, 0, 0, false, this.exceed134217727, true);
             } catch (final SpaceExceededException e1) {
-                Log.logException(e1);
+                ConcurrentLog.logException(e1);
             }
         }
         this.tables.put(this.current, table);
@@ -368,7 +368,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         try {
             d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(name.substring(this.prefix.length() + 1, this.prefix.length() + 18)).getTime();
         } catch (final ParseException e) {
-            Log.logSevere("SplitTable", "", e);
+            ConcurrentLog.severe("SplitTable", "", e);
             d = 0;
         }
         if (d + this.fileAgeLimit < t || new File(this.path, name).length() >= this.fileSizeLimit) {

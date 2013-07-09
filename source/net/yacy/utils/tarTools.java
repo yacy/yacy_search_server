@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
@@ -67,7 +67,7 @@ public class tarTools {
 	 * @throws Exception (IOException or FileNotFoundException)
 	 */
 	public static void unTar(final InputStream in, final String untarDir) throws Exception{
-		Log.logInfo("UNTAR", "starting");
+		ConcurrentLog.info("UNTAR", "starting");
 		if(new File(untarDir).exists()){
 			final TarInputStream tin = new TarInputStream(in);
 			TarEntry tarEntry = tin.getNextEntry();
@@ -85,9 +85,9 @@ public class tarTools {
 			}
 			tin.close();
 		} else { // untarDir doesn't exist
-			Log.logWarning("UNTAR", "destination " + untarDir + " doesn't exist.");
+			ConcurrentLog.warn("UNTAR", "destination " + untarDir + " doesn't exist.");
 		}
-		Log.logInfo("UNTAR", "finished");
+		ConcurrentLog.info("UNTAR", "finished");
 	}
 	
 	public static void main(final String args[]) {

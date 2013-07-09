@@ -27,12 +27,12 @@ import java.util.regex.Pattern;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.crawler.robots.RobotsTxtEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -65,7 +65,7 @@ public class CrawlCheck_p {
                     DigestURI crawlingStartURL = new DigestURI(crawlingStart);
                     rootURLs.add(crawlingStartURL);
                 } catch (MalformedURLException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
 

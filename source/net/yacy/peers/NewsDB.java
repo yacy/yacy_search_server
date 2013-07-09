@@ -57,11 +57,11 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MapTools;
@@ -103,7 +103,7 @@ public class NewsDB {
             try {
                 this.news = new Table(path, this.rowdef, 0, 0, false, exceed134217727, true);
             } catch (final SpaceExceededException e1) {
-                Log.logException(e1);
+                ConcurrentLog.logException(e1);
             }
         }
     }
@@ -117,7 +117,7 @@ public class NewsDB {
             try {
                 this.news = new Table(this.path, this.rowdef, 0, 0, false, false, true);
             } catch (final SpaceExceededException e1) {
-                Log.logException(e1);
+                ConcurrentLog.logException(e1);
             }
         }
     }
@@ -176,7 +176,7 @@ public class NewsDB {
         if (r == null) return null;
         String attributes = r.attributes().toString();
         if (attributes.length() > this.attributesMaxLength) {
-            Log.logWarning("yacyNewsDB", "attribute length=" + attributes.length() + " exceeds maximum size=" + this.attributesMaxLength);
+            ConcurrentLog.warn("yacyNewsDB", "attribute length=" + attributes.length() + " exceeds maximum size=" + this.attributesMaxLength);
             attributes = new HashMap<String, String>().toString();
         }
         final Row.Entry entry = this.news.row().newEntry();
@@ -199,7 +199,7 @@ public class NewsDB {
             }
             return new Record(mySeed, category, m);
         } catch (final IllegalArgumentException e) {
-            Network.log.logWarning("rejected bad yacy news record (1): " + e.getMessage());
+            Network.log.warn("rejected bad yacy news record (1): " + e.getMessage());
             return null;
         }
     }
@@ -208,7 +208,7 @@ public class NewsDB {
         try {
             return new Record(mySeed, category, attributes);
         } catch (final IllegalArgumentException e) {
-            Network.log.logWarning("rejected bad yacy news record (2): " + e.getMessage());
+            Network.log.warn("rejected bad yacy news record (2): " + e.getMessage());
             return null;
         }
     }
@@ -217,7 +217,7 @@ public class NewsDB {
         try {
             return new Record(external);
         } catch (final IllegalArgumentException e) {
-            Network.log.logWarning("rejected bad yacy news record (3): " + e.getMessage());
+            Network.log.warn("rejected bad yacy news record (3): " + e.getMessage());
             return null;
         }
     }

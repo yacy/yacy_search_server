@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -90,7 +90,7 @@ public final class Records {
                 fos = new FileOutputStream(tablefile);
             } catch (final FileNotFoundException e) {
                 // should not happen
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             try { if (fos != null) fos.close(); } catch (final IOException e) {}
         }
@@ -100,7 +100,7 @@ public final class Records {
             this.raf = new RandomAccessFile(tablefile,"rw");
         } catch (final FileNotFoundException e) {
             // should never happen
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         // initialize write buffer
@@ -163,7 +163,7 @@ public final class Records {
             records = this.raf.length() / this.recordsize;
         } catch (NullPointerException e) {
             // This may happen on shutdown while still something is moving on
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         return records;
@@ -192,7 +192,7 @@ public final class Records {
             this.raf.seek(this.raf.length());
             this.raf.write(this.buffer, 0, this.recordsize * this.buffercount);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         this.buffercount = 0;
     }
@@ -203,7 +203,7 @@ public final class Records {
             flushBuffer();
             this.raf.close();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         this.raf = null;
         this.buffer = null;
@@ -477,7 +477,7 @@ public final class Records {
 
             t.close();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 

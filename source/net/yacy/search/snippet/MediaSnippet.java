@@ -42,6 +42,7 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.ZURL.FailCategory;
@@ -52,7 +53,6 @@ import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
@@ -137,7 +137,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
 
     public static List<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final Classification.ContentDomain mediatype, final CacheStrategy cacheStrategy, final boolean reindexing) {
         if (queryhashes.isEmpty()) {
-            Log.logFine("snippet fetch", "no query hashes given for url " + url);
+            ConcurrentLog.fine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();
         }
 
@@ -145,10 +145,10 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         try {
             document = Document.mergeDocuments(url, null, Switchboard.getSwitchboard().loader.loadDocuments(Switchboard.getSwitchboard().loader.request(url, false, reindexing), cacheStrategy, Integer.MAX_VALUE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT));
         } catch (final IOException e) {
-            Log.logFine("snippet fetch", "load error: " + e.getMessage());
+            ConcurrentLog.fine("snippet fetch", "load error: " + e.getMessage());
             return new ArrayList<MediaSnippet>();
         } catch (final Parser.Failure e) {
-            Log.logFine("snippet fetch", "parser error: " + e.getMessage());
+            ConcurrentLog.fine("snippet fetch", "parser error: " + e.getMessage());
             return new ArrayList<MediaSnippet>();
         }
         final ArrayList<MediaSnippet> a = new ArrayList<MediaSnippet>();
@@ -239,7 +239,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
                 try {
                     remaininghashes.put(hash);
                 } catch (final SpaceExceededException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }
@@ -260,7 +260,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         // check if url is in blacklist
         if (Switchboard.urlBlacklist.isListed(blacklistType, url.getHost().toLowerCase(), url.getFile())) {
             Switchboard.getSwitchboard().crawlQueues.errorURL.push(new Request(url, null), ASCII.getBytes(Switchboard.getSwitchboard().peers.mySeed().hash), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
-            Log.logFine("snippet fetch", "MEDIA-SNIPPET Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
+            ConcurrentLog.fine("snippet fetch", "MEDIA-SNIPPET Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
             isBlacklisted = true;
         }
 

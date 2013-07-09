@@ -41,9 +41,9 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
-import net.yacy.kelondro.logging.Log;
 
 /**
  *
@@ -377,7 +377,7 @@ public class WikiBoard {
             this.datbase.insert(UTF8.getBytes(entry.key), entry.record);
             key = entry.key;
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return key;
     }
@@ -407,9 +407,9 @@ public class WikiBoard {
             final Map<String, String> record = base.get(UTF8.getBytes(copyOfKey));
             ret = (record == null) ? newEntry(copyOfKey, ANONYMOUS, Domains.LOCALHOST, "New Page", UTF8.getBytes("")) : new Entry(copyOfKey, record);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return ret;
     }

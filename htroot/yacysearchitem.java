@@ -38,10 +38,10 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.Cache;
 import net.yacy.data.URLLicense;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.Seed;
@@ -124,7 +124,7 @@ public class yacysearchitem {
             if ((fileType == FileType.HTML || fileType == FileType.JSON) && !sb.isIntranetMode()) try {
                 faviconURL = new DigestURI(resultURL.getProtocol() + "://" + resultURL.getHost() + ((port != -1) ? (":" + port) : "") + "/favicon.ico");
             } catch (final MalformedURLException e1) {
-                Log.logException(e1);
+                ConcurrentLog.logException(e1);
                 faviconURL = null;
             }
             final String resource = theSearch.query.domType.toString();

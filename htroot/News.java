@@ -31,7 +31,7 @@ import java.util.Map.Entry;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.NewsDB;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.Seed;
@@ -64,7 +64,7 @@ public class News {
                         id = check.substring(4);
                         try {
                             sb.peers.newsPool.moveOff(tableID, id);
-                        } catch (final Exception ee) {Log.logException(ee);}
+                        } catch (final Exception ee) {ConcurrentLog.logException(ee);}
                     }
                 }
             }
@@ -81,7 +81,7 @@ public class News {
                         sb.peers.newsPool.moveOffAll(tableID);
                     }
                 } catch (final Exception e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }

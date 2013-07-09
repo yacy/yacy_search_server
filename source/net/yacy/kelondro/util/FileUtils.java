@@ -55,7 +55,7 @@ import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.Files;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 public final class FileUtils {
 
@@ -182,7 +182,7 @@ public final class FileUtils {
                 try {
                     fos.close();
                 } catch ( final Exception e ) {
-                    Log.logWarning(
+                    ConcurrentLog.warn(
                         "FileUtils",
                         "cannot close FileOutputStream for " + dest + "! " + e.getMessage());
                 }
@@ -383,7 +383,7 @@ public final class FileUtils {
             final byte[] b = read(f);
             return table(strings(b));
         } catch ( final IOException e2 ) {
-            Log.logSevere("FileUtils", f.toString() + " not found", e2);
+            ConcurrentLog.severe("FileUtils", f.toString() + " not found", e2);
             return null;
         }
     }
@@ -427,9 +427,9 @@ public final class FileUtils {
             }
             pw.println("# EOF");
         } catch ( FileNotFoundException e ) {
-            Log.logWarning("FileUtils", e.getMessage(), e);
+            ConcurrentLog.warn("FileUtils", e.getMessage(), e);
         } catch ( UnsupportedEncodingException e ) {
-            Log.logWarning("FileUtils", e.getMessage(), e);
+            ConcurrentLog.warn("FileUtils", e.getMessage(), e);
         } finally {
             if ( pw != null ) {
                 pw.close();
@@ -476,7 +476,7 @@ public final class FileUtils {
                 //System.out.println("key = " + key + ", value = " + value);
                 props.put(key, value);
             } catch (IndexOutOfBoundsException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
         return props;
@@ -730,7 +730,7 @@ public final class FileUtils {
             } catch ( final IOException e ) {
                 this.nextLine = null;
             } catch ( final OutOfMemoryError e ) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 this.nextLine = null;
             }
             if (this.nextLine == null && this.reader != null) {
@@ -829,7 +829,7 @@ public final class FileUtils {
             try {
                 p = path.getCanonicalPath();
             } catch ( final IOException e1 ) {
-                Log.logException(e1);
+                ConcurrentLog.logException(e1);
             }
             if ( System.getProperties().getProperty("os.name", "").toLowerCase().startsWith("windows") ) {
                 // deleting files on windows sometimes does not work with java
@@ -837,17 +837,17 @@ public final class FileUtils {
                     final String command = "cmd /C del /F /Q \"" + p + "\"";
                     final Process r = Runtime.getRuntime().exec(command);
                     if ( r == null ) {
-                        Log.logSevere("FileUtils", "cannot execute command: " + command);
+                        ConcurrentLog.severe("FileUtils", "cannot execute command: " + command);
                     } else {
                         final byte[] response = read(r.getInputStream());
-                        Log.logInfo("FileUtils", "deletedelete: " + UTF8.String(response));
+                        ConcurrentLog.info("FileUtils", "deletedelete: " + UTF8.String(response));
                     }
                 } catch ( final IOException e ) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
             if ( path.exists() ) {
-                Log.logSevere("FileUtils", "cannot delete file " + p);
+                ConcurrentLog.severe("FileUtils", "cannot delete file " + p);
             }
         }
     }

@@ -33,7 +33,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 
@@ -181,7 +181,7 @@ public class WorkflowProcessor<J extends WorkflowJob> {
                     this.output.enQueue(out);
                 }
             } catch (final Throwable e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             return;
         }        
@@ -215,16 +215,16 @@ public class WorkflowProcessor<J extends WorkflowJob> {
         // put poison pills into the queue
         for (int i = 0; i < this.executorRunning.get(); i++) {
             try {
-                Log.logInfo("serverProcessor", "putting poison pill in queue " + this.processName + ", thread " + i);
+                ConcurrentLog.info("serverProcessor", "putting poison pill in queue " + this.processName + ", thread " + i);
                 this.input.put((J) WorkflowJob.poisonPill); // put a poison pill into the queue which will kill the job
-                Log.logInfo("serverProcessor", ".. poison pill is in queue " + this.processName + ", thread " + i + ". awaiting termination");
+                ConcurrentLog.info("serverProcessor", ".. poison pill is in queue " + this.processName + ", thread " + i + ". awaiting termination");
             } catch (final InterruptedException e) { }
         }
 
         // wait until input queue is empty
         for (int i = 0; i < 10; i++) {
             if (this.input.size() <= 0) break;
-            Log.logInfo("WorkflowProcess", "waiting for queue " + this.processName + " to shut down; input.size = " + this.input.size());
+            ConcurrentLog.info("WorkflowProcess", "waiting for queue " + this.processName + " to shut down; input.size = " + this.input.size());
             try {Thread.sleep(1000);} catch (InterruptedException e) {}
         }
         this.executorRunning.set(0);
@@ -240,7 +240,7 @@ public class WorkflowProcessor<J extends WorkflowJob> {
                 }
             } catch (final InterruptedException e) {}
         }
-        Log.logInfo("serverProcessor", "queue " + this.processName + ": shutdown.");
+        ConcurrentLog.info("serverProcessor", "queue " + this.processName + ": shutdown.");
         this.executor = null;
         this.input = null;
         // remove entry from monitor

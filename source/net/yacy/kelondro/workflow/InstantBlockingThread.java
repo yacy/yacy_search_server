@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlockingThread<J> implements BlockingThread<J> {
@@ -98,13 +98,13 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
             try {
                 out = (J) this.jobExecMethod.invoke(this.environment, new Object[]{next});
             } catch (final Throwable e) {
-                Log.logSevere(BLOCKINGTHREAD, "Internal Error in serverInstantThread.job: " + e.getMessage());
-                Log.logSevere(BLOCKINGTHREAD, "shutting down thread '" + getName() + "'");
+                ConcurrentLog.severe(BLOCKINGTHREAD, "Internal Error in serverInstantThread.job: " + e.getMessage());
+                ConcurrentLog.severe(BLOCKINGTHREAD, "shutting down thread '" + getName() + "'");
                 final Throwable targetException = (e instanceof InvocationTargetException) ? ((InvocationTargetException) e).getTargetException() : null;
-                Log.logException(e);
-                Log.logException(e.getCause());
-                if (targetException != null) Log.logException(targetException);
-                Log.logSevere(BLOCKINGTHREAD, "Runtime Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage());
+                ConcurrentLog.logException(e);
+                ConcurrentLog.logException(e.getCause());
+                if (targetException != null) ConcurrentLog.logException(targetException);
+                ConcurrentLog.severe(BLOCKINGTHREAD, "Runtime Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage());
             }
             instantThreadCounter.decrementAndGet();
             jobs.remove(this.handle);

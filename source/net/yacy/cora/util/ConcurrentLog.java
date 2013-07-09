@@ -1,28 +1,24 @@
-// Log.java
-// -------------------------------------
-// (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  ConcurrentLog
+ *  Copyright 2013 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+ *  First published 2004, redesigned 9.7.2013 on http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-package net.yacy.kelondro.logging;
+package net.yacy.cora.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -41,31 +37,27 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 
-public final class Log {
+/**
+ * jdk-based logger tend to block at java.util.logging.Logger.log(Logger.java:476)
+ * in concurrent environments. This makes logging a main performance issue. 
+ * To overcome this problem, this is a add-on to jdk logging to put log entries
+ * on a concurrent message queue and log the messages one by one using a
+ * separate process
+ */
+public final class ConcurrentLog {
 
-    // log-level categories
-    public static final int LOGLEVEL_ZERO    = Level.OFF.intValue(); // no output at all
-    public static final int LOGLEVEL_SEVERE  = Level.SEVERE.intValue(); // system-level error, internal cause, critical and not fixeable (i.e. inconsistency)
-    public static final int LOGLEVEL_WARNING = Level.WARNING.intValue(); // uncritical service failure, may require user activity (i.e. input required, wrong authorization)
-    public static final int LOGLEVEL_CONFIG  = Level.CONFIG.intValue(); // regular system status information (i.e. start-up messages)
-    public static final int LOGLEVEL_INFO    = Level.INFO.intValue(); // regular action information (i.e. any httpd request URL)
-    public static final int LOGLEVEL_FINE    = Level.FINE.intValue(); // in-function status debug output
-    public static final int LOGLEVEL_FINER    = Level.FINER.intValue(); // in-function status debug output
-    public static final int LOGLEVEL_FINEST    = Level.FINEST.intValue(); // in-function status debug output
 
-    // these categories are also present as character tokens
-    public static final char LOGTOKEN_ZERO    = 'Z';
-    public static final char LOGTOKEN_SEVERE  = 'E';
-    public static final char LOGTOKEN_WARNING = 'W';
-    public static final char LOGTOKEN_CONFIG  = 'S';
-    public static final char LOGTOKEN_INFO    = 'I';
-    public static final char LOGTOKEN_FINE    = 'D';
-    public static final char LOGTOKEN_FINER   = 'D';
-    public static final char LOGTOKEN_FINEST  = 'D';
+    private final static Message POISON_MESSAGE = new Message();
+    private final static BlockingQueue<Message> logQueue = new ArrayBlockingQueue<Message>(300);
+    private final static Worker logRunnerThread = new Worker();
+
+    static {
+        logRunnerThread.start();
+    }
 
     private final Logger theLogger;
 
-    public Log(final String appName) {
+    public ConcurrentLog(final String appName) {
         this.theLogger = Logger.getLogger(appName);
         //this.theLogger.setLevel(Level.FINEST); // set a default level
     }
@@ -74,11 +66,11 @@ public final class Log {
         this.theLogger.setLevel(newLevel);
     }
 
-    public final void logSevere(final String message) {
+    public final void severe(final String message) {
         enQueueLog(this.theLogger, Level.SEVERE, message);
     }
 
-    public final void logSevere(final String message, final Throwable thrown) {
+    public final void severe(final String message, final Throwable thrown) {
         if (thrown == null) return;
         enQueueLog(this.theLogger, Level.SEVERE, message, thrown);
     }
@@ -87,24 +79,29 @@ public final class Log {
         return this.theLogger.isLoggable(Level.SEVERE);
     }
 
-    public final void logWarning(final String message) {
+    public final void warn(final String message) {
         enQueueLog(this.theLogger, Level.WARNING, message);
     }
 
-    public final void logWarning(final String message, final Throwable thrown) {
+    public final void warn(final Throwable thrown) {
+        if (thrown == null) return;
+        enQueueLog(this.theLogger, Level.WARNING, thrown.getMessage(), thrown);
+    }
+
+    public final void warn(final String message, final Throwable thrown) {
         if (thrown == null) return;
         enQueueLog(this.theLogger, Level.WARNING, message, thrown);
     }
 
-    public final boolean isWarning() {
+    public final boolean isWarn() {
         return this.theLogger.isLoggable(Level.WARNING);
     }
 
-    public final void logConfig(final String message) {
+    public final void config(final String message) {
         enQueueLog(this.theLogger, Level.CONFIG, message);
     }
 
-    public final void logConfig(final String message, final Throwable thrown) {
+    public final void config(final String message, final Throwable thrown) {
         if (thrown == null) return;
         enQueueLog(this.theLogger, Level.CONFIG, message, thrown);
     }
@@ -113,11 +110,11 @@ public final class Log {
         return this.theLogger.isLoggable(Level.CONFIG);
     }
 
-    public final void logInfo(final String message) {
+    public final void info(final String message) {
         enQueueLog(this.theLogger, Level.INFO, message);
     }
 
-    public final void logInfo(final String message, final Throwable thrown) {
+    public final void info(final String message, final Throwable thrown) {
         if (thrown == null) return;
         enQueueLog(this.theLogger, Level.INFO, message, thrown);
     }
@@ -126,11 +123,11 @@ public final class Log {
         return this.theLogger.isLoggable(Level.INFO);
     }
 
-    public final void logFine(final String message) {
+    public final void fine(final String message) {
         enQueueLog(this.theLogger, Level.FINE, message);
     }
 
-    public final void logFine(final String message, final Throwable thrown) {
+    public final void fine(final String message, final Throwable thrown) {
         if (thrown == null) return;
         enQueueLog(this.theLogger, Level.FINE, message, thrown);
     }
@@ -139,11 +136,11 @@ public final class Log {
         return this.theLogger.isLoggable(Level.FINE);
     }
 
-    public final void logFiner(final String message) {
+    public final void finer(final String message) {
         enQueueLog(this.theLogger, Level.FINER, message);
     }
 
-    public final void logFiner(final String message, final Throwable thrown) {
+    public final void finer(final String message, final Throwable thrown) {
         if (thrown == null) return;
         enQueueLog(this.theLogger, Level.FINER, message, thrown);
     }
@@ -152,11 +149,11 @@ public final class Log {
        return this.theLogger.isLoggable(Level.FINER);
     }
 
-    public final void logFinest(final String message) {
+    public final void finest(final String message) {
         enQueueLog(this.theLogger, Level.FINEST, message);
     }
 
-    public final void logFinest(final String message, final Throwable thrown) {
+    public final void finest(final String message, final Throwable thrown) {
         if (thrown == null) return;
         enQueueLog(this.theLogger, Level.FINEST, message, thrown);
     }
@@ -171,46 +168,46 @@ public final class Log {
 
 
     // static log messages
-    public final static void logSevere(final String appName, final String message) {
-        enQueueLog(appName, Level.SEVERE, message);
-    }
-    public final static void logSevere(final String appName, final String message, final Throwable thrown) {
-        if (thrown == null) return;
-        enQueueLog(appName, Level.SEVERE, message, thrown);
-    }
-
-    public final static void logWarning(final String appName, final String message) {
-        enQueueLog(appName, Level.WARNING, message);
-    }
     public final static void logException(final Throwable thrown) {
         if (thrown == null) return;
         enQueueLog("StackTrace", Level.WARNING, thrown.getMessage(), thrown);
     }
-    public final static void logWarning(final String appName, final String message, final Throwable thrown) {
+    public final static void severe(final String appName, final String message) {
+        enQueueLog(appName, Level.SEVERE, message);
+    }
+    public final static void severe(final String appName, final String message, final Throwable thrown) {
+        if (thrown == null) return;
+        enQueueLog(appName, Level.SEVERE, message, thrown);
+    }
+
+    public final static void warn(final String appName, final String message) {
+        enQueueLog(appName, Level.WARNING, message);
+    }
+    public final static void warn(final String appName, final String message, final Throwable thrown) {
         if (thrown == null) return;
         enQueueLog(appName, Level.WARNING, message, thrown);
     }
 
-    public final static void logConfig(final String appName, final String message) {
+    public final static void config(final String appName, final String message) {
         enQueueLog(appName, Level.CONFIG, message);
     }
-    public final static void logConfig(final String appName, final String message, final Throwable thrown) {
+    public final static void config(final String appName, final String message, final Throwable thrown) {
         if (thrown == null) return;
         enQueueLog(appName, Level.CONFIG, message, thrown);
     }
 
-    public final static void logInfo(final String appName, final String message) {
+    public final static void info(final String appName, final String message) {
         enQueueLog(appName, Level.INFO, message);
     }
-    public final static void logInfo(final String appName, final String message, final Throwable thrown) {
+    public final static void info(final String appName, final String message, final Throwable thrown) {
         if (thrown == null) return;
         enQueueLog(appName, Level.INFO, message, thrown);
     }
 
-    public final static void logFine(final String appName, final String message) {
+    public final static void fine(final String appName, final String message) {
         enQueueLog(appName, Level.FINE, message);
     }
-    public final static void logFine(final String appName, final String message, final Throwable thrown) {
+    public final static void fine(final String appName, final String message, final Throwable thrown) {
         if (thrown == null) return;
         enQueueLog(appName, Level.FINE, message, thrown);
     }
@@ -218,18 +215,18 @@ public final class Log {
         return Logger.getLogger(appName).isLoggable(Level.FINE);
     }
 
-    public final static void logFiner(final String appName, final String message) {
+    public final static void finer(final String appName, final String message) {
         enQueueLog(appName, Level.FINER, message);
     }
-    public final static void logFiner(final String appName, final String message, final Throwable thrown) {
+    public final static void finer(final String appName, final String message, final Throwable thrown) {
         if (thrown == null) return;
         enQueueLog(appName, Level.FINER, message, thrown);
     }
 
-    public final static void logFinest(final String appName, final String message) {
+    public final static void finest(final String appName, final String message) {
         enQueueLog(appName, Level.FINEST, message);
     }
-    public final static void logFinest(final String appName, final String message, final Throwable thrown) {
+    public final static void finest(final String appName, final String message, final Throwable thrown) {
         if (thrown == null) return;
         enQueueLog(appName, Level.FINEST, message, thrown);
     }
@@ -243,7 +240,7 @@ public final class Log {
             if (thrown == null) logger.log(level, message); else  logger.log(level, message, thrown);
         } else {
             try {
-            	if (thrown == null) logQueue.put(new logEntry(logger, level, message)); else logQueue.put(new logEntry(logger, level, message, thrown));
+            	if (thrown == null) logQueue.put(new Message(logger, level, message)); else logQueue.put(new Message(logger, level, message, thrown));
             } catch (final InterruptedException e) {
             	if (thrown == null) logger.log(level, message); else  logger.log(level, message, thrown);
             }
@@ -256,7 +253,7 @@ public final class Log {
             logger.log(level, message);
         } else {
             try {
-                logQueue.put(new logEntry(logger, level, message));
+                logQueue.put(new Message(logger, level, message));
             } catch (final InterruptedException e) {
                 logger.log(level, message);
             }
@@ -268,7 +265,7 @@ public final class Log {
         	if (thrown == null) Logger.getLogger(loggername).log(level, message); else Logger.getLogger(loggername).log(level, message, thrown);
         } else {
             try {
-            	if (thrown == null) logQueue.put(new logEntry(loggername, level, message)); else logQueue.put(new logEntry(loggername, level, message, thrown));
+            	if (thrown == null) logQueue.put(new Message(loggername, level, message)); else logQueue.put(new Message(loggername, level, message, thrown));
             } catch (final InterruptedException e) {
             	if (thrown == null) Logger.getLogger(loggername).log(level, message); else Logger.getLogger(loggername).log(level, message, thrown);
             }
@@ -280,48 +277,48 @@ public final class Log {
             Logger.getLogger(loggername).log(level, message);
         } else {
             try {
-                logQueue.put(new logEntry(loggername, level, message));
+                logQueue.put(new Message(loggername, level, message));
             } catch (final InterruptedException e) {
                 Logger.getLogger(loggername).log(level, message);
             }
         }
     }
 
-    protected final static class logEntry {
+    protected final static class Message {
         private final Level level;
         private final String message;
         private Logger logger;
         private String loggername;
         private Throwable thrown;
-        private logEntry(final Level level, final String message) {
+        private Message(final Level level, final String message) {
             this.level = level;
             this.message = message == null || message.length() <= 1024 ? message : message.substring(0, 1024);
         }
-        public logEntry(final Logger logger, final Level level, final String message, final Throwable thrown) {
+        public Message(final Logger logger, final Level level, final String message, final Throwable thrown) {
             this(level, message);
             this.logger = logger;
             this.loggername = null;
             this.thrown = thrown;
         }
-        public logEntry(final Logger logger, final Level level, final String message) {
+        public Message(final Logger logger, final Level level, final String message) {
             this(level, message);
             this.logger = logger;
             this.loggername = null;
             this.thrown = null;
         }
-        public logEntry(final String loggername, final Level level, final String message, final Throwable thrown) {
+        public Message(final String loggername, final Level level, final String message, final Throwable thrown) {
             this(level, message);
             this.logger = null;
             this.loggername = loggername;
             this.thrown = thrown;
         }
-        public logEntry(final String loggername, final Level level, final String message) {
+        public Message(final String loggername, final Level level, final String message) {
             this(level, message);
             this.logger = null;
             this.loggername = loggername;
             this.thrown = null;
         }
-        public logEntry() {
+        public Message() {
             this.logger = null;
             this.loggername = null;
             this.level = null;
@@ -330,26 +327,18 @@ public final class Log {
         }
     }
 
-    private final static logEntry poison = new logEntry();
-    private final static BlockingQueue<logEntry> logQueue = new ArrayBlockingQueue<logEntry>(300);
-    private   final static logRunner logRunnerThread = new logRunner();
-
-    static {
-        logRunnerThread.start();
-    }
-
-    protected final static class logRunner extends Thread {
-        public logRunner() {
-            super("Log Runner");
+    protected final static class Worker extends Thread {
+        public Worker() {
+            super("Log Worker");
         }
 
         @Override
         public void run() {
-            logEntry entry;
+            Message entry;
             Map<String, Logger> loggerCache = new HashMap<String, Logger>();
             //Map<String, AtomicInteger> loggerCounter = new HashMap<String, AtomicInteger>();
             try {
-                while ((entry = logQueue.take()) != poison) {
+                while ((entry = logQueue.take()) != POISON_MESSAGE) {
                     if (entry.logger == null) {
                         assert entry.loggername != null;
                         //AtomicInteger i = loggerCounter.get(entry.loggername);
@@ -372,7 +361,7 @@ public final class Log {
                     }
                 }
             } catch (final InterruptedException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             //Logger.getLogger("Log").log(Level.INFO, "closing logRunner with cached loggers: " + loggerCounter.entrySet().toString());
         }
@@ -408,7 +397,7 @@ public final class Log {
             }
 
             // redirect uncaught exceptions to logging
-            final Log exceptionLog = new Log("UNCAUGHT-EXCEPTION");
+            final ConcurrentLog exceptionLog = new ConcurrentLog("UNCAUGHT-EXCEPTION");
             Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler(){
                 @Override
                 public void uncaughtException(final Thread t, final Throwable e) {
@@ -418,10 +407,10 @@ public final class Log {
                     final PrintStream ps = new PrintStream(baos);
                     e.printStackTrace(ps);
                     ps.close();
-                    exceptionLog.logSevere(msg + "\n" + baos.toString(), e);
-                    Log.logException(e);
-                    Log.logException(e.getCause());
-                    if (e instanceof InvocationTargetException) Log.logException(((InvocationTargetException) e).getTargetException());
+                    exceptionLog.severe(msg + "\n" + baos.toString(), e);
+                    ConcurrentLog.logException(e);
+                    ConcurrentLog.logException(e.getCause());
+                    if (e instanceof InvocationTargetException) ConcurrentLog.logException(((InvocationTargetException) e).getTargetException());
                 }
             });
         } finally {
@@ -432,7 +421,7 @@ public final class Log {
     public final static void shutdown() {
         if (logRunnerThread == null || !logRunnerThread.isAlive()) return;
         try {
-            logQueue.put(poison);
+            logQueue.put(POISON_MESSAGE);
             logRunnerThread.join(1000);
         } catch (final InterruptedException e) {
         }

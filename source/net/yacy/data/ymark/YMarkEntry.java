@@ -33,11 +33,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.document.content.DCEntry;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 
 public class YMarkEntry extends TreeMap<String, String> {
@@ -209,7 +209,7 @@ public class YMarkEntry extends TreeMap<String, String> {
 			try {
 				return YMarkUtil.getBookmarkId(this.get(YMarkEntry.BOOKMARK.URL.key()));
 			} catch (MalformedURLException e) {
-				Log.logWarning(YMarkTables.BOOKMARKS_LOG, "getUrlHash - MalformedURLException for YMarkEntry: "+this.get(YMarkEntry.BOOKMARK.URL.key()));
+				ConcurrentLog.warn(YMarkTables.BOOKMARKS_LOG, "getUrlHash - MalformedURLException for YMarkEntry: "+this.get(YMarkEntry.BOOKMARK.URL.key()));
 			}
     	return null;
     }

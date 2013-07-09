@@ -59,11 +59,11 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.data.UserDB;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -134,7 +134,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     private int keepAliveRequestCount = 0;
 
     // needed for logging
-    private final static Log log = new Log("HTTPD");
+    private final static ConcurrentLog log = new ConcurrentLog("HTTPD");
 
     // class methods
     public HTTPDemon(final serverSwitch s) {
@@ -210,9 +210,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     public String error(final Throwable e) { // OBLIGATORIC FUNCTION
         // return string in case of any error that occurs during communication
         // is always (but not only) called if an IO-dependent exception occurrs.
-        log.logSevere("Unexpected Error. " + e.getClass().getName(),e);
+        log.severe("Unexpected Error. " + e.getClass().getName(),e);
         final String message = e.getMessage();
-        if (message != null && message.indexOf("heap space",0) > 0) Log.logException(e);
+        if (message != null && message.indexOf("heap space",0) > 0) ConcurrentLog.logException(e);
         return "501 Exception occurred: " + message;
     }
 
@@ -427,22 +427,22 @@ public final class HTTPDemon implements serverHandler, Cloneable {
 
     private static void logUnexpectedError(final Exception e, final String address) {
         if (e instanceof InterruptedException) {
-            log.logInfo("Interruption detected");
+            log.info("Interruption detected");
         } else {
             final String errorMsg = e.getMessage();
             if (errorMsg != null) {
                 if (errorMsg.startsWith("Socket closed")) {
-                    log.logInfo("httpd shutdown detected ... (" + e.getMessage() + "), client = " +address);
+                    log.info("httpd shutdown detected ... (" + e.getMessage() + "), client = " +address);
                 } else if ((errorMsg.startsWith("Broken pipe") || errorMsg.startsWith("Connection reset"))) {
                     // client closed the connection, so we just end silently
-                    log.logInfo("Client unexpectedly closed connection... (" + e.getMessage() + "), client = " + address);
+                    log.info("Client unexpectedly closed connection... (" + e.getMessage() + "), client = " + address);
                 } else if (errorMsg.equals("400 Bad request")) {
-                	log.logInfo("Bad client request ... (" + e.getMessage() + "), client = " + address);
+                	log.info("Bad client request ... (" + e.getMessage() + "), client = " + address);
                 } else {
-                    log.logSevere("Unexpected Error ... (" + e.getMessage() + "), client = " + address,e);
+                    log.severe("Unexpected Error ... (" + e.getMessage() + "), client = " + address,e);
                 }
             } else {
-                log.logSevere("Unexpected Error ... (" + e.getMessage() + "), client = " + address,e);
+                log.severe("Unexpected Error ... (" + e.getMessage() + "), client = " + address,e);
             }
         }
     }
@@ -509,7 +509,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             final String transferEncoding = header.get(HeaderFramework.TRANSFER_ENCODING);
             if (transferEncoding != null) {
                 if (!HeaderFramework.HTTP_VERSION_1_1.equals(httpVersion)) {
-                    log.logWarning("client "+ session.getName() +" uses transfer-coding with HTTP version "+ httpVersion +"!");
+                    log.warn("client "+ session.getName() +" uses transfer-coding with HTTP version "+ httpVersion +"!");
                 }
                 if("chunked".equalsIgnoreCase(header.get(HeaderFramework.TRANSFER_ENCODING))) {
                     sessionIn = new ChunkedInputStream(session.in);
@@ -805,7 +805,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     b.write(NumberTools.parseIntDecSubstring(s, i + 2, end));
                     i += end - i;
                 } else {                                                // 'named' smybols
-                    if (log.isFine()) log.logFine("discovered yet unimplemented HTML entity '" + s.substring(i, end + 1) + "'");
+                    if (log.isFine()) log.fine("discovered yet unimplemented HTML entity '" + s.substring(i, end + 1) + "'");
                     b.write(s.charAt(i));
                 }
             } else {
@@ -1157,8 +1157,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             }
             respond.flush();
         } finally {
-            if (fis != null) try { fis.close(); } catch (final Exception e) { Log.logException(e); }
-            if (o != null)   try { o.close();   } catch (final Exception e) { Log.logException(e); }
+            if (fis != null) try { fis.close(); } catch (final Exception e) { ConcurrentLog.logException(e); }
+            if (o != null)   try { o.close();   } catch (final Exception e) { ConcurrentLog.logException(e); }
         }
     }
 

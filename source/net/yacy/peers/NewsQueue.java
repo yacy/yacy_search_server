@@ -52,10 +52,10 @@ import java.util.Iterator;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -78,7 +78,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
         try {
             this.queueStack = new Table(path, rowdef, 10, 0, false, false, true);
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             this.queueStack = null;
         }
     }
@@ -92,7 +92,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
             try {
                 this.queueStack = new Table(this.path, rowdef, 10, 0, false, false, true);
             } catch (final SpaceExceededException ee) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 this.queueStack = null;
             }
         }
@@ -118,7 +118,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
 
     public synchronized void push(final NewsDB.Record entry) throws IOException, SpaceExceededException {
         if (!this.queueStack.consistencyCheck()) {
-            Log.logSevere("yacyNewsQueue", "reset of table " + this.path);
+            ConcurrentLog.severe("yacyNewsQueue", "reset of table " + this.path);
             this.queueStack.clear();
         }
         this.queueStack.addUnique(r2b(entry));
@@ -148,7 +148,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
                 try {
                     this.queueStack.remove(UTF8.getBytes(id));
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
                 return record;
             }
@@ -188,7 +188,7 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
             try {
                 this.stackNodeIterator = NewsQueue.this.queueStack.rows();
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 this.stackNodeIterator = null;
             }
         }

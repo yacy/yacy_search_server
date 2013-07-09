@@ -58,7 +58,7 @@ import java.io.PushbackInputStream;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.server.serverObjects;
@@ -240,7 +240,7 @@ public final class TemplateEngine {
                             try{
                                 num=Integer.parseInt(pattern.get(patternKey)); // Key contains the iteration number as string
                             }catch(final NumberFormatException e){
-                                Log.logException(e);
+                                ConcurrentLog.logException(e);
                                 num=0;
                             }
                         }
@@ -258,7 +258,7 @@ public final class TemplateEngine {
                         }//for
                         structure.append(open_endtag).append(multi_key).append(close_tagn);
                     } else {//transferUntil
-                        Log.logSevere("TEMPLATE", "No Close Key found for #{"+UTF8.String(multi_key)+"}#"); //prefix here?
+                        ConcurrentLog.severe("TEMPLATE", "No Close Key found for #{"+UTF8.String(multi_key)+"}#"); //prefix here?
                     }
                 }
 
@@ -295,7 +295,7 @@ public final class TemplateEngine {
                     //TODO: better Error Handling
                     transferUntil(pis, keyStream, appendBytes(PP, patternName, null, null));
                     if(pis.available()==0){
-                        Log.logSevere("TEMPLATE", "No such Template: %%" + UTF8.String(patternName));
+                        ConcurrentLog.severe("TEMPLATE", "No such Template: %%" + UTF8.String(patternName));
                         final byte[] sb = structure.getBytes();
                         structure.close();
                         text.close();
@@ -307,7 +307,7 @@ public final class TemplateEngine {
                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
                     transferUntil(pis, keyStream, appendBytes(hash_brackopen_slash, key, brackclose_hash, null));
                     if(pis.available()==0){
-                        Log.logSevere("TEMPLATE", "No Close Key found for #("+UTF8.String(key)+")# (by Name)");
+                        ConcurrentLog.severe("TEMPLATE", "No Close Key found for #("+UTF8.String(key)+")# (by Name)");
                     }
                 } else {
                     while(!found){
@@ -414,7 +414,7 @@ public final class TemplateEngine {
                             }
                         } catch (final IOException e) {
                             //file not found?
-                            Log.logSevere("FILEHANDLER","Include Error with file " + UTF8.String(filename) + ": " + e.getMessage());
+                            ConcurrentLog.severe("FILEHANDLER","Include Error with file " + UTF8.String(filename) + ": " + e.getMessage());
                         } finally {
                             if (br != null) try { br.close(); br=null; } catch (final Exception e) {}
                         }
@@ -463,7 +463,7 @@ public final class TemplateEngine {
         try {
             newPrefix.close();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return result;
     }
@@ -474,7 +474,7 @@ public final class TemplateEngine {
         try {
             newPrefix.close();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return newPrefix.getBytes();
     }
@@ -488,7 +488,7 @@ public final class TemplateEngine {
             try {
                 patternKey.close();
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -502,7 +502,7 @@ public final class TemplateEngine {
         try {
             byteArray.close();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return result;
     }
@@ -516,7 +516,7 @@ public final class TemplateEngine {
             writeTemplate(new PushbackInputStream(i, 100), System.out, h, UTF8.getBytes(args[2]));
             System.out.flush();
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 }

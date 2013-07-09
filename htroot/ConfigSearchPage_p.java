@@ -33,8 +33,8 @@ import java.sql.Date;
 import java.util.Properties;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -99,17 +99,17 @@ public class ConfigSearchPage_p {
                     fis = new FileInputStream(new File(sb.appPath, "defaults/yacy.init"));
                     config.load(fis);
                 } catch (final FileNotFoundException e) {
-                    Log.logSevere(mes, "could not find configuration file.");
+                    ConcurrentLog.severe(mes, "could not find configuration file.");
                     return prop;
                 } catch (final IOException e) {
-                    Log.logSevere(mes, "could not read configuration file.");
+                    ConcurrentLog.severe(mes, "could not read configuration file.");
                     return prop;
                 } finally {
                     if (fis != null) {
                         try {
                             fis.close();
                         } catch (final IOException e) {
-                            Log.logException(e);
+                            ConcurrentLog.logException(e);
                         }
                     }
                 }

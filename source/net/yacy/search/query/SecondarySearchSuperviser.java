@@ -11,7 +11,7 @@ import java.util.TreeSet;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.RemoteSearch;
@@ -183,7 +183,7 @@ public class SecondarySearchSuperviser extends Thread {
             if ( words.isEmpty() ) {
                 continue; // ???
             }
-            Log.logInfo("SearchEvent.SecondarySearchSuperviser", "asking peer " + peer + " for urls: " + urls + " from words: " + words);
+            ConcurrentLog.info("SearchEvent.SecondarySearchSuperviser", "asking peer " + peer + " for urls: " + urls + " from words: " + words);
             this.checkedPeers.add(peer);
             this.searchEvent.secondarySearchThreads[c++] =
                 RemoteSearch.secondaryRemoteSearch(

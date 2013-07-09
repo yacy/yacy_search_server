@@ -34,12 +34,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.solr.common.SolrInputDocument;
 
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.WebgraphConfiguration;
@@ -66,7 +66,7 @@ public class DocumentIndex extends Segment {
 
     public DocumentIndex(final File segmentPath, final File collectionConfigurationPath, final File webgraphConfigurationPath, final CallbackListener callback, final int cachesize)
         throws IOException {
-        super(new Log("DocumentIndex"), segmentPath,
+        super(new ConcurrentLog("DocumentIndex"), segmentPath,
                 collectionConfigurationPath == null ? null : new CollectionConfiguration(collectionConfigurationPath, true),
                 webgraphConfigurationPath == null ? null : new WebgraphConfiguration(webgraphConfigurationPath, true)
         );
@@ -112,7 +112,7 @@ public class DocumentIndex extends Segment {
                         }
                     } catch ( final IOException e ) {
                         if ( e.getMessage().indexOf("cannot parse", 0) < 0 ) {
-                            Log.logException(e);
+                            ConcurrentLog.logException(e);
                         }
                         DocumentIndex.this.callback.fail(f, e.getMessage());
                     }
@@ -208,7 +208,7 @@ public class DocumentIndex extends Segment {
                     }
                 }
             } catch ( final MalformedURLException e1 ) {
-                Log.logException(e1);
+                ConcurrentLog.logException(e1);
             }
         }
     }

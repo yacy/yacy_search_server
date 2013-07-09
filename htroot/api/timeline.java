@@ -30,9 +30,9 @@ import java.util.Iterator;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.WordReference;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.ISO639;
@@ -88,7 +88,7 @@ public final class timeline {
         try {
             search = segment.termIndex().query(q, qg.getExcludeHashes(), null, Segment.wordReferenceFactory, maxdist);
         } catch (SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         ReferenceContainer<WordReference> index = search.joined();
 
@@ -111,7 +111,7 @@ public final class timeline {
         prop.put("event", c);
 
         // log
-        Network.log.logInfo("EXIT TIMELINE SEARCH: " +
+        Network.log.info("EXIT TIMELINE SEARCH: " +
                 QueryParams.anonymizedQueryHashes(q) + " - " + joincount + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstracts, " +

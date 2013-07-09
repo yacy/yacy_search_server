@@ -32,12 +32,12 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
 import net.yacy.document.importer.OAIPMHImporter;
 import net.yacy.document.importer.OAIPMHLoader;
 import net.yacy.document.importer.ResumptionToken;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -79,11 +79,11 @@ public class IndexImportOAIPMH_p {
                         prop.put("defaulturl", e.getMessage());
                     }
                 } catch (final MalformedURLException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     prop.put("import-one", 2);
                     prop.put("import-one_error", e.getMessage());
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     prop.put("import-one", 2);
                     prop.put("import-one_error", e.getMessage());
                 }
@@ -101,7 +101,7 @@ public class IndexImportOAIPMH_p {
                     prop.put("optiongetlist", 1);
                     prop.put("iframetype", 1);
                 } catch (final MalformedURLException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     prop.put("status", 2);
                     prop.put("status_message", e.getMessage());
                 }
@@ -134,7 +134,7 @@ public class IndexImportOAIPMH_p {
                         final OAIPMHImporter job = new OAIPMHImporter(sb.loader, url);
                         job.start();
                     } catch (final MalformedURLException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 }
             }

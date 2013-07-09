@@ -33,6 +33,7 @@ import java.util.List;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -40,7 +41,6 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ByteArray;
@@ -96,7 +96,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
                              urlentry.dc_title()), null).keySet()),
                              urlentry.hash());
                 } catch (IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
                 indexSegment.fulltext().remove(urlentry.hash()); // clean up
                 throw new RuntimeException("index void");

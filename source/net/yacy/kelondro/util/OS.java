@@ -34,8 +34,8 @@ import java.util.Properties;
 import java.util.Vector;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.server.serverCore;
 
 
@@ -115,7 +115,7 @@ public final class OS {
         processArgs.add("-Xms4m");
         processArgs.add("-Xmx" + Integer.toString(mem) + "m");
         try {
-    		line = ConsoleInterface.getLastLineConsoleOutput(processArgs, new Log("MEMCHECK"));
+    		line = ConsoleInterface.getLastLineConsoleOutput(processArgs, new ConcurrentLog("MEMCHECK"));
 		} catch (final IOException e) {
 			return false;
 		}
@@ -157,7 +157,7 @@ public final class OS {
 			try {
 				Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
 			} catch (final InterruptedException e) {
-				Log.logSevere("DEPLOY", "deploy of script file failed. file = " + scriptFile.getAbsolutePath(), e);
+				ConcurrentLog.severe("DEPLOY", "deploy of script file failed. file = " + scriptFile.getAbsolutePath(), e);
 				throw new IOException(e.getMessage());
 			}
 		}

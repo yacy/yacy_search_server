@@ -39,6 +39,7 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.CrawlQueues;
@@ -48,7 +49,6 @@ import net.yacy.data.WorkTables;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
@@ -78,7 +78,7 @@ public class Load_RSS_p {
                 if (entry.getValue().startsWith("mark_")) try {
                     sb.tables.delete("rss", entry.getValue().substring(5).getBytes());
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }
@@ -103,9 +103,9 @@ public class Load_RSS_p {
                 sb.tables.delete("rss", pk);
             }
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         if (post != null && post.containsKey("removeSelectedFeedsScheduler")) {
@@ -118,9 +118,9 @@ public class Load_RSS_p {
                     rssRow.remove("api_pk");
                     sb.tables.insert("rss", pk, rssRow);
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 } catch (final SpaceExceededException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }
@@ -149,9 +149,9 @@ public class Load_RSS_p {
                 sb.tables.insert("rss", pk, rssRow);
             }
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         if (post != null && post.containsKey("addSelectedFeedScheduler")) {
@@ -162,17 +162,17 @@ public class Load_RSS_p {
                         final byte [] pk = entry.getValue().substring(5).getBytes();
                         row = sb.tables.select("rss", pk);
                     } catch (final IOException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                         continue;
                     } catch (final SpaceExceededException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                         continue;
                     }
                     DigestURI url = null;
                     try {
                         url = new DigestURI(row.get("url", ""));
                     } catch (final MalformedURLException e) {
-                        Log.logWarning("Load_RSS", "malformed url '" + row.get("url", "") + "': " + e.getMessage());
+                        ConcurrentLog.warn("Load_RSS", "malformed url '" + row.get("url", "") + "': " + e.getMessage());
                         continue;
                     }
                     // load feeds concurrently to get better responsibility in web interface
@@ -240,9 +240,9 @@ public class Load_RSS_p {
                 prop.put("shownewfeeds_num", newc);
                 prop.put("shownewfeeds", newc > 0 ? 1 : 0);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch (final SpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
 
             return prop;
@@ -260,7 +260,7 @@ public class Load_RSS_p {
         try {
             url = post.containsKey("url") ? new DigestURI(post.get("url", "")) : null;
         } catch (final MalformedURLException e) {
-            Log.logWarning("Load_RSS_p", "url not well-formed: '" + post.get("url", "") + "'");
+            ConcurrentLog.warn("Load_RSS_p", "url not well-formed: '" + post.get("url", "") + "'");
         }
 
         // if we have an url then try to load the rss
@@ -271,7 +271,7 @@ public class Load_RSS_p {
             final byte[] resource = response == null ? null : response.getContent();
             rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         // index all selected items: description only
@@ -286,7 +286,7 @@ public class Load_RSS_p {
                     if (RSSLoader.indexTriggered.containsKey(messageurl.hash())) continue loop;
                     messages.put(ASCII.String(messageurl.hash()), message);
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
             Map<String, HarvestProcess> existingurls = sb.urlExists(messages.keySet());
@@ -298,7 +298,7 @@ public class Load_RSS_p {
                     list.add(messageurl);
                     RSSLoader.indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
             sb.addToIndex(list, null, null, collections);
@@ -337,7 +337,7 @@ public class Load_RSS_p {
                     final DigestURI messageurl = new DigestURI(item.getLink());
                     urls.put(ASCII.String(messageurl.hash()), messageurl);
                 } catch (final MalformedURLException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     continue;
                 }
             }
@@ -361,7 +361,7 @@ public class Load_RSS_p {
                     prop.putHTML("showitems_item_" + i + "_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
                     i++;
                 } catch (final MalformedURLException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     continue;
                 }
             }

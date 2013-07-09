@@ -32,13 +32,13 @@ import java.util.Iterator;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.sorting.Rating;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.blob.BLOB;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
-import net.yacy.kelondro.logging.Log;
 
 
 public final class ReferenceContainerArray<ReferenceType extends Reference> {
@@ -113,7 +113,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         try {
             return new ReferenceContainerIterator(startWordHash, rot, excludePrivate);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }
@@ -140,7 +140,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             try {
 				return new ReferenceContainerIterator((byte[]) secondWordHash, this.rot, this.excludePrivate);
 			} catch (final IOException e) {
-			    Log.logException(e);
+			    ConcurrentLog.logException(e);
 				return null;
 			}
         }
@@ -159,7 +159,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
 			    if (this.excludePrivate && Word.isPrivate(b)) continue;
                 return get(b);
             } catch (final Throwable e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 return null;
             }
             // rotation iteration
@@ -175,7 +175,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
                 }
                 return null;
             } catch (final Throwable e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 return null;
             }
         }
@@ -206,7 +206,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         try {
             return new ReferenceCountIterator(startWordHash, rot, excludePrivate);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }
@@ -228,7 +228,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             try {
                 return new ReferenceCountIterator((byte[]) secondWordHash, this.rot, this.excludePrivate);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 return null;
             }
         }
@@ -248,7 +248,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
                 if (this.excludePrivate && Word.isPrivate(reference)) continue;
                 return new Rating<byte[]>(reference, count(reference));
             } catch (final Throwable e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 return null;
             }
             // rotation iteration
@@ -261,7 +261,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
                 if (this.excludePrivate && Word.isPrivate(reference)) continue;
                 return new Rating<byte[]>(reference, count(reference));
             } catch (final Throwable e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 return null;
             }
             return null;
@@ -310,14 +310,14 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     	int k = 1;
     	ReferenceContainer<ReferenceType> c = new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(a, this.factory.getRow()));
     	if (System.currentTimeMillis() > timeout) {
-    	    Log.logWarning("ReferenceContainerArray", "timout in get() (1): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
+    	    ConcurrentLog.warn("ReferenceContainerArray", "timout in get() (1): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
     	    return c;
     	}
     	while (entries.hasNext()) {
     		c = c.merge(new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(entries.next(), this.factory.getRow())));
     		k++;
     		if (System.currentTimeMillis() > timeout) {
-    		    Log.logWarning("ReferenceContainerArray", "timout in get() (2): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
+    		    ConcurrentLog.warn("ReferenceContainerArray", "timout in get() (2): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
     		    return c;
             }
     	}
@@ -333,7 +333,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         int c = RowSet.importRowCount(a, this.factory.getRow());
         assert c >= 0;
         if (System.currentTimeMillis() > timeout) {
-            Log.logWarning("ReferenceContainerArray", "timout in count() (1): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
+            ConcurrentLog.warn("ReferenceContainerArray", "timout in count() (1): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
             return c;
         }
         while (entries.hasNext()) {
@@ -341,7 +341,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             assert c >= 0;
             k++;
             if (System.currentTimeMillis() > timeout) {
-                Log.logWarning("ReferenceContainerArray", "timout in count() (2): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
+                ConcurrentLog.warn("ReferenceContainerArray", "timout in count() (2): " + k + " tables searched. timeout = " + METHOD_MAXRUNTIME);
                 return c;
             }
         }
@@ -398,7 +398,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     public boolean shrinkBestSmallFiles(final IODispatcher merger, final long targetFileSize) {
         final File[] ff = this.array.unmountBestMatch(2.0f, targetFileSize);
         if (ff == null) return false;
-        Log.logInfo("RICELL-shrink1", "unmountBestMatch(2.0, " + targetFileSize + ")");
+        ConcurrentLog.info("RICELL-shrink1", "unmountBestMatch(2.0, " + targetFileSize + ")");
         merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
         return true;
     }
@@ -406,7 +406,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     public boolean shrinkAnySmallFiles(final IODispatcher merger, final long targetFileSize) {
         final File[] ff = this.array.unmountSmallest(targetFileSize);
         if (ff == null) return false;
-        Log.logInfo("RICELL-shrink2", "unmountSmallest(" + targetFileSize + ")");
+        ConcurrentLog.info("RICELL-shrink2", "unmountSmallest(" + targetFileSize + ")");
         merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
         return true;
     }
@@ -414,7 +414,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     public boolean shrinkUpToMaxSizeFiles(final IODispatcher merger, final long maxFileSize) {
         final File[] ff = this.array.unmountBestMatch(2.0f, maxFileSize);
         if (ff == null) return false;
-        Log.logInfo("RICELL-shrink3", "unmountBestMatch(2.0, " + maxFileSize + ")");
+        ConcurrentLog.info("RICELL-shrink3", "unmountBestMatch(2.0, " + maxFileSize + ")");
         merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
         return true;
     }
@@ -422,7 +422,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     public boolean shrinkOldFiles(final IODispatcher merger) {
         final File ff = this.array.unmountOldest();
         if (ff == null) return false;
-        Log.logInfo("RICELL-shrink4/rewrite", "unmountOldest()");
+        ConcurrentLog.info("RICELL-shrink4/rewrite", "unmountOldest()");
         merger.merge(ff, null, this.factory, this.array, newContainerBLOBFile());
         return true;
     }

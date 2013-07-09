@@ -44,9 +44,9 @@ import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.logging.Log;
 
 
 public class MapDataMining extends MapHeap {
@@ -121,7 +121,7 @@ public class MapDataMining extends MapHeap {
                 try {
                     map = super.get(mapnameb);
                 } catch (final SpaceExceededException e) {
-                    Log.logWarning("MapDataMining", e.getMessage());
+                    ConcurrentLog.warn("MapDataMining", e.getMessage());
                     break;
                 }
                 if (map == null) break;
@@ -299,7 +299,7 @@ public class MapDataMining extends MapHeap {
                 }
             } catch (final SpaceExceededException e) {
                 map = null;
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
         super.delete(key);

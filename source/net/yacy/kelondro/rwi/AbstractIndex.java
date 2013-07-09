@@ -33,9 +33,9 @@ import java.util.TreeMap;
 
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.logging.Log;
 
 public abstract class AbstractIndex <ReferenceType extends Reference> implements Index<ReferenceType> {
 
@@ -115,7 +115,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
             try {
                 singleContainer = get(singleHash, urlselection);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 continue;
             }
 

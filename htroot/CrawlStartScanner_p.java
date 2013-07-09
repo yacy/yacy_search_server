@@ -38,9 +38,9 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.protocol.Scanner.Access;
 import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
@@ -201,7 +201,7 @@ public class CrawlStartScanner_p
                         uu = u.url();
                         pkmap.put(uu.hash(), uu);
                     } catch ( final MalformedURLException e ) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 }
                 // search for crawl start requests in this mapping
@@ -266,7 +266,7 @@ public class CrawlStartScanner_p
                                         u.hash());
                                 }
                             } catch ( final MalformedURLException e ) {
-                                Log.logException(e);
+                                ConcurrentLog.logException(e);
                             }
                         }
                     } catch ( final ConcurrentModificationException e ) {

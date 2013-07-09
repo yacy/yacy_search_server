@@ -39,10 +39,10 @@ import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.kelondroException;
 import net.yacy.peers.operation.yacyVersion;
 
@@ -127,12 +127,12 @@ public class DHTSelection {
             if (seed == null) continue;
             if (seed.isLastSeenTimeout(3600000)) continue;
             if (seed.getAge() < 1) { // the 'workshop feature'
-                Log.logInfo("DHT", "selectPeers/Age: " + seed.hash + ":" + seed.getName() + ", is newbie, age = " + seed.getAge());
+                ConcurrentLog.info("DHT", "selectPeers/Age: " + seed.hash + ":" + seed.getName() + ", is newbie, age = " + seed.getAge());
                 regularSeeds.put(seed.hash, seed);
                 continue;
             }
             if (Math.random() * 100 + (wordhashes.size() > 1 ? burstMultiwordPercent : 25) >= 50) {
-                if (Log.isFine("DHT")) Log.logFine("DHT", "selectPeers/CountBurst: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.getWordCount());
+                if (ConcurrentLog.isFine("DHT")) ConcurrentLog.fine("DHT", "selectPeers/CountBurst: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.getWordCount());
                 regularSeeds.put(seed.hash, seed);
                 continue;
             }
@@ -157,7 +157,7 @@ public class DHTSelection {
             if (seed == null) continue;
             if (seed.isLastSeenTimeout(3600000)) continue;
             if (Math.random() * 100 + burstRobinsonPercent >= 100) {
-                if (Log.isFine("DHT")) Log.logFine("DHT", "selectPeers/RobinsonBurst: " + seed.hash + ":" + seed.getName());
+                if (ConcurrentLog.isFine("DHT")) ConcurrentLog.fine("DHT", "selectPeers/RobinsonBurst: " + seed.hash + ":" + seed.getName());
                 regularSeeds.put(seed.hash, seed);
                 continue;
             }
@@ -174,9 +174,9 @@ public class DHTSelection {
                 // peer tags match
                 String specialized = seed.getPeerTags().toString();
                 if (specialized.equals("[*]")) {
-                    Log.logInfo("DHT", "selectPeers/RobinsonTag: " + seed.hash + ":" + seed.getName() + " grants search for all");
+                    ConcurrentLog.info("DHT", "selectPeers/RobinsonTag: " + seed.hash + ":" + seed.getName() + " grants search for all");
                 } else {
-                    Log.logInfo("DHT", "selectPeers/RobinsonTag " + seed.hash + ":" + seed.getName() + " is specialized peer for " + specialized);
+                    ConcurrentLog.info("DHT", "selectPeers/RobinsonTag " + seed.hash + ":" + seed.getName() + " is specialized peer for " + specialized);
                 }
                 regularSeeds.put(seed.hash, seed);
             }
@@ -205,7 +205,7 @@ public class DHTSelection {
                 seed = dhtEnum.next();
                 if (seed == null || seed.hash == null) continue;
                 if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
-                if (Log.isFine("DHT")) Log.logFine("DHT", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/ score " + c);
+                if (ConcurrentLog.isFine("DHT")) ConcurrentLog.fine("DHT", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/ score " + c);
                 regularSeeds.put(seed.hash, seed);
                 c--;
             }
@@ -281,7 +281,7 @@ public class DHTSelection {
                     try {
                         this.doublecheck.put(hashb);
                     } catch (SpaceExceededException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                         break;
                     }
                     if (s.getFlagAcceptRemoteIndex() ||
@@ -293,7 +293,7 @@ public class DHTSelection {
                 }
             } catch (final kelondroException e) {
                 System.out.println("DEBUG acceptRemoteIndexSeedEnum:" + e.getMessage());
-                Network.log.logSevere("database inconsistency (" + e.getMessage() + "), re-set of db.");
+                Network.log.severe("database inconsistency (" + e.getMessage() + "), re-set of db.");
                 this.seedDB.resetActiveTable();
                 return null;
             }
@@ -433,7 +433,7 @@ public class DHTSelection {
                 }
             } catch (final kelondroException e) {
                 System.out.println("DEBUG providesRemoteCrawlURLsEnum:" + e.getMessage());
-                Network.log.logSevere("database inconsistency (" + e.getMessage() + "), re-set of db.");
+                Network.log.severe("database inconsistency (" + e.getMessage() + "), re-set of db.");
                 this.seedDB.resetActiveTable();
                 return null;
             }
@@ -478,7 +478,7 @@ public class DHTSelection {
             }
             return result;
         } catch (final kelondroException e) {
-            Network.log.logSevere("Internal Error at yacySeedDB.seedsByAge: " + e.getMessage(), e);
+            Network.log.severe("Internal Error at yacySeedDB.seedsByAge: " + e.getMessage(), e);
             return null;
         }
     }

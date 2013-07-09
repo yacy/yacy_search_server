@@ -13,11 +13,11 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.UserDB;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 
@@ -134,7 +134,7 @@ public static String GetTableentry(String url, String type, String username) {
 	try {
 		Iterator<Row> it = sb.tables.iterator(username+"_contribution", "url", url.getBytes());
 
-		Log.logInfo ("TABLE", "GET "+username+" / "+url+" - "+type+" ...");
+		ConcurrentLog.info ("TABLE", "GET "+username+" / "+url+" - "+type+" ...");
 
 		it = sb.tables.orderBy(it, -1, "timestamp_creation").iterator();
 
@@ -152,7 +152,7 @@ public static String GetTableentry(String url, String type, String username) {
 		e.printStackTrace();
 	}
 
-	Log.logInfo ("TABLE", "GET "+username+" / "+url+" - "+type+" - "+retvalue);
+	ConcurrentLog.info ("TABLE", "GET "+username+" / "+url+" - "+type+" - "+retvalue);
 
 	return retvalue;
 
@@ -169,7 +169,7 @@ public static String Tableentry(String url, String type, String comment, String 
 
 	Boolean processlocal = false;
 
-	Log.logInfo ("TABLE", "PUT "+from+" / "+url+" - "+type+" - "+comment);
+	ConcurrentLog.info ("TABLE", "PUT "+from+" / "+url+" - "+type+" - "+comment);
 
 	if (!sb.getConfig("interaction.contribution.accumulationpeer", "").equals("")) {
 
@@ -181,7 +181,7 @@ public static String Tableentry(String url, String type, String comment, String 
 		} else {
 
 			// Forward feedback to other peer
-			Log.logInfo("INTERACTION", "Forwarding contribution to "+sb.getConfig("interaction.contribution.accumulationpeer", "")+": " + url + ": "
+			ConcurrentLog.info("INTERACTION", "Forwarding contribution to "+sb.getConfig("interaction.contribution.accumulationpeer", "")+": " + url + ": "
 					+ comment);
 			try {
 
@@ -220,7 +220,7 @@ public static String Tableentry(String url, String type, String comment, String 
         try {
             sb.tables.insert(from+"_contribution", map);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (SpaceExceededException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

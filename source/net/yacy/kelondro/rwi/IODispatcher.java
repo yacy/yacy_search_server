@@ -29,8 +29,8 @@ import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Semaphore;
 
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.blob.ArrayStack;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 
 
@@ -48,7 +48,7 @@ import net.yacy.kelondro.util.MemoryControl;
  */
 public class IODispatcher extends Thread {
 
-    private static final Log log = new Log("IODispatcher");
+    private static final ConcurrentLog log = new ConcurrentLog("IODispatcher");
 
     private   Semaphore                    controlQueue;
     private   final Semaphore              termination;
@@ -75,7 +75,7 @@ public class IODispatcher extends Thread {
             try {
                 this.termination.acquire();
             } catch (final InterruptedException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -83,7 +83,7 @@ public class IODispatcher extends Thread {
     @SuppressWarnings("unchecked")
 	protected synchronized void dump(final ReferenceContainerCache<? extends Reference> cache, final File file, final ReferenceContainerArray<? extends Reference> array) {
         if (this.dumpQueue == null || this.controlQueue == null || !isAlive()) {
-            log.logWarning("emergency dump of file " + file.getName());
+            log.warn("emergency dump of file " + file.getName());
              if (!cache.isEmpty()) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, this.writeBufferSize), true);
         } else {
             @SuppressWarnings("rawtypes")
@@ -93,16 +93,16 @@ public class IODispatcher extends Thread {
             if (isAlive()) {
                 try {
                     this.dumpQueue.put(job);
-                    log.logInfo("appended dump job for file " + file.getName());
+                    log.info("appended dump job for file " + file.getName());
                 } catch (final InterruptedException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     cache.dump(file, (int) Math.min(MemoryControl.available() / 3, this.writeBufferSize), true);
                 } finally {
                     this.controlQueue.release();
                 }
             } else {
                 job.dump();
-                log.logWarning("dispatcher is not alive, just dumped file " + file.getName());
+                log.warn("dispatcher is not alive, just dumped file " + file.getName());
             }
         }
     }
@@ -114,9 +114,9 @@ public class IODispatcher extends Thread {
     protected synchronized void merge(final File f1, final File f2, final ReferenceFactory<? extends Reference> factory, final ArrayStack array, final File newFile) {
         if (this.mergeQueue == null || this.controlQueue == null || !isAlive()) {
             if (f2 == null) {
-                log.logWarning("emergency rewrite of file " + f1.getName() + " to " + newFile.getName());
+                log.warn("emergency rewrite of file " + f1.getName() + " to " + newFile.getName());
             } else {
-                log.logWarning("emergency merge of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
+                log.warn("emergency merge of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
             }
             array.mergeMount(f1, f2, factory, newFile, (int) Math.min(MemoryControl.available() / 3, this.writeBufferSize));
         } else {
@@ -125,12 +125,12 @@ public class IODispatcher extends Thread {
                 try {
                     this.mergeQueue.put(job);
                     if (f2 == null) {
-                        log.logInfo("appended rewrite job of file " + f1.getName() + " to " + newFile.getName());
+                        log.info("appended rewrite job of file " + f1.getName() + " to " + newFile.getName());
                     } else {
-                        log.logInfo("appended merge job of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
+                        log.info("appended merge job of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
                     }
                 } catch (final InterruptedException e) {
-                    log.logWarning("interrupted: " + e.getMessage(), e);
+                    log.warn("interrupted: " + e.getMessage(), e);
                     array.mergeMount(f1, f2, factory, newFile, (int) Math.min(MemoryControl.available() / 3, this.writeBufferSize));
                 } finally {
                     this.controlQueue.release();
@@ -138,9 +138,9 @@ public class IODispatcher extends Thread {
             } else {
                 job.merge();
                 if (f2 == null) {
-                    log.logWarning("dispatcher not running, merged files " + f1.getName() + " to " + newFile.getName());
+                    log.warn("dispatcher not running, merged files " + f1.getName() + " to " + newFile.getName());
                 } else {
-                    log.logWarning("dispatcher not running, rewrote file " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
+                    log.warn("dispatcher not running, rewrote file " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
                 }
             }
         }
@@ -162,11 +162,11 @@ public class IODispatcher extends Thread {
                         f = dumpJob.file;
                         dumpJob.dump();
                     } catch (final InterruptedException e) {
-                        log.logSevere("main run job was interrupted (1)", e);
-                        Log.logException(e);
+                        log.severe("main run job was interrupted (1)", e);
+                        ConcurrentLog.logException(e);
                     } catch (final Throwable e) {
-                        log.logSevere("main run job had errors (1), dump to " + f + " failed.", e);
-                        Log.logException(e);
+                        log.severe("main run job had errors (1), dump to " + f + " failed.", e);
+                        ConcurrentLog.logException(e);
                     }
                     continue loop;
                 }
@@ -181,37 +181,37 @@ public class IODispatcher extends Thread {
                         f2 = mergeJob.f2;
                         mergeJob.merge();
                     } catch (final InterruptedException e) {
-                        log.logSevere("main run job was interrupted (2)", e);
-                        Log.logException(e);
+                        log.severe("main run job was interrupted (2)", e);
+                        ConcurrentLog.logException(e);
                     } catch (final Throwable e) {
                         if (f2 == null) {
-                            log.logSevere("main run job had errors (2), dump to " + f + " failed. Input file is " + f1, e);
+                            log.severe("main run job had errors (2), dump to " + f + " failed. Input file is " + f1, e);
                         } else {
-                            log.logSevere("main run job had errors (2), dump to " + f + " failed. Input files are " + f1 + " and " + f2, e);
+                            log.severe("main run job had errors (2), dump to " + f + " failed. Input files are " + f1 + " and " + f2, e);
                         }
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                     continue loop;
                 }
 
                 // check termination
                 if (this.terminate) {
-                    log.logInfo("caught termination signal");
+                    log.info("caught termination signal");
                     break;
                 }
 
-                log.logSevere("main loop in bad state, dumpQueue.size() = " + this.dumpQueue.size() + ", mergeQueue.size() = " + this.mergeQueue.size() + ", controlQueue.availablePermits() = " + this.controlQueue.availablePermits());
+                log.severe("main loop in bad state, dumpQueue.size() = " + this.dumpQueue.size() + ", mergeQueue.size() = " + this.mergeQueue.size() + ", controlQueue.availablePermits() = " + this.controlQueue.availablePermits());
                 assert false : "this process statt should not be reached"; // this should never happen
             } catch (final Throwable e) {
-                log.logSevere("main run job failed (X)", e);
-                Log.logException(e);
+                log.severe("main run job failed (X)", e);
+                ConcurrentLog.logException(e);
             }
-        log.logInfo("loop terminated");
+        log.info("loop terminated");
         } catch (final Throwable e) {
-            log.logSevere("main run job failed (4)", e);
-            Log.logException(e);
+            log.severe("main run job failed (4)", e);
+            ConcurrentLog.logException(e);
         } finally {
-            log.logInfo("terminating run job");
+            log.info("terminating run job");
             this.controlQueue = null;
             this.dumpQueue = null;
             this.mergeQueue = null;
@@ -233,7 +233,7 @@ public class IODispatcher extends Thread {
                 if (!this.cache.isEmpty()) this.cache.dump(this.file, (int) Math.min(MemoryControl.available() / 3, IODispatcher.this.writeBufferSize), true);
                 this.array.mountBLOBFile(this.file);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -259,11 +259,11 @@ public class IODispatcher extends Thread {
 
         private File merge() {
         	if (!this.f1.exists()) {
-        	    log.logWarning("merge of file (1) " + this.f1.getName() + " failed: file does not exists");
+        	    log.warn("merge of file (1) " + this.f1.getName() + " failed: file does not exists");
         		return null;
         	}
         	if (this.f2 != null && !this.f2.exists()) {
-        	    log.logWarning("merge of file (2) " + this.f2.getName() + " failed: file does not exists");
+        	    log.warn("merge of file (2) " + this.f2.getName() + " failed: file does not exists");
         		return null;
         	}
             return this.array.mergeMount(this.f1, this.f2, this.factory, this.newFile, (int) Math.min(MemoryControl.available() / 3, IODispatcher.this.writeBufferSize));

@@ -28,8 +28,8 @@ import java.util.Iterator;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.Rating;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.server.serverObjects;
@@ -39,7 +39,7 @@ public class termlist_p {
 
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
-    	final Log log = new Log("TERMLIST");
+    	final ConcurrentLog log = new ConcurrentLog("TERMLIST");
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
         Segment segment = sb.index;
@@ -86,7 +86,7 @@ public class termlist_p {
                 try {
                     segment.termIndex().delete(t);
                 } catch (final IOException e1) {
-                	log.logWarning("Error deleting " + ASCII.String(t), e1);
+                	log.warn("Error deleting " + ASCII.String(t), e1);
                     e1.printStackTrace();
                 }
             }
@@ -104,11 +104,11 @@ public class termlist_p {
         prop.put("over10000000", over10000000);
         prop.put("over100000000", over100000000);
 
-        log.logWarning("finished termlist_p -> terms: " + c);
-        log.logWarning("maxterm: "+ (maxterm == null ? "" : ASCII.String(maxterm)));
-        log.logWarning("maxcount:  " + maxcount);
-        log.logWarning("termnumber: " + termnumber);
-        log.logWarning("totalmemory: " + totalmemory);
+        log.warn("finished termlist_p -> terms: " + c);
+        log.warn("maxterm: "+ (maxterm == null ? "" : ASCII.String(maxterm)));
+        log.warn("maxcount:  " + maxcount);
+        log.warn("termnumber: " + termnumber);
+        log.warn("totalmemory: " + totalmemory);
         // return rewrite properties
         return prop;
     }

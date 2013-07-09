@@ -41,13 +41,13 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.FailType;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.FileUtils;
@@ -55,7 +55,7 @@ import net.yacy.search.index.Fulltext;
 
 public class ZURL implements Iterable<ZURL.Entry> {
 
-    private static Log log = new Log("REJECTED");
+    private static ConcurrentLog log = new ConcurrentLog("REJECTED");
 
     private static final int EcoFSBufferSize = 2000;
     private static final int maxStackSize    = 1000;
@@ -115,7 +115,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             try {
                 this.urlIndex = new Table(f, rowdef, 0, 0, false, exceed134217727, true);
             } catch (final SpaceExceededException e1) {
-                Log.logException(e1);
+                ConcurrentLog.logException(e1);
             }
         }
         //urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, 0, true);
@@ -186,14 +186,14 @@ public class ZURL implements Iterable<ZURL.Entry> {
         final Entry entry = new Entry(bentry, executor, workdate, workcount, reason);
         put(entry);
         this.stack.add(entry.hash());
-        if (!reason.startsWith("double")) log.logInfo(bentry.url().toNormalform(true) + " - " + reason);
+        if (!reason.startsWith("double")) log.info(bentry.url().toNormalform(true) + " - " + reason);
         if (this.fulltext.getDefaultConnector() != null && failCategory.store) {
             // send the error to solr
             try {
                 SolrInputDocument errorDoc = this.fulltext.getDefaultConfiguration().err(bentry.url(), failCategory.name() + " " + reason, failCategory.failType, httpcode);
                 this.fulltext.getDefaultConnector().add(errorDoc);
             } catch (final IOException e) {
-                Log.logWarning("SOLR", "failed to send error " + bentry.url().toNormalform(true) + " to solr: " + e.getMessage());
+                ConcurrentLog.warn("SOLR", "failed to send error " + bentry.url().toNormalform(true) + " to solr: " + e.getMessage());
             }
         }
         while (this.stack.size() > maxStackSize) this.stack.poll();
@@ -247,7 +247,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             if (entry == null) return null;
             return new Entry(entry);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }
@@ -271,7 +271,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             if (this.urlIndex != null) this.urlIndex.put(newrow);
             entry.stored = true;
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 

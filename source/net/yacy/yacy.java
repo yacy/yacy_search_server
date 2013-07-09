@@ -48,10 +48,10 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.sorting.Array;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.Translator;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
@@ -167,23 +167,23 @@ public final class yacy {
                 System.out.println("could not copy yacy.logging");
             }
             try{
-                Log.configureLogging(dataHome, appHome, new File(dataHome, "DATA/LOG/yacy.logging"));
+                ConcurrentLog.configureLogging(dataHome, appHome, new File(dataHome, "DATA/LOG/yacy.logging"));
             } catch (final IOException e) {
                 System.out.println("could not find logging properties in homePath=" + dataHome);
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
-            Log.logConfig("STARTUP", "YaCy version: " + yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision());
-            Log.logConfig("STARTUP", "Java version: " + System.getProperty("java.version", "no-java-version"));
-            Log.logConfig("STARTUP", "Operation system: " + System.getProperty("os.name","unknown"));
-            Log.logConfig("STARTUP", "Application root-path: " + appHome);
-            Log.logConfig("STARTUP", "Data root-path: " + dataHome);
-            Log.logConfig("STARTUP", "Time zone: UTC" + GenericFormatter.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
-            Log.logConfig("STARTUP", "Maximum file system path length: " + OS.maxPathLength);
+            ConcurrentLog.config("STARTUP", "YaCy version: " + yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision());
+            ConcurrentLog.config("STARTUP", "Java version: " + System.getProperty("java.version", "no-java-version"));
+            ConcurrentLog.config("STARTUP", "Operation system: " + System.getProperty("os.name","unknown"));
+            ConcurrentLog.config("STARTUP", "Application root-path: " + appHome);
+            ConcurrentLog.config("STARTUP", "Data root-path: " + dataHome);
+            ConcurrentLog.config("STARTUP", "Time zone: UTC" + GenericFormatter.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
+            ConcurrentLog.config("STARTUP", "Maximum file system path length: " + OS.maxPathLength);
 
             f = new File(dataHome, "DATA/yacy.running");
             final String conf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
             if (f.exists()) {                // another instance running? VM crash? User will have to care about this
-                Log.logSevere("STARTUP", "WARNING: the file " + f + " exists, this usually means that a YaCy instance is still running. If you want to restart YaCy, try first ./stopYACY.sh, then ./startYACY.sh. If ./stopYACY.sh fails, try ./killYACY.sh");
+                ConcurrentLog.severe("STARTUP", "WARNING: the file " + f + " exists, this usually means that a YaCy instance is still running. If you want to restart YaCy, try first ./stopYACY.sh, then ./startYACY.sh. If ./stopYACY.sh fails, try ./killYACY.sh");
                 
                 // If YaCy is actually running, then we check if the server port is open.
                 // If yes, then we consider that a restart is a user mistake and then we just respond
@@ -200,18 +200,18 @@ public final class yacy {
                         if (TimeoutRequest.ping("127.0.0.1", port, 1000)) {
                             Browser.openBrowser("http://localhost:" + port + "/" + p.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
                             // Thats it; YaCy was running, the user is happy, we can stop now.
-                            Log.logSevere("STARTUP", "WARNING: YaCy instance was still running; just opening the browser and exit.");
+                            ConcurrentLog.severe("STARTUP", "WARNING: YaCy instance was still running; just opening the browser and exit.");
                             System.exit(0);
                         }
                     } catch (ExecutionException ex) {
-                        Log.logInfo("STARTUP", "INFO: delete old yacy.running file; likely previous YaCy session was not orderly shutdown!");
+                        ConcurrentLog.info("STARTUP", "INFO: delete old yacy.running file; likely previous YaCy session was not orderly shutdown!");
                     }
                 }
                 
                 // YaCy is not running; thus delete the file an go on as nothing was wrong.
                 delete(f);
             }
-            if (!f.createNewFile()) Log.logSevere("STARTUP", "WARNING: the file " + f + " can not be created!");
+            if (!f.createNewFile()) ConcurrentLog.severe("STARTUP", "WARNING: the file " + f + " can not be created!");
             try { new FileOutputStream(f).write(Integer.toString(OS.getPID()).getBytes()); } catch (final Exception e) { } // write PID
             f.deleteOnExit();
             FileChannel channel = null;
@@ -224,7 +224,7 @@ public final class yacy {
             try {
                 sb = new Switchboard(dataHome, appHome, "defaults/yacy.init".replace("/", File.separator), conf);
             } catch (final RuntimeException e) {
-                Log.logSevere("STARTUP", "YaCy cannot start: " + e.getMessage(), e);
+                ConcurrentLog.severe("STARTUP", "YaCy cannot start: " + e.getMessage(), e);
                 System.exit(-1);
             }
             //sbSync.V(); // signal that the sb reference was set
@@ -311,7 +311,7 @@ public final class yacy {
                     try {
                         JenaTripleStore.load(new File(triplestore, s).getAbsolutePath());
                     } catch (IOException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
             	}
             }
@@ -321,7 +321,7 @@ public final class yacy {
                     try {
                         JenaTripleStore.load(local.getAbsolutePath());
                     } catch (IOException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 }
             }
@@ -387,7 +387,7 @@ public final class yacy {
                 Formatter.setLocale(lang);
 
                 // registering shutdown hook
-                Log.logConfig("STARTUP", "Registering Shutdown Hook");
+                ConcurrentLog.config("STARTUP", "Registering Shutdown Hook");
                 final Runtime run = Runtime.getRuntime();
                 run.addShutdownHook(new shutdownHookThread(Thread.currentThread(), sb));
 
@@ -404,11 +404,11 @@ public final class yacy {
                 try {
                     sb.waitForShutdown();
                 } catch (final Exception e) {
-                    Log.logSevere("MAIN CONTROL LOOP", "PANIC: " + e.getMessage(),e);
+                    ConcurrentLog.severe("MAIN CONTROL LOOP", "PANIC: " + e.getMessage(),e);
                 }
                 // shut down
                 Array.terminate();
-                Log.logConfig("SHUTDOWN", "caught termination signal");
+                ConcurrentLog.config("SHUTDOWN", "caught termination signal");
                 server.terminate(false);
                 server.interrupt();
                 server.close();
@@ -417,16 +417,16 @@ public final class yacy {
                 if (server.isAlive()) {
                     server.interrupt();
                 }
-                Log.logConfig("SHUTDOWN", "server has terminated");
+                ConcurrentLog.config("SHUTDOWN", "server has terminated");
                 sb.close();
             } catch (final Exception e) {
-                Log.logSevere("STARTUP", "Unexpected Error: " + e.getClass().getName(),e);
+                ConcurrentLog.severe("STARTUP", "Unexpected Error: " + e.getClass().getName(),e);
                 //System.exit(1);
             }
             if(lock != null) lock.release();
             if(channel != null) channel.close();
         } catch (final Exception ee) {
-            Log.logSevere("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
+            ConcurrentLog.severe("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
         } finally {
         }
 
@@ -435,8 +435,8 @@ public final class yacy {
             JenaTripleStore.saveAll();
         }
 
-        Log.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
-        Log.shutdown();
+        ConcurrentLog.config("SHUTDOWN", "goodbye. (this is the last line)");
+        ConcurrentLog.shutdown();
         shutdownSemaphore.release(1000);
         try {
             System.exit(0);
@@ -448,7 +448,7 @@ public final class yacy {
 	 */
 	private static void delete(final File f) {
 		if(!f.delete())
-		    Log.logSevere("STARTUP", "WARNING: the file " + f + " can not be deleted!");
+		    ConcurrentLog.severe("STARTUP", "WARNING: the file " + f + " can not be deleted!");
 	}
 
 	/**
@@ -458,7 +458,7 @@ public final class yacy {
 	private static void mkdirIfNeseccary(final File path) {
 		if (!(path.exists()))
 			if(!path.mkdir())
-				Log.logWarning("STARTUP", "could not create directory "+ path.toString());
+				ConcurrentLog.warn("STARTUP", "could not create directory "+ path.toString());
 	}
 
 	/**
@@ -468,7 +468,7 @@ public final class yacy {
 	public static void mkdirsIfNeseccary(final File path) {
 		if (!(path.exists()))
 			if(!path.mkdirs())
-				Log.logWarning("STARTUP", "could not create directories "+ path.toString());
+				ConcurrentLog.warn("STARTUP", "could not create directories "+ path.toString());
 	}
 
 	/**
@@ -482,12 +482,12 @@ public final class yacy {
     * @return Properties read from the configurationfile.
     */
     private static Properties configuration(final String mes, final File homePath) {
-        Log.logConfig(mes, "Application Root Path: " + homePath.toString());
+        ConcurrentLog.config(mes, "Application Root Path: " + homePath.toString());
 
         // read data folder
         final File dataFolder = new File(homePath, "DATA");
         if (!(dataFolder.exists())) {
-            Log.logSevere(mes, "Application was never started or root path wrong.");
+            ConcurrentLog.severe(mes, "Application was never started or root path wrong.");
             System.exit(-1);
         }
 
@@ -497,17 +497,17 @@ public final class yacy {
         	fis  = new FileInputStream(new File(homePath, "DATA/SETTINGS/yacy.conf"));
             config.load(fis);
         } catch (final FileNotFoundException e) {
-            Log.logSevere(mes, "could not find configuration file.");
+            ConcurrentLog.severe(mes, "could not find configuration file.");
             System.exit(-1);
         } catch (final IOException e) {
-            Log.logSevere(mes, "could not read configuration file.");
+            ConcurrentLog.severe(mes, "could not read configuration file.");
             System.exit(-1);
         } finally {
         	if(fis != null) {
         		try {
 					fis.close();
 				} catch (final IOException e) {
-				    Log.logException(e);
+				    ConcurrentLog.logException(e);
 				}
         	}
         }
@@ -559,7 +559,7 @@ public final class yacy {
             // read response
 //            if (res.getStatusLine().startsWith("2")) {
             if (con.getStatusCode() > 199 && con.getStatusCode() < 300) {
-                Log.logConfig("COMMAND-STEERING", "YACY accepted steering command: " + processdescription);
+                ConcurrentLog.config("COMMAND-STEERING", "YACY accepted steering command: " + processdescription);
 //                final ByteArrayOutputStream bos = new ByteArrayOutputStream(); //This is stream is not used???
 //                try {
 //                    FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(bos));
@@ -568,11 +568,11 @@ public final class yacy {
 //                }
             } else {
 //                Log.logSevere("COMMAND-STEERING", "error response from YACY socket: " + res.getStatusLine());
-            	Log.logSevere("COMMAND-STEERING", "error response from YACY socket: " + con.getHttpResponse().getStatusLine());
+            	ConcurrentLog.severe("COMMAND-STEERING", "error response from YACY socket: " + con.getHttpResponse().getStatusLine());
                 System.exit(-1);
             }
         } catch (final IOException e) {
-            Log.logSevere("COMMAND-STEERING", "could not establish connection to YACY socket: " + e.getMessage());
+            ConcurrentLog.severe("COMMAND-STEERING", "could not establish connection to YACY socket: " + e.getMessage());
             System.exit(-1);
 //        } finally {
 //            // release connection
@@ -588,7 +588,7 @@ public final class yacy {
 		}
 
         // finished
-        Log.logConfig("COMMAND-STEERING", "SUCCESSFULLY FINISHED COMMAND: " + processdescription);
+        ConcurrentLog.config("COMMAND-STEERING", "SUCCESSFULLY FINISHED COMMAND: " + processdescription);
     }
 
     /**
@@ -655,7 +655,7 @@ public final class yacy {
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
 	        }
     	} finally {
-    		Log.shutdown();
+    		ConcurrentLog.shutdown();
     	}
     }
 }
@@ -678,20 +678,20 @@ class shutdownHookThread extends Thread {
     public void run() {
         try {
             if (!this.sb.isTerminated()) {
-                Log.logConfig("SHUTDOWN","Shutdown via shutdown hook.");
+                ConcurrentLog.config("SHUTDOWN","Shutdown via shutdown hook.");
 
                 // sending the yacy main thread a shutdown signal
-                Log.logFine("SHUTDOWN","Signaling shutdown to the switchboard.");
+                ConcurrentLog.fine("SHUTDOWN","Signaling shutdown to the switchboard.");
                 this.sb.terminate("shutdown hook");
 
                 // waiting for the yacy thread to finish execution
-                Log.logFine("SHUTDOWN","Waiting for main thread to finish.");
+                ConcurrentLog.fine("SHUTDOWN","Waiting for main thread to finish.");
                 if (this.mainThread.isAlive() && !this.sb.isTerminated()) {
                     this.mainThread.join();
                 }
             }
         } catch (final Exception e) {
-            Log.logSevere("SHUTDOWN","Unexpected error. " + e.getClass().getName(),e);
+            ConcurrentLog.severe("SHUTDOWN","Unexpected error. " + e.getClass().getName(),e);
         }
     }
 }

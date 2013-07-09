@@ -25,7 +25,7 @@ import java.util.Iterator;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphConfiguration;
@@ -94,7 +94,7 @@ public class IndexSchema_p {
                 }
                 cs.commit();
             } catch (IOException ex) {
-                Log.logWarning("IndexSchema", "file " + solrInitFile.getAbsolutePath() + " not found");
+                ConcurrentLog.warn("IndexSchema", "file " + solrInitFile.getAbsolutePath() + " not found");
             }
         }
         

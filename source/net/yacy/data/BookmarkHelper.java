@@ -49,13 +49,13 @@ import javax.xml.parsers.ParserConfigurationException;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.BookmarksDB.Tag;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
 import org.w3c.dom.Document;
@@ -146,11 +146,11 @@ public class BookmarkHelper {
             FileUtils.copy(input,writer);
             writer.close();
             links = scraper.getAnchors();
-        } catch (final IOException e) { Log.logWarning("BOOKMARKS", "error during load of links: "+ e.getClass() +" "+ e.getMessage());}
+        } catch (final IOException e) { ConcurrentLog.warn("BOOKMARKS", "error during load of links: "+ e.getClass() +" "+ e.getMessage());}
         for (final Entry<DigestURI, Properties> link: links.entrySet()) {
             url = link.getKey();
             title = link.getValue().getProperty("name", "");
-            Log.logInfo("BOOKMARKS", "links.get(url)");
+            ConcurrentLog.info("BOOKMARKS", "links.get(url)");
             if ("".equals(title)) {//cannot be displayed
                 title = url.toString();
             }

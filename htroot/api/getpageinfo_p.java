@@ -36,10 +36,10 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.robots.RobotsTxtEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -93,13 +93,13 @@ public class getpageinfo_p {
                 try {
                     u = new DigestURI(url);
                 } catch (final MalformedURLException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
                 net.yacy.document.Document scraper = null;
                 if (u != null) try {
                     scraper = sb.loader.loadDocument(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     // bad things are possible, i.e. that the Server responds with "403 Bad Behavior"
                     // that should not affect the robots.txt validity
                 }
@@ -158,7 +158,7 @@ public class getpageinfo_p {
                     final MultiProtocolURI sitemapURL = robotsEntry == null ? null : robotsEntry.getSitemap();
                     prop.putXML("sitemap", sitemapURL == null ? "" : sitemapURL.toString());
                 } catch (final MalformedURLException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
             if (actions.indexOf("oai",0) >= 0) {
@@ -190,11 +190,11 @@ public class getpageinfo_p {
 			final DocumentBuilder builder = factory.newDocumentBuilder();
 			return parseXML(builder.parse(url));
 		} catch (final ParserConfigurationException ex) {
-			Log.logException(ex);
+			ConcurrentLog.logException(ex);
 		} catch (final SAXException ex) {
-			Log.logException(ex);
+			ConcurrentLog.logException(ex);
 		} catch (final IOException ex) {
-			Log.logException(ex);
+			ConcurrentLog.logException(ex);
 		}
 
 		return "";

@@ -38,10 +38,10 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.word.WordReferenceVars;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.utils.crypt;
@@ -78,7 +78,7 @@ public class URIMetadataNode {
         try {
             this.url = new DigestURI(this.urlRaw, this.hash);
         } catch (MalformedURLException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             this.url = null;
         }
     }
@@ -369,7 +369,7 @@ public class URIMetadataNode {
             }
             return s;
         } catch (final Throwable e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }

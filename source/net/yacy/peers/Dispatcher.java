@@ -36,12 +36,12 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
@@ -92,7 +92,7 @@ public class Dispatcher {
     private final SeedDB seeds;
 
     // the log
-    private final Log log;
+    private final ConcurrentLog log;
 
     // transmission process
     private WorkflowProcessor<Transmission.Chunk> indexingTransmissionProcessor;
@@ -109,7 +109,7 @@ public class Dispatcher {
         this.transmissionCloud = new ConcurrentHashMap<ByteArray, Transmission.Chunk>();
         this.segment = segment;
         this.seeds = seeds;
-        this.log = new Log("INDEX-TRANSFER-DISPATCHER");
+        this.log = new ConcurrentLog("INDEX-TRANSFER-DISPATCHER");
         this.transmission = new Transmission(
             this.log,
             segment,
@@ -199,8 +199,8 @@ public class Dispatcher {
             for (final ReferenceContainer<WordReference> c: containers) {
                 urlHashes.clear();
                 it = c.entries();
-                while (it.hasNext()) try { urlHashes.put(it.next().urlhash()); } catch (final SpaceExceededException e) { Log.logException(e); }
-                if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + ASCII.String(c.getTermHash()) + "'");
+                while (it.hasNext()) try { urlHashes.put(it.next().urlhash()); } catch (final SpaceExceededException e) { ConcurrentLog.logException(e); }
+                if (this.log.isFine()) this.log.fine("selected " + urlHashes.size() + " urls for word '" + ASCII.String(c.getTermHash()) + "'");
                 if (this.segment.termIndex() != null && !urlHashes.isEmpty()) this.segment.termIndex().remove(c.getTermHash(), urlHashes);
             }
             rc = containers;
@@ -211,7 +211,7 @@ public class Dispatcher {
             for (final ReferenceContainer<WordReference> c: containers) {
                 container = this.segment.termIndex() == null ? null : this.segment.termIndex().remove(c.getTermHash()); // be aware this might be null!
                 if (container != null && !container.isEmpty()) {
-                    if (this.log.isFine()) this.log.logFine("selected " + container.size() + " urls for word '" + ASCII.String(c.getTermHash()) + "'");
+                    if (this.log.isFine()) this.log.fine("selected " + container.size() + " urls for word '" + ASCII.String(c.getTermHash()) + "'");
                     rc.add(container);
                 }
             }
@@ -293,7 +293,7 @@ public class Dispatcher {
                     primaryTarget,
                     this.seeds.redundancy() * 3,
                     true);
-            this.log.logInfo("enqueueContainers: selected " + targets.size() + " targets for primary target key " + ASCII.String(primaryTarget) + "/" + vertical + " with " + containers[vertical].size() + " index containers.");
+            this.log.info("enqueueContainers: selected " + targets.size() + " targets for primary target key " + ASCII.String(primaryTarget) + "/" + vertical + " with " + containers[vertical].size() + " index containers.");
             if (entry == null) entry = this.transmission.newChunk(primaryTarget, targets);
 
             /*/ lookup targets
@@ -311,7 +311,7 @@ public class Dispatcher {
                 try {
                     entry.add(c);
                 } catch (final SpaceExceededException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     break;
                 }
             }
@@ -333,13 +333,13 @@ public class Dispatcher {
         try {
             selectedContainerCache = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime);
         } catch (final IOException e) {
-            this.log.logSevere("selectContainersEnqueueToCloud: selectedContainer failed", e);
+            this.log.severe("selectContainersEnqueueToCloud: selectedContainer failed", e);
             return false;
         }
-        this.log.logInfo("selectContainersEnqueueToCloud: selectedContainerCache was filled with " + selectedContainerCache.size() + " entries");
+        this.log.info("selectContainersEnqueueToCloud: selectedContainerCache was filled with " + selectedContainerCache.size() + " entries");
 
         if (selectedContainerCache == null || selectedContainerCache.isEmpty()) {
-        	this.log.logInfo("selectContainersEnqueueToCloud: selectedContainerCache is empty, cannot do anything here.");
+        	this.log.info("selectContainersEnqueueToCloud: selectedContainerCache is empty, cannot do anything here.");
         	return false;
         }
 
@@ -347,22 +347,22 @@ public class Dispatcher {
         try {
             splitContainerCache = splitContainers(selectedContainerCache);
         } catch (final SpaceExceededException e) {
-            this.log.logSevere("selectContainersEnqueueToCloud: splitContainers failed because of too low RAM", e);
+            this.log.severe("selectContainersEnqueueToCloud: splitContainers failed because of too low RAM", e);
             return false;
         }
         selectedContainerCache = null;
         if (splitContainerCache == null) {
-        	this.log.logInfo("selectContainersEnqueueToCloud: splitContainerCache is empty, cannot do anything here.");
+        	this.log.info("selectContainersEnqueueToCloud: splitContainerCache is empty, cannot do anything here.");
         	return false;
         }
-        this.log.logInfo("splitContainersFromCache: splitContainerCache filled with " + splitContainerCache.length + " partitions, deleting selectedContainerCache");
+        this.log.info("splitContainersFromCache: splitContainerCache filled with " + splitContainerCache.length + " partitions, deleting selectedContainerCache");
         if (splitContainerCache.length != this.seeds.scheme.verticalPartitions()) {
-        	this.log.logWarning("selectContainersEnqueueToCloud: splitContainerCache has wrong length.");
+        	this.log.warn("selectContainersEnqueueToCloud: splitContainerCache has wrong length.");
         	return false;
         }
         enqueueContainersToCloud(splitContainerCache);
         splitContainerCache = null;
-    	this.log.logInfo("selectContainersEnqueueToCloud: splitContainerCache enqueued to cloud array which has now " + this.transmissionCloud.size() + " entries.");
+    	this.log.info("selectContainersEnqueueToCloud: splitContainerCache enqueued to cloud array which has now " + this.transmissionCloud.size() + " entries.");
         return true;
     }
 
@@ -403,17 +403,17 @@ public class Dispatcher {
 
         if (success && chunk.isFinished()) {
             // finished with this queue!
-            this.log.logInfo("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has FINISHED all transmissions!");
+            this.log.info("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has FINISHED all transmissions!");
             return chunk;
         }
 
-        if (!success) this.log.logInfo("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has failed to transmit index; marked peer as busy");
+        if (!success) this.log.info("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has failed to transmit index; marked peer as busy");
 
         if (chunk.canFinish()) {
             if (this.indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.enQueue(chunk);
             return chunk;
         }
-        this.log.logInfo("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has not enough targets left. This transmission has failed, putting back index to backend");
+        this.log.info("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has not enough targets left. This transmission has failed, putting back index to backend");
         chunk.restore();
         return null;
     }
@@ -426,7 +426,7 @@ public class Dispatcher {
         		for (final ReferenceContainer<WordReference> i : e.getValue()) try {
         		    this.segment.storeRWI(i);
         		} catch (final Exception e1) {
-        		    Log.logException(e1);
+        		    ConcurrentLog.logException(e1);
         		    break outerLoop;
         		}
         	}

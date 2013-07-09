@@ -46,6 +46,7 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
@@ -57,7 +58,6 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.BufferedObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.Blacklist.BlacklistType;
@@ -122,11 +122,11 @@ public class Balancer {
             try {
                 this.urlFileIndex = new BufferedObjectIndex(new Table(f, Request.rowdef, 0, 0, false, exceed134217727, true), objectIndexBufferSize);
             } catch (final SpaceExceededException e1) {
-                Log.logException(e1);
+                ConcurrentLog.logException(e1);
             }
         }
         this.lastDomainStackFill = 0;
-        Log.logInfo("Balancer", "opened balancer file with " + this.urlFileIndex.size() + " entries from " + f.toString());
+        ConcurrentLog.info("Balancer", "opened balancer file with " + this.urlFileIndex.size() + " entries from " + f.toString());
     }
 
     public int getMinimumLocalDelta() {
@@ -150,11 +150,11 @@ public class Balancer {
     }
 
     public void clear() {
-    	Log.logInfo("Balancer", "cleaning balancer with " + this.urlFileIndex.size() + " entries from " + this.urlFileIndex.filename());
+    	ConcurrentLog.info("Balancer", "cleaning balancer with " + this.urlFileIndex.size() + " entries from " + this.urlFileIndex.filename());
         try {
             this.urlFileIndex.clear();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         this.domainStacks.clear();
         this.double_push_check.clear();
@@ -435,7 +435,7 @@ public class Balancer {
     
     	        // check blacklist (again) because the user may have created blacklist entries after the queue has been filled
     	        if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, crawlEntry.url())) {
-    	            Log.logFine("CRAWLER", "URL '" + crawlEntry.url() + "' is in blacklist.");
+    	            ConcurrentLog.fine("CRAWLER", "URL '" + crawlEntry.url() + "' is in blacklist.");
     	            continue;
     	        }
     
@@ -443,7 +443,7 @@ public class Balancer {
     	        // if not: return null. A calling method must handle the null value and try again
     	        profileEntry = cs.getActive(UTF8.getBytes(crawlEntry.profileHandle()));
     	        if (profileEntry == null) {
-    	        	Log.logWarning("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
+    	        	ConcurrentLog.warn("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
     	        	continue;
     	        }
     	        // depending on the caching policy we need sleep time to avoid DoS-like situations
@@ -465,7 +465,7 @@ public class Balancer {
             // in best case, this should never happen if the balancer works propertly
             // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
-            Log.logInfo("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta) + ", domainStacks.size() = " + this.domainStacks.size() + ", domainStacksInitSize = " + this.domStackInitSize);
+            ConcurrentLog.info("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta) + ", domainStacks.size() = " + this.domainStacks.size() + ", domainStacksInitSize = " + this.domStackInitSize);
             long loops = sleeptime / 1000;
             long rest = sleeptime % 1000;
             if (loops < 3) {
@@ -477,7 +477,7 @@ public class Balancer {
                 // must be synchronized here to avoid 'takeover' moves from other threads which then idle the same time which would not be enough
                 if (rest > 0) {try {this.wait(rest);} catch (final InterruptedException e) {}}
                 for (int i = 0; i < loops; i++) {
-                	Log.logInfo("BALANCER", "waiting for " + crawlEntry.url().getHost() + ": " + (loops - i) + " seconds remaining...");
+                	ConcurrentLog.info("BALANCER", "waiting for " + crawlEntry.url().getHost() + ": " + (loops - i) + " seconds remaining...");
                 	try {this.wait(1000); } catch (final InterruptedException e) {}
                 }
             }
@@ -499,7 +499,7 @@ public class Balancer {
         	try {
     			fillDomainStacks();
     		} catch (final IOException e) {
-    		    Log.logException(e);
+    		    ConcurrentLog.logException(e);
     		}
     
         	// iterate over the domain stacks
@@ -596,7 +596,7 @@ public class Balancer {
             host = z.getKey(); if (host == null) continue;
             hash = z.getValue(); if (hash == null) continue;
             removeHashFromDomainStacks(host, hash);
-            Log.logInfo("Balancer", "// getbest: picked a random from the zero-waiting stack: " + host + ", zeroWaitingCandidates.size = " + this.zeroWaitingCandidates.size());
+            ConcurrentLog.info("Balancer", "// getbest: picked a random from the zero-waiting stack: " + host + ", zeroWaitingCandidates.size = " + this.zeroWaitingCandidates.size());
             return hash;
         }
 
@@ -620,7 +620,7 @@ public class Balancer {
     	    
             // check blacklist (again) because the user may have created blacklist entries after the queue has been filled
             if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, request.url())) {
-                Log.logFine("CRAWLER", "URL '" + request.url() + "' is in blacklist.");
+                ConcurrentLog.fine("CRAWLER", "URL '" + request.url() + "' is in blacklist.");
                 try {blackhandles.put(entry.getPrimaryKeyBytes());} catch (SpaceExceededException e) {}
                 continue;
             }
@@ -638,7 +638,7 @@ public class Balancer {
     	// if we collected blacklist entries then delete them now
     	for (byte[] blackhandle: blackhandles) this.urlFileIndex.remove(blackhandle);
     	
-    	Log.logInfo("BALANCER", "re-fill of domain stacks; fileIndex.size() = " + this.urlFileIndex.size() + ", domainStacks.size = " + this.domainStacks.size() + ", blackhandles = " + blackhandles.size() + ", collection time = " + (System.currentTimeMillis() - this.lastDomainStackFill) + " ms");
+    	ConcurrentLog.info("BALANCER", "re-fill of domain stacks; fileIndex.size() = " + this.urlFileIndex.size() + ", domainStacks.size = " + this.domainStacks.size() + ", blackhandles = " + blackhandles.size() + ", collection time = " + (System.currentTimeMillis() - this.lastDomainStackFill) + " ms");
         this.domStackInitSize = this.domainStacks.size();
     }
 
@@ -665,7 +665,7 @@ public class Balancer {
             try {
                 return (entry == null) ? null : new Request(entry);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 this.rowIterator = null;
                 return null;
             }

@@ -46,13 +46,13 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ListManager;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.search.Switchboard;
@@ -121,14 +121,14 @@ public class Blacklist {
      * Close (shutdown) this "sub-system", add more here for shutdown.
      */
     public final synchronized void close() {
-        Log.logFine("Blacklist", "Shutting down blacklists ...");
+        ConcurrentLog.fine("Blacklist", "Shutting down blacklists ...");
 
         // Save cache
         for (final BlacklistType blacklistType : BlacklistType.values()) {
             saveDHTCache(blacklistType);
         }
 
-        Log.logFine("Blacklist", "All blacklists has been shutdown.");
+        ConcurrentLog.fine("Blacklist", "All blacklists has been shutdown.");
     }
 
     public final void setRootPath(final File rootPath) {
@@ -237,7 +237,7 @@ public class Blacklist {
                     }
                     if (a.indexOf("?*", 0) > 0) {
                         // prevent "Dangling meta character '*'" exception
-                        Log.logWarning("Blacklist", "ignored blacklist path to prevent 'Dangling meta character' exception: " + a);
+                        ConcurrentLog.warn("Blacklist", "ignored blacklist path to prevent 'Dangling meta character' exception: " + a);
                         continue;
                     }
                     loadedPathsPattern.add(Pattern.compile("(?i)" + a)); // add case insesitive regex
@@ -360,13 +360,13 @@ public class Blacklist {
             pw.println(pattern);
             pw.close();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } finally {
             if (pw != null) {
                 try {
                     pw.close();
                 } catch (final Exception e) {
-                    Log.logWarning("Blacklist", "could not close stream to " + 
+                    ConcurrentLog.warn("Blacklist", "could not close stream to " + 
                     		getFileName(blacklistType) + "! " + e.getMessage());
                 }
 
@@ -440,7 +440,7 @@ public class Blacklist {
                 try {
                     urlHashCache.put(url.hash());
                 } catch (final SpaceExceededException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
                 this.cachedUrlHashs.put(blacklistType, urlHashCache);
             }
@@ -451,7 +451,7 @@ public class Blacklist {
                 try {
                     urlHashCache.put(url.hash());
                 } catch (final SpaceExceededException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
             return temp;
@@ -642,7 +642,7 @@ public class Blacklist {
             }
 
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
@@ -656,7 +656,7 @@ public class Blacklist {
                 in.close();
                 return;
             } catch (Throwable e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
         this.cachedUrlHashs.put(type, new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0));

@@ -70,7 +70,7 @@ public class rct_p {
                         final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(url);
                         if (urlRejectReason == null) {
                             // stack url
-                            if (sb.getLog().isFinest()) sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
+                            if (sb.getLog().isFinest()) sb.getLog().finest("crawlOrder: stack: url='" + url + "'");
                             sb.crawlStacker.enqueueEntry(new Request(
                                     peerhash.getBytes(),
                                     url,
@@ -84,7 +84,7 @@ public class rct_p {
                                     item.getSize()
                                     ));
                         } else {
-                            env.getLog().logWarning("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
+                            env.getLog().warn("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
                         }
                     }
                 }

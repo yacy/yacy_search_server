@@ -31,13 +31,13 @@ import java.util.Set;
 
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
 import com.google.common.io.Files;
 import net.yacy.cora.storage.Configuration.Entry;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
@@ -64,7 +64,7 @@ public class migration {
             if(fromRev < NEW_OVERLAYS){
                 migrateDefaultFiles(sb);
             }
-            Log.logInfo("MIGRATION", "Migrating from "+ fromRev + " to " + toRev);
+            ConcurrentLog.info("MIGRATION", "Migrating from "+ fromRev + " to " + toRev);
             presetPasswords(sb);
             migrateSwitchConfigSettings(sb);
             migrateWorkFiles(sb);
@@ -124,17 +124,17 @@ public class migration {
         final File styleFile=new File(htdocsPath, "style.css");
         if(!skinFile.exists()){
             if(styleFile.exists()){
-                Log.logInfo("MIGRATION", "Skin "+skin+" not found. Keeping old skin.");
+                ConcurrentLog.info("MIGRATION", "Skin "+skin+" not found. Keeping old skin.");
             }else{
-                Log.logSevere("MIGRATION", "Skin "+skin+" and no existing Skin found.");
+                ConcurrentLog.severe("MIGRATION", "Skin "+skin+" and no existing Skin found.");
             }
         }else{
             try {
                 mkdirs(styleFile.getParentFile());
                 Files.copy(skinFile, styleFile);
-                Log.logInfo("MIGRATION", "copied new Skinfile");
+                ConcurrentLog.info("MIGRATION", "copied new Skinfile");
             } catch (final IOException e) {
-                Log.logSevere("MIGRATION", "Cannot copy skinfile.");
+                ConcurrentLog.severe("MIGRATION", "Cannot copy skinfile.");
             }
         }
     }
@@ -145,7 +145,7 @@ public class migration {
 	private static void mkdirs(final File path) {
 		if (!path.exists()) {
 			if(!path.mkdirs())
-				Log.logWarning("MIGRATION", "could not create directories for "+ path);
+				ConcurrentLog.warn("MIGRATION", "could not create directories for "+ path);
 		}
 	}
     public static void migrateBookmarkTagsDB(final Switchboard sb){
@@ -153,12 +153,12 @@ public class migration {
         final File tagsDBFile=new File(sb.workPath, "bookmarkTags.db");
         if(tagsDBFile.exists()){
             delete(tagsDBFile);
-            Log.logInfo("MIGRATION", "Migrating bookmarkTags.db to use wordhashs as keys.");
+            ConcurrentLog.info("MIGRATION", "Migrating bookmarkTags.db to use wordhashs as keys.");
         }
         try {
             sb.initBookmarks();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
@@ -167,13 +167,13 @@ public class migration {
 	 */
 	private static void delete(final File filename) {
 		if(!filename.delete())
-			Log.logWarning("MIGRATION", "could not delete "+ filename);
+			ConcurrentLog.warn("MIGRATION", "could not delete "+ filename);
 	}
     public static void migrateWorkFiles(final Switchboard sb){
         File file=new File(sb.getDataPath(), "DATA/SETTINGS/wiki.db");
         File file2;
         if (file.exists()) {
-            Log.logInfo("MIGRATION", "Migrating wiki.db to "+ sb.workPath);
+            ConcurrentLog.info("MIGRATION", "Migrating wiki.db to "+ sb.workPath);
             sb.wikiDB.close();
             file2 = new File(sb.workPath, "wiki.db");
             try {
@@ -184,7 +184,7 @@ public class migration {
 
             file = new File(sb.getDataPath(), "DATA/SETTINGS/wiki-bkp.db");
             if (file.exists()) {
-                Log.logInfo("MIGRATION", "Migrating wiki-bkp.db to "+ sb.workPath);
+                ConcurrentLog.info("MIGRATION", "Migrating wiki-bkp.db to "+ sb.workPath);
                 file2 = new File(sb.workPath, "wiki-bkp.db");
                 try {
                     Files.copy(file, file2);
@@ -194,14 +194,14 @@ public class migration {
             try {
                 sb.initWiki();
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
 
 
         file=new File(sb.getDataPath(), "DATA/SETTINGS/message.db");
         if(file.exists()){
-            Log.logInfo("MIGRATION", "Migrating message.db to "+ sb.workPath);
+            ConcurrentLog.info("MIGRATION", "Migrating message.db to "+ sb.workPath);
             sb.messageDB.close();
             file2=new File(sb.workPath, "message.db");
             try {
@@ -211,7 +211,7 @@ public class migration {
             try {
                 sb.initMessages();
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -289,7 +289,7 @@ public class migration {
             try {
                 f.createNewFile();                    
             } catch (IOException ex) {
-                Log.logInfo("migrateUrldbtoSolr","could not create lock file");
+                ConcurrentLog.info("migrateUrldbtoSolr","could not create lock file");
             }
 
             final Thread t = new Thread() {
@@ -319,15 +319,15 @@ public class migration {
                                         go = false;
                                     }
                                 } catch (Exception e) {
-                                    Log.logInfo("migrateUrldbtoSolr", "some error while adding old data to new index, continue with next entry");
+                                    ConcurrentLog.info("migrateUrldbtoSolr", "some error while adding old data to new index, continue with next entry");
                                 }
                             }
-                            Log.logInfo("migrateUrldbtoSolr", Integer.toString(i) + " entries left (convert next chunk of 1000 entries)");
+                            ConcurrentLog.info("migrateUrldbtoSolr", Integer.toString(i) + " entries left (convert next chunk of 1000 entries)");
                         }
                         ft.commit(true);
 
                     } catch (IOException ex) {
-                        Log.logInfo("migrateUrldbtoSolr", "error reading old urldb index");
+                        ConcurrentLog.info("migrateUrldbtoSolr", "error reading old urldb index");
                     } finally {
                         if (f.exists()) {
                             f.delete(); // delete lock file
@@ -382,9 +382,9 @@ public class migration {
             }
             lukeCheckok = true;
         } catch (SolrServerException ex) {
-            Log.logException(ex);
+            ConcurrentLog.logException(ex);
         } catch (IOException ex) {
-            Log.logException(ex);
+            ConcurrentLog.logException(ex);
         }
   
         if (!lukeCheckok) {  // if luke failed alternatively use config and manual list                

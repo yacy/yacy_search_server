@@ -15,11 +15,11 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.table.SQLTable;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.table.Table;
@@ -132,11 +132,11 @@ public class dbtest {
                 if (getTable_reference() != null) getTable_reference().put(getTable_test().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
             } catch (final IOException e) {
                 System.err.println(e);
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 System.exit(0);
             } catch (final SpaceExceededException e) {
                 System.err.println(e);
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 System.exit(0);
             }
         }
@@ -156,7 +156,7 @@ public class dbtest {
                 if (getTable_reference() != null) getTable_reference().delete(entry.getKey());
             } catch (final IOException e) {
                 System.err.println(e);
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 System.exit(0);
             }
         }
@@ -195,7 +195,7 @@ public class dbtest {
                 }
             } catch (final IOException e) {
                 System.err.println(e);
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 System.exit(0);
             }
         }
@@ -431,7 +431,7 @@ public class dbtest {
                     ", total=" + (afterclose - startup));
             profiler.terminate();
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 }
@@ -470,7 +470,7 @@ final class memprofiler extends Thread {
                 try {Thread.sleep(100);} catch (final InterruptedException e) {}
             }
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         ImageIO.setUseCache(false);
         try {
@@ -478,7 +478,7 @@ final class memprofiler extends Thread {
         } catch (final IOException e) {
             // do noting
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 

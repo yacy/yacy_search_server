@@ -42,13 +42,13 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ComparableARC;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -75,14 +75,14 @@ public class RSSLoader extends Thread {
             final byte[] resource = response == null ? null : response.getContent();
             rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
         } catch (final MalformedURLException e) {
-            Log.logWarning("Load_RSS", "rss loading for url '" + getName().substring(9) + "' failed: " + e.getMessage());
+            ConcurrentLog.warn("Load_RSS", "rss loading for url '" + getName().substring(9) + "' failed: " + e.getMessage());
             return;
         } catch (final IOException e) {
-            Log.logWarning("Load_RSS", "rss loading for url '" + this.urlf.toNormalform(true) + "' failed: " + e.getMessage());
+            ConcurrentLog.warn("Load_RSS", "rss loading for url '" + this.urlf.toNormalform(true) + "' failed: " + e.getMessage());
             return;
         }
         if (rss == null) {
-            Log.logWarning("Load_RSS", "no rss for url " + this.urlf.toNormalform(true));
+            ConcurrentLog.warn("Load_RSS", "no rss for url " + this.urlf.toNormalform(true));
             return;
         }
         final RSSFeed feed = rss.getFeed();
@@ -102,7 +102,7 @@ public class RSSLoader extends Thread {
                 if (indexTriggered.containsKey(messageurl.hash())) continue;
                 urlmap.put(ASCII.String(messageurl.hash()), messageurl);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
         Map<String, HarvestProcess> existingids = sb.urlExists(urlmap.keySet());
@@ -132,9 +132,9 @@ public class RSSLoader extends Thread {
             rssRow.put("avg_upd_per_day", nextAvg);
             sb.tables.update("rss", url.hash(), rssRow);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
@@ -162,7 +162,7 @@ public class RSSLoader extends Thread {
         try {
             sb.tables.update("rss", url.hash(), rssRow);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 }

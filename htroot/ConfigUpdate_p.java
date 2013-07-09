@@ -33,8 +33,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
 import net.yacy.peers.operation.yacyBuildProperties;
@@ -97,7 +97,7 @@ public class ConfigUpdate_p {
                 	versionToDownload.downloadRelease();
                     } catch (final IOException e) {
                 	// TODO Auto-generated catch block
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 }
             }
@@ -115,10 +115,10 @@ public class ConfigUpdate_p {
                         FileUtils.deletedelete(new File(sb.releasePath, release));
                         FileUtils.deletedelete(new File(sb.releasePath, release + ".sig"));
                         } else {
-                            sb.getLog().logSevere("AUTO-UPDATE: could not delete " + release + ": file not in release directory.");
+                            sb.getLog().severe("AUTO-UPDATE: could not delete " + release + ": file not in release directory.");
                         }
                     } catch (final NullPointerException e) {
-                        sb.getLog().logSevere("AUTO-UPDATE: could not delete release " + release + ": " + e.getMessage());
+                        sb.getLog().severe("AUTO-UPDATE: could not delete release " + release + ": " + e.getMessage());
                     }
                 }
             }
@@ -129,20 +129,20 @@ public class ConfigUpdate_p {
                     prop.put("candeploy_autoUpdate", "2"); // no more recent release found
                 } else {
                     // there is a version that is more recent. Load it and re-start with it
-                    sb.getLog().logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.getUrl());
+                    sb.getLog().info("AUTO-UPDATE: downloading more recent release " + updateVersion.getUrl());
                     final File downloaded = updateVersion.downloadRelease();
                     prop.putHTML("candeploy_autoUpdate_downloadedRelease", updateVersion.getName());
                     final boolean devenvironment = new File(sb.getAppPath(), ".git").exists();
                     if (devenvironment) {
-                        sb.getLog().logInfo("AUTO-UPDATE: omitting update because this is a development environment");
+                        sb.getLog().info("AUTO-UPDATE: omitting update because this is a development environment");
                         prop.put("candeploy_autoUpdate", "3");
                     } else if ((downloaded == null) || (!downloaded.exists()) || (downloaded.length() == 0)) {
-                        sb.getLog().logInfo("AUTO-UPDATE: omitting update because download failed (file cannot be found, is too small or signature was bad)");
+                        sb.getLog().info("AUTO-UPDATE: omitting update because download failed (file cannot be found, is too small or signature was bad)");
                         prop.put("candeploy_autoUpdate", "4");
                     } else {
                         yacyRelease.deployRelease(downloaded);
                         sb.terminate(10, "manual release update to " + downloaded.getName());
-                        sb.getLog().logInfo("AUTO-UPDATE: deploy and restart initiated");
+                        sb.getLog().info("AUTO-UPDATE: deploy and restart initiated");
                         prop.put("candeploy_autoUpdate", "1");
                     }
                 }

@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.sorting.ClusteredScoreMap;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 
 
@@ -118,7 +118,7 @@ public class Evaluation {
                 final String v = (String) entry.getValue();
                 final int w = k.indexOf('_');
                 if (w < 0) {
-                    Log.logSevere("PatternAnalysis", "wrong configuration in " + name + ": separator '_' missing: " + k);
+                    ConcurrentLog.severe("PatternAnalysis", "wrong configuration in " + name + ": separator '_' missing: " + k);
                     continue;
                 }
                 subject = k.substring(0, w);
@@ -126,12 +126,12 @@ public class Evaluation {
                 try {
                     pattern = Pattern.compile(v);
                 } catch (final PatternSyntaxException e) {
-                    Log.logSevere("PatternAnalysis", "bad pattern in " + name + ": '" + k + "=" + v + "' - " + e.getDescription());
+                    ConcurrentLog.severe("PatternAnalysis", "bad pattern in " + name + ": '" + k + "=" + v + "' - " + e.getDescription());
                     continue;
                 }
                 element = Element.valueOf(elementName);
                 if (element == null) {
-                    Log.logSevere("PatternAnalysis", "unknown element in " + name + ": " + elementName);
+                    ConcurrentLog.severe("PatternAnalysis", "unknown element in " + name + ": " + elementName);
                     continue;
                 }
                 List<Attribute> attributeList = this.elementMatcher.get(element);

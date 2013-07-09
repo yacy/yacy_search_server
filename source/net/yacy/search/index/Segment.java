@@ -52,6 +52,7 @@ import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.CrawlQueues;
@@ -68,7 +69,6 @@ import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
@@ -112,7 +112,7 @@ public class Segment {
     public static final ReferenceFactory<CitationReference> citationReferenceFactory = new CitationReferenceFactory();
     public static final ByteOrder wordOrder = Base64Order.enhancedCoder;
 
-    private   final Log                            log;
+    private   final ConcurrentLog                            log;
     private   final File                           segmentPath;
     protected final Fulltext                       fulltext;
     protected       IndexCell<WordReference>       termIndex;
@@ -126,9 +126,9 @@ public class Segment {
      * @param segmentPath that should be the path ponting to the directory "SEGMENT"
      * @param collectionSchema
      */
-    public Segment(final Log log, final File segmentPath,
+    public Segment(final ConcurrentLog log, final File segmentPath,
             final CollectionConfiguration collectionConfiguration, final WebgraphConfiguration webgraphConfiguration) {
-        log.logInfo("Initializing Segment '" + segmentPath + ".");
+        log.info("Initializing Segment '" + segmentPath + ".");
         this.log = log;
         this.segmentPath = segmentPath;
 
@@ -297,7 +297,7 @@ public class Segment {
                 cache.put(id, rr);
                 return rr;
             } catch (SpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 throw new IOException(e.getMessage());
             }
         }
@@ -343,7 +343,7 @@ public class Segment {
                         }
                     }
                 } catch (InterruptedException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             } else {
                 // read the references from the citation index
@@ -410,7 +410,7 @@ public class Segment {
         try {
             return (int) this.fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.text_t.getSolrFieldName() + ":\"" + word + "\"");
         } catch (Throwable e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return 0;
         }
     }
@@ -457,7 +457,7 @@ public class Segment {
                     try {
                         doc = docQueue.take();
                     } catch (InterruptedException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                         return null;
                     }
                     if (doc == null || doc == AbstractSolrConnector.POISON_DOCUMENT) return null;
@@ -483,7 +483,7 @@ public class Segment {
             if (this.fulltext != null) this.fulltext.clearRemoteSolr();
             if (this.urlCitationIndex != null) this.urlCitationIndex.clear();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
     
@@ -566,7 +566,7 @@ public class Segment {
         try {
             this.fulltext().putDocument(queueEntry.queueEntry);
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
     
@@ -696,7 +696,7 @@ public class Segment {
                     break tryloop;
                 } catch ( final IOException e ) {
                     error = "failed to send " + urlNormalform + " to solr: " + e.getMessage();
-                    Log.logWarning("SOLR", error);
+                    ConcurrentLog.warn("SOLR", error);
                     if (i == 10) this.fulltext.commit(false);
                     try {Thread.sleep(1000);} catch (InterruptedException e1) {}
                     continue tryloop;
@@ -704,7 +704,7 @@ public class Segment {
             }
         }
         if (error != null) {
-            Log.logSevere("SOLR", error + ", PLEASE REPORT TO bugs.yacy.net");
+            ConcurrentLog.severe("SOLR", error + ", PLEASE REPORT TO bugs.yacy.net");
             //Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, error);
             //Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, error);
         }
@@ -743,7 +743,7 @@ public class Segment {
                 if (this.termIndex != null && storeToRWI) try {
                     this.termIndex.add(wordhash, ientry);
                 } catch (final Exception e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
     
                 // during a search event it is possible that a heuristic is used which aquires index
@@ -769,7 +769,7 @@ public class Segment {
             if (this.termIndex != null) try {
                 this.termIndex.add(catchallHash, ientry);
             } catch (final Exception e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
 
@@ -777,7 +777,7 @@ public class Segment {
         final long indexingEndTime = System.currentTimeMillis();
 
         if (this.log.isInfo()) {
-            this.log.logInfo("*Indexed " + condenser.words().size() + " words in URL " + url +
+            this.log.info("*Indexed " + condenser.words().size() + " words in URL " + url +
                     " [" + id + "]" +
                     "\n\tDescription:  " + dc_title +
                     "\n\tMimeType: "  + document.dc_format() + " | Charset: " + document.getCharset() + " | " +
@@ -832,7 +832,7 @@ public class Segment {
         } catch (final Parser.Failure e) {
             return 0;
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return 0;
         }
     }

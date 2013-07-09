@@ -62,6 +62,7 @@ import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
@@ -73,7 +74,6 @@ import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.RowHandleMap;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.search.index.Segment;
@@ -112,7 +112,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 CollectionSchema f = CollectionSchema.valueOf(etr.key());
                 f.setSolrFieldName(etr.getValue());
             } catch (IllegalArgumentException e) {
-                Log.logFine("SolrCollectionWriter", "solr schema file " + configurationFile.getAbsolutePath() + " defines unknown attribute '" + etr.toString() + "'");
+                ConcurrentLog.fine("SolrCollectionWriter", "solr schema file " + configurationFile.getAbsolutePath() + " defines unknown attribute '" + etr.toString() + "'");
                 it.remove();
             }
         }
@@ -122,7 +122,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         	    if (CollectionSchema.author_sxt.getSolrFieldName().endsWith(field.name())) continue; // exception for this: that is a copy-field
         	    if (CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName().endsWith(field.name())) continue; // exception for this: automatically generated
         	    if (CollectionSchema.coordinate_p_1_coordinate.getSolrFieldName().endsWith(field.name())) continue; // exception for this: automatically generated
-                Log.logWarning("SolrCollectionWriter", " solr schema file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
+                ConcurrentLog.warn("SolrCollectionWriter", " solr schema file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
         	}
         }
     }
@@ -897,7 +897,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 while (convergence_attempts++ < 30) {
                     if (crh.convergenceStep()) break;
                 }
-                Log.logInfo("CollectionConfiguration.CRHost", "convergence for host " + host + " after " + convergence_attempts + " steps");
+                ConcurrentLog.info("CollectionConfiguration.CRHost", "convergence for host " + host + " after " + convergence_attempts + " steps");
                 // we have now the cr for all documents of a specific host; we store them for later use
                 Map<byte[], CRV> crn = crh.normalize();
                 crh.log(crn);
@@ -961,7 +961,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 } catch (Throwable e1) {
                 }
             }
-            Log.logInfo("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount+ " new documents, " +
+            ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount+ " new documents, " +
                         proccount_clickdepthchange + " clickdepth changes, " +
                         proccount_referencechange + " reference-count changes," +
                         proccount_citationchange + " citation ranking changes.");
@@ -1058,10 +1058,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 if (entry == null || entry.getValue() == null) continue;
                 try {
                     String url = (String) connector.getDocumentById(ASCII.String(entry.getKey()), CollectionSchema.sku.getSolrFieldName()).getFieldValue(CollectionSchema.sku.getSolrFieldName());
-                    Log.logInfo("CollectionConfiguration.CRHost", "CR for " + url);
-                    Log.logInfo("CollectionConfiguration.CRHost", ">> " + entry.getValue().toString());
+                    ConcurrentLog.info("CollectionConfiguration.CRHost", "CR for " + url);
+                    ConcurrentLog.info("CollectionConfiguration.CRHost", ">> " + entry.getValue().toString());
                 } catch (IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }
@@ -1087,9 +1087,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 this.internal_links_counter.put(id, il);
                 return il;
             } catch (IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch (SpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             try {this.internal_links_counter.put(id, 0);} catch (SpaceExceededException e) {}
             return 0;

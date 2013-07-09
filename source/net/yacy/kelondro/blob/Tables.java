@@ -46,10 +46,10 @@ import java.util.regex.Pattern;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ymark.YMarkUtil;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
@@ -142,7 +142,7 @@ public class Tables implements Iterable<String> {
     			bheap = this.getHeap(idx_table);
     		} catch (IOException e) {
     			bheap = null;
-    			Log.logException(e);
+    			ConcurrentLog.logException(e);
     		}
     		if(bheap != null) {
     			index =  new TablesColumnBLOBIndex(bheap);
@@ -167,7 +167,7 @@ public class Tables implements Iterable<String> {
 				return true;
 			}
 		} catch (IOException e) {
-			Log.logException(e);
+			ConcurrentLog.logException(e);
 		}
     	return false;
     }
@@ -199,7 +199,7 @@ public class Tables implements Iterable<String> {
     			}
 
 			} catch (Exception e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 				return new HashSet<Row>().iterator();
 			}
     	} else if (!separator.isEmpty()) {
@@ -218,14 +218,14 @@ public class Tables implements Iterable<String> {
     		try {
 				return this.iterator(table, whereColumn, p);
 			} catch (IOException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 				return new HashSet<Row>().iterator();
 			}
     	} else {
     		try {
 				return this.iterator(table, whereColumn, UTF8.getBytes(whereValue));
 			} catch (IOException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 				return new HashSet<Row>().iterator();
 			}
     	}
@@ -277,7 +277,7 @@ public class Tables implements Iterable<String> {
                 heap = null;
             }
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } finally {
             this.tables.remove(tablename);
         }
@@ -713,7 +713,7 @@ public class Tables implements Iterable<String> {
             // clean up
             map.close();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 

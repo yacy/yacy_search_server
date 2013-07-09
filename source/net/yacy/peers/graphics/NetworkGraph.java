@@ -38,7 +38,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Hit;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.Distribution;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.RemoteSearch;
 import net.yacy.peers.Seed;
@@ -225,7 +225,7 @@ public class NetworkGraph {
         while (e.hasNext() && count < maxCount) {
             seed = e.next();
             if (seed == null) {
-                Log.logWarning("NetworkGraph", "connected seed == null");
+                ConcurrentLog.warn("NetworkGraph", "connected seed == null");
                 continue;
             }
             if (seed.hash.startsWith("AD")) {//temporary patch
@@ -243,7 +243,7 @@ public class NetworkGraph {
         while (e.hasNext() && count < maxCount) {
             seed = e.next();
             if (seed == null) {
-                Log.logWarning("NetworkGraph", "disconnected seed == null");
+                ConcurrentLog.warn("NetworkGraph", "disconnected seed == null");
                 continue;
             }
             lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
@@ -261,7 +261,7 @@ public class NetworkGraph {
         while (e.hasNext() && count < maxCount) {
             seed = e.next();
             if (seed == null) {
-                Log.logWarning("NetworkGraph", "potential seed == null");
+                ConcurrentLog.warn("NetworkGraph", "potential seed == null");
                 continue;
             }
             lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);

@@ -29,11 +29,11 @@ package net.yacy.document.parser;
 
 import java.io.InputStream;
 
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 
 import org.apache.poi.hdgf.extractor.VisioTextExtractor;
 import org.apache.poi.hpsf.SummaryInformation;
@@ -76,7 +76,7 @@ public class vsdParser extends AbstractParser implements Parser {
             	contents = extractor.getText();
                 summary = extractor.getSummaryInformation();
             } catch (Exception e) {
-            	Log.logWarning("vsdParser", e.getMessage());
+            	ConcurrentLog.warn("vsdParser", e.getMessage());
             }
 
             String author = null;
@@ -125,13 +125,13 @@ public class vsdParser extends AbstractParser implements Parser {
 
             // if an unexpected error occures just log the error and raise a new ParserException
             final String errorMsg = "Unable to parse the vsd document '" + location + "':" + e.getMessage();
-            AbstractParser.log.logSevere(errorMsg);
+            AbstractParser.log.severe(errorMsg);
             throw new Parser.Failure(errorMsg, location);
         } finally {
             if (theDoc == null) {
                 // if an unexpected error occures just log the error and raise a new Parser.Failure
                 final String errorMsg = "Unable to parse the vsd document '" + location + "': possibly out of memory";
-                AbstractParser.log.logSevere(errorMsg);
+                AbstractParser.log.severe(errorMsg);
                 throw new Parser.Failure(errorMsg, location);
             }
         }

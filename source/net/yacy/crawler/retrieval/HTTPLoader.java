@@ -33,13 +33,13 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.Latency;
 import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.ByteCount;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -60,9 +60,9 @@ public final class HTTPLoader {
      */
     private final int socketTimeout;
     private final Switchboard sb;
-    private final Log log;
+    private final ConcurrentLog log;
 
-    public HTTPLoader(final Switchboard sb, final Log theLog) {
+    public HTTPLoader(final Switchboard sb, final ConcurrentLog theLog) {
         this.sb = sb;
         this.log = theLog;
 
@@ -154,8 +154,8 @@ public final class HTTPLoader {
             final DigestURI redirectionUrl = DigestURI.newURL(request.url(), redirectionUrlString);
 
             // restart crawling with new url
-            this.log.logInfo("CRAWLER Redirection detected ('" + client.getHttpResponse().getStatusLine() + "') for URL " + requestURLString);
-            this.log.logInfo("CRAWLER ..Redirecting request to: " + redirectionUrl);
+            this.log.info("CRAWLER Redirection detected ('" + client.getHttpResponse().getStatusLine() + "') for URL " + requestURLString);
+            this.log.info("CRAWLER ..Redirecting request to: " + redirectionUrl);
 
             this.sb.webStructure.generateCitationReference(url, redirectionUrl);
             

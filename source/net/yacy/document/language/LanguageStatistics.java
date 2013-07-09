@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 /**
@@ -41,7 +41,7 @@ import net.yacy.kelondro.logging.Log;
  */
 public class LanguageStatistics {
     
-    private static Log logger = new Log("LANGUAGESTATISTICS");
+    private static ConcurrentLog logger = new ConcurrentLog("LANGUAGESTATISTICS");
 
     /** This variable holds the name of the language. */
     private String langName = null;
@@ -133,15 +133,15 @@ public class LanguageStatistics {
         
         } catch (final FileNotFoundException ex) {
             ret = false;
-            logger.logWarning("ERROR: file '" + file.getName() + "' not found", ex);
+            logger.warn("ERROR: file '" + file.getName() + "' not found", ex);
         } catch (final IOException ex) {
-            logger.logWarning("ERROR: problems reading file '" + file.getName() + "'", ex);
+            logger.warn("ERROR: problems reading file '" + file.getName() + "'", ex);
         } finally {
             try { if(reader != null) {
                 reader.close();
             }
             } catch (final IOException ex) {
-                logger.logWarning("ERROR: IO trouble ", ex);
+                logger.warn("ERROR: IO trouble ", ex);
             }
         }
         return ret;

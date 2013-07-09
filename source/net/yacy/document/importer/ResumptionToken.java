@@ -37,8 +37,8 @@ import javax.xml.parsers.SAXParserFactory;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -194,7 +194,7 @@ public class ResumptionToken extends TreeMap<String, String> {
         try {
             return ISO8601Formatter.FORMATTER.parse(d);
         } catch (final ParseException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return new Date();
         }
     }
@@ -279,17 +279,17 @@ public class ResumptionToken extends TreeMap<String, String> {
                 this.saxParser = getParser();
                 this.saxParser.parse(this.stream, this);
             } catch (final SAXException e) {
-                Log.logException(e);
-                Log.logWarning("ResumptionToken", "token was not parsed (1):\n" + UTF8.String(b));
+                ConcurrentLog.logException(e);
+                ConcurrentLog.warn("ResumptionToken", "token was not parsed (1):\n" + UTF8.String(b));
             } catch (final IOException e) {
-                Log.logException(e);
-                Log.logWarning("ResumptionToken", "token was not parsed (2):\n" + UTF8.String(b));
+                ConcurrentLog.logException(e);
+                ConcurrentLog.warn("ResumptionToken", "token was not parsed (2):\n" + UTF8.String(b));
                 throw new IOException(e.getMessage());
             } finally {
                 try {
                     this.stream.close();
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }

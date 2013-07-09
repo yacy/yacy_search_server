@@ -21,11 +21,11 @@
 
 package net.yacy.server;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 public abstract class serverSwitchAbstractAction {
 
-    protected Log log = null;
+    protected ConcurrentLog log = null;
     private String shortDescr = "", longDescr = "";
     
     public void setDescription(final String shortText, final String longText) {
@@ -44,7 +44,7 @@ public abstract class serverSwitchAbstractAction {
 	return this.longDescr;
     }
 
-    public void setLog(final Log log) {
+    public void setLog(final ConcurrentLog log) {
         // defines a log where process states can be written to
         this.log = log;
     }

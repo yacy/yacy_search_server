@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
 import net.yacy.data.ymark.YMarkDate;
 import net.yacy.data.ymark.YMarkEntry;
@@ -12,7 +13,6 @@ import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.data.ymark.YMarkXBELImporter;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -62,7 +62,7 @@ public class get_xbel {
         	try {
         		fit = sb.tables.bookmarks.getFolders(bmk_user, root).iterator();
 			} catch (final IOException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 			}
 
 			while (fit.hasNext()) {

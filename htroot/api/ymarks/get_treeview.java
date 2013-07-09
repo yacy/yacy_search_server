@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.UserDB;
 import net.yacy.data.ymark.YMarkAutoTagger;
@@ -22,7 +23,6 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -95,7 +95,7 @@ public class get_treeview {
 	        		// it = sb.tables.bookmarks.folders.getFolders(bmk_user, root);
 	        		it = sb.tables.bookmarks.getFolders(bmk_user, root).iterator();
 				} catch (final IOException e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				}
 	        	int n = Pattern.compile(YMarkUtil.FOLDERS_SEPARATOR).split(root, 0).length;
 	        	if (n == 0) n = 1;
@@ -205,9 +205,9 @@ public class get_treeview {
 		        		prop.put("folders", count);
 					}
 				} catch (final IOException e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				} catch (final SpaceExceededException e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				}
 	        } else if (isAutoTagger || isMetadata || isURLdb || isCrawlStart) {
 	        	try {
@@ -230,7 +230,7 @@ public class get_treeview {
 	        		} else if(isURLdb) {
 						count = putMeta(count, meta.getMetadata());
 	        		} else if(isCrawlStart) {
-	        			Log.logInfo("YMark", "I am looking for CrawlStart: "+post.get(ROOT).substring(2));
+	        			ConcurrentLog.info("YMark", "I am looking for CrawlStart: "+post.get(ROOT).substring(2));
 	        			final YMarkCrawlStart crawlStart = new YMarkCrawlStart(sb.tables, post.get(ROOT).substring(2));
 	        			final Iterator<String> iter = crawlStart.keySet().iterator();
 	        			String key;
@@ -244,11 +244,11 @@ public class get_treeview {
 	        		}
 
 				} catch (final MalformedURLException e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				} catch (final IOException e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				} catch (final Failure e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				}
 	        }
         } else {

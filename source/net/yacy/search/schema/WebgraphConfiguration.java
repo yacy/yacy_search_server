@@ -51,10 +51,10 @@ import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.search.index.Segment;
 
@@ -89,14 +89,14 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                 WebgraphSchema f = WebgraphSchema.valueOf(etr.key());
                 f.setSolrFieldName(etr.getValue());
             } catch (IllegalArgumentException e) {
-                Log.logFine("SolrWebgraphWriter", "solr schema file " + configurationFile.getAbsolutePath() + " defines unknown attribute '" + etr.toString() + "'");
+                ConcurrentLog.fine("SolrWebgraphWriter", "solr schema file " + configurationFile.getAbsolutePath() + " defines unknown attribute '" + etr.toString() + "'");
                 it.remove();
             }
         }
         // check consistency the other way: look if all enum constants in SolrField appear in the configuration file
         for (SchemaDeclaration field: WebgraphSchema.values()) {
             if (this.get(field.name()) == null) {
-                Log.logWarning("SolrWebgraphWriter", " solr schema file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
+                ConcurrentLog.warn("SolrWebgraphWriter", " solr schema file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
             }
         }
     }
@@ -328,7 +328,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                     
                 }
             }
-            Log.logInfo("WebgraphConfiguration", "cleanup_processing: re-calculated " + proccount+ " new documents, " + proccount_clickdepthchange + " clickdepth values changed, " + proccount_referencechange + " reference-count values changed.");
+            ConcurrentLog.info("WebgraphConfiguration", "cleanup_processing: re-calculated " + proccount+ " new documents, " + proccount_clickdepthchange + " clickdepth values changed, " + proccount_referencechange + " reference-count values changed.");
         } catch (InterruptedException e) {
         }
     }

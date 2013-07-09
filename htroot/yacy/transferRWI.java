@@ -39,11 +39,11 @@ import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.Network;
@@ -106,39 +106,39 @@ public final class transferRWI {
         final StringBuilder unknownURLs = new StringBuilder(6000);
 
         if ((youare == null) || (!youare.equals(sb.peers.mySeed().hash))) {
-        	sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.peers.mySeed().hash);
+        	sb.getLog().info("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.peers.mySeed().hash);
             result = "wrong_target";
             pause = 0;
         } else if (otherPeer == null) {
             // we dont want to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted. Other Peer is unknown");
+            sb.getLog().info("Rejecting RWIs from peer " + otherPeerName + ". Not granted. Other Peer is unknown");
             result = "not_granted";
             pause = 60000;
         } else if (!granted) {
             // we dont want to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Granted is false");
+            sb.getLog().info("Rejecting RWIs from peer " + otherPeerName + ". Granted is false");
             result = "not_granted";
             pause = 60000;
         } else if (sb.isRobinsonMode()) {
             // we dont want to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted. This peer is in robinson mode");
+            sb.getLog().info("Rejecting RWIs from peer " + otherPeerName + ". Not granted. This peer is in robinson mode");
             result = "not_granted";
             pause = 60000;
         } else if (sb.index.RWIBufferCount() > cachelimit) {
             // we are too busy to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.index.RWIBufferCount() + ").");
+            sb.getLog().info("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.index.RWIBufferCount() + ").");
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 60000;
         } else if (otherPeer.getVersion() < 0.75005845 && otherPeer.getVersion() >= 0.75005821) {
         	// version that sends [B@... hashes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Bad version.");
+            sb.getLog().info("Rejecting RWIs from peer " + otherPeerName + ". Bad version.");
             result = "not_granted";
             pause = 1800000;
         } else {
             // we want and can receive indexes
             // log value status (currently added to find outOfMemory error
-            if (sb.getLog().isFine()) sb.getLog().logFine("Processing " + indexes.length + " bytes / " + wordc + " words / " + entryc + " entries from " + otherPeerName);
+            if (sb.getLog().isFine()) sb.getLog().fine("Processing " + indexes.length + " bytes / " + wordc + " words / " + entryc + " entries from " + otherPeerName);
             final long startProcess = System.currentTimeMillis();
 
             // decode request
@@ -180,7 +180,7 @@ public final class transferRWI {
 
                 // block blacklisted entries
                 if ((blockBlacklist) && (Switchboard.urlBlacklist.hashInBlacklistedCache(BlacklistType.DHT, urlHash))) {
-                    Network.log.logFine("transferRWI: blocked blacklisted URLHash '" + ASCII.String(urlHash) + "' from peer " + otherPeerName);
+                    Network.log.fine("transferRWI: blocked blacklisted URLHash '" + ASCII.String(urlHash) + "' from peer " + otherPeerName);
                     blocked++;
                     continue;
                 }
@@ -188,7 +188,7 @@ public final class transferRWI {
                 // check if the entry is in our network domain
                 final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomainHash(urlHash);
                 if (urlRejectReason != null) {
-                    Network.log.logWarning("transferRWI: blocked URL hash '" + ASCII.String(urlHash) + "' (" + urlRejectReason + ") from peer " + otherPeerName + "; peer is suspected to be a spam-peer (or something is wrong)");
+                    Network.log.warn("transferRWI: blocked URL hash '" + ASCII.String(urlHash) + "' (" + urlRejectReason + ") from peer " + otherPeerName + "; peer is suspected to be a spam-peer (or something is wrong)");
                     //if (yacyCore.log.isFine()) yacyCore.log.logFine("transferRWI: blocked URL hash '" + urlHash + "' (" + urlRejectReason + ") from peer " + otherPeerName);
                     blocked++;
                     continue;
@@ -198,7 +198,7 @@ public final class transferRWI {
                 try {
                     sb.index.storeRWI(ASCII.getBytes(wordHash), iEntry);
                 } catch (final Exception e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
                 serverCore.checkInterruption();
 
@@ -215,7 +215,7 @@ public final class transferRWI {
                         unknownURL.put(ASCII.getBytes(id));
                     }
                 } catch (SpaceExceededException e) {
-                    sb.getLog().logWarning("transferRWI: DB-Error while trying to determine if URL with hash '" + id + "' is known.", e);
+                    sb.getLog().warn("transferRWI: DB-Error while trying to determine if URL with hash '" + id + "' is known.", e);
                 }
             }
             sb.peers.mySeed().incRI(received);
@@ -228,12 +228,12 @@ public final class transferRWI {
             }
             if (unknownURLs.length() > 0) { unknownURLs.setLength(unknownURLs.length() - 1); }
             if (wordhashes.isEmpty() || received == 0) {
-                sb.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs");
+                sb.getLog().info("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs");
             } else {
                 final String firstHash = wordhashes.get(0);
                 final String lastHash = wordhashes.get(wordhashes.size() - 1);
                 final long avdist = (Distribution.horizontalDHTDistance(firstHash.getBytes(), ASCII.getBytes(sb.peers.mySeed().hash)) + Distribution.horizontalDHTDistance(lastHash.getBytes(), ASCII.getBytes(sb.peers.mySeed().hash))) / 2;
-                sb.getLog().logInfo("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + received+ " URLs from " + otherPeerName);
+                sb.getLog().info("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + received+ " URLs from " + otherPeerName);
                 EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "], processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, " + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + received + " URLs from " + otherPeerName, "", otherPeer.hash));
             }
             result = "ok";
@@ -254,6 +254,6 @@ public final class transferRWI {
      * @param msg
      */
     private static void logWarning(final String requestIdentifier, final String msg) {
-        Log.logWarning("transferRWI", requestIdentifier +" "+ msg);
+        ConcurrentLog.warn("transferRWI", requestIdentifier +" "+ msg);
     }
 }

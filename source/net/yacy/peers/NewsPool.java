@@ -53,9 +53,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 
@@ -311,7 +311,7 @@ public class NewsPool {
                 this.outgoingNews.push(record); // .. and put it on the publishing list
             }
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 

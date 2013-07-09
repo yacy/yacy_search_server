@@ -38,9 +38,9 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.io.AbstractWriter;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 
 
@@ -89,7 +89,7 @@ public final class Heap extends HeapModifier implements BLOB {
         this.buffermax = buffermax;
         this.buffer = new TreeMap<byte[], byte[]>(ordering);
         this.buffersize = 0;
-        Log.logInfo("Heap", "initializing heap " + this.name());
+        ConcurrentLog.info("Heap", "initializing heap " + this.name());
         /*
         // DEBUG
         Iterator<byte[]> i = index.keys(true, null);
@@ -281,7 +281,7 @@ public final class Heap extends HeapModifier implements BLOB {
      */
     @Override
     public synchronized void clear() throws IOException {
-        Log.logInfo("Heap", "clearing heap " + this.name());
+        ConcurrentLog.info("Heap", "clearing heap " + this.name());
         assert this.buffer != null;
         if (this.buffer == null) this.buffer = new TreeMap<byte[], byte[]>(this.ordering);
     	this.buffer.clear();
@@ -294,12 +294,12 @@ public final class Heap extends HeapModifier implements BLOB {
      */
     @Override
     public synchronized void close(final boolean writeIDX) {
-        Log.logInfo("Heap", "closing heap " + this.name());
+        ConcurrentLog.info("Heap", "closing heap " + this.name());
     	if (this.file != null && this.buffer != null) {
             try {
                 flushBuffer();
             } catch (IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     	this.buffer = null;
@@ -542,7 +542,7 @@ public final class Heap extends HeapModifier implements BLOB {
             heap.insert("aaaaaaaaaaaX".getBytes(), "WXYZ".getBytes());
             heap.close(true);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
@@ -566,9 +566,9 @@ public final class Heap extends HeapModifier implements BLOB {
             heap.insert("aaaaaaaaaaaX".getBytes(), map("aaaaaaaaaaad", "WXYZ"));
             heap.close();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
     

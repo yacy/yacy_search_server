@@ -30,8 +30,8 @@
 import java.io.File;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.Cache;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -140,7 +140,7 @@ public class ProxyIndexingMonitor_p {
             } catch (final Exception e) {
                 prop.put("info", "2"); //Error: errmsg
                 prop.putHTML("info_error", e.getMessage());
-                Log.logSevere("SERVLET", "ProxyIndexingMonitor.case3", e);
+                ConcurrentLog.severe("SERVLET", "ProxyIndexingMonitor.case3", e);
             }
         }
 

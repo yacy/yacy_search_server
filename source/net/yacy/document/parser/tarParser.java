@@ -94,12 +94,12 @@ public class tarParser extends AbstractParser implements Parser {
                     if (subDocs == null) continue;
                     for (final Document d: subDocs) docacc.add(d);
                 } catch (final Parser.Failure e) {
-                    AbstractParser.log.logWarning("tar parser entry " + name + ": " + e.getMessage());
+                    AbstractParser.log.warn("tar parser entry " + name + ": " + e.getMessage());
                 } finally {
                     if (tmp != null) FileUtils.deletedelete(tmp);
                 }
             } catch (final IOException e) {
-                AbstractParser.log.logWarning("tar parser:" + e.getMessage());
+                AbstractParser.log.warn("tar parser:" + e.getMessage());
                 break;
             }
         }

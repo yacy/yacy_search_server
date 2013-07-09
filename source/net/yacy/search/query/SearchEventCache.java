@@ -31,8 +31,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedMap;
 
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.SeedDB;
 import net.yacy.repository.LoaderDispatcher;
@@ -167,7 +167,7 @@ public class SearchEventCache {
         if (event == null) {
             // check if there are too many other searches alive now
             synchronized (lastEvents) {
-                Log.logInfo("SearchEventCache", "getEvent: " + lastEvents.size() + " in cache");
+                ConcurrentLog.info("SearchEventCache", "getEvent: " + lastEvents.size() + " in cache");
             }
             
             // start a new event

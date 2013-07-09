@@ -55,12 +55,12 @@ import org.apache.pdfbox.pdmodel.font.PDType3Font;
 import org.apache.pdfbox.util.PDFTextStripper;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -261,14 +261,14 @@ public class pdfParser extends AbstractParser implements Parser {
                     document = Document.mergeDocuments(null, "application/pdf", parser.parse(null, "application/pdf", null, new FileInputStream(pdfFile)));
                 } catch (final Parser.Failure e) {
                     System.err.println("Cannot parse file " + pdfFile.getAbsolutePath());
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 } catch (final InterruptedException e) {
                     System.err.println("Interrupted while parsing!");
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 } catch (final NoClassDefFoundError e) {
                     System.err.println("class not found: " + e.getMessage());
                 } catch (final FileNotFoundException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
 
                 // statistics
@@ -284,7 +284,7 @@ public class pdfParser extends AbstractParser implements Parser {
                         FileUtils.copy(document.getTextStream(), new File("parsedPdf.txt"));
                     } catch (final IOException e) {
                         System.err.println("error saving parsed document");
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 }
             } else {

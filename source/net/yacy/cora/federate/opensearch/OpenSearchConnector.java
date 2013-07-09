@@ -29,10 +29,10 @@ import java.util.Set;
 
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.storage.Configuration;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.parser.xml.opensearchdescriptionReader;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEvent;
@@ -79,13 +79,13 @@ public class OpenSearchConnector {
                         try {
                             sb.tables.insert("opensearchsys", row);
                         } catch (SpaceExceededException ex) {
-                            Log.logException(ex);
+                            ConcurrentLog.logException(ex);
                         }
                     }
                 }
                 size = sb.tables.size("opensearchsys");
             } catch (IOException ex) {
-                Log.logException(ex);
+                ConcurrentLog.logException(ex);
             }
         }
     }
@@ -112,7 +112,7 @@ public class OpenSearchConnector {
                         sb.heuristicRSS(parseSearchTemplate(osurl, "$", 0, theSearch.query.itemsPerPage), theSearch, "opensearch:" + name);
                     }
                 } catch (IOException ex) {
-                    Log.logWarning("OpenSearchConnector.query", "failed reading table opensearchsys");
+                    ConcurrentLog.warn("OpenSearchConnector.query", "failed reading table opensearchsys");
                 }
             }
         }
@@ -152,12 +152,12 @@ public class OpenSearchConnector {
                 try {
                     conf.commit();
                 } catch (IOException ex) {
-                    Log.logWarning("OpenSearchConnector.add", "config file write error");
+                    ConcurrentLog.warn("OpenSearchConnector.add", "config file write error");
                 }
                 return true;
             }
         } catch (IOException e1) {
-            Log.logException(e1);
+            ConcurrentLog.logException(e1);
             return false;
         }
         return false;
@@ -184,14 +184,14 @@ public class OpenSearchConnector {
         final SolrConnector connector = sb.index.fulltext().getWebgraphConnector();
         // check if needed Solr fields are available (selected)
         if (connector == null) {
-            Log.logSevere("OpenSearchConnector.Discover", "Error on connecting to embedded Solr webgraph index");
+            ConcurrentLog.severe("OpenSearchConnector.Discover", "Error on connecting to embedded Solr webgraph index");
             return false;
         }
         final boolean metafieldavailable = sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_rel_s.name()) 
                 && ( sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_protocol_s.name()) && sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_urlstub_s.name()) ) 
                 && sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false);
         if (!metafieldavailable) {
-            Log.logWarning("OpenSearchConnector.Discover", "webgraph option and webgraph Schema fields target_rel_s, target_protocol_s and target_urlstub_s must be switched on");
+            ConcurrentLog.warn("OpenSearchConnector.Discover", "webgraph option and webgraph Schema fields target_rel_s, target_protocol_s and target_urlstub_s must be switched on");
             return false;
         }
         // the solr query
@@ -204,12 +204,12 @@ public class OpenSearchConnector {
             SolrDocumentList docList = connector.getDocumentListByQuery(webgraphquerystr, 0, 1, webgraphqueryfields);
             numfound = docList.getNumFound();
             if (numfound == 0) {
-                Log.logInfo("OpenSearchConnector.Discover", "no results found, abort discover job");
+                ConcurrentLog.info("OpenSearchConnector.Discover", "no results found, abort discover job");
                 return true;
             }
-            Log.logInfo("OpenSearchConnector.Discover", "start checking " + Long.toString(numfound) + " found index results");
+            ConcurrentLog.info("OpenSearchConnector.Discover", "start checking " + Long.toString(numfound) + " found index results");
         } catch (IOException ex) {
-            Log.logException(ex);
+            ConcurrentLog.logException(ex);
             return false;
         }
 
@@ -225,12 +225,12 @@ public class OpenSearchConnector {
                     int loopnr = 0;
                     Set<String> dblmem = new HashSet<String>(); // temp memory for already checked url
                     while (doloop) {
-                        Log.logInfo("OpenSearchConnector.Discover", "start Solr query loop at " + Integer.toString(loopnr * 20) + " of " + Long.toString(numfound));
+                        ConcurrentLog.info("OpenSearchConnector.Discover", "start Solr query loop at " + Integer.toString(loopnr * 20) + " of " + Long.toString(numfound));
                         SolrDocumentList docList = connector.getDocumentListByQuery(webgraphquerystr, loopnr * 20, 20,webgraphqueryfields); // check chunk of 20 result documents
                         loopnr++;
                         if (stoptime < System.currentTimeMillis()) {// stop after max 1h
                             doloop = false;
-                            Log.logInfo("OpenSearchConnector.Discover", "long running discover task aborted");
+                            ConcurrentLog.info("OpenSearchConnector.Discover", "long running discover task aborted");
                         }
                         if (docList != null && docList.size() > 0) {
                             Iterator<SolrDocument> docidx = docList.iterator();
@@ -246,9 +246,9 @@ public class OpenSearchConnector {
                                         if (os.getRSSorAtomUrl() != null) {
                                             // add found system to config file
                                             add(os.getShortName(), os.getRSSorAtomUrl(), false, os.getItem("LongName"));
-                                            Log.logInfo("OpenSearchConnector.Discover", "added " + os.getShortName() + " " + hrefurltxt);
+                                            ConcurrentLog.info("OpenSearchConnector.Discover", "added " + os.getShortName() + " " + hrefurltxt);
                                         } else {
-                                            Log.logInfo("OpenSearchConnector.Discover", "osd.xml check failed (no RSS or Atom support) for " + hrefurltxt);
+                                            ConcurrentLog.info("OpenSearchConnector.Discover", "osd.xml check failed (no RSS or Atom support) for " + hrefurltxt);
                                         }
                                     }
                                 } catch (MalformedURLException ex) {
@@ -258,9 +258,9 @@ public class OpenSearchConnector {
                             doloop = false;
                         }
                     }
-                    Log.logInfo("OpenSearchConnector.Discover", "finisched Solr query (checked " + Integer.toString(dblmem.size()) + " unique opensearchdescription links found in " + Long.toString(numfound) + " results)");
+                    ConcurrentLog.info("OpenSearchConnector.Discover", "finisched Solr query (checked " + Integer.toString(dblmem.size()) + " unique opensearchdescription links found in " + Long.toString(numfound) + " results)");
                 } catch (IOException ex) {
-                    Log.logException(ex);
+                    ConcurrentLog.logException(ex);
                 }
             }
         };

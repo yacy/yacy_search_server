@@ -52,10 +52,10 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.wiki.WikiBoard;
 import net.yacy.kelondro.blob.MapHeap;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.kelondroException;
 
 import org.w3c.dom.Document;
@@ -130,9 +130,9 @@ public class BlogBoard {
             this.database.insert(UTF8.getBytes(page.key), page.record);
             ret = page.key;
         } catch (IOException ex) {
-            Log.logException(ex);
+            ConcurrentLog.logException(ex);
         } catch (SpaceExceededException ex) {
-            Log.logException(ex);
+            ConcurrentLog.logException(ex);
         }
         return ret;
     }
@@ -147,10 +147,10 @@ public class BlogBoard {
         try {
             record = base.get(UTF8.getBytes(normalized.substring(0, Math.min(normalized.length(), KEY_LENGTH))));
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             record = null;
         } catch (SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             record = null;
         }
         return (record == null) ?
@@ -164,11 +164,11 @@ public class BlogBoard {
             final DocumentBuilder builder = factory.newDocumentBuilder();
             return parseXMLimport(builder.parse(new ByteArrayInputStream(UTF8.getBytes(input))));
         } catch (final ParserConfigurationException ex) {
-            Log.logException(ex);
+            ConcurrentLog.logException(ex);
         } catch (final SAXException ex) {
-            Log.logException(ex);
+            ConcurrentLog.logException(ex);
         } catch (final IOException ex) {
-            Log.logException(ex);
+            ConcurrentLog.logException(ex);
         }
 
     	return false;
@@ -399,8 +399,8 @@ public class BlogBoard {
             try {
                 final String date = this.record.get("date");
                 if (date == null) {
-                    if (Log.isFinest("Blog")) {
-                        Log.logFinest("Blog", "ERROR: date field missing in blogBoard");
+                    if (ConcurrentLog.isFinest("Blog")) {
+                        ConcurrentLog.finest("Blog", "ERROR: date field missing in blogBoard");
                     }
                     return new Date();
                 }
@@ -421,8 +421,8 @@ public class BlogBoard {
         public String getTimestamp() {
             final String timestamp = this.record.get("date");
             if (timestamp == null) {
-                if (Log.isFinest("Blog")) {
-                    Log.logFinest("Blog", "ERROR: date field missing in blogBoard");
+                if (ConcurrentLog.isFinest("Blog")) {
+                    ConcurrentLog.finest("Blog", "ERROR: date field missing in blogBoard");
                 }
                 return GenericFormatter.SHORT_SECOND_FORMATTER.format();
             }

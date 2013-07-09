@@ -13,8 +13,8 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.server.http.ServerSideIncludes;
 
@@ -97,7 +97,7 @@ public class AugmentHtmlStream {
         boolean augmented = false;
 
         try {
-            Log.logInfo("AUGMENTATION", url.getName());
+            ConcurrentLog.info("AUGMENTATION", url.getName());
         } catch (IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -110,7 +110,7 @@ public class AugmentHtmlStream {
             try {
 
                 Doc = processExternal("http://reflect.ws/REST/GetHTML", "document", Doc);
-                Log.logInfo("AUGMENTATION", "reflected " + url);
+                ConcurrentLog.info("AUGMENTATION", "reflected " + url);
                 augmented = true;
             } catch (Exception e) {
 

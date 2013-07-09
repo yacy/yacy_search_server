@@ -42,11 +42,11 @@ import java.util.TreeMap;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.index.RowCollection;
-import net.yacy.kelondro.logging.Log;
 
 
 /*
@@ -129,7 +129,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
         if (this.theDBConnection != null) try {
             this.theDBConnection.close();
         } catch (final SQLException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         this.theDBConnection = null;
     }
@@ -152,7 +152,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
 
             return size;
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return -1;
         }
     }
@@ -290,7 +290,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
         		try {
 					sqlStatement.close();
 				} catch (final SQLException e) {
-				    Log.logException(e);
+				    ConcurrentLog.logException(e);
 				}
         	}
         }

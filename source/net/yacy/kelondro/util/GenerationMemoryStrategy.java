@@ -41,7 +41,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
     	error = initPoolBeans();
     	heap = ManagementFactory.getMemoryMXBean();
     	if (lastGC == 0l) gc(10000, "initial gc - to get proper results"); // this is necessary on some GCs / vm
-    	if (error) log.logWarning(name + ": not a generational heap");
+    	if (error) log.warn(name + ": not a generational heap");
     }
 
     /**
@@ -170,10 +170,10 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
 				final MemoryUsage usage = bean.getCollectionUsage();
 				if (usage != null) return usage;
 			} catch (final IllegalArgumentException e) {
-				log.logWarning(name + ": ", e);
+				log.warn(name + ": ", e);
 			}
     		error = true;
-    		log.logWarning(name + ": no colletion usage available at " + bean.getName());
+    		log.warn(name + ": no colletion usage available at " + bean.getName());
     	}
     	return bean.getUsage();
     }

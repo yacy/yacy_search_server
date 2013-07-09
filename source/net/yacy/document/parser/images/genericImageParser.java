@@ -43,13 +43,13 @@ import java.util.Set;
 import javax.imageio.ImageIO;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.images.bmpParser.IMAGEMAP;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
 import com.drew.imaging.jpeg.JpegProcessingException;
@@ -110,7 +110,7 @@ public class genericImageParser extends AbstractParser implements Parser {
             try {
                 b = FileUtils.read(sourceStream);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 throw new Parser.Failure(e.getMessage(), location);
             }
             final IMAGEMAP imap = bmpParser.parse(b);
@@ -124,7 +124,7 @@ public class genericImageParser extends AbstractParser implements Parser {
             try {
                 b = FileUtils.read(sourceStream);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 throw new Parser.Failure(e.getMessage(), location);
             }
 

@@ -34,12 +34,12 @@ import java.util.Set;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.workflow.WorkflowJob;
@@ -51,14 +51,14 @@ public class Transmission {
     // anything beyond that might get discarded without notice
     public static final int maxRWIsCount = 1000; // since SVN 7993 hardcoded in htroot/yacy/transferRWI.java:161
 
-    protected Log log;
+    protected ConcurrentLog log;
     protected Segment segment;
     protected SeedDB seeds;
     protected boolean gzipBody4Transfer;
     protected int timeout4Transfer;
 
     public Transmission(
-            final Log log,
+            final ConcurrentLog log,
             final Segment segment,
             final SeedDB seeds,
             final boolean gzipBody4Transfer,
@@ -138,7 +138,7 @@ public class Transmission {
             try {
                 Transmission.this.segment.storeRWI(container);
             } catch (final Exception e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             return c;
         }
@@ -157,7 +157,7 @@ public class Transmission {
                 try {
                     Transmission.this.segment.storeRWI(container);
                 } catch (final Exception e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
                 return;
             }
@@ -243,10 +243,10 @@ public class Transmission {
             	// target is my own peer. This is easy. Just restore the indexContainer
             	restore();
             	this.hit++;
-            	Transmission.this.log.logInfo("Transfer of chunk to myself-target");
+            	Transmission.this.log.info("Transfer of chunk to myself-target");
             	return true;
             }
-            Transmission.this.log.logInfo("starting new index transmission request to " + ASCII.String(this.primaryTarget));
+            Transmission.this.log.info("starting new index transmission request to " + ASCII.String(this.primaryTarget));
             final long start = System.currentTimeMillis();
             final String error = Protocol.transferIndex(target, this.containers, this.references, Transmission.this.segment, Transmission.this.gzipBody4Transfer, Transmission.this.timeout4Transfer);
             if (error == null) {
@@ -254,7 +254,7 @@ public class Transmission {
                 final long transferTime = System.currentTimeMillis() - start;
                 final Iterator<ReferenceContainer<WordReference>> i = this.containers.iterator();
                 final ReferenceContainer<WordReference> firstContainer = (i == null) ? null : i.next();
-                Transmission.this.log.logInfo("Index transfer of " + this.containers.size() +
+                Transmission.this.log.info("Index transfer of " + this.containers.size() +
                                  " words [" + ((firstContainer == null) ? null : ASCII.String(firstContainer.getTermHash())) + " .. " + ASCII.String(this.primaryTarget) + "]" +
                                  " and " + this.references.size() + " URLs" +
                                  " to peer " + target.getName() + ":" + target.hash +
@@ -265,13 +265,13 @@ public class Transmission {
                 Transmission.this.seeds.mySeed().incSU(this.references.size());
                 // if the peer has set a pause time and we are in flush mode (index transfer)
                 // then we pause for a while now
-                Transmission.this.log.logInfo("Transfer finished of chunk to target " + target.hash + "/" + target.getName());
+                Transmission.this.log.info("Transfer finished of chunk to target " + target.hash + "/" + target.getName());
                 this.hit++;
                 return true;
             }
             this.miss++;
             // write information that peer does not receive index transmissions
-            Transmission.this.log.logInfo("Transfer failed of chunk to target " + target.hash + "/" + target.getName() + ": " + error);
+            Transmission.this.log.info("Transfer failed of chunk to target " + target.hash + "/" + target.getName() + ": " + error);
             // get possibly newer target Info
             final Seed newTarget = Transmission.this.seeds.get(target.hash);
             if (newTarget != null) {
@@ -302,7 +302,7 @@ public class Transmission {
             for (final ReferenceContainer<WordReference> ic : this) try {
                 Transmission.this.segment.storeRWI(ic);
             } catch (final Exception e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
 

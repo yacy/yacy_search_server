@@ -4,6 +4,7 @@ import java.util.Iterator;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.UserDB;
 import net.yacy.data.ymark.YMarkEntry;
@@ -11,7 +12,6 @@ import net.yacy.data.ymark.YMarkRDF;
 import net.yacy.data.ymark.YMarkTables;
 import net.yacy.data.ymark.YMarkTables.TABLES;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -69,7 +69,7 @@ public class YMarks {
 			try {
 				size = sb.tables.bookmarks.getSize(bmk_user);
 			} catch (IOException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 				size = 0;
 			}
             prop.put("size", size);

@@ -44,8 +44,8 @@ import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.storage.MapStore;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.BDecoder;
 import net.yacy.kelondro.util.BDecoder.BObject;
 import net.yacy.kelondro.util.BEncoder;
@@ -99,7 +99,7 @@ public class BEncodedHeap implements MapStore {
         try {
             return this.table.keys(true, false);
         } catch (IOException e) {
-            Log.logSevere("BEncodedHeap", "returning empty iterator for failed key iteration: " + e.getMessage(), e);
+            ConcurrentLog.severe("BEncodedHeap", "returning empty iterator for failed key iteration: " + e.getMessage(), e);
             return new CloneableIterator<byte[]>(){
 
                 @Override
@@ -297,10 +297,10 @@ public class BEncodedHeap implements MapStore {
             try {
                 return get((byte[]) key);
             } catch ( final IOException e ) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 return null;
             } catch ( final SpaceExceededException e ) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 return null;
             }
         }
@@ -444,10 +444,10 @@ public class BEncodedHeap implements MapStore {
             this.columnames.addAll(map.keySet());
             return entry;
         } catch ( final IOException e ) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         } catch ( final SpaceExceededException e ) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }
@@ -481,10 +481,10 @@ public class BEncodedHeap implements MapStore {
             try {
                 return remove((byte[]) key);
             } catch ( final IOException e ) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 return null;
             } catch ( final SpaceExceededException e ) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 return null;
             }
         }
@@ -502,9 +502,9 @@ public class BEncodedHeap implements MapStore {
             try {
                 this.insert(me.getKey(), me.getValue());
             } catch ( final SpaceExceededException e ) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch ( final IOException e ) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -518,7 +518,7 @@ public class BEncodedHeap implements MapStore {
             this.table.clear();
             this.columnames.clear();
         } catch ( final IOException e ) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
@@ -609,7 +609,7 @@ public class BEncodedHeap implements MapStore {
                 this.table = new Heap(location, keylen, order, buffermax);
                 return iter;
             } catch ( final IOException e ) {
-                Log.logSevere("PropertiesTable", e.getMessage(), e);
+                ConcurrentLog.severe("PropertiesTable", e.getMessage(), e);
                 return null;
             }
         }
@@ -685,9 +685,9 @@ public class BEncodedHeap implements MapStore {
                 // clean up
                 map.close();
             } catch ( final IOException e ) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch ( final SpaceExceededException e ) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         } else {
             final File f = new File(args[0]);
@@ -701,7 +701,7 @@ public class BEncodedHeap implements MapStore {
                 }
                 map.close();
             } catch ( final IOException e ) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }

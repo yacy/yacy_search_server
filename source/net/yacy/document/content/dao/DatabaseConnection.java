@@ -30,7 +30,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 public class DatabaseConnection {
 
@@ -63,7 +63,7 @@ public class DatabaseConnection {
     	try {
 			this.connection.setAutoCommit(b);
 		} catch (SQLException e) {
-		    Log.logException(e);
+		    ConcurrentLog.logException(e);
 		}
     }
     

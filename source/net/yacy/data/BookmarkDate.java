@@ -40,10 +40,10 @@ import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.kelondro.blob.MapHeap;
-import net.yacy.kelondro.logging.Log;
 
 public class BookmarkDate {
 
@@ -75,7 +75,7 @@ public class BookmarkDate {
     
     // rebuilds the datesDB from the bookmarksDB
     public void init(final Iterator<Bookmark> it) {
-        Log.logInfo("BOOKMARKS", "start init dates.db from bookmarks.db...");
+        ConcurrentLog.info("BOOKMARKS", "start init dates.db from bookmarks.db...");
         Bookmark bookmark;        
         String date;
         Entry bmDate;
@@ -91,7 +91,7 @@ public class BookmarkDate {
             bmDate.setDatesTable();
             count++;
         }
-        Log.logInfo("BOOKMARKS", "finished init "+datesTable.size()+" dates using " + count + " bookmarks.");
+        ConcurrentLog.info("BOOKMARKS", "finished init "+datesTable.size()+" dates using " + count + " bookmarks.");
     }
     
     /**
@@ -149,13 +149,13 @@ public class BookmarkDate {
                 try {
                     datesTable.insert(UTF8.getBytes(getDateString()), mem);
                 } catch (Exception e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             } else {
                 try {
                     datesTable.delete(UTF8.getBytes(getDateString()));
                 } catch (IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }

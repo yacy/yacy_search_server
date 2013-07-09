@@ -59,7 +59,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.util.CommonPattern;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public class cryptbig {
@@ -214,7 +214,7 @@ public class cryptbig {
 		    System.out.println(decrypted);
 		} catch (final Exception e) {
 		    System.out.println("Exception: " + e.getMessage());
-		    Log.logException(e);
+		    ConcurrentLog.logException(e);
 		}
 	    }
     }
@@ -615,7 +615,7 @@ public class cryptbig {
             System.out.println(descrambleString(s[1], s[2]));
         } catch (final IOException e) {
             // TODO Auto-generated catch block
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 	    System.out.println("Calculation time: " + (System.currentTimeMillis() - t) + " milliseconds");
 	    System.exit(0);

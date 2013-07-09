@@ -7,12 +7,12 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ymark.YMarkEntry;
 import net.yacy.data.ymark.YMarkTables;
 import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -105,7 +105,7 @@ public class Table_YMark_p {
         if (columns.isEmpty() && table != null) try {
             columns = sb.tables.columns(table);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         count = 0;
@@ -121,7 +121,7 @@ public class Table_YMark_p {
                     count++;
     	        }
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
         prop.put("showselection_columns", count);
@@ -149,9 +149,9 @@ public class Table_YMark_p {
                 if (entry.getValue().startsWith("mark_")) try {
                     sb.tables.bookmarks.deleteBookmark(bmk_user, entry.getValue().substring(5).getBytes());
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 } catch (final SpaceExceededException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }
@@ -166,7 +166,7 @@ public class Table_YMark_p {
             try {
                 sb.tables.bookmarks.addBookmark(bmk_user, bmk, false, false);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
 
@@ -190,18 +190,18 @@ public class Table_YMark_p {
                         setEdit(sb, prop, table, pk, columns);
                     }
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 } catch (final SpaceExceededException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             } else if (post.containsKey("addrow")) try {
                 // get a new key
                 final String pk = UTF8.String(sb.tables.createRow(table));
                 setEdit(sb, prop, table, pk, columns);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch (final SpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } else {
                 prop.put("showtable", 1);
                 prop.put("showtable_table", table);
@@ -212,7 +212,7 @@ public class Table_YMark_p {
                     prop.put("showtable_tagsize", sb.tables.size(YMarkTables.TABLES.TAGS.tablename(bmk_user)));
                     prop.put("showtable_foldersize", sb.tables.size(YMarkTables.TABLES.FOLDERS.tablename(bmk_user)));
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     prop.put("showtable_bmksize", 0);
                     prop.put("showtable_tagsize", 0);
                     prop.put("showtable_foldersize", 0);
@@ -229,7 +229,7 @@ public class Table_YMark_p {
                 try {
                     maxcount = Math.min(maxcount, sb.tables.size(table));
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     maxcount = 0;
                 }
                 count = 0;
@@ -265,7 +265,7 @@ public class Table_YMark_p {
                         count++;
                     }
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
                 prop.put("showtable_list", count);
                 prop.put("showtable_num", count);

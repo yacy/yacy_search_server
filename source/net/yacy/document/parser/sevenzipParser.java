@@ -33,12 +33,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import SevenZip.ArchiveExtractCallback;
 import SevenZip.IInStream;
@@ -74,14 +74,14 @@ public class sevenzipParser extends AbstractParser implements Parser {
                 null,
                 false);
         Handler archive;
-        AbstractParser.log.logFine("opening 7zip archive...");
+        AbstractParser.log.fine("opening 7zip archive...");
         try {
             archive = new Handler(source);
         } catch (final IOException e) {
             throw new Parser.Failure("error opening 7zip archive: " + e.getMessage(), location);
         }
         final SZParserExtractCallback aec = new SZParserExtractCallback(AbstractParser.log, archive, doc, location.getFile());
-        AbstractParser.log.logFine("processing archive contents...");
+        AbstractParser.log.fine("processing archive contents...");
         try {
             archive.Extract(null, -1, 0, aec);
             return doc;
@@ -117,12 +117,12 @@ public class sevenzipParser extends AbstractParser implements Parser {
      // and parse the extracted content
      private static class SZParserExtractCallback extends ArchiveExtractCallback {
 
-         private final Log log;
+         private final ConcurrentLog log;
          private ByteArrayOutputStream cfos = null;
          private final Document doc;
          private final String prefix;
 
-         public SZParserExtractCallback(final Log logger, final IInArchive handler,
+         public SZParserExtractCallback(final ConcurrentLog logger, final IInArchive handler,
                  final Document doc, final String prefix) {
              super.Init(handler);
              this.log = logger;
@@ -135,13 +135,13 @@ public class sevenzipParser extends AbstractParser implements Parser {
              this.extractMode = (arg0 == IInArchive.NExtract_NAskMode_kExtract);
              switch (arg0) {
                  case IInArchive.NExtract_NAskMode_kExtract:
-                     this.log.logFine("Extracting " + this.filePath);
+                     this.log.fine("Extracting " + this.filePath);
                      break;
                  case IInArchive.NExtract_NAskMode_kTest:
-                     this.log.logFine("Testing " + this.filePath);
+                     this.log.fine("Testing " + this.filePath);
                      break;
                  case IInArchive.NExtract_NAskMode_kSkip:
-                     this.log.logFine("Skipping " + this.filePath);
+                     this.log.fine("Skipping " + this.filePath);
                      break;
              }
          }

@@ -30,7 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 public final class CachedFileWriter extends AbstractWriter implements Writer {
 
@@ -151,7 +151,7 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
             this.RAFile.close();
             //System.out.println("***DEBUG*** closed file " + this.file + ", FD is " + ((RAFile.getFD().valid()) ? "VALID" : "VOID") + ", channel is " + ((RAFile.getChannel().isOpen()) ? "OPEN" : "CLOSE"));
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         this.cache = null;
         this.RAFile = null;
@@ -163,7 +163,7 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
         try {
             this.RAFile = new RandomAccessFile(this.file, "rw");
         } catch (FileNotFoundException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         this.cache = new byte[8192];
         this.cachestart = 0;

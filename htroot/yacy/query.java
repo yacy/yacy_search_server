@@ -32,7 +32,7 @@ import java.io.IOException;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.Network;
 import net.yacy.peers.Protocol;
 import net.yacy.search.Switchboard;
@@ -98,7 +98,7 @@ public final class query {
             prop.put("response", sb.index.termIndex() == null ? 0 : sb.index.termIndex().get(env.getBytes(), null).size());
             return prop;
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         if (obj.equals("rwicount")) {

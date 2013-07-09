@@ -20,7 +20,7 @@
 
 package net.yacy.search;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 public class Shutdown extends Thread {
     private final Switchboard sb;
@@ -38,9 +38,9 @@ public class Shutdown extends Thread {
         try {
             Thread.sleep(this.delay);
         } catch ( final InterruptedException e ) {
-            this.sb.getLog().logInfo("interrupted delayed shutdown");
+            this.sb.getLog().info("interrupted delayed shutdown");
         } catch ( final Exception e ) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         this.sb.terminate(this.reason);
     }

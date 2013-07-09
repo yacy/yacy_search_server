@@ -39,6 +39,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.CrawlProfile;
@@ -52,7 +53,6 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.NewsPool;
 import net.yacy.repository.Blacklist.BlacklistType;
@@ -96,7 +96,7 @@ public class Crawler_p {
         
         if (post != null) {
             String c = post.toString();
-            if (c.length() < 1000) Log.logInfo("Crawl Start", c);
+            if (c.length() < 1000) ConcurrentLog.info("Crawl Start", c);
         }
 
         if (post != null && post.containsKey("continue")) {
@@ -132,7 +132,7 @@ public class Crawler_p {
             sb.crawler.removeActive(handle.getBytes());
             sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000);
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         if (post != null && post.containsKey("crawlingstart")) {
@@ -189,7 +189,7 @@ public class Crawler_p {
                         if (crawlingStartURL != null && (crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
                         
                     } catch (MalformedURLException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 } else {
                 	crawlName = crawlingFile.getName();
@@ -294,7 +294,7 @@ public class Crawler_p {
                                 newRootURLs.add(u);
                             }
                         } catch (IOException e) {
-                            Log.logException(e);
+                            ConcurrentLog.logException(e);
                         }
                     }
                     rootURLs = newRootURLs;
@@ -319,7 +319,7 @@ public class Crawler_p {
                                 String basepath = u.toNormalform(true);
                                 if (!basepath.endsWith("/")) {int p = basepath.lastIndexOf("/"); if (p > 0) basepath = basepath.substring(0, p + 1);}
                                 int count = sb.index.fulltext().remove(basepath, deleteageDate);
-                                if (count > 0) Log.logInfo("Crawler_p", "deleted " + count + " documents for host " + u.getHost());
+                                if (count > 0) ConcurrentLog.info("Crawler_p", "deleted " + count + " documents for host " + u.getHost());
                             }
                         }
                     }
@@ -390,7 +390,7 @@ public class Crawler_p {
                 for (byte[] hosthash: hosthashes) {
                     try {
                         sb.index.fulltext().getDefaultConnector().deleteByQuery(CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
-                    } catch (IOException e) {Log.logException(e);}
+                    } catch (IOException e) {ConcurrentLog.logException(e);}
                 }
                 sb.index.fulltext().commit(true);
                 
@@ -472,7 +472,7 @@ public class Crawler_p {
                         prop.put("info", "6");//Error with url
                         prop.putHTML("info_crawlingStart", sitemapURLStr);
                         prop.putHTML("info_error", e.getMessage());
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 } else if ("file".equals(crawlingMode)) {
                     if (post.containsKey("crawlingFile")) {
@@ -510,7 +510,7 @@ public class Crawler_p {
                             prop.put("info", "7"); // Error with file
                             prop.putHTML("info_crawlingStart", crawlingFileName);
                             prop.putHTML("info_error", e.getMessage());
-                            Log.logException(e);
+                            ConcurrentLog.logException(e);
                         }
                         sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                     }

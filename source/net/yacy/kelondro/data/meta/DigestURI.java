@@ -40,8 +40,8 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteArray;
 
 /**
@@ -71,7 +71,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         try {
             url = new DigestURI(h);
         } catch (final MalformedURLException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
         return (url == null) ? null : ASCII.String(url.hash(), 6, 6);

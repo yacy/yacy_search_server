@@ -77,7 +77,7 @@ public class psParser extends AbstractParser implements Parser {
             final int returnCode = ps2asciiProc.waitFor();
             return (returnCode == 0);
         } catch (final Exception e) {
-            if (AbstractParser.log != null) AbstractParser.log.logInfo("ps2ascii not found. Switching to java parser mode.");
+            if (AbstractParser.log != null) AbstractParser.log.info("ps2ascii not found. Switching to java parser mode.");
             return false;
         }
     }
@@ -246,7 +246,7 @@ public class psParser extends AbstractParser implements Parser {
             execCode = ps2asciiProc.waitFor();
     	} catch (final Exception e) {
             final String errorMsg = "Unable to convert ps to ascii. " + e.getMessage();
-            AbstractParser.log.logSevere(errorMsg);
+            AbstractParser.log.severe(errorMsg);
             throw new Exception(errorMsg);
     	}
 

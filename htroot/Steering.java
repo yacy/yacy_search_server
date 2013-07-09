@@ -32,7 +32,7 @@ import java.io.File;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.operation.yacyRelease;
 import net.yacy.search.Switchboard;
@@ -52,13 +52,13 @@ public class Steering {
 
         // handle access rights
         if (!sb.verifyAuthentication(header)) {
-            Log.logInfo("STEERING", "log-in attempt for steering from " + requestIP);
+            ConcurrentLog.info("STEERING", "log-in attempt for steering from " + requestIP);
         	prop.authenticationRequired();
             return prop;
         }
 
         if (post.containsKey("shutdown")) {
-            Log.logInfo("STEERING", "shutdown request from " + requestIP);
+            ConcurrentLog.info("STEERING", "shutdown request from " + requestIP);
             sb.terminate(10, "shutdown request from Steering; ip = " + requestIP);
             prop.put("info", "3");
 
@@ -66,7 +66,7 @@ public class Steering {
         }
 
         if (post.containsKey("restart")) {
-            Log.logInfo("STEERING", "restart request from " + requestIP);
+            ConcurrentLog.info("STEERING", "restart request from " + requestIP);
             yacyRelease.restart();
             prop.put("info", "4");
 
@@ -74,7 +74,7 @@ public class Steering {
         }
 
         if (post.containsKey("update")) {
-            Log.logInfo("STEERING", "update request from " + requestIP);
+            ConcurrentLog.info("STEERING", "update request from " + requestIP);
             final boolean devenvironment = new File(sb.getAppPath(), ".git").exists();
             final String releaseFileName = post.get("releaseinstall", "");
             final File releaseFile = new File(sb.releasePath, releaseFileName);

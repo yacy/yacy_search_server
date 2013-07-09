@@ -31,7 +31,7 @@ import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 public class YMarkHTMLImporter extends YMarkImporter {
 	
@@ -93,7 +93,7 @@ public class YMarkHTMLImporter extends YMarkImporter {
 	    			this.folderstring.append(data);
 	    			break;
 	    		case FOLDER_DESC:
-	    			Log.logInfo(YMarkTables.BOOKMARKS_LOG, "YMarksHTMLImporter - folder: "+this.folderstring+" desc: " + new String(data));
+	    			ConcurrentLog.info(YMarkTables.BOOKMARKS_LOG, "YMarksHTMLImporter - folder: "+this.folderstring+" desc: " + new String(data));
 	    			break;
 	    		case BMK_DESC:
 	    			this.bmk.put(YMarkEntry.BOOKMARK.DESC.key(), new String(data));
@@ -110,7 +110,7 @@ public class YMarkHTMLImporter extends YMarkImporter {
 						bookmarks.put(this.bmk);
 						bmk = new YMarkEntry();
 					} catch (InterruptedException e) {
-						Log.logException(e);
+						ConcurrentLog.logException(e);
 					}
 				}
 		    	final String url = (String)a.getAttribute(HTML.Attribute.HREF);
@@ -120,7 +120,7 @@ public class YMarkHTMLImporter extends YMarkImporter {
 					sb.setLength(0);   			
 					if (a.isDefined(bmk.html_attrb())) {
 						sb.append((String)a.getAttribute(bmk.html_attrb()));
-						Log.logInfo(YMarkTables.BOOKMARKS_LOG, bmk.key()+" : "+sb.toString());
+						ConcurrentLog.info(YMarkTables.BOOKMARKS_LOG, bmk.key()+" : "+sb.toString());
 					}
 	    			switch(bmk) {	    					
 	    				case TAGS:	    					
@@ -165,7 +165,7 @@ public class YMarkHTMLImporter extends YMarkImporter {
 					try {
 						bookmarks.put(this.bmk);
 					} catch (InterruptedException e) {
-						Log.logException(e);
+						ConcurrentLog.logException(e);
 					}
 				}
 			}

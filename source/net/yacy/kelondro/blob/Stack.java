@@ -29,8 +29,8 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 
 
 public class Stack {
@@ -196,7 +196,7 @@ public class Stack {
         try {
             b = this.stack.get(k);
         } catch (SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             b = null;
         }
         assert b != null;

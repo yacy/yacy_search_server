@@ -25,11 +25,11 @@
 
 package net.yacy.kelondro.util;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 public abstract class MemoryStrategy {
 
-	protected final static Log log = new Log("MEMORY");
+	protected final static ConcurrentLog log = new ConcurrentLog("MEMORY");
     protected static long lastGC = 0l;
     protected static boolean error = true;
 	protected static String name;
@@ -62,7 +62,7 @@ public abstract class MemoryStrategy {
             return true;
         }
 
-        if (log.isFinest()) log.logFinest("[gc] no execute, last run: " + (elapsed / 1000) + " seconds ago, call: " + info);
+        if (log.isFinest()) log.finest("[gc] no execute, last run: " + (elapsed / 1000) + " seconds ago, call: " + info);
         return false;
     }
 

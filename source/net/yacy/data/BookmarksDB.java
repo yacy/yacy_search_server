@@ -39,9 +39,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 
 public class BookmarksDB {
 
@@ -75,7 +75,7 @@ public class BookmarksDB {
 
         // tags
         this.tags = new ConcurrentHashMap<String, Tag>();
-        Log.logInfo("BOOKMARKS", "started init of tags from bookmarks.db...");
+        ConcurrentLog.info("BOOKMARKS", "started init of tags from bookmarks.db...");
         final Iterator<Bookmark> it = new bookmarkIterator(true);
         Bookmark bookmark;
         Tag tag;
@@ -99,7 +99,7 @@ public class BookmarksDB {
                 putTag(tag);
             }
         }
-        Log.logInfo("BOOKMARKS", "finished init " + this.tags.size() + " tags using your "+this.bookmarks.size()+" bookmarks.");
+        ConcurrentLog.info("BOOKMARKS", "finished init " + this.tags.size() + " tags using your "+this.bookmarks.size()+" bookmarks.");
 
         // dates
         final boolean datesExisted = datesFile.exists();
@@ -144,7 +144,7 @@ public class BookmarksDB {
     	try {
             this.bookmarks.insert(ASCII.getBytes(bookmark.getUrlHash()), bookmark.entry);
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
     public String addBookmark(final Bookmark bookmark){
@@ -196,7 +196,7 @@ public class BookmarksDB {
         try {
             it = new bookmarkIterator(true);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return set.iterator();
         }
         Bookmark bm;

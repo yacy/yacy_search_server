@@ -28,7 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.TreeMap;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public final class InstantBusyThread extends AbstractBusyThread implements BusyThread {
@@ -93,7 +93,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
         } catch (final IllegalArgumentException e) {
             return -1;
         } catch (final InvocationTargetException e) {
-            Log.logSevere("BUSYTHREAD", "invocation serverInstantThread of thread '" + getName() + "': " + e.getMessage(), e);
+            ConcurrentLog.severe("BUSYTHREAD", "invocation serverInstantThread of thread '" + getName() + "': " + e.getMessage(), e);
             return -1;
         }
     }
@@ -108,26 +108,26 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
             if (result == null) jobHasDoneSomething = true;
             else if (result instanceof Boolean) jobHasDoneSomething = ((Boolean) result).booleanValue();
         } catch (final IllegalAccessException e) {
-            Log.logSevere("BUSYTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
-            Log.logSevere("BUSYTHREAD", "shutting down thread '" + getName() + "'");
+            ConcurrentLog.severe("BUSYTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
+            ConcurrentLog.severe("BUSYTHREAD", "shutting down thread '" + getName() + "'");
             terminate(false);
         } catch (final IllegalArgumentException e) {
-            Log.logSevere("BUSYTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
-            Log.logSevere("BUSYTHREAD", "shutting down thread '" + getName() + "'");
+            ConcurrentLog.severe("BUSYTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
+            ConcurrentLog.severe("BUSYTHREAD", "shutting down thread '" + getName() + "'");
             terminate(false);
         } catch (final InvocationTargetException e) {
             final String targetException = e.getTargetException().getMessage();
-            Log.logException(e);
-            Log.logException(e.getCause());
-            Log.logException(e.getTargetException());
-            Log.logSevere("BUSYTHREAD", "Runtime Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
+            ConcurrentLog.logException(e);
+            ConcurrentLog.logException(e.getCause());
+            ConcurrentLog.logException(e.getTargetException());
+            ConcurrentLog.severe("BUSYTHREAD", "Runtime Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
         } catch (final OutOfMemoryError e) {
-            Log.logSevere("BUSYTHREAD", "OutOfMemory Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage());
-            Log.logException(e);
+            ConcurrentLog.severe("BUSYTHREAD", "OutOfMemory Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage());
+            ConcurrentLog.logException(e);
             freemem();
         } catch (final Exception e) {
-            Log.logSevere("BUSYTHREAD", "Generic Exception, thread '" + getName() + "': " + e.getMessage());
-            Log.logException(e);
+            ConcurrentLog.severe("BUSYTHREAD", "Generic Exception, thread '" + getName() + "': " + e.getMessage());
+            ConcurrentLog.logException(e);
         }
         synchronized(jobs) {jobs.remove(this.handle);}
         return jobHasDoneSomething;
@@ -139,21 +139,21 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
         try {
             this.freememExecMethod.invoke(this.environment);
         } catch (final IllegalAccessException e) {
-            Log.logSevere("BUSYTHREAD", "Internal Error in serverInstantThread.freemem: " + e.getMessage());
-            Log.logSevere("BUSYTHREAD", "shutting down thread '" + getName() + "'");
+            ConcurrentLog.severe("BUSYTHREAD", "Internal Error in serverInstantThread.freemem: " + e.getMessage());
+            ConcurrentLog.severe("BUSYTHREAD", "shutting down thread '" + getName() + "'");
             terminate(false);
         } catch (final IllegalArgumentException e) {
-            Log.logSevere("BUSYTHREAD", "Internal Error in serverInstantThread.freemem: " + e.getMessage());
-            Log.logSevere("BUSYTHREAD", "shutting down thread '" + getName() + "'");
+            ConcurrentLog.severe("BUSYTHREAD", "Internal Error in serverInstantThread.freemem: " + e.getMessage());
+            ConcurrentLog.severe("BUSYTHREAD", "shutting down thread '" + getName() + "'");
             terminate(false);
         } catch (final InvocationTargetException e) {
             final String targetException = e.getTargetException().getMessage();
-            if (targetException.indexOf("heap space",0) > 0) Log.logException(e.getTargetException());
-            Log.logSevere("BUSYTHREAD", "Runtime Error in serverInstantThread.freemem, thread '" + getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
-            Log.logException(e.getTargetException());
+            if (targetException.indexOf("heap space",0) > 0) ConcurrentLog.logException(e.getTargetException());
+            ConcurrentLog.severe("BUSYTHREAD", "Runtime Error in serverInstantThread.freemem, thread '" + getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
+            ConcurrentLog.logException(e.getTargetException());
         } catch (final OutOfMemoryError e) {
-            Log.logSevere("BUSYTHREAD", "OutOfMemory Error in serverInstantThread.freemem, thread '" + getName() + "': " + e.getMessage());
-            Log.logException(e);
+            ConcurrentLog.severe("BUSYTHREAD", "OutOfMemory Error in serverInstantThread.freemem, thread '" + getName() + "': " + e.getMessage());
+            ConcurrentLog.logException(e);
         }
     }
 

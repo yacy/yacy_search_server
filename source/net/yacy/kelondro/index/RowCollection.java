@@ -40,9 +40,9 @@ import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.sorting.Array;
 import net.yacy.cora.sorting.Sortable;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Row.Entry;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.kelondroException;
@@ -106,7 +106,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
         this.rowdef = rowdef;
         this.chunkcount = (int) exportedCollection.getColLong(exp_chunkcount);
         if ((this.chunkcount > chunkcachelength / rowdef.objectsize)) {
-            Log.logWarning("RowCollection", "corrected wrong chunkcount; chunkcount = " + this.chunkcount + ", chunkcachelength = " + chunkcachelength + ", rowdef.objectsize = " + rowdef.objectsize);
+            ConcurrentLog.warn("RowCollection", "corrected wrong chunkcount; chunkcount = " + this.chunkcount + ", chunkcachelength = " + chunkcachelength + ", rowdef.objectsize = " + rowdef.objectsize);
             this.chunkcount = chunkcachelength / rowdef.objectsize; // patch problem
         }
         this.lastTimeWrote = (exportedCollection.getColLong(exp_last_wrote) + 10957) * day;
@@ -122,7 +122,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
             throw new kelondroException("old collection order does not match with new order; objectOrder.signature = " + rowdef.objectOrder.signature() + ", oldOrder.signature = " + oldOrder.signature());
         this.sortBound = (int) exportedCollection.getColLong(exp_order_bound);
         if (this.sortBound > this.chunkcount) {
-            Log.logWarning("RowCollection", "corrected wrong sortBound; sortBound = " + this.sortBound + ", chunkcount = " + this.chunkcount);
+            ConcurrentLog.warn("RowCollection", "corrected wrong sortBound; sortBound = " + this.sortBound + ", chunkcount = " + this.chunkcount);
             this.sortBound = this.chunkcount;
         }
         this.chunkcache = exportedCollection.getColBytes(exp_collection, false);
@@ -400,7 +400,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
     private final void addUnique(final byte[] a, final int astart, final int alength) throws SpaceExceededException {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + astart;
-        assert (!(Log.allZero(a, astart, alength))) : "a = " + NaturalOrder.arrayList(a, astart, alength);
+        assert (!(ConcurrentLog.allZero(a, astart, alength))) : "a = " + NaturalOrder.arrayList(a, astart, alength);
         assert (alength > 0);
         assert (astart + alength <= a.length);
         assert alength == this.rowdef.objectsize : "alength =" + alength + ", rowdef.objectsize = " + this.rowdef.objectsize;
@@ -424,7 +424,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
     protected final void addSorted(final byte[] a, final int astart, final int alength) throws SpaceExceededException {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + astart;
-        assert (!(Log.allZero(a, astart, alength))) : "a = " + NaturalOrder.arrayList(a, astart, alength);
+        assert (!(ConcurrentLog.allZero(a, astart, alength))) : "a = " + NaturalOrder.arrayList(a, astart, alength);
         assert (alength > 0);
         assert (astart + alength <= a.length);
         assert alength == this.rowdef.objectsize : "alength =" + alength + ", rowdef.objectsize = " + this.rowdef.objectsize;
@@ -827,7 +827,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
                 i--;
             }
         } catch (final RuntimeException e) {
-            Log.logWarning("kelondroRowCollection", e.getMessage(), e);
+            ConcurrentLog.warn("kelondroRowCollection", e.getMessage(), e);
         } finally {
             if (!u) sort();
         }
@@ -1063,7 +1063,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
             //test(50000);
             //test(100000);
             //test(1000000);
-            Log.shutdown();
+            ConcurrentLog.shutdown();
             Array.terminate();
         } catch (final SpaceExceededException e) {
             e.printStackTrace();

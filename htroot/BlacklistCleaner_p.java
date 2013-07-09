@@ -45,8 +45,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.ListManager;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistError;
@@ -303,7 +303,7 @@ public class BlacklistCleaner_p {
                     try {
                     Switchboard.urlBlacklist.remove(supportedBlacklistType, host, path);
                     } catch (final RuntimeException e) {
-                        Log.logSevere("BLACKLIST-CLEANER", e.getMessage() + ": " + host + "/" + path);
+                        ConcurrentLog.severe("BLACKLIST-CLEANER", e.getMessage() + ": " + host + "/" + path);
                     }
                 }
             }
@@ -355,7 +355,7 @@ public class BlacklistCleaner_p {
             }
             pw.close();
         } catch (final IOException e) {
-            Log.logSevere("BLACKLIST-CLEANER", "error on writing altered entries to blacklist", e);
+            ConcurrentLog.severe("BLACKLIST-CLEANER", "error on writing altered entries to blacklist", e);
         }
         return newEntry.length;
     }

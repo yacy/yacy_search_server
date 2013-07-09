@@ -39,6 +39,7 @@ import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ListManager;
 import net.yacy.document.Condenser;
@@ -49,7 +50,6 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
@@ -118,7 +118,7 @@ public class IndexControlRWIs_p {
                     try {
                         urlb.put(s.getBytes());
                     } catch ( final SpaceExceededException e ) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 }
             }
@@ -172,7 +172,7 @@ public class IndexControlRWIs_p {
                             try {
                                 urlb.put(en.next().urlhash());
                             } catch ( final SpaceExceededException e ) {
-                                Log.logException(e);
+                                ConcurrentLog.logException(e);
                             }
                         }
                         index = null;
@@ -191,7 +191,7 @@ public class IndexControlRWIs_p {
                     post.remove("keyhashdeleteall");
                     post.put("urllist", "generated");
                 } catch ( final IOException e ) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
 
@@ -215,7 +215,7 @@ public class IndexControlRWIs_p {
                         try {
                             urlHashes.put(b);
                         } catch ( final SpaceExceededException e ) {
-                            Log.logException(e);
+                            ConcurrentLog.logException(e);
                         }
                     }
                     segment.termIndex().remove(keyhash, urlHashes);
@@ -224,7 +224,7 @@ public class IndexControlRWIs_p {
                     post.remove("keyhashdelete");
                     post.put("urllist", "generated");
                 } catch ( final IOException e ) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
 
@@ -286,14 +286,14 @@ public class IndexControlRWIs_p {
                                 try {
                                     unknownURLEntries.put(iEntry.urlhash());
                                 } catch (final SpaceExceededException e) {
-                                    Log.logException(e);
+                                    ConcurrentLog.logException(e);
                                 }
                                 urlIter.remove();
                             } else {
                                 try {
 									knownURLs.put(iEntry.urlhash());
 								} catch (final SpaceExceededException e) {
-									Log.logException(e);
+									ConcurrentLog.logException(e);
 								}
                             }
                         }
@@ -307,7 +307,7 @@ public class IndexControlRWIs_p {
                         try {
                             icc.add(index);
                         } catch (final SpaceExceededException e) {
-                            Log.logException(e);
+                            ConcurrentLog.logException(e);
                         }
 
                         // transport to other peer
@@ -325,7 +325,7 @@ public class IndexControlRWIs_p {
                         prop.put("result", "Peer " + host + " not found");
                     }
                 } catch ( final IOException e ) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
 
@@ -355,7 +355,7 @@ public class IndexControlRWIs_p {
                     prop.put("keyhashsimilar_rows", rows + 1);
                     prop.put("result", "");
                 } catch ( final IOException e ) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
 
@@ -378,7 +378,7 @@ public class IndexControlRWIs_p {
                             try {
                                 urlHashes.put(b);
                             } catch ( final SpaceExceededException e ) {
-                                Log.logException(e);
+                                ConcurrentLog.logException(e);
                             }
                             url = segment.fulltext().getURL(b);
                             segment.fulltext().remove(b);
@@ -412,7 +412,7 @@ public class IndexControlRWIs_p {
                             try {
                                 urlHashes.put(b);
                             } catch ( final SpaceExceededException e ) {
-                                Log.logException(e);
+                                ConcurrentLog.logException(e);
                             }
                             url = segment.fulltext().getURL(b);
                             segment.fulltext().remove(b);
@@ -437,7 +437,7 @@ public class IndexControlRWIs_p {
                 try {
                     segment.termIndex().remove(keyhash, urlHashes);
                 } catch ( final IOException e ) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
 

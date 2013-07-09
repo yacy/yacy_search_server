@@ -29,19 +29,19 @@ import java.net.MalformedURLException;
 import java.util.Date;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.document.parser.sitemapParser;
 import net.yacy.document.parser.sitemapParser.URLEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 
 public class SitemapImporter extends Thread {
 
     private CrawlProfile crawlingProfile = null;
-    private static final Log logger = new Log("SITEMAP");
+    private static final ConcurrentLog logger = new ConcurrentLog("SITEMAP");
     private DigestURI siteMapURL = null;
     private final Switchboard sb;
 
@@ -56,7 +56,7 @@ public class SitemapImporter extends Thread {
     @Override
     public void run() {
         try {
-            logger.logInfo("Start parsing sitemap file " + this.siteMapURL);
+            logger.info("Start parsing sitemap file " + this.siteMapURL);
             sitemapParser.SitemapReader parser = sitemapParser.parse(this.siteMapURL);
             parser.start();
             URLEntry item;
@@ -64,7 +64,7 @@ public class SitemapImporter extends Thread {
                 process(item);
             }
         } catch (final Exception e) {
-            logger.logWarning("Unable to parse sitemap file " + this.siteMapURL, e);
+            logger.warn("Unable to parse sitemap file " + this.siteMapURL, e);
         }
     }
 
@@ -108,6 +108,6 @@ public class SitemapImporter extends Thread {
                 0,
                 0
                 ));
-        logger.logInfo("New URL '" + entry.url() + "' added for loading.");
+        logger.info("New URL '" + entry.url() + "' added for loading.");
     }
 }

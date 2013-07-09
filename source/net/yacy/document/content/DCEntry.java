@@ -38,9 +38,9 @@ import java.util.Locale;
 import java.util.TreeMap;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 
 public class DCEntry extends TreeMap<String, String> {
 
@@ -106,7 +106,7 @@ public class DCEntry extends TreeMap<String, String> {
             Date now = new Date();
             return x.after(now) ? now : x;
         } catch (ParseException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return new Date();
         }
     }
@@ -126,9 +126,9 @@ public class DCEntry extends TreeMap<String, String> {
             if (useRelationAsAlternative) {
                 DigestURI relation = this.getRelation();
                 if (relation != null) return relation;
-                Log.logWarning("DCEntry", "getIdentifier: url is bad, relation also: " + e.getMessage());
+                ConcurrentLog.warn("DCEntry", "getIdentifier: url is bad, relation also: " + e.getMessage());
             }
-            Log.logWarning("DCEntry", "getIdentifier: url is bad: " + e.getMessage());
+            ConcurrentLog.warn("DCEntry", "getIdentifier: url is bad: " + e.getMessage());
             return null;
         }
     }
@@ -144,7 +144,7 @@ public class DCEntry extends TreeMap<String, String> {
         try {
             return new DigestURI(u);
         } catch (MalformedURLException e) {
-            Log.logWarning("DCEntry", "getRelation: url is bad: " + e.getMessage());
+            ConcurrentLog.warn("DCEntry", "getRelation: url is bad: " + e.getMessage());
             return null;
         }
     }

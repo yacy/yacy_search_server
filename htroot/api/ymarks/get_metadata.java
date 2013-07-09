@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
 import net.yacy.data.ymark.YMarkAutoTagger;
 import net.yacy.data.ymark.YMarkCrawlStart;
@@ -15,7 +16,6 @@ import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -73,15 +73,15 @@ public class get_metadata {
 
 			} catch (final MalformedURLException e) {
 				// TODO Auto-generated catch block
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 				prop.put("status", "error");
 			} catch (final IOException e) {
 				// TODO Auto-generated catch block
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 				prop.put("status", "error");
 			} catch (final Failure e) {
 				// TODO Auto-generated catch block
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 				prop.put("status", "error");
 			}
         } else {

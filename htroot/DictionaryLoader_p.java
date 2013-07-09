@@ -26,11 +26,11 @@ import net.yacy.cora.geo.GeonamesLocation;
 import net.yacy.cora.geo.OpenGeoDBLocation;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -75,11 +75,11 @@ public class DictionaryLoader_p {
                 prop.put("geon0Status", LibraryProvider.Dictionary.GEON0.file().exists() ? 1 : 0);
                 prop.put("geon0ActionLoaded", 1);
             } catch (final MalformedURLException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geon0ActionLoaded", 2);
                 prop.put("geon0ActionLoaded_error", e.getMessage());
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geon0ActionLoaded", 2);
                 prop.put("geon0ActionLoaded_error", e.getMessage());
             }
@@ -117,11 +117,11 @@ public class DictionaryLoader_p {
                 prop.put("geon1Status", LibraryProvider.Dictionary.GEON1.file().exists() ? 1 : 0);
                 prop.put("geon1ActionLoaded", 1);
             } catch (final MalformedURLException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geon1ActionLoaded", 2);
                 prop.put("geon1ActionLoaded_error", e.getMessage());
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geon1ActionLoaded", 2);
                 prop.put("geon1ActionLoaded_error", e.getMessage());
             }
@@ -159,11 +159,11 @@ public class DictionaryLoader_p {
                 prop.put("geon2Status", LibraryProvider.Dictionary.GEON2.file().exists() ? 1 : 0);
                 prop.put("geon2ActionLoaded", 1);
             } catch (final MalformedURLException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geon2ActionLoaded", 2);
                 prop.put("geon2ActionLoaded_error", e.getMessage());
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geon2ActionLoaded", 2);
                 prop.put("geon2ActionLoaded_error", e.getMessage());
             }
@@ -202,11 +202,11 @@ public class DictionaryLoader_p {
                 prop.put("geo1Status", LibraryProvider.Dictionary.GEODB1.file().exists() ? 1 : 0);
                 prop.put("geo1ActionLoaded", 1);
             } catch (final MalformedURLException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geo1ActionLoaded", 2);
                 prop.put("geo1ActionLoaded_error", e.getMessage());
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geo1ActionLoaded", 2);
                 prop.put("geo1ActionLoaded_error", e.getMessage());
             }
@@ -244,11 +244,11 @@ public class DictionaryLoader_p {
                 prop.put("drw0Status", LibraryProvider.Dictionary.DRW0.file().exists() ? 1 : 0);
                 prop.put("drw0ActionLoaded", 1);
             } catch (final MalformedURLException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("drw0ActionLoaded", 2);
                 prop.put("drw0ActionLoaded_error", e.getMessage());
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("drw0ActionLoaded", 2);
                 prop.put("drw0ActionLoaded_error", e.getMessage());
             }
@@ -287,11 +287,11 @@ public class DictionaryLoader_p {
                 prop.put("pnd0Status", LibraryProvider.Dictionary.PND0.file().exists() ? 1 : 0);
                 prop.put("pnd0ActionLoaded", 1);
             } catch (final MalformedURLException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("pnd0ActionLoaded", 2);
                 prop.put("pnd0ActionLoaded_error", e.getMessage());
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("pnd0ActionLoaded", 2);
                 prop.put("pnd0ActionLoaded_error", e.getMessage());
             }

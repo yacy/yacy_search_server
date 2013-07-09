@@ -39,12 +39,12 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.BlogBoard;
 import net.yacy.data.BlogBoardComments;
 import net.yacy.data.MessageBoard;
 import net.yacy.data.UserDB;
 import net.yacy.data.BlogBoard.BlogEntry;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -147,7 +147,7 @@ public class BlogComments {
                 try {
                     Files.copy(notifierSource, notifierDest);
                 } catch (final IOException e) {
-                    Log.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
+                    ConcurrentLog.severe("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
 
                 }
             }
@@ -320,7 +320,7 @@ public class BlogComments {
             email.print(new String(emailTxt));
             email.close();
         } catch (final Exception e) {
-            Network.log.logWarning("message: message forwarding via email failed. ",e);
+            Network.log.warn("message: message forwarding via email failed. ",e);
         }
     }
 }

@@ -32,7 +32,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 public class bmpParser {
 
@@ -256,15 +256,15 @@ public class bmpParser {
             fis = new FileInputStream(in);
             fis.read(file);
         } catch (final FileNotFoundException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         try {
             ImageIO.write(parse(file).getImage(), "PNG", out);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 }

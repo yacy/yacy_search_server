@@ -39,10 +39,10 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
-import net.yacy.kelondro.logging.Log;
 
 
 /**
@@ -160,7 +160,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
                 try {
                     if (putRecent(i.next())) x++;
                 } catch (final ConcurrentModificationException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }

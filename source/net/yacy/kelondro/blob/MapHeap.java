@@ -50,9 +50,9 @@ import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.RotateIterator;
@@ -101,7 +101,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
     	try {
             this.blob.clear();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         this.cache.clear();
     }
@@ -187,9 +187,9 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             v = this.get(key);
             insert(key, newMap);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return v;
     }
@@ -220,7 +220,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             v = this.get(key);
             delete((byte[]) key);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return v;
     }
@@ -263,9 +263,9 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             if (key instanceof byte[]) return get((byte[]) key);
             if (key instanceof String) return get(UTF8.getBytes((String) key));
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return null;
     }
@@ -484,10 +484,10 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                 try {
                     map = get(nextKey, false);
                 } catch (final IOException e) {
-                    Log.logWarning("MapDataMining", e.getMessage());
+                    ConcurrentLog.warn("MapDataMining", e.getMessage());
                     continue;
                 } catch (final SpaceExceededException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     continue;
                 }
                 if (map == null) continue; // circumvention of a modified exception
@@ -506,9 +506,9 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             try {
                 insert(me.getKey(), me.getValue());
             } catch (final SpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -585,9 +585,9 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             // clean up
             map.close();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 }

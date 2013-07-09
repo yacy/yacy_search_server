@@ -28,7 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.solr.common.SolrInputDocument;
@@ -66,7 +66,7 @@ public class ShardSelection {
                 try {
                     return selectURL(url);
                 } catch (IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     return 0;
                 }
             }

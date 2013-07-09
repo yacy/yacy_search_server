@@ -45,7 +45,7 @@ import java.util.TreeSet;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.HandleSet;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 public final class SetTools {
 
@@ -158,7 +158,7 @@ public final class SetTools {
                         }
                     }
                 } catch (ConcurrentModificationException e) {
-                    Log.logWarning("SetTools", e.getMessage(), e);
+                    ConcurrentLog.warn("SetTools", e.getMessage(), e);
                     break loop;
                 }
             }

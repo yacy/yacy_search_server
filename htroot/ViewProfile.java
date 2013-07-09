@@ -43,7 +43,7 @@ import java.util.Set;
 
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.Network;
 import net.yacy.peers.NewsDB;
 import net.yacy.peers.NewsPool;
@@ -102,7 +102,7 @@ public class ViewProfile {
                     final NewsDB.Record record = sb.peers.newsPool.getByOriginator(NewsPool.INCOMING_DB, NewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
                     if (record != null) sb.peers.newsPool.moveOff(NewsPool.INCOMING_DB, record.id());
                 } catch (final Exception e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
 
                 // try to get the profile from remote peer
@@ -113,7 +113,7 @@ public class ViewProfile {
                 if (profile == null) {
                     prop.put("success", "2"); // peer known, but disconnected
                 } else {
-                    Network.log.logInfo("fetched profile:" + profile);
+                    Network.log.info("fetched profile:" + profile);
                     prop.put("success", "3"); // everything ok
                 }
                 prop.putHTML("success_peername", seed.getName());

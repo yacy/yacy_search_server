@@ -55,13 +55,13 @@ import java.util.zip.DeflaterOutputStream;
 
 import javax.imageio.ImageIO;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.ByteBuffer;
 
 
 public class RasterPlotter {
 
-    public final Log log = new Log("RasterPlotter");
+    public final ConcurrentLog log = new ConcurrentLog("RasterPlotter");
 
     public static final double PI180 = Math.PI / 180.0d;
     public static final double PI4 = Math.PI / 4.0d;
@@ -290,7 +290,7 @@ public class RasterPlotter {
             setPixel(x, y, c);
         }
         } catch (ArrayIndexOutOfBoundsException e) {
-            this.log.logWarning(e.getMessage() + ": x = " + x + ", y = " + y);
+            this.log.warn(e.getMessage() + ": x = " + x + ", y = " + y);
         } // may appear when pixel coordinate is out of bounds
     }
 
@@ -920,7 +920,7 @@ public class RasterPlotter {
     		return baos;
     	} catch (final IOException e) {
     		// should not happen
-    	    Log.logException(e);
+    	    ConcurrentLog.logException(e);
     		return null;
     	}
     }
@@ -936,7 +936,7 @@ public class RasterPlotter {
             return baos;
         } catch (IOException e) {
             // should not happen
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }
@@ -1034,7 +1034,7 @@ public class RasterPlotter {
             ImageIO.write(m.getImage(), "png", fos);
             fos.close();
         } catch (final IOException e) {}
-        Log.shutdown();
+        ConcurrentLog.shutdown();
         
         // open file automatically, works only on Mac OS X
         /*

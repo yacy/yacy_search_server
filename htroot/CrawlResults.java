@@ -34,11 +34,11 @@ import java.util.Map;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
 import net.yacy.crawler.data.ResultURLs.InitExecEntry;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
@@ -184,7 +184,7 @@ public class CrawlResults {
                 try {
                     urle = sb.index.fulltext().getMetadata(UTF8.getBytes(entry.getKey()));
                     if (urle == null) {
-                        Log.logWarning("PLASMA", "CrawlResults: URL not in index with url hash " + entry.getKey());
+                        ConcurrentLog.warn("PLASMA", "CrawlResults: URL not in index with url hash " + entry.getKey());
                         urlstr = null;
                         urltxt = null;
                         continue;
@@ -271,7 +271,7 @@ public class CrawlResults {
                     dark = !dark;
                     cnt++;
                 } catch (final Exception e) {
-                    Log.logSevere("PLASMA", "genTableProps", e);
+                    ConcurrentLog.severe("PLASMA", "genTableProps", e);
                 }
             }
             prop.put("table_indexed", cnt);

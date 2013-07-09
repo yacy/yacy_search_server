@@ -38,9 +38,9 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
 import net.yacy.data.UserDB.AccessRight;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -224,7 +224,7 @@ public class ConfigAccounts_p {
                         }
 
                     } catch (final Exception e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
 
                 } else {

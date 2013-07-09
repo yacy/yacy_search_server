@@ -58,6 +58,7 @@ import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.Element;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.WorkTables;
 import net.yacy.document.Condenser;
@@ -71,7 +72,6 @@ import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.Bitfield;
@@ -106,7 +106,7 @@ public final class SearchEvent {
     }
     */
 
-    public static Log log = new Log("SEARCH");
+    public static ConcurrentLog log = new ConcurrentLog("SEARCH");
 
     public static final int SNIPPET_MAX_LENGTH = 220;
     private static final int MAX_TOPWORDS = 12; // default count of words for topicnavigagtor
@@ -195,7 +195,7 @@ public final class SearchEvent {
             SearchEventCache.cleanupEvents(false);
             int en = SearchEventCache.size();
             if (en < eb) {
-                log.logInfo("Cleaned up search event cache (1) " + eb + "->" + en + ", " + (ab - MemoryControl.available()) / 1024 / 1024 + " MB freed");
+                log.info("Cleaned up search event cache (1) " + eb + "->" + en + ", " + (ab - MemoryControl.available()) / 1024 / 1024 + " MB freed");
             }
         }
         ab = MemoryControl.available();
@@ -203,7 +203,7 @@ public final class SearchEvent {
         SearchEventCache.cleanupEvents(Math.max(1, (int) (MemoryControl.available() / (1024 * 1024 * 120))));
         int en = SearchEventCache.size();
         if (en < eb) {
-            log.logInfo("Cleaned up search event cache (2) " + eb + "->" + en + ", " + (ab - MemoryControl.available()) / 1024 / 1024 + " MB freed");
+            log.info("Cleaned up search event cache (2) " + eb + "->" + en + ", " + (ab - MemoryControl.available()) / 1024 / 1024 + " MB freed");
         }
         
         this.eventTime = System.currentTimeMillis(); // for lifetime check
@@ -317,17 +317,17 @@ public final class SearchEvent {
                 }.start();
             }
             if ( this.primarySearchThreadsL != null ) {
-                Log.logFine("SEARCH_EVENT", "STARTING "
+                ConcurrentLog.fine("SEARCH_EVENT", "STARTING "
                     + this.primarySearchThreadsL.size()
                     + " THREADS TO CATCH EACH "
                     + remote_maxcount
                     + " URLs");
                 EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.REMOTESEARCH_START, "", this.primarySearchThreadsL.size(), System.currentTimeMillis() - timer), false);
                 // finished searching
-                Log.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + this.primarySearchThreadsL.size() + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
+                ConcurrentLog.fine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + this.primarySearchThreadsL.size() + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
             } else {
                 // no search since query is empty, user might have entered no data or filters have removed all search words
-                Log.logFine("SEARCH_EVENT", "NO SEARCH STARTED DUE TO EMPTY SEARCH REQUEST.");
+                ConcurrentLog.fine("SEARCH_EVENT", "NO SEARCH STARTED DUE TO EMPTY SEARCH REQUEST.");
             }
         } else {
             this.primarySearchThreadsL = null;
@@ -456,7 +456,7 @@ public final class SearchEvent {
                     SearchEvent.this.addFinalize();
                 }
             } catch ( final Exception e ) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } finally {
                 oneFeederTerminated();
             }
@@ -508,12 +508,12 @@ public final class SearchEvent {
             pollloop: while ( true ) {
                 remaining = timeout - System.currentTimeMillis();
                 if (remaining <= 0) {
-                    Log.logWarning("SearchEvent", "terminated 'add' loop before poll time-out = " + remaining + ", decodedEntries.size = " + decodedEntries.size());
+                    ConcurrentLog.warn("SearchEvent", "terminated 'add' loop before poll time-out = " + remaining + ", decodedEntries.size = " + decodedEntries.size());
                     break;
                 }
                 iEntry = decodedEntries.poll(remaining, TimeUnit.MILLISECONDS);
                 if (iEntry == null) {
-                    Log.logWarning("SearchEvent", "terminated 'add' loop after poll time-out = " + remaining + ", decodedEntries.size = " + decodedEntries.size());
+                    ConcurrentLog.warn("SearchEvent", "terminated 'add' loop after poll time-out = " + remaining + ", decodedEntries.size = " + decodedEntries.size());
                     break pollloop;
                 }
                 if (iEntry == WordReferenceVars.poison) {
@@ -523,7 +523,7 @@ public final class SearchEvent {
 
                 // doublecheck for urls
                 if (this.urlhashes.has(iEntry.urlhash())) {
-                    if (log.isFine()) log.logFine("dropped RWI: doublecheck");
+                    if (log.isFine()) log.fine("dropped RWI: doublecheck");
                     continue pollloop;
                 }
                 
@@ -535,7 +535,7 @@ public final class SearchEvent {
 
                 // check constraints
                 if (!this.testFlags(flags)) {
-                    if (log.isFine()) log.logFine("dropped RWI: flag test failed");
+                    if (log.isFine()) log.fine("dropped RWI: flag test failed");
                     continue pollloop;
                 }
 
@@ -545,7 +545,7 @@ public final class SearchEvent {
                      (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Condenser.flag_cat_hasvideo))) ||
                      (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Condenser.flag_cat_hasimage))) ||
                      (this.query.contentdom == ContentDomain.APP && !(flags.get(Condenser.flag_cat_hasapp))))) {
-                    if (log.isFine()) log.logFine("dropped RWI: contentdom fail");
+                    if (log.isFine()) log.fine("dropped RWI: contentdom fail");
                     continue pollloop;
                 }
 
@@ -556,13 +556,13 @@ public final class SearchEvent {
                 final String hosthash = iEntry.hosthash();
                 if ( this.query.modifier.sitehash == null ) {
                     if (this.query.siteexcludes != null && this.query.siteexcludes.contains(hosthash)) {
-                        if (log.isFine()) log.logFine("dropped RWI: siteexcludes");
+                        if (log.isFine()) log.fine("dropped RWI: siteexcludes");
                         continue pollloop;
                     }
                 } else {
                     // filter out all domains that do not match with the site constraint
                     if (!hosthash.equals(this.query.modifier.sitehash)) {
-                        if (log.isFine()) log.logFine("dropped RWI: modifier.sitehash");
+                        if (log.isFine()) log.fine("dropped RWI: modifier.sitehash");
                         continue pollloop;
                     }
                 }
@@ -575,14 +575,14 @@ public final class SearchEvent {
                         break rankingtryloop;
                     } catch ( final ArithmeticException e ) {
                         // this may happen if the concurrent normalizer changes values during cardinal computation
-                        if (log.isFine()) log.logFine("dropped RWI: arithmetic exception");
+                        if (log.isFine()) log.fine("dropped RWI: arithmetic exception");
                         continue rankingtryloop;
                     }
                 }
                 // increase counter for statistics
                 if (local) this.local_rwi_available.incrementAndGet(); else this.remote_rwi_available.incrementAndGet();
             }
-            if (System.currentTimeMillis() >= timeout) Log.logWarning("SearchEvent", "rwi normalization ended with timeout = " + maxtime);
+            if (System.currentTimeMillis() >= timeout) ConcurrentLog.warn("SearchEvent", "rwi normalization ended with timeout = " + maxtime);
 
         } catch ( final InterruptedException e ) {
         } catch ( final SpaceExceededException e ) {
@@ -799,14 +799,14 @@ public final class SearchEvent {
                 if ( !this.query.urlMask_isCatchall ) {
                     // check url mask
                     if (!iEntry.matches(this.query.urlMask)) {
-                        if (log.isFine()) log.logFine("dropped Node: url mask does not match");
+                        if (log.isFine()) log.fine("dropped Node: url mask does not match");
                         continue pollloop;
                     }
                 }
                 
                 // doublecheck for urls
                 if (this.urlhashes.has(iEntry.hash())) {
-                    if (log.isFine()) log.logFine("dropped Node: double check");
+                    if (log.isFine()) log.fine("dropped Node: double check");
                     continue pollloop;
                 }
 
@@ -818,7 +818,7 @@ public final class SearchEvent {
                 // check constraints
                 Bitfield flags = iEntry.flags();
                 if (!this.testFlags(flags)) {
-                    if (log.isFine()) log.logFine("dropped Node: flag test");
+                    if (log.isFine()) log.fine("dropped Node: flag test");
                     continue pollloop;
                 }
 
@@ -828,7 +828,7 @@ public final class SearchEvent {
                      (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Condenser.flag_cat_hasvideo))) ||
                      (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Condenser.flag_cat_hasimage))) ||
                      (this.query.contentdom == ContentDomain.APP && !(flags.get(Condenser.flag_cat_hasapp))))) {
-                    if (log.isFine()) log.logFine("dropped Node: content domain does not match");
+                    if (log.isFine()) log.fine("dropped Node: content domain does not match");
                     continue pollloop;
                 }
 
@@ -836,13 +836,13 @@ public final class SearchEvent {
                 final String hosthash = iEntry.hosthash();
                 if ( this.query.modifier.sitehash == null ) {
                     if (this.query.siteexcludes != null && this.query.siteexcludes.contains(hosthash)) {
-                        if (log.isFine()) log.logFine("dropped Node: siteexclude");
+                        if (log.isFine()) log.fine("dropped Node: siteexclude");
                         continue pollloop;
                     }
                 } else {
                     // filter out all domains that do not match with the site constraint
                     if (iEntry.url().getHost().indexOf(this.query.modifier.sitehost) < 0) {
-                        if (log.isFine()) log.logFine("dropped Node: sitehost");
+                        if (log.isFine()) log.fine("dropped Node: sitehost");
                         continue pollloop;
                     }
                 }
@@ -935,7 +935,7 @@ public final class SearchEvent {
                 try {
                     m = i.next();
                 } catch (final ConcurrentModificationException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     continue mainloop; // not the best solution...
                 }
                 if (m == null) continue doubleloop;
@@ -972,7 +972,7 @@ public final class SearchEvent {
             URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(bestEntry);
             if (node == null) {
                 if (bestEntry.getElement().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
-                if (log.isFine()) log.logFine("dropped RWI: hash not in metadata");
+                if (log.isFine()) log.fine("dropped RWI: hash not in metadata");
                 continue mainloop;
             }
             return node;
@@ -995,14 +995,14 @@ public final class SearchEvent {
         while ((page = pullOneRWI(skipDoubleDom)) != null) {
 
             if (!this.query.urlMask_isCatchall && !page.matches(this.query.urlMask)) {
-                if (log.isFine()) log.logFine("dropped RWI: no match with urlMask");
+                if (log.isFine()) log.fine("dropped RWI: no match with urlMask");
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
 
             // check for more errors
             if (page.url() == null) {
-                if (log.isFine()) log.logFine("dropped RWI: url == null");
+                if (log.isFine()) log.fine("dropped RWI: url == null");
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue; // rare case where the url is corrupted
             }
@@ -1013,14 +1013,14 @@ public final class SearchEvent {
                 (this.query.contentdom == Classification.ContentDomain.AUDIO && page.url().getContentDomain() != Classification.ContentDomain.AUDIO) ||
                 (this.query.contentdom == Classification.ContentDomain.VIDEO && page.url().getContentDomain() != Classification.ContentDomain.VIDEO) ||
                 (this.query.contentdom == Classification.ContentDomain.APP && page.url().getContentDomain() != Classification.ContentDomain.APP)) && this.query.urlMask_isCatchall) {
-                if (log.isFine()) log.logFine("dropped RWI: wrong contentdom = " + this.query.contentdom + ", domain = " + page.url().getContentDomain());
+                if (log.isFine()) log.fine("dropped RWI: wrong contentdom = " + this.query.contentdom + ", domain = " + page.url().getContentDomain());
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
             
             // Check for blacklist
             if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page)) {
-                if (log.isFine()) log.logFine("dropped RWI: url is blacklisted in url blacklist");
+                if (log.isFine()) log.fine("dropped RWI: url is blacklisted in url blacklist");
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
@@ -1029,7 +1029,7 @@ public final class SearchEvent {
 			if (Switchboard.getSwitchboard().getConfigBool("contentcontrol.enabled", false)) {
 				FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
 				if (f != null && !f.isListed(page.url(), null)) {
-	                if (log.isFine()) log.logFine("dropped RWI: url is blacklisted in contentcontrol");
+	                if (log.isFine()) log.fine("dropped RWI: url is blacklisted in contentcontrol");
 	                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
 				    continue;
 				}
@@ -1044,7 +1044,7 @@ public final class SearchEvent {
                 ((QueryParams.anymatch(pagetitle, this.query.getQueryGoal().getExcludeHashes()))
                 || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.getQueryGoal().getExcludeHashes()))
                 || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.getQueryGoal().getExcludeHashes())))) {
-                if (log.isFine()) log.logFine("dropped RWI: no match with query goal exclusion");
+                if (log.isFine()) log.fine("dropped RWI: no match with query goal exclusion");
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
@@ -1057,14 +1057,14 @@ public final class SearchEvent {
                         this.query.getSegment().termIndex().removeDelayed(wi.next(), page.hash());
                     }
                 }
-                if (log.isFine()) log.logFine("dropped RWI: url does not match index-of constraint");
+                if (log.isFine()) log.fine("dropped RWI: url does not match index-of constraint");
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
 
             // check location constraint
             if ((this.query.constraint != null) && (this.query.constraint.get(Condenser.flag_cat_haslocation)) && (page.lat() == 0.0 || page.lon() == 0.0)) {
-                if (log.isFine()) log.logFine("dropped RWI: location constraint");
+                if (log.isFine()) log.fine("dropped RWI: location constraint");
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
@@ -1076,7 +1076,7 @@ public final class SearchEvent {
                 double lonDelta = this.query.lon - lon;
                 double distance = Math.sqrt(latDelta * latDelta + lonDelta * lonDelta); // pythagoras
                 if (distance > this.query.radius) {
-                    if (log.isFine()) log.logFine("dropped RWI: radius constraint");
+                    if (log.isFine()) log.fine("dropped RWI: radius constraint");
                     if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                     continue;
                 }
@@ -1084,7 +1084,7 @@ public final class SearchEvent {
 
             // check Scanner
             if (this.query.filterscannerfail && !Scanner.acceptURL(page.url())) {
-                if (log.isFine()) log.logFine("dropped RWI: url not accepted by scanner");
+                if (log.isFine()) log.fine("dropped RWI: url not accepted by scanner");
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
@@ -1276,7 +1276,7 @@ public final class SearchEvent {
                     180,
                     !this.query.isLocal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            SearchEvent.log.logInfo("text snippet load time for " + page.url() + ": " + snippetComputationTime + ", " + (!snippet.getErrorCode().fail() ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
+            SearchEvent.log.info("text snippet load time for " + page.url() + ": " + snippetComputationTime + ", " + (!snippet.getErrorCode().fail() ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
 
             if (!snippet.getErrorCode().fail()) {
                 // we loaded the file and found the snippet
@@ -1295,7 +1295,7 @@ public final class SearchEvent {
                 if (this.deleteIfSnippetFail) {
                     this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.getQueryGoal().getIncludeHashes(), reason);
                 }
-                SearchEvent.log.logInfo("sorted out url " + page.url().toNormalform(true) + " during search: " + reason);
+                SearchEvent.log.info("sorted out url " + page.url().toNormalform(true) + " during search: " + reason);
                 return null;
             }
         }
@@ -1326,7 +1326,7 @@ public final class SearchEvent {
         while ( this.resultList.sizeAvailable() <= item &&
                 (this.rwiQueueSize() > 0 || this.nodeStack.sizeQueue() > 0 ||
                 (!this.feedingIsFinished() && System.currentTimeMillis() < finishTime))) {
-            if (!drainStacksToResult()) try {Thread.sleep(10);} catch (final InterruptedException e) {Log.logException(e);}
+            if (!drainStacksToResult()) try {Thread.sleep(10);} catch (final InterruptedException e) {ConcurrentLog.logException(e);}
         }
         
         // check if we have a success

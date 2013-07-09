@@ -3,7 +3,7 @@ package net.yacy.peers.operation;
 import java.util.Comparator;
 import java.util.regex.Matcher;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 
 
@@ -148,7 +148,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
     public static String[] combined2prettyVersion(final String ver, final String computerName) {
         final Matcher matcher = yacyBuildProperties.versionMatcher.matcher(ver);
          if (!matcher.find()) {
-             Log.logWarning("STARTUP", "Peer '"+computerName+"': wrong format of version-string: '" + ver + "'. Using default string 'dev/00000' instead");
+             ConcurrentLog.warn("STARTUP", "Peer '"+computerName+"': wrong format of version-string: '" + ver + "'. Using default string 'dev/00000' instead");
              return new String[]{"dev", "0000"};
          }
 

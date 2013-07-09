@@ -37,13 +37,13 @@ import java.util.Set;
 
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.Balancer;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 
 public class NoticedURL {
 
@@ -64,7 +64,7 @@ public class NoticedURL {
             final Set<String> myAgentIDs,
             final boolean useTailCache,
             final boolean exceed134217727) {
-        Log.logInfo("NoticedURL", "CREATING STACKS at " + cachePath.toString());
+        ConcurrentLog.info("NoticedURL", "CREATING STACKS at " + cachePath.toString());
         this.coreStack = new Balancer(cachePath, "urlNoticeCoreStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
         this.limitStack = new Balancer(cachePath, "urlNoticeLimitStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
         //overhangStack = new plasmaCrawlBalancer(overhangStackFile);
@@ -88,7 +88,7 @@ public class NoticedURL {
     }
 
     public void clear() {
-    	Log.logInfo("NoticedURL", "CLEARING ALL STACKS");
+    	ConcurrentLog.info("NoticedURL", "CLEARING ALL STACKS");
     	if (this.coreStack != null) this.coreStack.clear();
     	if (this.limitStack != null) this.limitStack.clear();
     	if (this.remoteStack != null) this.remoteStack.clear();
@@ -96,7 +96,7 @@ public class NoticedURL {
     }
 
     protected void close() {
-        Log.logInfo("NoticedURL", "CLOSING ALL STACKS");
+        ConcurrentLog.info("NoticedURL", "CLOSING ALL STACKS");
         if (this.coreStack != null) {
             this.coreStack.close();
             this.coreStack = null;
@@ -119,7 +119,7 @@ public class NoticedURL {
     @Override
     protected void finalize() throws Throwable {
         if ((this.coreStack != null) || (this.limitStack != null) || (this.remoteStack != null)) {
-            Log.logWarning("plasmaCrawlNURL", "NURL stack closed by finalizer");
+            ConcurrentLog.warn("plasmaCrawlNURL", "NURL stack closed by finalizer");
             close();
         }
         super.finalize();
@@ -182,7 +182,7 @@ public class NoticedURL {
                 default: return "stack type unknown";
             }
         } catch (final Exception er) {
-            Log.logException(er);
+            ConcurrentLog.logException(er);
             return "error pushing onto the crawl stack: " + er.getMessage();
         }
     }
@@ -213,7 +213,7 @@ public class NoticedURL {
             try {ret |= this.remoteStack.remove(urlHashes) > 0;} catch (final IOException e) {}
             return ret;
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return false;
         }
     }
@@ -273,7 +273,7 @@ public class NoticedURL {
             if (entry != null) {
                 final String warning = push(toStack, entry, robots);
                 if (warning != null) {
-                    Log.logWarning("NoticedURL", "shift from " + fromStack + " to " + toStack + ": " + warning);
+                    ConcurrentLog.warn("NoticedURL", "shift from " + fromStack + " to " + toStack + ": " + warning);
                 }
             }
         } catch (final IOException e) {
@@ -282,7 +282,7 @@ public class NoticedURL {
     }
 
     public void clear(final StackType stackType) {
-    	Log.logInfo("NoticedURL", "CLEARING STACK " + stackType);
+    	ConcurrentLog.info("NoticedURL", "CLEARING STACK " + stackType);
         switch (stackType) {
                 case LOCAL:     this.coreStack.clear(); break;
                 case GLOBAL:    this.limitStack.clear(); break;
@@ -305,7 +305,7 @@ public class NoticedURL {
                 if (errors < 100) continue;
                 final int aftersize = balancer.size();
                 balancer.clear(); // the balancer is broken and cannot shrink
-                Log.logWarning("BALANCER", "entry is null, balancer cannot shrink (bevore pop = " + s + ", after pop = " + aftersize + "); reset of balancer");
+                ConcurrentLog.warn("BALANCER", "entry is null, balancer cannot shrink (bevore pop = " + s + ", after pop = " + aftersize + "); reset of balancer");
             }
             return entry;
         }

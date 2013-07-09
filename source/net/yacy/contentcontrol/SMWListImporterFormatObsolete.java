@@ -5,7 +5,7 @@ import java.io.Reader;
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -29,7 +29,7 @@ public class SMWListImporterFormatObsolete implements Runnable{
 	@Override
     public void run() {
 		try {
-			Log.logInfo("SMWLISTSYNC", "Importer run()");
+			ConcurrentLog.info("SMWLISTSYNC", "Importer run()");
 			Object obj = this.parser.parse(this.importFile);
 			
 			JSONObject jsonObject = (JSONObject) obj;
@@ -43,16 +43,16 @@ public class SMWListImporterFormatObsolete implements Runnable{
 			}
 
 		} catch (IOException e) {
-			Log.logException(e);
+			ConcurrentLog.logException(e);
 		} catch (ParseException e) {
-			Log.logException(e);
+			ConcurrentLog.logException(e);
 		} finally {
 
 			try {
-				Log.logInfo("SMWLISTSYNC", "Importer inserted poison pill in queue");
+				ConcurrentLog.info("SMWLISTSYNC", "Importer inserted poison pill in queue");
 				this.listEntries.put(SMWListRow.POISON);
 			} catch (InterruptedException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 			}
 		}
 	}
@@ -82,7 +82,7 @@ public class SMWListImporterFormatObsolete implements Runnable{
     		this.listEntries.put(row);
     		
     	} catch (Exception e) {
-    		Log.logInfo("SMWLISTSYNC", "import of entry failed");
+    		ConcurrentLog.info("SMWLISTSYNC", "import of entry failed");
     	}
 		
 	}
@@ -110,7 +110,7 @@ public class SMWListImporterFormatObsolete implements Runnable{
         try {
             return this.listEntries.take();
         } catch (InterruptedException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }

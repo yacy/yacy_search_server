@@ -37,10 +37,10 @@ import java.util.List;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.ListManager;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
@@ -181,7 +181,7 @@ public class Blacklist_p {
 
                 final File blackListFile = new File(ListManager.listsPath, blacklistToUse);
                 if(!blackListFile.delete()) {
-                    Log.logWarning("Blacklist", "file "+ blackListFile +" could not be deleted!");
+                    ConcurrentLog.warn("Blacklist", "file "+ blackListFile +" could not be deleted!");
                 }
 
                 for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
@@ -590,7 +590,7 @@ public class Blacklist_p {
 
         // ignore empty entries
         if(newEntry == null || newEntry.isEmpty()) {
-            Log.logWarning("Blacklist", "skipped adding an empty entry");
+            ConcurrentLog.warn("Blacklist", "skipped adding an empty entry");
             return "";
         }
 

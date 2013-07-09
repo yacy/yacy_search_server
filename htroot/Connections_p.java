@@ -37,7 +37,7 @@ import java.util.Set;
 
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.workflow.WorkflowThread;
 import net.yacy.peers.PeerActions;
 import net.yacy.peers.Seed;
@@ -111,7 +111,7 @@ public final class Connections_p {
                 prop.put("list_" + idx + "_serverSessionID",URLEncoder.encode(s.getName(),"UTF8"));
             } catch (final UnsupportedEncodingException e) {
                 // TODO Auto-generated catch block
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             prop.putHTML("list_" + idx + "_sessionName", s.getName());
             prop.put("list_" + idx + "_proto", prot);

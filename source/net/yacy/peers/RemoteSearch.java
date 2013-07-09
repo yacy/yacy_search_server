@@ -34,7 +34,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.storage.HandleSet;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -109,10 +109,10 @@ public class RemoteSearch extends Thread {
                 this.event.peers.mySeed().incRI(this.urls);
                 this.event.peers.mySeed().incRU(this.urls);
             } else {
-                Network.log.logInfo("REMOTE SEARCH - no answer from remote peer " + this.targetPeer.hash + ":" + this.targetPeer.getName());
+                Network.log.info("REMOTE SEARCH - no answer from remote peer " + this.targetPeer.hash + ":" + this.targetPeer.getName());
             }
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } finally {
             this.event.oneFeederTerminated();
         }
@@ -206,7 +206,7 @@ public class RemoteSearch extends Thread {
                     rs.start();
                     event.primarySearchThreadsL.add(rs);
                 } catch (final OutOfMemoryError e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     break;
                 }
             }
@@ -248,14 +248,14 @@ public class RemoteSearch extends Thread {
                                 blacklist);
                     if (urls >= 0) {
                         // urls is an array of url hashes. this is only used for log output
-                        if (urlhashes != null && urlhashes.length() > 0) Network.log.logInfo("SECONDARY REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + urls + " links for word hash " + wordhashes);
+                        if (urlhashes != null && urlhashes.length() > 0) Network.log.info("SECONDARY REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + urls + " links for word hash " + wordhashes);
                         event.peers.mySeed().incRI(urls);
                         event.peers.mySeed().incRU(urls);
                     } else {
-                        Network.log.logInfo("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
+                        Network.log.info("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
                     }
                 } catch (final Exception e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 } finally {
                     event.oneFeederTerminated();
                 }
@@ -296,11 +296,11 @@ public class RemoteSearch extends Thread {
                             event.peers.mySeed().incRU(urls);
                         } else {
                             if (targetPeer != null) {
-                                Network.log.logInfo("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
+                                Network.log.info("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
                             }
                         }
                     } catch (final Exception e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     } finally {
                         event.oneFeederTerminated();
                     }

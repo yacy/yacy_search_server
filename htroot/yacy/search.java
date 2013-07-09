@@ -196,11 +196,11 @@ public final class search {
         try {
             remoteSeed = Seed.genRemoteSeed(oseed, false, client);
         } catch (final IOException e) {
-            Network.log.logInfo("yacy.search: access with bad seed: " + e.getMessage());
+            Network.log.info("yacy.search: access with bad seed: " + e.getMessage());
             remoteSeed = null;
         }
         if (sb.peers == null) {
-            Network.log.logSevere("yacy.search: seed cache not initialized");
+            Network.log.severe("yacy.search: seed cache not initialized");
         } else {
             sb.peers.peerActions.peerArrival(remoteSeed, true);
         }
@@ -253,7 +253,7 @@ public final class search {
                     0.0d,
                     0.0d
                     );
-            Network.log.logInfo("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
+            Network.log.info("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
 
             final long timer = System.currentTimeMillis();
             //final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
@@ -317,7 +317,7 @@ public final class search {
                     0.0d,
                     0.0d
                     );
-            Network.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
+            Network.log.info("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
             EventChannel.channels(EventChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()), ""));
 
             // make event
@@ -435,7 +435,7 @@ public final class search {
         if (MemoryControl.shortStatus()) sb.remoteSearchTracker.clear();
 
         // log
-        Network.log.logInfo("EXIT HASH SEARCH: " +
+        Network.log.info("EXIT HASH SEARCH: " +
                 QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + resultCount + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstracts, " +

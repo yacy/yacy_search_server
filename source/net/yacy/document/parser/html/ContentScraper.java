@@ -49,13 +49,13 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.storage.SizeLimitedMap;
 import net.yacy.cora.storage.SizeLimitedSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.document.SentenceReader;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.Evaluation.Element;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.ISO639;
 
@@ -554,7 +554,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         try {
             FileUtils.copy(new CharArrayReader(inlineHtml), writer);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return cleanLine(CharacterCoding.html2unicode(stripAllTags(inlineHtml)));
         } finally {
             try {
@@ -679,7 +679,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         try {
             return this.content.toString();
         } catch (final OutOfMemoryError e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return "";
         }
     }

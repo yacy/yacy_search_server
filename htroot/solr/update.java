@@ -21,7 +21,7 @@
 import java.io.OutputStream;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -36,7 +36,7 @@ public class update {
     }
     
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env, @SuppressWarnings("unused") final OutputStream out) {
-        Log.logInfo("update", "post = " + post == null ? "NULL" : post.toString());
+        ConcurrentLog.info("update", "post = " + post == null ? "NULL" : post.toString());
         return null;
     }
 }

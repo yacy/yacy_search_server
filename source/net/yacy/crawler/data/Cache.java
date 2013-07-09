@@ -45,6 +45,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.blob.Compressor;
@@ -52,7 +53,6 @@ import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 
 
 public final class Cache {
@@ -67,7 +67,7 @@ public final class Cache {
     private static long maxCacheSize = Long.MAX_VALUE;
     private static File cachePath = null;
     private static String prefix;
-    public static final Log log = new Log("HTCACHE");
+    public static final ConcurrentLog log = new ConcurrentLog("HTCACHE");
 
     public static void init(final File htCachePath, final String peerSalt, final long CacheSizeMax) {
 
@@ -85,7 +85,7 @@ public final class Cache {
         try {
             responseHeaderDB = new MapHeap(dbfile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 1024, 100, ' ');
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         // open the cache file
         try {
@@ -93,14 +93,14 @@ public final class Cache {
             fileDBunbuffered.setMaxSize(maxCacheSize);
             fileDB = new Compressor(fileDBunbuffered, 6 * 1024 * 1024);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
-        Log.logInfo("Cache", "initialized cache database responseHeaderDB.size() = " + responseHeaderDB.size() + ", fileDB.size() = " + fileDB.size());
+        ConcurrentLog.info("Cache", "initialized cache database responseHeaderDB.size() = " + responseHeaderDB.size() + ", fileDB.size() = " + fileDB.size());
 
         // clean up the responseHeaderDB which cannot be cleaned the same way as the cache files.
         // We do this as a concurrent job only once after start-up silently
         if (responseHeaderDB.size() != fileDB.size()) {
-            Log.logWarning("Cache", "file and metadata size is not equal, starting a cleanup thread...");
+            ConcurrentLog.warn("Cache", "file and metadata size is not equal, starting a cleanup thread...");
             Thread startupCleanup = new Thread() {
                 @Override
                 public void run() {
@@ -108,7 +108,7 @@ public final class Cache {
                     // enumerate the responseHeaderDB and find out all entries that are not inside the fileDBunbuffered
                     BlockingQueue<byte[]> q = responseHeaderDB.keyQueue(1000);
                     final HandleSet delkeys = new RowHandleSet(Word.commonHashLength, Base64Order.enhancedCoder, 1);
-                    Log.logInfo("Cache", "started cleanup thread to remove unused cache metadata");
+                    ConcurrentLog.info("Cache", "started cleanup thread to remove unused cache metadata");
                     try {
                         byte[] k;
                         while (((k = q.take()) != MapHeap.POISON_QUEUE_ENTRY)) {
@@ -117,7 +117,7 @@ public final class Cache {
                     } catch (InterruptedException e) {
                     } finally {
                         // delete the collected keys from the metadata
-                        Log.logInfo("Cache", "cleanup thread collected " + delkeys.size() + " unused metadata entries; now deleting them from the file...");
+                        ConcurrentLog.info("Cache", "cleanup thread collected " + delkeys.size() + " unused metadata entries; now deleting them from the file...");
                         for (byte[] k: delkeys) {
                             try {
                                 responseHeaderDB.delete(k);
@@ -126,19 +126,19 @@ public final class Cache {
                         }
                     }
 
-                    Log.logInfo("Cache", "running check to remove unused file cache data");
+                    ConcurrentLog.info("Cache", "running check to remove unused file cache data");
                     delkeys.clear();
                     for (byte[] k: fileDB) {
                         if (!responseHeaderDB.containsKey(k)) try { delkeys.put(k); } catch (SpaceExceededException e) { break; }
                     }
-                    Log.logInfo("Cache", "cleanup thread collected " + delkeys.size() + " unused cache entries; now deleting them from the file...");
+                    ConcurrentLog.info("Cache", "cleanup thread collected " + delkeys.size() + " unused cache entries; now deleting them from the file...");
                     for (byte[] k: delkeys) {
                         try {
                             fileDB.delete(k);
                         } catch (IOException e) {
                         }
                     }
-                    Log.logInfo("Cache", "terminated cleanup thread; responseHeaderDB.size() = " + responseHeaderDB.size() + ", fileDB.size() = " + fileDB.size());
+                    ConcurrentLog.info("Cache", "terminated cleanup thread; responseHeaderDB.size() = " + responseHeaderDB.size() + ", fileDB.size() = " + fileDB.size());
                 }
             };
             startupCleanup.start();
@@ -157,12 +157,12 @@ public final class Cache {
         try {
             fileDB.clear();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         try {
             fileDBunbuffered.clear();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
@@ -195,7 +195,7 @@ public final class Cache {
         if (maxCacheSize == 0) return;
         if (responseHeader == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: responseHeader == null");
         if (file == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: file == null");
-        log.logInfo("storing content of url " + url.toString() + ", " + file.length + " bytes");
+        log.info("storing content of url " + url.toString() + ", " + file.length + " bytes");
 
         // store the file
         try {
@@ -216,7 +216,7 @@ public final class Cache {
             fileDB.delete(url.hash());
             throw new IOException("Cache.store: cannot write to headerDB: " + e.getMessage());
         }
-        if (log.isFine()) log.logFine("stored in cache: " + url.toNormalform(true));
+        if (log.isFine()) log.fine("stored in cache: " + url.toNormalform(true));
     }
 
     /**
@@ -235,7 +235,7 @@ public final class Cache {
         if (!headerExists && !fileExists) return false;
         // if not both is there then we do a clean-up
         if (headerExists) try {
-            log.logWarning("header but not content of urlhash " + ASCII.String(urlhash) + " in cache; cleaned up");
+            log.warn("header but not content of urlhash " + ASCII.String(urlhash) + " in cache; cleaned up");
             responseHeaderDB.delete(urlhash);
         } catch (final IOException e) {}
         if (fileExists) try {
@@ -285,16 +285,16 @@ public final class Cache {
             if (b == null) return null;
             return b;
         } catch (final UnsupportedEncodingException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         } catch (final OutOfMemoryError e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }
@@ -304,7 +304,7 @@ public final class Cache {
         try {
             return fileDB.containsKey(hash);
         } catch (final OutOfMemoryError e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return false;
         }
     }

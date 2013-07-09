@@ -35,11 +35,11 @@ import java.util.List;
 import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -209,7 +209,7 @@ public class audioTagParser extends AbstractParser implements Parser {
 					fout.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 			}
             if (tempFile != null)
             	tempFile.delete();

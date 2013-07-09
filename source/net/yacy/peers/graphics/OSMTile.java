@@ -36,10 +36,10 @@ import javax.imageio.ImageIO;
 
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.visualization.RasterPlotter;
@@ -116,7 +116,7 @@ public class OSMTile {
             try {
                 entry = Switchboard.getSwitchboard().loader.load(Switchboard.getSwitchboard().loader.request(tileURL, false, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
             } catch (final IOException e) {
-                Log.logWarning("OSMTile", "cannot load: " + e.getMessage());
+                ConcurrentLog.warn("OSMTile", "cannot load: " + e.getMessage());
                 return null;
             }
             tileb = entry.getContent();

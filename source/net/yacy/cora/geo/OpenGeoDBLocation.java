@@ -40,8 +40,8 @@ import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.WordCache;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.StringBuilderComparator;
-import net.yacy.kelondro.logging.Log;
 
 /**
  * this class loads and parses database dumps from the OpenGeoDB project files can be loaded from
@@ -163,7 +163,7 @@ public class OpenGeoDBLocation implements Locations
             }
             reader.close();
         } catch ( final IOException e ) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } finally {
             if ( reader != null ) {
                 try {

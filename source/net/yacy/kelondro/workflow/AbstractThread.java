@@ -34,12 +34,12 @@ package net.yacy.kelondro.workflow;
 
 import java.nio.channels.ClosedByInterruptException;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public abstract class AbstractThread extends Thread implements WorkflowThread {
 
-    private static Log log = new Log("AbstractThread");
+    private static ConcurrentLog log = new ConcurrentLog("AbstractThread");
     protected boolean running = true;
     private boolean announcedShutdown = false;
     protected long busytime = 0, memuse = 0;
@@ -128,9 +128,9 @@ public abstract class AbstractThread extends Thread implements WorkflowThread {
 
     private final void logError(final String text,final Throwable thrown) {
         if (log == null) {
-            Log.logSevere("THREAD-CONTROL", text, thrown);
+            ConcurrentLog.severe("THREAD-CONTROL", text, thrown);
         } else {
-            log.logSevere(text,thrown);
+            log.severe(text,thrown);
         }
     }
 

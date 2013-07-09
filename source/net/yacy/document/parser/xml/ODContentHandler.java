@@ -29,7 +29,7 @@ package net.yacy.document.parser.xml;
 import java.io.IOException;
 import java.io.Writer;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -50,7 +50,7 @@ public class ODContentHandler extends DefaultHandler {
 	    try {
 		out.write(ch, start, length);
 	    } catch (IOException e) {
-	        Log.logException(e);
+	        ConcurrentLog.logException(e);
 	    }
 	}
 	@Override
@@ -60,7 +60,7 @@ public class ODContentHandler extends DefaultHandler {
 		try {
 		    out.append("\n");
 		} catch (IOException e) {
-		    Log.logException(e);
+		    ConcurrentLog.logException(e);
 		}
 	    }
 	}

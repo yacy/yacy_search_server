@@ -39,12 +39,12 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.ftp.FTPClient;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.Latency;
 import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 
 public class FTPLoader {
@@ -52,10 +52,10 @@ public class FTPLoader {
     public  static final long   DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
 
     private final Switchboard sb;
-    private final Log log;
+    private final ConcurrentLog log;
     private final long maxFileSize;
 
-    public FTPLoader(final Switchboard sb, final Log log) {
+    public FTPLoader(final Switchboard sb, final ConcurrentLog log) {
         this.sb = sb;
         this.log = log;
         this.maxFileSize = sb.getConfigLong("crawler.ftp.maxFileSize", -1l);
@@ -145,7 +145,7 @@ public class FTPLoader {
                     response = getFile(ftpClient, request, acceptOnlyParseable);
                 } catch (final Exception e) {
                     // add message to errorLog
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     (new PrintStream(berr)).print(e.getMessage());
                 }
             }
@@ -242,9 +242,9 @@ public class FTPLoader {
             // only the metadata is returned
 
             if (parserError != null) {
-                this.log.logInfo("No parser available in FTP crawler: '" + parserError + "' for URL " + request.url().toString() + ": parsing only metadata");
+                this.log.info("No parser available in FTP crawler: '" + parserError + "' for URL " + request.url().toString() + ": parsing only metadata");
             } else {
-                this.log.logInfo("Too big file in FTP crawler with size = " + size + " Bytes for URL " + request.url().toString() + ": parsing only metadata");
+                this.log.info("Too big file in FTP crawler with size = " + size + " Bytes for URL " + request.url().toString() + ": parsing only metadata");
             }
 
             // create response with metadata only

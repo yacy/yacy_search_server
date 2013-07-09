@@ -42,12 +42,12 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.graphics.WebStructureGraph.StructureEntry;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
@@ -151,15 +151,15 @@ public class HostBrowser {
             try {
                 fulltext.getDefaultConnector().deleteByQuery("-" + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200 AND " 
                         + CollectionSchema.httpstatus_i.getSolrFieldName() + ":[* TO *]"); // make sure field exists
-                Log.logInfo ("HostBrowser:", "delete documents with httpstatus_i <> 200");
+                ConcurrentLog.info ("HostBrowser:", "delete documents with httpstatus_i <> 200");
                 fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failtype_s.getSolrFieldName() + ":\"" + FailType.fail.name() + "\"" );
-                Log.logInfo ("HostBrowser:", "delete documents with failtype_s = fail");
+                ConcurrentLog.info ("HostBrowser:", "delete documents with failtype_s = fail");
                 fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failtype_s.getSolrFieldName() + ":\"" + FailType.excl.name() + "\"" );
-                Log.logInfo ("HostBrowser:", "delete documents with failtype_s = excl");
+                ConcurrentLog.info ("HostBrowser:", "delete documents with failtype_s = excl");
                 prop.putNum("ucount", fulltext.collectionSize());
                 return prop;
             } catch (IOException ex) {
-                Log.logException(ex);
+                ConcurrentLog.logException(ex);
             }
         }
         
@@ -217,7 +217,7 @@ public class HostBrowser {
                 prop.put("hosts_list", c);
                 prop.put("hosts", 1);
             } catch (IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
         
@@ -349,7 +349,7 @@ public class HostBrowser {
                 for (Map.Entry<String, FailType> e: errorDocs.entrySet()) files.put(e.getKey(), e.getValue() == FailType.fail ? StoreType.FAILED : StoreType.EXCLUDED);
                 for (String u: inboundLinks) if (!files.containsKey(u)) files.put(u, StoreType.LINK);
                 for (String u: loadingLinks) if (u.startsWith(path) && !files.containsKey(u)) files.put(u, StoreType.LINK);
-                Log.logInfo("HostBrowser", "collected " + files.size() + " urls for path " + path);
+                ConcurrentLog.info("HostBrowser", "collected " + files.size() + " urls for path " + path);
 
                 // distinguish files and folders
                 Map<String, Object> list = new TreeMap<String, Object>(); // a directory list; if object is boolean, its a file; if its a int[], then its a folder
@@ -500,7 +500,7 @@ public class HostBrowser {
                 }
                 
             } catch (Throwable e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
 

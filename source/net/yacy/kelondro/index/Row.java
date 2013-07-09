@@ -44,8 +44,8 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.order.Order;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.kelondroException;
@@ -173,7 +173,7 @@ public final class Row implements Serializable {
         try {
             assert (this.objectOrder.wellformed(rowinstance, start, this.primaryKeyLength)) : "rowinstance = " + UTF8.String(rowinstance);
         } catch (final Throwable e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         // this method offers the option to clone the content
         // this is necessary if it is known that the underlying byte array may change and therefore
@@ -312,7 +312,7 @@ public final class Row implements Serializable {
                             try {
                                 setCol(col.encoder, this.offset + clstrt, col.cellwidth, NumberTools.parseLongDecSubstring(token, p + 1));
                             } catch (final NumberFormatException e) {
-                                Log.logSevere("kelondroRow", "NumberFormatException for celltype_cardinal, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
+                                ConcurrentLog.severe("kelondroRow", "NumberFormatException for celltype_cardinal, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
                                 setCol(col.encoder, this.offset + clstrt, col.cellwidth, 0);
                             }
                         } else if ((decimalCardinal) && (col.celltype == Column.celltype_binary)) {
@@ -320,7 +320,7 @@ public final class Row implements Serializable {
                             try {
                                 setCol(clstrt, col.cellwidth, new byte[]{(byte) NumberTools.parseIntDecSubstring(token, p + 1)});
                             } catch (final NumberFormatException e) {
-                                Log.logSevere("kelondroRow", "NumberFormatException for celltype_binary, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
+                                ConcurrentLog.severe("kelondroRow", "NumberFormatException for celltype_binary, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
                                 setCol(clstrt, col.cellwidth, new byte[]{0});
                             }
                         } else if ((decimalCardinal) && (col.celltype == Column.celltype_bitfield)) {

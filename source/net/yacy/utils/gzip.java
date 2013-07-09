@@ -39,12 +39,12 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public class gzip {
 
-    private static Log logger = new Log("GZIP");
+    private static ConcurrentLog logger = new ConcurrentLog("GZIP");
 
     public static void gzipFile(final String inFile, final String outFile) {
 	try {
@@ -54,9 +54,9 @@ public class gzip {
 	    fin.close();
 	    fout.close();
 	} catch (final FileNotFoundException e) {
-	    logger.logWarning("ERROR: file '" + inFile + "' not found", e);
+	    logger.warn("ERROR: file '" + inFile + "' not found", e);
 	} catch (final IOException e) {
-            logger.logWarning("ERROR: IO trouble ",e);
+            logger.warn("ERROR: IO trouble ",e);
 	}
     }
 
@@ -76,9 +76,9 @@ public class gzip {
 	    fin.close();
 	    fout.close();
 	} catch (final FileNotFoundException e) {
-	    logger.logWarning("ERROR: file '" + inFile + "' not found", e);
+	    logger.warn("ERROR: file '" + inFile + "' not found", e);
 	} catch (final IOException e) {
-            logger.logWarning("ERROR: IO trouble ",e);
+            logger.warn("ERROR: IO trouble ",e);
 	}
     }
 
@@ -93,7 +93,7 @@ public class gzip {
 	    fout.close();
 	    return baos.toByteArray();
 	} catch (final IOException e) {
-	    logger.logWarning("ERROR: IO trouble ",e);
+	    logger.warn("ERROR: IO trouble ",e);
 	    return null;
 	}
     }

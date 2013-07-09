@@ -50,13 +50,13 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.AbstractReference;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -70,7 +70,7 @@ public class WebStructureGraph {
     public static int maxref = 200; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
     public static int maxhosts = 10000; // maximum number of hosts in web structure map
 
-    private final static Log log = new Log("WebStructureGraph");
+    private final static ConcurrentLog log = new ConcurrentLog("WebStructureGraph");
 
     private final File structureFile;
     private final TreeMap<String, byte[]> structure_old; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
@@ -109,7 +109,7 @@ public class WebStructureGraph {
         if ( loadedStructureB != null ) {
             this.structure_old.putAll(loadedStructureB);
         }
-        log.logInfo("loaded dump of " + loadedStructureB.size() + " entries from " + this.structureFile.toString());
+        log.info("loaded dump of " + loadedStructureB.size() + " entries from " + this.structureFile.toString());
         
         // delete out-dated entries in case the structure is too big
         if ( this.structure_old.size() > maxhosts ) {
@@ -794,7 +794,7 @@ public class WebStructureGraph {
     public synchronized void close() {
         // finish dns resolving queue
         if ( this.publicRefDNSResolvingWorker.isAlive() ) {
-            log.logInfo("Waiting for the DNS Resolving Queue to terminate");
+            log.info("Waiting for the DNS Resolving Queue to terminate");
             try {
                 this.publicRefDNSResolvingQueue.put(leanrefObjectPOISON);
                 this.publicRefDNSResolvingWorker.join(5000);
@@ -803,14 +803,14 @@ public class WebStructureGraph {
         }
 
         // save to web structure file
-        log.logInfo("Saving Web Structure File: new = "
+        log.info("Saving Web Structure File: new = "
             + this.structure_new.size()
             + " entries, old = "
             + this.structure_old.size()
             + " entries");
         final long time = System.currentTimeMillis();
         joinOldNew();
-        log.logInfo("dumping " + structure_old.size() + " entries to " + structureFile.toString());
+        log.info("dumping " + structure_old.size() + " entries to " + structureFile.toString());
         if ( !this.structure_old.isEmpty() ) {
             synchronized ( this.structure_old ) {
                 if ( !this.structure_old.isEmpty() ) {
@@ -820,7 +820,7 @@ public class WebStructureGraph {
                             this.structure_old,
                             "Web Structure Syntax: <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*");
                     final long t = Math.max(1, System.currentTimeMillis() - time);
-                    log.logInfo("Saved Web Structure File: "
+                    log.info("Saved Web Structure File: "
                         + this.structure_old.size()
                         + " entries in "
                         + t

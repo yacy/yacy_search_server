@@ -49,10 +49,10 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.wiki.WikiBoard;
 import net.yacy.kelondro.blob.MapHeap;
-import net.yacy.kelondro.logging.Log;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -120,7 +120,7 @@ public class BlogBoardComments {
     	    this.database.insert(UTF8.getBytes(page.key), page.record);
     	    return page.key;
     	} catch (final Exception e) {
-    	    Log.logException(e);
+    	    ConcurrentLog.logException(e);
     	    return null;
     	}
     }
@@ -136,10 +136,10 @@ public class BlogBoardComments {
         try {
             record = base.get(UTF8.getBytes(copyOfKey));
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             record = null;
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             record = null;
         }
         return (record == null) ?
@@ -285,7 +285,7 @@ public class BlogBoardComments {
             try {
                 final String date = this.record.get("date");
                 if (date == null) {
-                    if (Log.isFinest("Blog")) Log.logFinest("Blog", "ERROR: date field missing in blogBoard");
+                    if (ConcurrentLog.isFinest("Blog")) ConcurrentLog.finest("Blog", "ERROR: date field missing in blogBoard");
                     return new Date();
                 }
                 synchronized (SIMPLE_DATE_FORMATTER) {
@@ -299,7 +299,7 @@ public class BlogBoardComments {
         public String getTimestamp() {
             final String timestamp = this.record.get("date");
             if (timestamp == null) {
-                if (Log.isFinest("Blog")) Log.logFinest("Blog", "ERROR: date field missing in blogBoard");
+                if (ConcurrentLog.isFinest("Blog")) ConcurrentLog.finest("Blog", "ERROR: date field missing in blogBoard");
                 return dateString(new Date());
             }
             return timestamp;

@@ -33,10 +33,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.schema.CollectionSchema;
 
@@ -72,11 +72,11 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
                         ConcurrentUpdateSolrConnector.this.connector.deleteById(id);
                         ConcurrentUpdateSolrConnector.this.idCache.remove(ASCII.getBytes(id));
                     } catch (IOException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 }
             } catch (InterruptedException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -91,11 +91,11 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
                         updateIdCache((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                         ConcurrentUpdateSolrConnector.this.connector.add(doc);
                     } catch (IOException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 }
             } catch (InterruptedException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -301,7 +301,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
                     ConcurrentUpdateSolrConnector.this.connector.deleteByQuery(querystring);
                     ConcurrentUpdateSolrConnector.this.idCache.clear();
                 } catch (IOException e) {
-                    Log.logSevere("ConcurrentUpdateSolrConnector", e.getMessage(), e);
+                    ConcurrentLog.severe("ConcurrentUpdateSolrConnector", e.getMessage(), e);
                 }
                 ConcurrentUpdateSolrConnector.this.connector.commit(true);
             }

@@ -31,7 +31,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 
 
@@ -83,10 +83,10 @@ public class ImportDump {
         	}
         	statement.executeBatch();
         } catch (SQLException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             throw e;
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             throw new SQLException(e.getMessage());
 		} finally {
             if (statement != null) try {statement.close();} catch (SQLException e) {}

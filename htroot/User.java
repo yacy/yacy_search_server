@@ -32,8 +32,8 @@ import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -135,7 +135,7 @@ public class User{
 							entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(entry.getUserName()+":"+post.get("newpass", "")));
 							prop.put("status_password", "0"); //changes
 						} catch (final Exception e) {
-						    Log.logException(e);
+						    ConcurrentLog.logException(e);
 						}
         			}else{
         				prop.put("status_password", "3"); //empty

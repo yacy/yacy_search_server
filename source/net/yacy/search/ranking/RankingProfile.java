@@ -32,8 +32,8 @@ import java.util.Map;
 
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
-import net.yacy.kelondro.logging.Log;
 
 public class RankingProfile {
 
@@ -147,7 +147,7 @@ public class RankingProfile {
                         coeff.put(e.substring(s, p), Integer.valueOf(NumberTools.parseIntDecSubstring(e, p + 1)));
                     } catch (final NumberFormatException e1) {
                         System.out.println("wrong parameter: " + e.substring(s, p) + "=" + e.substring(p + 1));
-                        Log.logException(e1);
+                        ConcurrentLog.logException(e1);
                     }
                 }
             }

@@ -12,8 +12,8 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.storage.HashARC;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 
 /**
  * a URL filter engine for black and white lists
@@ -153,7 +153,7 @@ public class FilterEngine {
         	for(final FilterEntry e: app) {
         		if (e.path.indexOf("?*",0) > 0) {
                     // prevent "Dangling meta character '*'" exception
-                    Log.logWarning("FilterEngine", "ignored blacklist path to prevent 'Dangling meta character' exception: " + e);
+                    ConcurrentLog.warn("FilterEngine", "ignored blacklist path to prevent 'Dangling meta character' exception: " + e);
                     continue;
                 }
                 if((e.path.equals("*")) || (path.matches(e.path)))

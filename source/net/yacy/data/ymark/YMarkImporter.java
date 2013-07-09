@@ -25,7 +25,7 @@ package net.yacy.data.ymark;
 import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 
 public abstract class YMarkImporter implements Runnable {
@@ -52,13 +52,13 @@ public abstract class YMarkImporter implements Runnable {
     	try {
     		parse();
         } catch (Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } finally {
         	try {
-        		Log.logInfo(YMarkTables.BOOKMARKS_LOG, this.importer+" Importer inserted poison pill in queue");
+        		ConcurrentLog.info(YMarkTables.BOOKMARKS_LOG, this.importer+" Importer inserted poison pill in queue");
 				this.bookmarks.put(YMarkEntry.POISON);
 			} catch (InterruptedException e1) {
-			    Log.logException(e1);
+			    ConcurrentLog.logException(e1);
 			}
         }
     }
@@ -67,7 +67,7 @@ public abstract class YMarkImporter implements Runnable {
         try {
             return this.bookmarks.take();
         } catch (InterruptedException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }
@@ -138,17 +138,17 @@ public abstract class YMarkImporter implements Runnable {
 		                }
 					}
 				} catch (final IOException e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				} catch (final InterruptedException e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				}
 	        }
         	if(this.autotag) {
             	try {
     				this.autoTaggingQueue.put(YMarkAutoTagger.POISON);
-    				Log.logInfo(YMarkTables.BOOKMARKS_LOG, YMarkImporter.this.importer+" inserted poison pill into autoTagging queue");
+    				ConcurrentLog.info(YMarkTables.BOOKMARKS_LOG, YMarkImporter.this.importer+" inserted poison pill into autoTagging queue");
     			} catch (final InterruptedException e) {
-    				Log.logException(e);
+    				ConcurrentLog.logException(e);
     			}
         	}
 		}

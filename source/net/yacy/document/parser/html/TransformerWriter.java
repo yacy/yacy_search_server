@@ -45,9 +45,9 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
-import net.yacy.kelondro.logging.Log;
 
 
 public final class TransformerWriter extends Writer {
@@ -557,9 +557,9 @@ public final class TransformerWriter extends Writer {
             is.close();
             scraper.print();
         } catch (final MalformedURLException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 

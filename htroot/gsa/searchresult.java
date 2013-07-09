@@ -31,7 +31,7 @@ import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryGoal;
@@ -98,7 +98,7 @@ public class searchresult {
 
         // check post
         if (post == null) {post = new serverObjects(); post.put("q", ""); post.put("num", "0");}
-        Log.logInfo("GSA Query", post.toString());
+        ConcurrentLog.info("GSA Query", post.toString());
         sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
         
         // rename post fields according to result style
@@ -189,7 +189,7 @@ public class searchresult {
         try {response = connector.query(req);} catch (SolrException ee) {e = ee;}
         if (response != null) e = response.getException();
         if (e != null) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             if (req != null) req.close();
             SolrRequestInfo.clearRequestInfo();
             return null;

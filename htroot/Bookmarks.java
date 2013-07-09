@@ -44,6 +44,7 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.BookmarkHelper;
 import net.yacy.data.BookmarksDB;
 import net.yacy.data.ListManager;
@@ -54,7 +55,6 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
 import net.yacy.search.snippet.TextSnippet;
@@ -212,7 +212,7 @@ public class Bookmarks {
                             prop.putHTML("mode_path","");
                             prop.put("mode_public", "0");
                             prop.put("mode_feed", "0"); //TODO: check if it IS a feed
-                        } catch (final IOException e) {Log.logException(e);} catch (final Parser.Failure e) {Log.logException(e);}
+                        } catch (final IOException e) {ConcurrentLog.logException(e);} catch (final Parser.Failure e) {ConcurrentLog.logException(e);}
                     } else {
                         // get from the bookmark database
                         prop.put("mode_edit", "1"); // edit mode
@@ -243,14 +243,14 @@ public class Bookmarks {
                     tags="unsorted";
                 }
 
-                Log.logInfo("BOOKMARKS", "Trying to import bookmarks from HTML-file");
+                ConcurrentLog.info("BOOKMARKS", "Trying to import bookmarks from HTML-file");
 
                 try {
                     final File file = new File(post.get("htmlfile"));
                     BookmarkHelper.importFromBookmarks(sb.bookmarksDB, new DigestURI(file), post.get("htmlfile$file"), tags, isPublic);
                 } catch (final MalformedURLException e) {}
 
-                Log.logInfo("BOOKMARKS", "success!!");
+                ConcurrentLog.info("BOOKMARKS", "success!!");
 
             } else if (post.containsKey("xmlfile")) {
 

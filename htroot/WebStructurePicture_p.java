@@ -37,8 +37,8 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -116,7 +116,7 @@ public class WebStructurePicture_p {
             for (int i = 0; i < hostlist.length; i++) {
                 String host = hostlist[i];
                 String hash = null;
-                try {hash = ASCII.String((new DigestURI("http://" + host)).hash(), 6, 6);} catch (final MalformedURLException e) {Log.logException(e);}
+                try {hash = ASCII.String((new DigestURI("http://" + host)).hash(), 6, 6);} catch (final MalformedURLException e) {ConcurrentLog.logException(e);}
                 Map.Entry<String, String> centernode = new AbstractMap.SimpleEntry<String, String>(hash, host);
                 double angle = 2.0d * i * Math.PI / hostlist.length;
                 if (hostlist.length == 3) angle -= Math.PI / 2;

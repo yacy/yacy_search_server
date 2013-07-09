@@ -14,6 +14,7 @@ import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.BookmarksDB;
 import net.yacy.data.UserDB;
 import net.yacy.data.WorkTables;
@@ -30,7 +31,6 @@ import net.yacy.data.ymark.YMarkXBELImporter;
 import net.yacy.document.Parser.Failure;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -95,7 +95,7 @@ public class import_ymark {
                         surrogateReader = new SurrogateReader(stream, queueSize);
                     } catch (final IOException e) {
                         //TODO: display an error message
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                         prop.put("status", "0");
                         return prop;
                     }
@@ -110,7 +110,7 @@ public class import_ymark {
                         reader = new MonitoredReader(new InputStreamReader(stream,"UTF-8"), 1024*16, bytes.length);
                     } catch (final UnsupportedEncodingException e1) {
                         //TODO: display an error message
-                        Log.logException(e1);
+                        ConcurrentLog.logException(e1);
                         prop.put("status", "0");
                         return prop;
                     }
@@ -126,7 +126,7 @@ public class import_ymark {
                             xbelImporter = new YMarkXBELImporter(reader, queueSize, root);
                         } catch (final SAXException e) {
                             //TODO: display an error message
-                            Log.logException(e);
+                            ConcurrentLog.logException(e);
                             prop.put("status", "0");
                             return prop;
                         }
@@ -161,9 +161,9 @@ public class import_ymark {
 	    			}
 	    			prop.put("status", "1");
 				} catch (final IOException e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				} catch (final Failure e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				}
         	} else if(post.containsKey("importer") && post.get("importer").equals("bmks")) {
         		if(!isAdmin) {
@@ -191,9 +191,9 @@ public class import_ymark {
                             sb.tables.bookmarks.addBookmark(bmk_user, bmk_entry, merge, true);
                             prop.put("status", "1");
                         } catch (final MalformedURLException e) {
-                            Log.logException(e);
+                            ConcurrentLog.logException(e);
                         } catch (final IOException e) {
-                            Log.logException(e);
+                            ConcurrentLog.logException(e);
                         }
                     } catch (IOException e1) {
                     }
@@ -221,7 +221,7 @@ public class import_ymark {
 
         			prop.put("status", "1");
 				} catch (Exception e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				}
             }
         }  else {
@@ -255,9 +255,9 @@ public class import_ymark {
                 }
 			}
 		} catch (final IOException e) {
-			Log.logException(e);
+			ConcurrentLog.logException(e);
 		} catch (final InterruptedException e) {
-			Log.logException(e);
+			ConcurrentLog.logException(e);
 		}
 	}
 }

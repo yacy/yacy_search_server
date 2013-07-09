@@ -42,9 +42,9 @@ import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 
@@ -74,7 +74,7 @@ public final class UserDB {
         try {
             userTable = new MapHeap(userTableFile, 128, NaturalOrder.naturalOrder, 1024 * 64, 10, '_');
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
     
@@ -90,7 +90,7 @@ public final class UserDB {
         try {
             userTable.delete(UTF8.getBytes(hostName.toLowerCase()));
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }        
     
@@ -102,9 +102,9 @@ public final class UserDB {
         try {
             record = userTable.get(UTF8.getBytes(userName));
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         
         return (record != null) ? new Entry(userName, record) : null;
@@ -120,7 +120,7 @@ public final class UserDB {
             userTable.insert(UTF8.getBytes(entry.userName), entry.mem);
             return entry.userName;
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }    
@@ -208,7 +208,7 @@ public final class UserDB {
                 try {
                     entry.setProperty(Entry.LOGGED_OUT, "false");
                 } catch (final Exception e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
                 return entry;
             }
@@ -233,7 +233,7 @@ public final class UserDB {
                 try {
                     entry.setProperty(Entry.LOGGED_OUT, "false");
                 } catch (final Exception e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
                 return null;
             }
@@ -395,13 +395,13 @@ public final class UserDB {
                 try{
                     ret = Long.parseLong(s);
                 } catch (final NumberFormatException e){
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             } else {
                 try {
                     this.setProperty(TIME_USED,"0");
                 } catch (final Exception e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
             return ret;
@@ -414,13 +414,13 @@ public final class UserDB {
                 try {
                     ret =  Long.parseLong(s);
                 } catch (final NumberFormatException e){
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             } else {
                 try {
                     this.setProperty(TIME_LIMIT, "0");
                 } catch (final Exception e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
             return ret;
@@ -433,13 +433,13 @@ public final class UserDB {
                 try {
                     ret = Long.parseLong(s);
                 } catch (final NumberFormatException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             } else {
                 try {
                     this.setProperty(TRAFFIC_SIZE, "0");
                 } catch (final Exception e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
             return ret;
@@ -459,7 +459,7 @@ public final class UserDB {
             try {
                 this.setProperty(TRAFFIC_SIZE,Long.toString(newTrafficSize));
             } catch (final Exception e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             return newTrafficSize;
         }
@@ -524,7 +524,7 @@ public final class UserDB {
             try {
                 UserDB.this.userTable.insert(UTF8.getBytes(getUserName()), this.mem);
             } catch(final Exception e){
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             return newTimeUsed;
         }
@@ -568,7 +568,7 @@ public final class UserDB {
                        ipUsers.remove(ip);
                }
     	   } catch (final Exception e) {
-               Log.logException(e);
+               ConcurrentLog.logException(e);
            }
         }
 

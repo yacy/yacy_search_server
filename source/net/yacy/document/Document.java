@@ -57,11 +57,11 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -342,7 +342,7 @@ dc_rights
             assert false : this.text.getClass().toString();
             return null;
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return new ByteArrayInputStream(UTF8.getBytes(""));
     }
@@ -363,7 +363,7 @@ dc_rights
             assert this.text instanceof String : this.text.getClass().toString();
             return (String) this.text;
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return "";
     }
@@ -385,7 +385,7 @@ dc_rights
             assert false : this.text.getClass().toString();
             return -1;
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return -1;
     }
@@ -819,7 +819,7 @@ dc_rights
                 try {
                     docTextLength += FileUtils.copy(doc.getTextStream(), content);
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
             anchors.putAll(doc.getAnchors());

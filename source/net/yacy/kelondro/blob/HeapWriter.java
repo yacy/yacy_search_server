@@ -33,15 +33,15 @@ import java.io.IOException;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.storage.HandleMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.RowHandleMap;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
 
 public final class HeapWriter {
 
-    private final static Log log = new Log("HeapWriter");
+    private final static ConcurrentLog log = new ConcurrentLog("HeapWriter");
     public final static byte[] ZERO = new byte[]{0};
 
     private final int          keylength;     // the length of the primary key
@@ -140,11 +140,11 @@ public final class HeapWriter {
             long start = System.currentTimeMillis();
             String fingerprint = HeapReader.fingerprintFileHash(this.heapFileREADY);
             if (fingerprint == null) {
-                log.logSevere("cannot write a dump for " + this.heapFileREADY.getName()+ ": fingerprint is null");
+                log.severe("cannot write a dump for " + this.heapFileREADY.getName()+ ": fingerprint is null");
             } else {
                 new Gap().dump(fingerprintGapFile(this.heapFileREADY, fingerprint));
                 this.index.dump(fingerprintIndexFile(this.heapFileREADY, fingerprint));
-                log.logInfo("wrote a dump for the " + this.index.size() +  " index entries of " + this.heapFileREADY.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                log.info("wrote a dump for the " + this.index.size() +  " index entries of " + this.heapFileREADY.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
             }
             this.index.close();
             this.index = null;

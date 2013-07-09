@@ -31,9 +31,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ymark.YMarkUtil;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 
 public class TablesColumnBLOBIndex extends TablesColumnIndex{
@@ -70,9 +70,9 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
     	try {
 			this.index.remove(column);
 		} catch (IOException e) {
-			Log.logException(e);
+			ConcurrentLog.logException(e);
 		} catch (SpaceExceededException e) {
-			Log.logException(e);
+			ConcurrentLog.logException(e);
 		}
     }
 
@@ -103,9 +103,9 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 			this.index.insert(column, valueIdxMap);
 			return;
 		} catch (IOException e) {
-			Log.logException(e);
+			ConcurrentLog.logException(e);
 		} catch (SpaceExceededException e) {
-			Log.logException(e);
+			ConcurrentLog.logException(e);
 		}
 	}
 
@@ -128,9 +128,9 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 			try {
 				this.index.insert(entry.getKey(), entry.getValue());
 			} catch (SpaceExceededException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 			} catch (IOException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 			}
 		}
 	}
@@ -153,9 +153,9 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 			try {
 				return new TreeSet<String>(this.index.get(column).keySet());
 			} catch (IOException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 			} catch (SpaceExceededException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 			}
 		}
 		return new TreeSet<String>();
@@ -168,9 +168,9 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 			try {
 				return this.index.get(column).containsKey(key);
 			} catch (IOException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 			} catch (SpaceExceededException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 			}
 		}
 		return false;
@@ -189,9 +189,9 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 		try {
 			return byteToCollection(this.index.get(column).get(key));
 		} catch (IOException e) {
-			Log.logException(e);
+			ConcurrentLog.logException(e);
 		} catch (SpaceExceededException e) {
-			Log.logException(e);
+			ConcurrentLog.logException(e);
 		}
 		return new ArrayList<byte[]>();
 	}
@@ -203,9 +203,9 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 			try {
 				return this.index.get(column).size();
 			} catch (IOException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 			} catch (SpaceExceededException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 			}
 		}
 		return -1;

@@ -37,10 +37,10 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.AbstractReference;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -508,7 +508,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     			p--;
 				worker[p % cores0].add(this.container.get(p, false));
 				if (p % 100 == 0 && System.currentTimeMillis() > timeout) {
-				    Log.logWarning("TransformDistributor", "distribution of WordReference entries to worker queues ended with timeout = " + this.maxtime);
+				    ConcurrentLog.warn("TransformDistributor", "distribution of WordReference entries to worker queues ended with timeout = " + this.maxtime);
 				    break;
 				}
             }
@@ -559,7 +559,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 				while ((entry = this.in.take()) != WordReferenceRow.poisonRowEntry) {
 				    this.out.put(new WordReferenceVars(new WordReferenceRow(entry), local));
 				    if (System.currentTimeMillis() > timeout) {
-	                    Log.logWarning("TransformWorker", "normalization of row entries from row to vars ended with timeout = " + this.maxtime);
+	                    ConcurrentLog.warn("TransformWorker", "normalization of row entries from row to vars ended with timeout = " + this.maxtime);
 				        break;
 				    }
 				}

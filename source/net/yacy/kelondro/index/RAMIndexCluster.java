@@ -34,9 +34,9 @@ import java.util.TreeMap;
 
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Row.Entry;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MergeIterator;
 import net.yacy.kelondro.util.StackIterator;
 
@@ -91,7 +91,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
             for (final RAMIndex rs: this.cluster) try {
                 keysort.put(rs.smallestKey());
             } catch (final SpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
         return keysort.smallestKey();
@@ -104,7 +104,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
             for (final RAMIndex rs: this.cluster) try {
                 keysort.put(rs.largestKey());
             } catch (final SpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
         return keysort.largestKey();

@@ -28,9 +28,9 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.logging.Log;
 
 public class SnippetExtractor {
 
@@ -139,7 +139,7 @@ public class SnippetExtractor {
                     try {
                         remainingHashes.put(hash);
                     } catch (SpaceExceededException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 } else {
                     p = pos.intValue();

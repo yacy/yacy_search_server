@@ -35,10 +35,10 @@ import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.server.serverObjects;
@@ -93,7 +93,7 @@ public class yacydoc {
                 final DigestURI url = new DigestURI(urlstring);
                 urlhash = ASCII.String(url.hash());
             } catch (final MalformedURLException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
         if (urlhash == null || urlhash.isEmpty()) return prop;
@@ -145,7 +145,7 @@ public class yacydoc {
             references += r.toString()+",";
         }
 
-        Log.logInfo("yacydoc", references);
+        ConcurrentLog.info("yacydoc", references);
 
         prop.put("taglinks", references);
 

@@ -54,6 +54,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.DidYouMean;
 import net.yacy.data.UserDB;
 import net.yacy.data.ymark.YMarkTables;
@@ -63,7 +64,6 @@ import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.ISO639;
@@ -164,7 +164,7 @@ public class yacysearch {
         prop.put("topmenu_resource-select", stealthmode ? 2 : global ? 1 : 0);
         
         if ( post == null || indexSegment == null || env == null || !searchAllowed ) {
-            if (indexSegment == null) Log.logInfo("yacysearch", "indexSegment == null");
+            if (indexSegment == null) ConcurrentLog.info("yacysearch", "indexSegment == null");
             // we create empty entries for template strings
             prop.put("searchagain", "0");
             prop.put("former", "");
@@ -289,11 +289,11 @@ public class yacysearch {
                 snippetFetchStrategy = null;
             }
             block = true;
-            Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: BLACKLISTED CLIENT FROM "
+            ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: BLACKLISTED CLIENT FROM "
                 + client
                 + " gets no permission to search");
         } else if ( Domains.matchesList(client, sb.networkWhitelist) ) {
-            Log.logInfo("LOCAL_SEARCH", "ACCESS CONTROL: WHITELISTED CLIENT FROM "
+            ConcurrentLog.info("LOCAL_SEARCH", "ACCESS CONTROL: WHITELISTED CLIENT FROM "
                 + client
                 + " gets no search restrictions");
         } else if ( !authenticated && !localhostAccess && !intranetMode ) {
@@ -309,7 +309,7 @@ public class yacysearch {
                 if ( global ) {
                     if ( accInTenMinutes >= 60 || accInOneMinute >= 6 || accInThreeSeconds >= 1 ) {
                         global = false;
-                        Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
+                        ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
                             + client
                             + ": "
                             + accInThreeSeconds
@@ -325,7 +325,7 @@ public class yacysearch {
                 if ( snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ) {
                     if ( accInTenMinutes >= 20 || accInOneMinute >= 4 || accInThreeSeconds >= 1 ) {
                         snippetFetchStrategy = CacheStrategy.CACHEONLY;
-                        Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
+                        ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
                             + client
                             + ": "
                             + accInThreeSeconds
@@ -340,7 +340,7 @@ public class yacysearch {
                 // general load protection
                 if ( accInTenMinutes >= 3000 || accInOneMinute >= 600 || accInThreeSeconds >= 60 ) {
                     block = true;
-                    Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
+                    ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
                         + client
                         + ": "
                         + accInThreeSeconds
@@ -560,7 +560,7 @@ public class yacysearch {
                     // delete the search history since this still shows the entry
                     SearchEventCache.delete(delHash);
                 } catch ( final IOException e ) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
 
@@ -626,7 +626,7 @@ public class yacysearch {
             try {
                 Pattern.compile(urlmask);
             } catch ( final PatternSyntaxException ex ) {
-                SearchEvent.log.logWarning("Illegal URL mask, not a valid regex: " + urlmask);
+                SearchEvent.log.warn("Illegal URL mask, not a valid regex: " + urlmask);
                 prop.put("urlmaskerror", 1);
                 prop.putHTML("urlmaskerror_urlmask", urlmask);
                 urlmask = ".*";
@@ -635,7 +635,7 @@ public class yacysearch {
             try {
                 Pattern.compile(prefermask);
             } catch ( final PatternSyntaxException ex ) {
-                SearchEvent.log.logWarning("Illegal prefer mask, not a valid regex: " + prefermask);
+                SearchEvent.log.warn("Illegal prefer mask, not a valid regex: " + prefermask);
                 prop.put("prefermaskerror", 1);
                 prop.putHTML("prefermaskerror_prefermask", prefermask);
                 prefermask = "";
@@ -685,7 +685,7 @@ public class yacysearch {
             theQuery.getQueryGoal().filterOut(Switchboard.blueList);
 
             // log
-            Log.logInfo(
+            ConcurrentLog.info(
                 "LOCAL_SEARCH",
                 "INIT WORD SEARCH: "
                     + theQuery.getQueryGoal().getOriginalQueryString(false)
@@ -738,7 +738,7 @@ public class yacysearch {
             }
 
             // log
-            Log.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: "
+            ConcurrentLog.info("LOCAL_SEARCH", "EXIT WORD SEARCH: "
                 + theQuery.getQueryGoal().getOriginalQueryString(false)
                 + " - "
                 + "local_rwi_available(" + theSearch.local_rwi_available.get() + "), "
@@ -830,7 +830,7 @@ public class yacysearch {
                     sb.localSearchTracker.clear();
                 }
             } catch ( final Exception e ) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
 
             prop.put("num-results_offset", startRecord == 0 ? 0 : startRecord + 1);

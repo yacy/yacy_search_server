@@ -39,9 +39,9 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.server.serverObjects;
 
 public class CrawlProfile extends ConcurrentHashMap<String, String> implements Map<String, String> {
@@ -430,7 +430,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         try {
             return Integer.parseInt(r);
         } catch (final NumberFormatException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return 0;
         }
     }
@@ -447,7 +447,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         try {
             return CacheStrategy.decode(Integer.parseInt(r));
         } catch (final NumberFormatException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return CacheStrategy.IFEXIST;
         }
     }
@@ -469,7 +469,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             final long l = Long.parseLong(r);
             return (l < 0) ? 0L : l;
         } catch (final NumberFormatException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return 0L;
         }
     }
@@ -484,7 +484,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             if (i < 0) return Integer.MAX_VALUE;
             return i;
         } catch (final NumberFormatException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return Integer.MAX_VALUE;
         }
     }

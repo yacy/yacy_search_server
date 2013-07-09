@@ -54,8 +54,8 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.operation.yacySeedUploadFile;
 import net.yacy.peers.operation.yacySeedUploadFtp;
 import net.yacy.peers.operation.yacySeedUploadScp;
@@ -70,7 +70,7 @@ public class Network
     // statics
     public static final ThreadGroup publishThreadGroup = new ThreadGroup("publishThreadGroup");
     public static final HashMap<String, String> seedUploadMethods = new HashMap<String, String>();
-    public static final Log log = new Log("YACY");
+    public static final ConcurrentLog log = new ConcurrentLog("YACY");
     public static long lastOnlineTime = 0;
     /** pseudo-random key derived from a time-interval while YaCy startup */
     public static long speedKey = 0;
@@ -110,14 +110,14 @@ public class Network
         if ( staticIP.length() != 0 && Seed.isProperIP(staticIP) == null ) {
             serverCore.useStaticIP = true;
             sb.peers.mySeed().setIP(staticIP);
-            log.logInfo("staticIP set to " + staticIP);
+            log.info("staticIP set to " + staticIP);
         } else {
             serverCore.useStaticIP = false;
         }
 
         loadSeedUploadMethods();
 
-        log.logConfig("CORE INITIALIZED");
+        log.config("CORE INITIALIZED");
         // ATTENTION, VERY IMPORTANT: before starting the thread, the httpd yacy server must be running!
 
         speedKey = System.currentTimeMillis() - time;
@@ -130,7 +130,7 @@ public class Network
 
     public final void publishSeedList() {
         if ( log.isFine() ) {
-            log.logFine("yacyCore.publishSeedList: Triggered Seed Publish");
+            log.fine("yacyCore.publishSeedList: Triggered Seed Publish");
         }
 
         /*
@@ -148,7 +148,7 @@ public class Network
             && (this.sb.peers.mySeed().isPrincipal()) ) {
             if ( log.isFine() ) {
                 log
-                    .logFine("yacyCore.publishSeedList: not necessary to publish: oldIP is equal, sizeConnected is equal and I can reach myself under the old IP.");
+                    .fine("yacyCore.publishSeedList: not necessary to publish: oldIP is equal, sizeConnected is equal and I can reach myself under the old IP.");
             }
             return;
         }
@@ -174,7 +174,7 @@ public class Network
                 this.sb.setConfig("seedUploadMethod", "none");
             }
             if ( log.isFine() ) {
-                log.logFine("yacyCore.publishSeedList: No uploading method configured");
+                log.fine("yacyCore.publishSeedList: No uploading method configured");
             }
             return;
         }
@@ -198,13 +198,13 @@ public class Network
         if ( this.sb.peers.sizeConnected() == 0 ) {
             // reload the seed lists
             this.sb.loadSeedLists();
-            log.logInfo("re-initialized seed list. received "
+            log.info("re-initialized seed list. received "
                 + this.sb.peers.sizeConnected()
                 + " new peer(s)");
         }
         final int newSeeds = publishMySeed(false);
         if ( newSeeds > 0 ) {
-            log.logInfo("received "
+            log.info("received "
                 + newSeeds
                 + " new peer(s), know a total of "
                 + this.sb.peers.sizeConnected()
@@ -252,7 +252,7 @@ public class Network
                 if ( this.added < 0 ) {
                     // no or wrong response, delete that address
                     final String cause = "peer ping to peer resulted in error response (added < 0)";
-                    log.logInfo("publish: disconnected "
+                    log.info("publish: disconnected "
                         + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR)
                         + " peer '"
                         + this.seed.getName()
@@ -264,7 +264,7 @@ public class Network
                 } else {
                     // success! we have published our peer to a senior peer
                     // update latest news from the other peer
-                    log.logInfo("publish: handshaked "
+                    log.info("publish: handshaked "
                         + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR)
                         + " peer '"
                         + this.seed.getName()
@@ -275,7 +275,7 @@ public class Network
                     if ( newSeed != null ) {
                         if ( !newSeed.isOnline() ) {
                             if ( log.isFine() ) {
-                                log.logFine("publish: recently handshaked "
+                                log.fine("publish: recently handshaked "
                                     + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR)
                                     + " peer '"
                                     + this.seed.getName()
@@ -290,7 +290,7 @@ public class Network
                             if ( newSeed.getLastSeenUTC() >= this.seed.getLastSeenUTC() ) {
                                 if ( log.isFine() ) {
                                     log
-                                        .logFine("publish: recently handshaked "
+                                        .fine("publish: recently handshaked "
                                             + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR)
                                             + " peer '"
                                             + this.seed.getName()
@@ -305,7 +305,7 @@ public class Network
                             } else {
                                 if ( log.isFine() ) {
                                     log
-                                        .logFine("publish: recently handshaked "
+                                        .fine("publish: recently handshaked "
                                             + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR)
                                             + " peer '"
                                             + this.seed.getName()
@@ -325,7 +325,7 @@ public class Network
                         }
                     } else {
                         if ( log.isFine() ) {
-                            log.logFine("publish: recently handshaked "
+                            log.fine("publish: recently handshaked "
                                 + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR)
                                 + " peer '"
                                 + this.seed.getName()
@@ -336,8 +336,8 @@ public class Network
                     }
                 }
             } catch ( final Exception e ) {
-                Log.logException(e);
-                log.logSevere(
+                ConcurrentLog.logException(e);
+                log.severe(
                     "publishThread: error with target seed " + this.seed.toString() + ": " + e.getMessage(),
                     e);
             } finally {
@@ -432,7 +432,7 @@ public class Network
                     this.sb.peers.mySeed().put("news", net.yacy.utils.crypt.simpleEncode(record.toString()));
                 }
             } catch ( final Exception e ) {
-                log.logSevere("publishMySeed: problem with news encoding", e);
+                log.severe("publishMySeed: problem with news encoding", e);
             }
             this.sb.peers.mySeed().setUnusedFlags();
             int newSeeds = -1;
@@ -454,7 +454,7 @@ public class Network
 
                 final String address = seed.getClusterAddress();
                 if ( log.isFine() ) {
-                    log.logFine("HELLO #" + i + " to peer '" + seed.get(Seed.NAME, "") + "' at " + address); // debug
+                    log.fine("HELLO #" + i + " to peer '" + seed.get(Seed.NAME, "") + "' at " + address); // debug
                 }
                 final String seederror = seed.isProper(false);
                 if ( (address == null) || (seederror != null) ) {
@@ -479,7 +479,7 @@ public class Network
 
                 // if this is true something is wrong ...
                 if ( syncList.isEmpty() ) {
-                    log.logWarning("PeerPing: syncList.isEmpty()==true");
+                    log.warn("PeerPing: syncList.isEmpty()==true");
                     continue;
                     //return 0;
                 }
@@ -518,13 +518,13 @@ public class Network
                 }
                 if ( log.isFine() ) {
                     log
-                        .logFine("DBSize before -> after Cleanup: "
+                        .fine("DBSize before -> after Cleanup: "
                             + dbSize
                             + " -> "
                             + amIAccessibleDB.size());
                 }
             }
-            log.logInfo("PeerPing: I am accessible for "
+            log.info("PeerPing: I am accessible for "
                 + accessible
                 + " peer(s), not accessible for "
                 + notaccessible
@@ -545,9 +545,9 @@ public class Network
                     newPeerType = Seed.PEERTYPE_JUNIOR;
                 }
                 if ( this.sb.peers.mySeed().orVirgin().equals(newPeerType) ) {
-                    log.logInfo("PeerPing: myType is " + this.sb.peers.mySeed().orVirgin());
+                    log.info("PeerPing: myType is " + this.sb.peers.mySeed().orVirgin());
                 } else {
-                    log.logInfo("PeerPing: changing myType from '"
+                    log.info("PeerPing: changing myType from '"
                         + this.sb.peers.mySeed().orVirgin()
                         + "' to '"
                         + newPeerType
@@ -555,7 +555,7 @@ public class Network
                     this.sb.peers.mySeed().put(Seed.PEERTYPE, newPeerType);
                 }
             } else {
-                log.logInfo("PeerPing: No data, staying at myType: " + this.sb.peers.mySeed().orVirgin());
+                log.info("PeerPing: No data, staying at myType: " + this.sb.peers.mySeed().orVirgin());
             }
 
             // success! we have published our peer to a senior peer
@@ -584,7 +584,7 @@ public class Network
             if ( this.sb.peers.mySeed().get(Seed.PEERTYPE, Seed.PEERTYPE_JUNIOR).equals(Seed.PEERTYPE_JUNIOR) ) {
                 this.sb.peers.mySeed().put(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR); // to start bootstraping, we need to be recognised as PEERTYPE_SENIOR peer
             }
-            log.logInfo("publish: no recipient found, our address is "
+            log.info("publish: no recipient found, our address is "
                 + ((this.sb.peers.mySeed().getPublicAddress() == null) ? "unknown" : this.sb.peers
                     .mySeed()
                     .getPublicAddress()));
@@ -592,13 +592,13 @@ public class Network
             return 0;
         } catch ( final InterruptedException e ) {
             try {
-                log.logInfo("publish: Interruption detected while publishing my seed.");
+                log.info("publish: Interruption detected while publishing my seed.");
 
                 // consuming the theads interrupted signal
                 Thread.interrupted();
 
                 // interrupt all already started publishThreads
-                log.logInfo("publish: Signaling shutdown to "
+                log.info("publish: Signaling shutdown to "
                     + Network.publishThreadGroup.activeCount()
                     + " remaining publishing threads ...");
                 Network.publishThreadGroup.interrupt();
@@ -616,7 +616,7 @@ public class Network
 
                 // we need to use a timeout here because of missing interruptable session threads ...
                 if ( log.isFine() ) {
-                    log.logFine("publish: Waiting for "
+                    log.fine("publish: Waiting for "
                         + Network.publishThreadGroup.activeCount()
                         + " remaining publishing threads to finish shutdown ...");
                 }
@@ -625,7 +625,7 @@ public class Network
 
                     if ( currentThread.isAlive() ) {
                         if ( log.isFine() ) {
-                            log.logFine("publish: Waiting for remaining publishing thread '"
+                            log.fine("publish: Waiting for remaining publishing thread '"
                                 + currentThread.getName()
                                 + "' to finish shutdown");
                         }
@@ -636,10 +636,10 @@ public class Network
                     }
                 }
 
-                log.logInfo("publish: Shutdown off all remaining publishing thread finished.");
+                log.info("publish: Shutdown off all remaining publishing thread finished.");
 
             } catch ( final Exception ee ) {
-                log.logWarning(
+                log.warn(
                     "publish: Unexpected error while trying to shutdown all remaining publishing threads.",
                     e);
             }
@@ -716,7 +716,7 @@ public class Network
             // be shure that we have something to say
             if ( sb.peers.mySeed().getPublicAddress() == null ) {
                 final String errorMsg = "We have no valid IP address until now";
-                log.logWarning("SaveSeedList: " + errorMsg);
+                log.warn("SaveSeedList: " + errorMsg);
                 return errorMsg;
             }
 
@@ -748,7 +748,7 @@ public class Network
                     "Unable to get the proper uploader-class for seed uploading method '"
                         + seedUploadMethod
                         + "'.";
-                log.logWarning("SaveSeedList: " + errorMsg);
+                log.warn("SaveSeedList: " + errorMsg);
                 return errorMsg;
             }
 
@@ -767,7 +767,7 @@ public class Network
                 final String host = seedURL.getHost();
                 if (Domains.isLocalhost(host)) { // check seedlist reacheable
                     final String errorMsg = "seedURL in localhost rejected (localhost can't be reached from outside)";
-                    log.logWarning("SaveSeedList: " + errorMsg);
+                    log.warn("SaveSeedList: " + errorMsg);
                     return errorMsg;
                 }
             } catch ( final MalformedURLException e ) {
@@ -776,7 +776,7 @@ public class Network
                         + sb.peers.mySeed().get(Seed.SEEDLISTURL, "")
                         + "'. "
                         + e.getMessage();
-                log.logWarning("SaveSeedList: " + errorMsg);
+                log.warn("SaveSeedList: " + errorMsg);
                 return errorMsg;
             }
 
@@ -790,7 +790,7 @@ public class Network
                 sb.peers.mySeed().put(Seed.PEERTYPE, Seed.PEERTYPE_PRINCIPAL); // this information shall also be uploaded
 
                 if ( log.isFine() ) {
-                    log.logFine("SaveSeedList: Using seed uploading method '"
+                    log.fine("SaveSeedList: Using seed uploading method '"
                         + seedUploadMethod
                         + "' for seed-list uploading."
                         + "\n\tPrevious peerType is '"
@@ -807,10 +807,10 @@ public class Network
                                 + uploader.getClass().getName()
                                 + " (error): "
                                 + logt.substring(logt.indexOf("Error", 0) + 6);
-                        log.logSevere(errorMsg);
+                        log.severe(errorMsg);
                         return errorMsg;
                     }
-                    log.logInfo(logt);
+                    log.info(logt);
                 }
 
                 // finally, set the principal status
@@ -820,7 +820,7 @@ public class Network
                 sb.peers.mySeed().put(Seed.PEERTYPE, prevStatus);
                 sb.setConfig("yacyStatus", prevStatus);
                 final String errorMsg = "SaveSeedList: Seed upload failed (IO error): " + e.getMessage();
-                log.logInfo(errorMsg, e);
+                log.info(errorMsg, e);
                 return errorMsg;
             }
         } finally {

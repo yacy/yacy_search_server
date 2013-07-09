@@ -35,9 +35,9 @@ import java.util.TimeZone;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
-import net.yacy.kelondro.logging.Log;
 
 
 public class MessageBoard {
@@ -187,7 +187,7 @@ public class MessageBoard {
             database.insert(UTF8.getBytes(message.key), message.record);
             return message.key;
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }
@@ -197,10 +197,10 @@ public class MessageBoard {
         try {
             record = database.get(UTF8.getBytes(key));
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         } catch (SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
 	    return new entry(key, record);

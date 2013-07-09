@@ -40,6 +40,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -47,7 +48,6 @@ import net.yacy.document.parser.xml.ODContentHandler;
 import net.yacy.document.parser.xml.ODMetaHandler;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
 import org.xml.sax.SAXException;
@@ -189,7 +189,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
                 writer.close();
             } catch (final Exception ex) {/* ignore this */}
 
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             throw new Parser.Failure("Unexpected error while parsing odt file. " + e.getMessage(),location);
         }
     }

@@ -39,7 +39,7 @@ import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.AccessTracker;
@@ -150,7 +150,7 @@ public class select {
         // check post
         if (post == null) {post = new serverObjects(); post.put(CommonParams.Q, ""); post.put(CommonParams.ROWS, "0");}
         if (post.size() > 100) {
-            Log.logWarning("select", "rejected bad-formed search request with " + post.size() + " properties from " + header.refererHost());
+            ConcurrentLog.warn("select", "rejected bad-formed search request with " + post.size() + " properties from " + header.refererHost());
             return null; // prevent the worst hacks here...
         }
         sb.intermissionAllThreads(3000); // tell all threads to do nothing for a specific time
@@ -221,7 +221,7 @@ public class select {
         try {response = connector.query(req);} catch (SolrException ee) {e = ee;}
         if (response != null) e = response.getException();
         if (e != null) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             if (req != null) req.close();
             SolrRequestInfo.clearRequestInfo();
             return null;
@@ -246,7 +246,7 @@ public class select {
             AccessTracker.addToDump(q, Integer.toString(matches));
         }
 
-        Log.logInfo("SOLR Query", "results: " + matches + ", for query:" + post.toString());
+        ConcurrentLog.info("SOLR Query", "results: " + matches + ", for query:" + post.toString());
         return null;
     }
 }

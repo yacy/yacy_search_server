@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
 import net.yacy.data.ymark.YMarkCrawlStart;
 import net.yacy.data.ymark.YMarkDate;
@@ -14,7 +15,6 @@ import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.data.ymark.YMarkTables.TABLES;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -84,7 +84,7 @@ public class get_ymark {
                 total = result.size();
                 bookmarks = result.iterator();
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             prop.put("page", page);
             prop.put("total", total);

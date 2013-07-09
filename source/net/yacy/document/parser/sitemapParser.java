@@ -44,6 +44,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -51,7 +52,6 @@ import net.yacy.document.TextParser;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.ByteCountInputStream;
-import net.yacy.kelondro.logging.Log;
 
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Element;
@@ -109,7 +109,7 @@ public class sitemapParser extends AbstractParser implements Parser {
 
     public static SitemapReader parse(final DigestURI sitemapURL) throws IOException {
         // download document
-        Log.logInfo("SitemapReader", "loading sitemap from " + sitemapURL.toNormalform(true));
+        ConcurrentLog.info("SitemapReader", "loading sitemap from " + sitemapURL.toNormalform(true));
         final RequestHeader requestHeader = new RequestHeader();
         final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), 5000);
         client.setHeader(requestHeader.entrySet());
@@ -179,7 +179,7 @@ public class sitemapParser extends AbstractParser implements Parser {
                     }
                 }
             } catch (Throwable e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
 
             try {

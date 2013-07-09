@@ -11,11 +11,11 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.Request;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -93,13 +93,13 @@ public class IndexCreateQueues_p {
 
                                 if (value != null && compiledPattern.matcher(value).matches()) removehashes.add(entry.url().hash());
                             }
-                            Log.logInfo("IndexCreateQueues_p", "created a remove list with " + removehashes.size() + " entries for pattern '" + deletepattern + "'");
+                            ConcurrentLog.info("IndexCreateQueues_p", "created a remove list with " + removehashes.size() + " entries for pattern '" + deletepattern + "'");
                             for (final byte[] b: removehashes) {
                                 sb.crawlQueues.noticeURL.removeByURLHash(b);
                             }
                         }
                     } catch (final PatternSyntaxException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 }
             }

@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.log4j.Logger;
@@ -85,7 +85,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             try {
                 this.server.optimize(true, true, maxSegments);
             } catch (Throwable e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -97,7 +97,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             if (this.server instanceof EmbeddedSolrServer) synchronized (this.server) {this.server.commit(true, true, false);}
             this.server = null;
         } catch (Throwable e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
@@ -199,27 +199,27 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
                 this.server.add(solrdoc, -1);
             } catch (Throwable e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 // catches "version conflict for": try this again and delete the document in advance
                 try {
                     this.server.deleteById((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                 } catch (SolrServerException e1) {
-                    Log.logException(e1);
+                    ConcurrentLog.logException(e1);
                 }
                 try {
                     this.server.add(solrdoc, -1);
                 } catch (Throwable ee) {
-                    Log.logException(ee);
+                    ConcurrentLog.logException(ee);
                     try {
                         this.server.commit();
                     } catch (Throwable eee) {
-                        Log.logException(eee);
+                        ConcurrentLog.logException(eee);
                         // a time-out may occur here
                     }
                     try {
                         this.server.add(solrdoc, -1);
                     } catch (Throwable eee) {
-                        Log.logException(eee);
+                        ConcurrentLog.logException(eee);
                         throw new IOException(eee);
                     }
                 }
@@ -237,25 +237,25 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 }
                 this.server.add(solrdocs, -1);
             } catch (Throwable e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 // catches "version conflict for": try this again and delete the document in advance
                 List<String> ids = new ArrayList<String>();
                 for (SolrInputDocument solrdoc : solrdocs) ids.add((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                 try {
                     this.server.deleteById(ids);
                 } catch (SolrServerException e1) {
-                    Log.logException(e1);
+                    ConcurrentLog.logException(e1);
                 }
                 try {
                     this.server.commit();
                 } catch (Throwable eee) {
-                    Log.logException(eee);
+                    ConcurrentLog.logException(eee);
                     // a time-out may occur here
                 }
                 try {
                     this.server.add(solrdocs, -1);
                 } catch (Throwable ee) {
-                    Log.logException(ee);
+                    ConcurrentLog.logException(ee);
                     log.warn(e.getMessage() + " IDs=" + ids.toString());
                     throw new IOException(ee);
                 }

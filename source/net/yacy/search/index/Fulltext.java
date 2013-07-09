@@ -60,6 +60,7 @@ import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.ZIPReader;
 import net.yacy.cora.storage.ZIPWriter;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -68,7 +69,6 @@ import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
@@ -164,10 +164,10 @@ public final class Fulltext {
 
         Version luceneVersion = localCollectionConnector.getConfig().getLuceneVersion("luceneMatchVersion");
         String lvn = luceneVersion.name();
-        Log.logInfo("Fulltext", "using lucene version " + lvn);
+        ConcurrentLog.info("Fulltext", "using lucene version " + lvn);
         int p = lvn.indexOf('_');
         assert SOLR_PATH.endsWith(lvn.substring(p)) : "luceneVersion = " + lvn + ", solrPath = " + SOLR_PATH + ", p = " + p + ", check defaults/solr/solrconfig.xml";
-        Log.logInfo("Fulltext", "connected solr in " + solrLocation.toString() + ", lucene version " + lvn + ", default core size: " + localCollectionConnector.getSize());
+        ConcurrentLog.info("Fulltext", "connected solr in " + solrLocation.toString() + ", lucene version " + lvn + ", default core size: " + localCollectionConnector.getSize());
         this.solrInstances.connect0(localCollectionInstance);
     }
 
@@ -351,7 +351,7 @@ public final class Fulltext {
             	return new URIMetadataNode(doc, wre, weight);
             }
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         // get the metadata from the old metadata index
@@ -365,7 +365,7 @@ public final class Fulltext {
 			SolrDocument sd = this.collectionConfiguration.toSolrDocument(solrInput);
 			return new URIMetadataNode(sd, wre, weight);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         return null;
@@ -376,7 +376,7 @@ public final class Fulltext {
         if (connector == null) return;
         String id = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
         String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
-        Log.logInfo("Fulltext", "indexing: " + id + " " + url);
+        ConcurrentLog.info("Fulltext", "indexing: " + id + " " + url);
         byte[] idb = ASCII.getBytes(id);
         try {
             if (this.urlIndexFile != null) this.urlIndexFile.remove(idb);
@@ -548,7 +548,7 @@ public final class Fulltext {
             this.getDefaultConnector().deleteByIds(deleteIDs);
             this.getWebgraphConnector().deleteByIds(deleteIDs);
         } catch (final Throwable e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         if (Fulltext.this.urlIndexFile != null) try {
             for (String id: deleteIDs) {
@@ -565,7 +565,7 @@ public final class Fulltext {
             this.getDefaultConnector().deleteById(id);
             this.getWebgraphConnector().deleteById(id);
         } catch (final Throwable e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         if (this.urlIndexFile != null) try {
             final Row.Entry r = this.urlIndexFile.remove(urlHash);
@@ -584,7 +584,7 @@ public final class Fulltext {
         try {
             if (this.getDefaultConnector().existsById(urlHash)) return true;
         } catch (final Throwable e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return false;
     }
@@ -615,7 +615,7 @@ public final class Fulltext {
             Set<String> e1 = this.getDefaultConnector().existsByIds(idsC);
             e.addAll(e1);
         } catch (final Throwable ee) {
-            Log.logException(ee);
+            ConcurrentLog.logException(ee);
         }
         return e;
     }
@@ -631,19 +631,19 @@ public final class Fulltext {
         EmbeddedInstance esc = this.solrInstances.getSolr0();
         ArrayList<File> zips = new ArrayList<File>();
         if (esc == null) {
-            Log.logWarning("Fulltext", "HOT DUMP selected solr0 == NULL, no dump list!");
+            ConcurrentLog.warn("Fulltext", "HOT DUMP selected solr0 == NULL, no dump list!");
             return zips;
         }
         if (esc.getContainerPath() == null) {
-            Log.logWarning("Fulltext", "HOT DUMP selected solr0.getStoragePath() == NULL, no dump list!");
+            ConcurrentLog.warn("Fulltext", "HOT DUMP selected solr0.getStoragePath() == NULL, no dump list!");
             return zips;
         }
         File storagePath = esc.getContainerPath().getParentFile();
         if (storagePath == null) {
-            Log.logWarning("Fulltext", "HOT DUMP selected esc.getStoragePath().getParentFile() == NULL, no dump list!");
+            ConcurrentLog.warn("Fulltext", "HOT DUMP selected esc.getStoragePath().getParentFile() == NULL, no dump list!");
             return zips;
         }
-        Log.logInfo("Fulltext", "HOT DUMP dump path = " + storagePath.toString());
+        ConcurrentLog.info("Fulltext", "HOT DUMP dump path = " + storagePath.toString());
         for (String p: storagePath.list()) {
             if (p.endsWith("zip")) zips.add(new File(storagePath, p));
         }
@@ -664,13 +664,13 @@ public final class Fulltext {
             try {
                 ZIPWriter.zip(storagePath, zipOut);
             } catch (IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } finally {
                 this.solrInstances = new InstanceMirror();
                 try {
                     this.connectLocalSolr();
                 } catch (IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }
@@ -690,13 +690,13 @@ public final class Fulltext {
             try {
                 ZIPReader.unzip(solrDumpZipFile, storagePath);
             } catch (IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } finally {
                 this.solrInstances = new InstanceMirror();
                 try {
                     this.connectLocalSolr();
                 } catch (IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }
@@ -723,7 +723,7 @@ public final class Fulltext {
             try {
                 this.connectLocalSolr();
             } catch (IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -731,7 +731,7 @@ public final class Fulltext {
     // export methods
     public Export export(final File f, final String filter, final int format, final boolean dom) {
         if ((this.exportthread != null) && (this.exportthread.isAlive())) {
-            Log.logWarning("LURL-EXPORT", "cannot start another export thread, already one running");
+            ConcurrentLog.warn("LURL-EXPORT", "cannot start another export thread, already one running");
             return this.exportthread;
         }
         this.exportthread = new Export(f, filter, format, dom);
@@ -838,10 +838,10 @@ public final class Fulltext {
                 }
                 pw.close();
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 this.failure = e.getMessage();
             } catch (final Exception e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 this.failure = e.getMessage();
             }
             // terminate process

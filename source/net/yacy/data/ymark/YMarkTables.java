@@ -43,6 +43,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.WorkTables;
 import net.yacy.document.Document;
@@ -52,7 +53,6 @@ import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.blob.TablesColumnIndex;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.LoaderDispatcher;
 
 public class YMarkTables {
@@ -142,14 +142,14 @@ public class YMarkTables {
     				final long time = System.currentTimeMillis();
     				final TablesColumnIndex index = this.worktables.getIndex(bmk_table);
 					if(index.getType() == TablesColumnIndex.INDEXTYPE.RAM || index.size() == 0) {
-						Log.logInfo(YMarkTables.BOOKMARKS_LOG, "buildIndex() "+YMarkEntry.BOOKMARK.indexColumns().keySet().toString());
+						ConcurrentLog.info(YMarkTables.BOOKMARKS_LOG, "buildIndex() "+YMarkEntry.BOOKMARK.indexColumns().keySet().toString());
 						index.buildIndex(YMarkEntry.BOOKMARK.indexColumns(), this.worktables.iterator(bmk_table));
-						Log.logInfo(YMarkTables.BOOKMARKS_LOG, "build "+index.getType().name()+" index for columns "+YMarkEntry.BOOKMARK.indexColumns().keySet().toString()
+						ConcurrentLog.info(YMarkTables.BOOKMARKS_LOG, "build "+index.getType().name()+" index for columns "+YMarkEntry.BOOKMARK.indexColumns().keySet().toString()
 								+" of table "+bmk_table+" containing "+this.worktables.size(bmk_table)+ " bookmarks"
 								+" ("+(System.currentTimeMillis()-time)+"ms)");
 					}
     			} catch (IOException e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				} catch (TableColumnIndexException e) {
 					// currently nothing to do...
 				}
@@ -248,7 +248,7 @@ public class YMarkTables {
 	        	if (!root.equals(YMarkTables.FOLDERS_ROOT)) { folders.add(root); }
 	        	return folders;
 			} catch (Exception e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 			}
     	}
 
@@ -413,7 +413,7 @@ public class YMarkTables {
         try {
 			urlHash = YMarkUtil.getBookmarkId(bmk.get(YMarkEntry.BOOKMARK.URL.key()));
         } catch (MalformedURLException e) {
-        	Log.logInfo("BOOKMARKIMPORT", "invalid url: "+bmk.get(YMarkEntry.BOOKMARK.URL.key()));
+        	ConcurrentLog.info("BOOKMARKIMPORT", "invalid url: "+bmk.get(YMarkEntry.BOOKMARK.URL.key()));
         }
 		Tables.Row bmk_row = null;
 

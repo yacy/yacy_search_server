@@ -34,9 +34,9 @@ import java.util.TreeMap;
 
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Row.Entry;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MergeIterator;
 
 /**
@@ -118,9 +118,9 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
             try {
                 flushBuffer();
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch (final SpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             this.backend.close();
         }
@@ -283,7 +283,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         try {
             return this.rows();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }
@@ -336,7 +336,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
                 try {
                     this.buffer.put(this.backend.removeOne());
                 } catch (final SpaceExceededException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     break;
                 }
             }
@@ -346,7 +346,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
                 try {
                     handles.put(i.next());
                 } catch (final SpaceExceededException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     break;
                 }
             }

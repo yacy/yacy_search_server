@@ -30,7 +30,7 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -218,7 +218,7 @@ public class YMarkXBELImporter extends YMarkImporter {
 						bookmarks.put(this.bmk);
 						bmk = new YMarkEntry();
 					} catch (InterruptedException e) {
-						Log.logException(e);
+						ConcurrentLog.logException(e);
 					}
 				}
 	        	this.outer_state = XBEL.FOLDER;

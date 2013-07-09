@@ -24,8 +24,8 @@ import java.net.MalformedURLException;
 
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.HTTPDemon;
@@ -78,9 +78,9 @@ public class Triple_p {
 							}
 							JenaTripleStore.load(newurl);
 						} catch (MalformedURLException e) {
-							Log.logException(e);
+							ConcurrentLog.logException(e);
 						} catch (IOException e) {
-							Log.logException(e);
+							ConcurrentLog.logException(e);
 						}
 					}
 

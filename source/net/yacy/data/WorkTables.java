@@ -45,12 +45,12 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ymark.YMarkTables;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -116,9 +116,9 @@ public class WorkTables extends Tables {
         try {
             row = (pk == null) ? null : super.select(TABLE_API_NAME, pk);
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         // insert or update entry
@@ -150,11 +150,11 @@ public class WorkTables extends Tables {
                 assert pk != null;
             }
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
-        Log.logInfo("APICALL", apiurl);
+        ConcurrentLog.info("APICALL", apiurl);
         return pk;
     }
 
@@ -201,11 +201,11 @@ public class WorkTables extends Tables {
             calculateAPIScheduler(data, false); // set next execution time
             pk = super.insert(TABLE_API_NAME, data);
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
-        Log.logInfo("APICALL", apiurl);
+        ConcurrentLog.info("APICALL", apiurl);
         return pk;
     }
 
@@ -231,19 +231,19 @@ public class WorkTables extends Tables {
             try {
                 row = select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
             } catch (IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch (SpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             if (row == null) continue;
             url = "http://" + host + ":" + port + UTF8.String(row.get(WorkTables.TABLE_API_COL_URL));
             url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(row.getPK());
-            Log.logInfo("WorkTables", "executing url: " + url);
+            ConcurrentLog.info("WorkTables", "executing url: " + url);
             try {
                 client.GETbytes(url);
                 l.put(url, client.getStatusCode());
             } catch (IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 l.put(url, -1);
             }
         }
@@ -261,7 +261,7 @@ public class WorkTables extends Tables {
             client.GETbytes(url);
             return client.getStatusCode();
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return -1;
         }
     }
@@ -343,7 +343,7 @@ public class WorkTables extends Tables {
             data.put(TABLE_SEARCH_FAILURE_COL_COMMENT, UTF8.getBytes(reason));
             super.insert(TABLE_SEARCH_FAILURE_NAME, url.hash(),  data);
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
@@ -351,7 +351,7 @@ public class WorkTables extends Tables {
         try {
             return super.has(TABLE_SEARCH_FAILURE_NAME, urlhash);
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return false;
         }
     }
@@ -374,7 +374,7 @@ public class WorkTables extends Tables {
 					}
 				}
 			} catch (IOException e) {
-	            Log.logException(e);
+	            ConcurrentLog.logException(e);
 			}
     	}
     }
@@ -390,7 +390,7 @@ public class WorkTables extends Tables {
                 comments.put(row.getPK(), UTF8.String(row.get(WorkTables.TABLE_API_COL_COMMENT)));
             }
         } catch (IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return comments;
     }

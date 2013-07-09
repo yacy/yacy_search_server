@@ -27,7 +27,7 @@ package net.yacy.utils;
 import java.util.Random;
 
 import net.yacy.cora.order.Base64Order;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public class crypt {
@@ -96,7 +96,7 @@ public class crypt {
             try {
                 return gzip.gunzipString(Base64Order.enhancedCoder.decode(encoded.substring(2)));
             } catch (final Exception e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 return null;
             }
         case 'p': {

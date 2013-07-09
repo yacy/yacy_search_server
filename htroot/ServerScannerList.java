@@ -27,9 +27,9 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.protocol.Scanner.Access;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -79,7 +79,7 @@ public class ServerScannerList {
                             prop.put("servertable_list_" + i + "_edit_preselected", host.getValue() == Access.granted && Scanner.inIndex(apiCommentCache, urlString) == null ? 1 : 0);
                             i++;
                         } catch (MalformedURLException e) {
-                            Log.logException(e);
+                            ConcurrentLog.logException(e);
                         }
                     }
                     prop.put("servertable_list", i);

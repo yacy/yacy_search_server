@@ -33,8 +33,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
 
@@ -77,7 +77,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
             this.source = new DigestURI(url + "verb=ListRecords&metadataPrefix=oai_dc");
         } catch (MalformedURLException e) {
             // this should never happen
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         startedJobs.put(this, N);
     }
@@ -217,7 +217,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
                     Date md = map.get(hostID);
                     if (md == null || fd.after(md)) map.put(hostID, fd);
                 } catch (ParseException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }

@@ -46,7 +46,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.server.serverSwitch;
@@ -73,7 +73,7 @@ public class Translator {
             } else {
                 //Filename not available, but it will be printed in Log
                 //after all untranslated Strings as "Translated file: "
-                if (Log.isFine("TRANSLATOR")) Log.logFine("TRANSLATOR", "Unused String: "+key);
+                if (ConcurrentLog.isFine("TRANSLATOR")) ConcurrentLog.fine("TRANSLATOR", "Unused String: "+key);
             }
         }
         return result;
@@ -187,17 +187,17 @@ public class Translator {
                     relativePath=sourceFile.getAbsolutePath().substring(baseDir.getAbsolutePath().length()+1); //+1 to get the "/"
                     relativePath = relativePath.replace(File.separatorChar, '/');
                 } catch (final IndexOutOfBoundsException e) {
-                    Log.logSevere("TRANSLATOR", "Error creating relative Path for "+sourceFile.getAbsolutePath());
+                    ConcurrentLog.severe("TRANSLATOR", "Error creating relative Path for "+sourceFile.getAbsolutePath());
                     relativePath = "wrong path"; //not in translationLists
                 }
                 if (translationLists.containsKey(relativePath)) {
-                    Log.logInfo("TRANSLATOR", "Translating file: "+ relativePath);
+                    ConcurrentLog.info("TRANSLATOR", "Translating file: "+ relativePath);
                     if(!translateFile(
                                       sourceFile,
                                       new File(destDir, sourceFile.getName().replace('/', File.separatorChar)),
                                       translationLists.get(relativePath)))
                     {
-                        Log.logSevere("TRANSLATOR", "File error while translating file "+relativePath);
+                        ConcurrentLog.severe("TRANSLATOR", "File error while translating file "+relativePath);
                     }
                     //}else{
                         //serverLog.logInfo("TRANSLATOR", "No translation for file: "+relativePath);

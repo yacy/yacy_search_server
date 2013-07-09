@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 
 import org.apache.solr.client.solrj.SolrServer;
@@ -85,7 +85,7 @@ public class EmbeddedInstance implements SolrInstance {
         // get the default core from the coreContainer
         this.defaultCoreName = this.coreContainer.getDefaultCoreName();
         assert(this.defaultCoreName.equals(givenDefaultCoreName));
-        Log.logInfo("SolrEmbeddedInstance", "detected default solr core: " + this.defaultCoreName);
+        ConcurrentLog.info("SolrEmbeddedInstance", "detected default solr core: " + this.defaultCoreName);
         this.defaultCore = this.coreContainer.getCore(this.defaultCoreName);
         assert givenDefaultCoreName.equals(this.defaultCore.getName()) : "givenDefaultCoreName = " + givenDefaultCoreName + ", this.defaultCore.getName() = " + this.defaultCore.getName();
         if (this.defaultCore == null) {
@@ -154,7 +154,7 @@ public class EmbeddedInstance implements SolrInstance {
         if (source.exists()) {
             try {
                 Files.copy(source, target);
-                Log.logFine("initializeCoreConf", "overwrite " + target.getAbsolutePath() + " with " + source.getAbsolutePath());
+                ConcurrentLog.fine("initializeCoreConf", "overwrite " + target.getAbsolutePath() + " with " + source.getAbsolutePath());
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -204,7 +204,7 @@ public class EmbeddedInstance implements SolrInstance {
 
     @Override
     public synchronized void close() {
-        try {this.coreContainer.shutdown();} catch (Throwable e) {Log.logException(e);}
+        try {this.coreContainer.shutdown();} catch (Throwable e) {ConcurrentLog.logException(e);}
     }
     
 }

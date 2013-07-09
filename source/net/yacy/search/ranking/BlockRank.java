@@ -36,9 +36,9 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.BinSearch;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.rwi.ReferenceIterator;
@@ -75,17 +75,17 @@ public class BlockRank {
         // get the local index
         if (myGraph != null) try {
             final ReferenceContainerCache<HostReference> myIndex = myGraph.incomingReferences();
-            Log.logInfo("BlockRank", "loaded " + myIndex.size() + " host indexes from my peer");
+            ConcurrentLog.info("BlockRank", "loaded " + myIndex.size() + " host indexes from my peer");
             index.merge(myIndex);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         // wait for termination
         for (final IndexRetrieval job: jobs) try { job.join(); } catch (final InterruptedException e) { }
-        Log.logInfo("BlockRank", "create " + index.size() + " host indexes from all peers");
+        ConcurrentLog.info("BlockRank", "create " + index.size() + " host indexes from all peers");
 
         return index;
     }
@@ -104,13 +104,13 @@ public class BlockRank {
         public void run() {
             final ReferenceContainerCache<HostReference> partialIndex = Protocol.loadIDXHosts(this.seed);
             if (partialIndex == null || partialIndex.isEmpty()) return;
-            Log.logInfo("BlockRank", "loaded " + partialIndex.size() + " host indexes from peer " + this.seed.getName());
+            ConcurrentLog.info("BlockRank", "loaded " + partialIndex.size() + " host indexes from peer " + this.seed.getName());
             try {
                 this.index.merge(partialIndex);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch (final SpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -121,14 +121,14 @@ public class BlockRank {
      * @param file
      */
     public static void saveHostIndex(final ReferenceContainerCache<HostReference> index, final File file) {
-        Log.logInfo("BlockRank", "saving " + index.size() + " host indexes to file " + file.toString());
+        ConcurrentLog.info("BlockRank", "saving " + index.size() + " host indexes to file " + file.toString());
         index.dump(file, Segment.writeBufferSize, false);
-        Log.logInfo("BlockRank", "saved " + index.size() + " host indexes to file " + file.toString());
+        ConcurrentLog.info("BlockRank", "saved " + index.size() + " host indexes to file " + file.toString());
     }
 
     public static ReferenceContainerCache<HostReference> loadHostIndex(final File file) {
 
-        Log.logInfo("BlockRank", "reading host indexes from file " + file.toString());
+        ConcurrentLog.info("BlockRank", "reading host indexes from file " + file.toString());
         final ReferenceContainerCache<HostReference> index = new ReferenceContainerCache<HostReference>(WebStructureGraph.hostReferenceFactory, Base64Order.enhancedCoder, 6);
 
         // load from file
@@ -140,12 +140,12 @@ public class BlockRank {
             }
             ri.close();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
-        Log.logInfo("BlockRank", "read " + index.size() + " host indexes from file " + file.toString());
+        ConcurrentLog.info("BlockRank", "read " + index.size() + " host indexes from file " + file.toString());
         return index;
     }
 
@@ -186,14 +186,14 @@ public class BlockRank {
         while (hostScore.size() > 10) {
             final List<byte[]> smallest = hostScore.lowerHalf();
             if (smallest.isEmpty()) break; // should never happen but this ensures termination of the loop
-            Log.logInfo("BlockRank", "index evaluation: computed partition of size " + smallest.size());
+            ConcurrentLog.info("BlockRank", "index evaluation: computed partition of size " + smallest.size());
             table.add(new BinSearch(smallest, 6));
             for (final byte[] host: smallest) hostScore.delete(host);
         }
         if (!hostScore.isEmpty()) {
             final ArrayList<byte[]> list = new ArrayList<byte[]>();
             for (final byte[] entry: hostScore) list.add(entry);
-            Log.logInfo("BlockRank", "index evaluation: computed last partition of size " + list.size());
+            ConcurrentLog.info("BlockRank", "index evaluation: computed last partition of size " + list.size());
             table.add(new BinSearch(list, 6));
         }
 

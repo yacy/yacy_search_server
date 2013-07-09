@@ -13,6 +13,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -22,7 +23,6 @@ import net.yacy.document.SentenceReader;
 import net.yacy.document.WordTokenizer;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.snippet.TextSnippet;
 
@@ -66,14 +66,14 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 		try {
 			uri = new DigestURI(url);
 		} catch (final MalformedURLException e) {
-			Log.logWarning(YMarkTables.BOOKMARKS_LOG, "loadDocument failed due to malformed url: "+url);
+			ConcurrentLog.warn(YMarkTables.BOOKMARKS_LOG, "loadDocument failed due to malformed url: "+url);
 			return null;
 		}
 		response = loader.load(loader.request(uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
 		try {
 			return Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
 		} catch (final Failure e) {
-			Log.logWarning(YMarkTables.BOOKMARKS_LOG, "loadDocument failed due to a parser failure for url: "+url);
+			ConcurrentLog.warn(YMarkTables.BOOKMARKS_LOG, "loadDocument failed due to a parser failure for url: "+url);
 			return null;
 		}
 	}
@@ -267,16 +267,16 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 				}
 			}
 		} catch (final InterruptedException e) {
-			Log.logException(e);
+			ConcurrentLog.logException(e);
 		} catch (final IOException e) {
-			Log.logWarning(YMarkTables.BOOKMARKS_LOG.toString(), "autoTagger - IOException for URL: "+url);
+			ConcurrentLog.warn(YMarkTables.BOOKMARKS_LOG.toString(), "autoTagger - IOException for URL: "+url);
 		} finally {
 		}
 	}
 
 	@Override
     public void uncaughtException(final Thread t, final Throwable e) {
-		Log.logWarning(YMarkTables.BOOKMARKS_LOG, "I caught an uncaughtException in thread "+t.getName());
-		Log.logException(e);
+		ConcurrentLog.warn(YMarkTables.BOOKMARKS_LOG, "I caught an uncaughtException in thread "+t.getName());
+		ConcurrentLog.logException(e);
 	}
 }

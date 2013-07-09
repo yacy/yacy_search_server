@@ -32,11 +32,11 @@ import java.util.HashMap;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.logging.Log;
 
 
 public class Relations {
@@ -192,9 +192,9 @@ public class Relations {
             r.putRelation(table1, "abcdefg", "eineintrag");
             r.putRelation(table1, "abcdefg", "eineintrag");
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (final SpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
