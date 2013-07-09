@@ -38,9 +38,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.log4j.Logger;
-
 import net.yacy.cora.sorting.OrderedScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.StringBuilderComparator;
 
 /**
@@ -49,7 +48,7 @@ import net.yacy.cora.util.StringBuilderComparator;
  */
 public class WordCache {
 
-    private final static Logger log = Logger.getLogger(WordCache.class);
+    private final static ConcurrentLog log = new ConcurrentLog(WordCache.class.getName());
     
     // common word cache
     private static final int commonWordsMaxSize = 20000;  // maximum size of common word cache

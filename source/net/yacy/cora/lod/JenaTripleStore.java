@@ -20,9 +20,8 @@ import net.yacy.cora.lod.vocabulary.Geo;
 import net.yacy.cora.lod.vocabulary.HttpHeader;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
-
-import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -38,7 +37,7 @@ import com.hp.hpl.jena.util.FileManager;
 
 public class JenaTripleStore {
 
-    private final static Logger log = Logger.getLogger(JenaTripleStore.class);
+    private final static ConcurrentLog log = new ConcurrentLog(JenaTripleStore.class.getName());
     
 	public static Model model = ModelFactory.createDefaultModel();
 	static {

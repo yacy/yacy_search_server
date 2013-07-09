@@ -29,12 +29,11 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
-
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.federate.yacy.api.Network;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.ConcurrentLog;
 
 public class Peers extends TreeMap<byte[], Peer> implements Serializable {
 
@@ -43,7 +42,7 @@ public class Peers extends TreeMap<byte[], Peer> implements Serializable {
         "sokrates.homeunix.net:6070", "sokrates.homeunix.net:9090",
         "141.52.175.27:8080", "62.75.214.113:8080", "141.52.175.30:8080"};
 
-    private final static Logger log = Logger.getLogger(Peers.class);
+    private final static ConcurrentLog log = new ConcurrentLog(Peers.class.getName());
     private static final long serialVersionUID = -2939656606305545080L;
     private long lastBootstrap;
 

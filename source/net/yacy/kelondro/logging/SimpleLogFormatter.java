@@ -37,8 +37,6 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
-import net.yacy.cora.util.ConcurrentLog;
-
 
 public final class SimpleLogFormatter extends SimpleFormatter {
 

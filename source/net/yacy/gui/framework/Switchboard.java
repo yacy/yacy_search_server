@@ -33,9 +33,7 @@ import java.util.concurrent.Semaphore;
 
 import javax.swing.text.JTextComponent;
 
-import org.apache.log4j.Logger;
-
-
+import net.yacy.cora.util.ConcurrentLog;
 
 /**
  * a static class that holds application-wide parameters
@@ -58,7 +56,7 @@ public class Switchboard {
      */
     private static Properties properties = new Properties();
     
-    public static Logger log = Logger.getLogger(Switchboard.class);
+    public static ConcurrentLog log = new ConcurrentLog(Switchboard.class.getName());
 
     
     public static void startInfoUpdater() {

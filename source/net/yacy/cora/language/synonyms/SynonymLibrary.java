@@ -29,10 +29,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
-import org.apache.log4j.Logger;
-
 import net.yacy.cora.storage.Files;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
 
 /**
  * Stemming library: reads stemming files and creates a mapping from words to synonyms
@@ -43,7 +42,7 @@ import net.yacy.cora.util.CommonPattern;
  */
 public class SynonymLibrary {
 
-    Logger log = Logger.getLogger(SynonymLibrary.class);
+    ConcurrentLog log = new ConcurrentLog(SynonymLibrary.class.getName());
     private Map<String, List<Set<String>>> lib;
     
     public SynonymLibrary(final File path) {

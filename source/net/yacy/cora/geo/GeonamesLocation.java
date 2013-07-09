@@ -39,9 +39,8 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.apache.log4j.Logger;
-
 import net.yacy.cora.document.WordCache;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.StringBuilderComparator;
 
 public class GeonamesLocation implements Locations {
@@ -69,7 +68,7 @@ public class GeonamesLocation implements Locations {
         timezone          : the timezone id (see file timeZone.txt)
         modification date : date of last modification in yyyy-MM-dd format
      */
-    private final static Logger log = Logger.getLogger(GeonamesLocation.class);
+    private final static ConcurrentLog log = new ConcurrentLog(GeonamesLocation.class.getName());
     
     private final Map<Integer, GeoLocation> id2loc;
     private final TreeMap<StringBuilder, List<Integer>> name2ids;

@@ -29,13 +29,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.storage.Configuration;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segment.ReferenceReport;
@@ -45,7 +45,7 @@ import net.yacy.search.schema.CollectionSchema;
 public class SchemaConfiguration extends Configuration implements Serializable {
 
     private final static long serialVersionUID=-5961730809008841258L;
-    private final static Logger log = Logger.getLogger(SchemaConfiguration.class);
+    private final static ConcurrentLog log = new ConcurrentLog(SchemaConfiguration.class.getName());
    
 
     public SchemaConfiguration() {

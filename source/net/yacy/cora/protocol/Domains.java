@@ -50,13 +50,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.apache.log4j.Logger;
-
 import net.yacy.cora.plugin.ClassProvider;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.KeyList;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
 
 import com.google.common.net.InetAddresses;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
@@ -64,7 +63,7 @@ import com.google.common.util.concurrent.TimeLimiter;
 
 public class Domains {
     
-    private final static Logger log = Logger.getLogger(Domains.class);
+    private final static ConcurrentLog log = new ConcurrentLog(Domains.class.getName());
     
     public  static final String LOCALHOST = "127.0.0.1"; // replace with IPv6 0:0:0:0:0:0:0:1 ?
     private static       String LOCALHOST_NAME = LOCALHOST; // this will be replaced with the actual name of the local host

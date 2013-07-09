@@ -29,13 +29,12 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.storage.Files;
-
-import org.apache.log4j.Logger;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public class URLRewriterLibrary {
 
-    private final static Logger log = Logger.getLogger(URLRewriterLibrary.class);
+    private final static ConcurrentLog log = new ConcurrentLog(URLRewriterLibrary.class.getName());
 
     private final File rewritingPath;
     private final Map<Pattern, String> rewriters;

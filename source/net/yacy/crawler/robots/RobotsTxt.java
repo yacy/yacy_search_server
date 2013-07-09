@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
@@ -46,12 +47,9 @@ import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.LoaderDispatcher;
 
-import org.apache.log4j.Logger;
-
-
 public class RobotsTxt {
 
-    private static Logger log = Logger.getLogger(RobotsTxt.class);
+    private static ConcurrentLog log = new ConcurrentLog(RobotsTxt.class.getName());
 
     protected static final String ROBOTS_DB_PATH_SEPARATOR = ";";
     protected static final Pattern ROBOTS_DB_PATH_SEPARATOR_MATCHER = Pattern.compile(ROBOTS_DB_PATH_SEPARATOR);
@@ -104,7 +102,7 @@ public class RobotsTxt {
         try {
             robotsTable = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
         } catch (IOException e1) {
-            log.fatal("tables not available", e1);
+            log.severe("tables not available", e1);
         }
         try {
             record = robotsTable.get(robotsTable.encodedKey(urlHostPort));
@@ -156,13 +154,13 @@ public class RobotsTxt {
                 try {
                     robotsURL = new DigestURI((urlHostPort.endsWith(":443") ? "https://" : "http://") + urlHostPort + "/robots.txt");
                 } catch (final MalformedURLException e) {
-                    log.fatal("Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.", e);
+                    log.severe("Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.", e);
                     robotsURL = null;
                 }
 
                 Response response = null;
                 if (robotsURL != null) {
-                    if (log.isDebugEnabled()) log.debug("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
+                    if (log.isFine()) log.fine("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
                     Request request = new Request(robotsURL, null);
                     try {
                         response = this.loader.load(request, CacheStrategy.NOCACHE, null, 0, 3000);
@@ -191,7 +189,7 @@ public class RobotsTxt {
         try {
             robotsTable = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
         } catch (IOException e1) {
-            log.fatal("tables not available", e1);
+            log.severe("tables not available", e1);
             return;
         }
         if (robotsTable == null || robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
@@ -212,13 +210,13 @@ public class RobotsTxt {
                     try {
                         robotsURL = new DigestURI((urlHostPort.endsWith(":443") ? "https://" : "http://") + urlHostPort + "/robots.txt");
                     } catch (final MalformedURLException e) {
-                        log.fatal("Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.", e);
+                        log.severe("Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.", e);
                         robotsURL = null;
                     }
 
                     Response response = null;
                     if (robotsURL != null) {
-                        if (log.isDebugEnabled()) log.debug("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
+                        if (log.isFine()) log.fine("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
                         Request request = new Request(robotsURL, null);
                         try {
                             response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE, null, 0, 3000);
@@ -260,7 +258,7 @@ public class RobotsTxt {
         final int sz = robotsTable.size();
         addEntry(robotsTxt4Host);
         if (robotsTable.size() <= sz) {
-            log.fatal("new entry in robots.txt table failed, resetting database");
+            log.severe("new entry in robots.txt table failed, resetting database");
             try {clear();} catch (IOException e) {}
             addEntry(robotsTxt4Host);
         }

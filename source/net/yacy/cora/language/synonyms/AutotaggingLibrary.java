@@ -27,10 +27,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.log4j.Logger;
-
 import net.yacy.cora.geo.Locations;
 import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.util.ConcurrentLog;
 
 /**
  * Autotagging provides a set of tag/print-name properties which can be used to
@@ -39,7 +38,7 @@ import net.yacy.cora.lod.vocabulary.Tagging;
  */
 public class AutotaggingLibrary {
 
-    private final static Logger log = Logger.getLogger(AutotaggingLibrary.class);
+    private final static ConcurrentLog log = new ConcurrentLog(AutotaggingLibrary.class.getName());
     private final static Object PRESENT = new Object();
 
     private final File autotaggingPath;

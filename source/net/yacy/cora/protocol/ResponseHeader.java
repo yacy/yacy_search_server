@@ -27,17 +27,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.yacy.cora.util.ConcurrentLog;
+
 import org.apache.http.Header;
-import org.apache.log4j.Logger;
-
-
 
 public class ResponseHeader extends HeaderFramework {
 
     // response header properties
 
     private static final long serialVersionUID = 0L;
-    private static Logger log = Logger.getLogger(ResponseHeader.class);
+    private static ConcurrentLog log = new ConcurrentLog(ResponseHeader.class.getName());
 
     public ResponseHeader(final int statusCode) {
         super();
