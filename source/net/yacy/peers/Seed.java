@@ -196,10 +196,10 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         assert theHash != null;
         this.hash = theHash;
         this.dna = theDna;
-        final String flags = this.dna.get(Seed.FLAGS);
-        if ( (flags == null) || (flags.length() != 4) ) {
-            this.dna.put(Seed.FLAGS, Seed.FLAGSZERO);
-        }
+        String flags = this.dna.get(Seed.FLAGS);
+        if (flags == null) flags = Seed.FLAGSZERO;
+        while (flags.length() < 4) flags += " ";
+        this.dna.put(Seed.FLAGS, flags);
         this.dna.put(Seed.NAME, checkPeerName(get(Seed.NAME, "&empty;")));
         this.birthdate = -1; // this means 'not yet parsed', parse that later when it is used
     }
@@ -1007,6 +1007,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( testResult != null ) {
             throw new IOException("seed is not proper (" + testResult + "): " + resultSeed);
         }
+        //assert resultSeed.toString().equals(seed) : "\nresultSeed.toString() = " + resultSeed.toString() + ",\n                 seed = " + seed; // debug
 
         // seed ok
         return resultSeed;
@@ -1092,7 +1093,8 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final ConcurrentMap<String, String> copymap = new ConcurrentHashMap<String, String>();
         copymap.putAll(this.dna);
         copymap.put(Seed.HASH, this.hash); // set hash into seed code structure
-        return MapTools.map2string(copymap, ",", true); // generate string representation
+        String s = MapTools.map2string(copymap, ",", true); // generate string representation
+        return s;
     }
 
     public final String genSeedStr(final String key) {
