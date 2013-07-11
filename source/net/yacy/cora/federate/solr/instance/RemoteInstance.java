@@ -156,6 +156,7 @@ public class RemoteInstance implements SolrInstance {
                 @Override
                 public void process(final HttpRequest request, final HttpContext context) throws IOException {
                     if (!request.containsHeader("Accept-Encoding")) request.addHeader("Accept-Encoding", "gzip");
+                    if (!request.containsHeader("Connection")) request.addHeader("Connection", "close"); // prevent CLOSE_WAIT
                 }
 
             });
