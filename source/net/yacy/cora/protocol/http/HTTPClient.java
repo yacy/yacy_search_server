@@ -86,6 +86,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -344,6 +345,7 @@ public class HTTPClient {
         final boolean localhost = Domains.isLocalhost(url.getHost());
         final String urix = url.toNormalform(true);
         final HttpGet httpGet = new HttpGet(urix);
+        httpGet.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         return getContentBytes(httpGet, url.getHost(), maxBytes);
     }
@@ -360,6 +362,7 @@ public class HTTPClient {
         if (this.currentRequest != null) throw new IOException("Client is in use!");
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpGet httpGet = new HttpGet(url.toNormalform(true));
+        httpGet.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         this.currentRequest = httpGet;
         execute(httpGet, url.getHost());
@@ -375,6 +378,7 @@ public class HTTPClient {
     public HttpResponse HEADResponse(final String uri) throws IOException {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpHead httpHead = new HttpHead(url.toNormalform(true));
+        httpHead.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	execute(httpHead, url.getHost());
     	finish();
@@ -396,6 +400,7 @@ public class HTTPClient {
     	if (this.currentRequest != null) throw new IOException("Client is in use!");
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true));
+        httpPost.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         String host = url.getHost();
         if (host == null) host = Domains.LOCALHOST;
         setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
@@ -432,6 +437,7 @@ public class HTTPClient {
      */
     public byte[] POSTbytes(final MultiProtocolURI url, final String vhost, final Map<String, ContentBody> post, final boolean usegzip) throws IOException {
     	final HttpPost httpPost = new HttpPost(url.toNormalform(true));
+        httpPost.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
 
         setHost(vhost); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	if (vhost == null) setHost(Domains.LOCALHOST);
@@ -463,6 +469,7 @@ public class HTTPClient {
     public byte[] POSTbytes(final String uri, final InputStream instream, final long length) throws IOException {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true));
+        httpPost.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         String host = url.getHost();
         if (host == null) host = Domains.LOCALHOST;
         setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
