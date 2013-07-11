@@ -20,7 +20,7 @@ if exist DATA\SETTINGS\httpProxy.conf GoTo :RENAMEINDEX
 if exist DATA\SETTINGS\yacy.conf GoTo :GETSTARTOPTS
 
 :STARTJAVA
-set javacmd=%javacmd% -XX:-UseGCOverheadLimit -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8
+set javacmd=%javacmd% -Xss256k -XX:MaxPermSize=256m -XX:ReservedCodeCacheSize=1024m -XX:-UseGCOverheadLimit -XX:+UseAdaptiveSizePolicy -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8
 Rem Starting YaCy
 Echo Generated classpath:%CLASSPATH%
 Echo JRE Parameters:%javacmd%
@@ -37,7 +37,7 @@ Echo  ^>^> YaCy started as daemon process. Administration at http://localhost:%p
 
 title YaCy - http://localhost:%port%
 
-start "YaCy" %priority% /B /WAIT java %javacmd% -classpath %CLASSPATH% net.yacy.yacy
+start "YaCy" %priority% /B /WAIT java %javacmd% -classpath %CLASSPATH% net.yacy.yacy -start YaCy
 
 if not exist DATA\yacy.restart GoTo :END
 del DATA\yacy.restart
