@@ -547,19 +547,17 @@ public class Blacklist_p {
         if (pos > 0) {
             path = oldEntry.substring(pos + 1);
         }
-        if (Switchboard.urlBlacklist.getFileName(BlacklistType.DHT) == blacklistToUse) {
-        	Switchboard.urlBlacklist.remove(host, path);
-        }
         
         for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
             if (Switchboard.urlBlacklist.getFileName(supportedBlacklistType) != blacklistToUse) {
-            	continue;
+            	Switchboard.urlBlacklist.remove(supportedBlacklistType, host, path);
             }
-            
-            Blacklist bl = new Blacklist(ListManager.listsPath);
-        	bl.loadList(supportedBlacklistType, blacklistToUse, "/");
-        	
-        	bl.remove(host, path);
+            else {
+	            Blacklist bl = new Blacklist(ListManager.listsPath);
+	        	bl.loadList(supportedBlacklistType, blacklistToUse, "/");
+	        	
+	        	bl.remove(host, path);
+            }
         }
         
         SearchEventCache.cleanupEvents(true);
@@ -618,20 +616,17 @@ public class Blacklist_p {
         int pos = newEntry.indexOf('/',0);
         String host = newEntry.substring(0, pos);
         String path = newEntry.substring(pos + 1);
-
-        if (Switchboard.urlBlacklist.getFileName(BlacklistType.DHT) == blacklistToUse) {
-        	Switchboard.urlBlacklist.add(host, path);	
-        }
         
         for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
-            if (Switchboard.urlBlacklist.getFileName(supportedBlacklistType) != blacklistToUse) {
-            	continue;
+            if (Switchboard.urlBlacklist.getFileName(supportedBlacklistType) == blacklistToUse) {
+            	Switchboard.urlBlacklist.add(supportedBlacklistType, host, path);
             }
-            
-	    	Blacklist bl = new Blacklist(ListManager.listsPath);
-	    	bl.loadList(supportedBlacklistType, blacklistToUse, "/");
-	    	
-	    	bl.add(supportedBlacklistType, host, path);    	
+            else {
+		    	Blacklist bl = new Blacklist(ListManager.listsPath);
+		    	bl.loadList(supportedBlacklistType, blacklistToUse, "/");
+		    	
+		    	bl.add(supportedBlacklistType, host, path); 
+            }
         }
         
         SearchEventCache.cleanupEvents(true);
