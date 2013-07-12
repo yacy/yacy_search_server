@@ -55,6 +55,9 @@ public class ConfigUpdate_p {
         if (yacyBuildProperties.isPkgManager()) {
             prop.put("candeploy", "2");
             return prop;
+        } else if (OS.isWindows && sb.appPath.toString().indexOf("Program Files") > -1) {
+            prop.put("candeploy", "3");
+            return prop;
         } else if (OS.canExecUnix || OS.isWindows) {
             // we can deploy a new system with (i.e.)
             // cd DATA/RELEASE;tar xfz $1;cp -Rf yacy/* ../../;rm -Rf yacy
