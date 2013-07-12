@@ -2102,8 +2102,6 @@ public final class Switchboard extends serverSwitch {
                 ConcurrentLog.logException(e);
             }
 
-            execAPIActions();
-
             // close unused connections
             ConnectionInfo.cleanUp();
 
@@ -2289,6 +2287,10 @@ public final class Switchboard extends serverSwitch {
                 index.fulltext().getWebgraphConfiguration().postprocessing(index);
                 postprocessingRunning = false;
             }
+
+            // execute api actions; this must be done after postprocessing because 
+            // these actions may also influence the search index/ call optimize steps
+            execAPIActions();
             
             return true;
         } catch ( final InterruptedException e ) {
