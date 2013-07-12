@@ -588,6 +588,7 @@ public class CrawlQueues {
                         + this.noticeURL.stackSize(NoticedURL.StackType.REMOTE) + "]";
         try {
             final Request urlEntry = this.noticeURL.pop(NoticedURL.StackType.REMOTE, true, this.sb.crawler, this.sb.robots);
+            if (urlEntry == null) return false;
             final String profileHandle = urlEntry.profileHandle();
             // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
             // profileHandle = " + profileHandle + ", urlEntry.url = " +
