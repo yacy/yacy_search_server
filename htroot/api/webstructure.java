@@ -35,7 +35,6 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.rwi.IndexCell;
@@ -98,7 +97,7 @@ public class webstructure {
                 prop.put("references", 1);
                 net.yacy.document.Document scraper = null;
                 if (url != null) try {
-                    scraper = sb.loader.loadDocument(url, CacheStrategy.IFEXIST, null, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+                    scraper = sb.loader.loadDocument(url, CacheStrategy.IFEXIST, null, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 }

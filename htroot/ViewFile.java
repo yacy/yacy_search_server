@@ -45,7 +45,6 @@ import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.Cache;
-import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -169,7 +168,7 @@ public class ViewFile {
 
         Response response = null;
         try {
-            response = sb.loader.load(sb.loader.request(url, true, false), authorized ? CacheStrategy.IFEXIST : CacheStrategy.CACHEONLY, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+            response = sb.loader.load(sb.loader.request(url, true, false), authorized ? CacheStrategy.IFEXIST : CacheStrategy.CACHEONLY, Integer.MAX_VALUE, null, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
         } catch (final IOException e) {
             prop.put("error", "4");
             prop.put("error_errorText", "error loading resource: " + e.getMessage());

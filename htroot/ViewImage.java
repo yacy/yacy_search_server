@@ -39,7 +39,6 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.data.URLLicense;
 import net.yacy.document.ImageParser;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -105,7 +104,7 @@ public class ViewImage {
         if (image == null) {
             byte[] resourceb = null;
             if (url != null) try {
-                resourceb = sb.loader.loadContent(sb.loader.request(url, false, true), CacheStrategy.IFEXIST, BlacklistType.SEARCH, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+                resourceb = sb.loader.loadContent(sb.loader.request(url, false, true), CacheStrategy.IFEXIST, BlacklistType.SEARCH, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
             } catch (final IOException e) {
                 ConcurrentLog.fine("ViewImage", "cannot load: " + e.getMessage());
             }

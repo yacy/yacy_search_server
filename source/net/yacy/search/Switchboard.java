@@ -2879,7 +2879,7 @@ public final class Switchboard extends serverSwitch {
         // get a scraper to get the title
         Document scraper;
         try {
-            scraper = this.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+            scraper = this.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
         } catch (IOException e) {
             return "scraper cannot load URL: " + e.getMessage();
         }
@@ -2986,7 +2986,7 @@ public final class Switchboard extends serverSwitch {
                     String urlName = url.toNormalform(true);
                     Thread.currentThread().setName("Switchboard.addToIndex:" + urlName);
                     try {
-                        final Response response = Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+                        final Response response = Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
                         if (response == null) {
                             throw new IOException("response == null");
                         }
