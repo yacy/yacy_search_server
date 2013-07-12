@@ -124,6 +124,8 @@ public class status_p {
         prop.put("crawlProfiles_count", count);
         prop.put("crawlProfiles", count == 0 ? 0 : 1);
         
+        prop.put("postprocessingRunning", Switchboard.postprocessingRunning ? 1 : 0);
+        
         // return rewrite properties
         return prop;
     }

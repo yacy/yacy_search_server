@@ -2011,6 +2011,8 @@ public final class Switchboard extends serverSwitch {
         return c;
     }
 
+    public static boolean postprocessingRunning = false;
+    
     public boolean cleanupJob() {
         
         try {
@@ -2281,9 +2283,11 @@ public final class Switchboard extends serverSwitch {
             // if no crawl is running and processing is activated:
             // execute the (post-) processing steps for all entries that have a process tag assigned
             if (this.crawlQueues.coreCrawlJobSize() == 0) {
-                if (this.crawlQueues.noticeURL.isEmpty()) this.crawlQueues.noticeURL.clear(); // flushes more caches                
+                if (this.crawlQueues.noticeURL.isEmpty()) this.crawlQueues.noticeURL.clear(); // flushes more caches 
+                postprocessingRunning = true;
                 index.fulltext().getDefaultConfiguration().postprocessing(index);
                 index.fulltext().getWebgraphConfiguration().postprocessing(index);
+                postprocessingRunning = false;
             }
             
             return true;

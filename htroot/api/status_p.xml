@@ -65,4 +65,8 @@
   </crawls>
 #(/crawlProfiles)#
   
+  <postprocessing>
+    <status>#(postprocessingRunning)#idle::busy#(/postprocessingRunning)#</status>
+  </postprocessing>
+  
 </status>
