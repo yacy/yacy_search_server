@@ -49,5 +49,20 @@
     <size>#[noloadCrawlSize]#</size>
     <state>#[noloadCrawlState]#</state>
   </noloadcrawlerqueue>
+
+<!-- crawl profile list -->
+#(crawlProfiles)#::
+  <crawls count="#[count]#">
+  #{list}#
+    <crawl>
+      <name>#[name]#</name>
+      <count>#[count]#</count>
+      <handle>#[handle]#</handle>
+      <depth>#[depth]#</depth>
+      <status>#(terminateButton)#terminated::alive#(/terminateButton)#</status>
+    </crawl>
+  #{/list}# 
+  </crawls>
+#(/crawlProfiles)#
   
 </status>
