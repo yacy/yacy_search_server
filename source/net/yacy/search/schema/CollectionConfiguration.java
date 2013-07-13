@@ -1076,8 +1076,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         public int getInternalLinks(final byte[] id) {
             int il = (int) this.internal_links_counter.get(id);
             if (il >= 0) return il;
+            SolrConnector connector = this.segment.fulltext().getDefaultConnector();
+            if (connector == null) return 0;
             try {
-                SolrDocument doc = this.segment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(id), CollectionSchema.inboundlinkscount_i.getSolrFieldName());
+                SolrDocument doc = connector.getDocumentById(ASCII.String(id), CollectionSchema.inboundlinkscount_i.getSolrFieldName());
                 if (doc == null) {
                     this.internal_links_counter.put(id, 0);
                     return 0;
