@@ -877,9 +877,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param urlCitation
      * @return
      */
-    public void postprocessing(final Segment segment) {
-        if (!this.contains(CollectionSchema.process_sxt)) return;
-        if (!segment.connectedCitation()) return;
+    public int postprocessing(final Segment segment) {
+        if (!this.contains(CollectionSchema.process_sxt)) return 0;
+        if (!segment.connectedCitation()) return 0;
         SolrConnector connector = segment.fulltext().getDefaultConnector();
         connector.commit(true); // make sure that we have latest information that can be found
         ReferenceReportCache rrCache = segment.getReferenceReportCache();
@@ -967,6 +967,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         proccount_citationchange + " citation ranking changes.");
         } catch (InterruptedException e) {
         }
+        return proccount;
     }
 
     private static final class CRV {

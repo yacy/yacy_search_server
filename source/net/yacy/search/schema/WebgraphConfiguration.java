@@ -276,9 +276,9 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         }
     }
     
-    public void postprocessing(Segment segment) {
-        if (!this.contains(WebgraphSchema.process_sxt)) return;
-        if (!segment.connectedCitation()) return;
+    public int postprocessing(Segment segment) {
+        if (!this.contains(WebgraphSchema.process_sxt)) return 0;
+        if (!segment.connectedCitation()) return 0;
         SolrConnector connector = segment.fulltext().getWebgraphConnector();
         // that means we must search for those entries.
         connector.commit(true); // make sure that we have latest information that can be found
@@ -288,7 +288,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         SolrDocument doc;
         String protocol, urlstub, id;
         DigestURI url;
-        int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0;
+        int proccount = 0, proccount_clickdepthchange = 0;
         try {
             while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                 // for each to-be-processed entry work on the process tag
@@ -328,9 +328,10 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                     
                 }
             }
-            ConcurrentLog.info("WebgraphConfiguration", "cleanup_processing: re-calculated " + proccount+ " new documents, " + proccount_clickdepthchange + " clickdepth values changed, " + proccount_referencechange + " reference-count values changed.");
+            ConcurrentLog.info("WebgraphConfiguration", "cleanup_processing: re-calculated " + proccount + " new documents, " + proccount_clickdepthchange + " clickdepth values changed.");
         } catch (InterruptedException e) {
         }
+        return proccount;
     }
 
     /**

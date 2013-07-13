@@ -2283,8 +2283,10 @@ public final class Switchboard extends serverSwitch {
             if (this.crawlQueues.coreCrawlJobSize() == 0) {
                 if (this.crawlQueues.noticeURL.isEmpty()) this.crawlQueues.noticeURL.clear(); // flushes more caches 
                 postprocessingRunning = true;
-                index.fulltext().getDefaultConfiguration().postprocessing(index);
-                index.fulltext().getWebgraphConfiguration().postprocessing(index);
+                int proccount = 0;
+                proccount += index.fulltext().getDefaultConfiguration().postprocessing(index);
+                proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index);
+                if (proccount > 0) index.fulltext().optimize(8);
                 postprocessingRunning = false;
             }
 
