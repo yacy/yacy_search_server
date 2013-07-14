@@ -23,7 +23,7 @@ import java.io.IOException;
 import net.yacy.search.Switchboard;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
-import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
+import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.search.schema.CollectionConfiguration;
@@ -46,7 +46,7 @@ import org.apache.solr.common.SolrInputDocument;
      */
      public class ReindexSolrBusyThread extends AbstractBusyThread {
 
-        final EmbeddedSolrConnector esc;
+        SolrConnector esc;
         final CollectionConfiguration colcfg; // collection config
         int processed = 0; // total number of reindexed documents
         int docstoreindex = 0; // documents found to reindex for current query
@@ -61,6 +61,7 @@ import org.apache.solr.common.SolrInputDocument;
         public ReindexSolrBusyThread(String query) {
             super(100,1000,0,500);
             this.esc = Switchboard.getSwitchboard().index.fulltext().getDefaultEmbeddedConnector();
+            if  (this.esc == null) this.esc = Switchboard.getSwitchboard().index.fulltext().getDefaultRemoteSolrConnector();
             this.colcfg = Switchboard.getSwitchboard().index.fulltext().getDefaultConfiguration();
 
             if (Switchboard.getSwitchboard().getThread("reindexSolr") != null) {
@@ -108,7 +109,6 @@ import org.apache.solr.common.SolrInputDocument;
                 if (sem.tryAcquire()) {
                     try {
                         String query = querylist.get(0);
-                        boolean go = true;
                         SolrDocumentList xdocs = esc.getDocumentListByQuery(query, start, chunksize);
                         docstoreindex = (int) xdocs.getNumFound();
                         
