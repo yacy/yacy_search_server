@@ -246,7 +246,7 @@ public final class Switchboard extends serverSwitch {
     public BlogBoardComments blogCommentDB;
     public RobotsTxt robots;
     public Map<String, Object[]> outgoingCookies, incomingCookies;
-    public volatile long proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
+    public volatile long proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess, adminAuthenticationLastAccess, optimizeLastRun;
     public Network yc;
     public ResourceObserver observer;
     public UserDB userDB;
@@ -563,6 +563,8 @@ public final class Switchboard extends serverSwitch {
         this.proxyLastAccess = System.currentTimeMillis() - 10000;
         this.localSearchLastAccess = System.currentTimeMillis() - 10000;
         this.remoteSearchLastAccess = System.currentTimeMillis() - 10000;
+        this.adminAuthenticationLastAccess = System.currentTimeMillis();
+        this.optimizeLastRun = System.currentTimeMillis();
         this.webStructure = new WebStructureGraph(new File(this.queuesRoot, "webStructure.map"));
 
         // configuring list path
@@ -2286,7 +2288,24 @@ public final class Switchboard extends serverSwitch {
                 int proccount = 0;
                 proccount += index.fulltext().getDefaultConfiguration().postprocessing(index);
                 proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index);
-                if (proccount > 0) index.fulltext().optimize(8);
+                long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
+                long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
+                long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
+                boolean optimizeRequired = deltaOptimize > 60000 * 60 * 6; // 6 hours
+                log.info("Solr auto-optimization: idleSearch=" + idleSearch + ", idleAdmin=" + idleAdmin + ", deltaOptimize=" + deltaOptimize + ", proccount=" + proccount);
+                if (idleAdmin > 600000) {
+                    // only run optimization if the admin is idle (10 minutes)
+                    if (proccount > 0) {
+                        log.info("Solr auto-optimization: running solr.optimize(8)");
+                        index.fulltext().optimize(8);
+                    }
+                    if (optimizeRequired) {
+                        int opts = idleSearch > 600000 ? 1 : 5;
+                        log.info("Solr auto-optimization: running solr.optimize(" + opts + ")");
+                        index.fulltext().optimize(opts);
+                        this.optimizeLastRun = System.currentTimeMillis();
+                    }
+                }
                 postprocessingRunning = false;
             }
 
@@ -3105,6 +3124,7 @@ public final class Switchboard extends serverSwitch {
                 + (System.currentTimeMillis() - t));
         }
     }
+    
 
     /**
      * check authentication status for request access shall be granted if return value >= 2; these are the
@@ -3123,12 +3143,14 @@ public final class Switchboard extends serverSwitch {
         // authorization in case that there is no account stored
         final String adminAccountBase64MD5 = getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
         if ( adminAccountBase64MD5.isEmpty() ) {
+            adminAuthenticationLastAccess = System.currentTimeMillis();
             return 2; // no password stored; this should not happen for older peers
         }
 
         // authorization for localhost, only if flag is set to grant localhost access as admin
         final boolean accessFromLocalhost = requestHeader.accessFromLocalhost();
         if ( getConfigBool("adminAccountForLocalhost", false) && accessFromLocalhost ) {
+            adminAuthenticationLastAccess = System.currentTimeMillis();
             return 3; // soft-authenticated for localhost
         }
 
@@ -3143,11 +3165,13 @@ public final class Switchboard extends serverSwitch {
 
         // authorization by encoded password, only for localhost access
         if ( accessFromLocalhost && (adminAccountBase64MD5.equals(realmValue)) ) {
+            adminAuthenticationLastAccess = System.currentTimeMillis();
             return 3; // soft-authenticated for localhost
         }
 
         // authorization by hit in userDB
         if ( this.userDB.hasAdminRight(realmProp, requestHeader.getHeaderCookies()) ) {
+            adminAuthenticationLastAccess = System.currentTimeMillis();
             return 4; //return, because 4=max
         }
 
@@ -3156,6 +3180,7 @@ public final class Switchboard extends serverSwitch {
             return 1;
         }
         if ( adminAccountBase64MD5.equals(Digest.encodeMD5Hex(realmValue)) ) {
+            adminAuthenticationLastAccess = System.currentTimeMillis();
             return 4; // hard-authenticated, all ok
         }
         return 1;
