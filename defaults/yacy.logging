@@ -122,6 +122,10 @@ com.hp.hpl.jena.util.SystemUtils.level = SEVERE
 # Properties for the YaCy solr interface
 net.yacy.cora.federate.solr.connector.SolrServerConnector.level = INFO
 
+# Some more cora loggers
+net.yacy.cora.lod.JenaTripleStore.level = SEVERE
+net.yacy.cora.protocol.Domains.level = SEVERE
+
 # java properties
 javax.management.misc.level = INFO
 javax.management.mbeanserver.level = INFO
