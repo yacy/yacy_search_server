@@ -2300,7 +2300,7 @@ public final class Switchboard extends serverSwitch {
                         index.fulltext().optimize(8);
                     }
                     if (optimizeRequired) {
-                        int opts = idleSearch > 600000 ? 0 : 5;
+                        int opts = idleSearch > 600000 ? 1 : 5;
                         log.info("Solr auto-optimization: running solr.optimize(" + opts + ")");
                         index.fulltext().optimize(opts);
                         this.optimizeLastRun = System.currentTimeMillis();
