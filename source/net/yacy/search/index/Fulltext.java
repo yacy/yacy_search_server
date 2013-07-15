@@ -326,7 +326,7 @@ public final class Fulltext {
         }
     }
     
-    public URIMetadataNode getMetadata(WeakPriorityBlockingQueue.Element<WordReferenceVars> element) {
+    public URIMetadataNode getMetadata(final WeakPriorityBlockingQueue.Element<WordReferenceVars> element) {
         if (element == null) return null;
         WordReferenceVars wre = element.getElement();        
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
@@ -340,7 +340,7 @@ public final class Fulltext {
         return getMetadata(urlHash, null, 0);
     }
     
-    private URIMetadataNode getMetadata(final byte[] urlHash, WordReferenceVars wre, long weight) {
+    private URIMetadataNode getMetadata(final byte[] urlHash, final WordReferenceVars wre, final long weight) {
         String u = ASCII.String(urlHash);
         
         // get the metadata from Solr
@@ -391,7 +391,7 @@ public final class Fulltext {
         this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCache();
     }
-    
+
     public void putEdges(final Collection<SolrInputDocument> edges) throws IOException {
         if (edges == null || edges.size() == 0) return;
         try {
@@ -402,7 +402,7 @@ public final class Fulltext {
         this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCache();
     }
-    
+
     public void putMetadata(final URIMetadataRow entry) throws IOException {
         byte[] idb = entry.hash();
         String id = ASCII.String(idb);
@@ -412,7 +412,7 @@ public final class Fulltext {
             SolrDocument sd = this.getDefaultConnector().getDocumentById(id);
             if (sd == null || (new URIMetadataNode(sd)).isOlder(entry)) {
                 putDocument(getDefaultConfiguration().metadata2solr(entry));
-            }                                                                                                                     
+            }
         } catch (final SolrException e) {
             throw new IOException(e.getMessage(), e);
         }
@@ -440,7 +440,7 @@ public final class Fulltext {
                         (" AND " + WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") :
                         ""
                 );
-        
+
         // delete in solr
         try {Fulltext.this.getDefaultConnector().deleteByQuery(collection1Query);} catch (final IOException e) {}
         try {Fulltext.this.getWebgraphConnector().deleteByQuery(webgraphQuery);} catch (final IOException e) {}
