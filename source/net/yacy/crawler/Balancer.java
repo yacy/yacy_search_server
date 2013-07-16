@@ -267,7 +267,7 @@ public class Balancer {
      * @throws IOException
      * @throws SpaceExceededException
      */
-    public String push(final Request entry, final RobotsTxt robots) throws IOException, SpaceExceededException {
+    public String push(final Request entry, CrawlProfile profile, final RobotsTxt robots) throws IOException, SpaceExceededException {
         assert entry != null;
         final byte[] hash = entry.url().hash();
         synchronized (this) {
@@ -278,6 +278,11 @@ public class Balancer {
             if (this.double_push_check.size() > MAX_DOUBLE_PUSH_CHECK || MemoryControl.shortStatus()) this.double_push_check.clear();
             this.double_push_check.put(hash);
 
+            // increase dom counter
+            if (profile != null && profile.domMaxPages() != Integer.MAX_VALUE && profile.domMaxPages() > 0) {
+                profile.domInc(entry.url().getHost());
+            }
+            
             // add to index
             final int s = this.urlFileIndex.size();
             this.urlFileIndex.put(entry.toRow());

@@ -3071,9 +3071,9 @@ public final class Switchboard extends serverSwitch {
             }
             final String s;
             if (asglobal) {
-                s = this.crawlQueues.noticeURL.push(StackType.GLOBAL, request, this.robots);
+                s = this.crawlQueues.noticeURL.push(StackType.GLOBAL, request, profile, this.robots);
             } else {
-                s = this.crawlQueues.noticeURL.push(StackType.LOCAL, request, this.robots);
+                s = this.crawlQueues.noticeURL.push(StackType.LOCAL, request, profile, this.robots);
             }
     
             if (s != null) {
