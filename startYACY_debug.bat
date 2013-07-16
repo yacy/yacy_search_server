@@ -37,7 +37,7 @@ Echo  ^>^> YaCy started as daemon process. Administration at http://localhost:%p
 
 title YaCy - http://localhost:%port%
 
-start "YaCy" %priority% /B /WAIT java %javacmd% -classpath %CLASSPATH% net.yacy.yacy -start YaCy
+start "YaCy" %priority% /B /WAIT java %javacmd% -classpath %CLASSPATH% net.yacy.yacy
 
 if not exist DATA\yacy.restart GoTo :END
 del DATA\yacy.restart

@@ -30,7 +30,7 @@ Echo.
 Echo You can download Java at http://java.com/
 Echo.
 Echo ***************************************************************************
-start %priority% javaw %javacmd% -classpath %CLASSPATH% net.yacy.yacy -start YaCy
+start %priority% javaw %javacmd% -classpath %CLASSPATH% net.yacy.yacy
 Echo You can close the console safely now.
 
 GoTo :END
