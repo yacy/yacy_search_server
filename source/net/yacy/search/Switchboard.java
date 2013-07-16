@@ -2291,7 +2291,7 @@ public final class Switchboard extends serverSwitch {
                 long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
                 long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
                 long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
-                boolean optimizeRequired = deltaOptimize > 60000 * 60 * 6; // 6 hours
+                boolean optimizeRequired = deltaOptimize > 60000 * 60 * 3; // 3 hours
                 log.info("Solr auto-optimization: idleSearch=" + idleSearch + ", idleAdmin=" + idleAdmin + ", deltaOptimize=" + deltaOptimize + ", proccount=" + proccount);
                 if (idleAdmin > 600000) {
                     // only run optimization if the admin is idle (10 minutes)
@@ -2300,7 +2300,7 @@ public final class Switchboard extends serverSwitch {
                         index.fulltext().optimize(8);
                     }
                     if (optimizeRequired) {
-                        int opts = idleSearch > 600000 ? 1 : 5;
+                        int opts = idleSearch > 600000 ? 1 : 5; // > 10 minutes idle time will cause a full optimization, otherwise a 5-segment optimization
                         log.info("Solr auto-optimization: running solr.optimize(" + opts + ")");
                         index.fulltext().optimize(opts);
                         this.optimizeLastRun = System.currentTimeMillis();
