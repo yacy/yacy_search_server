@@ -100,8 +100,8 @@ public class yacysearch {
         final Switchboard sb = (Switchboard) env;
         sb.localSearchLastAccess = System.currentTimeMillis();
 
-        final boolean searchAllowed =
-            sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header);
+        final boolean authorized = sb.verifyAuthentication(header);
+        final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || authorized;
 
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         if ( !authenticated ) {
@@ -161,7 +161,7 @@ public class yacysearch {
         boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
         boolean global = post == null || (post.get("resource", "local").equals("global") && p2pmode);
         boolean stealthmode = p2pmode && !global;
-        prop.put("topmenu_resource-select", stealthmode ? 2 : global ? 1 : 0);
+        prop.put("topmenu_resource-select", !authorized ? 0 : stealthmode ? 2 : global ? 1 : 0);
         
         if ( post == null || indexSegment == null || env == null || !searchAllowed ) {
             if (indexSegment == null) ConcurrentLog.info("yacysearch", "indexSegment == null");

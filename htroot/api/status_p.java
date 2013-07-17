@@ -26,6 +26,9 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.crawler.CrawlSwitchboard;
+import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.io.ByteCount;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
@@ -100,6 +103,29 @@ public class status_p {
         prop.putNum("noloadCrawlSize", sb.crawlQueues.noloadCrawlJobSize());
         prop.put("noloadCrawlState", STATE_RUNNING);
 
+        // generate crawl profile table
+        int count = 0;
+        final int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
+        CrawlProfile profile;
+        // put active crawls into list
+        String hosts = "";
+        for (final byte[] h: sb.crawler.getActive()) {
+            profile = sb.crawler.getActive(h);
+            if (CrawlSwitchboard.DEFAULT_PROFILES.contains(profile.name())) continue;
+            profile.putProfileEntry("crawlProfiles_list_", prop, true, false, count, domlistlength);
+            RowHandleSet urlhashes = sb.crawler.getURLHashes(h);
+            prop.put("crawlProfiles_list_" + count + "_count", urlhashes == null ? "unknown" : Integer.toString(urlhashes.size()));
+            if (profile.urlMustMatchPattern() == CrawlProfile.MATCH_ALL_PATTERN) {
+                hosts = hosts + "," + profile.name();
+            }
+            count++;
+        }
+        prop.put("crawlProfiles_list", count);
+        prop.put("crawlProfiles_count", count);
+        prop.put("crawlProfiles", count == 0 ? 0 : 1);
+        
+        prop.put("postprocessingRunning", Switchboard.postprocessingRunning ? 1 : 0);
+        
         // return rewrite properties
         return prop;
     }

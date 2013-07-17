@@ -26,9 +26,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.Latency;
-import net.yacy.crawler.data.NoticedURL;
 import net.yacy.crawler.data.Latency.Host;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -52,7 +52,7 @@ public class latency_p {
             prop.put("domains_" + c + "_count", host.count());
             prop.put("domains_" + c + "_average", host.average());
             prop.put("domains_" + c + "_robots", host.robotsDelay());
-            prop.put("domains_" + c + "_flux", host.flux(NoticedURL.minimumGlobalDeltaInit));
+            prop.put("domains_" + c + "_flux", host.flux(ClientIdentification.minimumGlobalDeltaInit));
             c++;
         }
         prop.put("domains", c);

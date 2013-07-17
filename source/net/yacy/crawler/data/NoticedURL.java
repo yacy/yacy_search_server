@@ -39,6 +39,7 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.crawler.Balancer;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.retrieval.Request;
@@ -51,9 +52,6 @@ public class NoticedURL {
         LOCAL, GLOBAL, REMOTE, NOLOAD;
     }
 
-    private static final int minimumLocalDeltaInit  =  10; // the minimum time difference between access of the same local domain
-    public  static final int minimumGlobalDeltaInit = 500; // the minimum time difference between access of the same global domain
-
     private Balancer coreStack;      // links found by crawling to depth-1
     private Balancer limitStack;     // links found by crawling at target depth
     private Balancer remoteStack;    // links from remote crawl orders
@@ -65,11 +63,11 @@ public class NoticedURL {
             final boolean useTailCache,
             final boolean exceed134217727) {
         ConcurrentLog.info("NoticedURL", "CREATING STACKS at " + cachePath.toString());
-        this.coreStack = new Balancer(cachePath, "urlNoticeCoreStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
-        this.limitStack = new Balancer(cachePath, "urlNoticeLimitStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
+        this.coreStack = new Balancer(cachePath, "urlNoticeCoreStack", ClientIdentification.minimumLocalDeltaInit, ClientIdentification.minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
+        this.limitStack = new Balancer(cachePath, "urlNoticeLimitStack", ClientIdentification.minimumLocalDeltaInit, ClientIdentification.minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
         //overhangStack = new plasmaCrawlBalancer(overhangStackFile);
-        this.remoteStack = new Balancer(cachePath, "urlNoticeRemoteStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
-        this.noloadStack = new Balancer(cachePath, "urlNoticeNoLoadStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
+        this.remoteStack = new Balancer(cachePath, "urlNoticeRemoteStack", ClientIdentification.minimumLocalDeltaInit, ClientIdentification.minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
+        this.noloadStack = new Balancer(cachePath, "urlNoticeNoLoadStack", ClientIdentification.minimumLocalDeltaInit, ClientIdentification.minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
     }
 
     public int getMinimumLocalDelta() {
@@ -172,13 +170,13 @@ public class NoticedURL {
      * @param entry
      * @return null if this was successful or a String explaining what went wrong in case of an error
      */
-    public String push(final StackType stackType, final Request entry, final RobotsTxt robots) {
+    public String push(final StackType stackType, final Request entry, CrawlProfile profile, final RobotsTxt robots) {
         try {
             switch (stackType) {
-                case LOCAL: return this.coreStack.push(entry, robots);
-                case GLOBAL: return this.limitStack.push(entry, robots);
-                case REMOTE: return this.remoteStack.push(entry, robots);
-                case NOLOAD: return this.noloadStack.push(entry, robots);
+                case LOCAL: return this.coreStack.push(entry, profile, robots);
+                case GLOBAL: return this.limitStack.push(entry, profile, robots);
+                case REMOTE: return this.remoteStack.push(entry, profile, robots);
+                case NOLOAD: return this.noloadStack.push(entry, profile, robots);
                 default: return "stack type unknown";
             }
         } catch (final Exception er) {
@@ -271,7 +269,7 @@ public class NoticedURL {
         try {
             final Request entry = pop(fromStack, false, cs, robots);
             if (entry != null) {
-                final String warning = push(toStack, entry, robots);
+                final String warning = push(toStack, entry, null, robots);
                 if (warning != null) {
                     ConcurrentLog.warn("NoticedURL", "shift from " + fromStack + " to " + toStack + ": " + warning);
                 }

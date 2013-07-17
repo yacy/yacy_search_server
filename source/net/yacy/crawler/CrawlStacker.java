@@ -149,7 +149,8 @@ public final class CrawlStacker {
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null) {
-                this.nextQueue.errorURL.push(entry, ASCII.getBytes(this.peers.mySeed().hash), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
+                final CrawlProfile profile = this.crawler.getActive(UTF8.getBytes(entry.profileHandle()));
+                this.nextQueue.errorURL.push(entry, profile, ASCII.getBytes(this.peers.mySeed().hash), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
             }
         } catch (final Exception e) {
             CrawlStacker.this.log.warn("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);
@@ -341,30 +342,25 @@ public final class CrawlStacker {
             entry.url().getContentDomain() == ContentDomain.AUDIO  ||
             entry.url().getContentDomain() == ContentDomain.VIDEO ||
             entry.url().getContentDomain() == ContentDomain.CTRL) {
-            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry, this.robots);
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry, profile, this.robots);
             //if (warning != null && this.log.isFine()) this.log.logFine("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
             return null;
-        }
-        
-        // add domain to profile domain list
-        if (profile.domMaxPages() != Integer.MAX_VALUE && profile.domMaxPages() > 0) {
-            profile.domInc(entry.url().getHost());
         }
 
         if (global) {
             // it may be possible that global == true and local == true, so do not check an error case against it
             if (proxy) this.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
             if (remote) this.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.GLOBAL, entry, this.robots);
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.GLOBAL, entry, profile, this.robots);
         } else if (local) {
             if (proxy) this.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
             if (remote) this.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry, this.robots);
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry, profile, this.robots);
         } else if (proxy) {
             if (remote) this.log.warn("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + ASCII.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry, this.robots);
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.LOCAL, entry, profile, this.robots);
         } else if (remote) {
-            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.REMOTE, entry, this.robots);
+            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.REMOTE, entry, profile, this.robots);
         }
         if (warning != null && this.log.isFine()) this.log.fine("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true) + " - not pushed: " + warning);
 

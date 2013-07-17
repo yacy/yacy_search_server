@@ -53,7 +53,6 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.storage.Files;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.document.Document;
 import net.yacy.document.parser.tarParser;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -239,7 +238,7 @@ public final class yacyRelease extends yacyVersion {
         try {
             final DigestURI uri = location.getLocationURL();
             Thread.currentThread().setName("allReleaseFrom - host " + uri.getHost()); // makes it more easy to see which release blocks process in thread dump
-            scraper = Switchboard.getSwitchboard().loader.loadDocument(uri, CacheStrategy.NOCACHE, null, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+            scraper = Switchboard.getSwitchboard().loader.loadDocument(uri, CacheStrategy.NOCACHE, null, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
         } catch (final IOException e) {
             return null;
         }

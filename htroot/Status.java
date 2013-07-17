@@ -32,6 +32,7 @@ import java.util.Date;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.Memory;
 import net.yacy.kelondro.io.ByteCount;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
@@ -317,6 +318,7 @@ public class Status
         prop.put("totalMemory", Formatter.bytesToString(MemoryControl.total()));
         prop.put("maxMemory", Formatter.bytesToString(MemoryControl.maxMemory()));
         prop.put("processors", WorkflowProcessor.availableCPU);
+        prop.put("load", Memory.load());
 
         // proxy traffic
         //prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));

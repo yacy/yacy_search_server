@@ -27,7 +27,10 @@ package net.yacy.cora.protocol;
 
 public class ClientIdentification {
 
+    public static final long MIN_LOAD_DELAY = 500;
     public static final int DEFAULT_TIMEOUT = 10000;
+    public static final int minimumLocalDeltaInit  =  10; // the minimum time difference between access of the same local domain
+    public static final int minimumGlobalDeltaInit = 500; // the minimum time difference between access of the same global domain
     
     /**
      * provide system information (this is part of YaCy protocol)
@@ -115,5 +118,9 @@ public class ClientIdentification {
         }
 
         return location;
+    }
+    
+    public static long minLoadDelay() {
+        return MIN_LOAD_DELAY;
     }
 }

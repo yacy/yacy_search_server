@@ -43,7 +43,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.CrawlProfile;
-import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.SitemapImporter;
@@ -288,7 +287,7 @@ public class Crawler_p {
                         // download document
                         Document scraper;
                         try {
-                            scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+                            scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
                             // get links and generate filter
                             for (DigestURI u: scraper.getAnchors().keySet()) {
                                 newRootURLs.add(u);
@@ -445,6 +444,7 @@ public class Crawler_p {
                                             0,
                                             0,
                                             0),
+                                    null,
                                     sb.peers.mySeed().hash.getBytes(),
                                     new Date(),
                                     1,

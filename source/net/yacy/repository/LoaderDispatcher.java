@@ -186,15 +186,15 @@ public final class LoaderDispatcher {
         if (url.isFile() || url.isSMB()) cacheStrategy = CacheStrategy.NOCACHE; // load just from the file system
         final String protocol = url.getProtocol();
         final String host = url.getHost();
-
+        final CrawlProfile crawlProfile = request.profileHandle() == null ? null : this.sb.crawler.getActive(UTF8.getBytes(request.profileHandle()));
+        
         // check if url is in blacklist
         if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(), url.getFile())) {
-            this.sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
+            this.sb.crawlQueues.errorURL.push(request, crawlProfile, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
         }
 
         // check if we have the page in the cache
-        final CrawlProfile crawlProfile = request.profileHandle() == null ? null : this.sb.crawler.getActive(UTF8.getBytes(request.profileHandle()));
         if (cacheStrategy != CacheStrategy.NOCACHE && crawlProfile != null) {
             // we have passed a first test if caching is allowed
             // now see if there is a cache entry
@@ -280,7 +280,7 @@ public final class LoaderDispatcher {
         // load resource from the internet
         Response response = null;
         if (protocol.equals("http") || protocol.equals("https")) {
-            response = this.httpLoader.load(request, maxFileSize, blacklistType, timeout);
+            response = this.httpLoader.load(request, crawlProfile, maxFileSize, blacklistType, timeout);
         } else if (protocol.equals("ftp")) {
             response = this.ftpLoader.load(request, true);
         } else if (protocol.equals("smb")) {

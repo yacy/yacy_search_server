@@ -28,7 +28,6 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.crawler.robots.RobotsTxtEntry;
@@ -88,19 +87,19 @@ public class CrawlCheck_p {
                     robotsEntry = sb.robots.getEntry(u, sb.peers.myBotIDs());
                     if (robotsEntry == null) {
                         prop.put("table_list_" + row + "_robots", "no robots");
-                        prop.put("table_list_" + row + "_crawldelay", CrawlQueues.queuedMinLoadDelay + " ms");
+                        prop.put("table_list_" + row + "_crawldelay", ClientIdentification.minLoadDelay() + " ms");
                         prop.put("table_list_" + row + "_sitemap", "");
                     } else {
                         robotsAllowed = !robotsEntry.isDisallowed(u);
                         prop.put("table_list_" + row + "_robots", "robots exist: " + (robotsAllowed ? "crawl allowed" : "url disallowed"));
-                        prop.put("table_list_" + row + "_crawldelay", Math.max(CrawlQueues.queuedMinLoadDelay, robotsEntry.getCrawlDelayMillis()) + " ms");
+                        prop.put("table_list_" + row + "_crawldelay", Math.max(ClientIdentification.minLoadDelay(), robotsEntry.getCrawlDelayMillis()) + " ms");
                         prop.put("table_list_" + row + "_sitemap", robotsEntry.getSitemap() == null ? "-" : robotsEntry.getSitemap().toNormalform(true));
                     }
                     
                     // try to load the url
                     if (robotsAllowed) try {
                         Request request = sb.loader.request(u, true, false);
-                        final Response response = sb.loader.load(request, CacheStrategy.NOCACHE, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+                        final Response response = sb.loader.load(request, CacheStrategy.NOCACHE, BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
                         if (response == null) {
                             prop.put("table_list_" + row + "_access", "no response");
                         } else {

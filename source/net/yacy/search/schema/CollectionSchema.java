@@ -32,7 +32,8 @@ public enum CollectionSchema implements SchemaDeclaration {
     
     // mandatory
     id(SolrType.string, true, true, false, false, false, "primary key of document, the URL hash **mandatory field**"),
-    sku(SolrType.text_en_splitting_tight, true, true, false, true, true, "url of document"), // a 'sku' is a stock-keeping unit, a unique identifier and a default field in unmodified solr.
+    sku(SolrType.string, true, true, false, true, true, "url of document"), // a 'sku' is a stock-keeping unit, a unique identifier and a default field in unmodified solr.
+    //sku(SolrType.text_en_splitting_tight, true, true, false, true, true, "url of document"), // a 'sku' is a stock-keeping unit, a unique identifier and a default field in unmodified solr.
     last_modified(SolrType.date, true, true, false, false, false, "last-modified from http header"),
     content_type(SolrType.string, true, true, true, false, false, "mime-type of document"),
     title(SolrType.text_general, true, true, true, false, true, "content of title tag"),

@@ -64,6 +64,7 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -877,9 +878,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param urlCitation
      * @return
      */
-    public void postprocessing(final Segment segment) {
-        if (!this.contains(CollectionSchema.process_sxt)) return;
-        if (!segment.connectedCitation()) return;
+    public int postprocessing(final Segment segment) {
+        if (!this.contains(CollectionSchema.process_sxt)) return 0;
+        if (!segment.connectedCitation()) return 0;
         SolrConnector connector = segment.fulltext().getDefaultConnector();
         connector.commit(true); // make sure that we have latest information that can be found
         ReferenceReportCache rrCache = segment.getReferenceReportCache();
@@ -967,6 +968,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         proccount_citationchange + " citation ranking changes.");
         } catch (InterruptedException e) {
         }
+        return proccount;
     }
 
     private static final class CRV {
@@ -1076,8 +1078,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         public int getInternalLinks(final byte[] id) {
             int il = (int) this.internal_links_counter.get(id);
             if (il >= 0) return il;
+            SolrConnector connector = this.segment.fulltext().getDefaultConnector();
+            if (connector == null) return 0;
             try {
-                SolrDocument doc = this.segment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(id), CollectionSchema.inboundlinkscount_i.getSolrFieldName());
+                SolrDocument doc = connector.getDocumentById(ASCII.String(id), CollectionSchema.inboundlinkscount_i.getSolrFieldName());
                 if (doc == null) {
                     this.internal_links_counter.put(id, 0);
                     return 0;
@@ -1188,7 +1192,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param httpstatus
      * @throws IOException
      */
-    public SolrInputDocument err(final DigestURI digestURI, final String failReason, final FailType failType, final int httpstatus) throws IOException {
+    public SolrInputDocument err(final DigestURI digestURI, String[] collections, final String failReason, final FailType failType, final int httpstatus) throws IOException {
         final SolrInputDocument solrdoc = new SolrInputDocument();
         add(solrdoc, CollectionSchema.id, ASCII.String(digestURI.hash()));
         add(solrdoc, CollectionSchema.sku, digestURI.toNormalform(true));
@@ -1209,6 +1213,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (contains(CollectionSchema.failreason_s)) add(solrdoc, CollectionSchema.failreason_s, failReason);
         if (contains(CollectionSchema.failtype_s)) add(solrdoc, CollectionSchema.failtype_s, failType.name());
         if (contains(CollectionSchema.httpstatus_i)) add(solrdoc, CollectionSchema.httpstatus_i, httpstatus);
+        if (contains(CollectionSchema.collection_sxt)) add(solrdoc, CollectionSchema.collection_sxt, collections);
         return solrdoc;
     }
 

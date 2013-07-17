@@ -55,7 +55,6 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -812,7 +811,7 @@ public class Segment {
 
         try {
             // parse the resource
-            final Document document = Document.mergeDocuments(url, null, loader.loadDocuments(loader.request(url, true, false), cacheStrategy, Integer.MAX_VALUE, null, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT));
+            final Document document = Document.mergeDocuments(url, null, loader.loadDocuments(loader.request(url, true, false), cacheStrategy, Integer.MAX_VALUE, null, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT));
             if (document == null) {
                 // delete just the url entry
                 fulltext().remove(urlhash);

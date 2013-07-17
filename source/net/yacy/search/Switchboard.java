@@ -113,6 +113,7 @@ import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.Memory;
 import net.yacy.crawler.CrawlStacker;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.HarvestProcess;
@@ -246,7 +247,7 @@ public final class Switchboard extends serverSwitch {
     public BlogBoardComments blogCommentDB;
     public RobotsTxt robots;
     public Map<String, Object[]> outgoingCookies, incomingCookies;
-    public volatile long proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
+    public volatile long proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess, adminAuthenticationLastAccess, optimizeLastRun;
     public Network yc;
     public ResourceObserver observer;
     public UserDB userDB;
@@ -563,6 +564,8 @@ public final class Switchboard extends serverSwitch {
         this.proxyLastAccess = System.currentTimeMillis() - 10000;
         this.localSearchLastAccess = System.currentTimeMillis() - 10000;
         this.remoteSearchLastAccess = System.currentTimeMillis() - 10000;
+        this.adminAuthenticationLastAccess = System.currentTimeMillis();
+        this.optimizeLastRun = System.currentTimeMillis();
         this.webStructure = new WebStructureGraph(new File(this.queuesRoot, "webStructure.map"));
 
         // configuring list path
@@ -1800,6 +1803,7 @@ public final class Switchboard extends serverSwitch {
             //if (log.isFine()) log.logFine("deQueue: not indexed any word in URL " + response.url() + "; cause: " + noIndexReason);
             addURLtoErrorDB(
                 response.url(),
+                response.profile(),
                 (referrerURL == null) ? null : referrerURL.hash(),
                 response.initiator(),
                 response.name(),
@@ -2011,6 +2015,8 @@ public final class Switchboard extends serverSwitch {
         return c;
     }
 
+    public static boolean postprocessingRunning = false;
+    
     public boolean cleanupJob() {
         
         try {
@@ -2099,8 +2105,6 @@ public final class Switchboard extends serverSwitch {
             } catch ( final Exception e ) {
                 ConcurrentLog.logException(e);
             }
-
-            execAPIActions();
 
             // close unused connections
             ConnectionInfo.cleanUp();
@@ -2281,10 +2285,38 @@ public final class Switchboard extends serverSwitch {
             // if no crawl is running and processing is activated:
             // execute the (post-) processing steps for all entries that have a process tag assigned
             if (this.crawlQueues.coreCrawlJobSize() == 0) {
-                if (this.crawlQueues.noticeURL.isEmpty()) this.crawlQueues.noticeURL.clear(); // flushes more caches                
-                index.fulltext().getDefaultConfiguration().postprocessing(index);
-                index.fulltext().getWebgraphConfiguration().postprocessing(index);
+                if (this.crawlQueues.noticeURL.isEmpty()) this.crawlQueues.noticeURL.clear(); // flushes more caches 
+                postprocessingRunning = true;
+                int proccount = 0;
+                proccount += index.fulltext().getDefaultConfiguration().postprocessing(index);
+                proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index);
+                long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
+                long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
+                long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
+                boolean optimizeRequired = deltaOptimize > 60000 * 60 * 3; // 3 hours
+                log.info("Solr auto-optimization: idleSearch=" + idleSearch + ", idleAdmin=" + idleAdmin + ", deltaOptimize=" + deltaOptimize + ", proccount=" + proccount);
+                if (idleAdmin > 600000) {
+                    // only run optimization if the admin is idle (10 minutes)
+                    if (proccount > 0) {
+                        log.info("Solr auto-optimization: running solr.optimize(8)");
+                        index.fulltext().optimize(8);
+                    }
+                    if (optimizeRequired) {
+                        int opts = idleSearch > 600000 ? 1 : 5; // > 10 minutes idle time will cause a full optimization, otherwise a 5-segment optimization
+                        log.info("Solr auto-optimization: running solr.optimize(" + opts + ")");
+                        index.fulltext().optimize(opts);
+                        this.optimizeLastRun = System.currentTimeMillis();
+                    }
+                }
+                postprocessingRunning = false;
             }
+
+            // execute api actions; this must be done after postprocessing because 
+            // these actions may also influence the search index/ call optimize steps
+            execAPIActions();
+            
+            // show deadlocks if there are any in the log
+            if (Memory.deadlocks() > 0) Memory.logDeadlocks();
             
             return true;
         } catch ( final InterruptedException e ) {
@@ -2443,6 +2475,7 @@ public final class Switchboard extends serverSwitch {
                 this.log.warn("the resource '" + response.url() + "' is missing in the cache.");
                 addURLtoErrorDB(
                     response.url(),
+                    response.profile(),
                     response.referrerHash(),
                     response.initiator(),
                     response.name(),
@@ -2467,6 +2500,7 @@ public final class Switchboard extends serverSwitch {
             this.log.warn("Unable to parse the resource '" + response.url() + "'. " + e.getMessage());
             addURLtoErrorDB(
                 response.url(),
+                response.profile(),
                 response.referrerHash(),
                 response.initiator(),
                 response.name(),
@@ -2566,6 +2600,7 @@ public final class Switchboard extends serverSwitch {
             if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + profile.indexUrlMustMatchPattern().pattern() + ", indexUrlMustNotMatchPattern = " + profile.indexUrlMustNotMatchPattern().pattern());
             addURLtoErrorDB(
                     in.queueEntry.url(),
+                    profile,
                     in.queueEntry.referrerHash(),
                     in.queueEntry.initiator(),
                     in.queueEntry.name(),
@@ -2581,6 +2616,7 @@ public final class Switchboard extends serverSwitch {
                 if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': denied by document-attached noindexing rule");
                 addURLtoErrorDB(
                     in.queueEntry.url(),
+                    profile,
                     in.queueEntry.referrerHash(),
                     in.queueEntry.initiator(),
                     in.queueEntry.name(),
@@ -2593,6 +2629,7 @@ public final class Switchboard extends serverSwitch {
                 if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': indexing prevented by regular expression on content; indexContentMustMatchPattern = " + profile.indexContentMustMatchPattern().pattern() + ", indexContentMustNotMatchPattern = " + profile.indexContentMustNotMatchPattern().pattern());
                 addURLtoErrorDB(
                     in.queueEntry.url(),
+                    profile,
                     in.queueEntry.referrerHash(),
                     in.queueEntry.initiator(),
                     in.queueEntry.name(),
@@ -2676,6 +2713,7 @@ public final class Switchboard extends serverSwitch {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by rule in document, process case=" + processCase);
             addURLtoErrorDB(
                 url,
+                profile,
                 (referrerURL == null) ? null : referrerURL.hash(),
                 queueEntry.initiator(),
                 dc_title,
@@ -2688,6 +2726,7 @@ public final class Switchboard extends serverSwitch {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
             addURLtoErrorDB(
                 url,
+                profile,
                 (referrerURL == null) ? null : referrerURL.hash(),
                 queueEntry.initiator(),
                 dc_title,
@@ -2873,7 +2912,7 @@ public final class Switchboard extends serverSwitch {
         // get a scraper to get the title
         Document scraper;
         try {
-            scraper = this.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+            scraper = this.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
         } catch (IOException e) {
             return "scraper cannot load URL: " + e.getMessage();
         }
@@ -2980,7 +3019,7 @@ public final class Switchboard extends serverSwitch {
                     String urlName = url.toNormalform(true);
                     Thread.currentThread().setName("Switchboard.addToIndex:" + urlName);
                     try {
-                        final Response response = Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, CrawlQueues.queuedMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+                        final Response response = Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
                         if (response == null) {
                             throw new IOException("response == null");
                         }
@@ -3044,9 +3083,9 @@ public final class Switchboard extends serverSwitch {
             }
             final String s;
             if (asglobal) {
-                s = this.crawlQueues.noticeURL.push(StackType.GLOBAL, request, this.robots);
+                s = this.crawlQueues.noticeURL.push(StackType.GLOBAL, request, profile, this.robots);
             } else {
-                s = this.crawlQueues.noticeURL.push(StackType.LOCAL, request, this.robots);
+                s = this.crawlQueues.noticeURL.push(StackType.LOCAL, request, profile, this.robots);
             }
     
             if (s != null) {
@@ -3097,6 +3136,7 @@ public final class Switchboard extends serverSwitch {
                 + (System.currentTimeMillis() - t));
         }
     }
+    
 
     /**
      * check authentication status for request access shall be granted if return value >= 2; these are the
@@ -3115,12 +3155,14 @@ public final class Switchboard extends serverSwitch {
         // authorization in case that there is no account stored
         final String adminAccountBase64MD5 = getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
         if ( adminAccountBase64MD5.isEmpty() ) {
+            adminAuthenticationLastAccess = System.currentTimeMillis();
             return 2; // no password stored; this should not happen for older peers
         }
 
         // authorization for localhost, only if flag is set to grant localhost access as admin
         final boolean accessFromLocalhost = requestHeader.accessFromLocalhost();
         if ( getConfigBool("adminAccountForLocalhost", false) && accessFromLocalhost ) {
+            adminAuthenticationLastAccess = System.currentTimeMillis();
             return 3; // soft-authenticated for localhost
         }
 
@@ -3135,11 +3177,13 @@ public final class Switchboard extends serverSwitch {
 
         // authorization by encoded password, only for localhost access
         if ( accessFromLocalhost && (adminAccountBase64MD5.equals(realmValue)) ) {
+            adminAuthenticationLastAccess = System.currentTimeMillis();
             return 3; // soft-authenticated for localhost
         }
 
         // authorization by hit in userDB
         if ( this.userDB.hasAdminRight(realmProp, requestHeader.getHeaderCookies()) ) {
+            adminAuthenticationLastAccess = System.currentTimeMillis();
             return 4; //return, because 4=max
         }
 
@@ -3148,6 +3192,7 @@ public final class Switchboard extends serverSwitch {
             return 1;
         }
         if ( adminAccountBase64MD5.equals(Digest.encodeMD5Hex(realmValue)) ) {
+            adminAuthenticationLastAccess = System.currentTimeMillis();
             return 4; // hard-authenticated, all ok
         }
         return 1;
@@ -3324,6 +3369,7 @@ public final class Switchboard extends serverSwitch {
 
     private void addURLtoErrorDB(
         final DigestURI url,
+        final CrawlProfile profile,
         final byte[] referrerHash,
         final byte[] initiator,
         final String name,
@@ -3343,7 +3389,7 @@ public final class Switchboard extends serverSwitch {
                 0,
                 0,
                 0);
-        this.crawlQueues.errorURL.push(bentry, initiator, new Date(), 0, failCategory, failreason, -1);
+        this.crawlQueues.errorURL.push(bentry, profile, initiator, new Date(), 0, failCategory, failreason, -1);
     }
 
     public final void heuristicSite(final SearchEvent searchEvent, final String host) {
