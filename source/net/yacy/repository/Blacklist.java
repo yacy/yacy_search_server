@@ -232,7 +232,7 @@ public class Blacklist {
                 loadedPathsPattern = new HashSet<Pattern>();
                 for (String a: loadedPaths) {
                     if (a.equals("*")) {
-                        loadedPathsPattern.add(Pattern.compile("(?i).*"));
+                        loadedPathsPattern.add(Pattern.compile(".*", Pattern.CASE_INSENSITIVE));
                         continue;
                     }
                     if (a.indexOf("?*", 0) > 0) {
@@ -240,7 +240,7 @@ public class Blacklist {
                         ConcurrentLog.warn("Blacklist", "ignored blacklist path to prevent 'Dangling meta character' exception: " + a);
                         continue;
                     }
-                    loadedPathsPattern.add(Pattern.compile("(?i)" + a)); // add case insesitive regex
+                    loadedPathsPattern.add(Pattern.compile(a, Pattern.CASE_INSENSITIVE)); // add case insesitive regex
                 }
 
                 // create new entry if host mask unknown, otherwise merge
@@ -348,29 +348,31 @@ public class Blacklist {
             blacklistMap.put(h, (hostList = new HashSet<Pattern>()));
         }
         
-        // Create add case insesitive regex
-        Pattern pattern = Pattern.compile("(?i)" + p); 
+        Pattern pattern = Pattern.compile(p, Pattern.CASE_INSENSITIVE); 
         
         hostList.add(pattern); 
-        
-        // append the line to the file
+
+        // Append the line to the file.
         PrintWriter pw = null;
-        try {
-            pw = new PrintWriter(new FileWriter(new File(blacklistRootPath, getFileName(blacklistType)), true));
-            pw.println(pattern);
-            pw.close();
+        try {        	
+        	if (!blacklistFileContains(blacklistRootPath, 
+        			getFileName(blacklistType), pattern.toString())) {
+	            pw = new PrintWriter(new FileWriter(new File(blacklistRootPath, 
+	            		getFileName(blacklistType)), true));
+	            pw.println(pattern);
+	            pw.close();
+        	}
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
         } finally {
-            if (pw != null) {
+        	if (pw != null) {
                 try {
-                    pw.close();
+                		pw.close();
                 } catch (final Exception e) {
                     ConcurrentLog.warn("Blacklist", "could not close stream to " + 
                     		getFileName(blacklistType) + "! " + e.getMessage());
                 }
-
-            }
+        	}
         }
     }
 
