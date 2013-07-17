@@ -60,8 +60,7 @@ import org.apache.solr.common.SolrInputDocument;
          */
         public ReindexSolrBusyThread(String query) {
             super(100,1000,0,500);
-            this.esc = Switchboard.getSwitchboard().index.fulltext().getDefaultEmbeddedConnector();
-            if  (this.esc == null) this.esc = Switchboard.getSwitchboard().index.fulltext().getDefaultRemoteSolrConnector();
+            this.esc = Switchboard.getSwitchboard().index.fulltext().getDefaultConnector();
             this.colcfg = Switchboard.getSwitchboard().index.fulltext().getDefaultConfiguration();
 
             if (Switchboard.getSwitchboard().getThread("reindexSolr") != null) {

@@ -53,7 +53,7 @@ public class IndexReIndexMonitor_p {
                 prop.put("showstartbutton", 0);
             }            
         } else {
-            if (post != null && post.containsKey("reindexnow")) {
+            if (post != null && post.containsKey("reindexnow") && sb.index.fulltext().connectedLocalSolr()) {
                 migration.reindexToschema(sb);
                 prop.put("showstartbutton", 0);
                 prop.put("querysize", "0");
