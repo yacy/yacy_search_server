@@ -70,20 +70,20 @@ public final class HTTPLoader {
         this.socketTimeout = (int) sb.getConfigLong("crawler.clientTimeout", 30000);
     }
 
-    public Response load(final Request entry, final int maxFileSize, final BlacklistType blacklistType, int timeout) throws IOException {
+    public Response load(final Request entry, CrawlProfile profile, final int maxFileSize, final BlacklistType blacklistType, int timeout) throws IOException {
         Latency.updateBeforeLoad(entry.url());
         final long start = System.currentTimeMillis();
-        final Response doc = load(entry, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize, blacklistType, timeout);
+        final Response doc = load(entry, profile, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize, blacklistType, timeout);
         Latency.updateAfterLoad(entry.url(), System.currentTimeMillis() - start);
         return doc;
     }
 
-    private Response load(final Request request, final int retryCount, final int maxFileSize, final BlacklistType blacklistType, int timeout) throws IOException {
+    private Response load(final Request request, CrawlProfile profile, final int retryCount, final int maxFileSize, final BlacklistType blacklistType, int timeout) throws IOException {
 
         byte[] myHash = ASCII.getBytes(this.sb.peers.mySeed().hash);
 
         if (retryCount < 0) {
-            this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "retry counter exceeded", -1);
+            this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "retry counter exceeded", -1);
             throw new IOException("retry counter exceeded for URL " + request.url().toString() + ". Processing aborted.");
         }
 
@@ -99,7 +99,7 @@ public final class HTTPLoader {
         // check if url is in blacklist
         final String hostlow = host.toLowerCase();
         if (blacklistType != null && Switchboard.urlBlacklist.isListed(blacklistType, hostlow, path)) {
-            this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
+            this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("CRAWLER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
         }
 
@@ -146,7 +146,7 @@ public final class HTTPLoader {
             redirectionUrlString = redirectionUrlString == null ? "" : redirectionUrlString.trim();
 
             if (redirectionUrlString.isEmpty()) {
-                this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "no redirection url provided, field '" + HeaderFramework.LOCATION + "' is empty", statusCode);
+                this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "no redirection url provided, field '" + HeaderFramework.LOCATION + "' is empty", statusCode);
                 throw new IOException("REJECTED EMTPY REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL " + requestURLString);
             }
 
@@ -160,32 +160,32 @@ public final class HTTPLoader {
             this.sb.webStructure.generateCitationReference(url, redirectionUrl);
             
             if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_RECORD_REDIRECTS, true)) {
-                this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.FINAL_REDIRECT_RULE, "redirect to " + redirectionUrlString, statusCode);
+                this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.FINAL_REDIRECT_RULE, "redirect to " + redirectionUrlString, statusCode);
             }
 
     	    if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {
                 // if we are already doing a shutdown we don't need to retry crawling
                 if (Thread.currentThread().isInterrupted()) {
-                    this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "server shutdown", statusCode);
+                    this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "server shutdown", statusCode);
                     throw new IOException("CRAWLER Retry of URL=" + requestURLString + " aborted because of server shutdown.");
                 }
 
                 // check if the url was already loaded
                 if (Cache.has(redirectionUrl.hash())) { // customer request
-                    this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "redirection to double content", statusCode);
+                    this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "redirection to double content", statusCode);
                     throw new IOException("CRAWLER Redirection of URL=" + requestURLString + " ignored. The url appears already in htcache");
                 }
 
                 // retry crawling with new url
                 request.redirectURL(redirectionUrl);
-                return load(request, retryCount - 1, maxFileSize, blacklistType, timeout);
+                return load(request, profile, retryCount - 1, maxFileSize, blacklistType, timeout);
     	    }
             // we don't want to follow redirects
-            this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
+            this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
             throw new IOException("REJECTED UNWANTED REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL " + requestURLString);
         } else if (responseBody == null) {
     	    // no response, reject file
-            this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "no response body", statusCode);
+            this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "no response body", statusCode);
             throw new IOException("REJECTED EMPTY RESPONSE BODY '" + client.getHttpResponse().getStatusLine() + "' for URL " + requestURLString);
     	} else if (statusCode == 200 || statusCode == 203) {
             // the transfer is ok
@@ -196,12 +196,11 @@ public final class HTTPLoader {
 
             // check length again in case it was not possible to get the length before loading
             if (maxFileSize >= 0 && contentLength > maxFileSize) {
-            	this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "file size limit exceeded", statusCode);
+            	this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "file size limit exceeded", statusCode);
             	throw new IOException("REJECTED URL " + request.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)");
             }
 
             // create a new cache entry
-            final CrawlProfile profile = request.profileHandle() == null ? null : this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
             response = new Response(
                     request,
                     requestHeader,
@@ -214,7 +213,7 @@ public final class HTTPLoader {
             return response;
     	} else {
             // if the response has not the right response type then reject file
-        	this.sb.crawlQueues.errorURL.push(request, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "wrong http status code", statusCode);
+        	this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "wrong http status code", statusCode);
             throw new IOException("REJECTED WRONG STATUS TYPE '" + client.getHttpResponse().getStatusLine() + "' for URL " + requestURLString);
         }
     }

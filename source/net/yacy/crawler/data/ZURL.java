@@ -172,6 +172,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
 
     public void push(
             final Request bentry,
+            final CrawlProfile profile,
             final byte[] executor,
             final Date workdate,
             final int workcount,
@@ -190,7 +191,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         if (this.fulltext.getDefaultConnector() != null && failCategory.store) {
             // send the error to solr
             try {
-                SolrInputDocument errorDoc = this.fulltext.getDefaultConfiguration().err(bentry.url(), failCategory.name() + " " + reason, failCategory.failType, httpcode);
+                SolrInputDocument errorDoc = this.fulltext.getDefaultConfiguration().err(bentry.url(), profile == null ? null : profile.collections(), failCategory.name() + " " + reason, failCategory.failType, httpcode);
                 this.fulltext.getDefaultConnector().add(errorDoc);
             } catch (final IOException e) {
                 ConcurrentLog.warn("SOLR", "failed to send error " + bentry.url().toNormalform(true) + " to solr: " + e.getMessage());

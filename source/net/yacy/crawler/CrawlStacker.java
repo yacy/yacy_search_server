@@ -149,7 +149,8 @@ public final class CrawlStacker {
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null) {
-                this.nextQueue.errorURL.push(entry, ASCII.getBytes(this.peers.mySeed().hash), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
+                final CrawlProfile profile = this.crawler.getActive(UTF8.getBytes(entry.profileHandle()));
+                this.nextQueue.errorURL.push(entry, profile, ASCII.getBytes(this.peers.mySeed().hash), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
             }
         } catch (final Exception e) {
             CrawlStacker.this.log.warn("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);

@@ -82,6 +82,7 @@ public class urls {
                 // place url to notice-url db
                 sb.crawlQueues.delegatedURL.push(
                                 entry,
+                                null,
                                 sb.peers.mySeed().hash.getBytes(),
                                 new Date(),
                                 0,

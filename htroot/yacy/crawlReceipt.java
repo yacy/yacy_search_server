@@ -163,6 +163,7 @@ public final class crawlReceipt {
         sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work is transformed into an error case
         sb.crawlQueues.errorURL.push(
                 entry.toBalancerEntry(iam),
+                null,
                 youare.getBytes(),
                 null,
                 0,

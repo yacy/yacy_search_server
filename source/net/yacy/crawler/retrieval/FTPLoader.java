@@ -101,6 +101,7 @@ public class FTPLoader {
         // create new ftp client
         final FTPClient ftpClient = new FTPClient();
 
+        final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
         // get a connection
         if (openConnection(ftpClient, entryUrl)) {
             // test if the specified file is a directory
@@ -130,7 +131,6 @@ public class FTPLoader {
                     final ResponseHeader responseHeader = new ResponseHeader(200);
                     responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
                     responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
-                    final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
                     response = new Response(
                             request,
                             requestHeader,
@@ -156,7 +156,7 @@ public class FTPLoader {
         if (berr.size() > 0 || response == null) {
             // some error logging
             final String detail = (berr.size() > 0) ? "Errorlog: " + berr.toString() : "";
-            this.sb.crawlQueues.errorURL.push(request, ASCII.getBytes(this.sb.peers.mySeed().hash), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, " ftp server download, " + detail, -1);
+            this.sb.crawlQueues.errorURL.push(request, profile, ASCII.getBytes(this.sb.peers.mySeed().hash), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, " ftp server download, " + detail, -1);
             throw new IOException("FTPLoader: Unable to download URL '" + request.url().toString() + "': " + detail);
         }
 

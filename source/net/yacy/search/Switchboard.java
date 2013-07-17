@@ -1803,6 +1803,7 @@ public final class Switchboard extends serverSwitch {
             //if (log.isFine()) log.logFine("deQueue: not indexed any word in URL " + response.url() + "; cause: " + noIndexReason);
             addURLtoErrorDB(
                 response.url(),
+                response.profile(),
                 (referrerURL == null) ? null : referrerURL.hash(),
                 response.initiator(),
                 response.name(),
@@ -2474,6 +2475,7 @@ public final class Switchboard extends serverSwitch {
                 this.log.warn("the resource '" + response.url() + "' is missing in the cache.");
                 addURLtoErrorDB(
                     response.url(),
+                    response.profile(),
                     response.referrerHash(),
                     response.initiator(),
                     response.name(),
@@ -2498,6 +2500,7 @@ public final class Switchboard extends serverSwitch {
             this.log.warn("Unable to parse the resource '" + response.url() + "'. " + e.getMessage());
             addURLtoErrorDB(
                 response.url(),
+                response.profile(),
                 response.referrerHash(),
                 response.initiator(),
                 response.name(),
@@ -2597,6 +2600,7 @@ public final class Switchboard extends serverSwitch {
             if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + profile.indexUrlMustMatchPattern().pattern() + ", indexUrlMustNotMatchPattern = " + profile.indexUrlMustNotMatchPattern().pattern());
             addURLtoErrorDB(
                     in.queueEntry.url(),
+                    profile,
                     in.queueEntry.referrerHash(),
                     in.queueEntry.initiator(),
                     in.queueEntry.name(),
@@ -2612,6 +2616,7 @@ public final class Switchboard extends serverSwitch {
                 if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': denied by document-attached noindexing rule");
                 addURLtoErrorDB(
                     in.queueEntry.url(),
+                    profile,
                     in.queueEntry.referrerHash(),
                     in.queueEntry.initiator(),
                     in.queueEntry.name(),
@@ -2624,6 +2629,7 @@ public final class Switchboard extends serverSwitch {
                 if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': indexing prevented by regular expression on content; indexContentMustMatchPattern = " + profile.indexContentMustMatchPattern().pattern() + ", indexContentMustNotMatchPattern = " + profile.indexContentMustNotMatchPattern().pattern());
                 addURLtoErrorDB(
                     in.queueEntry.url(),
+                    profile,
                     in.queueEntry.referrerHash(),
                     in.queueEntry.initiator(),
                     in.queueEntry.name(),
@@ -2707,6 +2713,7 @@ public final class Switchboard extends serverSwitch {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by rule in document, process case=" + processCase);
             addURLtoErrorDB(
                 url,
+                profile,
                 (referrerURL == null) ? null : referrerURL.hash(),
                 queueEntry.initiator(),
                 dc_title,
@@ -2719,6 +2726,7 @@ public final class Switchboard extends serverSwitch {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
             addURLtoErrorDB(
                 url,
+                profile,
                 (referrerURL == null) ? null : referrerURL.hash(),
                 queueEntry.initiator(),
                 dc_title,
@@ -3361,6 +3369,7 @@ public final class Switchboard extends serverSwitch {
 
     private void addURLtoErrorDB(
         final DigestURI url,
+        final CrawlProfile profile,
         final byte[] referrerHash,
         final byte[] initiator,
         final String name,
@@ -3380,7 +3389,7 @@ public final class Switchboard extends serverSwitch {
                 0,
                 0,
                 0);
-        this.crawlQueues.errorURL.push(bentry, initiator, new Date(), 0, failCategory, failreason, -1);
+        this.crawlQueues.errorURL.push(bentry, profile, initiator, new Date(), 0, failCategory, failreason, -1);
     }
 
     public final void heuristicSite(final SearchEvent searchEvent, final String host) {

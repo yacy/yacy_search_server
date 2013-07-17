@@ -64,6 +64,7 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -1191,7 +1192,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param httpstatus
      * @throws IOException
      */
-    public SolrInputDocument err(final DigestURI digestURI, final String failReason, final FailType failType, final int httpstatus) throws IOException {
+    public SolrInputDocument err(final DigestURI digestURI, String[] collections, final String failReason, final FailType failType, final int httpstatus) throws IOException {
         final SolrInputDocument solrdoc = new SolrInputDocument();
         add(solrdoc, CollectionSchema.id, ASCII.String(digestURI.hash()));
         add(solrdoc, CollectionSchema.sku, digestURI.toNormalform(true));
@@ -1212,6 +1213,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (contains(CollectionSchema.failreason_s)) add(solrdoc, CollectionSchema.failreason_s, failReason);
         if (contains(CollectionSchema.failtype_s)) add(solrdoc, CollectionSchema.failtype_s, failType.name());
         if (contains(CollectionSchema.httpstatus_i)) add(solrdoc, CollectionSchema.httpstatus_i, httpstatus);
+        if (contains(CollectionSchema.collection_sxt)) add(solrdoc, CollectionSchema.collection_sxt, collections);
         return solrdoc;
     }
 

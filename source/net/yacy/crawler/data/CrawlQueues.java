@@ -612,6 +612,7 @@ public class CrawlQueues {
         private Request request;
         private final Integer code;
         private final long start;
+        private final CrawlProfile profile;
 
         private Loader(final Request entry) {
             this.start = System.currentTimeMillis();
@@ -619,6 +620,7 @@ public class CrawlQueues {
             this.request.setStatus("worker-initialized", WorkflowJob.STATUS_INITIATED);
             this.code = Integer.valueOf(entry.hashCode());
             this.setPriority(Thread.MIN_PRIORITY); // http requests from the crawler should not cause that other functions work worse
+            this.profile = CrawlQueues.this.sb.crawler.getActive(UTF8.getBytes(this.request.profileHandle()));
         }
 
         private long age() {
@@ -637,6 +639,7 @@ public class CrawlQueues {
                     //if (log.isFine()) log.logFine("Crawling of URL '" + request.url().toString() + "' disallowed by robots.txt.");
                     CrawlQueues.this.errorURL.push(
                             this.request,
+                            profile,
                             ASCII.getBytes(CrawlQueues.this.sb.peers.mySeed().hash),
                             new Date(),
                             1,
@@ -652,8 +655,7 @@ public class CrawlQueues {
                     // returns null if everything went fine, a fail reason string if a problem occurred
                     try {
                         this.request.setStatus("loading", WorkflowJob.STATUS_RUNNING);
-                        final CrawlProfile e = CrawlQueues.this.sb.crawler.getActive(UTF8.getBytes(this.request.profileHandle()));
-                        final Response response = CrawlQueues.this.sb.loader.load(this.request, e == null ? CacheStrategy.IFEXIST : e.cacheStrategy(), BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
+                        final Response response = CrawlQueues.this.sb.loader.load(this.request, profile == null ? CacheStrategy.IFEXIST : profile.cacheStrategy(), BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
                         if (response == null) {
                             this.request.setStatus("error", WorkflowJob.STATUS_FINISHED);
                             if (CrawlQueues.this.log.isFine()) {
@@ -677,6 +679,7 @@ public class CrawlQueues {
                     if (result != null) {
                         CrawlQueues.this.errorURL.push(
                                 this.request,
+                                profile,
                                 ASCII.getBytes(CrawlQueues.this.sb.peers.mySeed().hash),
                                 new Date(),
                                 1,
@@ -690,6 +693,7 @@ public class CrawlQueues {
             } catch (final Exception e) {
                 CrawlQueues.this.errorURL.push(
                         this.request,
+                        profile,
                         ASCII.getBytes(CrawlQueues.this.sb.peers.mySeed().hash),
                         new Date(),
                         1,
