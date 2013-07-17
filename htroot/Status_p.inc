@@ -3,18 +3,17 @@
   <legend>System Status</legend>
   <dl>
 
-    <dt>Process</dt>
-    <dd>#[versionpp]#
+    <dt>System</dt>
+    <dd>YaCy version #[versionpp]#
     #(peerStatistics)#
       Unknown
       ::
       <div>Uptime: #[uptime]#</div>
-      #(/peerStatistics)#
-      </dd>
+    #(/peerStatistics)#
+    <div>Processors: #[processors]#</div>
+    <div>Load: #[load]#</div>
     
-    <dt>System Resources</dt>
-    <dd>Processors: #[processors]#</dd>
-    
+    </dd>
     <dt>Protection</dt>
     <dd>#(protection)#
       <strong>Password is missing.</strong>
