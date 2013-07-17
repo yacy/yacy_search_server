@@ -113,6 +113,7 @@ import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.Memory;
 import net.yacy.crawler.CrawlStacker;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.HarvestProcess;
@@ -2312,6 +2313,9 @@ public final class Switchboard extends serverSwitch {
             // execute api actions; this must be done after postprocessing because 
             // these actions may also influence the search index/ call optimize steps
             execAPIActions();
+            
+            // show deadlocks if there are any in the log
+            if (Memory.deadlocks() > 0) Memory.logDeadlocks();
             
             return true;
         } catch ( final InterruptedException e ) {
