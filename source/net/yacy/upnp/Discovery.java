@@ -170,7 +170,7 @@ public class Discovery {
             try {
               UPNPRootDevice device = new UPNPRootDevice( location, maxAge, firmware, usn, udn );
               devices.put( usn, device );
-            } catch ( Exception ex ) {
+            } catch (final  Exception ex ) {
               log.error( "Error occured during upnp root device object creation from location " + location, ex );             
             }
           }
@@ -200,7 +200,7 @@ public class Discovery {
 
     try {
         Thread.sleep( timeOut );
-    } catch ( InterruptedException ex ) {
+    } catch (final  InterruptedException ex ) {
       // don't care
     }
 

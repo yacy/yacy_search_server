@@ -115,12 +115,12 @@ public class tarParser extends AbstractParser implements Parser {
             byte[] b = new byte[5];
             raf.read(b);
             return MAGIC.equals(UTF8.String(b));
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             return false;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return false;
         } finally {
-            if (raf != null) try {raf.close();} catch (IOException e) {}
+            if (raf != null) try {raf.close();} catch (final IOException e) {}
         }
     }
 }

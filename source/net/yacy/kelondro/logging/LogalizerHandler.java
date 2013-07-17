@@ -55,7 +55,7 @@ public final class LogalizerHandler extends Handler {
             if (temp != null) try {
                 final int returnV = temp.parse(record.getLevel().toString(), record.getMessage());
                 if (debug) System.out.println("Logalizertest: " + returnV + " --- " + record.getLevel());
-            } catch (Exception e) {}
+            } catch (final Exception e) {}
         }
         flush();
     }

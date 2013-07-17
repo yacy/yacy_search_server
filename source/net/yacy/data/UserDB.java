@@ -73,7 +73,7 @@ public final class UserDB {
         userTableFile.getParentFile().mkdirs();
         try {
             userTable = new MapHeap(userTableFile, 128, NaturalOrder.naturalOrder, 1024 * 64, 10, '_');
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
     }
@@ -103,7 +103,7 @@ public final class UserDB {
             record = userTable.get(UTF8.getBytes(userName));
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
         }
         

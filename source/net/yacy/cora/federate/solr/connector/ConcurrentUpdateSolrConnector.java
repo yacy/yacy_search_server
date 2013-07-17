@@ -71,11 +71,11 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
                         removeIdFromUpdateQueue(id);
                         ConcurrentUpdateSolrConnector.this.connector.deleteById(id);
                         ConcurrentUpdateSolrConnector.this.idCache.remove(ASCII.getBytes(id));
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         ConcurrentLog.logException(e);
                     }
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 ConcurrentLog.logException(e);
             }
         }
@@ -90,11 +90,11 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
                     try {
                         updateIdCache((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                         ConcurrentUpdateSolrConnector.this.connector.add(doc);
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         ConcurrentLog.logException(e);
                     }
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 ConcurrentLog.logException(e);
             }
         }
@@ -192,7 +192,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         if (this.idCache.size() >= this.idCacheCapacity || MemoryControl.shortStatus()) this.idCache.clear();
         try {
             this.idCache.put(ASCII.getBytes(id));
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             this.idCache.clear();
         }
     }
@@ -229,12 +229,12 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
             long timeout = System.currentTimeMillis() + 1000;
             ensureAliveDeletionHandler();
             while (this.deleteQueue.size() > 0) {
-                try {Thread.sleep(10);} catch (InterruptedException e) {}
+                try {Thread.sleep(10);} catch (final InterruptedException e) {}
                 if (System.currentTimeMillis() > timeout) break;
             }
             ensureAliveUpdateHandler();
             while (this.updateQueue.size() > 0) {
-                try {Thread.sleep(10);} catch (InterruptedException e) {}
+                try {Thread.sleep(10);} catch (final InterruptedException e) {}
                 if (System.currentTimeMillis() > timeout) break;
             }
         }
@@ -249,11 +249,11 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     @Override
     public void close() {
         ensureAliveDeletionHandler();
-        try {this.deleteQueue.put(POISON_ID);} catch (InterruptedException e) {}
+        try {this.deleteQueue.put(POISON_ID);} catch (final InterruptedException e) {}
         ensureAliveUpdateHandler();
-        try {this.updateQueue.put(POISON_DOCUMENT);} catch (InterruptedException e) {}
-        try {this.deletionHandler.join();} catch (InterruptedException e) {}
-        try {this.updateHandler.join();} catch (InterruptedException e) {}
+        try {this.updateQueue.put(POISON_DOCUMENT);} catch (final InterruptedException e) {}
+        try {this.deletionHandler.join();} catch (final InterruptedException e) {}
+        try {this.updateHandler.join();} catch (final InterruptedException e) {}
         this.connector.close();
         this.idCache.clear();
     }
@@ -262,8 +262,8 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     public void clear() throws IOException {
         this.deleteQueue.clear();
         this.updateQueue.clear();
-        try {this.updateQueue.put(POISON_DOCUMENT);} catch (InterruptedException e) {}
-        try {this.updateHandler.join();} catch (InterruptedException e) {}
+        try {this.updateQueue.put(POISON_DOCUMENT);} catch (final InterruptedException e) {}
+        try {this.updateHandler.join();} catch (final InterruptedException e) {}
         this.connector.clear();
         this.idCache.clear();
     }
@@ -273,7 +273,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         removeIdFromUpdateQueue(id);
         this.idCache.remove(ASCII.getBytes(id));
         if (this.deletionHandler.isAlive()) {
-            try {this.deleteQueue.put(id);} catch (InterruptedException e) {}
+            try {this.deleteQueue.put(id);} catch (final InterruptedException e) {}
         } else {
             this.connector.deleteById(id);
         }
@@ -286,7 +286,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
             this.idCache.remove(ASCII.getBytes(id));
         }
         if (this.deletionHandler.isAlive()) {
-            for (String id: ids) try {this.deleteQueue.put(id);} catch (InterruptedException e) {}
+            for (String id: ids) try {this.deleteQueue.put(id);} catch (final InterruptedException e) {}
         } else {
             this.connector.deleteByIds(ids);
         }
@@ -300,7 +300,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
                 try {
                     ConcurrentUpdateSolrConnector.this.connector.deleteByQuery(querystring);
                     ConcurrentUpdateSolrConnector.this.idCache.clear();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     ConcurrentLog.severe("ConcurrentUpdateSolrConnector", e.getMessage(), e);
                 }
                 ConcurrentUpdateSolrConnector.this.connector.commit(true);
@@ -351,7 +351,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         removeIdFromDeleteQueue(id);
         updateIdCache(id);
         if (this.updateHandler.isAlive()) {
-            try {this.updateQueue.put(solrdoc);} catch (InterruptedException e) {}
+            try {this.updateQueue.put(solrdoc);} catch (final InterruptedException e) {}
         } else {
             this.connector.add(solrdoc);
         }
@@ -365,7 +365,7 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
             updateIdCache(id);
         }
         if (this.updateHandler.isAlive()) {
-            for (SolrInputDocument doc: solrdocs) try {this.updateQueue.put(doc);} catch (InterruptedException e) {}
+            for (SolrInputDocument doc: solrdocs) try {this.updateQueue.put(doc);} catch (final InterruptedException e) {}
         } else {
             this.connector.add(solrdocs);
         }

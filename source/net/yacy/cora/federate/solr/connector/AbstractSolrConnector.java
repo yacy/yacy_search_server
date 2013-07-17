@@ -113,18 +113,18 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                     try {
                         SolrDocumentList sdl = getDocumentListByQuery(querystring, o, pagesize, fields);
                         for (SolrDocument d: sdl) {
-                            try {queue.put(d);} catch (InterruptedException e) {break;}
+                            try {queue.put(d);} catch (final InterruptedException e) {break;}
                             count++;
                         }
                         if (sdl.size() < pagesize) break;
                         o += pagesize;
-                    } catch (SolrException e) {
+                    } catch (final SolrException e) {
                         break;
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         break;
                     }
                 }
-                try {queue.put(AbstractSolrConnector.POISON_DOCUMENT);} catch (InterruptedException e1) {}
+                try {queue.put(AbstractSolrConnector.POISON_DOCUMENT);} catch (final InterruptedException e1) {}
             }
         };
         t.start();
@@ -143,17 +143,17 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                     try {
                         SolrDocumentList sdl = getDocumentListByQuery(querystring, o, pagesize, CollectionSchema.id.getSolrFieldName());
                         for (SolrDocument d: sdl) {
-                            try {queue.put((String) d.getFieldValue(CollectionSchema.id.getSolrFieldName()));} catch (InterruptedException e) {break;}
+                            try {queue.put((String) d.getFieldValue(CollectionSchema.id.getSolrFieldName()));} catch (final InterruptedException e) {break;}
                         }
                         if (sdl.size() < pagesize) break;
                         o += pagesize;
-                    } catch (SolrException e) {
+                    } catch (final SolrException e) {
                         break;
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         break;
                     }
                 }
-                try {queue.put(AbstractSolrConnector.POISON_ID);} catch (InterruptedException e1) {}
+                try {queue.put(AbstractSolrConnector.POISON_ID);} catch (final InterruptedException e1) {}
             }
         };
         t.start();
@@ -170,7 +170,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
                     String s = queue.poll(60000, TimeUnit.MILLISECONDS);
                     if (s == AbstractSolrConnector.POISON_ID) return null;
                     return s;
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     return null;
                 }
             }

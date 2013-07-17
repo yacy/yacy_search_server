@@ -115,9 +115,9 @@ public class WorkTables extends Tables {
         Row row = null;
         try {
             row = (pk == null) ? null : super.select(TABLE_API_NAME, pk);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
         }
 
@@ -149,9 +149,9 @@ public class WorkTables extends Tables {
                 super.update(TABLE_API_NAME, row);
                 assert pk != null;
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
         }
         ConcurrentLog.info("APICALL", apiurl);
@@ -200,9 +200,9 @@ public class WorkTables extends Tables {
             data.put(TABLE_API_COL_APICALL_SCHEDULE_UNIT, UTF8.getBytes(unit));
             calculateAPIScheduler(data, false); // set next execution time
             pk = super.insert(TABLE_API_NAME, data);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
         }
         ConcurrentLog.info("APICALL", apiurl);
@@ -230,9 +230,9 @@ public class WorkTables extends Tables {
             row = null;
             try {
                 row = select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
-            } catch (SpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 ConcurrentLog.logException(e);
             }
             if (row == null) continue;
@@ -242,7 +242,7 @@ public class WorkTables extends Tables {
             try {
                 client.GETbytes(url);
                 l.put(url, client.getStatusCode());
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
                 l.put(url, -1);
             }
@@ -260,7 +260,7 @@ public class WorkTables extends Tables {
         try {
             client.GETbytes(url);
             return client.getStatusCode();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
             return -1;
         }
@@ -315,7 +315,7 @@ public class WorkTables extends Tables {
                 SimpleDateFormat dateFormat  = new SimpleDateFormat("yyyyMMddHHmm");
                 d = dateFormat.parse(dateFormat.format(new Date()).substring(0, 8) + action).getTime();
                 if (d < System.currentTimeMillis()) d += day;
-            } catch (ParseException e) {} else {
+            } catch (final ParseException e) {} else {
                 row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, "");
                 return;
             }
@@ -342,7 +342,7 @@ public class WorkTables extends Tables {
             data.put(TABLE_SEARCH_FAILURE_COL_WORDS, queryHashes.export());
             data.put(TABLE_SEARCH_FAILURE_COL_COMMENT, UTF8.getBytes(reason));
             super.insert(TABLE_SEARCH_FAILURE_NAME, url.hash(),  data);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
     }
@@ -350,7 +350,7 @@ public class WorkTables extends Tables {
     public boolean failURLsContains(byte[] urlhash) {
         try {
             return super.has(TABLE_SEARCH_FAILURE_NAME, urlhash);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
             return false;
         }
@@ -373,7 +373,7 @@ public class WorkTables extends Tables {
 						this.delete(TABLE_SEARCH_FAILURE_NAME, row.getPK());
 					}
 				}
-			} catch (IOException e) {
+			} catch (final IOException e) {
 	            ConcurrentLog.logException(e);
 			}
     	}
@@ -389,7 +389,7 @@ public class WorkTables extends Tables {
                 row = i.next();
                 comments.put(row.getPK(), UTF8.String(row.get(WorkTables.TABLE_API_COL_COMMENT)));
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
         return comments;

@@ -60,7 +60,7 @@ public class Peer extends HashMap<Peer.Schema, String> implements Comparable<Pee
         if (x == null) return Integer.MAX_VALUE;
         try {
             return Integer.parseInt(x);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             return Integer.MAX_VALUE;
         }
     }
@@ -83,7 +83,7 @@ public class Peer extends HashMap<Peer.Schema, String> implements Comparable<Pee
         x = x.substring(0, p);
         try {
             return Float.parseFloat(x);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             return 0.0f;
         }
     }

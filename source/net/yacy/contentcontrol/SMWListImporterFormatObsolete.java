@@ -42,16 +42,16 @@ public class SMWListImporterFormatObsolete implements Runnable{
 				this.parseItem (iterator.next());
 			}
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			ConcurrentLog.logException(e);
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			ConcurrentLog.logException(e);
 		} finally {
 
 			try {
 				ConcurrentLog.info("SMWLISTSYNC", "Importer inserted poison pill in queue");
 				this.listEntries.put(SMWListRow.POISON);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				ConcurrentLog.logException(e);
 			}
 		}
@@ -81,7 +81,7 @@ public class SMWListImporterFormatObsolete implements Runnable{
     		
     		this.listEntries.put(row);
     		
-    	} catch (Exception e) {
+    	} catch (final Exception e) {
     		ConcurrentLog.info("SMWLISTSYNC", "import of entry failed");
     	}
 		
@@ -109,7 +109,7 @@ public class SMWListImporterFormatObsolete implements Runnable{
 	public SMWListRow take() {
         try {
             return this.listEntries.take();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             ConcurrentLog.logException(e);
             return null;
         }

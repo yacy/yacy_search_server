@@ -62,7 +62,7 @@ public class DatabaseConnection {
     public void setAutoCommit(boolean b) {
     	try {
 			this.connection.setAutoCommit(b);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 		    ConcurrentLog.logException(e);
 		}
     }
@@ -77,11 +77,11 @@ public class DatabaseConnection {
                 return rs.getInt(1);
             }
             return 0;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw e;
         } finally {
-            if (rs != null) try {rs.close();} catch (SQLException e) {}
-            if (stmt != null) try {stmt.close();} catch (SQLException e) {}
+            if (rs != null) try {rs.close();} catch (final SQLException e) {}
+            if (stmt != null) try {stmt.close();} catch (final SQLException e) {}
         }
     }
     
@@ -90,7 +90,7 @@ public class DatabaseConnection {
             try {
             	connection.close();
             	connection = null;
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
             }
         }
     }

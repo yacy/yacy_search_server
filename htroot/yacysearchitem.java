@@ -169,7 +169,7 @@ public class yacysearchitem {
 						if (sb.crawlStacker.urlInAcceptedDomain(new DigestURI (modifyURL)) == null) {
 							modifyURL = "./proxy.html?url="+modifyURL;
 						}
-					} catch (MalformedURLException e) {
+					} catch (final MalformedURLException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
@@ -180,7 +180,7 @@ public class yacysearchitem {
 						if ((new DigestURI (modifyURL).getHost().endsWith(".yacy"))) {
 							modifyURL = "./proxy.html?url="+modifyURL;
 						}
-					} catch (MalformedURLException e) {
+					} catch (final MalformedURLException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}

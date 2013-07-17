@@ -49,7 +49,7 @@ public class ODContentHandler extends DefaultHandler {
 	public void characters(final char ch[], final int start, final int length) {
 	    try {
 		out.write(ch, start, length);
-	    } catch (IOException e) {
+	    } catch (final IOException e) {
 	        ConcurrentLog.logException(e);
 	    }
 	}
@@ -59,7 +59,7 @@ public class ODContentHandler extends DefaultHandler {
 		// add newlines after paragraphs 
 		try {
 		    out.append("\n");
-		} catch (IOException e) {
+		} catch (final IOException e) {
 		    ConcurrentLog.logException(e);
 		}
 	    }

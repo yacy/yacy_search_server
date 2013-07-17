@@ -157,7 +157,7 @@ public class Context<
             // if this state is reached then all possible findings will cause a lost situation
 
             return null;
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             return null;
         }
     }
@@ -210,7 +210,7 @@ public class Context<
             } else {
                 System.out.println("timed-out termination");
             }
-        } catch (InterruptedException e) {}
+        } catch (final InterruptedException e) {}
         if (announceCompletionAfterTimeOut) announceCompletion();
     }
 

@@ -91,7 +91,7 @@ public class Switchboard {
                         InfoBox.setText(InfoBoxMessage);
                     }
                 }
-                try {Thread.sleep(steptime);} catch (InterruptedException e) {}
+                try {Thread.sleep(steptime);} catch (final InterruptedException e) {}
             }
         }
     }
@@ -163,10 +163,10 @@ public class Switchboard {
     public static void load(File propFile) {
         try {
             properties.load(new FileInputStream(propFile));
-        } catch (FileNotFoundException e1) {
+        } catch (final FileNotFoundException e1) {
             log.info("error: file dispatcher.properties does not exist. Exit");
             System.exit(-1);
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             log.info("error: file dispatcher.properties cannot be readed. Exit");
             System.exit(-1);
         }

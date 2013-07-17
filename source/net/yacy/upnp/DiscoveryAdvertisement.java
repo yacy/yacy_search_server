@@ -211,7 +211,7 @@ public class DiscoveryAdvertisement implements Runnable
                     // let's wait a few ms
                     try {
                         Thread.sleep(2);
-                    } catch ( InterruptedException ex ) {
+                    } catch (final  InterruptedException ex ) {
                         // don t care
                     }
                 }
@@ -247,12 +247,12 @@ public class DiscoveryAdvertisement implements Runnable
         while ( this.inService ) {
             try {
                 listenBroadCast();
-            } catch ( SocketTimeoutException ex ) {
+            } catch (final  SocketTimeoutException ex ) {
                 // ignoring
-            } catch ( IOException ioEx ) {
+            } catch (final  IOException ioEx ) {
                 // fail silently
                 //log.warn("IO Exception during UPNP DiscoveryAdvertisement messages listening thread");
-            } catch ( Exception ex ) {
+            } catch (final  Exception ex ) {
                 // fail silently
                 //log.warn("Fatal Error during UPNP DiscoveryAdvertisement messages listening thread, thread will exit");
                 this.inService = false;
@@ -265,7 +265,7 @@ public class DiscoveryAdvertisement implements Runnable
         try {
             this.skt.leaveGroup(InetAddress.getByName(Discovery.SSDP_IP));
             this.skt.close();
-        } catch ( Exception ex ) {
+        } catch (final  Exception ex ) {
             // ignoring
         }
     }
@@ -278,7 +278,7 @@ public class DiscoveryAdvertisement implements Runnable
         HttpResponse msg = null;
         try {
             msg = new HttpResponse(received);
-        } catch ( IllegalArgumentException ex ) {
+        } catch (final  IllegalArgumentException ex ) {
             // crappy http sent
             if ( log.isDebugEnabled() ) {
                 log.debug("Skipping uncompliant HTTP message " + received);

@@ -98,7 +98,7 @@ public class sitemapParser extends AbstractParser implements Parser {
                     new HashMap<DigestURI, ImageEntry>(),
                     false);
             docs.add(doc);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             continue;
         }
 
@@ -131,7 +131,7 @@ public class sitemapParser extends AbstractParser implements Parser {
             }
             final ByteCountInputStream counterStream = new ByteCountInputStream(contentStream, null);
             return new SitemapReader(counterStream);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw e;
         }
     }
@@ -163,28 +163,28 @@ public class sitemapParser extends AbstractParser implements Parser {
                             while ((item = r.take()) != POISON_URLEntry) {
                                 try {
                                     this.queue.put(item);
-                                } catch (InterruptedException e) {
+                                } catch (final InterruptedException e) {
                                     break;
                                 }
                             }
-                        } catch (IOException e) {}
+                        } catch (final IOException e) {}
                     }
                 }
                 final NodeList urlEntryNodes = doc.getElementsByTagName("url");
                 for (int i = 0; i < urlEntryNodes.getLength(); i++) {
                     try {
                         this.queue.put(new URLEntry((Element) urlEntryNodes.item(i)));
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                         break;
                     }
                 }
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 ConcurrentLog.logException(e);
             }
 
             try {
                 this.queue.put(POISON_URLEntry);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
             }
         }
         /**
@@ -195,7 +195,7 @@ public class sitemapParser extends AbstractParser implements Parser {
         public URLEntry take() {
             try {
                 return this.queue.take();
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 return POISON_URLEntry;
             }
         }

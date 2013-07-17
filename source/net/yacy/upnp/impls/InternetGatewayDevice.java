@@ -123,9 +123,9 @@ public class InternetGatewayDevice {
             ActionResponse resp = msg.getMessage( "GetActiveConnection" ).setInputParameter( "NewActiveConnectionIndex", 0 ).service();
             deviceContainer = resp.getOutActionArgumentValue( "NewActiveConnDeviceContainer" );
             serviceID = resp.getOutActionArgumentValue( "NewActiveConnectionServiceID" );
-          } catch ( IOException ex ) {
+          } catch (final  IOException ex ) {
             // no response returned
-          } catch ( UPNPResponseException respEx ) {
+          } catch (final  UPNPResponseException respEx ) {
             // should never happen unless the damn thing is bugged
           }
           if ( deviceContainer != null && deviceContainer.trim().length() > 0 &&
@@ -164,16 +164,16 @@ public class InternetGatewayDevice {
     String ipToParse = null;
     try {
       ipToParse = msg.service().getOutActionArgumentValue( "NewExternalIPAddress" );
-    } catch ( UPNPResponseException ex ) {
+    } catch (final  UPNPResponseException ex ) {
       // ok probably not the IP interface
-    } catch ( IOException ex ) {
+    } catch (final  IOException ex ) {
       // not really normal
       //log.warn( "IOException occured during device detection", ex );
     }
     if ( ipToParse != null && ipToParse.length() > 0 && !ipToParse.equals( "0.0.0.0" ) ) {
       try {
         return InetAddress.getByName( ipToParse ) != null;
-      } catch ( UnknownHostException ex ) {
+      } catch (final  UnknownHostException ex ) {
         // ok a crappy IP provided, definitly the wrong interface..
       }
     }
@@ -254,7 +254,7 @@ public class InternetGatewayDevice {
       for (UPNPRootDevice device : devices) {
         try {
           valid.add( new InternetGatewayDevice( device, WANIPConnection, WANPPPConnection ) );
-        } catch ( UnsupportedOperationException ex ) {
+        } catch (final  UnsupportedOperationException ex ) {
           // the device is either not IP or PPP
           //if ( log.isDebugEnabled() ) log.debug( "UnsupportedOperationException during discovery " + ex.getMessage() );
         }
@@ -299,7 +299,7 @@ public class InternetGatewayDevice {
 
     try {
       return msg.service();
-    } catch ( UPNPResponseException ex ) {
+    } catch (final  UPNPResponseException ex ) {
       if ( ex.getDetailErrorCode() == 714 ) {
         return null;
       }
@@ -331,7 +331,7 @@ public class InternetGatewayDevice {
 
     try {
       return msg.service();
-    } catch ( UPNPResponseException ex ) {
+    } catch (final  UPNPResponseException ex ) {
       if ( ex.getDetailErrorCode() == 714 ) {
         return null;
       }
@@ -385,7 +385,7 @@ public class InternetGatewayDevice {
     try {
       msg.service();
       return true;
-    } catch ( UPNPResponseException ex ) {
+    } catch (final  UPNPResponseException ex ) {
       if ( ex.getDetailErrorCode() == 718 ) {
         return false;
       }
@@ -414,7 +414,7 @@ public class InternetGatewayDevice {
     try {
       msg.service();
       return true;
-    } catch ( UPNPResponseException ex ) {
+    } catch (final  UPNPResponseException ex ) {
       if ( ex.getDetailErrorCode() == 714 ) {
         return false;
       }
@@ -435,7 +435,7 @@ public class InternetGatewayDevice {
     try {
       StateVariableResponse resp = natTableSize.service();
       rtrval = new Integer(  resp.getStateVariableValue() );
-    } catch ( UPNPResponseException ex ) {
+    } catch (final  UPNPResponseException ex ) {
       // 404 can happen if device do not implement state variables queries
       if ( ex.getDetailErrorCode() != 404 ) {
         throw ex;
@@ -461,7 +461,7 @@ public class InternetGatewayDevice {
         this.getGenericPortMappingEntry( i );
         startIndex = i;
         break;
-      } catch ( UPNPResponseException ex ) {
+      } catch (final  UPNPResponseException ex ) {
         // some devices return the 402 code
         if ( ex.getDetailErrorCode() != 713 && ex.getDetailErrorCode() != 402 ) {
           throw ex;
@@ -479,7 +479,7 @@ public class InternetGatewayDevice {
       try {
         this.getGenericPortMappingEntry( startIndex++ );
         size++;
-      } catch ( UPNPResponseException ex ) {
+      } catch (final  UPNPResponseException ex ) {
         if ( ex.getDetailErrorCode() == 713 || ex.getDetailErrorCode() == 402 ) {
           /// ok index unknown
           break;

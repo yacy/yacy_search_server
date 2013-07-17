@@ -559,7 +559,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         } finally {
             try {
                 writer.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
             }
         }
         for (final Map.Entry<DigestURI, Properties> entry: scraper.getAnchors().entrySet()) {

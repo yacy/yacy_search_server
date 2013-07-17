@@ -47,7 +47,7 @@ public class svnRevNrParser extends org.apache.tools.ant.Task{
                 FileInputStream input = new FileInputStream(entriesFile);
                 input.read(data);
                 dataStr = new String(data);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new BuildException("Unable to read the SVN entries file '" + this.fileName + "'"); 
             }
             

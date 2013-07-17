@@ -94,7 +94,7 @@ public class IndexDeletion_p {
                     c++;
                 }
                 prop.put("collectiondelete-select_list", c );
-            } catch (IOException e1) {
+            } catch (final IOException e1) {
                 prop.put("collectiondelete-select", 0);
             }
         } else {
@@ -137,9 +137,9 @@ public class IndexDeletion_p {
                                 String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
                                 if (url.startsWith(urlStub)) ids.add((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                             }
-                        } catch (InterruptedException e) {
+                        } catch (final InterruptedException e) {
                         }
-                    } catch (MalformedURLException e) {}
+                    } catch (final MalformedURLException e) {}
                 }
                 
                 if (simulate) {
@@ -156,14 +156,14 @@ public class IndexDeletion_p {
                 if (simulate) {
                     try {
                         count = (int) defaultConnector.getCountByQuery(regexquery);
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                     }
                     prop.put("urldelete-active", count == 0 ? 2 : 1);
                 } else {
                     try {
                         defaultConnector.deleteByQuery(regexquery);
                         sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, regex match = " + urldelete);
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                     }
                     prop.put("urldelete-active", 2);
                 }
@@ -181,7 +181,7 @@ public class IndexDeletion_p {
             if (simulate) {
                 try {
                     count = (int) defaultConnector.getCountByQuery(collection1Query);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                 }
                 prop.put("timedelete-active", count == 0 ? 2 : 1);
             } else {
@@ -189,7 +189,7 @@ public class IndexDeletion_p {
                     defaultConnector.deleteByQuery(collection1Query);
                     webgraphConnector.deleteByQuery(webgraphQuery);
                     sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, docs older than " + timedelete_number + " " + timedelete_unit);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                 }
                 prop.put("timedelete-active", 2);
             }
@@ -203,14 +203,14 @@ public class IndexDeletion_p {
             if (simulate) {
                 try {
                     count = (int) defaultConnector.getCountByQuery(query);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                 }
                 prop.put("collectiondelete-active", count == 0 ? 2 : 1);
             } else {
                 try {
                     defaultConnector.deleteByQuery(query);
                     sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, collection " + collectiondelete);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                 }
                 prop.put("collectiondelete-active", 2);
             }
@@ -222,14 +222,14 @@ public class IndexDeletion_p {
             if (simulate) {
                 try {
                     count = (int) defaultConnector.getCountByQuery(querydelete);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                 }
                 prop.put("querydelete-active", count == 0 ? 2 : 1);
             } else {
                 try {
                     defaultConnector.deleteByQuery(querydelete);
                     sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, solr query, q = " + querydelete);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                 }
                 prop.put("querydelete-active", 2);
             }

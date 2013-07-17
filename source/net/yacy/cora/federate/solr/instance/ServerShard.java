@@ -340,7 +340,7 @@ public class ServerShard extends SolrServer {
                     QueryResponse rsp;
                     try {
                         rsp = s.query(params);
-                    } catch (Throwable e) {return;}
+                    } catch (final Throwable e) {return;}
                     qrl.add(rsp);
                 }
             };
@@ -348,7 +348,7 @@ public class ServerShard extends SolrServer {
             t.add(t0);
         }
         for (Thread t0: t) {
-            try {t0.join();} catch (InterruptedException e) {}
+            try {t0.join();} catch (final InterruptedException e) {}
         }
         
         // prepare combined response
@@ -372,7 +372,7 @@ public class ServerShard extends SolrServer {
                     QueryResponse rsp;
                     try {
                         rsp = s.query(params, method);
-                    } catch (Throwable e) {return;}
+                    } catch (final Throwable e) {return;}
                     qrl.add(rsp);
                 }
             };
@@ -380,7 +380,7 @@ public class ServerShard extends SolrServer {
             t.add(t0);
         }
         for (Thread t0: t) {
-            try {t0.join();} catch (InterruptedException e) {}
+            try {t0.join();} catch (final InterruptedException e) {}
         }
         
         // prepare combined response

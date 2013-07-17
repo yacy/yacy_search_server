@@ -59,12 +59,12 @@ public class URLRewriterLibrary {
                         if (p < 0) p = line.indexOf(':');
                         if (p > 0) try {
                             this.rewriters.put(Pattern.compile(line.substring(0, p)), line.substring(p + 1));
-                        } catch (PatternSyntaxException e) {
+                        } catch (final PatternSyntaxException e) {
                             log.warn("bad pattern: " + line.substring(0, p));
                         }
                     }
                 }
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 log.warn("cannot read stemming file " + f, e);
             }
         }

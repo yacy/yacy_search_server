@@ -55,7 +55,7 @@ public class ParserTest {
                             assertThat(doc.dc_creator(), containsString(testFile[3]));
                             assertThat(doc.dc_description(), containsString(testFile[4]));
                         }
-                    } catch (InterruptedException ex) {}
+                    } catch (final InterruptedException ex) {}
                     }
 		}
         
@@ -89,7 +89,7 @@ public class ParserTest {
                             assertThat(doc.dc_creator(), containsString(testFile[3]));
                             assertThat(doc.dc_description(), containsString(testFile[4]));
                         }
-                    } catch (InterruptedException ex) {}
+                    } catch (final InterruptedException ex) {}
                     }
 		}
                 
@@ -121,7 +121,7 @@ public class ParserTest {
                             assertThat(doc.dc_creator(), containsString(testFile[3]));
                             assertThat(doc.dc_description(), containsString(testFile[4]));
                         }
-                    } catch (InterruptedException ex) {}
+                    } catch (final InterruptedException ex) {}
                     }
 		}                
                 
@@ -153,7 +153,7 @@ public class ParserTest {
                             assertThat(doc.dc_creator(), containsString(testFile[3]));
                             assertThat(doc.dc_description(), containsString(testFile[4]));
                         }
-                    } catch (InterruptedException ex) {}
+                    } catch (final InterruptedException ex) {}
                     }
 		}                 
 	}

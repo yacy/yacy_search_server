@@ -122,7 +122,7 @@ public class EmbeddedInstance implements SolrInstance {
                 for (String cfl: source.list()) {
                     try {
                         Files.copy(new File(source, cfl), new File(target, cfl));
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         e.printStackTrace();
                     }
                 }
@@ -131,7 +131,7 @@ public class EmbeddedInstance implements SolrInstance {
                 target.getParentFile().mkdirs();
                 try {                                       
                     Files.copy(source, target);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -155,7 +155,7 @@ public class EmbeddedInstance implements SolrInstance {
             try {
                 Files.copy(source, target);
                 ConcurrentLog.fine("initializeCoreConf", "overwrite " + target.getAbsolutePath() + " with " + source.getAbsolutePath());
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 ex.printStackTrace();
             }
         }
@@ -204,7 +204,7 @@ public class EmbeddedInstance implements SolrInstance {
 
     @Override
     public synchronized void close() {
-        try {this.coreContainer.shutdown();} catch (Throwable e) {ConcurrentLog.logException(e);}
+        try {this.coreContainer.shutdown();} catch (final Throwable e) {ConcurrentLog.logException(e);}
     }
     
 }

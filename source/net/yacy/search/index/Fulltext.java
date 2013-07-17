@@ -199,7 +199,7 @@ public final class Fulltext {
         if (this.solrInstances.getSolr1() == null) return null;
         try {
             return new RemoteSolrConnector(this.solrInstances.getSolr1());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
     }
@@ -302,7 +302,7 @@ public final class Fulltext {
         Date x;
         try {
             x = (Date) this.getDefaultConnector().getFieldById(urlHash, CollectionSchema.load_date_dt.getSolrFieldName());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
         return x;
@@ -314,14 +314,14 @@ public final class Fulltext {
         String x;
         try {
             x = (String) this.getDefaultConnector().getFieldById(ASCII.String(urlHash), CollectionSchema.sku.getSolrFieldName());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
         if (x == null) return null;
         try {
             DigestURI uri = new DigestURI(x, urlHash);
             return uri;
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             return null;
         }
     }
@@ -350,7 +350,7 @@ public final class Fulltext {
             	if (this.urlIndexFile != null) this.urlIndexFile.remove(urlHash); // migration
             	return new URIMetadataNode(doc, wre, weight);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
 
@@ -385,7 +385,7 @@ public final class Fulltext {
             //if (sdDate == null || (docDate = SchemaConfiguration.getDate(doc, CollectionSchema.last_modified)) == null || sdDate.before(docDate)) {
             connector.add(doc);
             //}
-        } catch (SolrException e) {
+        } catch (final SolrException e) {
             throw new IOException(e.getMessage(), e);
         }
         this.statsDump = null;
@@ -396,7 +396,7 @@ public final class Fulltext {
         if (edges == null || edges.size() == 0) return;
         try {
             this.getWebgraphConnector().add(edges);
-        } catch (SolrException e) {
+        } catch (final SolrException e) {
             throw new IOException(e.getMessage(), e);
         }
         this.statsDump = null;
@@ -413,7 +413,7 @@ public final class Fulltext {
             if (sd == null || (new URIMetadataNode(sd)).isOlder(entry)) {
                 putDocument(getDefaultConfiguration().metadata2solr(entry));
             }                                                                                                                     
-        } catch (SolrException e) {
+        } catch (final SolrException e) {
             throw new IOException(e.getMessage(), e);
         }
         this.statsDump = null;
@@ -442,8 +442,8 @@ public final class Fulltext {
                 );
         
         // delete in solr
-        try {Fulltext.this.getDefaultConnector().deleteByQuery(collection1Query);} catch (IOException e) {}
-        try {Fulltext.this.getWebgraphConnector().deleteByQuery(webgraphQuery);} catch (IOException e) {}
+        try {Fulltext.this.getDefaultConnector().deleteByQuery(collection1Query);} catch (final IOException e) {}
+        try {Fulltext.this.getWebgraphConnector().deleteByQuery(webgraphQuery);} catch (final IOException e) {}
 
         // delete in old metadata structure
         if (Fulltext.this.urlIndexFile != null) {
@@ -459,7 +459,7 @@ public final class Fulltext {
                 
                 // then delete the urls using this list
                 for (final String h: l) Fulltext.this.urlIndexFile.delete(ASCII.getBytes(h));
-            } catch (IOException e) {}
+            } catch (final IOException e) {}
         }
 
         // finally remove the line with statistics
@@ -492,8 +492,8 @@ public final class Fulltext {
         );
         
         // delete in solr
-        try {Fulltext.this.getDefaultConnector().deleteByQuery(collectionQuery);} catch (IOException e) {}
-        try {Fulltext.this.getWebgraphConnector().deleteByQuery(webgraphQuery);} catch (IOException e) {}
+        try {Fulltext.this.getDefaultConnector().deleteByQuery(collectionQuery);} catch (final IOException e) {}
+        try {Fulltext.this.getWebgraphConnector().deleteByQuery(webgraphQuery);} catch (final IOException e) {}
         
         // finally remove the line with statistics
         if (Fulltext.this.statsDump != null) {
@@ -517,7 +517,7 @@ public final class Fulltext {
      */
     public int remove(final String basepath, Date freshdate) {
         DigestURI uri;
-        try {uri = new DigestURI(basepath);} catch (MalformedURLException e) {return 0;}
+        try {uri = new DigestURI(basepath);} catch (final MalformedURLException e) {return 0;}
         final String host = uri.getHost();
         final String collectionQuery = CollectionSchema.host_s.getSolrFieldName() + ":\"" + host + "\"" +
                 ((freshdate != null && freshdate.before(new Date())) ? (" AND " + CollectionSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") : "");
@@ -533,7 +533,7 @@ public final class Fulltext {
                 }
             }
             if (count.get() > 0) Fulltext.this.commit(true);
-        } catch (InterruptedException e) {}
+        } catch (final InterruptedException e) {}
         return count.get();
     }
     
@@ -663,13 +663,13 @@ public final class Fulltext {
             this.solrInstances.close();
             try {
                 ZIPWriter.zip(storagePath, zipOut);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             } finally {
                 this.solrInstances = new InstanceMirror();
                 try {
                     this.connectLocalSolr();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -689,13 +689,13 @@ public final class Fulltext {
             this.solrInstances.close();
             try {
                 ZIPReader.unzip(solrDumpZipFile, storagePath);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             } finally {
                 this.solrInstances = new InstanceMirror();
                 try {
                     this.connectLocalSolr();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -722,7 +722,7 @@ public final class Fulltext {
             this.solrInstances = new InstanceMirror();
             try {
                 this.connectLocalSolr();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }
         }

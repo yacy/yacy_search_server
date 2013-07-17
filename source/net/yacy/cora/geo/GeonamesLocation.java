@@ -92,7 +92,7 @@ public class GeonamesLocation implements Locations {
             final ZipEntry ze = zf.getEntry(entryName);
             final InputStream is = zf.getInputStream(ze);
             reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
             log.warn(e);
             return;
         }
@@ -153,7 +153,7 @@ public class GeonamesLocation implements Locations {
                     this.name2ids.put(name, locs);
                 }
             }
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
             log.warn(e);
         }
     }

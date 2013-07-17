@@ -129,9 +129,9 @@ public class BlogBoard {
         try {
             this.database.insert(UTF8.getBytes(page.key), page.record);
             ret = page.key;
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             ConcurrentLog.logException(ex);
-        } catch (SpaceExceededException ex) {
+        } catch (final SpaceExceededException ex) {
             ConcurrentLog.logException(ex);
         }
         return ret;
@@ -149,7 +149,7 @@ public class BlogBoard {
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
             record = null;
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
             record = null;
         }

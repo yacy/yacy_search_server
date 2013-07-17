@@ -215,7 +215,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 		String exception = "/IOExceptions";
 		try {
 			document = loadDocument(url, loader);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			exception = e.getMessage();
 			int start = exception.indexOf('\'')+9;
 			int end = exception.indexOf('\'', start);

@@ -78,13 +78,13 @@ public class OpenSearchConnector {
                         row.put("url", urlstr);
                         try {
                             sb.tables.insert("opensearchsys", row);
-                        } catch (SpaceExceededException ex) {
+                        } catch (final SpaceExceededException ex) {
                             ConcurrentLog.logException(ex);
                         }
                     }
                 }
                 size = sb.tables.size("opensearchsys");
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 ConcurrentLog.logException(ex);
             }
         }
@@ -111,7 +111,7 @@ public class OpenSearchConnector {
                         // querystring is inserted/replaced inside heuristicRSS
                         sb.heuristicRSS(parseSearchTemplate(osurl, "$", 0, theSearch.query.itemsPerPage), theSearch, "opensearch:" + name);
                     }
-                } catch (IOException ex) {
+                } catch (final IOException ex) {
                     ConcurrentLog.warn("OpenSearchConnector.query", "failed reading table opensearchsys");
                 }
             }
@@ -151,12 +151,12 @@ public class OpenSearchConnector {
                 conf.put(name, e);
                 try {
                     conf.commit();
-                } catch (IOException ex) {
+                } catch (final IOException ex) {
                     ConcurrentLog.warn("OpenSearchConnector.add", "config file write error");
                 }
                 return true;
             }
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             ConcurrentLog.logException(e1);
             return false;
         }
@@ -208,7 +208,7 @@ public class OpenSearchConnector {
                 return true;
             }
             ConcurrentLog.info("OpenSearchConnector.Discover", "start checking " + Long.toString(numfound) + " found index results");
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             ConcurrentLog.logException(ex);
             return false;
         }
@@ -251,7 +251,7 @@ public class OpenSearchConnector {
                                             ConcurrentLog.info("OpenSearchConnector.Discover", "osd.xml check failed (no RSS or Atom support) for " + hrefurltxt);
                                         }
                                     }
-                                } catch (MalformedURLException ex) {
+                                } catch (final MalformedURLException ex) {
                                 }
                             }
                         } else {
@@ -259,7 +259,7 @@ public class OpenSearchConnector {
                         }
                     }
                     ConcurrentLog.info("OpenSearchConnector.Discover", "finisched Solr query (checked " + Integer.toString(dblmem.size()) + " unique opensearchdescription links found in " + Long.toString(numfound) + " results)");
-                } catch (IOException ex) {
+                } catch (final IOException ex) {
                     ConcurrentLog.logException(ex);
                 }
             }

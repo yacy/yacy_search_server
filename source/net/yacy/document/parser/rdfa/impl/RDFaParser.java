@@ -74,7 +74,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 					.toString());
 			allTriples = triple.parse();
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			ConcurrentLog.warn("RDFA PARSER", "Triple extraction failed");
 		}
 
@@ -86,7 +86,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 				doc = convertAllTriplesToDocument(url, mimeType, charset,
 						allTriples);
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			ConcurrentLog.warn("RDFA PARSER",
 					"Conversion triple to document failed");
 		}
@@ -102,7 +102,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 			htmlDocs = this.hp.parse(url, mimeType, charset, source);
 			source.reset();
 
-		} catch (IOException e1) {
+		} catch (final IOException e1) {
 			ConcurrentLog.warn("RDFA PARSER", "Super call failed");
 		}
 		return htmlDocs;
@@ -158,15 +158,15 @@ public class RDFaParser extends AbstractParser implements Parser {
             if (aFile.exists()) {
                 try {
                     aReader = new FileReader(aFile);
-                } catch (FileNotFoundException e) {
+                } catch (final FileNotFoundException e) {
                     aReader = null;
                 }
             } else {
                 try {
                     aURL = new URL(args[0]);
                     aReader = new InputStreamReader(aURL.openStream());
-                } catch (MalformedURLException e) {
-                } catch (IOException e) {
+                } catch (final MalformedURLException e) {
+                } catch (final IOException e) {
                     e.printStackTrace();
                     aReader = null;
                 }
@@ -177,14 +177,14 @@ public class RDFaParser extends AbstractParser implements Parser {
                 RDFaParser aParser = new RDFaParser();
                 try {
                     aParser.parse(new DigestURI(args[0]),"","",aURL.openStream());
-                } catch (FileNotFoundException e) {
+                } catch (final FileNotFoundException e) {
                     e.printStackTrace();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     e.printStackTrace();
-                } catch (Failure e) {
+                } catch (final Failure e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }

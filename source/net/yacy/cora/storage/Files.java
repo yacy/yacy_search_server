@@ -88,23 +88,23 @@ public class Files {
 					while ((line = br.readLine()) != null) {
 						q.put(line);
 					}
-				} catch (IOException e) {
-				} catch (InterruptedException e) {
+				} catch (final IOException e) {
+				} catch (final InterruptedException e) {
 				} finally {
 					try {
 						q.put(POISON_LINE);
 						try {
 							br.close();
 							is.close();
-						} catch (IOException ee) {
+						} catch (final IOException ee) {
 						}
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						// last try
 						q.add(POISON_LINE);
 						try {
 							br.close();
 							is.close();
-						} catch (IOException ee) {
+						} catch (final IOException ee) {
 						}
 					}
 				}

@@ -116,7 +116,7 @@ public class RemoteInstance implements SolrInstance {
         final MultiProtocolURI u;
         try {
             u = new MultiProtocolURI(this.solrurl + this.defaultCoreName);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             throw new IOException(e.getMessage());
         }
         String solraccount, solrpw;
@@ -225,7 +225,7 @@ public class RemoteInstance implements SolrInstance {
             final MultiProtocolURI u;
             try {
                 u = new MultiProtocolURI(this.solrurl + name);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 return null;
             }
             String host = u.getHost();

@@ -138,7 +138,7 @@ public class xbel {
                 count++;
                 prop.put("xbel_"+count+"_elements", "</bookmark>");
                 count++;
-            } catch (IOException e) {
+            } catch (final IOException e) {
             }
 		}
     	return count;

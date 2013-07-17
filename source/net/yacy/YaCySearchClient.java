@@ -81,10 +81,10 @@ public class YaCySearchClient {
                     .append(YaCySearchClient.this.offset)
                     .append("&maximumRecords=10&resource=local&query=")
                     .append(CommonPattern.SPACE.matcher(YaCySearchClient.this.query).replaceAll("+")).toString();
-            try { url = new URL(u); } catch (MalformedURLException e) { throw new IOException (e); }
+            try { url = new URL(u); } catch (final MalformedURLException e) { throw new IOException (e); }
             try { doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url.openStream()); }
-            catch (ParserConfigurationException e) { throw new IOException (e); }
-            catch (SAXException e) { throw new IOException (e); }
+            catch (final ParserConfigurationException e) { throw new IOException (e); }
+            catch (final SAXException e) { throw new IOException (e); }
             final NodeList nodes = doc.getElementsByTagName("item");
             for (int i = 0; i < nodes.getLength(); i++)
                 this.add(new RSSEntry((Element) nodes.item(i)));
@@ -137,7 +137,7 @@ public class YaCySearchClient {
             System.out.println("Search result for '" + query + "':");
             System.out.print(search.next().toString()); // get 10 results; you may repeat this for next 10
             System.out.println("Search Time: " + (System.currentTimeMillis() - t) + " milliseconds\n");
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

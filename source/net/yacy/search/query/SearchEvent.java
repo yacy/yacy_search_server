@@ -101,7 +101,7 @@ public final class SearchEvent {
     static {
         try {
             noRobinsonLocalRWISearch = GenericFormatter.FORMAT_SHORT_DAY.parse("20121107").getTime();
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
         }
     }
     */
@@ -337,7 +337,7 @@ public final class SearchEvent {
                 // we need the results now
                 try {
                     if (rwiProcess != null && query.getSegment().connectedRWI()) rwiProcess.join();
-                } catch ( final Throwable e ) {
+                } catch (final Throwable e ) {
                 }
                 // compute index abstracts
                 final long timer = System.currentTimeMillis();
@@ -370,7 +370,7 @@ public final class SearchEvent {
                 // before a reading process wants to get results from it
                 try {
                     if (rwiProcess != null && query.getSegment().connectedRWI()) rwiProcess.join(100);
-                } catch ( final Throwable e ) {
+                } catch (final Throwable e ) {
                 }
                 // this will reduce the maximum waiting time until results are available to 100 milliseconds
                 // while we always get a good set of ranked data
@@ -455,7 +455,7 @@ public final class SearchEvent {
                     addRWIs(index, true, "local index: " + SearchEvent.this.query.getSegment().getLocation(), index.size(), SearchEvent.this.maxtime);
                     SearchEvent.this.addFinalize();
                 }
-            } catch ( final Exception e ) {
+            } catch (final Exception e ) {
                 ConcurrentLog.logException(e);
             } finally {
                 oneFeederTerminated();
@@ -573,7 +573,7 @@ public final class SearchEvent {
                     try {
                         this.rwiStack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
                         break rankingtryloop;
-                    } catch ( final ArithmeticException e ) {
+                    } catch (final ArithmeticException e ) {
                         // this may happen if the concurrent normalizer changes values during cardinal computation
                         if (log.isFine()) log.fine("dropped RWI: arithmetic exception");
                         continue rankingtryloop;
@@ -584,8 +584,8 @@ public final class SearchEvent {
             }
             if (System.currentTimeMillis() >= timeout) ConcurrentLog.warn("SearchEvent", "rwi normalization ended with timeout = " + maxtime);
 
-        } catch ( final InterruptedException e ) {
-        } catch ( final SpaceExceededException e ) {
+        } catch (final InterruptedException e ) {
+        } catch (final SpaceExceededException e ) {
         }
 
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
@@ -854,7 +854,7 @@ public final class SearchEvent {
                         long score = iEntry.ranking();
                         this.nodeStack.put(new ReverseElement<URIMetadataNode>(iEntry, score == 0 ? this.order.cardinal(iEntry) : score)); // inserts the element and removes the worst (which is smallest)
                         break rankingtryloop;
-                    } catch ( final ArithmeticException e ) {
+                    } catch (final ArithmeticException e ) {
                         // this may happen if the concurrent normalizer changes values during cardinal computation
                         continue rankingtryloop;
                     }
@@ -862,7 +862,7 @@ public final class SearchEvent {
                 // increase counter for statistics
                 if (local) this.local_solr_available.incrementAndGet(); else this.remote_solr_available.incrementAndGet();
             }
-        } catch ( final SpaceExceededException e ) {
+        } catch (final SpaceExceededException e ) {
         }
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.PRESORT, resourceName, nodeList.size(), System.currentTimeMillis() - timer), false);
     }
@@ -1151,10 +1151,10 @@ public final class SearchEvent {
                                 SearchEvent.this.snippetFetchAlive.incrementAndGet();
                                 try {
                                     addResult(getSnippet(node1, SearchEvent.this.query.snippetCacheStrategy));
-                                } catch (Throwable e) {} finally {
+                                } catch (final Throwable e) {} finally {
                                     SearchEvent.this.snippetFetchAlive.decrementAndGet();
                                 }
-                            } catch (Throwable e) {} finally {
+                            } catch (final Throwable e) {} finally {
                                 SearchEvent.this.oneFeederTerminated();
                             }
                         }
@@ -1179,11 +1179,11 @@ public final class SearchEvent {
                             SearchEvent.this.snippetFetchAlive.incrementAndGet();
                             try {
                                 addResult(getSnippet(node, SearchEvent.this.query.snippetCacheStrategy));
-                            } catch (Throwable e) {} finally {
+                            } catch (final Throwable e) {} finally {
                                 SearchEvent.this.snippetFetchAlive.decrementAndGet();
                             }
                         }
-                    } catch (Throwable e) {} finally {
+                    } catch (final Throwable e) {} finally {
                         SearchEvent.this.oneFeederTerminated();
                     }
                 }
@@ -1310,12 +1310,12 @@ public final class SearchEvent {
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "started, item = " + item + ", available = " + this.getResultCount(), 0, 0), false);
 
         // wait until a local solr is finished, we must do that to be able to check if we need more
-        if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join(100);} catch (InterruptedException e) {}}
-        if (item >= this.localsolroffset && this.local_solr_stored.get() == 0 && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (InterruptedException e) {}}
+        if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join(100);} catch (final InterruptedException e) {}}
+        if (item >= this.localsolroffset && this.local_solr_stored.get() == 0 && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (final InterruptedException e) {}}
         if (item >= this.localsolroffset && this.local_solr_stored.get() >= item) {
             // load remaining solr results now
             int nextitems = item - this.localsolroffset + this.query.itemsPerPage; // example: suddenly switch to item 60, just 10 had been shown, 20 loaded.
-            if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (InterruptedException e) {}}
+            if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (final InterruptedException e) {}}
             if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
                 this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.localsolroffset == 0), this.localsolroffset, nextitems, null /*this peer*/, Switchboard.urlBlacklist);
             }

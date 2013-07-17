@@ -318,7 +318,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
             rootCandidates.put(new DigestURI(rootStub + "/default.htm").hash());
             rootCandidates.put(new DigestURI(rootStub + "/default.html").hash());
             rootCandidates.put(new DigestURI(rootStub + "/default.php").hash());
-        } catch (Throwable e) {}
+        } catch (final Throwable e) {}
         return rootCandidates;
     }
 

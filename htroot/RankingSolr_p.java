@@ -56,7 +56,7 @@ public class RankingSolr_p {
                         float boost = Float.parseFloat(fieldValue);
                         if (boostString.length() > 0) boostString.append(',');
                         boostString.append(field.getSolrFieldName()).append('^').append(Float.toString(boost));
-                    } catch (NumberFormatException e) {
+                    } catch (final NumberFormatException e) {
                         continue;
                     }
                 }

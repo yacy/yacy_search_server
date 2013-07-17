@@ -91,7 +91,7 @@ public class LibraryProvider {
         private Dictionary(final String nickname, final String url) {
             try {
                 this.filename = (new MultiProtocolURI(url)).getFileName();
-            } catch ( final MalformedURLException e ) {
+            } catch (final MalformedURLException e ) {
                 assert false;
             }
             this.nickname = nickname;
@@ -219,7 +219,7 @@ public class LibraryProvider {
             final ArrayList<String> derewo = loadDeReWo(derewoInput, true);
             try {
                 writeWords(derewoOutput, derewo);
-            } catch ( final IOException e ) {
+            } catch (final IOException e ) {
                 ConcurrentLog.logException(e);
             }
         }
@@ -243,7 +243,7 @@ public class LibraryProvider {
         if ( dictInput.exists() ) {
             try {
             	JenaTripleStore.LoadNTriples(Files.read(dictInput));
-            } catch ( final IOException e ) {
+            } catch (final IOException e ) {
                 ConcurrentLog.logException(e);
             }
         }
@@ -276,7 +276,7 @@ public class LibraryProvider {
 			Tagging pndVoc = new Tagging("Persons", null, objectspace, map);
 			autotagging.addVocabulary(pndVoc);
             ConcurrentLog.info("LibraryProvider", "added pnd vocabulary to autotagging");
-		} catch (IOException e) {
+		} catch (final IOException e) {
 		}
     }
 
@@ -335,10 +335,10 @@ public class LibraryProvider {
         try {
             final ZipFile zip = new ZipFile(file);
             derewoTxtEntry = zip.getInputStream(zip.getEntry("derewo-v-100000t-2009-04-30-0.1"));
-        } catch ( final ZipException e ) {
+        } catch (final ZipException e ) {
             ConcurrentLog.logException(e);
             return list;
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
             ConcurrentLog.logException(e);
             return list;
         }
@@ -378,13 +378,13 @@ public class LibraryProvider {
                 }
             }
             reader.close();
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
             ConcurrentLog.logException(e);
         } finally {
             if ( reader != null ) {
                 try {
                     reader.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
         }

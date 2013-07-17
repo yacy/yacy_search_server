@@ -191,7 +191,7 @@ public class ResourceObserver {
 			final Method getFreeSpace = file6.getClass().getMethod("getUsableSpace", (Class[])null);
 			final Object space = getFreeSpace.invoke(file6, (Object[])null);
 			return Long.parseLong(space.toString());
-		} catch (Throwable e) {
+		} catch (final Throwable e) {
 			return -1L;
 		}
 	}

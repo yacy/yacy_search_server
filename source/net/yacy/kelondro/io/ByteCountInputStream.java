@@ -123,7 +123,7 @@ public final class ByteCountInputStream extends FilterInputStream {
     public final synchronized void close() throws IOException {
         try {
             super.close();
-        } catch (OutOfMemoryError e) {
+        } catch (final OutOfMemoryError e) {
             ConcurrentLog.logException(e);
         }
         this.finish();

@@ -42,7 +42,7 @@ public class EmbeddedSolrConnectorTest {
             // start a server
             jetty = startServer("/solr", 8091, solr); // try http://localhost:8091/solr/select?q=*:*
 
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             fail("IOException starting Jetty");
         }
     }
@@ -52,7 +52,7 @@ public class EmbeddedSolrConnectorTest {
         if (jetty != null) {
             try {
                 jetty.stop();
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 fail("Exception stopping Jetty");
             }
         }
@@ -72,9 +72,9 @@ public class EmbeddedSolrConnectorTest {
         doc.addField(CollectionSchema.text_t.name(), "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
         try {
             solr.add(doc);
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             fail("IOException adding test document to Solr");
-        } catch (SolrException ex) {
+        } catch (final SolrException ex) {
             fail("SolrExceptin adding test document to Solr");
         }
         solr.commit(true);
@@ -85,7 +85,7 @@ public class EmbeddedSolrConnectorTest {
         try {
             result = solr.getDocumentListByQuery(CollectionSchema.text_t.name() + ":tempor", 0, 10,"");
             assertEquals(expResult, result.getNumFound());
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             fail("Solr query no result");
         }
     }
@@ -100,7 +100,7 @@ public class EmbeddedSolrConnectorTest {
             try {
                 InputStream stream = url.openStream();
                 stream.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ex = e;
                 Thread.sleep(200);
                 continue;
@@ -135,7 +135,7 @@ public class EmbeddedSolrConnectorTest {
             try {
                 server.start();
                 waitForSolr(context, port);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 e.printStackTrace();
             }
         }
@@ -175,10 +175,10 @@ public class EmbeddedSolrConnectorTest {
             // try http://127.0.0.1:8091/solr/select?q=ping
             try {
                 Thread.sleep(1000 * 1000);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
             }
             solr.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
 

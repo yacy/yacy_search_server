@@ -109,7 +109,7 @@ public class YMarkHTMLImporter extends YMarkImporter {
 					try {
 						bookmarks.put(this.bmk);
 						bmk = new YMarkEntry();
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						ConcurrentLog.logException(e);
 					}
 				}
@@ -164,7 +164,7 @@ public class YMarkHTMLImporter extends YMarkImporter {
 				if (!this.bmk.isEmpty()) {
 					try {
 						bookmarks.put(this.bmk);
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						ConcurrentLog.logException(e);
 					}
 				}

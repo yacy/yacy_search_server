@@ -60,7 +60,7 @@ public class torrentParser extends AbstractParser implements Parser {
         byte[] b = null;
         try {
             b = FileUtils.read(source);
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             throw new Parser.Failure(e1.toString(), location);
         }
         final BDecoder bd = new BDecoder(b);
@@ -121,11 +121,11 @@ public class torrentParser extends AbstractParser implements Parser {
             Condenser c = new Condenser(d[0], true, true, LibraryProvider.dymLib, LibraryProvider.synonyms, false);
             Map<String, Word> w = c.words();
             for (Map.Entry<String, Word> e: w.entrySet()) System.out.println("Word: " + e.getKey() + " - " + e.getValue().posInText);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
-        } catch (Parser.Failure e) {
+        } catch (final Parser.Failure e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             e.printStackTrace();
         }
     }

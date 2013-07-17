@@ -55,7 +55,7 @@ public class DocumentIndex extends Segment {
     static {
         try {
             poison = new DigestURI("file://.");
-        } catch ( final MalformedURLException e ) {
+        } catch (final MalformedURLException e ) {
         }
     }
     BlockingQueue<DigestURI> queue; // a queue of document ID's
@@ -110,14 +110,14 @@ public class DocumentIndex extends Segment {
                                 }
                             }
                         }
-                    } catch ( final IOException e ) {
+                    } catch (final IOException e ) {
                         if ( e.getMessage().indexOf("cannot parse", 0) < 0 ) {
                             ConcurrentLog.logException(e);
                         }
                         DocumentIndex.this.callback.fail(f, e.getMessage());
                     }
                 }
-            } catch ( final InterruptedException e ) {
+            } catch (final InterruptedException e ) {
             }
         }
     }
@@ -147,12 +147,12 @@ public class DocumentIndex extends Segment {
         long length;
         try {
             length = url.length();
-        } catch ( final Exception e ) {
+        } catch (final Exception e ) {
             length = -1;
         }
         try {
             documents = TextParser.parseSource(url, null, null, length, url.getInputStream(null, -1));
-        } catch ( final Exception e ) {
+        } catch (final Exception e ) {
             throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
         }
         //Document document = Document.mergeDocuments(url, null, documents);
@@ -188,7 +188,7 @@ public class DocumentIndex extends Segment {
         if ( !start.isDirectory() ) {
             try {
                 this.queue.put(start);
-            } catch ( final InterruptedException e ) {
+            } catch (final InterruptedException e ) {
             }
             return;
         }
@@ -203,11 +203,11 @@ public class DocumentIndex extends Segment {
                     } else {
                         try {
                             this.queue.put(w);
-                        } catch ( final InterruptedException e ) {
+                        } catch (final InterruptedException e ) {
                         }
                     }
                 }
-            } catch ( final MalformedURLException e1 ) {
+            } catch (final MalformedURLException e1 ) {
                 ConcurrentLog.logException(e1);
             }
         }
@@ -223,14 +223,14 @@ public class DocumentIndex extends Segment {
         final Worker element : this.worker ) {
             try {
                 this.queue.put(poison);
-            } catch ( final InterruptedException e ) {
+            } catch (final InterruptedException e ) {
             }
         }
         // wait for termination
         for ( final Worker element : this.worker ) {
             try {
                 element.join();
-            } catch ( final InterruptedException e ) {
+            } catch (final InterruptedException e ) {
             }
         }
         // close the segment

@@ -154,7 +154,7 @@ public class QueryGoal {
         if (encodeHTML){
             try {
                 ret = URLEncoder.encode(this.query_original, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
                 ret = this.query_original;
             }
         } else {

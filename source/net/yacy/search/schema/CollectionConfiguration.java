@@ -112,7 +112,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             try {
                 CollectionSchema f = CollectionSchema.valueOf(etr.key());
                 f.setSolrFieldName(etr.getValue());
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 ConcurrentLog.fine("SolrCollectionWriter", "solr schema file " + configurationFile.getAbsolutePath() + " defines unknown attribute '" + etr.toString() + "'");
                 it.remove();
             }
@@ -154,7 +154,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 try {
                     SchemaDeclaration f = CollectionSchema.valueOf(etr.key());
                     f.setSolrFieldName(etr.getValue());
-                } catch (IllegalArgumentException e) {
+                } catch (final IllegalArgumentException e) {
                     continue;
                 }
             }
@@ -741,7 +741,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                             outboundLinks.remove(refreshURL);
                             add(doc, CollectionSchema.refresh_s, refreshURL.toNormalform(false));
                         }
-                    } catch (MalformedURLException e) {
+                    } catch (final MalformedURLException e) {
                         add(doc, CollectionSchema.refresh_s, refresh);
                     }
                 }
@@ -904,7 +904,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 crh.log(crn);
                 ranking.putAll(crn); // accumulate this here for usage in document update later
             }
-        } catch (IOException e2) {
+        } catch (final IOException e2) {
         }
         
         // process all documents
@@ -959,14 +959,14 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     //connector.deleteById(ASCII.String(id));
                     connector.add(sid);
                     proccount++;
-                } catch (Throwable e1) {
+                } catch (final Throwable e1) {
                 }
             }
             ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount+ " new documents, " +
                         proccount_clickdepthchange + " clickdepth changes, " +
                         proccount_referencechange + " reference-count changes," +
                         proccount_citationchange + " citation ranking changes.");
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
         return proccount;
     }
@@ -1010,7 +1010,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 while ((id = ids.take()) != AbstractSolrConnector.POISON_ID) {
                     crt.put(ASCII.getBytes(id), new double[]{0.0d,0.0d}); //{old value, new value}
                 }
-            } catch (InterruptedException e2) {
+            } catch (final InterruptedException e2) {
             }
             this.cr_host_count = crt.size();
             double initval = 1.0d / cr_host_count;
@@ -1062,7 +1062,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     String url = (String) connector.getDocumentById(ASCII.String(entry.getKey()), CollectionSchema.sku.getSolrFieldName()).getFieldValue(CollectionSchema.sku.getSolrFieldName());
                     ConcurrentLog.info("CollectionConfiguration.CRHost", "CR for " + url);
                     ConcurrentLog.info("CollectionConfiguration.CRHost", ">> " + entry.getValue().toString());
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -1090,12 +1090,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 il = (x == null) ? 0 : (x instanceof Integer) ? ((Integer) x).intValue() : (x instanceof Long) ? ((Long) x).intValue() : 0;
                 this.internal_links_counter.put(id, il);
                 return il;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
-            } catch (SpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 ConcurrentLog.logException(e);
             }
-            try {this.internal_links_counter.put(id, 0);} catch (SpaceExceededException e) {}
+            try {this.internal_links_counter.put(id, 0);} catch (final SpaceExceededException e) {}
             return 0;
         }
         /**
@@ -1126,7 +1126,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 for (Map.Entry<byte[], double[]> entry: crt.entrySet()) {
                     entry.getValue()[0] = entry.getValue()[1];
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
             }
             return convergence;
         }

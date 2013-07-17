@@ -275,7 +275,7 @@ public class ChunkedInputStream extends InputStream {
         int result;
         try {
             result = Integer.parseInt(dataString.trim(), 16);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw new IOException ("Bad chunk size: " + dataString);
         }
         return result;
@@ -299,7 +299,7 @@ public class ChunkedInputStream extends InputStream {
 
         try {
             return new String(data, 0, data.length, "US-ASCII");
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw new IOException("HttpClient requires ASCII support");
         }
     }
@@ -383,7 +383,7 @@ public class ChunkedInputStream extends InputStream {
 
         try {
             return new String(data, offset, length, charset);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             return new String(data, offset, length);
         }
     }

@@ -55,7 +55,7 @@ public class Network {
             Document doc = null;
             try {
                 doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(bais);
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 throw new IOException(e.getMessage());
             }
             bais.close();
@@ -91,7 +91,7 @@ public class Network {
     
     public static void main(String[] args) {
         //getNetwork("search.yacy.net");
-        try {getNetwork("sokrates.homeunix.net:9090");} catch (IOException e1) {}
-        try {HTTPClient.closeConnectionManager();} catch (InterruptedException e) {}
+        try {getNetwork("sokrates.homeunix.net:9090");} catch (final IOException e1) {}
+        try {HTTPClient.closeConnectionManager();} catch (final InterruptedException e) {}
     }
 }

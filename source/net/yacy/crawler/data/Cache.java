@@ -112,16 +112,16 @@ public final class Cache {
                     try {
                         byte[] k;
                         while (((k = q.take()) != MapHeap.POISON_QUEUE_ENTRY)) {
-                            if (!fileDB.containsKey(k)) try { delkeys.put(k); } catch (SpaceExceededException e) { break; }
+                            if (!fileDB.containsKey(k)) try { delkeys.put(k); } catch (final SpaceExceededException e) { break; }
                         }
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                     } finally {
                         // delete the collected keys from the metadata
                         ConcurrentLog.info("Cache", "cleanup thread collected " + delkeys.size() + " unused metadata entries; now deleting them from the file...");
                         for (byte[] k: delkeys) {
                             try {
                                 responseHeaderDB.delete(k);
-                            } catch (IOException e) {
+                            } catch (final IOException e) {
                             }
                         }
                     }
@@ -129,13 +129,13 @@ public final class Cache {
                     ConcurrentLog.info("Cache", "running check to remove unused file cache data");
                     delkeys.clear();
                     for (byte[] k: fileDB) {
-                        if (!responseHeaderDB.containsKey(k)) try { delkeys.put(k); } catch (SpaceExceededException e) { break; }
+                        if (!responseHeaderDB.containsKey(k)) try { delkeys.put(k); } catch (final SpaceExceededException e) { break; }
                     }
                     ConcurrentLog.info("Cache", "cleanup thread collected " + delkeys.size() + " unused cache entries; now deleting them from the file...");
                     for (byte[] k: delkeys) {
                         try {
                             fileDB.delete(k);
-                        } catch (IOException e) {
+                        } catch (final IOException e) {
                         }
                     }
                     ConcurrentLog.info("Cache", "terminated cleanup thread; responseHeaderDB.size() = " + responseHeaderDB.size() + ", fileDB.size() = " + fileDB.size());
@@ -260,9 +260,9 @@ public final class Cache {
         Map<String, String> hdb = null;
         try {
             hdb = responseHeaderDB.get(hash);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             return null;
         }
         if (hdb == null) return null;

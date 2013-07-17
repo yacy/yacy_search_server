@@ -135,11 +135,11 @@ public class MapColumnIndex implements Serializable {
     private static Collection<byte[]> getIndexWithExceptionHandler(final MapColumnIndex idx, final String whereKey, final String isValue, Map<byte[], Map<String, String>> table) {
         try {
             return idx.getIndex(whereKey, isValue);
-        } catch (UnsupportedOperationException e) {
+        } catch (final UnsupportedOperationException e) {
             idx.init(whereKey, isValue, table.entrySet().iterator());
             try {
                 return idx.getIndex(whereKey, isValue);
-            } catch (UnsupportedOperationException ee) {
+            } catch (final UnsupportedOperationException ee) {
                 throw ee;
             }
         }

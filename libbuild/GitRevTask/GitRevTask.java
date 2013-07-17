@@ -128,6 +128,6 @@ public class GitRevTask extends org.apache.tools.ant.Task {
             w.append("DSTAMP=" + commitDate + "\n");
             w.close();
 
-        } catch (IOException ex) {}
+        } catch (final IOException ex) {}
     }
 }

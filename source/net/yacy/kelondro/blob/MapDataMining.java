@@ -361,11 +361,11 @@ public class MapDataMining extends MapHeap {
         Collection<byte[]> idx = null;
         try {
             idx = this.columnIndex.getIndex(whereKey, isValue);
-        } catch (UnsupportedOperationException e) {
+        } catch (final UnsupportedOperationException e) {
             this.columnIndex.init(whereKey, isValue, new FullMapIterator(keys()));
             try {
                 idx = this.columnIndex.getIndex(whereKey, isValue);
-            } catch (UnsupportedOperationException ee) {
+            } catch (final UnsupportedOperationException ee) {
                 throw ee;
             }
         }

@@ -133,7 +133,7 @@ public class JenaTripleStore {
 			    ftmp.renameTo(f);
 			}
 			log.info("Saved triplestore with " + model.size() + " triples to " + filename);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			log.warn("Saving to " + filename+" failed");
 		}
 	}
@@ -301,7 +301,7 @@ public class JenaTripleStore {
                 	privatestorage.put(username, tmp);
                 }
 			}
-		} catch (Exception anyex) {
+		} catch (final Exception anyex) {
 			log.warn(anyex);
 		}
 	}

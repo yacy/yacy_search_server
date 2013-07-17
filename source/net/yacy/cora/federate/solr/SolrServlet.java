@@ -174,7 +174,7 @@ public class SolrServlet implements Filter {
             out.flush();
             return;
 
-        } catch (Throwable ex) {
+        } catch (final Throwable ex) {
             sendError(hresponse, ex);
             return;
         } finally {
@@ -202,7 +202,7 @@ public class SolrServlet implements Filter {
             try {
                 InputStream stream = url.openStream();
                 stream.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ex=e;
                 Thread.sleep(200);
                 continue;

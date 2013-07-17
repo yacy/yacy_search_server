@@ -65,7 +65,7 @@ public class ShardSelection {
                 final String url = (String) sif.getValue();
                 try {
                     return selectURL(url);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                     return 0;
                 }

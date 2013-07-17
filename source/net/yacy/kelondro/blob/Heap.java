@@ -154,7 +154,7 @@ public final class Heap extends HeapModifier implements BLOB {
             this.file.writeInt(this.keylength + blob.length);
             this.file.write(key);
             this.file.write(blob, 0, blob.length);
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             throw new IOException(e.getMessage()); // should never occur;
         }
     }
@@ -208,7 +208,7 @@ public final class Heap extends HeapModifier implements BLOB {
             blob = entry.getValue();
             try {
                 this.index.put(key, posFile);
-            } catch (SpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 nextBuffer.put(entry.getKey(), blob);
                 continue flush;
             }
@@ -298,7 +298,7 @@ public final class Heap extends HeapModifier implements BLOB {
     	if (this.file != null && this.buffer != null) {
             try {
                 flushBuffer();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }
         }
@@ -344,7 +344,7 @@ public final class Heap extends HeapModifier implements BLOB {
             // then look if we can use a free entry
             try {
                 if (putToGap(key, b)) return;
-            } catch (SpaceExceededException e) {} // too less space can be ignored, we have a second try
+            } catch (final SpaceExceededException e) {} // too less space can be ignored, we have a second try
             
             assert this.buffer != null;
             
@@ -567,7 +567,7 @@ public final class Heap extends HeapModifier implements BLOB {
             heap.close();
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
         }
     }

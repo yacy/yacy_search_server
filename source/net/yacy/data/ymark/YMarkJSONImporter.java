@@ -118,7 +118,7 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 			}
 			try {
 				this.bookmarks.put(this.bmk);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				ConcurrentLog.logException(e);
 			}
 			this.bmk = new YMarkEntry();	
@@ -169,15 +169,15 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 		try {
 			ConcurrentLog.info(YMarkTables.BOOKMARKS_LOG, "JSON Importer run()");
 			this.parser.parse(this.bmk_file, this, true);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			ConcurrentLog.logException(e);
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			ConcurrentLog.logException(e);
 		} finally {			
 			try {
 				ConcurrentLog.info(YMarkTables.BOOKMARKS_LOG, "JSON Importer inserted poison pill in queue");
 				this.bookmarks.put(YMarkEntry.POISON);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				ConcurrentLog.logException(e);
 			}
 		}
@@ -186,7 +186,7 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
     public YMarkEntry take() {
         try {
             return this.bookmarks.take();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             ConcurrentLog.logException(e);
             return null;
         }

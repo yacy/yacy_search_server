@@ -255,7 +255,7 @@ public class Tagging {
                     this.synonym2synonyms.put(s, synonyms);
                 }
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
     }
 
@@ -293,7 +293,7 @@ public class Tagging {
             if (!written) {
                 w.write(term + (synonyms == null || synonyms.isEmpty() ? "" : ":" + synonyms) + (objectlink == null || objectlink.isEmpty() || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
         w.close();
         this.propFile.delete();
@@ -320,7 +320,7 @@ public class Tagging {
                 }
                 w.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
         w.close();
         this.propFile.delete();
@@ -358,7 +358,7 @@ public class Tagging {
                 }
                 w.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
         w.close();
         this.propFile.delete();
@@ -410,7 +410,7 @@ public class Tagging {
         BlockingQueue<String> list;
         try {
             list=Files.concurentLineReader(this.propFile, 1000);
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             return map;
         }
         String line;
@@ -422,7 +422,7 @@ public class Tagging {
                 }
                 map.put(pl[0], new SOTuple(pl[1] == null || pl[1].isEmpty() ? "" : pl[1], pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : pl[2]));
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
         return map;
     }

@@ -120,7 +120,7 @@ public class CrawlQueues {
     public void clear() {
         // wait for all workers to finish
         for (final Loader w: this.workers.values()) w.interrupt();
-        for (final Loader w: this.workers.values()) try {w.join(10);} catch (InterruptedException e1) {}
+        for (final Loader w: this.workers.values()) try {w.join(10);} catch (final InterruptedException e1) {}
         this.workers.clear();
         this.remoteCrawlProviderHashes.clear();
         this.noticeURL.clear();

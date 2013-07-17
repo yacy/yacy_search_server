@@ -65,7 +65,7 @@ public class ResponseHeader extends HeaderFramework {
         if (statuscode == null) return 200;
         try {
             return Integer.parseInt(statuscode);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             return 200;
         }
     }

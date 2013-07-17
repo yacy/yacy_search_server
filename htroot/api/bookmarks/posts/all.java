@@ -48,7 +48,7 @@ public class all {
                     prop.put("posts_"+count+"_isExtended_private", Boolean.toString(!bookmark.getPublic()));
                 }
                 count++;
-            } catch (IOException e) {
+            } catch (final IOException e) {
             }
         }
         prop.put("posts", count);

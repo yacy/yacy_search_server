@@ -184,7 +184,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                         solitaireTag(writer, YaCyMetadata.host.getURIref(), url.getHost());
                         solitaireTag(writer, YaCyMetadata.path.getURIref(), url.getPath());
                         solitaireTag(writer, YaCyMetadata.file.getURIref(), url.getFileName());
-                    } catch (MalformedURLException e) {}
+                    } catch (final MalformedURLException e) {}
                     continue;
                 }
                 

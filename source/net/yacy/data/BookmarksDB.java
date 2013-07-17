@@ -83,7 +83,7 @@ public class BookmarksDB {
         while (it.hasNext()) {
             try {
                 bookmark = it.next();
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 //Log.logException(e);
                 continue;
             }
@@ -158,7 +158,7 @@ public class BookmarksDB {
             final Map<String, String> map = this.bookmarks.get(ASCII.getBytes(urlHash));
             if (map == null) throw new IOException("cannot get bookmark for url hash " + urlHash);
             return new Bookmark(map);
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             throw new IOException(e.getMessage());
         }
     }
@@ -167,7 +167,7 @@ public class BookmarksDB {
         Bookmark bookmark;
         try {
             bookmark = getBookmark(urlHash);
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             return false;
         }
         final Set<String> tagSet = bookmark.getTags();
@@ -229,7 +229,7 @@ public class BookmarksDB {
                     if (bm != null && bm.getPublic()) {
                         set.add(bm.getUrlHash());
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                 }
             }
         }
@@ -320,7 +320,7 @@ public class BookmarksDB {
                             set.add(tag);
                     }
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
             }
     	}
     	return set.iterator();
@@ -360,7 +360,7 @@ public class BookmarksDB {
                     bookmark.setTags(tagSet, true);                     // might not be needed, but doesn't hurt
                     if(!"".equals(newName)) bookmark.addTag(newName);
                     saveBookmark(bookmark);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                 }
             }
             return true;
@@ -376,7 +376,7 @@ public class BookmarksDB {
                 bookmark = getBookmark(urlHash);
                 bookmark.addTag(newTag);
                 saveBookmark(bookmark);
-            } catch (IOException e) {
+            } catch (final IOException e) {
             }
         }
     }
@@ -516,7 +516,7 @@ public class BookmarksDB {
                 }else{
                     this.entry.put(BOOKMARK_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
             }
             final BookmarkDate.Entry bmDate=BookmarksDB.this.dates.getDate(this.entry.get(BOOKMARK_TIMESTAMP));
             bmDate.add(this.urlHash);
@@ -707,7 +707,7 @@ public class BookmarksDB {
         public Bookmark next() {
             try {
                 return getBookmark(UTF8.String(this.bookmarkIter.next()));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 this.bookmarkIter.remove();
                 return null;
             }
@@ -746,7 +746,7 @@ public class BookmarksDB {
                     return -1;
                 }
                 if  (bm1.getTimeStamp() - bm2.getTimeStamp() > 0) return 1;
-            } catch (IOException e) {
+            } catch (final IOException e) {
             }
             return -1;
         }

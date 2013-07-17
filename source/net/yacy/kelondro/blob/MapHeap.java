@@ -535,13 +535,13 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                     while (i.hasNext())
                         try {
                             set.put(i.next());
-                        } catch (InterruptedException e) {
+                        } catch (final InterruptedException e) {
                             break;
                         }
                 } catch (final IOException e) {}
                 try {
                     set.put(MapHeap.POISON_QUEUE_ENTRY);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                 }
             }}).start();
         return set;

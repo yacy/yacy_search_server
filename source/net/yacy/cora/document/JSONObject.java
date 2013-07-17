@@ -170,7 +170,7 @@ public class JSONObject {
         for (String name : names) {
         	try {
         		putOnce(name, jo.opt(name));
-        	} catch (Exception ignore) {
+        	} catch (final Exception ignore) {
         	}
         }
     }
@@ -298,7 +298,7 @@ public class JSONObject {
         for (String name : names) {
             try {
                 putOpt(name, c.getField(name).get(object));
-            } catch (Exception ignore) {
+            } catch (final Exception ignore) {
             }
         }
     }
@@ -453,7 +453,7 @@ public class JSONObject {
             return o instanceof Number ?
                 ((Number)o).floatValue() :
                 Float.valueOf((String)o).floatValue();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new JSONException("JSONObject[" + quote(key) +
                 "] is not a number.");
         }
@@ -474,7 +474,7 @@ public class JSONObject {
             return o instanceof Number ?
                 ((Number)o).intValue() :
                 Integer.parseInt((String)o);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new JSONException("JSONObject[" + quote(key) +
                 "] is not an int.");
         }
@@ -531,7 +531,7 @@ public class JSONObject {
             return o instanceof Number ?
                 ((Number)o).longValue() :
                 Long.parseLong((String)o);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new JSONException("JSONObject[" + quote(key) +
                 "] is not a long.");
         }
@@ -744,7 +744,7 @@ public class JSONObject {
     public boolean optBoolean(String key, boolean defaultValue) {
         try {
             return getBoolean(key);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return defaultValue;
         }
     }
@@ -779,7 +779,7 @@ public class JSONObject {
             Object o = opt(key);
             return o instanceof Number ? ((Number)o).floatValue() :
                 new Float((String)o).floatValue();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return defaultValue;
         }
     }
@@ -812,7 +812,7 @@ public class JSONObject {
     public int optInt(String key, int defaultValue) {
         try {
             return getInt(key);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return defaultValue;
         }
     }
@@ -873,7 +873,7 @@ public class JSONObject {
     public long optLong(String key, long defaultValue) {
         try {
             return getLong(key);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return defaultValue;
         }
     }
@@ -945,7 +945,7 @@ public class JSONObject {
                         this.map.put(key, wrap(result));
                     }
                 }
-            } catch (Exception ignore) {
+            } catch (final Exception ignore) {
             }
         }
     }
@@ -1218,7 +1218,7 @@ public class JSONObject {
                         (s.charAt(1) == 'x' || s.charAt(1) == 'X')) {
                 try {
                     return new Integer(Integer.parseInt(s.substring(2), 16));
-                } catch (Exception ignore) {
+                } catch (final Exception ignore) {
                 }
             }
             try {
@@ -1231,7 +1231,7 @@ public class JSONObject {
                     return new Integer(myLong.intValue());
                 }
                 return myLong;
-            }  catch (Exception ignore) {
+            }  catch (final Exception ignore) {
             }
         }
         return s;
@@ -1308,7 +1308,7 @@ public class JSONObject {
             }
             sb.append('}');
             return sb.toString();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return null;
         }
     }
@@ -1461,7 +1461,7 @@ public class JSONObject {
             if (value instanceof String) {
                 return (String) value;
             }
-        } catch (Exception ignore) {
+        } catch (final Exception ignore) {
         }
         if (value instanceof Number) {
             return numberToString((Number) value);
@@ -1572,7 +1572,7 @@ public class JSONObject {
             }
             writer.write('}');
             return writer;
-        } catch (IOException exception) {
+        } catch (final IOException exception) {
             throw new JSONException(exception);
         }
      }

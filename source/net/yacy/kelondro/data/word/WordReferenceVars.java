@@ -522,7 +522,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         	for (int i = 0; i < cores0; i++) {
                 try {
                     worker[i].join();
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                 }
             }
 

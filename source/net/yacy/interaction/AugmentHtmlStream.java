@@ -77,7 +77,7 @@ public class AugmentHtmlStream {
                             + data;
                 }
             }
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
 
         }
 
@@ -98,7 +98,7 @@ public class AugmentHtmlStream {
 
         try {
             ConcurrentLog.info("AUGMENTATION", url.getName());
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
@@ -112,7 +112,7 @@ public class AugmentHtmlStream {
                 Doc = processExternal("http://reflect.ws/REST/GetHTML", "document", Doc);
                 ConcurrentLog.info("AUGMENTATION", "reflected " + url);
                 augmented = true;
-            } catch (Exception e) {
+            } catch (final Exception e) {
 
             }
         }

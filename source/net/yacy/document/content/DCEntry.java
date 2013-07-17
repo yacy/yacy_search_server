@@ -105,7 +105,7 @@ public class DCEntry extends TreeMap<String, String> {
             Date x = ISO8601Formatter.FORMATTER.parse(d);
             Date now = new Date();
             return x.after(now) ? now : x;
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             ConcurrentLog.logException(e);
             return new Date();
         }
@@ -122,7 +122,7 @@ public class DCEntry extends TreeMap<String, String> {
         }
         try {
             return new DigestURI(u);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             if (useRelationAsAlternative) {
                 DigestURI relation = this.getRelation();
                 if (relation != null) return relation;
@@ -143,7 +143,7 @@ public class DCEntry extends TreeMap<String, String> {
         }
         try {
             return new DigestURI(u);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             ConcurrentLog.warn("DCEntry", "getRelation: url is bad: " + e.getMessage());
             return null;
         }

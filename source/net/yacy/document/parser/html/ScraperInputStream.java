@@ -72,10 +72,10 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
 
         try {
 	    this.reader = (inputStreamCharset == null) ? new InputStreamReader(this) : new InputStreamReader(this,inputStreamCharset);
-	} catch (UnsupportedEncodingException e) {
+	} catch (final UnsupportedEncodingException e) {
 	    try {
 		this.reader = new InputStreamReader(this, "UTF-8");
-	    } catch (UnsupportedEncodingException e1) {
+	    } catch (final UnsupportedEncodingException e1) {
 		// how is that possible?
 		this.reader = new InputStreamReader(this);
 	    }

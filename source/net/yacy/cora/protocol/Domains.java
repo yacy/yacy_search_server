@@ -687,7 +687,7 @@ public class Domains {
         // call i.getHostName() using concurrency to interrupt execution in case of a time-out
         try {
             //TimeoutRequest.getHostName(i, 1000);
-        } catch (ExecutionException e) {
+        } catch (final ExecutionException e) {
             return i.getHostAddress();
         }
         */
@@ -772,7 +772,7 @@ public class Domains {
                     try {
                         ip = InetAddresses.forString(host);
                         log.info("using guava for host resolution:"  + host);
-                    } catch (IllegalArgumentException e) {
+                    } catch (final IllegalArgumentException e) {
                         ip = null;
                     }
                 }
@@ -827,7 +827,7 @@ public class Domains {
         	globalHosts.clear();
         	NAME_CACHE_HIT.clear();
         	NAME_CACHE_MISS.clear();
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
     }
     
 

@@ -93,7 +93,7 @@ public class get_folders {
                 prop.put("folders_"+count+"_hasChildren", "false");
                 prop.put("folders_"+count+"_comma", ",");
                 count++;
-            } catch (IOException e) {
+            } catch (final IOException e) {
             }
     	}
 

@@ -77,7 +77,7 @@ public class SnippetExtractor {
             sentence = order.remove(order.lastKey()); // sentence with the biggest score
             try {
                 tsr = new SnippetExtractor(sentence.toString(), queryhashes, maxLength);
-            } catch (UnsupportedOperationException e) {
+            } catch (final UnsupportedOperationException e) {
                 continue;
             }
             this.snippetString = tsr.snippetString;
@@ -94,7 +94,7 @@ public class SnippetExtractor {
                     if (maxLength < 20) maxLength = 20;
                     try {
                         tsr = new SnippetExtractor(order.values(), this.remainingHashes, maxLength);
-                    } catch (UnsupportedOperationException e) {
+                    } catch (final UnsupportedOperationException e) {
                         throw e;
                     }
                     final String nextSnippet = tsr.snippetString;
@@ -138,7 +138,7 @@ public class SnippetExtractor {
                 if (pos == null) {
                     try {
                         remainingHashes.put(hash);
-                    } catch (SpaceExceededException e) {
+                    } catch (final SpaceExceededException e) {
                         ConcurrentLog.logException(e);
                     }
                 } else {

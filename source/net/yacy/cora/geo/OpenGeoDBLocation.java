@@ -162,13 +162,13 @@ public class OpenGeoDBLocation implements Locations
                 continue;
             }
             reader.close();
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
             ConcurrentLog.logException(e);
         } finally {
             if ( reader != null ) {
                 try {
                     reader.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
         }

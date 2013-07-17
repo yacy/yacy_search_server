@@ -65,7 +65,7 @@ public class rssParser extends AbstractParser implements Parser {
         RSSReader rssReader;
         try {
             rssReader = new RSSReader(RSSFeed.DEFAULT_MAXSIZE, source, RSSReader.Type.none);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new Parser.Failure("Load error:" + e.getMessage(), url, e);
         }
 
@@ -104,7 +104,7 @@ public class rssParser extends AbstractParser implements Parser {
                     new HashMap<DigestURI, ImageEntry>(),
                     false);
             docs.add(doc);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             continue;
         }
 

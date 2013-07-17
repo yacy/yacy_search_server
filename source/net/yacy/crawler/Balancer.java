@@ -363,14 +363,14 @@ public class Balancer {
             Row.Entry rowEntry;
             try {
                 rowEntry = this.urlFileIndex.get(urlhash, true);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 continue;
             }
             if (rowEntry == null) continue;
             Request crawlEntry;
             try {
                 crawlEntry = new Request(rowEntry);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 continue;
             }
             cel.add(crawlEntry);
@@ -536,7 +536,7 @@ public class Balancer {
                     w = Latency.waitingRemaining(crawlEntry.url(), robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta);
                     //System.out.println("*** waitingRemaining = " + w + ", guessed = " + Latency.waitingRemainingGuessed(entry.getKey(), this.minimumLocalDelta, this.minimumGlobalDelta));
                     //System.out.println("*** explained: " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta));
-                } catch (IOException e1) {
+                } catch (final IOException e1) {
                     w = Latency.waitingRemainingGuessed(entry.getKey(), entry.getValue().hosthash, robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta);
                 }
 
@@ -626,7 +626,7 @@ public class Balancer {
             // check blacklist (again) because the user may have created blacklist entries after the queue has been filled
             if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, request.url())) {
                 ConcurrentLog.fine("CRAWLER", "URL '" + request.url() + "' is in blacklist.");
-                try {blackhandles.put(entry.getPrimaryKeyBytes());} catch (SpaceExceededException e) {}
+                try {blackhandles.put(entry.getPrimaryKeyBytes());} catch (final SpaceExceededException e) {}
                 continue;
             }
     	    

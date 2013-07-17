@@ -126,9 +126,9 @@ public final class CrawlSwitchboard {
             CrawlProfile p;
             try {
                 p = new CrawlProfile(this.profilesActiveCrawls.get(handle));
-            } catch ( final IOException e ) {
+            } catch (final IOException e ) {
                 p = null;
-            } catch ( final SpaceExceededException e ) {
+            } catch (final SpaceExceededException e ) {
                 p = null;
             }
             if ( p == null ) {
@@ -149,9 +149,9 @@ public final class CrawlSwitchboard {
             try {
                 p = new CrawlProfile(this.profilesPassiveCrawls.get(handle));
                 ConcurrentLog.info("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.collectionName());
-            } catch ( final IOException e ) {
+            } catch (final IOException e ) {
                 continue;
-            } catch ( final SpaceExceededException e ) {
+            } catch (final SpaceExceededException e ) {
                 continue;
             }
         }
@@ -179,9 +179,9 @@ public final class CrawlSwitchboard {
         Map<String, String> m;
         try {
             m = this.profilesActiveCrawls.get(profileKey);
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
             m = null;
-        } catch ( final SpaceExceededException e ) {
+        } catch (final SpaceExceededException e ) {
             m = null;
         }
         if ( m == null ) {
@@ -199,9 +199,9 @@ public final class CrawlSwitchboard {
         Map<String, String> m;
         try {
             m = this.profilesPassiveCrawls.get(profileKey);
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
             m = null;
-        } catch ( final SpaceExceededException e ) {
+        } catch (final SpaceExceededException e ) {
             m = null;
         }
         if ( m == null ) {
@@ -485,7 +485,7 @@ public final class CrawlSwitchboard {
         try {
             this.profilesActiveCrawls =
                 new MapHeap(pdb, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
-        } catch ( final IOException e1 ) {
+        } catch (final IOException e1 ) {
             ConcurrentLog.logException(e1);
             this.profilesActiveCrawls = null;
         }
@@ -506,9 +506,9 @@ public final class CrawlSwitchboard {
                 // getting next profile
                 try {
                     entry = new CrawlProfile(this.profilesActiveCrawls.get(handle));
-                } catch ( final IOException e ) {
+                } catch (final IOException e ) {
                     continue;
-                } catch ( final SpaceExceededException e ) {
+                } catch (final SpaceExceededException e ) {
                     continue;
                 }
                 if (!DEFAULT_PROFILES.contains(entry.name())) {
@@ -518,7 +518,7 @@ public final class CrawlSwitchboard {
                     hasDoneSomething = true;
                 }
             }
-        } catch ( final kelondroException e ) {
+        } catch (final kelondroException e ) {
             resetProfiles();
             hasDoneSomething = true;
         }
@@ -560,7 +560,7 @@ public final class CrawlSwitchboard {
                 }
                 if (deletionCandidate.size() == 0) return 0;
             }
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             return 0;
         }
         
@@ -592,14 +592,14 @@ public final class CrawlSwitchboard {
         MapHeap ret;
         try {
             ret = new MapHeap(file, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
             ConcurrentLog.logException(e);
             ConcurrentLog.logException(e);
             FileUtils.deletedelete(file);
             try {
                 ret =
                     new MapHeap(file, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
-            } catch ( final IOException e1 ) {
+            } catch (final IOException e1 ) {
                 ConcurrentLog.logException(e1);
                 ret = null;
             }

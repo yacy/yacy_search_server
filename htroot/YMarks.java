@@ -38,8 +38,8 @@ public class YMarks {
     				try {
     					bmk_row = sb.tables.select(bmk_table, urlHash);
     		           	rdf.addBookmark(bmk_user, bmk_row);
-    				} catch (IOException e) {
-    				} catch (SpaceExceededException e) {
+    				} catch (final IOException e) {
+    				} catch (final SpaceExceededException e) {
     				}    
             	}
             } else {
@@ -52,7 +52,7 @@ public class YMarks {
                 		try {
             				// TODO select only public bookmarks
                 			rdf.addBookmarks(bmk_user, sb.tables.iterator(bmk_table));
-            			} catch (IOException e) {
+            			} catch (final IOException e) {
             				// TODO exception handling
             			}
                 	}
@@ -68,7 +68,7 @@ public class YMarks {
             int size;
 			try {
 				size = sb.tables.bookmarks.getSize(bmk_user);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				ConcurrentLog.logException(e);
 				size = 0;
 			}

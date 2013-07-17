@@ -148,9 +148,9 @@ public class YMarkTables {
 								+" of table "+bmk_table+" containing "+this.worktables.size(bmk_table)+ " bookmarks"
 								+" ("+(System.currentTimeMillis()-time)+"ms)");
 					}
-    			} catch (IOException e) {
+    			} catch (final IOException e) {
 					ConcurrentLog.logException(e);
-				} catch (TableColumnIndexException e) {
+				} catch (final TableColumnIndexException e) {
 					// currently nothing to do...
 				}
     		}
@@ -167,7 +167,7 @@ public class YMarkTables {
     	if(this.worktables.hasIndex(bmk_table, YMarkEntry.BOOKMARK.FOLDERS.key())) {
 			try {
 				this.worktables.getIndex(bmk_table).delete(urlHash);
-			} catch (TableColumnIndexException e) {
+			} catch (final TableColumnIndexException e) {
 				// currently nothing to do...
 			}
     	}
@@ -212,7 +212,7 @@ public class YMarkTables {
     				tags.put(tag, new YMarkTag(tag, index.get(YMarkEntry.BOOKMARK.TAGS.key(), tag).size()));
 				}
 				return tags;
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				// nothing to do
 			}
     	}
@@ -247,7 +247,7 @@ public class YMarkTables {
 	    		}
 	        	if (!root.equals(YMarkTables.FOLDERS_ROOT)) { folders.add(root); }
 	        	return folders;
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				ConcurrentLog.logException(e);
 			}
     	}
@@ -336,7 +336,7 @@ public class YMarkTables {
             if(this.worktables.hasIndex(bmk_table)) {
             	try {
 					this.worktables.getIndex(bmk_table).update(YMarkEntry.BOOKMARK.TAGS.key(), YMarkEntry.BOOKMARK.TAGS.seperator(), row);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					// nothing to do
 				}
             }
@@ -412,7 +412,7 @@ public class YMarkTables {
 		byte[] urlHash = null;
         try {
 			urlHash = YMarkUtil.getBookmarkId(bmk.get(YMarkEntry.BOOKMARK.URL.key()));
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
         	ConcurrentLog.info("BOOKMARKIMPORT", "invalid url: "+bmk.get(YMarkEntry.BOOKMARK.URL.key()));
         }
 		Tables.Row bmk_row = null;
@@ -420,7 +420,7 @@ public class YMarkTables {
 		if (urlHash != null) {
 			try {
 				bmk_row = this.worktables.select(bmk_table, urlHash);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 
 			}
 	        if (bmk_row == null) {
@@ -433,7 +433,7 @@ public class YMarkTables {
 	        	try {
 	        		if(this.worktables.hasIndex(bmk_table))
 	        			this.worktables.getIndex(bmk_table).add(YMarkEntry.BOOKMARK.indexColumns(), bmk, urlHash);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					// nothing to do
 				}
 	        } else {
@@ -495,7 +495,7 @@ public class YMarkTables {
 	        	try {
 					if(this.worktables.hasIndex(bmk_table))
 						this.worktables.getIndex(bmk_table).update(YMarkEntry.BOOKMARK.indexColumns(), bmk_row);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					// nothing to do
 				}
             }

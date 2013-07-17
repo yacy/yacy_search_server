@@ -60,7 +60,7 @@ public class Vocabulary_p {
                     if (discovername != null && discovername.length() > 0) {
                         String discoverobjectspace = post.get("discoverobjectspace", "");
                         MultiProtocolURI discoveruri = null;
-                        if (discoverobjectspace.length() > 0) try {discoveruri = new MultiProtocolURI(discoverobjectspace);} catch (MalformedURLException e) {}
+                        if (discoverobjectspace.length() > 0) try {discoveruri = new MultiProtocolURI(discoverobjectspace);} catch (final MalformedURLException e) {}
                         if (discoveruri == null) discoverobjectspace = "";
                         Map<String, Tagging.SOTuple> table = new TreeMap<String, Tagging.SOTuple>();
                         File propFile = LibraryProvider.autotagging.getVocabularyFile(discovername);
@@ -132,7 +132,7 @@ public class Vocabulary_p {
                     	String objectlink = post.get("newobjectlink", "");
                     	if (objectlink.length() > 0) try {
                     		objectlink = new MultiProtocolURI(objectlink).toNormalform(true);
-                    	} catch (MalformedURLException e) {}
+                    	} catch (final MalformedURLException e) {}
                         vocabulary.put(post.get("newterm", ""), post.get("newsynonyms", ""), objectlink);
                     }
 
@@ -166,7 +166,7 @@ public class Vocabulary_p {
                         vocabularyName = null;
                     }
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }
         }

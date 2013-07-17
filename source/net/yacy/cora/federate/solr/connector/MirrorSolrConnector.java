@@ -283,7 +283,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
             public void run() {
                 try {
                     count.addAndGet(MirrorSolrConnector.this.solr0.getCountByQuery(querystring));
-                } catch (IOException e) {}
+                } catch (final IOException e) {}
             }
         };
         t0.start();
@@ -292,12 +292,12 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
             public void run() {
                 try {
                     count.addAndGet(MirrorSolrConnector.this.solr1.getCountByQuery(querystring));
-                } catch (IOException e) {}
+                } catch (final IOException e) {}
             }
         };
         t1.start();
-        try {t0.join();} catch (InterruptedException e) {}
-        try {t1.join();} catch (InterruptedException e) {}
+        try {t0.join();} catch (final InterruptedException e) {}
+        try {t1.join();} catch (final InterruptedException e) {}
         return count.get();
     }
 

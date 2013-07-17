@@ -214,7 +214,7 @@ public final class transferRWI {
                     } else {
                         unknownURL.put(ASCII.getBytes(id));
                     }
-                } catch (SpaceExceededException e) {
+                } catch (final SpaceExceededException e) {
                     sb.getLog().warn("transferRWI: DB-Error while trying to determine if URL with hash '" + id + "' is known.", e);
                 }
             }

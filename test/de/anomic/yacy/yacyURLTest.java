@@ -33,7 +33,7 @@ public class yacyURLTest extends TestCase {
 			String resolvedURL="";
                         try {
                             resolvedURL = (new MultiProtocolURI(testhost + testStrings[i][0])).toString();
-                        } catch (MalformedURLException ex) {
+                        } catch (final MalformedURLException ex) {
                             fail ("malformed URL");
                         }
 			// test if equal

@@ -208,7 +208,7 @@ public class YMarkEntry extends TreeMap<String, String> {
     	if(this.containsKey(YMarkEntry.BOOKMARK.URL.key()))
 			try {
 				return YMarkUtil.getBookmarkId(this.get(YMarkEntry.BOOKMARK.URL.key()));
-			} catch (MalformedURLException e) {
+			} catch (final MalformedURLException e) {
 				ConcurrentLog.warn(YMarkTables.BOOKMARKS_LOG, "getUrlHash - MalformedURLException for YMarkEntry: "+this.get(YMarkEntry.BOOKMARK.URL.key()));
 			}
     	return null;

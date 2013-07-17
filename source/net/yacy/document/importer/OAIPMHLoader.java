@@ -58,7 +58,7 @@ public class OAIPMHLoader {
             try {
                 response = loader.load(loader.request(source, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
                 break;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.warn("OAIPMHLoader", "loading failed at attempt " + (i + 1) + ": " + source.toNormalform(true));
                 ee = e;
                 continue;

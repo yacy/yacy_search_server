@@ -56,7 +56,7 @@ public class IndexFederated_p {
                 final int wordCacheMaxCount = (int) sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
                 final long fileSizeMax = (OS.isWindows) ? sb.getConfigLong("filesize.max.win", Integer.MAX_VALUE) : sb.getConfigLong( "filesize.max.other", Integer.MAX_VALUE);
                 sb.index.connectRWI(wordCacheMaxCount, fileSizeMax);
-            } catch (IOException e) { ConcurrentLog.logException(e); } // switch on
+            } catch (final IOException e) { ConcurrentLog.logException(e); } // switch on
 
             boolean post_core_citation = post.getBoolean(SwitchboardConstants.CORE_SERVICE_CITATION);
             final boolean previous_core_citation = sb.index.connectedCitation() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false);
@@ -66,7 +66,7 @@ public class IndexFederated_p {
                 final int wordCacheMaxCount = (int) sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
                 final long fileSizeMax = (OS.isWindows) ? sb.getConfigLong("filesize.max.win", Integer.MAX_VALUE) : sb.getConfigLong( "filesize.max.other", Integer.MAX_VALUE);
                 sb.index.connectCitation(wordCacheMaxCount, fileSizeMax);
-            } catch (IOException e) { ConcurrentLog.logException(e); } // switch on
+            } catch (final IOException e) { ConcurrentLog.logException(e); } // switch on
 
             boolean post_core_fulltext = post.getBoolean(SwitchboardConstants.CORE_SERVICE_FULLTEXT);
             final boolean previous_core_fulltext = sb.index.fulltext().connectedLocalSolr() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, false);
@@ -80,7 +80,7 @@ public class IndexFederated_p {
             if (!previous_core_fulltext && post_core_fulltext) {
                 // switch on
                 sb.index.connectUrlDb(sb.useTailCache, sb.exceed134217727);
-                try { sb.index.fulltext().connectLocalSolr(); } catch (IOException e) { ConcurrentLog.logException(e); }
+                try { sb.index.fulltext().connectLocalSolr(); } catch (final IOException e) { ConcurrentLog.logException(e); }
             }
 
             boolean webgraph = post.getBoolean(SwitchboardConstants.CORE_SERVICE_WEBGRAPH);
@@ -118,7 +118,7 @@ public class IndexFederated_p {
                 // switch off
                 try {
                     sb.index.fulltext().disconnectRemoteSolr();
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -138,11 +138,11 @@ public class IndexFederated_p {
                     ConcurrentLog.logException(e);
                     try {
                         sb.index.fulltext().disconnectRemoteSolr();
-                    } catch (Throwable ee) {
+                    } catch (final Throwable ee) {
                         ConcurrentLog.logException(ee);
                     }
                 }
-            } catch (SolrException e) {
+            } catch (final SolrException e) {
                 ConcurrentLog.severe("IndexFederated_p", "change of solr connection failed", e);
             }
             

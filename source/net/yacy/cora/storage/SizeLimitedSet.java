@@ -71,7 +71,7 @@ public class SizeLimitedSet<E> extends AbstractSet<E> implements Set<E>, Cloneab
         	SizeLimitedSet<E> n = (SizeLimitedSet<E>) super.clone();
             n.map = (SizeLimitedMap<E, Object>) map.clone();
             return n;
-        } catch (CloneNotSupportedException e) {
+        } catch (final CloneNotSupportedException e) {
             throw new InternalError();
         }
     }

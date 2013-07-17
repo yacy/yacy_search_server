@@ -196,7 +196,7 @@ public class Bookmarks {
                     BookmarksDB.Bookmark bookmark = null;
                     try {
                         bookmark = sb.bookmarksDB.getBookmark(urlHash);
-                    } catch (IOException e1) {
+                    } catch (final IOException e1) {
                     }
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
@@ -313,7 +313,7 @@ public class Bookmarks {
                     Bookmark bookmark = null;
                     try {
                         bookmark = sb.bookmarksDB.getBookmark(it.next());
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                     }
 
                     if (bookmark != null){
@@ -437,7 +437,7 @@ public class Bookmarks {
                 Bookmark bookmark = null;
                 try {
                     bookmark = sb.bookmarksDB.getBookmark(bit.next());
-                } catch (IOException e) {
+                } catch (final IOException e) {
                 }
         		if (bookmark == null) break;
                 prop.put("display_folderlist_" + count + "_folder", "<li><a href=\"" + bookmark.getUrl() + "\" title=\"" + bookmark.getDescription() + "\">" + bookmark.getTitle() + "</a></li>");

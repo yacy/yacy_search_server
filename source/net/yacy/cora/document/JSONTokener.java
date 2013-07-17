@@ -144,7 +144,7 @@ public class JSONTokener {
         } else {
 	        try {
 	            c = this.reader.read();
-	        } catch (IOException exception) {
+	        } catch (final IOException exception) {
 	            throw new JSONException(exception);
 	        }
 
@@ -408,7 +408,7 @@ public class JSONTokener {
                     return c;
                 }
             } while (c != to);
-        } catch (IOException exc) {
+        } catch (final IOException exc) {
             throw new JSONException(exc);
         }
 

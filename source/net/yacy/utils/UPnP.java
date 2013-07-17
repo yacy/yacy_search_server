@@ -74,7 +74,7 @@ public class UPnP {
 			if (IGDs == null) IGDs = InternetGatewayDevice.getDevices(discoveryTimeout);
 			localHostIP = Domains.myPublicLocalIP().getHostAddress();
 			if (localHostIP.startsWith("127.")) log.warn("found odd local address: " + localHostIP + "; UPnP may fail");
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			init = false;
 		}
 		if (IGDs != null) {
@@ -122,7 +122,7 @@ public class UPnP {
 						mappedPort = port;
 					}
 					else log.warn("could not map " + msg);
-				} catch (IOException e) {} catch (UPNPResponseException e) { log.severe("mapping error: " + e.getMessage()); }
+				} catch (final IOException e) {} catch (final UPNPResponseException e) { log.severe("mapping error: " + e.getMessage()); }
 			}
 		}
 	}
@@ -138,7 +138,7 @@ public class UPnP {
 					String msg = "port " + mappedPort + " on device "+ IGD.getIGDRootDevice().getFriendlyName();
 					if (unmapped) log.info("unmapped " + msg);
 					else log.warn("could not unmap " + msg);
-				} catch (IOException e) {} catch (UPNPResponseException e) { log.severe("unmapping error: " + e.getMessage()); }
+				} catch (final IOException e) {} catch (final UPNPResponseException e) { log.severe("unmapping error: " + e.getMessage()); }
 			}
 			mappedPort = 0; // reset mapped port
 		}
@@ -171,7 +171,7 @@ public class UPnP {
 			try {
 				DiscoveryAdvertisement.getInstance().registerEvent(DiscoveryAdvertisement.EVENT_SSDP_ALIVE, devicetype, handler);
 //				DiscoveryAdvertisement.getInstance().registerEvent(DiscoveryAdvertisement.EVENT_SSDP_BYE_BYE, devicetype, handler);
-			} catch (IOException e) {}
+			} catch (final IOException e) {}
 		}
 		
 		public static void unregister() {
@@ -188,13 +188,13 @@ public class UPnP {
 				String errorMsg = null;
 				try {
 					newIGD[0] = new InternetGatewayDevice(new UPNPRootDevice(location, maxAge, "", usn, udn));
-				} catch (UnsupportedOperationException e) {
+				} catch (final UnsupportedOperationException e) {
 					error = true;
 					errorMsg = e.getMessage();
-				} catch (MalformedURLException e) {
+				} catch (final MalformedURLException e) {
 					error = true;
 					errorMsg = e.getMessage();
-				} catch (IllegalStateException e) {
+				} catch (final IllegalStateException e) {
 					error = true;
 					errorMsg = e.getMessage();
 				}

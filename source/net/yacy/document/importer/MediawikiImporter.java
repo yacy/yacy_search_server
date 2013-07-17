@@ -152,12 +152,12 @@ public class MediawikiImporter extends Thread implements Importer {
             if (this.sourcefile.getName().endsWith(".bz2")) {
                 int b = is.read();
                 if (b != 'B') {
-                    try {is.close();} catch (IOException e) {}
+                    try {is.close();} catch (final IOException e) {}
                     throw new IOException("Invalid bz2 content.");
                 }
                 b = is.read();
                 if (b != 'Z') {
-                    try {is.close();} catch (IOException e) {}
+                    try {is.close();} catch (final IOException e) {}
                     throw new IOException("Invalid bz2 content.");
                 }
                 is = new BZip2CompressorInputStream(is);

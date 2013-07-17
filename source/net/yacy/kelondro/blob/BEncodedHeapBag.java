@@ -137,7 +137,7 @@ public class BEncodedHeapBag extends AbstractMapStore implements MapStore {
                 ConcurrentLog.info("BEncodedHeapBag", "opening partial heap " + f);
                 BEncodedHeap heap = new BEncodedHeap(f, this.keylength, this.entryOrder, this.buffermax);
                 this.bag.put(maxf, heap);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.severe("BEncodedHeapBag", "error opening partial heap " + f);
             }
         }
@@ -186,7 +186,7 @@ public class BEncodedHeapBag extends AbstractMapStore implements MapStore {
         BEncodedHeap heap;
         try {
             heap = new BEncodedHeap(f, this.keylength, this.entryOrder, this.buffermax);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.severe("BEncodedHeapBag", "unable to open new heap file: " + e.getMessage(), e);
             return null;
         }

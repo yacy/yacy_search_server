@@ -82,14 +82,14 @@ public class ImportDump {
         		statement.addBatch(t);
         	}
         	statement.executeBatch();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             ConcurrentLog.logException(e);
             throw e;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
             throw new SQLException(e.getMessage());
 		} finally {
-            if (statement != null) try {statement.close();} catch (SQLException e) {}
+            if (statement != null) try {statement.close();} catch (final SQLException e) {}
         }
     }
 

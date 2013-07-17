@@ -77,7 +77,7 @@ public class select {
     private static SolrServlet solrServlet = new SolrServlet();
     private final static Map<String, QueryResponseWriter> RESPONSE_WRITER = new HashMap<String, QueryResponseWriter>();
     static {
-        try {solrServlet.init(null);} catch (ServletException e) {}
+        try {solrServlet.init(null);} catch (final ServletException e) {}
         RESPONSE_WRITER.putAll(SolrCore.DEFAULT_RESPONSE_WRITERS);
         XSLTResponseWriter xsltWriter = new XSLTResponseWriter();
         OpensearchResponseWriter opensearchResponseWriter = new OpensearchResponseWriter();
@@ -218,7 +218,7 @@ public class select {
         SolrQueryRequest req = connector.request(params);
         SolrQueryResponse response = null;
         Exception e = null;
-        try {response = connector.query(req);} catch (SolrException ee) {e = ee;}
+        try {response = connector.query(req);} catch (final SolrException ee) {e = ee;}
         if (response != null) e = response.getException();
         if (e != null) {
             ConcurrentLog.logException(e);
@@ -232,11 +232,11 @@ public class select {
         try {
             responseWriter.write(ow, req, response);
             ow.flush();
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
         } finally {
             req.close();
             SolrRequestInfo.clearRequestInfo();
-            try {ow.close();} catch (IOException e1) {}
+            try {ow.close();} catch (final IOException e1) {}
         }
 
         // log result

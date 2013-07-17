@@ -78,7 +78,7 @@ public class SynonymLibrary {
                         symsetlist.add(synonyms);
                     }
                 }
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 log.warn("cannot read stemming file " + f, e);
             }
         }

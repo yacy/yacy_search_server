@@ -199,7 +199,7 @@ public class MessageBoard {
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
             return null;
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
             return null;
         }

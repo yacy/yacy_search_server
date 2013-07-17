@@ -517,7 +517,7 @@ public class URIMetadataRow {
                 if (lat >= -90.0d && lat <= 90.0d) return lat;
                 this.latlon = null; // wrong value
                 return 0.0d;
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return 0.0d;
             }
         }
@@ -530,7 +530,7 @@ public class URIMetadataRow {
                 if (lon >= -180.0d && lon <= 180.0d) return lon;
                 this.latlon = null; // wrong value
                 return 0.0d;
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 return 0.0d;
             }
         }

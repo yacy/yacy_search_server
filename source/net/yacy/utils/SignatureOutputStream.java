@@ -60,7 +60,7 @@ public class SignatureOutputStream extends FilterOutputStream {
         try {
     	    signature = Signature.getInstance(algorithm);
             signature.initVerify(publicKey);
-        } catch (InvalidKeyException e) {
+        } catch (final InvalidKeyException e) {
             System.out.println("Internal Error at signature:" + e.getMessage());
 	}
     }
@@ -73,7 +73,7 @@ public class SignatureOutputStream extends FilterOutputStream {
     public void write(int b) throws IOException {
 	try {
 	    signature.update((byte)b);
-	} catch (SignatureException e) {
+	} catch (final SignatureException e) {
 	    throw new IOException("Signature update failed: "+ e.getMessage());
 	}
 	out.write(b);
@@ -83,7 +83,7 @@ public class SignatureOutputStream extends FilterOutputStream {
     public void write(byte[] b, int off, int len) throws IOException {
 	try {
 	    signature.update(b, off, len);
-	} catch (SignatureException e) {
+	} catch (final SignatureException e) {
 	    throw new IOException("Signature update failed: "+ e.getMessage());
 	}
 	out.write(b, off, len);

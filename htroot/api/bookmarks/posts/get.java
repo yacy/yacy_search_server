@@ -66,7 +66,7 @@ public class get {
                     }
                     count++;
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
             }
         }
         prop.put("posts", count);

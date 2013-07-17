@@ -187,17 +187,17 @@ public class CryptoLib {
 		pubFile.close();
 	    }
 
-	} catch (FileNotFoundException e) {
+	} catch (final FileNotFoundException e) {
 	    System.out.println("File not found: " + e.getMessage());
-	} catch (IOException e) {
+	} catch (final IOException e) {
 	    System.out.println("IO-Error: " + e.getMessage());
-	} catch (NoSuchAlgorithmException e) {
+	} catch (final NoSuchAlgorithmException e) {
 	    System.out.println("No such Algorithm: " + e.getMessage());
-	} catch (InvalidKeySpecException e) {
+	} catch (final InvalidKeySpecException e) {
 	    System.out.println("Key has invalid format: " + e.getMessage());
-	} catch (InvalidKeyException e) {
+	} catch (final InvalidKeyException e) {
 	    System.out.println("Invalid Key: " + e.getMessage());
-	} catch (SignatureException e) {
+	} catch (final SignatureException e) {
 	    System.out.println("Error while signing: " + e.getMessage());
 	}
     }

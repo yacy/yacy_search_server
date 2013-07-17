@@ -75,7 +75,7 @@ public class Threaddump_p {
             for (int i = 0; i < multipleCount; i++) {
                 try {
                     traces.add(ThreadDump.getAllStackTraces());
-                } catch (OutOfMemoryError e) {
+                } catch (final OutOfMemoryError e) {
                     break;
                 }
             }
@@ -86,7 +86,7 @@ public class Threaddump_p {
             if (ThreadDump.canProduceLockedBy(logFile)) {
                 try {
                     new ThreadDump(logFile).appendBlockTraces(buffer, plain);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     e.printStackTrace();
                 }
             } else if (OS.canExecUnix) {

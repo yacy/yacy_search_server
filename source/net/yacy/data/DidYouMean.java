@@ -160,7 +160,7 @@ public class DidYouMean {
 	            }
 	            scored.inc(s, this.segment.getWordCountGuess(s.toString()));
 	        }
-        } catch (ConcurrentModificationException e) {
+        } catch (final ConcurrentModificationException e) {
         }
         final SortedSet<StringBuilder> countSorted = Collections.synchronizedSortedSet(new TreeSet<StringBuilder>(new headMatchingComparator(this.word, this.INDEX_SIZE_COMPARATOR)));
         final int wc = this.segment.getWordCountGuess(this.word.toString()); // all counts must be greater than this

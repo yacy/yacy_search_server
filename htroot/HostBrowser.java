@@ -116,7 +116,7 @@ public class HostBrowser {
         prop.put("delete", admin && path.length() > 0 ? 1 : 0);
         
         DigestURI pathURI = null;
-        try {pathURI = new DigestURI(path);} catch (MalformedURLException e) {}
+        try {pathURI = new DigestURI(path);} catch (final MalformedURLException e) {}
 
         String load = post.get("load", "");
         boolean wait = false;
@@ -140,9 +140,9 @@ public class HostBrowser {
                 prop.put("result", reasonString == null ? ("added url to indexer: " + load) : ("not indexed url '" + load + "': " + reasonString));
                 if (wait) for (int i = 0; i < 30; i++) {
                     if (sb.index.exists(ASCII.String(url.hash()))) break;
-                    try {Thread.sleep(100);} catch (InterruptedException e) {}
+                    try {Thread.sleep(100);} catch (final InterruptedException e) {}
                 }
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 prop.put("result", "bad url '" + load + "'");
             }
         }
@@ -158,7 +158,7 @@ public class HostBrowser {
                 ConcurrentLog.info ("HostBrowser:", "delete documents with failtype_s = excl");
                 prop.putNum("ucount", fulltext.collectionSize());
                 return prop;
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 ConcurrentLog.logException(ex);
             }
         }
@@ -216,7 +216,7 @@ public class HostBrowser {
                 }
                 prop.put("hosts_list", c);
                 prop.put("hosts", 1);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }
         }
@@ -331,7 +331,7 @@ public class HostBrowser {
                                     }
                                     lks.set(u, u.length());
                                 }
-                            } catch (MalformedURLException e) {}
+                            } catch (final MalformedURLException e) {}
                         }
                     }
                     if (System.currentTimeMillis() > timeoutList) break;
@@ -422,7 +422,7 @@ public class HostBrowser {
                         prop.put("files_list_" + c + "_type", 0);
                         prop.put("files_list_" + c + "_type_url", entry.getKey());
                         StoreType type = (StoreType) entry.getValue();
-                        try {uri = new DigestURI(entry.getKey());} catch (MalformedURLException e) {uri = null;}
+                        try {uri = new DigestURI(entry.getKey());} catch (final MalformedURLException e) {uri = null;}
                         HarvestProcess process = uri == null ? null : sb.crawlQueues.urlExists(uri.hash());
                         boolean loading = load.equals(entry.getKey()) || (process != null && process != HarvestProcess.ERRORS);
                         boolean error =  process == HarvestProcess.ERRORS || type == StoreType.EXCLUDED || type == StoreType.FAILED;
@@ -499,7 +499,7 @@ public class HostBrowser {
                     prop.put("outbound", 0);
                 }
                 
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 ConcurrentLog.logException(e);
             }
         }
@@ -549,7 +549,7 @@ public class HostBrowser {
                         DigestURI u = fulltext.getURL(ASCII.getBytes(id));
                         if (u != null) references_external_urls.add(u.toNormalform(true));
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                 }
                 
             }

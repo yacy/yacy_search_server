@@ -89,7 +89,7 @@ public class Interaction {
 			DigestURI uri = new DigestURI (url);
 
 			domain = uri.getHost();
-		} catch (MalformedURLException e) {
+		} catch (final MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -113,7 +113,7 @@ public class Interaction {
 
 
 
-		} catch (MalformedURLException e) {
+		} catch (final MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -147,7 +147,7 @@ public static String GetTableentry(String url, String type, String username) {
 			}
 
 		}
-	} catch (IOException e) {
+	} catch (final IOException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
@@ -192,7 +192,7 @@ public static String Tableentry(String url, String type, String comment, String 
 								+ "?url=" + url + "&comment=" + comment
 								+ "&from=" + from + "&peer=" + peer,
 						new HashMap<String, ContentBody>(), false)));
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return "";
@@ -221,7 +221,7 @@ public static String Tableentry(String url, String type, String comment, String 
             sb.tables.insert(from+"_contribution", map);
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

@@ -54,7 +54,7 @@ public class Phonetic {
             if (encoder == Encoder.METAPHONE) return metaphoneEncoder.encode(s);
             if (encoder == Encoder.DOUBLE_METAPHONE) return doubleMetaphoneEncoder.encode(s);
             return s;
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             // some encoders do not work with non-ASCII charachters and throw an exception
             return s;
         }

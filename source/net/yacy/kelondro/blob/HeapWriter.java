@@ -85,7 +85,7 @@ public final class HeapWriter {
         this.index = new RowHandleMap(keylength, ordering, 8, 100000, readyHeapFile.getAbsolutePath());
         try {
             this.os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(temporaryHeapFile), outBuffer));
-        } catch (OutOfMemoryError e) {
+        } catch (final OutOfMemoryError e) {
             // try this again without buffer
             this.os = new DataOutputStream(new FileOutputStream(temporaryHeapFile));
         }

@@ -69,7 +69,7 @@ public class Application extends JFrame implements DocumentListener {
             for (JMenu menu: menues) mainMenu.add(menu);
             
             pack();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }

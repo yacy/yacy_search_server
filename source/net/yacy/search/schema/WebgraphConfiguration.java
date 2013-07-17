@@ -88,7 +88,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             try {
                 WebgraphSchema f = WebgraphSchema.valueOf(etr.key());
                 f.setSolrFieldName(etr.getValue());
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 ConcurrentLog.fine("SolrWebgraphWriter", "solr schema file " + configurationFile.getAbsolutePath() + " defines unknown attribute '" + etr.toString() + "'");
                 it.remove();
             }
@@ -323,13 +323,13 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                         // send back to index
                         connector.add(sid);
                         proccount++;
-                    } catch (Throwable e1) {
+                    } catch (final Throwable e1) {
                     }
                     
                 }
             }
             ConcurrentLog.info("WebgraphConfiguration", "cleanup_processing: re-calculated " + proccount + " new documents, " + proccount_clickdepthchange + " clickdepth values changed.");
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
         return proccount;
     }
@@ -363,7 +363,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                 try {
                     SchemaDeclaration f = WebgraphSchema.valueOf(etr.key());
                     f.setSolrFieldName(etr.getValue());
-                } catch (IllegalArgumentException e) {
+                } catch (final IllegalArgumentException e) {
                     continue;
                 }
             }

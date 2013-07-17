@@ -63,7 +63,7 @@ public class RDFaTripleImpl{
 	public IRDFaTriple[] parse() {
 		try {
 			this.aTransformer.transform(new StreamSource(this.in), new StreamResult(System.out));
-		} catch (TransformerException e) {
+		} catch (final TransformerException e) {
 			ConcurrentLog.warn("RDFA PARSER", "Error while reading RDFa");
 //			e.printStackTrace();
 		}

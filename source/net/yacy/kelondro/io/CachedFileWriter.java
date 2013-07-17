@@ -146,11 +146,11 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
     @Override
     public final synchronized void close() {
         if (this.RAFile != null) try {
-            try{this.RAFile.getChannel().close();} catch (IOException e) {}
+            try{this.RAFile.getChannel().close();} catch (final IOException e) {}
             //System.out.println("***DEBUG*** closed file " + this.file + ", FD is " + ((RAFile.getFD().valid()) ? "VALID" : "VOID") + ", channel is " + ((RAFile.getChannel().isOpen()) ? "OPEN" : "CLOSE"));
             this.RAFile.close();
             //System.out.println("***DEBUG*** closed file " + this.file + ", FD is " + ((RAFile.getFD().valid()) ? "VALID" : "VOID") + ", channel is " + ((RAFile.getChannel().isOpen()) ? "OPEN" : "CLOSE"));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
         this.cache = null;
@@ -162,7 +162,7 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
         // re-open the file
         try {
             this.RAFile = new RandomAccessFile(this.file, "rw");
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             ConcurrentLog.logException(e);
         }
         this.cache = new byte[8192];

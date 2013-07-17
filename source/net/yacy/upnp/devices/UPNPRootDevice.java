@@ -160,9 +160,9 @@ public class UPNPRootDevice extends UPNPDevice {
         if ( log.isDebugEnabled() ) log.debug( "device URLBase " + URLBase );
         buildURLBase = false;
       }
-    } catch ( JXPathException ex ) {
+    } catch (final  JXPathException ex ) {
       // URLBase is not mandatory we assume we use the URL of the device
-    } catch ( MalformedURLException malformedEx ) {
+    } catch (final  MalformedURLException malformedEx ) {
       // crappy urlbase provided
       log.warn( "Error occured during device baseURL " + base + " parsing, building it from device default location", malformedEx );
     }
@@ -258,12 +258,12 @@ public class UPNPRootDevice extends UPNPDevice {
     String base = getNonMandatoryData( deviceCtx, "upnp:manufacturerURL" );
     try {
       if ( base != null ) device.manufacturerURL = new URL( base );
-    } catch ( java.net.MalformedURLException ex ) {
+    } catch (final  java.net.MalformedURLException ex ) {
       // crappy data provided, keep the field null
     }
     try {
       device.presentationURL = getURL( getNonMandatoryData( deviceCtx, "upnp:presentationURL" ), URLBase );
-    } catch ( java.net.MalformedURLException ex ) {
+    } catch (final  java.net.MalformedURLException ex ) {
       // crappy data provided, keep the field null
     }
     device.modelDescription = getNonMandatoryData( deviceCtx, "upnp:modelDescription" );
@@ -277,7 +277,7 @@ public class UPNPRootDevice extends UPNPDevice {
     if ( tmp != null ) {
       try {
         device.UPC = Long.parseLong( tmp );
-      } catch ( Exception ex ) {
+      } catch (final  Exception ex ) {
         // non all numeric field provided, non upnp compliant device
       }
     }
@@ -289,7 +289,7 @@ public class UPNPRootDevice extends UPNPDevice {
     Pointer deviceListPtr;
     try {
       deviceListPtr = deviceCtx.getPointer( "upnp:deviceList" );
-    } catch ( JXPathException ex ) {
+    } catch (final  JXPathException ex ) {
       // no pointers for this device list, this can happen
       // if the device has no child devices, simply returning
       return;
@@ -325,7 +325,7 @@ public class UPNPRootDevice extends UPNPDevice {
       if ( value != null && value.isEmpty() ) {
         value = null;
       }
-    } catch ( JXPathException ex ) {
+    } catch (final  JXPathException ex ) {
       value = null;
     }
     return value;
@@ -369,7 +369,7 @@ public class UPNPRootDevice extends UPNPDevice {
     Pointer iconListPtr;
     try {
       iconListPtr = deviceCtx.getPointer( "upnp:iconList" );
-    } catch ( JXPathException ex ) {
+    } catch (final  JXPathException ex ) {
       // no pointers for icons list, this can happen
       // simply returning
       return;
@@ -405,7 +405,7 @@ public class UPNPRootDevice extends UPNPDevice {
     if ( url == null || url.trim().isEmpty() ) return null;
     try {
       rtrVal = new URL( url );
-    } catch ( MalformedURLException malEx ) {
+    } catch (final  MalformedURLException malEx ) {
       // maybe that the url is relative, we add the baseURL and reparse it
       // if relative then we take the device baser url root and add the url
       if ( baseURL != null ) { 
@@ -445,7 +445,7 @@ public class UPNPRootDevice extends UPNPDevice {
         }
         in.close();
         deviceDefLocData = strBuff.toString();
-      } catch ( IOException ioEx ) {
+      } catch (final  IOException ioEx ) {
         return null;	
       }
     }

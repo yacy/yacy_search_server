@@ -170,7 +170,7 @@ public class serverObjects implements Serializable, Cloneable {
         if (result == null) return dflt;
         try {
             return Integer.parseInt(result);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             return dflt;
         }
     }

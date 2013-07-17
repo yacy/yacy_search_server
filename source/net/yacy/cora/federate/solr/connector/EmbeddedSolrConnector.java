@@ -142,9 +142,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
 
     @Override
     public synchronized void close() {
-        try {this.commit(false);} catch (Throwable e) {ConcurrentLog.logException(e);}
-        try {super.close();} catch (Throwable e) {ConcurrentLog.logException(e);}
-        try {this.core.close();} catch (Throwable e) {ConcurrentLog.logException(e);}
+        try {this.commit(false);} catch (final Throwable e) {ConcurrentLog.logException(e);}
+        try {super.close();} catch (final Throwable e) {ConcurrentLog.logException(e);}
+        try {this.core.close();} catch (final Throwable e) {ConcurrentLog.logException(e);}
     }
 
     public SolrQueryRequest request(final SolrParams params) {
@@ -196,9 +196,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             if (q != null) Thread.currentThread().setName(threadname);
             if (rsp != null) log.fine(rsp.getResults().getNumFound() + " results for q=" + q);
             return rsp;
-        } catch (SolrServerException e) {
+        } catch (final SolrServerException e) {
             throw new IOException(e);
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             throw new IOException("Error executing query", e);
         }
     }

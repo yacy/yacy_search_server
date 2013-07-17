@@ -28,7 +28,7 @@ public class addTag_p {
                     bm = switchboard.bookmarksDB.getBookmark(post.get("urlhash"));
                     bm.addTag(post.get("addTag"));
                     prop.put("result", "1");//success
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     prop.put("result", "0");//success
                 }
         	}

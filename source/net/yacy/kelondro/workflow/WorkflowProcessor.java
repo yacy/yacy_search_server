@@ -225,7 +225,7 @@ public class WorkflowProcessor<J extends WorkflowJob> {
         for (int i = 0; i < 10; i++) {
             if (this.input.size() <= 0) break;
             ConcurrentLog.info("WorkflowProcess", "waiting for queue " + this.processName + " to shut down; input.size = " + this.input.size());
-            try {Thread.sleep(1000);} catch (InterruptedException e) {}
+            try {Thread.sleep(1000);} catch (final InterruptedException e) {}
         }
         this.executorRunning.set(0);
 

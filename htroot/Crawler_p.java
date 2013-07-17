@@ -187,7 +187,7 @@ public class Crawler_p {
                         crawlName += ((crawlingStartURL.getHost() == null) ? crawlingStartURL.toNormalform(true) : crawlingStartURL.getHost()) + ',';
                         if (crawlingStartURL != null && (crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
                         
-                    } catch (MalformedURLException e) {
+                    } catch (final MalformedURLException e) {
                         ConcurrentLog.logException(e);
                     }
                 } else {
@@ -292,7 +292,7 @@ public class Crawler_p {
                             for (DigestURI u: scraper.getAnchors().keySet()) {
                                 newRootURLs.add(u);
                             }
-                        } catch (IOException e) {
+                        } catch (final IOException e) {
                             ConcurrentLog.logException(e);
                         }
                     }
@@ -378,7 +378,7 @@ public class Crawler_p {
                 // before we fire up a new crawl, we make sure that another crawl with the same name is not running
                 sb.crawler.removeActive(handle);
                 sb.crawler.removePassive(handle);
-                try {sb.crawlQueues.noticeURL.removeByProfileHandle(profile.handle(), 10000);} catch (SpaceExceededException e1) {}
+                try {sb.crawlQueues.noticeURL.removeByProfileHandle(profile.handle(), 10000);} catch (final SpaceExceededException e1) {}
                 
                 // delete all error urls for that domain
                 List<byte[]> hosthashes = new ArrayList<byte[]>();
@@ -389,7 +389,7 @@ public class Crawler_p {
                 for (byte[] hosthash: hosthashes) {
                     try {
                         sb.index.fulltext().getDefaultConnector().deleteByQuery(CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
-                    } catch (IOException e) {ConcurrentLog.logException(e);}
+                    } catch (final IOException e) {ConcurrentLog.logException(e);}
                 }
                 sb.index.fulltext().commit(true);
                 

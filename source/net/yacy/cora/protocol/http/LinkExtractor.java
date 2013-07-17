@@ -55,7 +55,7 @@ public class LinkExtractor {
             if (u.endsWith(".")) u = u.substring(0, u.length() - 1); // remove the '.' that was appended above
             s = p + 1;
             if (this.blackpattern.matcher(u).matches()) continue;
-            try {links.put(new MultiProtocolURI(u), PRESENT);} catch (MalformedURLException e) {}
+            try {links.put(new MultiProtocolURI(u), PRESENT);} catch (final MalformedURLException e) {}
         }
     }
 

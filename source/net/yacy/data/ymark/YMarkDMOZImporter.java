@@ -110,7 +110,7 @@ public class YMarkDMOZImporter extends YMarkImporter {
 			if (this.isNewEntry && this.isSubtopic && localName.equals(DMOZ.ExternalPage.name())) {
                 try {
                 	bookmarks.put(this.bmk);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     e.printStackTrace();
                 } finally {
         			this.isSubtopic = false;

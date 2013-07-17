@@ -301,7 +301,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final Date parseGSAFS(final String datestring) {
         try {
             return FORMAT_GSAFS.parse(datestring);
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             return null;
         }
     }

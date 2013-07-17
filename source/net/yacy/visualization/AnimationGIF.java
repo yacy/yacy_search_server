@@ -102,13 +102,13 @@ public class AnimationGIF {
                 setMetadata(imageMetadata2, delayMillis, transparencyColorIndex);
                 setLoops(imageMetadata2, this.loops);
                 writer.writeToSequence(new IIOImage(image, null, imageMetadata2), iwp);
-            } catch (IIOInvalidTreeException e) {
+            } catch (final IIOInvalidTreeException e) {
                 throw new IOException(e.getMessage());
             }
         } else try {
             setMetadata(iiom, delayMillis, transparencyColorIndex);
             writer.writeToSequence(new IIOImage(image, null, iiom), iwp);
-        } catch (IIOInvalidTreeException e) {
+        } catch (final IIOInvalidTreeException e) {
             throw new IOException(e.getMessage());
         }
         this.counter++;
@@ -122,7 +122,7 @@ public class AnimationGIF {
         if (ios != null) try {
             ios.close();
             ios = null;
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
         if (writer != null) {
             writer.dispose();
             writer = null;
@@ -207,7 +207,7 @@ public class AnimationGIF {
             FileOutputStream fos = new FileOutputStream(new File("/tmp/giftest.gif"));
             fos.write(generator.get());
             fos.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

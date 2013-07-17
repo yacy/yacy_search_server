@@ -474,7 +474,7 @@ public class yacysearch {
                     lat = Double.parseDouble(sp[0]);
                     lon = Double.parseDouble(sp[1]);
                     rad = Double.parseDouble(sp[2]);
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     lon = 0.0d; lat = 0.0d; rad = 0.0d;
                 }
             }
@@ -559,7 +559,7 @@ public class yacysearch {
 
                     // delete the search history since this still shows the entry
                     SearchEventCache.delete(delHash);
-                } catch ( final IOException e ) {
+                } catch (final IOException e ) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -580,8 +580,8 @@ public class yacysearch {
                                 sb.loader.request(urlentry.url(), true, false),
                                 CacheStrategy.IFEXIST,
                                 Integer.MAX_VALUE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
-                    } catch ( final IOException e ) {
-                    } catch ( final Parser.Failure e ) {
+                    } catch (final IOException e ) {
+                    } catch (final Parser.Failure e ) {
                     }
                     if ( documents != null ) {
                         // create a news message
@@ -617,7 +617,7 @@ public class yacysearch {
                             true,
                             "searchresult",
                             "/search");
-                    } catch ( final Throwable e ) {
+                    } catch (final Throwable e ) {
                     }
                 }
             }
@@ -625,7 +625,7 @@ public class yacysearch {
             // check filters
             try {
                 Pattern.compile(urlmask);
-            } catch ( final PatternSyntaxException ex ) {
+            } catch (final PatternSyntaxException ex ) {
                 SearchEvent.log.warn("Illegal URL mask, not a valid regex: " + urlmask);
                 prop.put("urlmaskerror", 1);
                 prop.putHTML("urlmaskerror_urlmask", urlmask);
@@ -634,7 +634,7 @@ public class yacysearch {
 
             try {
                 Pattern.compile(prefermask);
-            } catch ( final PatternSyntaxException ex ) {
+            } catch (final PatternSyntaxException ex ) {
                 SearchEvent.log.warn("Illegal prefer mask, not a valid regex: " + prefermask);
                 prop.put("prefermaskerror", 1);
                 prop.putHTML("prefermaskerror_prefermask", prefermask);
@@ -783,9 +783,9 @@ public class yacysearch {
                                     suggestion).toString());
                             prop.put("didYouMean_suggestions_" + meanCount + "_sep", "|");
                             meanCount++;
-                        } catch (ConcurrentModificationException e) {break meanCollect;}
+                        } catch (final ConcurrentModificationException e) {break meanCollect;}
                     }
-                } catch (ConcurrentModificationException e) {}
+                } catch (final ConcurrentModificationException e) {}
                 prop.put("didYouMean_suggestions_" + (meanCount - 1) + "_sep", "");
                 prop.put("didYouMean", meanCount > 0 ? 1 : 0);
                 prop.put("didYouMean_suggestions", meanCount);
@@ -829,7 +829,7 @@ public class yacysearch {
                 if ( MemoryControl.shortStatus() ) {
                     sb.localSearchTracker.clear();
                 }
-            } catch ( final Exception e ) {
+            } catch (final Exception e ) {
                 ConcurrentLog.logException(e);
             }
 

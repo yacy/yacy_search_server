@@ -144,17 +144,17 @@ public class IndexControlURLs_p {
         // delete everything
         if ( post.containsKey("deletecomplete") ) {
             if ( post.get("deleteIndex", "").equals("on") ) {
-                try {segment.fulltext().clearURLIndex();} catch (IOException e) {}
-                try {segment.fulltext().clearLocalSolr();} catch (IOException e) {}
+                try {segment.fulltext().clearURLIndex();} catch (final IOException e) {}
+                try {segment.fulltext().clearLocalSolr();} catch (final IOException e) {}
             }
             if ( post.get("deleteRemoteSolr", "").equals("on")) {
-                try {segment.fulltext().clearRemoteSolr();} catch (IOException e) {}
+                try {segment.fulltext().clearRemoteSolr();} catch (final IOException e) {}
             }
             if ( post.get("deleteRWI", "").equals("on")) {
-                if (segment.termIndex() != null) try {segment.termIndex().clear();} catch (IOException e) {}
+                if (segment.termIndex() != null) try {segment.termIndex().clear();} catch (final IOException e) {}
             }
             if ( post.get("deleteCitation", "").equals("on")) {
-                if (segment.urlCitation() != null) try {segment.urlCitation().clear();} catch (IOException e) {}
+                if (segment.urlCitation() != null) try {segment.urlCitation().clear();} catch (final IOException e) {}
             }
             if ( post.get("deleteCrawlQueues", "").equals("on") ) {
                 sb.crawlQueues.clear();
@@ -168,7 +168,7 @@ public class IndexControlURLs_p {
                 Cache.clear();
             }
             if ( post.get("deleteRobots", "").equals("on") ) {
-                try {sb.robots.clear();} catch (IOException e) {}
+                try {sb.robots.clear();} catch (final IOException e) {}
             }
             if ( post.get("deleteSearchFl", "").equals("on") ) {
                 sb.tables.clear(WorkTables.TABLE_SEARCH_FAILURE_NAME);

@@ -61,7 +61,7 @@ public class docParser extends AbstractParser implements Parser {
 
         try {
             extractor = new WordExtractor(source);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new Parser.Failure("error in docParser, WordTextExtractorFactory: " + e.getMessage(), location);
         }
 
@@ -72,7 +72,7 @@ public class docParser extends AbstractParser implements Parser {
             contents.append(extractor.getHeaderText());
             contents.append(' ');
             contents.append(extractor.getFooterText());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new Parser.Failure("error in docParser, getText: " + e.getMessage(), location);
         }
         String title = (contents.length() > 240) ? contents.substring(0,240) : contents.toString().trim();

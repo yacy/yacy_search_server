@@ -262,7 +262,7 @@ public class Scanner {
             if (subnet == 31) {
                 try {
                     c.add(InetAddress.getByAddress(base.getAddress()));
-                } catch (UnknownHostException e) {}
+                } catch (final UnknownHostException e) {}
             } else {
                 int ul = subnet >= 24 ? base.getAddress()[2] : (1 << (24 - subnet)) - 1;
                 for (int br = subnet >= 24 ? base.getAddress()[2] : 0; br <= ul; br++) {
@@ -291,7 +291,7 @@ public class Scanner {
     }
 
     public static void main(final String[] args) {
-        //try {System.out.println("192.168.1.91: " + ping(new MultiProtocolURI("smb://192.168.1.91/"), 1000));} catch (MalformedURLException e) {}
+        //try {System.out.println("192.168.1.91: " + ping(new MultiProtocolURI("smb://192.168.1.91/"), 1000));} catch (final MalformedURLException e) {}
         final Scanner scanner = new Scanner(100, 10);
         List<InetAddress> addresses = genlist(Domains.myIntranetIPs(), 20);
         scanner.addProtocols(addresses, true, true, true, true);

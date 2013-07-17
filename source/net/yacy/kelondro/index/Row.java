@@ -625,7 +625,7 @@ public final class Row implements Serializable {
             if (includeBraces) bb.append('}');
             //System.out.println("DEBUG-ROW " + bb.toString());
             String bbs = bb.toString();
-            try {bb.close();} catch (IOException e) {}
+            try {bb.close();} catch (final IOException e) {}
             return bbs;
         }
 

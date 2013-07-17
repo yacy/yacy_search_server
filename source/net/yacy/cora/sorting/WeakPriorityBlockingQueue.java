@@ -404,7 +404,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
                 Element<String> e;
                 try {
                     while ((e = a.poll(1000)) != null) System.out.println("> " + e.toString());
-                } catch (InterruptedException e1) {
+                } catch (final InterruptedException e1) {
                     e1.printStackTrace();
                 }
             }

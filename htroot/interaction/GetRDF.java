@@ -68,7 +68,7 @@ public class GetRDF {
 
         	try {
                 prop.put("resultXML", fout.toString(UTF8.charset.name()));
-            } catch (UnsupportedEncodingException e) {
+            } catch (final UnsupportedEncodingException e) {
             }
 
         } else {
@@ -83,7 +83,7 @@ public class GetRDF {
 
         		try {
                     prop.put("resultXML", fout.toString(UTF8.charset.name()));
-                } catch (UnsupportedEncodingException e) {
+                } catch (final UnsupportedEncodingException e) {
                 }
 
         	} else {

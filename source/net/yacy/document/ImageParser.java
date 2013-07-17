@@ -54,7 +54,7 @@ public class ImageParser {
             try {
                 ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
                 image = ImageIO.read(new ByteArrayInputStream(source));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Image i = Toolkit.getDefaultToolkit().createImage(source);
                 mediaTracker.addImage(i, 0);
                 try {mediaTracker.waitForID(0);} catch (final InterruptedException ee) {}

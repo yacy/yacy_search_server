@@ -71,7 +71,7 @@ public class webstructure {
                     url = new DigestURI(about.indexOf("://") >= 0 ? about : "http://" + about); // accept also domains
                     urlhash = url.hash();
                     hosthash = ASCII.String(urlhash, 6, 6);
-                } catch (MalformedURLException e) {
+                } catch (final MalformedURLException e) {
                 }
             }
             if (hosthash != null) {
@@ -142,7 +142,7 @@ public class webstructure {
             	// citationReferences.count(urlhash) would give to the number of references good for ranking
                 try {
                     citations = citationReferences != null ? citationReferences.get(urlhash, null) : null;
-                } catch (IOException e) {
+                } catch (final IOException e) {
                 }
             	if (citations != null) {
                     prop.put("citations_count", 1);

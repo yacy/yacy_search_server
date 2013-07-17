@@ -85,7 +85,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
         NamedList<Object> result = null;
         try {
             result = this.server.request(request);
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             //Log.logException(e);
             throw new IOException(e.getMessage());
             /*
@@ -94,7 +94,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
             super.init(server);
             try {
                 result = server.request(request);
-            } catch (Throwable e1) {
+            } catch (final Throwable e1) {
                 throw new IOException(e1.getMessage());
             }
             */

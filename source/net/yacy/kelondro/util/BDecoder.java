@@ -316,7 +316,7 @@ public class BDecoder {
             BObject o = bdecoder.parse();
             print(o, 0);
             System.out.println("Object: " + o.toString());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

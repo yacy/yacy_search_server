@@ -82,7 +82,7 @@ public class RSSFeed implements Iterable<RSSMessage> {
     public Set<MultiProtocolURI> getLinks() {
         Set<MultiProtocolURI> links = new HashSet<MultiProtocolURI>();
         for (RSSMessage message: this.messages.values()) {
-            try {links.add(new MultiProtocolURI(message.getLink()));} catch (MalformedURLException e) {}
+            try {links.add(new MultiProtocolURI(message.getLink()));} catch (final MalformedURLException e) {}
         }
         return links;
     }
@@ -145,7 +145,7 @@ public class RSSFeed implements Iterable<RSSMessage> {
             this.t--; // ensure termination
             try {
                 this.lastGUID = this.GUIDiterator.next();
-            } catch (ConcurrentModificationException e) {
+            } catch (final ConcurrentModificationException e) {
                 return null;
             }
             if (this.lastGUID == null) return null;

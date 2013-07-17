@@ -63,7 +63,7 @@ public class CrawlCheck_p {
                 try {
                     DigestURI crawlingStartURL = new DigestURI(crawlingStart);
                     rootURLs.add(crawlingStartURL);
-                } catch (MalformedURLException e) {
+                } catch (final MalformedURLException e) {
                     ConcurrentLog.logException(e);
                 }
             }

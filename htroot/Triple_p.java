@@ -77,9 +77,9 @@ public class Triple_p {
 								System.out.println (newurl);
 							}
 							JenaTripleStore.load(newurl);
-						} catch (MalformedURLException e) {
+						} catch (final MalformedURLException e) {
 							ConcurrentLog.logException(e);
-						} catch (IOException e) {
+						} catch (final IOException e) {
 							ConcurrentLog.logException(e);
 						}
 					}
@@ -132,7 +132,7 @@ public class Triple_p {
 					}
 
 
-					 } catch (Exception e) {
+					 } catch (final Exception e) {
 						 prop.putHTML("mode_rdfdump", "error");
 					 }
 

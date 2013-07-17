@@ -284,8 +284,8 @@ public final class search {
         } else {
             // retrieve index containers from search request
             RowHandleSet allHashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-            try {allHashes.putAll(queryhashes);} catch (SpaceExceededException e) {}
-            try {allHashes.putAll(excludehashes);} catch (SpaceExceededException e) {}
+            try {allHashes.putAll(queryhashes);} catch (final SpaceExceededException e) {}
+            try {allHashes.putAll(excludehashes);} catch (final SpaceExceededException e) {}
             QueryGoal qg = new QueryGoal(queryhashes, excludehashes, allHashes);
             theQuery = new QueryParams(
                     qg,
@@ -322,7 +322,7 @@ public final class search {
 
             // make event
             theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, null, abstracts.length() > 0, sb.loader, count, maxtime, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
-            if (theSearch.rwiProcess != null && theSearch.rwiProcess.isAlive()) try {theSearch.rwiProcess.join();} catch (InterruptedException e) {}
+            if (theSearch.rwiProcess != null && theSearch.rwiProcess.isAlive()) try {theSearch.rwiProcess.join();} catch (final InterruptedException e) {}
 
             // set statistic details of search result and find best result index set
             prop.put("joincount", Integer.toString(theSearch.getResultCount()));

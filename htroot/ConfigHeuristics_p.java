@@ -130,7 +130,7 @@ public class ConfigHeuristics_p {
                     }
                     try {
                         sb.index.fulltext().getWebgraphConfiguration().commit();
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                     }
                     sb.setConfig(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, true); 
                 }
@@ -144,7 +144,7 @@ public class ConfigHeuristics_p {
                 if (!osdConfig.exists() && osdDefaultConfig.exists()) {
                     try {
                         Files.copy(osdDefaultConfig, osdConfig);
-                    } catch (IOException ex) {
+                    } catch (final IOException ex) {
                         osderrmsg = "file I/O error during copy";
                     }
                 } else {osderrmsg = "config file exists or default doesn't exist";}
@@ -186,7 +186,7 @@ public class ConfigHeuristics_p {
                 c++;
             }
             prop.put("osdcfg", c);
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             ConcurrentLog.logException(e1);
             prop.put("osdcfg", 0);
         }
@@ -230,10 +230,10 @@ public class ConfigHeuristics_p {
             if (modified) { // save settings to config file if modified
                 try {
                     cfg.commit();
-                } catch (IOException ex) {
+                } catch (final IOException ex) {
                 }
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
         

@@ -98,7 +98,7 @@ public class SecondarySearchSuperviser extends Thread {
                 // a trigger was released
                 prepareSecondarySearch();
             }
-        } catch ( final InterruptedException e ) {
+        } catch (final InterruptedException e ) {
             // the thread was interrupted
             // do nothing
         }

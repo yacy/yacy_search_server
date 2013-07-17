@@ -209,7 +209,7 @@ public class ArrayStack implements BLOB {
                            oneBlob.trim(); // no writings here, can be used with minimum memory
                        }
                        sortedItems.put(Long.valueOf(time), new blobItem(d, f, oneBlob));
-                   } catch (IOException e) {
+                   } catch (final IOException e) {
                        if (deleteonfail) {
                            ConcurrentLog.warn("ArrayStack", "cannot read file " + f.getName() + ", deleting it (smart fail; alternative would be: crash; required user action would be same as deletion)");
                            f.delete();
@@ -873,7 +873,7 @@ public class ArrayStack implements BLOB {
                 i++;
             }
             // wait for termination
-            for (final FutureTask<Boolean> s: t) try {s.get();} catch (final InterruptedException e) {} catch (ExecutionException e) {}
+            for (final FutureTask<Boolean> s: t) try {s.get();} catch (final InterruptedException e) {} catch (final ExecutionException e) {}
         }
         assert mem() <= m : "m = " + m + ", mem() = " + mem();
     }

@@ -60,7 +60,7 @@ public class mmParser extends AbstractParser implements Parser {
     	if (parser == null) {
     		try {
 				parser = SAXParserFactory.newInstance().newSAXParser();
-			} catch (ParserConfigurationException e) {
+			} catch (final ParserConfigurationException e) {
 				throw new SAXException(e.getMessage(), e);
 			}
     		tlSax.set(parser);
@@ -93,9 +93,9 @@ public class mmParser extends AbstractParser implements Parser {
 
             content = UTF8.getBytes(sb.toString());
 
-        } catch (SAXException ex) {
+        } catch (final SAXException ex) {
             AbstractParser.log.warn(ex.getMessage());
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             AbstractParser.log.warn(ex.getMessage());
         }
 

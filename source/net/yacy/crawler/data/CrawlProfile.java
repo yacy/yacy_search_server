@@ -289,7 +289,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             final String r = get(CRAWLER_URL_MUSTMATCH);
             try {
                 this.crawlerurlmustmatch = (r == null || r.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN : Pattern.compile(r, Pattern.CASE_INSENSITIVE);
-            } catch (PatternSyntaxException e) { this.crawlerurlmustmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
+            } catch (final PatternSyntaxException e) { this.crawlerurlmustmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
         return this.crawlerurlmustmatch;
     }
@@ -303,7 +303,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             final String r = get(CRAWLER_URL_MUSTNOTMATCH);
             try {
                 this.crawlerurlmustnotmatch = (r == null || r.equals(CrawlProfile.MATCH_NEVER_STRING)) ? CrawlProfile.MATCH_NEVER_PATTERN : Pattern.compile(r, Pattern.CASE_INSENSITIVE);
-            } catch (PatternSyntaxException e) { this.crawlerurlmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
+            } catch (final PatternSyntaxException e) { this.crawlerurlmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
         return this.crawlerurlmustnotmatch;
     }
@@ -317,7 +317,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             final String r = get(CRAWLER_IP_MUSTMATCH);
             try {
                 this.crawleripmustmatch = (r == null || r.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN : Pattern.compile(r, Pattern.CASE_INSENSITIVE);
-            } catch (PatternSyntaxException e) { this.crawleripmustmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
+            } catch (final PatternSyntaxException e) { this.crawleripmustmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
         return this.crawleripmustmatch;
     }
@@ -331,7 +331,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             final String r = get(CRAWLER_IP_MUSTNOTMATCH);
             try {
                 this.crawleripmustnotmatch = (r == null || r.equals(CrawlProfile.MATCH_NEVER_STRING)) ? CrawlProfile.MATCH_NEVER_PATTERN : Pattern.compile(r, Pattern.CASE_INSENSITIVE);
-            } catch (PatternSyntaxException e) { this.crawleripmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
+            } catch (final PatternSyntaxException e) { this.crawleripmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
         return this.crawleripmustnotmatch;
     }
@@ -358,7 +358,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             final String r = get(CRAWLER_URL_NODEPTHLIMITMATCH);
             try {
                 this.crawlernodepthlimitmatch = (r == null || r.equals(CrawlProfile.MATCH_NEVER_STRING)) ? CrawlProfile.MATCH_NEVER_PATTERN : Pattern.compile(r, Pattern.CASE_INSENSITIVE);
-            } catch (PatternSyntaxException e) { this.crawlernodepthlimitmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
+            } catch (final PatternSyntaxException e) { this.crawlernodepthlimitmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
         return this.crawlernodepthlimitmatch;
     }
@@ -372,7 +372,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             final String r = get(INDEXING_URL_MUSTMATCH);
             try {
                 this.indexurlmustmatch = (r == null || r.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN : Pattern.compile(r, Pattern.CASE_INSENSITIVE);
-            } catch (PatternSyntaxException e) { this.indexurlmustmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
+            } catch (final PatternSyntaxException e) { this.indexurlmustmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
         return this.indexurlmustmatch;
     }
@@ -386,7 +386,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             final String r = get(INDEXING_URL_MUSTNOTMATCH);
             try {
                 this.indexurlmustnotmatch = (r == null || r.equals(CrawlProfile.MATCH_NEVER_STRING)) ? CrawlProfile.MATCH_NEVER_PATTERN : Pattern.compile(r, Pattern.CASE_INSENSITIVE);
-            } catch (PatternSyntaxException e) { this.indexurlmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
+            } catch (final PatternSyntaxException e) { this.indexurlmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
         return this.indexurlmustnotmatch;
     }
@@ -400,7 +400,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             final String r = get(INDEXING_CONTENT_MUSTMATCH);
             try {
                 this.indexcontentmustmatch = (r == null || r.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN : Pattern.compile(r, Pattern.CASE_INSENSITIVE);
-            } catch (PatternSyntaxException e) { this.indexcontentmustmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
+            } catch (final PatternSyntaxException e) { this.indexcontentmustmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
         return this.indexcontentmustmatch;
     }
@@ -414,7 +414,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             final String r = get(INDEXING_CONTENT_MUSTNOTMATCH);
             try {
                 this.indexcontentmustnotmatch = (r == null || r.equals(CrawlProfile.MATCH_NEVER_STRING)) ? CrawlProfile.MATCH_NEVER_PATTERN : Pattern.compile(r, Pattern.CASE_INSENSITIVE);
-            } catch (PatternSyntaxException e) { this.indexcontentmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
+            } catch (final PatternSyntaxException e) { this.indexcontentmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
         return this.indexcontentmustnotmatch;
     }

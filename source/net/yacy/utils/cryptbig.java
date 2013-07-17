@@ -636,7 +636,7 @@ public class cryptbig {
 	    String md5s = "";
         try {
             md5s = Digest.encodeMD5Hex(new File(s[1]));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
 	    System.out.println(md5s);

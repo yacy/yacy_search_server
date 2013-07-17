@@ -48,11 +48,11 @@ public class ynetSearch {
             	is = url.openStream();
             	final String httpout = new Scanner(is).useDelimiter( "\\Z" ).next();
             	prop.put("http", httpout);
-            } catch ( final Exception e ) {
+            } catch (final Exception e ) {
             	prop.put("url", "error!");
             } finally {
             	if ( is != null )
-            		try { is.close(); } catch ( final IOException e ) { }
+            		try { is.close(); } catch (final IOException e ) { }
             }
     	}
     	return prop;

@@ -113,7 +113,7 @@ public class Configuration extends TreeMap<String, Entry> implements Serializabl
         } catch (final IOException e) {
             throw e;
         } finally {
-            if (br != null) try {br.close();} catch (IOException e) {}
+            if (br != null) try {br.close();} catch (final IOException e) {}
         }
     }
 
@@ -316,7 +316,7 @@ public class Configuration extends TreeMap<String, Entry> implements Serializabl
                 k = i.next();
                 if (!k.enabled()) System.out.println(k.toString() );
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

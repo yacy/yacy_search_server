@@ -153,19 +153,19 @@ public class YMarkXBELImporter extends YMarkImporter {
 	            this.bmk.put(YMarkEntry.BOOKMARK.VISITS.key(), atts.getValue(uri, YMarkEntry.BOOKMARK.VISITS.xbel_attrb()));
 	            try {
 					date.parseISO8601(atts.getValue(uri, YMarkEntry.BOOKMARK.DATE_ADDED.xbel_attrb()));
-				} catch (ParseException e) {
+				} catch (final ParseException e) {
 					// TODO: exception handling
 				}
 	            this.bmk.put(YMarkEntry.BOOKMARK.DATE_ADDED.key(), date.toString());
 	            try {
 					date.parseISO8601(atts.getValue(uri, YMarkEntry.BOOKMARK.DATE_VISITED.xbel_attrb()));
-	            } catch (ParseException e) {
+	            } catch (final ParseException e) {
 	            	// TODO: exception handling
 	            }
 	            this.bmk.put(YMarkEntry.BOOKMARK.DATE_VISITED.key(), date.toString());
 	            try {
 					date.parseISO8601(atts.getValue(uri, YMarkEntry.BOOKMARK.DATE_MODIFIED.xbel_attrb()));
-				} catch (ParseException e) {
+				} catch (final ParseException e) {
 					// TODO: exception handling
 				}
 	            this.bmk.put(YMarkEntry.BOOKMARK.DATE_MODIFIED.key(), date.toString());
@@ -217,7 +217,7 @@ public class YMarkXBELImporter extends YMarkImporter {
 	        		try {
 						bookmarks.put(this.bmk);
 						bmk = new YMarkEntry();
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						ConcurrentLog.logException(e);
 					}
 				}

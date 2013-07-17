@@ -103,7 +103,7 @@ public class WebStructureGraph {
                 (this.structureFile.exists())
                     ? FileUtils.loadMapB(this.structureFile)
                     : new TreeMap<String, byte[]>();
-        } catch ( final OutOfMemoryError e ) {
+        } catch (final OutOfMemoryError e ) {
             loadedStructureB = new TreeMap<String, byte[]>();
         }
         if ( loadedStructureB != null ) {
@@ -147,7 +147,7 @@ public class WebStructureGraph {
                 while ( (lro = WebStructureGraph.this.publicRefDNSResolvingQueue.take()) != leanrefObjectPOISON ) {
                     learnrefs(lro);
                 }
-            } catch ( final InterruptedException e ) {
+            } catch (final InterruptedException e ) {
             }
         }
     }
@@ -183,7 +183,7 @@ public class WebStructureGraph {
                 } else {
                     learnrefs(lro);
                 }
-            } catch ( final InterruptedException e ) {
+            } catch (final InterruptedException e ) {
                 learnrefs(lro);
             }
         }
@@ -201,7 +201,7 @@ public class WebStructureGraph {
                 } else {
                     learnrefs(lro);
                 }
-            } catch ( final InterruptedException e ) {
+            } catch (final InterruptedException e ) {
                 learnrefs(lro);
             }
         }
@@ -223,7 +223,7 @@ public class WebStructureGraph {
             c = refs.substring(8 + i * 10, 8 + (i + 1) * 10);
             try {
                 d = Integer.valueOf(c.substring(6), 16);
-            } catch ( final NumberFormatException e ) {
+            } catch (final NumberFormatException e ) {
                 d = 1;
             }
             map.put(c.substring(0, 6), d);
@@ -503,7 +503,7 @@ public class WebStructureGraph {
                             ASCII.getBytes(sentry.hosthash),
                             GenericFormatter.SHORT_DAY_FORMATTER.parse(sentry.date).getTime(),
                             refhosthashandcounter.getValue().intValue());
-                } catch ( final ParseException e ) {
+                } catch (final ParseException e ) {
                     continue refloop;
                 }
                 // each term refers to an index entry. look if we already have such an entry
@@ -516,7 +516,7 @@ public class WebStructureGraph {
                     } else {
                         r.put(hr);
                     }
-                } catch ( final SpaceExceededException e ) {
+                } catch (final SpaceExceededException e ) {
                     continue refloop;
                 }
             }
@@ -551,7 +551,7 @@ public class WebStructureGraph {
                 }
             }
         }
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             this.clear();
         }
         return c;
@@ -798,7 +798,7 @@ public class WebStructureGraph {
             try {
                 this.publicRefDNSResolvingQueue.put(leanrefObjectPOISON);
                 this.publicRefDNSResolvingWorker.join(5000);
-            } catch ( final InterruptedException e ) {
+            } catch (final InterruptedException e ) {
             }
         }
 

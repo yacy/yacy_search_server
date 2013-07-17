@@ -288,7 +288,7 @@ public class migration {
             }
             try {
                 f.createNewFile();                    
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 ConcurrentLog.info("migrateUrldbtoSolr","could not create lock file");
             }
 
@@ -318,7 +318,7 @@ public class migration {
                                     if (Switchboard.getSwitchboard().shallTerminate()) {
                                         go = false;
                                     }
-                                } catch (Exception e) {
+                                } catch (final Exception e) {
                                     ConcurrentLog.info("migrateUrldbtoSolr", "some error while adding old data to new index, continue with next entry");
                                 }
                             }
@@ -326,7 +326,7 @@ public class migration {
                         }
                         ft.commit(true);
 
-                    } catch (IOException ex) {
+                    } catch (final IOException ex) {
                         ConcurrentLog.info("migrateUrldbtoSolr", "error reading old urldb index");
                     } finally {
                         if (f.exists()) {
@@ -381,9 +381,9 @@ public class migration {
                 }
             }
             lukeCheckok = true;
-        } catch (SolrServerException ex) {
+        } catch (final SolrServerException ex) {
             ConcurrentLog.logException(ex);
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             ConcurrentLog.logException(ex);
         }
   

@@ -187,7 +187,7 @@ public class get_bookmarks {
 
                         count++;
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                 }
             }
             // eliminate the trailing comma for Json output
@@ -285,7 +285,7 @@ public class get_bookmarks {
                 count++;
                 prop.put("display_xbel_"+count+"_elements", "</bookmark>");
                 count++;
-            } catch (IOException e) {
+            } catch (final IOException e) {
             }
         }
     	return count;

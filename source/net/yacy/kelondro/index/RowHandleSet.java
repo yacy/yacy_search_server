@@ -59,10 +59,10 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key")}, objectOrder);
         try {
             this.index = new RowSet(this.rowdef, expectedspace);
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             try {
                 this.index = new RowSet(this.rowdef, 0);
-            } catch (SpaceExceededException ee) {
+            } catch (final SpaceExceededException ee) {
                 ConcurrentLog.logException(ee);
                 this.index = null;
             }
@@ -128,7 +128,7 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
         OutputStream os;
         try {
             os = new BufferedOutputStream(new FileOutputStream(file), 1024 * 1024);
-        } catch (OutOfMemoryError e) {
+        } catch (final OutOfMemoryError e) {
             os = new FileOutputStream(file);
         }
         int c = 0;
@@ -388,10 +388,10 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
                 s1.close();
             } catch(IOException e) {
                 e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+            } catch (final ClassNotFoundException e) {
                 e.printStackTrace();
             }
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             e.printStackTrace();
         }
         s.close();

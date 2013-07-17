@@ -85,7 +85,7 @@ public class suggest {
                         }
                         prop.put("suggestions_" + c + "_eol", 0);
                         c++;
-                    } catch (ConcurrentModificationException e) {}
+                    } catch (final ConcurrentModificationException e) {}
                 }
             }
         }

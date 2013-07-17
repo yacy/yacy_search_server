@@ -70,7 +70,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         if (enew != null) {
             try {
                 commit();
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 log.warn(ex);
             }
         }
@@ -87,7 +87,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
                 sid.setField(clickdepthfield.getSolrFieldName(), clickdepth);
                 return true;
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
         return false;
     }
@@ -136,7 +136,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
                 change = true;
             }
             return change;
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
         return false;
     }

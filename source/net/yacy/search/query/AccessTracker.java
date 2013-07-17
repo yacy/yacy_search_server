@@ -162,7 +162,7 @@ public class AccessTracker {
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 } finally {
-                    if (raf != null) try {raf.close();} catch (IOException e) {}
+                    if (raf != null) try {raf.close();} catch (final IOException e) {}
                 }
             }
         };

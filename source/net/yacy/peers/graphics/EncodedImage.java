@@ -41,7 +41,7 @@ public class EncodedImage {
         try {
             bos.write(sourceImage.get());
             bos.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
         this.image = new ByteBuffer(bos.toByteArray());
         this.extension = "gif";

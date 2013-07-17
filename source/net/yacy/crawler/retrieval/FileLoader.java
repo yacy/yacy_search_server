@@ -69,7 +69,7 @@ public class FileLoader {
 
         // process directories: transform them to html with meta robots=noindex (using the ftpc lib)
         String[] l = null;
-        try {l = url.list();} catch (IOException e) {}
+        try {l = url.list();} catch (final IOException e) {}
         if (l != null) {
             String u = url.toNormalform(true);
             List<String> list = new ArrayList<String>();
@@ -105,7 +105,7 @@ public class FileLoader {
         long size;
         try {
             size = url.length();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             size = -1;
         }
         String parserError = null;

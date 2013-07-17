@@ -117,7 +117,7 @@ public class IndexControlRWIs_p {
                 for ( final String s : urls ) {
                     try {
                         urlb.put(s.getBytes());
-                    } catch ( final SpaceExceededException e ) {
+                    } catch (final SpaceExceededException e ) {
                         ConcurrentLog.logException(e);
                     }
                 }
@@ -171,7 +171,7 @@ public class IndexControlRWIs_p {
                         while ( en.hasNext() ) {
                             try {
                                 urlb.put(en.next().urlhash());
-                            } catch ( final SpaceExceededException e ) {
+                            } catch (final SpaceExceededException e ) {
                                 ConcurrentLog.logException(e);
                             }
                         }
@@ -190,7 +190,7 @@ public class IndexControlRWIs_p {
                     }
                     post.remove("keyhashdeleteall");
                     post.put("urllist", "generated");
-                } catch ( final IOException e ) {
+                } catch (final IOException e ) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -214,7 +214,7 @@ public class IndexControlRWIs_p {
                     for ( final byte[] b : urlb ) {
                         try {
                             urlHashes.put(b);
-                        } catch ( final SpaceExceededException e ) {
+                        } catch (final SpaceExceededException e ) {
                             ConcurrentLog.logException(e);
                         }
                     }
@@ -223,7 +223,7 @@ public class IndexControlRWIs_p {
                     // thinks that it was called for a list presentation
                     post.remove("keyhashdelete");
                     post.put("urllist", "generated");
-                } catch ( final IOException e ) {
+                } catch (final IOException e ) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -324,7 +324,7 @@ public class IndexControlRWIs_p {
                     } else {
                         prop.put("result", "Peer " + host + " not found");
                     }
-                } catch ( final IOException e ) {
+                } catch (final IOException e ) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -354,7 +354,7 @@ public class IndexControlRWIs_p {
                     prop.put("keyhashsimilar_rows_" + rows + "_cols", cols);
                     prop.put("keyhashsimilar_rows", rows + 1);
                     prop.put("result", "");
-                } catch ( final IOException e ) {
+                } catch (final IOException e ) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -377,7 +377,7 @@ public class IndexControlRWIs_p {
                         for ( final byte[] b : urlb ) {
                             try {
                                 urlHashes.put(b);
-                            } catch ( final SpaceExceededException e ) {
+                            } catch (final SpaceExceededException e ) {
                                 ConcurrentLog.logException(e);
                             }
                             url = segment.fulltext().getURL(b);
@@ -398,7 +398,7 @@ public class IndexControlRWIs_p {
                             }
                         }
                         pw.close();
-                    } catch ( final IOException e ) {
+                    } catch (final IOException e ) {
                     }
                 }
 
@@ -411,7 +411,7 @@ public class IndexControlRWIs_p {
                         for ( final byte[] b : urlb ) {
                             try {
                                 urlHashes.put(b);
-                            } catch ( final SpaceExceededException e ) {
+                            } catch (final SpaceExceededException e ) {
                                 ConcurrentLog.logException(e);
                             }
                             url = segment.fulltext().getURL(b);
@@ -431,12 +431,12 @@ public class IndexControlRWIs_p {
                             }
                         }
                         pw.close();
-                    } catch ( final IOException e ) {
+                    } catch (final IOException e ) {
                     }
                 }
                 try {
                     segment.termIndex().remove(keyhash, urlHashes);
-                } catch ( final IOException e ) {
+                } catch (final IOException e ) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -652,7 +652,7 @@ public class IndexControlRWIs_p {
                 false,
                 0.0d, 0.0d, 0.0d);       
         final SearchEvent theSearch = SearchEventCache.getEvent(query, sb.peers, sb.tables, null, false, sb.loader, Integer.MAX_VALUE, Long.MAX_VALUE, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));       
-        if (theSearch.rwiProcess != null && theSearch.rwiProcess.isAlive()) try {theSearch.rwiProcess.join();} catch (InterruptedException e) {}
+        if (theSearch.rwiProcess != null && theSearch.rwiProcess.isAlive()) try {theSearch.rwiProcess.join();} catch (final InterruptedException e) {}
         if (theSearch.local_rwi_available.get() == 0) {
             prop.put("searchresult", 2);
             prop.put("searchresult_wordhash", keyhash);

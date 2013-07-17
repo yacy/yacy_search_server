@@ -98,7 +98,7 @@ public class sidAudioParser extends AbstractParser implements Parser {
                         false)};
             }
             throw new Parser.Failure("Unable to parse SID file, file does seems to be incomplete (len = " + available + ").", location);
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             throw new Parser.Failure("Unable to read SID file header.", location, ex);
         }
     }

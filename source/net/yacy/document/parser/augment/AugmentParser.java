@@ -40,7 +40,7 @@ public class AugmentParser extends AbstractParser implements Parser {
         Document[] htmlDocs = this.rdfaParser.parse(url, mimeType, charset, source);
         try {
             source.reset();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
 
@@ -80,7 +80,7 @@ public class AugmentParser extends AbstractParser implements Parser {
                 }
             }
 
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
     }

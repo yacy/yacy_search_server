@@ -331,7 +331,7 @@ public class FTPClient {
         } catch (final NullPointerException e) {
             log.warn("main(String args[]) is not defined as static for " + obj);
             /*
-             * } catch (IOException e) { // class file does not exist, go
+             * } catch (final IOException e) { // class file does not exist, go
              * silently over it to not show everybody that the // system
              * attempted to load a class file log.warning("Command '" + obj + "'
              * not supported. Try 'HELP'.");
@@ -2042,13 +2042,13 @@ public class FTPClient {
         if (isPassive()) {
             try {
                 createPassiveDataPort();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 createActiveDataPort();
             }
         } else {
             try {
                 createActiveDataPort();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 createPassiveDataPort();
             }
         }

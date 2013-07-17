@@ -55,7 +55,7 @@ public class Attempts<SpecificRole extends Role> {
             try {
                 q.put(element);
                 this.stack.put(weight, q);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
         }

@@ -177,10 +177,10 @@ public class HeapReader {
         // read the index file:
         try {
             this.index = new RowHandleMap(this.keylength, this.ordering, 8, this.fingerprintFileIdx);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
             return false;
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
             return false;
         }
@@ -196,7 +196,7 @@ public class HeapReader {
         // read the gap file:
         try {
             this.free = new Gap(this.fingerprintFileGap);
-        } catch (IOException e) {
+        } catch (final IOException e) {
         	ConcurrentLog.logException(e);
             return false;
         }
@@ -307,9 +307,9 @@ public class HeapReader {
         // finish the index generation
         try {
             this.index = indexready.result();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         	ConcurrentLog.logException(e);
-        } catch (ExecutionException e) {
+        } catch (final ExecutionException e) {
         	ConcurrentLog.logException(e);
         }
         log.info("finished index generation for " + this.heapFile.toString() + ", " + this.index.size() + " entries, " + this.free.size() + " gaps.");
@@ -517,7 +517,7 @@ public class HeapReader {
             byte[] keyf;
             try {
                 keyf = new byte[this.keylength];
-            } catch (OutOfMemoryError e) {
+            } catch (final OutOfMemoryError e) {
                 throw new SpaceExceededException(this.keylength, "HeapReader.get()/keyf");
             }
             this.file.readFully(keyf, 0, keyf.length);
@@ -538,7 +538,7 @@ public class HeapReader {
             byte[] blob;
             try {
                 blob = new byte[len];
-            } catch (OutOfMemoryError e) {
+            } catch (final OutOfMemoryError e) {
                 throw new SpaceExceededException(len, "HeapReader.get()/blob");
             }
             this.file.readFully(blob, 0, blob.length);
@@ -551,9 +551,9 @@ public class HeapReader {
         if (!(key instanceof byte[])) return null;
         try {
             return get((byte[]) key);
-        } catch (IOException e) {
+        } catch (final IOException e) {
         	ConcurrentLog.logException(e);
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
         	ConcurrentLog.logException(e);
         }
         return null;
@@ -604,7 +604,7 @@ public class HeapReader {
             if (this.file != null)
     			try {
     				this.file.close();
-    			} catch (IOException e) {
+    			} catch (final IOException e) {
     				ConcurrentLog.logException(e);
     			}
             this.file = null;
@@ -643,7 +643,7 @@ public class HeapReader {
                     }
                     this.index.close();
                     this.index = null;
-                } catch (IOException e) {
+                } catch (final IOException e) {
                 	ConcurrentLog.logException(e);
                 }
             }
@@ -737,7 +737,7 @@ public class HeapReader {
             if (!(blobFile.exists())) throw new IOException("file " + blobFile + " does not exist");
             try {
                 this.is = new DataInputStream(new BufferedInputStream(new FileInputStream(blobFile), 256 * 1024));
-            } catch (OutOfMemoryError e) {
+            } catch (final OutOfMemoryError e) {
                 this.is = new DataInputStream(new FileInputStream(blobFile));
             }
             this.keylen = keylen;
@@ -751,7 +751,7 @@ public class HeapReader {
             this.is = null;
             try {
                 return new entries(this.blobFile, this.keylen);
-            } catch (IOException e) {
+            } catch (final IOException e) {
             	ConcurrentLog.logException(e);
                 return null;
             }
@@ -775,7 +775,7 @@ public class HeapReader {
                         if (len > 1) {
                         	if (len - 1 != this.is.skipBytes(len - 1)) {   // all that is remaining
 	                            log.warn("problem skiping " +  + len + " bytes in " + this.blobFile.getName());
-	                            try {this.is.close();} catch (IOException e) {}
+	                            try {this.is.close();} catch (final IOException e) {}
 	                            return null;
                         	}
                         }
@@ -785,32 +785,32 @@ public class HeapReader {
                     key = new byte[this.keylen];
                     key[0] = b;             // the first entry that we know already
                     if (this.is.read(key, 1, keylen1) < keylen1) {
-                        try {this.is.close();} catch (IOException e) {}
+                        try {this.is.close();} catch (final IOException e) {}
                         return null; // read remaining key bytes
                     }
                     // so far we have read this.keylen - 1 + 1 = this.keylen bytes.
                     // there must be a remaining number of len - this.keylen bytes left for the BLOB
                     if (len < this.keylen) {
-                        try {this.is.close();} catch (IOException e) {}
+                        try {this.is.close();} catch (final IOException e) {}
                         return null;    // a strange case that can only happen in case of corrupted data
                     }
                     try {
                         payload = new byte[len - this.keylen]; // the remaining record entries
                         if (this.is.read(payload) < payload.length) {
-                            try {this.is.close();} catch (IOException e) {}
+                            try {this.is.close();} catch (final IOException e) {}
                             return null;
                         }
                         return new entry(key, payload);
-                    } catch (OutOfMemoryError ee) {
+                    } catch (final OutOfMemoryError ee) {
                         // the allocation of memory for the payload may fail
                         // this is bad because we must interrupt the iteration here but the
                         // process that uses the iteration may think that the iteraton has just been completed
                         log.severe("out of memory in LookAheadIterator.next0", ee);
-                        try {this.is.close();} catch (IOException e) {}
+                        try {this.is.close();} catch (final IOException e) {}
                         return null;
                     }
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 return null;
             }
         }
@@ -858,7 +858,7 @@ public class HeapReader {
                 entry = hr.next();
                 System.out.println(ASCII.String(entry.getKey()) + ":" + UTF8.String(entry.getValue()));
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
         	ConcurrentLog.logException(e);
         }
 

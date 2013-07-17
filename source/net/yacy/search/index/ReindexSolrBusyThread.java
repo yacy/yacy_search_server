@@ -132,7 +132,7 @@ import org.apache.solr.common.SolrInputDocument;
                                 processed++;
                             }
                         }                        
-                    } catch (IOException ex) {
+                    } catch (final IOException ex) {
                         ConcurrentLog.logException(ex);
                     } finally {
                         sem.release();

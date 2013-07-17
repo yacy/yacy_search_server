@@ -95,7 +95,7 @@ public class Browser {
             } else if (systemOS == systemUnix) {
                 //try {
                 //    openBrowserUnixGeneric(url);
-                //} catch (Exception e) {
+                //} catch (final Exception e) {
                     openBrowserUnixFirefox(url);
                 //}
             } else if (systemOS == systemWindows) {
@@ -103,11 +103,11 @@ public class Browser {
             } else {
                 throw new RuntimeException("System unknown");
             }
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             if (head) {
                 try {
                     openBrowserJava(url);
-                } catch (Exception ee) {
+                } catch (final Exception ee) {
                     logBrowserFail(url);
                 }
             } else {
@@ -178,7 +178,7 @@ public class Browser {
         } finally {
             try {
                 err.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }
         }

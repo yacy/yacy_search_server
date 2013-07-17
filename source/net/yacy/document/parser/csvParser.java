@@ -95,7 +95,7 @@ public class csvParser extends AbstractParser implements Parser {
         BufferedReader reader;
         try {
             reader = new BufferedReader(new InputStreamReader(source, charset));
-        } catch (UnsupportedEncodingException e1) {
+        } catch (final UnsupportedEncodingException e1) {
             reader = new BufferedReader(new InputStreamReader(source));
         }
         String row;
@@ -121,7 +121,7 @@ public class csvParser extends AbstractParser implements Parser {
                 //if (cols.length != columns) continue; // skip lines that have the wrong number of columns
                 rows.add(cols);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
         return rows;
     }

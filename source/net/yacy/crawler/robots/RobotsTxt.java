@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.MultiProtocolURI;
@@ -54,7 +55,7 @@ public class RobotsTxt {
     protected static final String ROBOTS_DB_PATH_SEPARATOR = ";";
     protected static final Pattern ROBOTS_DB_PATH_SEPARATOR_MATCHER = Pattern.compile(ROBOTS_DB_PATH_SEPARATOR);
 
-    private final ConcurrentHashMap<String, DomSync> syncObjects;
+    private final ConcurrentMap<String, DomSync> syncObjects;
     //private static final HashSet<String> loadedRobots = new HashSet<String>(); // only for debugging
     private final WorkTables tables;
     private final LoaderDispatcher loader;
@@ -101,7 +102,7 @@ public class RobotsTxt {
         BEncodedHeap robotsTable = null;
         try {
             robotsTable = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             log.severe("tables not available", e1);
         }
         try {
@@ -109,7 +110,7 @@ public class RobotsTxt {
         } catch (final SpaceExceededException e) {
             log.warn("memory exhausted", e);
             record = null;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.warn("cannot get robotstxt from table", e);
             record = null;
         }
@@ -138,7 +139,7 @@ public class RobotsTxt {
                 } catch (final SpaceExceededException e) {
                     log.warn("memory exhausted", e);
                     record = null;
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     log.warn("cannot get robotstxt from table", e);
                     record = null;
                 }
@@ -163,8 +164,8 @@ public class RobotsTxt {
                     if (log.isFine()) log.fine("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
                     Request request = new Request(robotsURL, null);
                     try {
-                        response = this.loader.load(request, CacheStrategy.NOCACHE, null, 0, 3000);
-                    } catch (Throwable e) {
+                        response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE, null, 0, 3000);
+                    } catch (final Throwable e) {
                         log.info("Trying to download the robots.txt file from URL '" + robotsURL + "' failed - " + e.getMessage());
                         response = null;
                     }
@@ -188,7 +189,7 @@ public class RobotsTxt {
         final BEncodedHeap robotsTable;
         try {
             robotsTable = this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME);
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             log.severe("tables not available", e1);
             return;
         }
@@ -220,7 +221,7 @@ public class RobotsTxt {
                         Request request = new Request(robotsURL, null);
                         try {
                             response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE, null, 0, 3000);
-                        } catch (IOException e) {
+                        } catch (final IOException e) {
                             response = null;
                         }
                     }
@@ -259,7 +260,7 @@ public class RobotsTxt {
         addEntry(robotsTxt4Host);
         if (robotsTable.size() <= sz) {
             log.severe("new entry in robots.txt table failed, resetting database");
-            try {clear();} catch (IOException e) {}
+            try {clear();} catch (final IOException e) {}
             addEntry(robotsTxt4Host);
         }
     }

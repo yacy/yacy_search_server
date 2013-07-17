@@ -114,7 +114,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
         if (parser == null) {
             try {
                 parser = SAXParserFactory.newInstance().newSAXParser();
-            } catch (ParserConfigurationException e) {
+            } catch (final ParserConfigurationException e) {
                 throw new SAXException(e.getMessage(), e);
             }
             tlSax.set(parser);

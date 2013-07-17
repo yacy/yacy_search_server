@@ -182,7 +182,7 @@ public class audioTagParser extends AbstractParser implements Parser {
                     false)
             };            
             return docs;
-        } catch (Exception e) {
+        } catch (final Exception e) {
 			// return a generic document as default
 	    	docs = new Document[]{new Document(
 	                location,
@@ -207,7 +207,7 @@ public class audioTagParser extends AbstractParser implements Parser {
             try {
 				if (fout != null)
 					fout.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				// TODO Auto-generated catch block
 				ConcurrentLog.logException(e);
 			}

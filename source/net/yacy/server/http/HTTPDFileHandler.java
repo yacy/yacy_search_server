@@ -1304,10 +1304,10 @@ public final class HTTPDFileHandler {
                 ret.addAll(Arrays.asList(CommonPattern.SPACE.split(line.substring(2))));
             }
             ret.add(targetFile.getAbsolutePath());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         } finally {
-            try {br.close();} catch (IOException e) {}
+            try {br.close();} catch (final IOException e) {}
         }
         return ret;
     }
@@ -1385,7 +1385,7 @@ public final class HTTPDFileHandler {
                     serverSwitch.class };
             try {
                 m = c.getMethod(methodName, params);
-            } catch (NoSuchMethodException e) {
+            } catch (final NoSuchMethodException e) {
                 params = new Class[] {
                     RequestHeader.class,
                     serverObjects.class,
@@ -1492,7 +1492,7 @@ public final class HTTPDFileHandler {
 
 				try {
 				proxyurl = new URL(strUrl);
-				} catch (MalformedURLException e) {
+				} catch (final MalformedURLException e) {
 					proxyurl = new URL (URLDecoder.decode(strUrl, UTF8.charset.name()));
 
 				}

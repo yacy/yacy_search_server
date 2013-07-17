@@ -408,7 +408,7 @@ public class WikiBoard {
             ret = (record == null) ? newEntry(copyOfKey, ANONYMOUS, Domains.LOCALHOST, "New Page", UTF8.getBytes("")) : new Entry(copyOfKey, record);
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
         }
         return ret;

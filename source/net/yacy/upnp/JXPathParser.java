@@ -78,7 +78,7 @@ public class JXPathParser implements XMLParser {
       while ( ( readen = in.read( buffer ) ) != -1 ) {
         xml.append( new String( buffer, 0, readen ) );
       }
-    } catch ( IOException ex ) {
+    } catch (final  IOException ex ) {
       log.error( "IOException occured during XML reception", ex );
       return null;
     }

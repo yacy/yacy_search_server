@@ -82,12 +82,12 @@ public class PhpBB3Dao implements Dao {
                 return new Date(rs.getLong(1) * 1000L);
             }
             return null;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             ConcurrentLog.logException(e);
             return null;
         } finally {
-            if (rs != null) try {rs.close();} catch (SQLException e) {}
-            if (stmt != null) try {stmt.close();} catch (SQLException e) {}
+            if (rs != null) try {rs.close();} catch (final SQLException e) {}
+            if (stmt != null) try {stmt.close();} catch (final SQLException e) {}
         }
     }
 
@@ -102,12 +102,12 @@ public class PhpBB3Dao implements Dao {
                 return new Date(rs.getLong(1) * 1000L);
             }
             return null;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             ConcurrentLog.logException(e);
             return null;
         } finally {
-            if (rs != null) try {rs.close();} catch (SQLException e) {}
-            if (stmt != null) try {stmt.close();} catch (SQLException e) {}
+            if (rs != null) try {rs.close();} catch (final SQLException e) {}
+            if (stmt != null) try {stmt.close();} catch (final SQLException e) {}
         }
     }
 
@@ -159,17 +159,17 @@ public class PhpBB3Dao implements Dao {
             if (rs.next()) {
                 try {
                     return parseResultSet(rs);
-                } catch (MalformedURLException e) {
+                } catch (final MalformedURLException e) {
                     ConcurrentLog.logException(e);
                 }
             }
             return null;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             ConcurrentLog.logException(e);
             return null;
         } finally {
-            if (rs != null) try {rs.close();} catch (SQLException e) {}
-            if (stmt != null) try {stmt.close();} catch (SQLException e) {}
+            if (rs != null) try {rs.close();} catch (final SQLException e) {}
+            if (stmt != null) try {stmt.close();} catch (final SQLException e) {}
         }
     }
 
@@ -188,18 +188,18 @@ public class PhpBB3Dao implements Dao {
                     while (rs.next()) {
                         try {
                             queue.put(parseResultSet(rs));
-                        } catch (MalformedURLException e) {
+                        } catch (final MalformedURLException e) {
                             ConcurrentLog.logException(e);
                         }
                     }
                     queue.put(DCEntry.poison);
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     ConcurrentLog.logException(e);
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     ConcurrentLog.logException(e);
                 } finally {
-                    if (rs != null) try {rs.close();} catch (SQLException e) {}
-                    if (stmt != null) try {stmt.close();} catch (SQLException e) {}
+                    if (rs != null) try {rs.close();} catch (final SQLException e) {}
+                    if (stmt != null) try {stmt.close();} catch (final SQLException e) {}
                 }
             }
         };
@@ -253,12 +253,12 @@ public class PhpBB3Dao implements Dao {
             if (nick == null) nick = "";
             this.users.put(poster_id, nick);
             return nick;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             ConcurrentLog.logException(e);
             return "";
         } finally {
-            if (rs != null) try {rs.close();} catch (SQLException e) {}
-            if (stmt != null) try {stmt.close();} catch (SQLException e) {}
+            if (rs != null) try {rs.close();} catch (final SQLException e) {}
+            if (stmt != null) try {stmt.close();} catch (final SQLException e) {}
         }
     }
 
@@ -303,13 +303,13 @@ public class PhpBB3Dao implements Dao {
             osw.close();
             outputfiletmp.renameTo(outputfile);
             return fc + 1;
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             ConcurrentLog.logException(e);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             ConcurrentLog.logException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             ConcurrentLog.logException(e);
         }
         return 0;
@@ -338,7 +338,7 @@ public class PhpBB3Dao implements Dao {
             System.out.println("Last entry        : " + db.latest());
             File targetdir = new File("x").getParentFile();
             db.writeSurrogates(db.query(0, -1, 100), targetdir, "id0-current", 3000);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             ConcurrentLog.logException(e);
         }
     }

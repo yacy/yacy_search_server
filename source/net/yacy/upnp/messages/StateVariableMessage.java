@@ -123,7 +123,7 @@ public class StateVariableMessage {
     if ( log.isDebugEnabled() ) log.debug( "executing query :\n" + body );
     try {
       input = conn.getInputStream();
-    } catch ( IOException ex ) {
+    } catch (final  IOException ex ) {
       // java can throw an exception if he error code is 500 or 404 or something else than 200
       // but the device sends 500 error message with content that is required
       // this content is accessible with the getErrorStream
@@ -143,17 +143,17 @@ public class StateVariableMessage {
       try {
         SAXParser parser = saxParFact.newSAXParser();
         parser.parse( src, msgParser );
-      } catch ( ParserConfigurationException confEx ) {
+      } catch (final  ParserConfigurationException confEx ) {
         // should never happen
         // we throw a runtimeException to notify the env problem
         throw new RuntimeException( "ParserConfigurationException during SAX parser creation, please check your env settings:" + confEx.getMessage() );
-      } catch ( SAXException saxEx ) {
+      } catch (final  SAXException saxEx ) {
         // kind of tricky but better than nothing..
         upnpEx = new UPNPResponseException( 899, saxEx.getMessage() );
       } finally {
         try {
           input.close();
-        } catch ( IOException ex ) {
+        } catch (final  IOException ex ) {
           // ignoring
         }
       }
@@ -169,7 +169,7 @@ public class StateVariableMessage {
     }
     try {
       out.close();
-    } catch ( IOException ex ) {
+    } catch (final  IOException ex ) {
       // ignore
     }
     conn.disconnect();

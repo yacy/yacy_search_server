@@ -158,7 +158,7 @@ public class YJsonResponseWriter implements QueryResponseWriter {
                         solitaireTag(writer, "file", filename);
                         // get image license
                         if (MultiProtocolURI.isImage(filename)) URLLicense.aquireLicense(urlhash, url.toNormalform(true));
-                    } catch (MalformedURLException e) {}
+                    } catch (final MalformedURLException e) {}
                     continue;
                 }
                 if (CollectionSchema.title.getSolrFieldName().equals(fieldName)) {
@@ -216,7 +216,7 @@ public class YJsonResponseWriter implements QueryResponseWriter {
             if (i < responseCount - 1) {
                 writer.write(",\n".toCharArray());
             }
-            } catch (Throwable ee) {}
+            } catch (final Throwable ee) {}
         }
         writer.write("],\n".toCharArray());
         

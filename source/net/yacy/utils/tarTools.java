@@ -45,7 +45,7 @@ public class tarTools {
 		if (tarFileName.endsWith(".gz")) {
 		    try {
 		        return new GZIPInputStream(new FileInputStream(new File(tarFileName)));
-		    } catch (IOException e) {
+		    } catch (final IOException e) {
 		        // this might happen if the stream is not in gzip format.
 		        // there may be a 'gz' extension, but it may still be a raw tar file
 		        // this can be caused by 'one too much gzip-content header' that was attached

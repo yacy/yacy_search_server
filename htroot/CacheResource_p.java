@@ -47,7 +47,7 @@ public class CacheResource_p {
         DigestURI url;
         try {
             url = new DigestURI(u);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             ConcurrentLog.logException(e);
             return prop;
         }

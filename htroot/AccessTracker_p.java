@@ -153,7 +153,7 @@ public class AccessTracker_p {
             while (ai.hasNext()) {
                 try {
                     query = ai.next();
-                } catch (ConcurrentModificationException e) {
+                } catch (final ConcurrentModificationException e) {
                     break;
                 }
                 // put values in template

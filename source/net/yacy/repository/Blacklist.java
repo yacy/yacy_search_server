@@ -657,7 +657,7 @@ public class Blacklist {
                 this.cachedUrlHashs.put(type, rhs == null ? new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0) : rhs);
                 in.close();
                 return;
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 ConcurrentLog.logException(e);
             }
         }

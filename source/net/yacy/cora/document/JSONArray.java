@@ -229,7 +229,7 @@ public class JSONArray {
             return o instanceof Number ?
                 ((Number)o).doubleValue() :
                 Float.valueOf((String)o).floatValue();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new JSONException("JSONArray[" + index + "] is not a number.");
         }
     }
@@ -422,7 +422,7 @@ public class JSONArray {
     public String toString() {
         try {
             return '[' + join(",") + ']';
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return null;
         }
     }
@@ -502,7 +502,7 @@ public class JSONArray {
             }
             writer.write(']');
             return writer;
-        } catch (IOException e) {
+        } catch (final IOException e) {
            throw new JSONException(e);
         }
     }

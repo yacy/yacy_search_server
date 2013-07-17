@@ -335,7 +335,7 @@ public class Network
                         }
                     }
                 }
-            } catch ( final Exception e ) {
+            } catch (final Exception e ) {
                 ConcurrentLog.logException(e);
                 log.severe(
                     "publishThread: error with target seed " + this.seed.toString() + ": " + e.getMessage(),
@@ -431,7 +431,7 @@ public class Network
                 } else {
                     this.sb.peers.mySeed().put("news", net.yacy.utils.crypt.simpleEncode(record.toString()));
                 }
-            } catch ( final Exception e ) {
+            } catch (final Exception e ) {
                 log.severe("publishMySeed: problem with news encoding", e);
             }
             this.sb.peers.mySeed().setUnusedFlags();
@@ -590,7 +590,7 @@ public class Network
                     .getPublicAddress()));
             this.sb.peers.saveMySeed();
             return 0;
-        } catch ( final InterruptedException e ) {
+        } catch (final InterruptedException e ) {
             try {
                 log.info("publish: Interruption detected while publishing my seed.");
 
@@ -606,7 +606,7 @@ public class Network
                 // waiting some time for the publishThreads to finish execution
                 try {
                     Thread.sleep(500);
-                } catch ( final InterruptedException ex ) {
+                } catch (final InterruptedException ex ) {
                 }
 
                 // getting the amount of remaining publishing threads
@@ -631,14 +631,14 @@ public class Network
                         }
                         try {
                             currentThread.join(500);
-                        } catch ( final InterruptedException ex ) {
+                        } catch (final InterruptedException ex ) {
                         }
                     }
                 }
 
                 log.info("publish: Shutdown off all remaining publishing thread finished.");
 
-            } catch ( final Exception ee ) {
+            } catch (final Exception ee ) {
                 log.warn(
                     "publish: Unexpected error while trying to shutdown all remaining publishing threads.",
                     e);
@@ -670,7 +670,7 @@ public class Network
             final Class<?> uploaderClass = Class.forName(className);
             final Object uploader = uploaderClass.newInstance();
             return (yacySeedUploader) uploader;
-        } catch ( final Exception e ) {
+        } catch (final Exception e ) {
             return null;
         }
     }
@@ -770,7 +770,7 @@ public class Network
                     log.warn("SaveSeedList: " + errorMsg);
                     return errorMsg;
                 }
-            } catch ( final MalformedURLException e ) {
+            } catch (final MalformedURLException e ) {
                 final String errorMsg =
                     "Malformed seed file URL '"
                         + sb.peers.mySeed().get(Seed.SEEDLISTURL, "")
@@ -816,7 +816,7 @@ public class Network
                 // finally, set the principal status
                 sb.setConfig("yacyStatus", Seed.PEERTYPE_PRINCIPAL);
                 return null;
-            } catch ( final Exception e ) {
+            } catch (final Exception e ) {
                 sb.peers.mySeed().put(Seed.PEERTYPE, prevStatus);
                 sb.setConfig("yacyStatus", prevStatus);
                 final String errorMsg = "SaveSeedList: Seed upload failed (IO error): " + e.getMessage();

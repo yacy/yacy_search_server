@@ -558,7 +558,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         } finally {
             if (sessionIn != null && (sessionIn instanceof ChunkedInputStream)) {
                 // read to end, but do not close the stream (maybe HTTP/1.1 persistent)
-                try {sessionIn.close();} catch (IOException e) {}
+                try {sessionIn.close();} catch (final IOException e) {}
             }
         }
         return retv;

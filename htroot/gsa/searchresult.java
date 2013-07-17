@@ -186,7 +186,7 @@ public class searchresult {
         SolrQueryRequest req = connector.request(post.toSolrParams(null));
         SolrQueryResponse response = null;
         Exception e = null;
-        try {response = connector.query(req);} catch (SolrException ee) {e = ee;}
+        try {response = connector.query(req);} catch (final SolrException ee) {e = ee;}
         if (response != null) e = response.getException();
         if (e != null) {
             ConcurrentLog.logException(e);
@@ -211,11 +211,11 @@ public class searchresult {
         try {
             responseWriter.write(ow, req, response);
             ow.flush();
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
         } finally {
             req.close();
             SolrRequestInfo.clearRequestInfo();
-            try {ow.close();} catch (IOException e1) {}
+            try {ow.close();} catch (final IOException e1) {}
         }
 
         // log result

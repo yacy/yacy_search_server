@@ -141,7 +141,7 @@ public final class FileUtils {
                 count += n;
             }
             dest.flush();
-        } catch ( final Exception e ) {
+        } catch (final Exception e ) {
             assert e != null;
             // an "sun.io.MalformedInputException: Missing byte-order mark" - exception may occur here
             //Log.logException(e);
@@ -181,7 +181,7 @@ public final class FileUtils {
             if ( fos != null ) {
                 try {
                     fos.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                     ConcurrentLog.warn(
                         "FileUtils",
                         "cannot close FileOutputStream for " + dest + "! " + e.getMessage());
@@ -220,7 +220,7 @@ public final class FileUtils {
             if ( fis != null ) {
                 try {
                     fis.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
         }
@@ -246,7 +246,7 @@ public final class FileUtils {
             if ( fis != null ) {
                 try {
                     fis.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
         }
@@ -296,7 +296,7 @@ public final class FileUtils {
             if ( fis != null ) {
                 try {
                     fis.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
             fis = null;
@@ -342,7 +342,7 @@ public final class FileUtils {
                 byteOutput.close();
 
                 source = byteOutput.toByteArray();
-            } catch ( final Exception e ) {
+            } catch (final Exception e ) {
                 if ( !e.getMessage().equals("Not in GZIP format") ) {
                     throw new IOException(e.getMessage());
                 }
@@ -365,12 +365,12 @@ public final class FileUtils {
                 }
             }
             br.close();
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
         } finally {
             if ( br != null ) {
                 try {
                     br.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
         }
@@ -382,7 +382,7 @@ public final class FileUtils {
         try {
             final byte[] b = read(f);
             return table(strings(b));
-        } catch ( final IOException e2 ) {
+        } catch (final IOException e2 ) {
             ConcurrentLog.severe("FileUtils", f.toString() + " not found", e2);
             return null;
         }
@@ -426,9 +426,9 @@ public final class FileUtils {
                 pw.println(key + "=" + value);
             }
             pw.println("# EOF");
-        } catch ( FileNotFoundException e ) {
+        } catch (final  FileNotFoundException e ) {
             ConcurrentLog.warn("FileUtils", e.getMessage(), e);
-        } catch ( UnsupportedEncodingException e ) {
+        } catch (final  UnsupportedEncodingException e ) {
             ConcurrentLog.warn("FileUtils", e.getMessage(), e);
         } finally {
             if ( pw != null ) {
@@ -438,7 +438,7 @@ public final class FileUtils {
         }
         try {
             forceMove(tf, file);
-        } catch ( IOException e ) {
+        } catch (final  IOException e ) {
             // ignore
         }
     }
@@ -475,7 +475,7 @@ public final class FileUtils {
                 value = value.replace("\\\\", "\\"); // does not work: escaped_backslashbackslash.matcher(value).replaceAll("\\");
                 //System.out.println("key = " + key + ", value = " + value);
                 props.put(key, value);
-            } catch (IndexOutOfBoundsException e) {
+            } catch (final IndexOutOfBoundsException e) {
                 ConcurrentLog.logException(e);
             }
         }
@@ -494,7 +494,7 @@ public final class FileUtils {
         }
         try {
             return new StringsIterator(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(a), "UTF-8")));
-        } catch ( final UnsupportedEncodingException e ) {
+        } catch (final UnsupportedEncodingException e ) {
             return null;
         }
     }
@@ -516,13 +516,13 @@ public final class FileUtils {
                 list.add(line);
             }
             br.close();
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
             // list is empty
         } finally {
             if ( br != null ) {
                 try {
                     br.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
         }
@@ -543,13 +543,13 @@ public final class FileUtils {
             bw.write(out);
             bw.close();
             return true;
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
             return false;
         } finally {
             if ( bw != null ) {
                 try {
                     bw.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
         }
@@ -585,12 +585,12 @@ public final class FileUtils {
                 }
             }
             br.close();
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
         } finally {
             if ( br != null ) {
                 try {
                     br.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
         }
@@ -727,16 +727,16 @@ public final class FileUtils {
                         break;
                     }
                 }
-            } catch ( final IOException e ) {
+            } catch (final IOException e ) {
                 this.nextLine = null;
-            } catch ( final OutOfMemoryError e ) {
+            } catch (final OutOfMemoryError e ) {
                 ConcurrentLog.logException(e);
                 this.nextLine = null;
             }
             if (this.nextLine == null && this.reader != null) {
                 try {
                     this.reader.close();
-                } catch (IOException e) {} finally {
+                } catch (final IOException e) {} finally {
                     this.reader = null;
                 }
             }
@@ -819,7 +819,7 @@ public final class FileUtils {
             //System.gc();
             try {
                 Thread.sleep(200);
-            } catch ( final InterruptedException e ) {
+            } catch (final InterruptedException e ) {
                 break;
             }
         }
@@ -828,7 +828,7 @@ public final class FileUtils {
             String p = "";
             try {
                 p = path.getCanonicalPath();
-            } catch ( final IOException e1 ) {
+            } catch (final IOException e1 ) {
                 ConcurrentLog.logException(e1);
             }
             if ( System.getProperties().getProperty("os.name", "").toLowerCase().startsWith("windows") ) {
@@ -842,7 +842,7 @@ public final class FileUtils {
                         final byte[] response = read(r.getInputStream());
                         ConcurrentLog.info("FileUtils", "deletedelete: " + UTF8.String(response));
                     }
-                } catch ( final IOException e ) {
+                } catch (final IOException e ) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -870,7 +870,7 @@ public final class FileUtils {
                     && file.isFile()
                     && directory.getCanonicalPath().equalsIgnoreCase(
                             file.getParentFile().getCanonicalPath()));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             inDirectory = false;
         }
         

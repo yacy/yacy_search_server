@@ -83,7 +83,7 @@ public class citation {
             try {
                 uri = new DigestURI(url, null);
                 hash = ASCII.String(uri.hash());
-            } catch (MalformedURLException e) {}
+            } catch (final MalformedURLException e) {}
         }
         if (uri == null && hash.length() > 0) {
             uri = sb.getURL(ASCII.getBytes(hash));
@@ -100,7 +100,7 @@ public class citation {
         SolrDocument doc;
         try {
             doc = segment.fulltext().getDefaultConnector().getDocumentById(hash, CollectionSchema.title.getSolrFieldName(), CollectionSchema.text_t.getSolrFieldName());
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             return prop;
         }
         @SuppressWarnings("unchecked")
@@ -135,11 +135,11 @@ public class citation {
                         String u = (String) d.getFieldValue(CollectionSchema.sku.getSolrFieldName());
                         if (u == null || u.equals(url)) continue;
                         scores.inc(u);
-                        try {list.add(new DigestURI(u, null));} catch (MalformedURLException e) {}
+                        try {list.add(new DigestURI(u, null));} catch (final MalformedURLException e) {}
                     }
                     sentenceOcc.put(sentence, list);
                 }
-            } catch (Throwable ee) {
+            } catch (final Throwable ee) {
                 
             }
         }
@@ -178,7 +178,7 @@ public class citation {
                 }
                 prop.put("citations_" + i + "_dd", dd.toString());
                 i++;
-            } catch (MalformedURLException e) {}
+            } catch (final MalformedURLException e) {}
         }
         prop.put("citations", i);
         
@@ -191,7 +191,7 @@ public class citation {
                 if (uu.getOrganization().equals(uri.getOrganization())) continue;
                 prop.put("similar_links_" + i + "_url", u);
                 i++;
-            } catch (MalformedURLException e) {}
+            } catch (final MalformedURLException e) {}
         }
         prop.put("similar_links", i);
         prop.put("similar", i > 0 ? 1 : 0);

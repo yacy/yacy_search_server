@@ -868,7 +868,7 @@ dc_rights
             if (parser instanceof ContentScraper) {
                 final ContentScraper html = (ContentScraper) parser;
                 String refresh = html.getRefreshPath();
-                if (refresh != null && refresh.length() > 0) try {result.put(new DigestURI(refresh), "refresh");} catch (MalformedURLException e) {}
+                if (refresh != null && refresh.length() > 0) try {result.put(new DigestURI(refresh), "refresh");} catch (final MalformedURLException e) {}
                 DigestURI canonical = html.getCanonical();
                 if (canonical != null) result.put(canonical, "canonical");
             }

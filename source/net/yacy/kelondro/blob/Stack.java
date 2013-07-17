@@ -195,7 +195,7 @@ public class Stack {
         byte[] b;
         try {
             b = this.stack.get(k);
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
             b = null;
         }

@@ -385,7 +385,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( o instanceof String ) {
             try {
                 return Float.parseFloat((String) o);
-            } catch ( final NumberFormatException e ) {
+            } catch (final NumberFormatException e ) {
                 return dflt;
             }
         } else if ( o instanceof Float ) {
@@ -403,7 +403,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( o instanceof String ) {
             try {
                 return Long.parseLong((String) o);
-            } catch ( final NumberFormatException e ) {
+            } catch (final NumberFormatException e ) {
                 return dflt;
             }
         } else if ( o instanceof Long ) {
@@ -551,7 +551,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final Double getVersion() {
         try {
             return Double.parseDouble(get(Seed.VERSION, Seed.ZERO));
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             return 0.0d;
         }
     }
@@ -654,9 +654,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
             // of the local UTC offset is wrong. We correct this here by adding the local UTC
             // offset again.
             return t /*+ DateFormatter.UTCDiff()*/;
-        } catch ( final java.text.ParseException e ) { // in case of an error make seed look old!!!
+        } catch (final java.text.ParseException e ) { // in case of an error make seed look old!!!
             return System.currentTimeMillis() - AbstractFormatter.dayMillis;
-        } catch ( final java.lang.NumberFormatException e ) {
+        } catch (final java.lang.NumberFormatException e ) {
             return System.currentTimeMillis() - AbstractFormatter.dayMillis;
         }
     }
@@ -681,7 +681,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
             final GenericFormatter my_SHORT_SECOND_FORMATTER =
                 new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
             b = my_SHORT_SECOND_FORMATTER.parse(get(Seed.BDATE, "20040101000000")).getTime();
-        } catch ( final ParseException e ) {
+        } catch (final ParseException e ) {
             b = System.currentTimeMillis();
         }
         this.birthdate = b;
@@ -719,7 +719,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public int getPPM() {
         try {
             return Integer.parseInt(get(Seed.ISPEED, Seed.ZERO));
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             return 0;
         }
     }
@@ -727,7 +727,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public float getQPM() {
         try {
             return Float.parseFloat(get(Seed.RSPEED, Seed.ZERO));
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             return 0f;
         }
     }
@@ -735,7 +735,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final long getLinkCount() {
         try {
             return getLong(Seed.LCOUNT, 0);
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             return 0;
         }
     }
@@ -743,7 +743,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final long getWordCount() {
         try {
             return getLong(Seed.ICOUNT, 0);
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             return 0;
         }
     }
@@ -1062,7 +1062,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
                 if (Domains.isLocalhost(host)) {
                     return "seedURL in localhost rejected";
                 }
-            } catch ( final MalformedURLException e ) {
+            } catch (final MalformedURLException e ) {
                 return "seedURL malformed";
             }
         }

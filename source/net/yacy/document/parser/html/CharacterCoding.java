@@ -333,7 +333,7 @@ public final class CharacterCoding {
                 try {
                     int uc = Integer.parseInt(ucs);
                     sb.append(new char[] {(char) uc});
-                } catch (NumberFormatException e) { }
+                } catch (final NumberFormatException e) { }
                 continue;
             }
             // the entity is unknown, skip it

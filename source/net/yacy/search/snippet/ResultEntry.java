@@ -95,7 +95,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
                              " " +
                              urlentry.dc_title()), null).keySet()),
                              urlentry.hash());
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 }
                 indexSegment.fulltext().remove(urlentry.hash()); // clean up

@@ -164,7 +164,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
                             if (NaturalOrder.naturalOrder.equal(hosthash, 0, b, 6, 6)) i.remove();
                         }
                     }
-                } catch (IOException e) {}
+                } catch (final IOException e) {}
             }
         };
         if (concurrent) t.start(); else t.run();

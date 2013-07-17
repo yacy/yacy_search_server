@@ -161,7 +161,7 @@ public final class Records {
 
         try {
             records = this.raf.length() / this.recordsize;
-        } catch (NullPointerException e) {
+        } catch (final NullPointerException e) {
             // This may happen on shutdown while still something is moving on
             ConcurrentLog.logException(e);
         }

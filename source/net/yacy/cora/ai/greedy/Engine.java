@@ -112,7 +112,7 @@ public class Engine<
                     }
                     //while (!challengeQueue.isEmpty()) System.out.println("finding: " + challengeQueue.take().getChallenge().getFinding().toString());
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
         }
@@ -159,7 +159,7 @@ public class Engine<
                             // generate model clone and apply finding
                             try {
                                 nextModel = (SpecificModel) agent.getModel().clone();
-                            } catch (CloneNotSupportedException e) {
+                            } catch (final CloneNotSupportedException e) {
                                 e.printStackTrace();
                             }
                             nextModel.applyFinding(challenge.getFinding());
@@ -170,7 +170,7 @@ public class Engine<
                         // generate model clone and apply finding
                         try {
                             nextModel = (SpecificModel) agent.getModel().clone();
-                        } catch (CloneNotSupportedException e) {
+                        } catch (final CloneNotSupportedException e) {
                             e.printStackTrace();
                         }
                         nextModel.applyFinding(challenge.getFinding());
@@ -256,7 +256,7 @@ public class Engine<
                     // using the priority of the next role
                     agentQueue.put(nextAgent);
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
         }

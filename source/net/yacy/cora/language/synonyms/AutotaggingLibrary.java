@@ -114,7 +114,7 @@ public class AutotaggingLibrary {
         Tagging voc = new Tagging("Locations", locations);
         try {
             voc.setObjectspace("http://dbpedia.org/resource/");
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
         this.vocabularies.put("Locations", voc);
         for (String t: voc.tags()) {

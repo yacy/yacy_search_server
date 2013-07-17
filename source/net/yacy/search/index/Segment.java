@@ -234,7 +234,7 @@ public class Segment {
         
         RowHandleSet ignore = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100); // a set of urlhashes to be ignored. This is generated from all hashes that are seen during recursion to prevent enless loops
         RowHandleSet levelhashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 1); // all hashes of a clickdepth. The first call contains the target hash only and therefore just one entry
-        try {levelhashes.put(searchhash);} catch (SpaceExceededException e) {throw new IOException(e);}
+        try {levelhashes.put(searchhash);} catch (final SpaceExceededException e) {throw new IOException(e);}
         int leveldepth = 0; // the recursion depth and therefore the result depth-1. Shall be 0 for the first call
         final byte[] hosthash = new byte[6]; // the host of the url to be checked
         System.arraycopy(searchhash, 6, hosthash, 0, 6);
@@ -268,8 +268,8 @@ public class Segment {
                     }
                     
                     // step to next depth level
-                    try {checknext.put(u);} catch (SpaceExceededException e) {}
-                    try {ignore.put(u);} catch (SpaceExceededException e) {}
+                    try {checknext.put(u);} catch (final SpaceExceededException e) {}
+                    try {ignore.put(u);} catch (final SpaceExceededException e) {}
                 }
             }
             leveldepth++;
@@ -295,7 +295,7 @@ public class Segment {
                 rr = new ReferenceReport(id, acceptSelfReference);
                 cache.put(id, rr);
                 return rr;
-            } catch (SpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 ConcurrentLog.logException(e);
                 throw new IOException(e.getMessage());
             }
@@ -341,7 +341,7 @@ public class Segment {
                             external++;
                         }
                     }
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     ConcurrentLog.logException(e);
                 }
             } else {
@@ -408,7 +408,7 @@ public class Segment {
         }
         try {
             return (int) this.fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.text_t.getSolrFieldName() + ":\"" + word + "\"");
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             ConcurrentLog.logException(e);
             return 0;
         }
@@ -455,7 +455,7 @@ public class Segment {
                     SolrDocument doc;
                     try {
                         doc = docQueue.take();
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                         ConcurrentLog.logException(e);
                         return null;
                     }
@@ -465,7 +465,7 @@ public class Segment {
                     DigestURI url;
                     try {
                         url = new DigestURI(u, ASCII.getBytes(id));
-                    } catch (MalformedURLException e) {
+                    } catch (final MalformedURLException e) {
                         continue;
                     }
                     if (urlstub == null || u.startsWith(urlstub)) return url;
@@ -564,7 +564,7 @@ public class Segment {
     public void putDocument(final StorageQueueEntry queueEntry) {
         try {
             this.fulltext().putDocument(queueEntry.queueEntry);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
     }
@@ -640,7 +640,7 @@ public class Segment {
                         // change unique attribut in content
                         vector.setField(uniquefield.getSolrFieldName(), false);
                     }
-                } catch (IOException e) {}
+                } catch (final IOException e) {}
             }
         }
         
@@ -675,7 +675,7 @@ public class Segment {
                         } else {
                             vector.setField(uniquefield.getSolrFieldName(), true);
                         }
-                    } catch (IOException e) {}
+                    } catch (final IOException e) {}
                 }
             }
         }
@@ -693,11 +693,11 @@ public class Segment {
                     error = null;
                     this.fulltext.putEdges(vector.getWebgraphDocuments());
                     break tryloop;
-                } catch ( final IOException e ) {
+                } catch (final IOException e ) {
                     error = "failed to send " + urlNormalform + " to solr: " + e.getMessage();
                     ConcurrentLog.warn("SOLR", error);
                     if (i == 10) this.fulltext.commit(false);
-                    try {Thread.sleep(1000);} catch (InterruptedException e1) {}
+                    try {Thread.sleep(1000);} catch (final InterruptedException e1) {}
                     continue tryloop;
                 }
             }

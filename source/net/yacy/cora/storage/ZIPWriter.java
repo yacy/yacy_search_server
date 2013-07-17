@@ -55,7 +55,7 @@ public class ZIPWriter extends AbstractMap<String, ZipEntry> implements Map<Stri
         try {
             this.zos.putNextEntry(value);
             this.backup.put(key, value);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
         return null;

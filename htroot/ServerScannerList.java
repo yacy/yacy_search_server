@@ -78,14 +78,14 @@ public class ServerScannerList {
                             prop.put("servertable_list_" + i + "_process", Scanner.inIndex(apiCommentCache, urlString) == null ? 0 : 1);
                             prop.put("servertable_list_" + i + "_edit_preselected", host.getValue() == Access.granted && Scanner.inIndex(apiCommentCache, urlString) == null ? 1 : 0);
                             i++;
-                        } catch (MalformedURLException e) {
+                        } catch (final MalformedURLException e) {
                             ConcurrentLog.logException(e);
                         }
                     }
                     prop.put("servertable_list", i);
                     prop.put("servertable_edit_num", i);
                     break table;
-                } catch (ConcurrentModificationException e) {
+                } catch (final ConcurrentModificationException e) {
                     continue table;
                 }
             }

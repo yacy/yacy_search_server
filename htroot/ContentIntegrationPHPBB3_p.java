@@ -86,7 +86,7 @@ public class ContentIntegrationPHPBB3_p {
                     prop.putHTML("check_first", db.first().toString());
                     prop.putHTML("check_last", db.latest().toString());
                     db.close();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     ConcurrentLog.logException(e);
                     prop.put("check", 2);
                     prop.put("check_error", e.getMessage());
@@ -110,7 +110,7 @@ public class ContentIntegrationPHPBB3_p {
                     prop.put("export", 1);
                     prop.put("export_files", files);
                     db.close();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     ConcurrentLog.logException(e);
                     prop.put("export", 2);
                     prop.put("export_error", e.getMessage());
@@ -135,7 +135,7 @@ public class ContentIntegrationPHPBB3_p {
                 	importer.imp(f);
                 	prop.put("import", 1);
                     importer.close();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     ConcurrentLog.logException(e);
                     prop.put("import", 2);
                     prop.put("import_error", e.getMessage());

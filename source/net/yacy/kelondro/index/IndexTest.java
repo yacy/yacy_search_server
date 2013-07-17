@@ -121,7 +121,7 @@ public class IndexTest {
         for (int i = 0; i < count; i++)
             try {
                 ii.putUnique(tests[i], 1);
-            } catch (SpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 e.printStackTrace();
             }
         ii.get(randomHash(r)); // trigger sort

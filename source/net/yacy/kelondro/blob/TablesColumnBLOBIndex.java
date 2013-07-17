@@ -60,7 +60,7 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
     		buf.append(SEPERATOR);
     	}
     	byte[] b = buf.getBytes();
-    	try {buf.close(); } catch (IOException e) {}
+    	try {buf.close(); } catch (final IOException e) {}
     	return b;
     }
 
@@ -69,9 +69,9 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
     	final byte[] column = YMarkUtil.getKeyId(columnName);
     	try {
 			this.index.remove(column);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			ConcurrentLog.logException(e);
-		} catch (SpaceExceededException e) {
+		} catch (final SpaceExceededException e) {
 			ConcurrentLog.logException(e);
 		}
     }
@@ -102,9 +102,9 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 			valueIdxMap.put(columnValue, CollectionToByte(PKset));
 			this.index.insert(column, valueIdxMap);
 			return;
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			ConcurrentLog.logException(e);
-		} catch (SpaceExceededException e) {
+		} catch (final SpaceExceededException e) {
 			ConcurrentLog.logException(e);
 		}
 	}
@@ -127,9 +127,9 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 			}
 			try {
 				this.index.insert(entry.getKey(), entry.getValue());
-			} catch (SpaceExceededException e) {
+			} catch (final SpaceExceededException e) {
 				ConcurrentLog.logException(e);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				ConcurrentLog.logException(e);
 			}
 		}
@@ -152,9 +152,9 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 		if(this.index.containsKey(column)) {
 			try {
 				return new TreeSet<String>(this.index.get(column).keySet());
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				ConcurrentLog.logException(e);
-			} catch (SpaceExceededException e) {
+			} catch (final SpaceExceededException e) {
 				ConcurrentLog.logException(e);
 			}
 		}
@@ -167,9 +167,9 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 		if(this.index.containsKey(column)) {
 			try {
 				return this.index.get(column).containsKey(key);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				ConcurrentLog.logException(e);
-			} catch (SpaceExceededException e) {
+			} catch (final SpaceExceededException e) {
 				ConcurrentLog.logException(e);
 			}
 		}
@@ -188,9 +188,9 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 		// deserialize
 		try {
 			return byteToCollection(this.index.get(column).get(key));
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			ConcurrentLog.logException(e);
-		} catch (SpaceExceededException e) {
+		} catch (final SpaceExceededException e) {
 			ConcurrentLog.logException(e);
 		}
 		return new ArrayList<byte[]>();
@@ -202,9 +202,9 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 		if(this.index.containsKey(column)) {
 			try {
 				return this.index.get(column).size();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				ConcurrentLog.logException(e);
-			} catch (SpaceExceededException e) {
+			} catch (final SpaceExceededException e) {
 				ConcurrentLog.logException(e);
 			}
 		}

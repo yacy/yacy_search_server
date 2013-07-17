@@ -146,7 +146,7 @@ public class Agent<
             // they will attempt to assign different priorities as rankings from the
             // leaf of the search tree. Therefore the findings must be cloned.
             finding = (SpecificFinding) getResultFinding().clone();
-        } catch (CloneNotSupportedException e) {
+        } catch (final CloneNotSupportedException e) {
             e.printStackTrace();
         }
         finding.setPriority(this.model.getRanking(this.pathlength, this.context.initialRole()));

@@ -280,7 +280,7 @@ public class DHTSelection {
                     if (this.doublecheck.has(hashb)) return null;
                     try {
                         this.doublecheck.put(hashb);
-                    } catch (SpaceExceededException e) {
+                    } catch (final SpaceExceededException e) {
                         ConcurrentLog.logException(e);
                         break;
                     }

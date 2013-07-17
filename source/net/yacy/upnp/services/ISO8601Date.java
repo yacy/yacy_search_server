@@ -69,7 +69,7 @@ public class ISO8601Date {
         return true;
       }
       throw new NumberFormatException("Missing [" + token + "]");
-    } catch (NoSuchElementException ex) {
+    } catch (final NoSuchElementException ex) {
       return false;
     }
   }

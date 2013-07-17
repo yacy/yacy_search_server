@@ -785,7 +785,7 @@ public class HTTPClient {
         // Head some
 //		try {
 //			client.HEADResponse(url);
-//		} catch (IOException e) {
+//		} catch (final IOException e) {
 //			e.printStackTrace();
 //		}
         for (final Header header: client.getHttpResponse().getAllHeaders()) {
@@ -799,7 +799,7 @@ public class HTTPClient {
         // Post some
 //		try {
 //			System.out.println(UTF8.String(client.POSTbytes(url, newparts)));
-//		} catch (IOException e1) {
+//		} catch (final IOException e1) {
 //			e1.printStackTrace();
 //		}
         // Close out connection manager

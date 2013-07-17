@@ -315,7 +315,7 @@ public class ServicesEventing implements Runnable {
       inService = false;
       try {
         server.close();
-      } catch ( IOException ex ) {
+      } catch (final  IOException ex ) {
         // should not happen
       }
     }
@@ -326,7 +326,7 @@ public class ServicesEventing implements Runnable {
     if ( !Thread.currentThread().getName().equals( "ServicesEventing daemon" ) ) return;
     try {
       server = new ServerSocket( daemonPort );
-    } catch ( IOException ex )  {
+    } catch (final  IOException ex )  {
       log.error( "Error during daemon server socket on port " + daemonPort + " creation", ex );
       return;
     }
@@ -334,7 +334,7 @@ public class ServicesEventing implements Runnable {
       try {
         Socket skt = server.accept();
         new Thread( new RequestProcessor( skt ) ).start();
-      } catch ( IOException ioEx ) {
+      } catch (final  IOException ioEx ) {
         if ( inService ) {
           log.error( "IO Exception during UPNP messages listening thread", ioEx );
         }
@@ -425,7 +425,7 @@ public class ServicesEventing implements Runnable {
             }
           }
         }
-      } catch ( IOException ioEx ) {
+      } catch (final  IOException ioEx ) {
         log.error( "IO Exception during client processing thread", ioEx );
       } catch( Exception ex ) {
         log.error( "Unexpected error during client processing thread", ex );

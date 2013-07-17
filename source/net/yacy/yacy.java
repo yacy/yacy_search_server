@@ -203,7 +203,7 @@ public final class yacy {
                             ConcurrentLog.severe("STARTUP", "WARNING: YaCy instance was still running; just opening the browser and exit.");
                             System.exit(0);
                         }
-                    } catch (ExecutionException ex) {
+                    } catch (final ExecutionException ex) {
                         ConcurrentLog.info("STARTUP", "INFO: delete old yacy.running file; likely previous YaCy session was not orderly shutdown!");
                     }
                 }
@@ -310,7 +310,7 @@ public final class yacy {
             	if ((s.endsWith(".rdf") || s.endsWith(".nt")) && !s.equals("local.rdf") && !s.endsWith("_triplestore.rdf") && !s.startsWith("private_store_")) {
                     try {
                         JenaTripleStore.load(new File(triplestore, s).getAbsolutePath());
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         ConcurrentLog.logException(e);
                     }
             	}
@@ -320,7 +320,7 @@ public final class yacy {
                 if (local.exists()) {
                     try {
                         JenaTripleStore.load(local.getAbsolutePath());
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         ConcurrentLog.logException(e);
                     }
                 }
@@ -398,7 +398,7 @@ public final class yacy {
                     System.gc();
                     sb.setConfig("memoryFreeAfterInitAGC", MemoryControl.free());
                     sb.setConfig("memoryTotalAfterInitAGC", MemoryControl.total());
-                //} catch (ConcurrentModificationException e) {}
+                //} catch (final ConcurrentModificationException e) {}
 
                 // wait for server shutdown
                 try {

@@ -34,7 +34,7 @@ public class RegexTest {
         Boolean match = null;
         try {
             match = text.matches(regex);
-        } catch (PatternSyntaxException e) {
+        } catch (final PatternSyntaxException e) {
             error = e.getMessage();
         }
         

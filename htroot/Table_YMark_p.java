@@ -83,9 +83,9 @@ public class Table_YMark_p {
 				count++;
 			}
 			prop.put("showselection_folders", count);
-		} catch (IOException e) {
+		} catch (final IOException e) {
             Log.logException(e);
-		} catch (RowSpaceExceededException e) {
+		} catch (final RowSpaceExceededException e) {
             Log.logException(e);
 		}
 		*/
@@ -139,7 +139,7 @@ public class Table_YMark_p {
         if (!post.get("rebuildindex", "").isEmpty()) try {
             sb.tables.bookmarks.folders.rebuildIndex(bmk_user);
             sb.tables.bookmarks.tags.rebuildIndex(bmk_user);
-        }  catch (IOException e) {
+        }  catch (final IOException e) {
             Log.logException(e);
         }
         */

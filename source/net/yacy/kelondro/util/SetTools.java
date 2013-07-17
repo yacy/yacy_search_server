@@ -157,7 +157,7 @@ public final class SetTools {
                             result.put(mentry1.getKey(), mentry1.getValue());
                         }
                     }
-                } catch (ConcurrentModificationException e) {
+                } catch (final ConcurrentModificationException e) {
                     ConcurrentLog.warn("SetTools", e.getMessage(), e);
                     break loop;
                 }

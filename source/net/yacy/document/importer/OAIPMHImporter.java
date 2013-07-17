@@ -75,7 +75,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         if (!url.endsWith("?")) url = url + "?";
         try {
             this.source = new DigestURI(url + "verb=ListRecords&metadataPrefix=oai_dc");
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             // this should never happen
             ConcurrentLog.logException(e);
         }
@@ -127,7 +127,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     @Override
     public void run() {
         while (runningJobs.size() > 50) {
-            try {Thread.sleep(10000 + 3000 * (System.currentTimeMillis() % 6));} catch (InterruptedException e) {}
+            try {Thread.sleep(10000 + 3000 * (System.currentTimeMillis() % 6));} catch (final InterruptedException e) {}
         }
         startedJobs.remove(this);
         runningJobs.put(this, N);
@@ -144,7 +144,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
                     break;
                 }
                 this.message = "loading next resumption fragment, cursor = " + loader.getResumptionToken().getCursor();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 this.message = e.getMessage();
                 break;
             }
@@ -216,7 +216,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
                     String hostID = s.substring(7, s.length() - 22);
                     Date md = map.get(hostID);
                     if (md == null || fd.after(md)) map.put(hostID, fd);
-                } catch (ParseException e) {
+                } catch (final ParseException e) {
                     ConcurrentLog.logException(e);
                 }
             }

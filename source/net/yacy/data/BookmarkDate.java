@@ -64,7 +64,7 @@ public class BookmarkDate {
             map = datesTable.get(UTF8.getBytes(date));
         } catch (final IOException e) {
             map = null;
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             map = null;
         }
         if (map == null) {
@@ -148,13 +148,13 @@ public class BookmarkDate {
             if (this.size() >0) {
                 try {
                     datesTable.insert(UTF8.getBytes(getDateString()), mem);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     ConcurrentLog.logException(e);
                 }
             } else {
                 try {
                     datesTable.delete(UTF8.getBytes(getDateString()));
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 }
             }

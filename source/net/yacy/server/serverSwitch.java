@@ -232,7 +232,7 @@ public class serverSwitch
     public long getConfigLong(final String key, final long dflt) {
         try {
             return Long.parseLong(getConfig(key, Long.toString(dflt)));
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             return dflt;
         }
     }
@@ -247,7 +247,7 @@ public class serverSwitch
     public float getConfigFloat(final String key, final float dflt) {
         try {
             return Float.parseFloat(getConfig(key, Float.toString(dflt)));
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             return dflt;
         }
     }
@@ -262,7 +262,7 @@ public class serverSwitch
     public int getConfigInt(final String key, final int dflt) {
         try {
             return Integer.parseInt(getConfig(key, Integer.toString(dflt)));
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             return dflt;
         }
     }
@@ -368,21 +368,21 @@ public class serverSwitch
         try {
             x = Long.parseLong(getConfig(threadName + "_idlesleep", "novalue"));
             newThread.setIdleSleep(x);
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             newThread.setIdleSleep(initialIdleSleep);
             setConfig(threadName + "_idlesleep", initialIdleSleep);
         }
         try {
             x = Long.parseLong(getConfig(threadName + "_busysleep", "novalue"));
             newThread.setBusySleep(x);
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             newThread.setBusySleep(initialBusySleep);
             setConfig(threadName + "_busysleep", initialBusySleep);
         }
         try {
             x = Long.parseLong(getConfig(threadName + "_memprereq", "novalue"));
             newThread.setMemPreReqisite(x);
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             newThread.setMemPreReqisite(initialMemoryPreRequisite);
             setConfig(threadName + "_memprereq", initialMemoryPreRequisite);
         }
@@ -451,14 +451,14 @@ public class serverSwitch
                 s.setStopped(true);
                 try {
                     Thread.sleep(100);
-                } catch ( final InterruptedException ex ) {
+                } catch (final InterruptedException ex ) {
                 }
 
                 // try to interrupt session
                 s.interrupt();
                 try {
                     Thread.sleep(100);
-                } catch ( final InterruptedException ex ) {
+                } catch (final InterruptedException ex ) {
                 }
 
                 // try to close socket
@@ -470,7 +470,7 @@ public class serverSwitch
                 if ( s.isAlive() ) {
                     try {
                         s.join(500);
-                    } catch ( final InterruptedException ex ) {
+                    } catch (final InterruptedException ex ) {
                     }
                 }
             }
@@ -603,7 +603,7 @@ public class serverSwitch
                         f.close();
                     }
                     return new InputStreamReader(new BufferedInputStream(new ByteArrayInputStream(data)));
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                     continue;
                 }
             }

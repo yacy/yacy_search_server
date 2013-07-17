@@ -76,9 +76,9 @@ public final class CachedFileReader extends AbstractReader implements Reader {
     
     public final synchronized void close() {
         if (RAFile != null) try {
-            try{RAFile.getChannel().close();} catch (IOException e) {}
+            try{RAFile.getChannel().close();} catch (final IOException e) {}
             RAFile.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
         this.cache = null;

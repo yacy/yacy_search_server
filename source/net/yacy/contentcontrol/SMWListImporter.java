@@ -87,7 +87,7 @@ public class SMWListImporter implements Runnable, ContentHandler{
 			try {
 				this.listEntries.put(this.row);
 				//this.count++;
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				ConcurrentLog.logException(e);
 			}
 			this.obj.clear();
@@ -137,16 +137,16 @@ public class SMWListImporter implements Runnable, ContentHandler{
 			ConcurrentLog.info("SMWLISTSYNC", "Importer run()");
 			this.parser.parse(this.importFile, this, true);
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			ConcurrentLog.logException(e);
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			ConcurrentLog.logException(e);
 		} finally {
 
 			try {
 				ConcurrentLog.info("SMWLISTSYNC", "Importer inserted poison pill in queue");
 				this.listEntries.put(SMWListRow.POISON);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				ConcurrentLog.logException(e);
 			}
 		}
@@ -155,7 +155,7 @@ public class SMWListImporter implements Runnable, ContentHandler{
     public SMWListRow take() {
         try {
             return this.listEntries.take();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             ConcurrentLog.logException(e);
             return null;
         }

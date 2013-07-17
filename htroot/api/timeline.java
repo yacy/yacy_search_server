@@ -87,7 +87,7 @@ public final class timeline {
         TermSearch<WordReference> search = null;
         try {
             search = segment.termIndex().query(q, qg.getExcludeHashes(), null, Segment.wordReferenceFactory, maxdist);
-        } catch (SpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             ConcurrentLog.logException(e);
         }
         ReferenceContainer<WordReference> index = search.joined();

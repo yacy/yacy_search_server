@@ -46,7 +46,7 @@ public class ReverseMapIterator <E, F> implements Iterator<Map.Entry<E, F>> {
                         a.add(e);
                     }
                     break;
-                } catch (ConcurrentModificationException e) {
+                } catch (final ConcurrentModificationException e) {
                     continue;
                 }
             }

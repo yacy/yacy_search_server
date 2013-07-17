@@ -69,7 +69,7 @@ public class YMarkRDF {
 		this.model.write(baos, format);
 		try {
 			return baos.toString("UTF-8");
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			return new String();
 		}
 	}

@@ -632,7 +632,7 @@ public final class SeedDB implements AlternativeDomainNames {
                 //System.out.println("*** found lookupByName in seedActiveDB: " + peerName);
                 return seed;
             }
-        } catch ( IOException e ) {
+        } catch (final  IOException e ) {
         }}
         synchronized (this) { try {
             Collection<byte[]> idx = this.seedPassiveDB.select(Seed.NAME, name);
@@ -642,7 +642,7 @@ public final class SeedDB implements AlternativeDomainNames {
                 //System.out.println("*** found lookupByName in seedPassiveDB: " + peerName);
                 return seed;
             }
-        } catch ( IOException e ) {
+        } catch (final  IOException e ) {
         }}
 
         // check local seed
@@ -683,7 +683,7 @@ public final class SeedDB implements AlternativeDomainNames {
                     //System.out.println("*** found lookupByIP in connected: " + peerIP.toString() + " -> " + seed.getName());
                     return seed;
                 }
-            } catch ( IOException e ) {
+            } catch (final  IOException e ) {
             }
         }
 
@@ -697,7 +697,7 @@ public final class SeedDB implements AlternativeDomainNames {
                     //System.out.println("*** found lookupByIP in disconnected: " + peerIP.toString() + " -> " + seed.getName());
                     return seed;
                 }
-            } catch ( IOException e ) {
+            } catch (final  IOException e ) {
             }
         }
 
@@ -711,7 +711,7 @@ public final class SeedDB implements AlternativeDomainNames {
                     //System.out.println("*** found lookupByIP in potential: " + peerIP.toString() + " -> " + seed.getName());
                     return seed;
                 }
-            } catch ( IOException e ) {
+            } catch (final  IOException e ) {
             }
         }
 

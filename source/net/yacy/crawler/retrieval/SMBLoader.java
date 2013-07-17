@@ -80,7 +80,7 @@ public class SMBLoader {
 
         // process directories: transform them to html with meta robots=noindex (using the ftpc lib)
         String[] l = null;
-        try {l = url.list();} catch (IOException e) {}
+        try {l = url.list();} catch (final IOException e) {}
         if (l != null) {
             String u = url.toNormalform(true);
             List<String> list = new ArrayList<String>();
@@ -123,7 +123,7 @@ public class SMBLoader {
         long size;
         try {
             size = url.length();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             size = -1;
         }
         String parserError = null;
@@ -185,13 +185,13 @@ public class SMBLoader {
                     System.out.write( b, 0, n );
                 }
             }
-        } catch (SmbException e) {
+        } catch (final SmbException e) {
             ConcurrentLog.logException(e);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             ConcurrentLog.logException(e);
-        } catch (UnknownHostException e) {
+        } catch (final UnknownHostException e) {
             ConcurrentLog.logException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
     }

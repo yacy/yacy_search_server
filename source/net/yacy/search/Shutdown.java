@@ -37,9 +37,9 @@ public class Shutdown extends Thread {
     public void run() {
         try {
             Thread.sleep(this.delay);
-        } catch ( final InterruptedException e ) {
+        } catch (final InterruptedException e ) {
             this.sb.getLog().info("interrupted delayed shutdown");
-        } catch ( final Exception e ) {
+        } catch (final Exception e ) {
             ConcurrentLog.logException(e);
         }
         this.sb.terminate(this.reason);

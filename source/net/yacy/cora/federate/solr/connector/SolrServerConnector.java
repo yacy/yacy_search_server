@@ -68,7 +68,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             try {
                 this.server.commit(true, true, softCommit);
                 //if (this.server instanceof HttpSolrServer) ((HttpSolrServer) this.server).shutdown();
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 //Log.logException(e);
             }
         }
@@ -83,7 +83,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         synchronized (this.server) {
             try {
                 this.server.optimize(true, true, maxSegments);
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 ConcurrentLog.logException(e);
             }
         }
@@ -95,7 +95,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         try {
             if (this.server instanceof EmbeddedSolrServer) synchronized (this.server) {this.server.commit(true, true, false);}
             this.server = null;
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             ConcurrentLog.logException(e);
         }
     }
@@ -197,27 +197,27 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             try {
                 if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
                 this.server.add(solrdoc, -1);
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 ConcurrentLog.logException(e);
                 // catches "version conflict for": try this again and delete the document in advance
                 try {
                     this.server.deleteById((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
-                } catch (SolrServerException e1) {
+                } catch (final SolrServerException e1) {
                     ConcurrentLog.logException(e1);
                 }
                 try {
                     this.server.add(solrdoc, -1);
-                } catch (Throwable ee) {
+                } catch (final Throwable ee) {
                     ConcurrentLog.logException(ee);
                     try {
                         this.server.commit();
-                    } catch (Throwable eee) {
+                    } catch (final Throwable eee) {
                         ConcurrentLog.logException(eee);
                         // a time-out may occur here
                     }
                     try {
                         this.server.add(solrdoc, -1);
-                    } catch (Throwable eee) {
+                    } catch (final Throwable eee) {
                         ConcurrentLog.logException(eee);
                         throw new IOException(eee);
                     }
@@ -235,25 +235,25 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                     if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
                 }
                 this.server.add(solrdocs, -1);
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 ConcurrentLog.logException(e);
                 // catches "version conflict for": try this again and delete the document in advance
                 List<String> ids = new ArrayList<String>();
                 for (SolrInputDocument solrdoc : solrdocs) ids.add((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                 try {
                     this.server.deleteById(ids);
-                } catch (SolrServerException e1) {
+                } catch (final SolrServerException e1) {
                     ConcurrentLog.logException(e1);
                 }
                 try {
                     this.server.commit();
-                } catch (Throwable eee) {
+                } catch (final Throwable eee) {
                     ConcurrentLog.logException(eee);
                     // a time-out may occur here
                 }
                 try {
                     this.server.add(solrdocs, -1);
-                } catch (Throwable ee) {
+                } catch (final Throwable ee) {
                     ConcurrentLog.logException(ee);
                     log.warn(e.getMessage() + " IDs=" + ids.toString());
                     throw new IOException(ee);

@@ -180,7 +180,7 @@ public class Request extends WorkflowJob
             this.size = entry.getColLong(14);
             this.statusMessage = "loaded(kelondroRow.Entry)";
             this.initialHash = this.url.hashCode();
-        } catch ( Throwable e ) {
+        } catch (final  Throwable e ) {
             throw new IOException(e.getMessage());
         }
         return;

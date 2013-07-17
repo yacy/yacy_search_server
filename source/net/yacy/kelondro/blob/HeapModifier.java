@@ -236,7 +236,7 @@ public class HeapModifier extends HeapReader implements BLOB {
                 this.file.setLength(seek.longValue());
                 this.free.remove(seek);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
     }

@@ -130,9 +130,9 @@ public class Table implements Index, Iterable<Row.Entry> {
                 this.table = ((exceed134217727 || neededRAM4table < maxarraylength) &&
             	    	      useTailCache && MemoryControl.available() > 600L * 1024L * 1024L &&
             	    	      MemoryControl.request(neededRAM4table, true)) ? new RowSet(this.taildef, records) : null;
-            } catch (SpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
             	this.table = null;
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
             	this.table = null;
             }
             
@@ -1161,7 +1161,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             entry.setCol(1, "dummy".getBytes());
             t.put(entry);
             t.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
         }
         */

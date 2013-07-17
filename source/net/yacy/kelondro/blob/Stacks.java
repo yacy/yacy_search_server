@@ -61,7 +61,7 @@ public class Stacks {
             try {
                 si = new StackInstance(new File(this.stacksLocation, s));
                 this.stacks.put(si.name, si);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }
         }
@@ -94,7 +94,7 @@ public class Stacks {
                 si = new StackInstance(stack);
                 this.stacks.put(stack, si);
                 return si.stack;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
                 return null;
             }

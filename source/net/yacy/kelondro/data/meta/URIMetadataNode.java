@@ -77,7 +77,7 @@ public class URIMetadataNode {
         this.urlRaw = getString(CollectionSchema.sku);
         try {
             this.url = new DigestURI(this.urlRaw, this.hash);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             ConcurrentLog.logException(e);
             this.url = null;
         }
@@ -416,7 +416,7 @@ public class URIMetadataNode {
         if (x == null) return null;
         try {
             return new DigestURI((String) x);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             return null;
         }
     }

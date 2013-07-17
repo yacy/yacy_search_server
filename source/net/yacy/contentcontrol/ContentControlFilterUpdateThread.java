@@ -67,7 +67,7 @@ public class ContentControlFilterUpdateThread {
 				}
 			}
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

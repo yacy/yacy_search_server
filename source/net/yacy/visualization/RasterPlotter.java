@@ -289,7 +289,7 @@ public class RasterPlotter {
             }
             setPixel(x, y, c);
         }
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (final ArrayIndexOutOfBoundsException e) {
             this.log.warn(e.getMessage() + ": x = " + x + ", y = " + y);
         } // may appear when pixel coordinate is out of bounds
     }
@@ -934,7 +934,7 @@ public class RasterPlotter {
             baos.flush();
             baos.close();
             return baos;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // should not happen
             ConcurrentLog.logException(e);
             return null;
@@ -1039,8 +1039,8 @@ public class RasterPlotter {
         // open file automatically, works only on Mac OS X
         /*
         Process p = null;
-        try {p = Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", "open \"" + args[0] + "\""});} catch (java.io.IOException e) {Log.logException(e);}
-        try {p.waitFor();} catch (InterruptedException e) {Log.logException(e);}
+        try {p = Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", "open \"" + args[0] + "\""});} catch (final java.io.IOException e) {Log.logException(e);}
+        try {p.waitFor();} catch (final InterruptedException e) {Log.logException(e);}
         */
     }
 

@@ -51,13 +51,13 @@ public abstract class YMarkImporter implements Runnable {
     public void run() {
     	try {
     		parse();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             ConcurrentLog.logException(e);
         } finally {
         	try {
         		ConcurrentLog.info(YMarkTables.BOOKMARKS_LOG, this.importer+" Importer inserted poison pill in queue");
 				this.bookmarks.put(YMarkEntry.POISON);
-			} catch (InterruptedException e1) {
+			} catch (final InterruptedException e1) {
 			    ConcurrentLog.logException(e1);
 			}
         }
@@ -66,7 +66,7 @@ public abstract class YMarkImporter implements Runnable {
     public YMarkEntry take() {
         try {
             return this.bookmarks.take();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             ConcurrentLog.logException(e);
             return null;
         }

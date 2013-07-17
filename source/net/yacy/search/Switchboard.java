@@ -294,7 +294,7 @@ public final class Switchboard extends serverSwitch {
                         + port
                         + "; possibly another YaCy process has not terminated yet. Please stop YaCy before running a new instance.");
             }
-        } catch ( final ExecutionException e1 ) {
+        } catch (final ExecutionException e1 ) {
         }
 
         MemoryTracker.startSystemProfiling();
@@ -347,7 +347,7 @@ public final class Switchboard extends serverSwitch {
                 if (!wf.exists()) {
                     try {
                         Files.copy(new File(defaultWorkPath, fs), wf);
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         ConcurrentLog.logException(e);
                     }
                 }
@@ -389,9 +389,9 @@ public final class Switchboard extends serverSwitch {
         // load the network definition
         try {
             overwriteNetworkDefinition();
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             ConcurrentLog.logException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
 
@@ -421,7 +421,7 @@ public final class Switchboard extends serverSwitch {
         // initialize the collection schema if it does not yet exist
         if (!solrCollectionConfigurationWorkFile.exists()) try {
             Files.copy(solrCollectionConfigurationInitFile, solrCollectionConfigurationWorkFile);
-        } catch (IOException e) {ConcurrentLog.logException(e);}
+        } catch (final IOException e) {ConcurrentLog.logException(e);}
 
         // lazy definition of schema: do not write empty fields
         final boolean solrlazy = getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true);
@@ -448,12 +448,12 @@ public final class Switchboard extends serverSwitch {
             // activate some fields that are necessary here
             solrCollectionConfigurationWork.get(CollectionSchema.images_urlstub_sxt.getSolrFieldName()).setEnable(true);
             solrCollectionConfigurationWork.commit();
-        } catch (IOException e) {ConcurrentLog.logException(e);}
+        } catch (final IOException e) {ConcurrentLog.logException(e);}
         
         // initialize the webgraph schema if it does not yet exist
         if (!solrWebgraphConfigurationWorkFile.exists()) try {
             Files.copy(solrWebgraphConfigurationInitFile, solrWebgraphConfigurationWorkFile);
-        } catch (IOException e) {ConcurrentLog.logException(e);}
+        } catch (final IOException e) {ConcurrentLog.logException(e);}
         
         // define webgraph schema
         try {
@@ -461,7 +461,7 @@ public final class Switchboard extends serverSwitch {
             solrWebgraphConfigurationWork = new WebgraphConfiguration(solrWebgraphConfigurationWorkFile, solrlazy);
             solrWebgraphConfigurationWork.fill(solrWebgraphConfigurationInit, true);
             solrWebgraphConfigurationWork.commit();
-        } catch (IOException e) {ConcurrentLog.logException(e);}
+        } catch (final IOException e) {ConcurrentLog.logException(e);}
 
         // define boosts
         Ranking.setMinTokenLen(this.getConfigInt(SwitchboardConstants.SEARCH_RANKING_SOLR_DOUBLEDETECTION_MINLENGTH, 3));
@@ -481,13 +481,13 @@ public final class Switchboard extends serverSwitch {
         this.index = new Segment(this.log, segmentsPath, solrCollectionConfigurationWork, solrWebgraphConfigurationWork);
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, true)) try {
             this.index.connectRWI(wordCacheMaxCount, fileSizeMax);
-        } catch (IOException e) {ConcurrentLog.logException(e);}
+        } catch (final IOException e) {ConcurrentLog.logException(e);}
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, true)) try {
             this.index.connectCitation(wordCacheMaxCount, fileSizeMax);
-        } catch (IOException e) {ConcurrentLog.logException(e);}
+        } catch (final IOException e) {ConcurrentLog.logException(e);}
         if (this.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true)) {
             this.index.connectUrlDb(this.useTailCache, this.exceed134217727);
-            try {this.index.fulltext().connectLocalSolr();} catch (IOException e) {ConcurrentLog.logException(e);}
+            try {this.index.fulltext().connectLocalSolr();} catch (final IOException e) {ConcurrentLog.logException(e);}
         }
         this.index.writeWebgraph(this.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false));
 
@@ -499,7 +499,7 @@ public final class Switchboard extends serverSwitch {
             try {
                 ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null, 10000);
                 this.index.fulltext().connectRemoteSolr(instances);
-            } catch ( final IOException e ) {
+            } catch (final IOException e ) {
                 ConcurrentLog.logException(e);
             }
         }
@@ -507,7 +507,7 @@ public final class Switchboard extends serverSwitch {
         // for index migration in case of obsolete entries, delete entries now
         try {
             this.index.fulltext().getDefaultConnector().deleteByQuery("failreason_t:[* TO *]"); // field was renamed to failreason_s
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
         }
         
         // initialize network database
@@ -534,9 +534,9 @@ public final class Switchboard extends serverSwitch {
                 this.domainList = new FilterEngine();
                 this.domainList.loadList(new BufferedReader(r), null);
             }
-        } catch ( final FileNotFoundException e ) {
+        } catch (final FileNotFoundException e ) {
             this.log.severe("CONFIG: domainlist not found: " + e.getMessage());
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
             this.log.severe("CONFIG: error while retrieving domainlist: " + e.getMessage());
         }
 
@@ -675,21 +675,21 @@ public final class Switchboard extends serverSwitch {
         // starting message board
         try {
             initMessages();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
 
         // starting wiki
         try {
             initWiki();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
 
         //starting blog
         try {
             initBlog();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
 
@@ -705,7 +705,7 @@ public final class Switchboard extends serverSwitch {
                     + " entries"
                     + ", "
                     + ppRamString(userDbFile.length() / 1024));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
 
@@ -719,7 +719,7 @@ public final class Switchboard extends serverSwitch {
             if ( l.startsWith("parser.") && l.endsWith(".properties") ) {
                 try {
                     Evaluation.add(new File(parserPropertiesPath, l));
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -730,7 +730,7 @@ public final class Switchboard extends serverSwitch {
             if ( l.startsWith("parser.") && l.endsWith(".properties") ) {
                 try {
                     Evaluation.add(new File(parserPropertiesPath, l));
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -744,7 +744,7 @@ public final class Switchboard extends serverSwitch {
                 Thread.currentThread().setName("Switchboard.initBookmarks");
                 try {
                     initBookmarks();
-                } catch ( final IOException e ) {
+                } catch (final IOException e ) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -788,7 +788,7 @@ public final class Switchboard extends serverSwitch {
         this.robots = new RobotsTxt(this.tables, this.loader);
         try {
             this.log.config("Loaded robots.txt DB: " + this.robots.size() + " entries");
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
 
@@ -834,13 +834,13 @@ public final class Switchboard extends serverSwitch {
                 "notifier.gif");
         try {
             Files.copy(notifierSource, notifierDest);
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
         }
 
         // init nameCacheNoCachingList
         try {
             Domains.setNoCachingPatterns(getConfig(SwitchboardConstants.HTTPC_NAME_CACHE_CACHING_PATTERNS_NO, ""));
-        } catch (PatternSyntaxException pse) {
+        } catch (final PatternSyntaxException pse) {
             ConcurrentLog.severe("Switchboard", "Invalid regular expression in "
                             + SwitchboardConstants.HTTPC_NAME_CACHE_CACHING_PATTERNS_NO
                             + " property: " + pse.getMessage());
@@ -1121,7 +1121,7 @@ public final class Switchboard extends serverSwitch {
         // finally start jobs which shall be started after start-up
         new Thread() {
             public void run() {
-                try {Thread.sleep(10000);} catch (InterruptedException e) {} // we must wait until the httpd comes up
+                try {Thread.sleep(10000);} catch (final InterruptedException e) {} // we must wait until the httpd comes up
                 execAPIActions(); // trigger startup actions
             }
         }.start();
@@ -1190,7 +1190,7 @@ public final class Switchboard extends serverSwitch {
                 try {
                     // try to parse url
                     locationURL = new DigestURI(location);
-                } catch ( final MalformedURLException e ) {
+                } catch (final MalformedURLException e ) {
                     break;
                 }
                 PublicKey publicKey = null;
@@ -1203,7 +1203,7 @@ public final class Switchboard extends serverSwitch {
                             Base64Order.standardCoder.decode(publicKeyString.trim());
                         publicKey = cryptoLib.getPublicKeyFromBytes(publicKeyBytes);
                     }
-                } catch ( final InvalidKeySpecException e ) {
+                } catch (final InvalidKeySpecException e ) {
                     ConcurrentLog.logException(e);
                 }
                 final yacyUpdateLocation updateLocation = new yacyUpdateLocation(locationURL, publicKey);
@@ -1337,7 +1337,7 @@ public final class Switchboard extends serverSwitch {
                 try {
                     ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null, 10000);
                     this.index.fulltext().connectRemoteSolr(instances);
-                } catch ( final IOException e ) {
+                } catch (final IOException e ) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -1367,9 +1367,9 @@ public final class Switchboard extends serverSwitch {
                     this.domainList = new FilterEngine();
                     this.domainList.loadList(new BufferedReader(r), null);
                 }
-            } catch ( final FileNotFoundException e ) {
+            } catch (final FileNotFoundException e ) {
                 this.log.severe("CONFIG: domainlist not found: " + e.getMessage());
-            } catch ( final IOException e ) {
+            } catch (final IOException e ) {
                 this.log.severe("CONFIG: error while retrieving domainlist: " + e.getMessage());
             }
 
@@ -1740,7 +1740,7 @@ public final class Switchboard extends serverSwitch {
         this.tray.remove();
         try {
             HTTPClient.closeConnectionManager();
-        } catch ( final InterruptedException e ) {
+        } catch (final InterruptedException e ) {
             ConcurrentLog.logException(e);
         }
         this.log.config("SWITCHBOARD SHUTDOWN TERMINATED");
@@ -1847,11 +1847,11 @@ public final class Switchboard extends serverSwitch {
                     baos.close();
                     if (shallTerminate()) break;
                 }
-            } catch ( final IOException e ) {
+            } catch (final IOException e ) {
                 ConcurrentLog.logException(e);
             } finally {
                 moved = infile.renameTo(outfile);
-                if (zis != null) try {zis.close();} catch (IOException e) {}
+                if (zis != null) try {zis.close();} catch (final IOException e) {}
             }
             return moved;
         }
@@ -1861,7 +1861,7 @@ public final class Switchboard extends serverSwitch {
                 is = new GZIPInputStream(is);
             }
             processSurrogate(is, infile.getName());
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
             ConcurrentLog.logException(e);
         } finally {
             if (!shallTerminate()) {
@@ -1879,9 +1879,9 @@ public final class Switchboard extends serverSwitch {
                             if ( gzfile.exists() ) {
                                 FileUtils.deletedelete(outfile);
                             }
-                        } catch ( final FileNotFoundException e ) {
+                        } catch (final FileNotFoundException e ) {
                             ConcurrentLog.logException(e);
-                        } catch ( final IOException e ) {
+                        } catch (final IOException e ) {
                             ConcurrentLog.logException(e);
                         }
                     }
@@ -1989,7 +1989,7 @@ public final class Switchboard extends serverSwitch {
                 }
             }
 
-        } catch ( final InterruptedException e ) {
+        } catch (final InterruptedException e ) {
             return false;
         }
         return false;
@@ -2102,7 +2102,7 @@ public final class Switchboard extends serverSwitch {
                         this.crawler.putActive(UTF8.getBytes(selentry.handle()), selentry);
                     }
                 }
-            } catch ( final Exception e ) {
+            } catch (final Exception e ) {
                 ConcurrentLog.logException(e);
             }
 
@@ -2160,7 +2160,7 @@ public final class Switchboard extends serverSwitch {
                         + " entries on stack");
                 }
                 this.peers.newsPool.automaticProcess(this.peers);
-            } catch ( final Exception e ) {
+            } catch (final Exception e ) {
                 ConcurrentLog.logException(e);
             }
             if ( getConfigBool("cleanup.deletionProcessedNews", true) ) {
@@ -2240,12 +2240,12 @@ public final class Switchboard extends serverSwitch {
                 try {
                     fileIn = new FileInputStream(new File("DATA/SETTINGS/profile.txt"));
                     profile.load(fileIn);
-                } catch ( final IOException e ) {
+                } catch (final IOException e ) {
                 } finally {
                     if ( fileIn != null ) {
                         try {
                             fileIn.close();
-                        } catch ( final Exception e ) {
+                        } catch (final Exception e ) {
                         }
                     }
                 }
@@ -2319,7 +2319,7 @@ public final class Switchboard extends serverSwitch {
             if (Memory.deadlocks() > 0) Memory.logDeadlocks();
             
             return true;
-        } catch ( final InterruptedException e ) {
+        } catch (final InterruptedException e ) {
             this.log.info("cleanupJob: Shutdown detected");
             return false;
         }
@@ -2367,7 +2367,7 @@ public final class Switchboard extends serverSwitch {
                                 sb.tables.update(WorkTables.TABLE_API_NAME, row);
                             }
                         }
-                    } catch (ParseException e) {}
+                    } catch (final ParseException e) {}
                 }
             }
         } catch (final IOException e) {
@@ -2378,7 +2378,7 @@ public final class Switchboard extends serverSwitch {
                 row = this.tables.select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
                 WorkTables.calculateAPIScheduler(row, true); // calculate next update time
                 this.tables.update(WorkTables.TABLE_API_NAME, row);
-            } catch ( final Throwable e ) {
+            } catch (final Throwable e ) {
                 ConcurrentLog.logException(e);
                 continue;
             }
@@ -2440,9 +2440,9 @@ public final class Switchboard extends serverSwitch {
         Document[] documents = null;
         try {
             documents = parseDocument(in.queueEntry);
-        } catch ( final InterruptedException e ) {
+        } catch (final InterruptedException e ) {
             documents = null;
-        } catch ( final Exception e ) {
+        } catch (final Exception e ) {
             documents = null;
         }
         if ( documents == null ) {
@@ -2496,7 +2496,7 @@ public final class Switchboard extends serverSwitch {
             if ( documents == null ) {
                 throw new Parser.Failure("Parser returned null.", response.url());
             }
-        } catch ( final Parser.Failure e ) {
+        } catch (final Parser.Failure e ) {
             this.log.warn("Unable to parse the resource '" + response.url() + "'. " + e.getMessage());
             addURLtoErrorDB(
                 response.url(),
@@ -2566,7 +2566,7 @@ public final class Switchboard extends serverSwitch {
                         0,
                         0,
                         response.size() < 0 ? 0 : response.size()));
-                } catch ( final MalformedURLException e ) {
+                } catch (final MalformedURLException e ) {
                     ConcurrentLog.logException(e);
                 }
             }
@@ -2772,7 +2772,7 @@ public final class Switchboard extends serverSwitch {
             rssRow.put("recording_date", new Date());
             try {
                 this.tables.update("rss", rssEntry.getKey().hash(), rssRow);
-            } catch ( final IOException e ) {
+            } catch (final IOException e ) {
                 ConcurrentLog.logException(e);
             }
         }
@@ -2865,10 +2865,10 @@ public final class Switchboard extends serverSwitch {
             };
             t.start();
             stackthreads.add(t);
-            try {Thread.sleep(10);} catch (InterruptedException e) {} // to prevent that this fires more than 100 connections pre second!
+            try {Thread.sleep(10);} catch (final InterruptedException e) {} // to prevent that this fires more than 100 connections pre second!
         }
         long waitingtime = 1 + (30000 / rootURLs.size()); // at most wait only halve an minute to prevent that the crawl start runs into a time-out
-        for (Thread t: stackthreads) try {t.join(waitingtime);} catch (InterruptedException e) {}
+        for (Thread t: stackthreads) try {t.join(waitingtime);} catch (final InterruptedException e) {}
     }
     
     /**
@@ -2890,7 +2890,7 @@ public final class Switchboard extends serverSwitch {
         // we must wait here until the url has actually disappeared
         int t = 100;
         while (t-- > 0 && this.index.exists(ASCII.String(urlhash))) {
-            try {Thread.sleep(100);} catch (InterruptedException e) {}
+            try {Thread.sleep(100);} catch (final InterruptedException e) {}
             ConcurrentLog.fine("Switchboard", "STACKURL: waiting for deletion, t=" + t);
             if (t == 20) this.index.fulltext().commit(true);
             if (t == 50) this.index.fulltext().commit(false);
@@ -2913,7 +2913,7 @@ public final class Switchboard extends serverSwitch {
         Document scraper;
         try {
             scraper = this.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return "scraper cannot load URL: " + e.getMessage();
         }
         
@@ -2967,9 +2967,9 @@ public final class Switchboard extends serverSwitch {
         // TODO: could a non admin user add crawls?
         try {
             this.tables.bookmarks.createBookmark(this.loader, url, YMarkTables.USER_ADMIN, true, "crawlStart", "/Crawl Start");
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
-        } catch (Failure e) {
+        } catch (final Failure e) {
             ConcurrentLog.logException(e);
         }
 
@@ -3049,9 +3049,9 @@ public final class Switchboard extends serverSwitch {
                                 Switchboard.this.log.info("addToIndex fill of url " + urlName + " finished");
                             }
                         }
-                    } catch ( final IOException e ) {
+                    } catch (final IOException e ) {
                         Switchboard.this.log.warn("addToIndex: failed loading " + urlName + ": " + e.getMessage());
-                    } catch ( final Parser.Failure e ) {
+                    } catch (final Parser.Failure e ) {
                         Switchboard.this.log.warn("addToIndex: failed parsing " + urlName + ": " + e.getMessage());
                     }
                 }
@@ -3406,7 +3406,7 @@ public final class Switchboard extends serverSwitch {
                 DigestURI url;
                 try {
                     url = new DigestURI(r);
-                } catch ( final MalformedURLException e ) {
+                } catch (final MalformedURLException e ) {
                     ConcurrentLog.logException(e);
                     return;
                 }
@@ -3426,7 +3426,7 @@ public final class Switchboard extends serverSwitch {
                         // add all pages to the index
                         addAllToIndex(url, links, searchEvent, "site", new String[]{"site"});
                     }
-                } catch ( final Throwable e ) {
+                } catch (final Throwable e ) {
                     ConcurrentLog.logException(e);
                 } finally {
                     searchEvent.oneFeederTerminated();
@@ -3508,7 +3508,7 @@ public final class Switchboard extends serverSwitch {
                 final DigestURI url;
                 try {
                     url = new DigestURI(MultiProtocolURI.unescape(urlString));
-                } catch ( final MalformedURLException e1 ) {
+                } catch (final MalformedURLException e1 ) {
                     ConcurrentLog.warn("heuristicRSS", "url not well-formed: '" + urlString + "'");
                     return;
                 }
@@ -3529,7 +3529,7 @@ public final class Switchboard extends serverSwitch {
                             try {
                                 uri = new DigestURI(message.getLink());
                                 links.put(uri, message.getTitle());
-                            } catch ( final MalformedURLException e ) {
+                            } catch (final MalformedURLException e ) {
                             }
                         }
 
@@ -3541,7 +3541,7 @@ public final class Switchboard extends serverSwitch {
                         // add all pages to the index
                         addAllToIndex(null, links, searchEvent, feedName, new String[]{"rss"});
                     }
-                } catch ( final Throwable e ) {
+                } catch (final Throwable e ) {
                     //Log.logException(e);
                 } finally {
                     searchEvent.oneFeederTerminated();
@@ -3690,7 +3690,7 @@ public final class Switchboard extends serverSwitch {
                                         }
                                     }
                                 }
-                            } catch ( final IOException e ) {
+                            } catch (final IOException e ) {
                                 Network.log.info("BOOTSTRAP: bad seed from " + seedListFileURL + ": " + e.getMessage());
                             }
                         }
@@ -3703,11 +3703,11 @@ public final class Switchboard extends serverSwitch {
                             + "h");
                     }
 
-                } catch ( final IOException e ) {
+                } catch (final IOException e ) {
                     // this is when wget fails, commonly because of timeout
                     Network.log.info("BOOTSTRAP: failed (1) to load seeds from seed-list URL "
                         + seedListFileURL + ": " + e.getMessage());
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                     // this is when wget fails; may be because of missing internet connection
                     Network.log.severe("BOOTSTRAP: failed (2) to load seeds from seed-list URL "
                         + seedListFileURL + ": " + e.getMessage(), e);
@@ -3724,7 +3724,7 @@ public final class Switchboard extends serverSwitch {
         int port;
         try {
             port = Integer.parseInt(getConfig("remoteProxyPort", "3128"));
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             port = 3128;
         }
         

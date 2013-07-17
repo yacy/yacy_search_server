@@ -144,7 +144,7 @@ public class Table_API_p {
                     WorkTables.calculateAPIScheduler(row, false);
                     sb.tables.update(WorkTables.TABLE_API_NAME, row);
                 }
-            } catch (Throwable e) { ConcurrentLog.logException(e); }
+            } catch (final Throwable e) { ConcurrentLog.logException(e); }
         }
         
         if (post != null && !post.get("deleterows", "").isEmpty()) {
@@ -152,7 +152,7 @@ public class Table_API_p {
                 if (entry.getValue().startsWith("mark_")) {
                     try {
                         sb.tables.delete(WorkTables.TABLE_API_NAME, entry.getValue().substring(5).getBytes());
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         ConcurrentLog.logException(e);
                     }
                 }
@@ -191,7 +191,7 @@ public class Table_API_p {
                     }
                 }
                 sb.tables.recordAPICall(post, "Table_API_p.html", WorkTables.TABLE_API_TYPE_STEERING, "delete API calls older than " + days + " days");
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }
         }
@@ -368,7 +368,7 @@ public class Table_API_p {
             } else {
                 prop.put("showschedulerhint", 0);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
         prop.put("showtable_list", count);

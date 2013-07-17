@@ -94,7 +94,7 @@ public class Peers extends TreeMap<byte[], Peer> implements Serializable {
                             for (Peer p: ps.values()) Peers.this.add(p);
                             int c1 = Peers.this.size();
                             log.info("bootstrap with peer " + bp + ": added " + (c1 - c0) + " peers");
-                        } catch (IOException e) {
+                        } catch (final IOException e) {
                             log.info("bootstrap with peer " + bp + ": FAILED - " + e.getMessage());
                         }
                     }
@@ -102,7 +102,7 @@ public class Peers extends TreeMap<byte[], Peer> implements Serializable {
                 t0.start();
                 t.add(t0);
             }
-            for (Thread t0: t) try {t0.join(10000);} catch (InterruptedException e) {}
+            for (Thread t0: t) try {t0.join(10000);} catch (final InterruptedException e) {}
         }
         lastBootstrap = System.currentTimeMillis();
         log.info("bootstrap finished: " + this.size() + " peers");
@@ -169,7 +169,7 @@ public class Peers extends TreeMap<byte[], Peer> implements Serializable {
         for (Peer p: nodes) {
             log.info(p.get(Peer.Schema.fullname) + " - " + p.get(Peer.Schema.address));
         }
-        try {HTTPClient.closeConnectionManager();} catch (InterruptedException e) {}
+        try {HTTPClient.closeConnectionManager();} catch (final InterruptedException e) {}
     }
     
 }

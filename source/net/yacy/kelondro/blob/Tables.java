@@ -124,7 +124,7 @@ public class Tables implements Iterable<String> {
     	int size;
     	try {
 			size = this.size(tableName);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			size = 0;
 		}
 
@@ -140,7 +140,7 @@ public class Tables implements Iterable<String> {
     		BEncodedHeap bheap;
     		try {
     			bheap = this.getHeap(idx_table);
-    		} catch (IOException e) {
+    		} catch (final IOException e) {
     			bheap = null;
     			ConcurrentLog.logException(e);
     		}
@@ -166,7 +166,7 @@ public class Tables implements Iterable<String> {
 			if(this.has(tableName+CIDX, YMarkUtil.getKeyId(columnName))) {
 				return true;
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			ConcurrentLog.logException(e);
 		}
     	return false;
@@ -198,7 +198,7 @@ public class Tables implements Iterable<String> {
     				rows.add(this.select(table, pk));
     			}
 
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				ConcurrentLog.logException(e);
 				return new HashSet<Row>().iterator();
 			}
@@ -217,14 +217,14 @@ public class Tables implements Iterable<String> {
         	final Pattern p = Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE);
     		try {
 				return this.iterator(table, whereColumn, p);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				ConcurrentLog.logException(e);
 				return new HashSet<Row>().iterator();
 			}
     	} else {
     		try {
 				return this.iterator(table, whereColumn, UTF8.getBytes(whereValue));
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				ConcurrentLog.logException(e);
 				return new HashSet<Row>().iterator();
 			}

@@ -102,10 +102,10 @@ public class SMWListSyncThread {
 							ConcurrentLog.warn("SMWLISTSYNC",
 									"No SMWimport URL defined");
 						}
-					} catch (MalformedURLException e) {
+					} catch (final MalformedURLException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
@@ -145,7 +145,7 @@ public class SMWListSyncThread {
 							try {
 								reader = new InputStreamReader(
 										urlImport.openStream(), "UTF-8");
-							} catch (Exception e) {
+							} catch (final Exception e) {
 								ConcurrentLog.logException(e);
 								this.runningjob = false;
 							}
@@ -173,7 +173,7 @@ public class SMWListSyncThread {
 											
 											dirty = true;
 
-										} catch (Exception e) {
+										} catch (final Exception e) {
 											// TODO Auto-generated catch block
 											e.printStackTrace();
 										}
@@ -183,7 +183,7 @@ public class SMWListSyncThread {
 						}
 						
 
-					} catch (MalformedURLException e2) {
+					} catch (final MalformedURLException e2) {
 						// TODO Auto-generated catch block
 						e2.printStackTrace();
 					}

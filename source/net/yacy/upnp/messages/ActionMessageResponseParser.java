@@ -113,7 +113,7 @@ public class ActionMessageResponseParser extends org.xml.sax.helpers.DefaultHand
       String code = new String( ch, start, length );
       try {
         msgEx.detailErrorCode = Integer.parseInt( code );
-      } catch ( Throwable ex ) {
+      } catch (final  Throwable ex ) {
         log.debug( "Error during returned error code " + code + " parsing" );
       }
       readErrorCode = false;

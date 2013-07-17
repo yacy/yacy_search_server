@@ -141,7 +141,7 @@ public class Digest {
         try {
             digestPool.put(digest);
             //System.out.println("Digest Pool size = " + digestPool.size());
-        } catch ( InterruptedException e ) {
+        } catch (final  InterruptedException e ) {
         }
 
         // update the cache
@@ -181,7 +181,7 @@ public class Digest {
             md5consumer.consume(md5FilechunkConsumer.poison);
             throw e;
         } finally {
-            try {in.close();} catch (IOException e) {}
+            try {in.close();} catch (final IOException e) {}
         }
         // put in poison into queue to tell the consumer to stop
         md5consumer.consume(md5FilechunkConsumer.poison);

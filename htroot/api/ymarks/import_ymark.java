@@ -195,7 +195,7 @@ public class import_ymark {
                         } catch (final IOException e) {
                             ConcurrentLog.logException(e);
                         }
-                    } catch (IOException e1) {
+                    } catch (final IOException e1) {
                     }
             	}
             } else if(post.containsKey("importer") && post.get("importer").equals("dmoz")) {
@@ -220,7 +220,7 @@ public class import_ymark {
         			InstantBusyThread.oneTimeJob(DMOZImporter.getConsumer(sb, bmk_user, autoTaggingQueue, autotag, empty, indexing, medialink), 0);
 
         			prop.put("status", "1");
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					ConcurrentLog.logException(e);
 				}
             }

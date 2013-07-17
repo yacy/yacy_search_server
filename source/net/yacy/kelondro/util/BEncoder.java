@@ -48,7 +48,7 @@ public class BEncoder {
             dict.toStream(baos);
             baos.close();
             return baos.toByteArray();
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
         return null;
     }
     public static byte[] encodeMap(String key, byte[] value) {
@@ -57,7 +57,7 @@ public class BEncoder {
             BDecoder.BDictionaryObject.toStream(baos, key, value);
             baos.close();
             return baos.toByteArray();
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
         return null;
     }
 

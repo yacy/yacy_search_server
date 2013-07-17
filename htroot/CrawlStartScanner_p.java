@@ -112,7 +112,7 @@ public class CrawlStartScanner_p
             ReversibleScoreMap<String> hostscore = null;
             try {
                 hostscore = sb.index.fulltext().getDefaultConnector().getFacets(AbstractSolrConnector.CATCHALL_TERM, 1000, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
-            } catch (IOException e) {}
+            } catch (final IOException e) {}
             if (hostscore != null) {
                 for (String s: hostscore) hostSet.add(s);
             }
@@ -200,7 +200,7 @@ public class CrawlStartScanner_p
                     try {
                         uu = u.url();
                         pkmap.put(uu.hash(), uu);
-                    } catch ( final MalformedURLException e ) {
+                    } catch (final MalformedURLException e ) {
                         ConcurrentLog.logException(e);
                     }
                 }
@@ -265,11 +265,11 @@ public class CrawlStartScanner_p
                                         path,
                                         u.hash());
                                 }
-                            } catch ( final MalformedURLException e ) {
+                            } catch (final MalformedURLException e ) {
                                 ConcurrentLog.logException(e);
                             }
                         }
-                    } catch ( final ConcurrentModificationException e ) {
+                    } catch (final ConcurrentModificationException e ) {
                     }
                 }
 

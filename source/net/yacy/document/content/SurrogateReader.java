@@ -79,7 +79,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     	if (parser == null) {
     		try {
 				parser = SAXParserFactory.newInstance().newSAXParser();
-			} catch (ParserConfigurationException e) {
+			} catch (final ParserConfigurationException e) {
 				throw new SAXException(e.getMessage(), e);
 			}
     		tlSax.set(parser);
@@ -101,7 +101,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         
         try {
             this.saxParser = getParser();
-        } catch (SAXException e) {
+        } catch (final SAXException e) {
             ConcurrentLog.logException(e);
             throw new IOException(e.getMessage());
         }
@@ -110,21 +110,21 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     public void run() {
         try {
             this.saxParser.parse(this.inputSource, this);
-        } catch (SAXParseException e) {
+        } catch (final SAXParseException e) {
             ConcurrentLog.logException(e);
-        } catch (SAXException e) {
+        } catch (final SAXException e) {
             ConcurrentLog.logException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         } finally {
         	try {
 				this.surrogates.put(DCEntry.poison);
-			} catch (InterruptedException e1) {
+			} catch (final InterruptedException e1) {
 			    ConcurrentLog.logException(e1);
 			}
 			try {
         		this.inputStream.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 			    ConcurrentLog.logException(e);
 			}
         }
@@ -154,7 +154,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             //System.out.println("A Title: " + this.surrogate.title());
             try {
                 this.surrogates.put(this.surrogate);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 ConcurrentLog.logException(e);
             } finally {
                 //System.out.println("B Title: " + this.surrogate.title());
@@ -198,7 +198,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     public DCEntry take() {
         try {
             return this.surrogates.take();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             ConcurrentLog.logException(e);
             return null;
         }
@@ -224,7 +224,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
                 System.out.println("Language: " + s.getLanguage());
                 System.out.println("Body: " + s.getDescription());
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
     }

@@ -315,7 +315,7 @@ public class Compressor implements BLOB, Iterable<byte[]> {
         flushAll();
         try {
             return this.backend.keys(true, false);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
     }

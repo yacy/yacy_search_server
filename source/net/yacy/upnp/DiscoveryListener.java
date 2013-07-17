@@ -199,9 +199,9 @@ public void run() {
     while ( this.inService ) {
       try {
         listenBroadCast();
-      } catch ( SocketTimeoutException ex ) {
+      } catch (final  SocketTimeoutException ex ) {
         // ignoring
-      } catch ( IOException ioEx ) {
+      } catch (final  IOException ioEx ) {
         log.error( "IO Exception during UPNP DiscoveryListener messages listening thread" );
       } catch( Exception ex ) {
         log.error( "Fatal Error during UPNP DiscoveryListener messages listening thread, thread will exit" );
@@ -212,7 +212,7 @@ public void run() {
     try {
       this.skt.leaveGroup( InetAddress.getByName( Discovery.SSDP_IP ) );
       this.skt.close();
-    } catch ( Exception ex ) {
+    } catch (final  Exception ex ) {
       // ignoring
     }
   }
@@ -225,7 +225,7 @@ public void run() {
     HttpResponse msg = null;
     try {
       msg = new HttpResponse( received );
-    } catch (IllegalArgumentException ex ) {
+    } catch (final IllegalArgumentException ex ) {
       // crappy http sent
       if ( log.isDebugEnabled() ) log.debug( "Skipping uncompliant HTTP message " + received );
       return;

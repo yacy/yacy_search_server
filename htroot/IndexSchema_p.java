@@ -73,7 +73,7 @@ public class IndexSchema_p {
                     sb.index.fulltext().getDefaultConfiguration().commit();
                     sb.index.fulltext().getWebgraphConfiguration().commit();
                     modified = false;
-                } catch (IOException ex) {}
+                } catch (final IOException ex) {}
             }            
         }
         
@@ -93,7 +93,7 @@ public class IndexSchema_p {
                     etr.setEnable(solrConfigurationInit.contains(etr.key()));
                 }
                 cs.commit();
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 ConcurrentLog.warn("IndexSchema", "file " + solrInitFile.getAbsolutePath() + " not found");
             }
         }
