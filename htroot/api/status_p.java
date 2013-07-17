@@ -58,15 +58,7 @@ public class status_p {
         prop.putNum("qpm", sb.peers.mySeed().getQPM());
         prop.putNum("wordCacheSize", segment.RWIBufferCount());
         prop.putNum("wordCacheMaxSize", cacheMaxSize);
-
-        // crawl queues
-        prop.putNum("localCrawlSize", sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount());
-        prop.putNum("limitCrawlSize", sb.crawlQueues.limitCrawlJobSize());
-        prop.putNum("remoteCrawlSize", sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount());
-        prop.putNum("noloadCrawlSize", sb.crawlQueues.noloadCrawlJobSize());
-        prop.putNum("loaderSize", sb.crawlQueues.workerSize());
-        prop.putNum("loaderMax", sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10));
-
+        
 		// memory usage and system attributes
         prop.putNum("freeMemory", MemoryControl.free());
         prop.putNum("totalMemory", MemoryControl.total());
