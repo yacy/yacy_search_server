@@ -275,7 +275,9 @@ public class WordCache {
                     break;
                 }
             }
-        } catch (final ConcurrentModificationException e) {}
+        } catch (final ConcurrentModificationException e) {
+            ConcurrentLog.logException(e);
+        }
         return ret;
     }
 

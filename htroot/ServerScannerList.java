@@ -86,6 +86,7 @@ public class ServerScannerList {
                     prop.put("servertable_edit_num", i);
                     break table;
                 } catch (final ConcurrentModificationException e) {
+                    ConcurrentLog.logException(e);
                     continue table;
                 }
             }

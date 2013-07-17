@@ -783,9 +783,14 @@ public class yacysearch {
                                     suggestion).toString());
                             prop.put("didYouMean_suggestions_" + meanCount + "_sep", "|");
                             meanCount++;
-                        } catch (final ConcurrentModificationException e) {break meanCollect;}
+                        } catch (final ConcurrentModificationException e) {
+                            ConcurrentLog.logException(e);
+                            break meanCollect;
+                        }
                     }
-                } catch (final ConcurrentModificationException e) {}
+                } catch (final ConcurrentModificationException e) {
+                    ConcurrentLog.logException(e);
+                }
                 prop.put("didYouMean_suggestions_" + (meanCount - 1) + "_sep", "");
                 prop.put("didYouMean", meanCount > 0 ? 1 : 0);
                 prop.put("didYouMean_suggestions", meanCount);

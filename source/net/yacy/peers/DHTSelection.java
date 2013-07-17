@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.federate.yacy.Distribution;
@@ -461,13 +463,13 @@ public class DHTSelection {
      * @param count number of wanted peers
      * @return a hash map of peer hashes to seed object
      */
-    public static Map<String, Seed> seedsByAge(final SeedDB seedDB, final boolean up, int count) {
+    public static ConcurrentMap<String, Seed> seedsByAge(final SeedDB seedDB, final boolean up, int count) {
         if (count > seedDB.sizeConnected()) count = seedDB.sizeConnected();
         Seed ys;
         //long age;
         final Iterator<Seed> s = seedDB.seedsSortedConnected(!up, Seed.LASTSEEN);
         try {
-            final Map<String, Seed> result = new HashMap<String, Seed>();
+            final ConcurrentMap<String, Seed> result = new ConcurrentHashMap<String, Seed>();
             while (s.hasNext() && count-- > 0) {
                 ys = s.next();
                 if (ys != null && ys.hash != null) {

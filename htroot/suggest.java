@@ -28,6 +28,7 @@ import java.util.SortedSet;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.DidYouMean;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -85,7 +86,9 @@ public class suggest {
                         }
                         prop.put("suggestions_" + c + "_eol", 0);
                         c++;
-                    } catch (final ConcurrentModificationException e) {}
+                    } catch (final ConcurrentModificationException e) {
+                        ConcurrentLog.logException(e);
+                    }
                 }
             }
         }

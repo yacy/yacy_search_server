@@ -29,6 +29,7 @@ import java.util.Set;
 
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -126,7 +127,10 @@ public class AccessPicture_p {
                         time[h] = time2;
                     }
                 }
-            } catch (final ConcurrentModificationException e) {} // we don't want to synchronize this
+            } catch (final ConcurrentModificationException e) {
+                // we don't want to synchronize this
+                ConcurrentLog.logException(e);
+            }
         }
 
         // draw left column: access from outside

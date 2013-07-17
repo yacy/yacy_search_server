@@ -29,14 +29,12 @@
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.ConcurrentModificationException;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.Network;
 import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
@@ -216,7 +214,7 @@ public final class hello {
             if (count > 100) { count = 100; }
 
             // latest seeds
-            final Map<String, Seed> ySeeds = DHTSelection.seedsByAge(sb.peers, true, count); // peerhash/yacySeed relation
+            final ConcurrentMap<String, Seed> ySeeds = DHTSelection.seedsByAge(sb.peers, true, count); // peerhash/yacySeed relation
 
             // attach also my own seed
             seeds.append("seed0=").append(sb.peers.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
@@ -230,14 +228,12 @@ public final class hello {
                 String seedString;
                 while (si.hasNext()) {
                 	s = si.next();
-                    if ((s != null) && (s.isProper(false) == null)) try {
+                    if ((s != null) && (s.isProper(false) == null)) {
                         seedString = s.genSeedStr(key);
                         if (seedString != null) {
                             seeds.append("seed").append(count).append('=').append(seedString).append(serverCore.CRLF_STRING);
                             count++;
                         }
-                    } catch (final ConcurrentModificationException e) {
-                        ConcurrentLog.logException(e);
                     }
                 }
             }

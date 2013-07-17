@@ -168,7 +168,7 @@ public final class LoaderDispatcher {
             // release the semaphore anyway
             check = this.loaderSteering.remove(request.url());
             if (check != null) check.release(1000);
-            //Log.logException(e);
+            // Very noisy: ConcurrentLog.logException(e);
             throw new IOException(e);
         }
     }

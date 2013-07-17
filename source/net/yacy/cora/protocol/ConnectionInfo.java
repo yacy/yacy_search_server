@@ -27,6 +27,7 @@ package net.yacy.cora.protocol;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 
@@ -132,7 +133,7 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
      * @return count of active connections
      */
     public static int getCount() {
-    	return allConnections.size();
+    	return getAllConnections().size();
     }
     
     /**
@@ -141,22 +142,20 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
      * @return load in percent
      */
     public static int getLoadPercent() {
-    	return getCount() * 100 / maxcount;
+    	return getCount() * 100 / getMaxcount();
     }
     
     /**
      * @return how many bytes queued up
      */
     public static long getActiveUpbytes() {
-    	long up = 0L;
-    	try {
-            synchronized (allConnections) {
-                for(final ConnectionInfo con: allConnections) {
-                    up += con.getUpbytes();
-                }
+        long up = 0L;
+        Iterator<ConnectionInfo> iter = getAllConnections().iterator();
+        synchronized (iter) { 
+            while (iter.hasNext()) {
+                ConnectionInfo con = iter.next();
+                up += con.getUpbytes();
             }
-        } catch (final java.util.ConcurrentModificationException e) {
-            // there will be another try :-)
         }
         return up;
     }
@@ -175,6 +174,7 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
      * to be used in statistics
      * 
      * @param max connections
+     * @TODO Is it correct to only set if max > 0? What if maxcount is > 0 and max = 0 ?
      */
     public static void setMaxcount(final int max) {
     	if (max > 0) maxcount = max;
@@ -186,7 +186,7 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
      * @param conInfo
      */
     public static void addConnection(final ConnectionInfo conInfo) {
-        allConnections.add(conInfo);
+    	getAllConnections().add(conInfo);
     }
 
     /**
@@ -195,7 +195,7 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
      * @param conInfo
      */
     protected static void removeConnection(final ConnectionInfo conInfo) {
-        allConnections.remove(conInfo);
+    	getAllConnections().remove(conInfo);
     }
 
     /**
@@ -211,16 +211,14 @@ public class ConnectionInfo implements Comparable<ConnectionInfo> {
      * removes stale connections
      */
     public static void cleanUp() {
-    	try {
-            synchronized (allConnections) {
-                for(final ConnectionInfo con: allConnections) {
-                    if(con.getLifetime() > staleAfterMillis) {
-                        allConnections.remove(con);
-                    }
+        Iterator<ConnectionInfo> iter = getAllConnections().iterator();
+        synchronized (iter) { 
+            while (iter.hasNext()) {
+                ConnectionInfo con = iter.next();
+                if(con.getLifetime() > staleAfterMillis) {
+                	getAllConnections().remove(con);
                 }
             }
-        } catch (final java.util.ConcurrentModificationException e) {
-            // there will be another try :-)
         }
     }
     

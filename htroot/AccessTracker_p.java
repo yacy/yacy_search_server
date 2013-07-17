@@ -37,6 +37,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
@@ -84,7 +85,10 @@ public class AccessTracker_p {
                     prop.putNum("page_list_" + entCount + "_countHour", sb.latestAccessCount(host, 1000 * 60 * 60));
                     entCount++;
                 }
-            } catch (final ConcurrentModificationException e) {} // we don't want to synchronize this
+            } catch (final ConcurrentModificationException e) {
+                // we don't want to synchronize this
+                ConcurrentLog.logException(e);
+            }
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
 
@@ -95,7 +99,10 @@ public class AccessTracker_p {
                     prop.putNum("page_bflist_" + entCount + "_countSecond", bfe.getValue());
                     entCount++;
                 }
-            } catch (final ConcurrentModificationException e) {} // we dont want to synchronize this
+            } catch (final ConcurrentModificationException e) {
+                // we don't want to synchronize this
+                ConcurrentLog.logException(e);
+            }
             prop.put("page_bflist", entCount);
         } else if (page == 1) {
             String host = (post == null) ? "" : post.get("host", "");
@@ -114,7 +121,10 @@ public class AccessTracker_p {
                             prop.putHTML("page_list_" + entCount + "_path", entry.getPath());
                             entCount++;
                         }
-                    } catch (final ConcurrentModificationException e) {} // we don't want to synchronize this
+                    } catch (final ConcurrentModificationException e) {
+                        // we don't want to synchronize this
+                        ConcurrentLog.logException(e);
+                    }
                 }
             } else {
                 try {
@@ -131,7 +141,10 @@ public class AccessTracker_p {
                                 entCount++;
                         }
                     }
-                } catch (final ConcurrentModificationException e) {} // we dont want to synchronize this
+                } catch (final ConcurrentModificationException e) {
+                    // we don't want to synchronize this
+                    ConcurrentLog.logException(e);
+                }
             }
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
@@ -154,6 +167,8 @@ public class AccessTracker_p {
                 try {
                     query = ai.next();
                 } catch (final ConcurrentModificationException e) {
+                    // we don't want to synchronize this
+                    ConcurrentLog.logException(e);
                     break;
                 }
                 // put values in template
@@ -272,7 +287,10 @@ public class AccessTracker_p {
                 // next
                 m++;
             }
-            } catch (final ConcurrentModificationException e) {} // we dont want to synchronize this
+            } catch (final ConcurrentModificationException e) {
+                // we don't want to synchronize this
+                ConcurrentLog.logException(e);
+            }
             // return empty values to not break the table view if no results can be listed
             if (m==0) {
                 prop.put("page_list", 1);

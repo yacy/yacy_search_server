@@ -29,6 +29,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import net.yacy.cora.util.ConcurrentLog;
+
 public class RSSFeed implements Iterable<RSSMessage> {
 
     public static final int DEFAULT_MAXSIZE = 10000;
@@ -146,6 +148,7 @@ public class RSSFeed implements Iterable<RSSMessage> {
             try {
                 this.lastGUID = this.GUIDiterator.next();
             } catch (final ConcurrentModificationException e) {
+                ConcurrentLog.logException(e);
                 return null;
             }
             if (this.lastGUID == null) return null;

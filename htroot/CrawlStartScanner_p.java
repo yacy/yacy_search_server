@@ -269,7 +269,9 @@ public class CrawlStartScanner_p
                                 ConcurrentLog.logException(e);
                             }
                         }
-                    } catch (final ConcurrentModificationException e ) {
+                    } catch (final ConcurrentModificationException e) {
+                        // we don't want to synchronize this
+                        ConcurrentLog.logException(e);
                     }
                 }
 

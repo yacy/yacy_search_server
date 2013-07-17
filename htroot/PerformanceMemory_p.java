@@ -32,6 +32,7 @@ import java.util.Map;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.RAMIndex;
 import net.yacy.kelondro.table.Table;
@@ -138,6 +139,8 @@ public class PerformanceMemory_p {
             try {
                 oie = oi.next();
             } catch (final ConcurrentModificationException e) {
+                // we don't want to synchronize this
+                ConcurrentLog.logException(e);
                 break;
             }
             filename = oie.getKey();
