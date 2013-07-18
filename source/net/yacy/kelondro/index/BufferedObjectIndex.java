@@ -232,12 +232,18 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
 
     @Override
     public List<Row.Entry> random(final int count) throws IOException {
-        final List<Row.Entry> list = new ArrayList<Row.Entry>();
+        List<Row.Entry> list0, list1;
         synchronized (this.backend) {
-            List<Row.Entry> list0 = this.buffer.random(count);
-            list.addAll(list0);
-            list0 = this.backend.random(count - list.size());
-            list.addAll(list0);
+            list0 = this.buffer.random(Math.max(1, count / 2));
+            list1 = this.backend.random(count - list0.size());
+        }
+        // multiplex the lists
+        final List<Row.Entry> list = new ArrayList<Row.Entry>();
+        Iterator<Row.Entry> i0 = list0.iterator();
+        Iterator<Row.Entry> i1 = list1.iterator();
+        while (i0.hasNext() || i1.hasNext()) {
+            if (i0.hasNext()) list.add(i0.next());
+            if (i1.hasNext()) list.add(i1.next());
         }
         return list;
     }

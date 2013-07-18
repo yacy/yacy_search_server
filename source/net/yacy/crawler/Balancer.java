@@ -304,9 +304,11 @@ public class Balancer {
     public Map<String, Integer[]> getDomainStackHosts(RobotsTxt robots) {
         Map<String, Integer[]> map = new TreeMap<String, Integer[]>(); // we use a tree map to get a stable ordering
         for (Map.Entry<String, HostHandles> entry: this.domainStacks.entrySet()) {
-            int size = entry.getValue().handleSet.size();
-            int delta = Latency.waitingRemainingGuessed(entry.getKey(), entry.getValue().hosthash, robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta);
-            map.put(entry.getKey(), new Integer[]{size, delta});
+            final String hostname = entry.getKey();
+            final HostHandles hosthandles = entry.getValue();
+            int size = hosthandles.handleSet.size();
+            int delta = Latency.waitingRemainingGuessed(hostname, hosthandles.hosthash, robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta);
+            map.put(hostname, new Integer[]{size, delta});
         }
         return map;
     }
@@ -429,9 +431,9 @@ public class Balancer {
 	    byte[] failhash = null;
 		while (!this.urlFileIndex.isEmpty()) {
 		    byte[] nexthash = getbest(robots);
+            if (nexthash == null) return null;
+            
 	        synchronized (this) {
-    		    if (nexthash == null) return null;
-    
     	        Row.Entry rowEntry = (nexthash == null) ? null : this.urlFileIndex.remove(nexthash);
     	        if (rowEntry == null) continue;
     	        
@@ -515,43 +517,43 @@ public class Balancer {
         	int newCandidatesForward = 1;
         	while (i.hasNext() && nextZeroCandidates.size() < 1000) {
                 entry = i.next();
+                final String hostname = entry.getKey();
+                final HostHandles hosthandles = entry.getValue();
     
                 // clean up empty entries
-                if (entry.getValue().handleSet.isEmpty()) {
+                if (hosthandles.handleSet.isEmpty()) {
                     i.remove();
                     continue;
                 }
     
-                final byte[] urlhash = entry.getValue().handleSet.getOne(0);
+                final byte[] urlhash = hosthandles.handleSet.getOne(0);
                 if (urlhash == null) continue;
     
                 int w;
                 Row.Entry rowEntry;
                 try {
                     rowEntry = this.urlFileIndex.get(urlhash, false);
-                    if (rowEntry == null) {
-                    	continue;
-                    }
+                    if (rowEntry == null) continue; // may have been deleted there manwhile
                     Request crawlEntry = new Request(rowEntry);
                     w = Latency.waitingRemaining(crawlEntry.url(), robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta);
-                    //System.out.println("*** waitingRemaining = " + w + ", guessed = " + Latency.waitingRemainingGuessed(entry.getKey(), this.minimumLocalDelta, this.minimumGlobalDelta));
+                    //System.out.println("*** waitingRemaining = " + w + ", guessed = " + Latency.waitingRemainingGuessed(hostname, this.minimumLocalDelta, this.minimumGlobalDelta));
                     //System.out.println("*** explained: " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta));
                 } catch (final IOException e1) {
-                    w = Latency.waitingRemainingGuessed(entry.getKey(), entry.getValue().hosthash, robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta);
+                    w = Latency.waitingRemainingGuessed(hostname, hosthandles.hosthash, robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta);
                 }
 
                 if (w <= 0) {
                     if (w == Integer.MIN_VALUE) {
                         if (newCandidatesForward-- > 0) {
-                            nextZeroCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(entry.getKey(), urlhash), 10000);
+                            nextZeroCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(hostname, urlhash), 10000);
                         } else {
-                            failoverCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(entry.getKey(), urlhash), 0);
+                            failoverCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(hostname, urlhash), 0);
                         }
                     } else {
-                        nextZeroCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(entry.getKey(), urlhash), entry.getValue().handleSet.size());
+                        nextZeroCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(hostname, urlhash), hosthandles.handleSet.size());
                     }
                 } else {
-                    failoverCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(entry.getKey(), urlhash), w);
+                    failoverCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(hostname, urlhash), w);
                 }
         	}
         	//Log.logInfo("Balancer", "*** getbest: created new nextZeroCandidates-list, size = " + nextZeroCandidates.size() + ", domainStacks.size = " + this.domainStacks.size());
@@ -576,7 +578,7 @@ public class Balancer {
                 Map.Entry<String, byte[]> hosthash;
                 while (k.hasNext()) {
                     hosthash = k.next();
-                    if (failoverCandidates.get(hosthash) > 1000) break; // thats too long; we want a second chance for this!
+                    if (failoverCandidates.get(hosthash) > 2000) break; // thats too long; we want a second chance for this!
                     besthost = hosthash.getKey();
                     besturlhash = hosthash.getValue();
                     removeHashFromDomainStacks(besthost, besturlhash);
