@@ -124,7 +124,8 @@ public class InstanceMirror {
 
     public EmbeddedSolrConnector getDefaultEmbeddedConnector() {
         if (this.defaultEmbeddedConnector != null) return this.defaultEmbeddedConnector;
-        this.defaultEmbeddedConnector = this.solr0 == null ? null : new EmbeddedSolrConnector(this.solr0);
+        if (this.solr0 == null) return null;
+        this.defaultEmbeddedConnector = new EmbeddedSolrConnector(this.solr0);
         String coreName = this.getDefaultCoreName();
         if (coreName == null) return null;
         this.embeddedCache.put(coreName, this.defaultEmbeddedConnector);
