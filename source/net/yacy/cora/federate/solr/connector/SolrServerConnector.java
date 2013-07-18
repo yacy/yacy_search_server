@@ -32,6 +32,7 @@ import net.yacy.search.schema.CollectionSchema;
 import org.apache.lucene.analysis.NumericTokenStream;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.util.NamedList;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -81,6 +82,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
      */
     public void optimize(int maxSegments) {
         if (this.server == null) return;
+        if (getSegmentCount() <= maxSegments) return;
         synchronized (this.server) {
             try {
                 this.server.optimize(true, true, maxSegments);
@@ -89,6 +91,20 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             }
         }
     }
+    
+    public int getSegmentCount() {
+        if (this.server == null) return 0;
+        try {
+            NamedList<Object> info = getIndexBrowser().getIndexInfo();
+            Integer segmentCount = (Integer) info.get("segmentCount");
+            if (segmentCount == null) return 1;
+            return segmentCount.intValue();
+        } catch (final Throwable e) {
+            log.warn(e);
+            return 0;
+        }
+    }
+    
 
     @Override
     public void close() {
