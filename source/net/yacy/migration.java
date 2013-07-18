@@ -24,6 +24,7 @@ package net.yacy;
 import net.yacy.search.index.ReindexSolrBusyThread;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -46,8 +47,7 @@ import net.yacy.search.index.Fulltext;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.request.LukeRequest;
-import org.apache.solr.client.solrj.response.LukeResponse;
+import org.apache.solr.client.solrj.response.LukeResponse.FieldInfo;
 
 public class migration {
     //SVN constants
@@ -371,19 +371,14 @@ public class migration {
         ReindexSolrBusyThread reidx = new ReindexSolrBusyThread(null); // ("*:*" would reindex all);
         
         try { // get all fields contained in index
-            LukeRequest lukeRequest = new LukeRequest();
-            lukeRequest.setNumTerms(1);
-            LukeResponse lukeResponse = lukeRequest.process(Switchboard.getSwitchboard().index.fulltext().getDefaultEmbeddedConnector().getServer());            
-
-            for (LukeResponse.FieldInfo solrfield : lukeResponse.getFieldInfo().values()) {
+            Collection<FieldInfo> solrfields = Switchboard.getSwitchboard().index.fulltext().getDefaultEmbeddedConnector().getFields();
+            for (FieldInfo solrfield : solrfields) {
                 if (!colcfg.contains(solrfield.getName()) && !omitFields.contains(solrfield.getName())) { // add found fields not in config for reindexing
                     reidx.addSelectFieldname(solrfield.getName());
                 }
             }
             lukeCheckok = true;
         } catch (final SolrServerException ex) {
-            ConcurrentLog.logException(ex);
-        } catch (final IOException ex) {
             ConcurrentLog.logException(ex);
         }
   

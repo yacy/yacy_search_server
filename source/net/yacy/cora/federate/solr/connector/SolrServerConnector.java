@@ -30,14 +30,15 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.lucene.analysis.NumericTokenStream;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.client.solrj.response.LukeResponse.FieldInfo;
+import org.apache.solr.client.solrj.request.LukeRequest;
+import org.apache.solr.client.solrj.response.LukeResponse;
 
 public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
@@ -104,11 +105,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     public long getSize() {
         if (this.server == null) return 0;
         try {
-            final QueryResponse rsp = getResponseByParams(AbstractSolrConnector.catchSuccessQuery);
-            if (rsp == null) return 0;
-            final SolrDocumentList docs = rsp.getResults();
-            if (docs == null) return 0;
-            return docs.getNumFound();
+            return getIndexBrowser().getNumDocs();
         } catch (final Throwable e) {
             log.warn(e);
             return 0;
@@ -260,6 +257,24 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 }
             }
         }
+    }
+    
+    public Collection<FieldInfo> getFields() throws SolrServerException {
+        // get all fields contained in index
+        return getIndexBrowser().getFieldInfo().values();
+    }
+    
+    private LukeResponse getIndexBrowser() throws SolrServerException {
+        // get all fields contained in index
+        final LukeRequest lukeRequest = new LukeRequest();
+        lukeRequest.setNumTerms(1);
+        LukeResponse lukeResponse = null;
+        try {
+            lukeResponse = lukeRequest.process(this.server);
+        } catch (IOException e) {
+            throw new SolrServerException(e.getMessage());
+        }
+        return lukeResponse;
     }
 
 }
