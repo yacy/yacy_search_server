@@ -78,6 +78,9 @@ public class Response {
         if (ext.equals(".jpg"))  return DT_IMAGE;
         if (ext.equals(".jpeg")) return DT_IMAGE;
         if (ext.equals(".png"))  return DT_IMAGE;
+        if (ext.equals(".tif"))  return DT_IMAGE;
+        if (ext.equals(".tiff")) return DT_IMAGE;
+        if (ext.equals(".htm"))  return DT_HTML;
         if (ext.equals(".html")) return DT_HTML;
         if (ext.equals(".txt"))  return DT_TEXT;
         if (ext.equals(".doc"))  return DT_DOC;
@@ -111,7 +114,6 @@ public class Response {
         else if (mime.endsWith("/mspowerpoint")) doctype = DT_DOC;
         else if (mime.endsWith("/postscript")) doctype = DT_PDFPS;
         else if (mime.startsWith("text/")) doctype = DT_TEXT;
-        else if (mime.startsWith("image/")) doctype = DT_IMAGE;
         else if (mime.startsWith("audio/")) doctype = DT_AUDIO;
         else if (mime.startsWith("video/")) doctype = DT_MOVIE;
         return doctype;
