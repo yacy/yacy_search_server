@@ -590,23 +590,6 @@ public class Segment {
             final boolean storeToRWI
             ) {
         final long startTime = System.currentTimeMillis();
-
-        // DO A SOFT/HARD COMMIT IF NEEDED
-        if (MemoryControl.shortStatus()) {
-            // do a 'hard' commit to flush index caches
-            this.fulltext.commit(false);
-        } else {
-            /*
-            if (
-                (this.fulltext.getDefaultConfiguration().contains(CollectionSchema.exact_signature_l) && this.fulltext.getDefaultConfiguration().contains(CollectionSchema.exact_signature_unique_b)) ||
-                (this.fulltext.getDefaultConfiguration().contains(CollectionSchema.fuzzy_signature_l) && this.fulltext.getDefaultConfiguration().contains(CollectionSchema.fuzzy_signature_unique_b)) ||
-                this.fulltext.getDefaultConfiguration().contains(CollectionSchema.title_unique_b) ||
-                this.fulltext.getDefaultConfiguration().contains(CollectionSchema.description_unique_b)
-               ) {
-                this.fulltext.getDefaultConnector().commit(true); // make sure that we have latest information for the postprocessing steps
-            }
-            */
-        }
         
         // CREATE INDEX
 
@@ -696,7 +679,7 @@ public class Segment {
                 } catch (final IOException e ) {
                     error = "failed to send " + urlNormalform + " to solr: " + e.getMessage();
                     ConcurrentLog.warn("SOLR", error);
-                    if (i == 10) this.fulltext.commit(false);
+                    if (i == 10) this.fulltext.commit(true);
                     try {Thread.sleep(1000);} catch (final InterruptedException e1) {}
                     continue tryloop;
                 }
