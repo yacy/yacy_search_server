@@ -34,11 +34,12 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
-import org.apache.solr.client.solrj.response.LukeResponse.FieldInfo;
 import org.apache.solr.client.solrj.request.LukeRequest;
+import org.apache.solr.client.solrj.response.LukeResponse.FieldInfo;
 import org.apache.solr.client.solrj.response.LukeResponse;
 
 public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
@@ -92,10 +93,16 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         }
     }
     
+    /**
+     * get the number of segments.
+     * @return the number of segments, or 0 if unknown
+     */
     public int getSegmentCount() {
         if (this.server == null) return 0;
         try {
-            NamedList<Object> info = getIndexBrowser().getIndexInfo();
+            LukeResponse lukeResponse = getIndexBrowser(false);
+            NamedList<Object> info = lukeResponse.getIndexInfo();
+            if (info == null) return 0;
             Integer segmentCount = (Integer) info.get("segmentCount");
             if (segmentCount == null) return 1;
             return segmentCount.intValue();
@@ -121,7 +128,11 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     public long getSize() {
         if (this.server == null) return 0;
         try {
-            return getIndexBrowser().getNumDocs();
+            LukeResponse lukeResponse = getIndexBrowser(false);
+            if (lukeResponse == null) return 0;
+            Integer numDocs = lukeResponse.getNumDocs();
+            if (numDocs == null) return 0;
+            return numDocs.longValue();
         } catch (final Throwable e) {
             log.warn(e);
             return 0;
@@ -277,13 +288,42 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     
     public Collection<FieldInfo> getFields() throws SolrServerException {
         // get all fields contained in index
-        return getIndexBrowser().getFieldInfo().values();
+        return getIndexBrowser(true).getFieldInfo().values();
     }
     
-    private LukeResponse getIndexBrowser() throws SolrServerException {
+    private LukeResponse getIndexBrowser(final boolean showSchema) throws SolrServerException {
         // get all fields contained in index
         final LukeRequest lukeRequest = new LukeRequest();
+        lukeRequest.setResponseParser(new XMLResponseParser());
         lukeRequest.setNumTerms(1);
+        lukeRequest.setShowSchema(showSchema);
+        /*
+        final SolrRequest lukeRequest = new SolrRequest(METHOD.GET, "/admin/luke") {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Collection<ContentStream> getContentStreams() throws IOException {
+                return null;
+            }
+            @Override
+            public SolrParams getParams() {
+                ModifiableSolrParams params = new ModifiableSolrParams();
+                //params.add("numTerms", "1");
+                params.add("_", "" + System.currentTimeMillis()); // cheat a proxy
+                if (showSchema) params.add("show", "schema");
+                return params;
+            }
+            @Override
+            public LukeResponse process(SolrServer server) throws SolrServerException, IOException {
+              long startTime = System.currentTimeMillis();
+              LukeResponse res = new LukeResponse();
+              this.setResponseParser(new XMLResponseParser());
+              NamedList<Object> response = server.request(this); 
+              res.setResponse(response);
+              res.setElapsedTime(System.currentTimeMillis() - startTime);
+              return res;
+            }
+        };
+        */
         LukeResponse lukeResponse = null;
         try {
             lukeResponse = lukeRequest.process(this.server);
