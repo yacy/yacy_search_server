@@ -1045,7 +1045,7 @@ public final class Switchboard extends serverSwitch {
                 Long.MAX_VALUE,
                 30000,
                 Long.MAX_VALUE),
-            2000);
+            8000);
         deployThread(
             SwitchboardConstants.INDEX_DIST,
             "DHT Distribution",
@@ -1060,7 +1060,7 @@ public final class Switchboard extends serverSwitch {
                 Long.MAX_VALUE,
                 1000,
                 Long.MAX_VALUE),
-            5000,
+            60000,
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_IDLESLEEP, "5000")),
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_BUSYSLEEP, "0")),
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_MEMPREREQ, "1000000")));
