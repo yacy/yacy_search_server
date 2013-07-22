@@ -308,6 +308,7 @@ public final class SwitchboardConstants {
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_URL = "federated.service.solr.indexing.url";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_SHARDING = "federated.service.solr.indexing.sharding";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_LAZY = "federated.service.solr.indexing.lazy";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT = "federated.service.solr.indexing.timeout";
 
     //public static final String CORE_SERVICE_URLDB = "core.service.urldb.tmp";
     //public static final String CORE_SERVICE_SOLR = "core.service.solr.tmp";

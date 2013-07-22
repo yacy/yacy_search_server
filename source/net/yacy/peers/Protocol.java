@@ -1045,7 +1045,8 @@ public final class Protocol {
         } else {
             try {
                 String address = target == event.peers.mySeed() ? "localhost:" + target.getPort() : target.getPublicAddress();
-                instance = new RemoteInstance("http://" + address, null, "solr", 3000); // this is a 'patch configuration' which considers 'solr' as default collection
+                final int solrtimeout = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 10000);
+                instance = new RemoteInstance("http://" + address, null, "solr", solrtimeout); // this is a 'patch configuration' which considers 'solr' as default collection
                 solrConnector = new RemoteSolrConnector(instance, "solr");
                 rsp = solrConnector.getResponseByParams(solrQuery);
                 docList = rsp.getResults();

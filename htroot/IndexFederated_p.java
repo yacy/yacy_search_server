@@ -127,9 +127,11 @@ public class IndexFederated_p {
                 if (solrRemoteWasOn) sb.index.fulltext().disconnectRemoteSolr();
                 // switch on
                 final boolean usesolr = sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;
+                final int solrtimeout = sb.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 10000);
+
                 try {
                     if (usesolr) {
-                        ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null, 10000);
+                        ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null, solrtimeout);
                         sb.index.fulltext().connectRemoteSolr(instances);
                     } else {
                         sb.index.fulltext().disconnectRemoteSolr();
