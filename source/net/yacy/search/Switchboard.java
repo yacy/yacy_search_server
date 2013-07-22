@@ -503,12 +503,6 @@ public final class Switchboard extends serverSwitch {
                 ConcurrentLog.logException(e);
             }
         }
-
-        // for index migration in case of obsolete entries, delete entries now
-        try {
-            this.index.fulltext().getDefaultConnector().deleteByQuery("failreason_t:[* TO *]"); // field was renamed to failreason_s
-        } catch (final IOException e1) {
-        }
         
         // initialize network database
         final File mySeedFile = new File(this.networkRoot, SeedDB.DBFILE_OWN_SEED);
