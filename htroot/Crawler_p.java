@@ -73,8 +73,11 @@ public class Crawler_p {
         final serverObjects prop = new serverObjects();
         prop.put("rejected", 0);
         prop.put("urlpublictextSize", 0);
+        prop.put("urlpublictextSegmentCount", 0);
         prop.put("webgraphSize", 0);
+        prop.put("webgraphSegmentCount", 0);
         prop.put("rwipublictextSize", 0);
+        prop.put("rwipublictextSegmentCount", 0);
         prop.put("list", "0");
         prop.put("loaderSize", 0);
         prop.put("loaderMax", 0);

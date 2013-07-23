@@ -89,12 +89,24 @@ function handleStatus(){
 	trafCrawlerSpan.appendChild(document.createTextNode(Math.round((trafficCrawlerValue) / 1024 / 10.24) / 100));
 	
 	dbsize=getFirstChild(statusTag, "dbsize");
-	urlpublictextSize=getValue(getFirstChild(dbsize, "urlpublictext"));
-	rwipublictextSize=getValue(getFirstChild(dbsize, "rwipublictext"));
-	webgraphSize=getValue(getFirstChild(dbsize, "webgraph"));
-	document.getElementById("urldbsize").firstChild.nodeValue=urlpublictextSize;
-	document.getElementById("webgraphsize").firstChild.nodeValue=webgraphSize;
-	document.getElementById("rwidbsize").firstChild.nodeValue=rwipublictextSize;
+	urlpublictext=getValue(getFirstChild(dbsize, "urlpublictext"));
+	urlpublictextSegmentCount=getValue(getFirstChild(dbsize, "urlpublictextSegmentCount"));
+	webgraph=getValue(getFirstChild(dbsize, "webgraph"));
+	webgraphSegmentCount=getValue(getFirstChild(dbsize, "webgraphSegmentCount"));
+	rwipublictext=getValue(getFirstChild(dbsize, "rwipublictext"));
+	rwipublictextSegmentCount=getValue(getFirstChild(dbsize, "rwipublictextSegmentCount"));
+	document.getElementById("urlpublictextSize").firstChild.nodeValue=urlpublictext;
+	document.getElementById("urlpublictextSegmentCount").firstChild.nodeValue=urlpublictextSegmentCount;
+	document.getElementById("webgraphSize").firstChild.nodeValue=webgraph;
+	document.getElementById("webgraphSegmentCount").firstChild.nodeValue=webgraphSegmentCount;
+	document.getElementById("rwipublictextSize").firstChild.nodeValue=rwipublictext;
+	document.getElementById("rwipublictextSegmentCount").firstChild.nodeValue=rwipublictextSegmentCount;
+
+	postprocessing=getFirstChild(statusTag, "postprocessing");
+	document.getElementById("postprocessing").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "status"));
+	
+	load=getFirstChild(statusTag, "load");
+	document.getElementById("load").firstChild.nodeValue=getValue(load);
 	
 	loaderqueue=getFirstChild(statusTag, "loaderqueue");	
 	loaderqueue_size=getValue(getFirstChild(loaderqueue, "size"));
