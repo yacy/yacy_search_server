@@ -595,6 +595,10 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         return m;
     }
 
+    public int getSegmentCount() {
+        return this.array.entries();
+    }
+
     @Override
     public int minMem() {
         return 10 * 1024 * 1024;

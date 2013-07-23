@@ -55,6 +55,12 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public void optimize(int maxSegments);
     
     /**
+     * ask the solr subsystem about it's segment number
+     * @return the segment count, which corresponds to the number of files for an index
+     */
+    public int getSegmentCount();
+    
+    /**
      * close the server connection
      */
     public void close();

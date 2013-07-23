@@ -21,8 +21,11 @@
   
   <dbsize>
     <urlpublictext>#[urlpublictextSize]#</urlpublictext>
+    <urlpublictextSegmentCount>#[urlpublictextSegmentCount]#</urlpublictextSegmentCount>
     <webgraph>#[webgraphSize]#</webgraph>
-    <rwipublictext>#[rwipublictextSize]#</rwipublictext>
+    <webgraphSegmentCount>#[webgraphSegmentCount]#</webgraphSegmentCount>
+    <rwipublictext>#[rwipublictextSize]#</rwipublictext>    
+    <rwipublictextSegmentCount>#[rwipublictextSegmentCount]#</rwipublictextSegmentCount>    
   </dbsize>
   
   <loaderqueue>

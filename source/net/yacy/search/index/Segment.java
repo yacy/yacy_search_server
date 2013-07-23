@@ -374,6 +374,11 @@ public class Segment {
         if (this.termIndex == null) return 0;
         return this.termIndex.sizesMax();
     }
+    
+    public long RWISegmentCount() {
+        if (this.termIndex == null) return 0;
+        return this.termIndex.getSegmentCount();
+    }
 
     public int RWIBufferCount() {
         if (this.termIndex == null) return 0;

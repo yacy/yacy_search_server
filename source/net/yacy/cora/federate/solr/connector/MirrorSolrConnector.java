@@ -98,6 +98,13 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         if (this.solr0 != null) this.solr0.optimize(maxSegments);
         if (this.solr1 != null) this.solr1.optimize(maxSegments);
     }
+
+    @Override
+    public int getSegmentCount() {
+        int s0 = this.solr0 == null ? 0 : this.solr0.getSegmentCount();
+        int s1 = this.solr1 == null ? 0 : this.solr1.getSegmentCount();
+        return Math.max(s0, s1);
+    }
     
     @Override
     public synchronized void close() {

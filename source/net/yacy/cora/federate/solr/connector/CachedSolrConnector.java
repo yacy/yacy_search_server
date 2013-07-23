@@ -306,4 +306,10 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
     public void optimize(int maxSegments) {
         this.solr.optimize(maxSegments);
     }
+
+    @Override
+    public int getSegmentCount() {
+        return this.solr.getSegmentCount();
+    }
+    
 }

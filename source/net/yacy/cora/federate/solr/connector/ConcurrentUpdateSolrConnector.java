@@ -247,6 +247,11 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     }
 
     @Override
+    public int getSegmentCount() {
+        return this.connector.getSegmentCount();
+    }
+
+    @Override
     public void close() {
         ensureAliveDeletionHandler();
         try {this.deleteQueue.put(POISON_ID);} catch (final InterruptedException e) {}

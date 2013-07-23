@@ -72,8 +72,11 @@ public class status_p {
 
         // index size
         prop.putNum("urlpublictextSize", segment.fulltext().collectionSize());
-        prop.putNum("webgraphSize", segment.fulltext().webgraphSize());
+        prop.putNum("urlpublictextSegmentCount", segment.fulltext().getDefaultConnector().getSegmentCount());
+        prop.putNum("webgraphSize", segment.fulltext().writeToWebgraph() ? segment.fulltext().webgraphSize() : 0);
+        prop.putNum("webgraphSegmentCount", segment.fulltext().writeToWebgraph() ? segment.fulltext().getWebgraphConnector().getSegmentCount() : 0);
         prop.putNum("rwipublictextSize", segment.RWICount());
+        prop.putNum("rwipublictextSegmentCount", segment.RWISegmentCount());
 
         // loader queue
         prop.putNum("loaderSize", sb.crawlQueues.workerSize());
