@@ -12,6 +12,7 @@
   </memory>
   
   <processors>#[processors]#</processors>
+  <load>#[load]#</load>
   
   <traffic>
 	<in>#[trafficIn]#</in>

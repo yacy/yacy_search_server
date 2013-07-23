@@ -26,6 +26,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.Memory;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.kelondro.index.RowHandleSet;
@@ -64,6 +65,7 @@ public class status_p {
         prop.putNum("totalMemory", MemoryControl.total());
         prop.putNum("maxMemory", MemoryControl.maxMemory());
         prop.putNum("processors", WorkflowProcessor.availableCPU);
+        prop.putNum("load", Memory.load());
 
 		// proxy traffic
 		prop.put("trafficIn", ByteCount.getGlobalCount());
