@@ -27,11 +27,10 @@ public class AugmentParser extends AbstractParser implements Parser {
         ConcurrentLog.info("AugmentedParser", "augmented parser was initialized");
 
         this.SUPPORTED_EXTENSIONS.add("html");
+        this.SUPPORTED_EXTENSIONS.add("htm");
         this.SUPPORTED_EXTENSIONS.add("php");
         this.SUPPORTED_MIME_TYPES.add("text/html");
         this.SUPPORTED_MIME_TYPES.add("text/xhtml+xml");
-        this.SUPPORTED_EXTENSIONS.add("html");
-        this.SUPPORTED_EXTENSIONS.add("htm");
     }
 
     @Override

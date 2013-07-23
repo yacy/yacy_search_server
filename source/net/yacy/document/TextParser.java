@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -359,7 +360,7 @@ public final class TextParser {
      * @throws Parser.Failure
      */
     private static Set<Parser> parsers(final MultiProtocolURI url, String mimeType1) throws Parser.Failure {
-        final Set<Parser> idioms = new HashSet<Parser>(2);
+        final Set<Parser> idioms = new LinkedHashSet<Parser>(2); // LinkedSet to maintain order (genericParser should be last)
 
         // check extension
         String ext = MultiProtocolURI.getFileExtension(url.getFileName());
@@ -383,7 +384,7 @@ public final class TextParser {
         final String mimeType2 = ext2mime.get(ext);
         if (mimeType2 != null && (idiom = mime2parser.get(mimeType2)) != null && !idioms.contains(idiom)) idioms.addAll(idiom);
 
-        // always add the generic parser
+        // always add the generic parser (make sure it is the last in access order)
         idioms.add(genericIdiom);
         //if (idioms.isEmpty()) throw new Parser.Failure("no parser found for extension '" + ext + "' and mime type '" + mimeType1 + "'", url);
 
