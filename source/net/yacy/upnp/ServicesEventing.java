@@ -148,7 +148,7 @@ public class ServicesEventing implements Runnable {
         unRegister( service, handler );
       }
       
-      StringBuffer packet = new StringBuffer( 64 );
+      StringBuilder packet = new StringBuilder( 64 );
       packet.append( "SUBSCRIBE " ).append( eventingLoc.getFile() ).append( " HTTP/1.1\r\n" );
       packet.append( "HOST: " ).append( eventingLoc.getHost() ).append( ":" ).append( eventingLoc.getPort() ).append( "\r\n" );
       packet.append( "CALLBACK: <http://" ).append( InetAddress.getLocalHost().getHostAddress() ).append( ":" ).append( daemonPort ).append( "" ).append( eventingLoc.getFile() ).append( ">\r\n" );
@@ -265,7 +265,7 @@ public class ServicesEventing implements Runnable {
           stopServicesEventingThread(); 
         }
         
-        StringBuffer packet = new StringBuffer( 64 );
+        StringBuilder packet = new StringBuilder( 64 );
         packet.append( "UNSUBSCRIBE  " ).append( eventingLoc.getFile() ).append( " HTTP/1.1\r\n" );
         packet.append( "HOST: " ).append( eventingLoc.getHost() ).append( ":" ).append( eventingLoc.getPort() ).append( "\r\n" );
         packet.append( "SID: " ).append( sub.sub.getSID() ).append( "\r\n\r\n" );

@@ -66,7 +66,7 @@ public final class SimpleLogFormatter extends SimpleFormatter {
     // e.g. 2005/05/25 11:22:53
     private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
 
-    private final StringBuffer buffer = new StringBuffer(80);
+    private final StringBuffer buffer = new StringBuffer(80); // we use StringBuffer on purpose instead of StringBuilder because of concurrency issues
 
     public SimpleLogFormatter() {
         super();

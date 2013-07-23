@@ -43,14 +43,14 @@ public class AugmentedHtmlStream extends FilterOutputStream {
 
 	@Override
     public void close() throws IOException {
-		StringBuffer b = new StringBuffer(this.buffer.toString(this.charset.name()));
+	    StringBuilder b = new StringBuilder(this.buffer.toString(this.charset.name()));
 		b = process(b);
 		this.out.write(b.toString());
 		this.out.close();
 	}
 
-    public StringBuffer process(StringBuffer data) {
-        if (this.urls.contains("currentyacypeer/")) {
+    public StringBuilder process(StringBuilder data) {
+        if (this.urls.contains("StringBuilder/")) {
             return data;
         }
         return AugmentHtmlStream.process(data, this.url, this.requestHeader);

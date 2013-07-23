@@ -85,7 +85,7 @@ public class AugmentHtmlStream {
 
     }
 
-    public static StringBuffer process(StringBuffer data, DigestURI url, RequestHeader requestHeader) {
+    public static StringBuilder process(StringBuilder data, DigestURI url, RequestHeader requestHeader) {
 
         String action =  requestHeader.get("YACYACTION");
         requestHeader.remove("YACYACTION");
@@ -151,7 +151,7 @@ public class AugmentHtmlStream {
 
 
         if (augmented) {
-            return (new StringBuffer (Doc));
+            return (new StringBuilder(Doc));
         }
         return (data);
     }

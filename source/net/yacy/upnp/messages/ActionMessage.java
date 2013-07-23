@@ -108,7 +108,7 @@ public class ActionMessage {
     ActionResponse rtrVal = null;
     UPNPResponseException upnpEx = null;
     IOException ioEx = null;
-    StringBuffer body = new StringBuffer( 256 );
+    StringBuilder body = new StringBuilder( 256 );
     
     body.append( "<?xml version=\"1.0\"?>\r\n" );
     body.append( "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"" );

@@ -219,7 +219,7 @@ public class UTF8 implements Comparator<String> {
     public static String decodeURL(final String s) {
         boolean needToChange = false;
         final int numChars = s.length();
-        final StringBuffer sb = new StringBuffer(numChars > 500 ? numChars / 2 : numChars);
+        final StringBuilder sb = new StringBuilder(numChars > 500 ? numChars / 2 : numChars);
         int i = 0;
         char c;
         byte[] bytes = null;
