@@ -116,8 +116,9 @@ public class Tables implements Iterable<String> {
 
     public TablesColumnIndex getIndex(final String tableName) throws TableColumnIndexException {
     	// return an existing index
-    	if(this.cidx.containsKey(tableName)) {
-    		return this.cidx.get(tableName);
+        final TablesColumnIndex tci = this.cidx.get(tableName);
+    	if (tci != null) {
+    		return tci;
     	}
 
     	// create a new index
@@ -158,9 +159,10 @@ public class Tables implements Iterable<String> {
     	return this.cidx.contains(tableName);
     }
 
-    public boolean hasIndex (final String tableName, final String columnName) {
-    	if(this.cidx.containsKey(tableName)) {
-    		return this.cidx.get(tableName).hasIndex(columnName);
+    public boolean hasIndex(final String tableName, final String columnName) {
+        final TablesColumnIndex tci = this.cidx.get(tableName);
+    	if (tci != null) {
+    		return tci.hasIndex(columnName);
     	}
     	try {
 			if(this.has(tableName+CIDX, YMarkUtil.getKeyId(columnName))) {
@@ -181,8 +183,9 @@ public class Tables implements Iterable<String> {
     		try {
     			final TablesColumnIndex index = this.getIndex(table);
     			for(int i=0; i<values.length; i++) {
-        			if(index.containsKey(whereColumn, values[i])) {
-    	        		final Iterator<byte[]> biter = index.get(whereColumn, values[i]).iterator();
+    			    final Collection<byte[]> b = index.get(whereColumn, values[i]);
+        			if (b != null) {
+    	        		final Iterator<byte[]> biter = b.iterator();
     	        		while(biter.hasNext()) {
     	        			set1.add(biter.next());
     	        		}
@@ -404,7 +407,8 @@ public class Tables implements Iterable<String> {
 
     public Row select(final String table, final byte[] pk) throws IOException, SpaceExceededException {
         final BEncodedHeap heap = getHeap(table);
-        if (heap.containsKey(pk)) return new Row(pk, heap.get(pk));
+        final Map<String,byte[]> b = heap.get(pk);
+        if (b != null) return new Row(pk, b);
         return null;
     }
 
