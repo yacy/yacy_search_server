@@ -3283,6 +3283,12 @@ public final class Switchboard extends serverSwitch {
                 + ", sbQueue.size() = "
                 + getIndexingProcessorsQueueSize();
         }
+        
+        double load = Memory.load();
+        float maxload = getConfigFloat(SwitchboardConstants.INDEX_TRANSFER_MAXLOAD, 1.5f);
+        if (load > maxload) {
+            return "no DHT distribution: system has too high load = " + load + ", maxload = " + maxload;
+        }
         return null; // this means; yes, please do dht transfer
     }
 
