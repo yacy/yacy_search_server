@@ -89,14 +89,15 @@ public final class Fulltext {
     private static final String SOLR_OLD_PATH[] = new String[]{"solr_36"};
     
     // class objects
-	private final File                 segmentPath;
-    private       Index                urlIndexFile;
-    private       Export               exportthread; // will have a export thread assigned if exporter is running
-    private       String               tablename;
-    private       ArrayList<HostStat>  statsDump;
-    private       InstanceMirror       solrInstances;
+	private final File                    segmentPath;
+    private       Index                   urlIndexFile;
+    private       Export                  exportthread; // will have a export thread assigned if exporter is running
+    private       String                  tablename;
+    private       ArrayList<HostStat>     statsDump;
+    private       InstanceMirror          solrInstances;
     private final CollectionConfiguration collectionConfiguration;
     private final WebgraphConfiguration   webgraphConfiguration;
+    private       boolean                 writeWebgraph;
 
     protected Fulltext(final File segmentPath, final CollectionConfiguration collectionConfiguration, final WebgraphConfiguration webgraphConfiguration) {
         this.segmentPath = segmentPath;
@@ -107,6 +108,15 @@ public final class Fulltext {
         this.solrInstances = new InstanceMirror();
         this.collectionConfiguration = collectionConfiguration;
         this.webgraphConfiguration = webgraphConfiguration;
+        this.writeWebgraph = false;
+    }
+    
+    public void writeWebgraph(boolean check) {
+        this.writeWebgraph = check;
+    }
+    
+    public boolean writeToWebgraph() {
+        return this.writeWebgraph;
     }
 
     /**
@@ -211,6 +221,7 @@ public final class Fulltext {
     }
     
     public SolrConnector getWebgraphConnector() {
+        if (!this.writeWebgraph) return null;
         synchronized (this.solrInstances) {
             return this.solrInstances.getMirrorConnector(WebgraphSchema.CORE_NAME);
         }
@@ -276,7 +287,7 @@ public final class Fulltext {
      * @return
      */
     public long webgraphSize() {
-        return this.getWebgraphConnector().getSize();
+        return this.writeWebgraph ? this.getWebgraphConnector().getSize() : 0;
     }
 
     public void close() {
@@ -294,7 +305,7 @@ public final class Fulltext {
         if (lastCommit + 10000 > t) return;
         lastCommit = t;
         getDefaultConnector().commit(softCommit);
-        getWebgraphConnector().commit(softCommit);
+        if (this.writeWebgraph) getWebgraphConnector().commit(softCommit);
     }
 
     public Date getLoadDate(final String urlHash) {
@@ -393,6 +404,7 @@ public final class Fulltext {
     }
 
     public void putEdges(final Collection<SolrInputDocument> edges) throws IOException {
+        if (!this.writeToWebgraph()) return;
         if (edges == null || edges.size() == 0) return;
         try {
             this.getWebgraphConnector().add(edges);
@@ -443,7 +455,7 @@ public final class Fulltext {
 
         // delete in solr
         try {Fulltext.this.getDefaultConnector().deleteByQuery(collection1Query);} catch (final IOException e) {}
-        try {Fulltext.this.getWebgraphConnector().deleteByQuery(webgraphQuery);} catch (final IOException e) {}
+        if (this.writeWebgraph) try {Fulltext.this.getWebgraphConnector().deleteByQuery(webgraphQuery);} catch (final IOException e) {}
 
         // delete in old metadata structure
         if (Fulltext.this.urlIndexFile != null) {
@@ -493,7 +505,7 @@ public final class Fulltext {
         
         // delete in solr
         try {Fulltext.this.getDefaultConnector().deleteByQuery(collectionQuery);} catch (final IOException e) {}
-        try {Fulltext.this.getWebgraphConnector().deleteByQuery(webgraphQuery);} catch (final IOException e) {}
+        if (this.writeWebgraph) try {Fulltext.this.getWebgraphConnector().deleteByQuery(webgraphQuery);} catch (final IOException e) {}
         
         // finally remove the line with statistics
         if (Fulltext.this.statsDump != null) {
@@ -546,7 +558,7 @@ public final class Fulltext {
         if (deleteIDs == null || deleteIDs.size() == 0) return;
         try {
             this.getDefaultConnector().deleteByIds(deleteIDs);
-            this.getWebgraphConnector().deleteByIds(deleteIDs);
+            if (this.writeWebgraph) this.getWebgraphConnector().deleteByIds(deleteIDs);
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);
         }
@@ -563,7 +575,7 @@ public final class Fulltext {
         try {
             String id = ASCII.String(urlHash);
             this.getDefaultConnector().deleteById(id);
-            this.getWebgraphConnector().deleteById(id);
+            if (this.writeWebgraph) this.getWebgraphConnector().deleteById(id);
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);
         }
@@ -709,7 +721,7 @@ public final class Fulltext {
     public void optimize(final int size) {
         if (size < 1) return;
         getDefaultConnector().optimize(size);
-        getWebgraphConnector().optimize(size);
+        if (this.writeWebgraph) getWebgraphConnector().optimize(size);
     }
     
     /**

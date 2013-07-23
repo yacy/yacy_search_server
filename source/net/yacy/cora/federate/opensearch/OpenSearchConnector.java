@@ -181,7 +181,7 @@ public class OpenSearchConnector {
         if (sb == null) {
             return false;
         }
-        final SolrConnector connector = sb.index.fulltext().getWebgraphConnector();
+        final SolrConnector connector = sb.index.fulltext().writeToWebgraph() ? null : sb.index.fulltext().getWebgraphConnector();
         // check if needed Solr fields are available (selected)
         if (connector == null) {
             ConcurrentLog.severe("OpenSearchConnector.Discover", "Error on connecting to embedded Solr webgraph index");

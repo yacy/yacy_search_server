@@ -74,7 +74,6 @@ import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.ISO639;
-import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.StorageQueueEntry;
@@ -111,12 +110,11 @@ public class Segment {
     public static final ReferenceFactory<CitationReference> citationReferenceFactory = new CitationReferenceFactory();
     public static final ByteOrder wordOrder = Base64Order.enhancedCoder;
 
-    private   final ConcurrentLog                            log;
+    private   final ConcurrentLog                  log;
     private   final File                           segmentPath;
     protected final Fulltext                       fulltext;
     protected       IndexCell<WordReference>       termIndex;
     protected       IndexCell<CitationReference>   urlCitationIndex;
-    protected boolean writeWebgraph;
     private   WorkflowProcessor<StorageQueueEntry> indexingPutDocumentProcessor;
 
     /**
@@ -135,7 +133,6 @@ public class Segment {
         this.fulltext = new Fulltext(segmentPath, collectionConfiguration, webgraphConfiguration);
         this.termIndex = null;
         this.urlCitationIndex = null;
-        this.writeWebgraph = false;
 
         this.indexingPutDocumentProcessor = new WorkflowProcessor<StorageQueueEntry>(
                 "putDocument",
@@ -146,14 +143,6 @@ public class Segment {
                 10,
                 null,
                 1);
-    }
-    
-    public void writeWebgraph(boolean check) {
-        this.writeWebgraph = check;
-    }
-    
-    public boolean writeToWebgraph() {
-        return this.writeWebgraph;
     }
     
     public boolean connectedRWI() {
@@ -317,7 +306,7 @@ public class Segment {
             this.externalHosts = new RowHandleSet(6, Base64Order.enhancedCoder, 0);
             this.internalIDs = new RowHandleSet(12, Base64Order.enhancedCoder, 0);
             this.externalIDs = new RowHandleSet(12, Base64Order.enhancedCoder, 0);
-            if (writeToWebgraph()) {
+            if (Segment.this.fulltext.writeToWebgraph()) {
                 // reqd the references from the webgraph
                 SolrConnector webgraph = Segment.this.fulltext.getWebgraphConnector();
                 webgraph.commit(true);
@@ -670,7 +659,7 @@ public class Segment {
         // STORE TO SOLR
         String error = null;
         this.putDocumentInQueue(vector);
-        if (this.writeWebgraph) {
+        if (this.fulltext.writeToWebgraph()) {
             tryloop: for (int i = 0; i < 20; i++) {
                 try {
                     error = null;

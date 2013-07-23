@@ -279,6 +279,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     public int postprocessing(Segment segment) {
         if (!this.contains(WebgraphSchema.process_sxt)) return 0;
         if (!segment.connectedCitation()) return 0;
+        if (!segment.fulltext().writeToWebgraph()) return 0;
         SolrConnector connector = segment.fulltext().getWebgraphConnector();
         // that means we must search for those entries.
         connector.commit(true); // make sure that we have latest information that can be found

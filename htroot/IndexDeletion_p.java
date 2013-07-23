@@ -187,7 +187,7 @@ public class IndexDeletion_p {
             } else {
                 try {
                     defaultConnector.deleteByQuery(collection1Query);
-                    webgraphConnector.deleteByQuery(webgraphQuery);
+                    if (webgraphConnector != null) webgraphConnector.deleteByQuery(webgraphQuery);
                     sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, docs older than " + timedelete_number + " " + timedelete_unit);
                 } catch (final IOException e) {
                 }

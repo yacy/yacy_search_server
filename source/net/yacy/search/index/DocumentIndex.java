@@ -77,7 +77,7 @@ public class DocumentIndex extends Segment {
                 false  // exceed134217727
                 );
         super.fulltext().connectLocalSolr();
-        super.writeWebgraph(true);
+        super.fulltext().writeWebgraph(true);
         this.callback = callback;
         this.queue = new LinkedBlockingQueue<DigestURI>(WorkflowProcessor.availableCPU * 300);
         this.worker = new Worker[WorkflowProcessor.availableCPU];

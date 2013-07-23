@@ -84,7 +84,7 @@ public class IndexFederated_p {
             }
 
             boolean webgraph = post.getBoolean(SwitchboardConstants.CORE_SERVICE_WEBGRAPH);
-            sb.index.writeWebgraph(webgraph);
+            sb.index.fulltext().writeWebgraph(webgraph);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, webgraph);
             
             boolean jena = post.getBoolean(SwitchboardConstants.CORE_SERVICE_JENA);
