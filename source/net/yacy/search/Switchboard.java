@@ -2720,7 +2720,7 @@ public final class Switchboard extends serverSwitch {
             return;
         }
 
-        if ( !profile.indexText() && !profile.indexMedia() ) {
+        if ( profile != null && !profile.indexText() && !profile.indexMedia() ) {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
             addURLtoErrorDB(
                 url,
