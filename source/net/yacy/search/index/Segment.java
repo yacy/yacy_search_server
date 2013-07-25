@@ -333,7 +333,7 @@ public class Segment {
                 } catch (final InterruptedException e) {
                     ConcurrentLog.logException(e);
                 }
-            } else {
+            } else if (connectedCitation()) {
                 // read the references from the citation index
                 ReferenceContainer<CitationReference> references;
                 references = urlCitation().get(id, null);
