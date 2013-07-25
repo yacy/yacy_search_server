@@ -157,7 +157,7 @@ public class ConfigUpdate_p {
                 sb.setConfig("update.cycle", Math.max(12, post.getLong("cycle", 168)));
                 sb.setConfig("update.blacklist", post.get("blacklist", ""));
                 sb.setConfig("update.concept", ("any".equals(post.get("releaseType", "any"))) ? "any" : "main");
-                sb.setConfig("update.onlySignedFiles", (post.getBoolean("onlySignedFiles")) ? "1" : "0");
+                sb.setConfig("update.onlySignedFiles", (post.getBoolean("onlySignedFiles", true)) ? "1" : "0");
             }
         }
 

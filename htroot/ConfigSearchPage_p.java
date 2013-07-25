@@ -59,34 +59,34 @@ public class ConfigSearchPage_p {
                 // store this call as api call
                 sb.tables.recordAPICall(post, "ConfigPortal.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "new portal design. greeting: " + newGreeting);
 
-                sb.setConfig("publicTopmenu", post.getBoolean("publicTopmenu"));
-                sb.setConfig("search.options", post.getBoolean("search.options"));
+                sb.setConfig("publicTopmenu", post.getBoolean("publicTopmenu", false));
+                sb.setConfig("search.options", post.getBoolean("search.options", false));
 
-                sb.setConfig("search.text", post.getBoolean("search.text"));
-                sb.setConfig("search.image", post.getBoolean("search.image"));
-                sb.setConfig("search.audio", post.getBoolean("search.audio"));
-                sb.setConfig("search.video", post.getBoolean("search.video"));
-                sb.setConfig("search.app", post.getBoolean("search.app"));
+                sb.setConfig("search.text", post.getBoolean("search.text", false));
+                sb.setConfig("search.image", post.getBoolean("search.image", false));
+                sb.setConfig("search.audio", post.getBoolean("search.audio", false));
+                sb.setConfig("search.video", post.getBoolean("search.video", false));
+                sb.setConfig("search.app", post.getBoolean("search.app", false));
 
-                sb.setConfig("search.result.show.date", post.getBoolean("search.result.show.date"));
-                sb.setConfig("search.result.show.size", post.getBoolean("search.result.show.size"));
-                sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata"));
-                sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser"));
-                sb.setConfig("search.result.show.citation", post.getBoolean("search.result.show.citation"));
-                sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures"));
-                sb.setConfig("search.result.show.cache", post.getBoolean("search.result.show.cache"));
-                sb.setConfig("search.result.show.proxy", post.getBoolean("search.result.show.proxy"));
-                sb.setConfig("search.result.show.hostbrowser", post.getBoolean("search.result.show.hostbrowser"));
-                sb.setConfig("search.result.show.tags", post.getBoolean("search.result.show.tags"));
+                sb.setConfig("search.result.show.date", post.getBoolean("search.result.show.date", false));
+                sb.setConfig("search.result.show.size", post.getBoolean("search.result.show.size", false));
+                sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata", false));
+                sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser", false));
+                sb.setConfig("search.result.show.citation", post.getBoolean("search.result.show.citation", false));
+                sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures", false));
+                sb.setConfig("search.result.show.cache", post.getBoolean("search.result.show.cache", false));
+                sb.setConfig("search.result.show.proxy", post.getBoolean("search.result.show.proxy", false));
+                sb.setConfig("search.result.show.hostbrowser", post.getBoolean("search.result.show.hostbrowser", false));
+                sb.setConfig("search.result.show.tags", post.getBoolean("search.result.show.tags", false));
 
                 // construct navigation String
                 String nav = "";
-                if (post.getBoolean("search.navigation.filetype")) nav += "filetype,";
-                if (post.getBoolean("search.navigation.protocol")) nav += "protocol,";
-                if (post.getBoolean("search.navigation.hosts")) nav += "hosts,";
-                if (post.getBoolean("search.navigation.authors")) nav += "authors,";
-                if (post.getBoolean("search.navigation.namespace")) nav += "namespace,";
-                if (post.getBoolean("search.navigation.topics")) nav += "topics,";
+                if (post.getBoolean("search.navigation.filetype", false)) nav += "filetype,";
+                if (post.getBoolean("search.navigation.protocol", false)) nav += "protocol,";
+                if (post.getBoolean("search.navigation.hosts", false)) nav += "hosts,";
+                if (post.getBoolean("search.navigation.authors", false)) nav += "authors,";
+                if (post.getBoolean("search.navigation.namespace", false)) nav += "namespace,";
+                if (post.getBoolean("search.navigation.topics", false)) nav += "topics,";
                 if (nav.endsWith(",")) nav = nav.substring(0, nav.length() - 1);
                 sb.setConfig("search.navigation", nav);
             }

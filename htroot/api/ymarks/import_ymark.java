@@ -62,7 +62,7 @@ public class import_ymark {
         	boolean merge = false;
         	boolean empty = false;
         	final String indexing = post.get("indexing", "off");
-        	final boolean medialink = post.getBoolean("medialink");
+        	final boolean medialink = post.getBoolean("medialink", false);
 
         	if(post.containsKey("autotag") && !post.get("autotag", "off").equals("off")) {
         		autotag = true;

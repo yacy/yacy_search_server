@@ -444,13 +444,6 @@ public class serverObjects implements Serializable, Cloneable {
         }
     }
 
-    public boolean getBoolean(final String key) {
-        String s = removeByteOrderMark(get(key));
-        if (s == null) return false;
-        s = s.toLowerCase();
-        return s.equals("true") || s.equals("on") || s.equals("1");
-    }
-
     public boolean getBoolean(final String key, final boolean dflt) {
         String s = removeByteOrderMark(get(key));
         if (s == null) return dflt;

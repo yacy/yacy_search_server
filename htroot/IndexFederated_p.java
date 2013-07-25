@@ -48,7 +48,7 @@ public class IndexFederated_p {
 
         if (post != null && post.containsKey("set")) {
             //yacy
-            boolean post_core_rwi = post.getBoolean(SwitchboardConstants.CORE_SERVICE_RWI);
+            boolean post_core_rwi = post.getBoolean(SwitchboardConstants.CORE_SERVICE_RWI, false);
             final boolean previous_core_rwi = sb.index.connectedRWI() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, false);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, post_core_rwi);
             if (previous_core_rwi && !post_core_rwi) sb.index.disconnectRWI(); // switch off
@@ -58,7 +58,7 @@ public class IndexFederated_p {
                 sb.index.connectRWI(wordCacheMaxCount, fileSizeMax);
             } catch (final IOException e) { ConcurrentLog.logException(e); } // switch on
 
-            boolean post_core_citation = post.getBoolean(SwitchboardConstants.CORE_SERVICE_CITATION);
+            boolean post_core_citation = post.getBoolean(SwitchboardConstants.CORE_SERVICE_CITATION, false);
             final boolean previous_core_citation = sb.index.connectedCitation() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_CITATION, post_core_citation);
             if (previous_core_citation && !post_core_citation) sb.index.disconnectCitation(); // switch off
@@ -68,7 +68,7 @@ public class IndexFederated_p {
                 sb.index.connectCitation(wordCacheMaxCount, fileSizeMax);
             } catch (final IOException e) { ConcurrentLog.logException(e); } // switch on
 
-            boolean post_core_fulltext = post.getBoolean(SwitchboardConstants.CORE_SERVICE_FULLTEXT);
+            boolean post_core_fulltext = post.getBoolean(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true);
             final boolean previous_core_fulltext = sb.index.fulltext().connectedLocalSolr() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, false);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_FULLTEXT, post_core_fulltext);
 
@@ -83,17 +83,17 @@ public class IndexFederated_p {
                 try { sb.index.fulltext().connectLocalSolr(); } catch (final IOException e) { ConcurrentLog.logException(e); }
             }
 
-            boolean webgraph = post.getBoolean(SwitchboardConstants.CORE_SERVICE_WEBGRAPH);
+            boolean webgraph = post.getBoolean(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false);
             sb.index.fulltext().writeWebgraph(webgraph);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, webgraph);
             
-            boolean jena = post.getBoolean(SwitchboardConstants.CORE_SERVICE_JENA);
+            boolean jena = post.getBoolean(SwitchboardConstants.CORE_SERVICE_JENA, false);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_JENA, jena);
             
             // solr
             final boolean solrRemoteWasOn = sb.index.fulltext().connectedRemoteSolr() && env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, true);
             String solrurls = post.get("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr"));
-            final boolean solrRemoteIsOnAfterwards = post.getBoolean("solr.indexing.solrremote") & solrurls.length() > 0;
+            final boolean solrRemoteIsOnAfterwards = post.getBoolean("solr.indexing.solrremote", false) & solrurls.length() > 0;
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, solrRemoteIsOnAfterwards);
             final BufferedReader r = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(UTF8.getBytes(solrurls))));
             final StringBuilder s = new StringBuilder();
@@ -148,7 +148,7 @@ public class IndexFederated_p {
                 ConcurrentLog.severe("IndexFederated_p", "change of solr connection failed", e);
             }
             
-            boolean lazy = post.getBoolean("solr.indexing.lazy");
+            boolean lazy = post.getBoolean("solr.indexing.lazy", true);
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, lazy);
         }
 
