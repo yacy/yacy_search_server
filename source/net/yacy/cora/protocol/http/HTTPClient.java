@@ -344,7 +344,12 @@ public class HTTPClient {
     public byte[] GETbytes(final MultiProtocolURI url, final int maxBytes) throws IOException {
         final boolean localhost = Domains.isLocalhost(url.getHost());
         final String urix = url.toNormalform(true);
-        final HttpGet httpGet = new HttpGet(urix);
+        HttpGet httpGet = null;
+        try {
+            httpGet = new HttpGet(urix);
+        } catch (IllegalArgumentException e) {
+            throw new IOException(e.getMessage()); // can be caused  at java.net.URI.create()
+        }
         httpGet.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         return getContentBytes(httpGet, url.getHost(), maxBytes);
@@ -361,7 +366,13 @@ public class HTTPClient {
     public void GET(final String uri) throws IOException {
         if (this.currentRequest != null) throw new IOException("Client is in use!");
         final MultiProtocolURI url = new MultiProtocolURI(uri);
-        final HttpGet httpGet = new HttpGet(url.toNormalform(true));
+        final String urix = url.toNormalform(true);
+        HttpGet httpGet = null;
+        try {
+            httpGet = new HttpGet(urix);
+        } catch (IllegalArgumentException e) {
+            throw new IOException(e.getMessage()); // can be caused  at java.net.URI.create()
+        }
         httpGet.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         this.currentRequest = httpGet;
