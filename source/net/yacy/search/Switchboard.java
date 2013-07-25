@@ -2875,7 +2875,6 @@ public final class Switchboard extends serverSwitch {
      * @param url
      * @return null if this was ok. If this failed, return a string with a fail reason
      */
-    @SuppressWarnings("deprecation")
     public String stackUrl(CrawlProfile profile, DigestURI url) {
         
         byte[] handle = ASCII.getBytes(profile.handle());
@@ -2887,10 +2886,12 @@ public final class Switchboard extends serverSwitch {
         // stacking may fail because of double occurrences of that url. Therefore
         // we must wait here until the url has actually disappeared
         int t = 100;
-        while (t-- > 0 && this.index.exists(ASCII.String(urlhash))) {
+        Collection<String> ids = new ArrayList<String>(1); ids.add(ASCII.String(urlhash));
+        while (t-- > 0 && this.index.exists(ids).size() > 0) {
             try {Thread.sleep(100);} catch (final InterruptedException e) {}
             ConcurrentLog.fine("Switchboard", "STACKURL: waiting for deletion, t=" + t);
             if (t == 20) this.index.fulltext().commit(true);
+            if (t == 40) this.index.fulltext().commit(false);
         }
         
         // special handling of ftp protocol
