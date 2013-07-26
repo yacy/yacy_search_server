@@ -201,7 +201,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         final DigestURI digestURI = md.url();
         boolean allAttr = this.isEmpty();
 
-        if (allAttr || contains(CollectionSchema.failreason_s)) add(doc, CollectionSchema.failreason_s, "");
         add(doc, CollectionSchema.id, ASCII.String(md.hash()));
         String us = digestURI.toNormalform(true);
         add(doc, CollectionSchema.sku, us);
@@ -354,7 +353,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
         
         add(doc, CollectionSchema.id, id);
-        if (allAttr || contains(CollectionSchema.failreason_s)) add(doc, CollectionSchema.failreason_s, ""); // overwrite a possible fail reason (in case that there was a fail reason before)
         String docurl = digestURI.toNormalform(true);
         add(doc, CollectionSchema.sku, docurl);
 
