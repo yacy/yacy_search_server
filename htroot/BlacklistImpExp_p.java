@@ -54,7 +54,7 @@ public class BlacklistImpExp_p {
         ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
 
         // loading all blacklist files located in the directory
-        final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath);
+        final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);
 
         String blacklistToUse = null;
         final serverObjects prop = new serverObjects();
