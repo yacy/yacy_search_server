@@ -56,6 +56,7 @@ import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 public class Blacklist {
 
@@ -630,7 +631,7 @@ public class Blacklist {
     }
 
     private static File DHTCacheFile(final BlacklistType type) {
-        String BLACKLIST_DHT_CACHEFILE_NAME = "DATA/LISTS/blacklist_" + type.name() + "_Cache.ser";
+        final String BLACKLIST_DHT_CACHEFILE_NAME = SwitchboardConstants.LISTS_PATH_DEFAULT + "/blacklist_" + type.name() + "_Cache.ser";
         return new File(Switchboard.getSwitchboard().dataPath, BLACKLIST_DHT_CACHEFILE_NAME);
     }
 

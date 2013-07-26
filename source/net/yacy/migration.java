@@ -99,7 +99,7 @@ public class migration {
      * copy skins from the release to DATA/SKINS.
      */
     public static void installSkins(final Switchboard sb){
-        final File skinsPath = sb.getDataPath("skinPath", "DATA/SKINS");
+        final File skinsPath = sb.getDataPath("skinPath", SwitchboardConstants.SKINS_PATH_DEFAULT);
         final File defaultSkinsPath = new File(sb.getAppPath(), "skins");
         if (defaultSkinsPath.exists()) {
             final List<String> skinFiles = FileUtils.getDirListing(defaultSkinsPath.getAbsolutePath());
@@ -118,7 +118,7 @@ public class migration {
         if(skin.equals("")){
             skin="default";
         }
-        final File skinsDir=sb.getDataPath("skinPath", "DATA/SKINS");
+        final File skinsDir=sb.getDataPath("skinPath", SwitchboardConstants.SKINS_PATH_DEFAULT);
         final File skinFile=new File(skinsDir, skin+".css");
         final File htdocsPath=new File(sb.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT), "env");
         final File styleFile=new File(htdocsPath, "style.css");

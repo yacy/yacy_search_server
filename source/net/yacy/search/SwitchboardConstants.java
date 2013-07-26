@@ -521,4 +521,9 @@ public final class SwitchboardConstants {
     public static final String GREEDYLEARNING_ENABLED              = "greedylearning.enabled";
     public static final String GREEDYLEARNING_LIMIT_DOCCOUNT       = "greedylearning.limit.doccount";
     public static final String GREEDYLEARNING_ACTIVE               = "greedylearning.active";
+
+    /*
+     * Skins
+     */
+    public static final String SKINS_PATH_DEFAULT                  = "DATA/SKINS";
 }
