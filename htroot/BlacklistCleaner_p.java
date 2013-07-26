@@ -63,8 +63,6 @@ public class BlacklistCleaner_p {
     private static final String BLACKLISTS = "blacklists_";
     private static final String ENTRIES = "entries_";
 
-    private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
-
     public static final Class<?>[] supportedBLEngines = {
         Blacklist.class
     };
@@ -92,7 +90,7 @@ public class BlacklistCleaner_p {
                 }
             }
 
-            putBlacklists(prop, FileUtils.getDirListing(ListManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
+            putBlacklists(prop, FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER), blacklistToUse);
 
             if (blacklistToUse != null) {
                 prop.put("results", "1");
@@ -125,7 +123,7 @@ public class BlacklistCleaner_p {
             }
         } else {
             prop.put("results", "0");
-            putBlacklists(prop, FileUtils.getDirListing(ListManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
+            putBlacklists(prop, FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER), blacklistToUse);
         }
 
         return prop;
