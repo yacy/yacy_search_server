@@ -5,6 +5,7 @@ import java.util.List;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.ListManager;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -16,7 +17,7 @@ public class blacklists_p {
         final serverObjects prop = new serverObjects();
 
         ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
-        final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath);
+        final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);
         int blacklistCount=0;
 
         final String blackListName = (post == null) ? "" : post.get("listname", "");
