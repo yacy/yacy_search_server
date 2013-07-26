@@ -50,6 +50,7 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Seed;
+import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
@@ -68,8 +69,6 @@ public class sharedBlacklist_p {
     public static final int STATUS_URL_PROBLEM = 4;
     public static final int STATUS_WRONG_INVOCATION = 5;
     public static final int STATUS_PARSE_ERROR = 6;
-
-    private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
 
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
@@ -95,7 +94,7 @@ public class sharedBlacklist_p {
 
 
             // loading all blacklist files located in the directory
-            final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, BLACKLIST_FILENAME_FILTER);
+            final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);
 
             // List BlackLists
             int blacklistCount = 0;
