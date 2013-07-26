@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.TreeMap;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.ListManager;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Seed;
@@ -84,7 +85,10 @@ public class BlacklistImpExp_p {
                     hostList.remove(peername);
                     peerCount++;
                 }
-            } catch (final Exception e) {/* */}
+            } catch (final Exception e) {
+                // Log exception for debug purposes ("catch-all catch")
+                ConcurrentLog.logException(e);
+            }
             prop.put(DISABLED + "otherHosts", peerCount);
         }
 
@@ -93,10 +97,8 @@ public class BlacklistImpExp_p {
 
         int count = 0;
         for (String element : dirlist) {
-            if (element.endsWith(".black")) {
-                prop.putHTML("blackListNames_" + count + "_blackListName", element);
-                count++;
-            }
+            prop.putHTML("blackListNames_" + count + "_blackListName", element);
+            count++;
         }
         prop.put("blackListNames", count);
 
