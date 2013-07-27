@@ -837,7 +837,7 @@ indexControl.gzipBody = true
 indexControl.timeout = 60000
 indexDistribution.timeout = 60000
 indexTransfer.timeout = 120000
-indexTransfer.maxload = 2.5
+indexTransfer.maxload = 2.2
 
 # defining max. allowed amount of open files during index- transfer/distribution
 indexDistribution.maxOpenFiles = 800
