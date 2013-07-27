@@ -182,7 +182,12 @@ public class CrawlResults {
             while (i.hasNext()) {
                 entry = i.next();
                 try {
-                    urle = sb.index.fulltext().getMetadata(UTF8.getBytes(entry.getKey()));
+                    byte[] urlhash = UTF8.getBytes(entry.getKey());
+                    urle = sb.index.fulltext().getMetadata(urlhash);
+                    if (urle == null) {
+                        sb.index.fulltext().commit(true);
+                        urle = sb.index.fulltext().getMetadata(urlhash);
+                    }
                     if (urle == null) {
                         ConcurrentLog.warn("PLASMA", "CrawlResults: URL not in index with url hash " + entry.getKey());
                         urlstr = null;
