@@ -251,6 +251,7 @@ public class Tables implements Iterable<String> {
                 try {
                     getHeap(tablename);
                 } catch (final IOException e) {
+                    ConcurrentLog.logException(e);
                 }
             }
         }
