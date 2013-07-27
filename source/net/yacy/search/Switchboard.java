@@ -1045,7 +1045,7 @@ public final class Switchboard extends serverSwitch {
                 Long.MAX_VALUE,
                 30000,
                 Long.MAX_VALUE),
-            8000);
+            10000);
         deployThread(
             SwitchboardConstants.INDEX_DIST,
             "DHT Distribution",
