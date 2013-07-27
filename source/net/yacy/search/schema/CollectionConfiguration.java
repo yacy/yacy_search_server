@@ -1005,11 +1005,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 BlockingQueue<String> ids = connector.concurrentIDsByQuery(CollectionSchema.host_s.getSolrFieldName() + ":\"" + host + "\"", 0, 1000000, 600000);
                 String id;
                 while ((id = ids.take()) != AbstractSolrConnector.POISON_ID) {
-                    crt.put(ASCII.getBytes(id), new double[]{0.0d,0.0d}); //{old value, new value}
+                    this.crt.put(ASCII.getBytes(id), new double[]{0.0d,0.0d}); //{old value, new value}
                 }
             } catch (final InterruptedException e2) {
             }
-            this.cr_host_count = crt.size();
+            this.cr_host_count = this.crt.size();
             double initval = 1.0d / cr_host_count;
             for (Map.Entry<byte[], double[]> entry: this.crt.entrySet()) entry.getValue()[0] = initval;
             this.internal_links_counter = new RowHandleMap(12, Base64Order.enhancedCoder, 8, 100, "internal_links_counter");
@@ -1019,8 +1019,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
          * @return
          */
         public Map<byte[], CRV> normalize() {
-            TreeMap<Double, List<byte[]>> reorder = new TreeMap<Double, List<byte[]>>();
-            for (Map.Entry<byte[], double[]> entry: crt.entrySet()) {
+            final TreeMap<Double, List<byte[]>> reorder = new TreeMap<Double, List<byte[]>>();
+            for (Map.Entry<byte[], double[]> entry: this.crt.entrySet()) {
                 Double d = entry.getValue()[0];
                 List<byte[]> ds = reorder.get(d);
                 if (ds == null) {ds = new ArrayList<byte[]>(); reorder.put(d, ds);}
@@ -1103,7 +1103,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             boolean convergence = true;
             double df = (1.0d - damping) / this.cr_host_count;
             try {
-                for (Map.Entry<byte[], double[]> entry: crt.entrySet()) {
+                for (Map.Entry<byte[], double[]> entry: this.crt.entrySet()) {
                     byte[] id = entry.getKey();
                     ReferenceReport rr = this.rrCache.getReferenceReport(id, false);
                     // sum up the cr of the internal links
@@ -1112,7 +1112,14 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     for (byte[] iid: iids) {
                         int ilc = getInternalLinks(iid);
                         if (ilc > 0) { // if (ilc == 0) then the reference report is wrong!
-                            ncr += this.crt.get(iid)[0] / ilc;
+                            double[] d = this.crt.get(iid);
+                            // d[] could be empty at some situations
+                            if (d.length > 0) {
+                                ncr += d[0] / ilc;
+                            } else {
+                                // Output a warning that d[] is empty
+                                ConcurrentLog.warn("COLLECTION", "d[] is empty, iid="  + iid);
+                            }
                         }
                     }
                     ncr = df + damping * ncr;
@@ -1120,7 +1127,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     entry.getValue()[1] = ncr;
                 }
                 // after the loop, replace the old value with the new value in crt
-                for (Map.Entry<byte[], double[]> entry: crt.entrySet()) {
+                for (Map.Entry<byte[], double[]> entry: this.crt.entrySet()) {
                     entry.getValue()[0] = entry.getValue()[1];
                 }
             } catch (final IOException e) {
@@ -1189,7 +1196,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param httpstatus
      * @throws IOException
      */
-    public SolrInputDocument err(final DigestURI digestURI, String[] collections, final String failReason, final FailType failType, final int httpstatus) throws IOException {
+    public SolrInputDocument err(final DigestURI digestURI, final String[] collections, final String failReason, final FailType failType, final int httpstatus) throws IOException {
         final SolrInputDocument solrdoc = new SolrInputDocument();
         add(solrdoc, CollectionSchema.id, ASCII.String(digestURI.hash()));
         add(solrdoc, CollectionSchema.sku, digestURI.toNormalform(true));
