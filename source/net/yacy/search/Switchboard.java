@@ -3475,7 +3475,6 @@ public final class Switchboard extends serverSwitch {
                         }
                     }
                 } catch (final Throwable e) {
-                    ConcurrentLog.logException(e);
                 }
             }
         }.start();
