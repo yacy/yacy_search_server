@@ -149,7 +149,7 @@ public class migration {
 		}
 	}
     public static void migrateBookmarkTagsDB(final Switchboard sb){
-        sb.bookmarksDB.close();
+        if (sb.bookmarksDB != null) sb.bookmarksDB.close();
         final File tagsDBFile=new File(sb.workPath, "bookmarkTags.db");
         if(tagsDBFile.exists()){
             delete(tagsDBFile);
