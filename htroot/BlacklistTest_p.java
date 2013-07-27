@@ -38,6 +38,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -47,7 +48,7 @@ public class BlacklistTest_p {
 
         // initialize the list manager
         ListManager.switchboard = (Switchboard) env;
-        ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
+        ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", SwitchboardConstants.LISTS_PATH_DEFAULT));
 
         final serverObjects prop = new serverObjects();
         prop.putHTML("blacklistEngine", Blacklist.getEngineInfo());

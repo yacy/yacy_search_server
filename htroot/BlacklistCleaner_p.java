@@ -52,6 +52,7 @@ import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistError;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -72,7 +73,7 @@ public class BlacklistCleaner_p {
 
         // initialize the list manager
         ListManager.switchboard = (Switchboard) env;
-        ListManager.listsPath = new File(env.getDataPath(), env.getConfig("listManager.listsPath", "DATA/LISTS"));
+        ListManager.listsPath = new File(env.getDataPath(), env.getConfig("listManager.listsPath", SwitchboardConstants.LISTS_PATH_DEFAULT));
         String blacklistToUse = null;
 
         prop.put(DISABLED+"checked", "1");
