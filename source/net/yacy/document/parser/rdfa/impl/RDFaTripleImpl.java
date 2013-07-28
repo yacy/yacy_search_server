@@ -38,6 +38,7 @@ public class RDFaTripleImpl{
 			TransformerException, TransformerConfigurationException {
 
 		BufferedReader bufReader = new BufferedReader(in);
+                bufReader.mark(2048); // mark position for following reset
 		String readLine = bufReader.readLine();
 		if (!readLine.toLowerCase().contains("<!doctype")){
 			bufReader.reset();

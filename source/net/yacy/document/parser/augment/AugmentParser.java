@@ -37,11 +37,6 @@ public class AugmentParser extends AbstractParser implements Parser {
     public Document[] parse(DigestURI url, String mimeType, String charset, InputStream source) throws Parser.Failure, InterruptedException {
 
         Document[] htmlDocs = this.rdfaParser.parse(url, mimeType, charset, source);
-        try {
-            source.reset();
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-        }
 
         for (final Document doc : htmlDocs) {
             /* analyze(doc, url, mimeType, charset);  // enrich document text */
