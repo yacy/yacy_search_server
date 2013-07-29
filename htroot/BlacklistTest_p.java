@@ -29,26 +29,19 @@
 // javac -classpath .:../classes Blacklist_p.java
 // if the shell's current path is HTROOT
 
-import java.io.File;
 import java.net.MalformedURLException;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.data.ListManager;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class BlacklistTest_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
-
-        // initialize the list manager
-        ListManager.switchboard = (Switchboard) env;
-        ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", SwitchboardConstants.LISTS_PATH_DEFAULT));
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
         prop.putHTML("blacklistEngine", Blacklist.getEngineInfo());

@@ -29,7 +29,6 @@
 // javac -classpath .:../classes Blacklist_p.java
 // if the shell's current path is HTROOT
 
-import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
@@ -41,7 +40,6 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -50,10 +48,6 @@ public class BlacklistImpExp_p {
 
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
-
-        // initialize the list manager
-        ListManager.switchboard = (Switchboard) env;
-        ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", SwitchboardConstants.LISTS_PATH_DEFAULT));
 
         // loading all blacklist files located in the directory
         final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);

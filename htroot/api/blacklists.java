@@ -5,7 +5,6 @@ import java.util.List;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.ListManager;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -14,7 +13,6 @@ public class blacklists {
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final serverObjects prop = new serverObjects();
 
-        ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", SwitchboardConstants.LISTS_PATH_DEFAULT));
         final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath);
         int blacklistCount = 0;
 
