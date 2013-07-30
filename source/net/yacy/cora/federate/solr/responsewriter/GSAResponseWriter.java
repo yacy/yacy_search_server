@@ -22,6 +22,7 @@ package net.yacy.cora.federate.solr.responsewriter;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,7 +85,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
 
     // pre-select a set of YaCy schema fields for the solr searcher which should cause a better caching
     private static final CollectionSchema[] extrafields = new CollectionSchema[]{
-        CollectionSchema.id, CollectionSchema.sku, CollectionSchema.title, CollectionSchema.description,
+        CollectionSchema.id, CollectionSchema.sku, CollectionSchema.title, CollectionSchema.description_txt,
         CollectionSchema.last_modified, CollectionSchema.load_date_dt, CollectionSchema.size_i, CollectionSchema.language_s
     };
     
@@ -235,7 +236,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
             // write the R header for a search result
             writer.write("<R N=\"" + (resHead.offset + i + 1)  + "\"" + (i == 1 ? " L=\"2\"" : "")  + (mime != null && mime.length() > 0 ? " MIME=\"" + mime + "\"" : "") + ">"); writer.write(lb);
             //List<String> texts = new ArrayList<String>();
-            String description = "";
+            List<String> descriptions = new ArrayList<String>();
             int size = 0;
             boolean title_written = false; // the solr index may contain several; we take only the first which should be the visible tag in <title></title>
             for (IndexableField value: fields) {
@@ -264,9 +265,9 @@ public class GSAResponseWriter implements QueryResponseWriter {
                     title_written = true;
                     continue;
                 }
-                if (CollectionSchema.description.getSolrFieldName().equals(fieldName)) {
-                    description = value.stringValue();
-                    //texts.add(description);
+                if (CollectionSchema.description_txt.getSolrFieldName().equals(fieldName)) {
+                    descriptions.add(value.stringValue());
+                    //texts.adds(description);
                     continue;
                 }
                 if (CollectionSchema.last_modified.getSolrFieldName().equals(fieldName)) {
@@ -290,8 +291,8 @@ public class GSAResponseWriter implements QueryResponseWriter {
             }
             // compute snippet from texts
             List<String> snippet = urlhash == null ? null : snippets.get(urlhash);
-            OpensearchResponseWriter.solitaireTag(writer, GSAToken.S.name(), snippet == null || snippet.size() == 0 ? description : snippet.get(0));
-            OpensearchResponseWriter.solitaireTag(writer, GSAToken.GD.name(), description);
+            OpensearchResponseWriter.solitaireTag(writer, GSAToken.S.name(), snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : snippet.get(0)) : snippet.get(0));
+            OpensearchResponseWriter.solitaireTag(writer, GSAToken.GD.name(), descriptions.size() > 0 ? descriptions.get(0) : "");
             writer.write("<HAS><L/><C SZ=\""); writer.write(Integer.toString(size / 1024)); writer.write("k\" CID=\""); writer.write(urlhash); writer.write("\" ENC=\"UTF-8\"/></HAS>");
             if (YaCyVer == null) YaCyVer = yacyVersion.thisVersion().getName() + "/" + Switchboard.getSwitchboard().peers.mySeed().hash;
             OpensearchResponseWriter.solitaireTag(writer, GSAToken.ENT_SOURCE.name(), YaCyVer);

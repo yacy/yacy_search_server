@@ -75,8 +75,8 @@ public class Document {
     private       List<String> titles;          // the document titles, taken from title and/or h1 tag; shall appear as headline of search result
     private final StringBuilder creator;        // author or copyright
     private final String publisher;             // publisher
-    private final List<String>  sections;       // if present: more titles/headlines appearing in the document
-    private final StringBuilder description;    // an abstract, if present: short content description
+    private final List<String> sections;        // if present: more titles/headlines appearing in the document
+    private final List<String> descriptions;    // an abstract, if present: short content description
     private Object text;                        // the clear text, all that is visible
     private final Map<DigestURI, Properties> anchors; // all links embedded as clickeable entities (anchor tags)
     private final Map<DigestURI, String> rss;   // all embedded rss feeds
@@ -101,7 +101,7 @@ public class Document {
                     final String[] keywords,
                     final List<String> titles,
                     final String author, final String publisher,
-                    final String[] sections, final String abstrct,
+                    final String[] sections, final List<String> abstrcts,
                     final double lon, final double lat,
                     final Object text,
                     final Map<DigestURI, Properties> anchors,
@@ -118,7 +118,7 @@ public class Document {
         this.creator = (author == null) ? new StringBuilder(0) : new StringBuilder(author);
         this.sections =  new LinkedList<String>() ;
         if (sections != null) this.sections.addAll(Arrays.asList(sections));
-        this.description = (abstrct == null) ? new StringBuilder(0) : new StringBuilder(abstrct);
+        this.descriptions = (abstrcts == null) ? new ArrayList<String>() : abstrcts;
         if (lat >= -90.0d && lat <= 90.0d && lon >= -180.0d && lon <= 180.0d) {
             this.lon = lon;
             this.lat = lat;
@@ -288,10 +288,9 @@ dc_rights
         return sb.substring(0, sb.length() - 1);
     }
 
-    public String dc_description() {
-        if (this.description == null)
-            return dc_title();
-        return this.description.toString();
+    public String[] dc_description() {
+        if (descriptions == null) return new String[0];
+        return this.descriptions.toArray(new String[this.descriptions.size()]);
     }
 
     public String dc_publisher() {
@@ -646,9 +645,7 @@ dc_rights
             this.sections.addAll(doc.sections);
             this.titles.addAll(doc.titles());
             this.keywords.addAll(doc.getKeywords());
-
-            if (this.description.length() > 0) this.description.append('\n');
-            this.description.append(doc.dc_description());
+            for (String d: doc.dc_description()) this.descriptions.add(d);
 
             if (!(this.text instanceof ByteArrayOutputStream)) {
                 this.text = new ByteArrayOutputStream();
@@ -779,7 +776,7 @@ dc_rights
         final StringBuilder      authors       = new StringBuilder(80);
         final StringBuilder      publishers    = new StringBuilder(80);
         final StringBuilder      subjects      = new StringBuilder(80);
-        final StringBuilder      description   = new StringBuilder(80);
+        final List<String>       descriptions  = new ArrayList<String>();
         final Collection<String> titles        = new LinkedHashSet<String>();
         final Collection<String> sectionTitles = new LinkedHashSet<String>();
         final Map<DigestURI, Properties> anchors = new HashMap<DigestURI, Properties>();
@@ -810,9 +807,7 @@ dc_rights
 
             titles.addAll(doc.titles());
             sectionTitles.addAll(Arrays.asList(doc.getSectionTitles()));
-
-            if (description.length() > 0) description.append("\n");
-            description.append(doc.dc_description());
+            for (String d: doc.dc_description()) descriptions.add(d);
 
             if (doc.getTextLength() > 0) {
                 if (docTextLength > 0) content.write('\n');
@@ -851,7 +846,7 @@ dc_rights
                 authors.toString(),
                 publishers.toString(),
                 sectionTitles.toArray(new String[sectionTitles.size()]),
-                description.toString(),
+                descriptions,
                 lon, lat,
                 content.getBytes(),
                 anchors,

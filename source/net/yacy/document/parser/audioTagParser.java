@@ -124,44 +124,36 @@ public class audioTagParser extends AbstractParser implements Parser {
             titles.add(filename);
              
             // text
+            final List<String> descriptions = new ArrayList<String>(7);
             final StringBuilder text = new StringBuilder(500);
             final char space = ' ';
-            text.append(tag.getFirst(FieldKey.ARTIST));
-            text.append(space);   
-            text.append(tag.getFirst(FieldKey.ALBUM));
-            text.append(space);
-            text.append(tag.getFirst(FieldKey.TITLE));
-            text.append(space);
-            text.append(tag.getFirst(FieldKey.COMMENT));
-            text.append(space);
-            text.append(tag.getFirst(FieldKey.LYRICS));
-            text.append(space);
-            text.append(tag.getFirst(FieldKey.TAGS));
-            text.append(space);
-            text.append(tag.getFirst(FieldKey.GENRE));
-            text.append(space);
+            String field = tag.getFirst(FieldKey.ARTIST);
+            descriptions.add(FieldKey.ARTIST.name() + ": " + field);
+            text.append(field); text.append(space);
+            field = tag.getFirst(FieldKey.ALBUM); 
+            descriptions.add(FieldKey.ALBUM.name() + ": " + field);
+            text.append(field); text.append(space);
+            field = tag.getFirst(FieldKey.TITLE); 
+            descriptions.add(FieldKey.TITLE.name() + ": " + field);
+            text.append(field); text.append(space);
+            field = tag.getFirst(FieldKey.COMMENT);
+            descriptions.add(FieldKey.COMMENT.name() + ": " + field);
+            text.append(field); text.append(space);
+            field = tag.getFirst(FieldKey.LYRICS);
+            descriptions.add(FieldKey.LYRICS.name() + ": " + field);
+            text.append(field); text.append(space);
+            field = tag.getFirst(FieldKey.TAGS);
+            descriptions.add(FieldKey.TAGS.name() + ": " + field);
+            text.append(field); text.append(space);
+            field = tag.getFirst(FieldKey.GENRE);
+            descriptions.add(FieldKey.GENRE.name() + ": " + field);
+            text.append(field); text.append(space);
             text.append(location.toTokens());
             
             // dc:subject
             final String[] subject = new String[1];
             subject[0] = tag.getFirst(FieldKey.GENRE);
 
-            // description
-            final StringBuilder desc = new StringBuilder(500);
-            final String sep = " - ";
-            int count = desc.length();
-            desc.append(tag.getFirst(FieldKey.ARTIST));
-            if(desc.length() > count) {
-            	desc.append(sep);
-            	count = desc.length();
-            }
-            desc.append(tag.getFirst(FieldKey.ALBUM));
-            if(desc.length() > count) {
-            	desc.append(sep);
-            	count = desc.length();
-            }
-            desc.append(tag.getFirst(FieldKey.TITLE));
-            
             docs = new Document[]{new Document(
                     location,
                     mime,
@@ -173,7 +165,7 @@ public class audioTagParser extends AbstractParser implements Parser {
                     tag.getFirst(FieldKey.ARTIST), // author
                     location.getHost(), // publisher
                     null, // sections
-                    desc.toString(), // abstrct
+                    descriptions, // abstrct
                     0.0f, 0.0f, // lon, lat
                     text.toString(), // text
                     null,

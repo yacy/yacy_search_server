@@ -75,7 +75,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     ip_s(SolrType.string, true, true, false, false, false, "ip of host of url (after DNS lookup)"),
     author(SolrType.text_general, true, true, false, false, true, "content of author-tag"),
     author_sxt(SolrType.string, true, true, true, false, false, "content of author-tag as copy-field from author. This is used for facet generation"),
-    description(SolrType.text_general, true, true, false, false, true, "content of description-tag"),
+    description_txt(SolrType.text_general, true, true, true, false, true, "content of description-tag(s)"),
     description_exact_signature_l(SolrType.num_long, true, true, false, false, false, "the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of description, used to compute description_unique_b"),
     description_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if description is unique in the whole index; if yes and another document appears with same description, the unique-flag is set to false"),
     keywords(SolrType.text_general, true, true, false, false, true, "content of keywords tag; words are separated by space"),

@@ -2916,7 +2916,7 @@ public final class Switchboard extends serverSwitch {
         }
         
         final String title = scraper == null ? url.toNormalform(true) : scraper.dc_title();
-        final String description = scraper.dc_description();
+        final String description = scraper.dc_description().length > 0 ? scraper.dc_description()[0] : "";
 
         // add the url to the crawl stack
         this.crawler.removePassive(handle); // if there is an old entry, delete it

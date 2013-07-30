@@ -590,12 +590,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             }
         }
 
-        if (this.titles.size() == 0) {
-            // take description tag
-            s = getDescription();
-            if (!s.isEmpty()) this.titles.add(s);
-        }
-
         // extract headline from file name
         ArrayList<String> t = new ArrayList<String>();
         t.addAll(this.titles);
@@ -768,11 +762,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return false;
     }
 
-    public String getDescription() {
+    public List<String> getDescriptions() {
         String s = this.metas.get("description");
         if (s == null) s = this.metas.get("dc.description");
-        if (s == null) return EMPTY_STRING;
-        return s;
+        List<String> descriptions = new ArrayList<String>();
+        if (s == null) return descriptions;
+        descriptions.add(s);
+        return descriptions;
     }
 
     public String getContentType() {

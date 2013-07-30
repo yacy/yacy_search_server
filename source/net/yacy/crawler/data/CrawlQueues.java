@@ -527,7 +527,7 @@ public class CrawlQueues {
                         ASCII.getBytes(hash),
                         url,
                         (referrer == null) ? null : referrer.hash(),
-                        item.getDescription(),
+                        item.getDescriptions().size() > 0 ? item.getDescriptions().get(0) : "",
                         loaddate,
                         this.sb.crawler.defaultRemoteProfile.handle(),
                         0,

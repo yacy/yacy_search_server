@@ -28,6 +28,8 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
@@ -90,16 +92,10 @@ public class vsdParser extends AbstractParser implements Parser {
                 title = summary.getTitle();
             }
 
-            String abstrct = null;
-            abstrct = ((contents.length() > 80)? contents.substring(0, 80) : contents.trim()).
-                          replaceAll("\r\n"," ").
-                          replaceAll("\n"," ").
-                          replaceAll("\r"," ").
-                          replaceAll("\t"," ");
+            List<String> abstrct = new ArrayList<String>();
+            if (contents.length() > 0) abstrct.add(((contents.length() > 80) ? contents.substring(0, 80) : contents.trim()).replaceAll("\r\n"," ").replaceAll("\n"," ").replaceAll("\r"," ").replaceAll("\t"," "));
 
-            if (title == null) {
-                title = abstrct;
-            }
+            if (title == null) title = location.toNormalform(true);
 
            // As the result of parsing this function must return a plasmaParserDocument object
             return new Document[]{new Document(

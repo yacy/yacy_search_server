@@ -136,7 +136,8 @@ public class YJsonResponseWriter implements QueryResponseWriter {
             List<String> texts = new ArrayList<String>();
             MultiProtocolURI url = null;
             String urlhash = null;
-            String description = "", title = "";
+            List<String> descriptions = new ArrayList<String>();
+            String title = "";
             StringBuilder path = new StringBuilder(80);
             for (int j = 0; j < fieldc; j++) {
                 IndexableField value = fields.get(j);
@@ -166,8 +167,9 @@ public class YJsonResponseWriter implements QueryResponseWriter {
                     texts.add(title);
                     continue;
                 }
-                if (CollectionSchema.description.getSolrFieldName().equals(fieldName)) {
-                    description = value.stringValue();
+                if (CollectionSchema.description_txt.getSolrFieldName().equals(fieldName)) {
+                    String description = value.stringValue();
+                    descriptions.add(description);
                     texts.add(description);
                     continue;
                 }
@@ -212,7 +214,7 @@ public class YJsonResponseWriter implements QueryResponseWriter {
             solitaireTag(writer, "path", path.toString());
             solitaireTag(writer, "title", title.length() == 0 ? (texts.size() == 0 ? path.toString() : texts.get(0)) : title);
             List<String> snippet = urlhash == null ? null : snippets.get(urlhash);
-            writer.write("\"description\":\""); writer.write(serverObjects.toJSON(snippet == null || snippet.size() == 0 ? description : snippet.get(0))); writer.write("\"\n}\n");
+            writer.write("\"description\":\""); writer.write(serverObjects.toJSON(snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : "") : snippet.get(0))); writer.write("\"\n}\n");
             if (i < responseCount - 1) {
                 writer.write(",\n".toCharArray());
             }

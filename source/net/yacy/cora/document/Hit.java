@@ -27,6 +27,7 @@
 package net.yacy.cora.document;
 
 import java.util.Date;
+import java.util.List;
 
 public interface Hit {
 
@@ -70,7 +71,7 @@ public interface Hit {
     
     public String getLanguage();
     
-    public String getDescription();
+    public List<String> getDescriptions();
     
     public Date   getPubDate();
     

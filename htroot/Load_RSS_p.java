@@ -324,7 +324,7 @@ public class Load_RSS_p {
             if (author == null || author.isEmpty()) author = channel == null ? "" : channel.getCopyright();
             Date pubDate = channel == null ? null : channel.getPubDate();
             prop.putHTML("showitems_author", author == null ? "" : author);
-            prop.putHTML("showitems_description", channel == null ? "" : channel.getDescription());
+            prop.putHTML("showitems_description", channel == null ? "" : channel.getDescriptions().toString());
             prop.putHTML("showitems_language", channel == null ? "" : channel.getLanguage());
             prop.putHTML("showitems_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
             prop.putHTML("showitems_ttl", channel == null ? "" : channel.getTTL());
@@ -355,7 +355,7 @@ public class Load_RSS_p {
                     prop.putHTML("showitems_item_" + i + "_author", author == null ? "" : author);
                     prop.putHTML("showitems_item_" + i + "_title", item.getTitle());
                     prop.putHTML("showitems_item_" + i + "_link", messageurl.toNormalform(true));
-                    prop.putHTML("showitems_item_" + i + "_description", item.getDescription());
+                    prop.putHTML("showitems_item_" + i + "_description", item.getDescriptions().toString());
                     prop.putHTML("showitems_item_" + i + "_language", item.getLanguage());
                     prop.putHTML("showitems_item_" + i + "_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
                     i++;

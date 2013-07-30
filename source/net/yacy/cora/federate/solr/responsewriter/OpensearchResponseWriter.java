@@ -59,7 +59,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
 
     // pre-select a set of YaCy schema fields for the solr searcher which should cause a better caching
     private static final CollectionSchema[] extrafields = new CollectionSchema[]{
-        CollectionSchema.id, CollectionSchema.title, CollectionSchema.description, CollectionSchema.text_t,
+        CollectionSchema.id, CollectionSchema.title, CollectionSchema.description_txt, CollectionSchema.text_t,
         CollectionSchema.h1_txt, CollectionSchema.h2_txt, CollectionSchema.h3_txt, CollectionSchema.h4_txt, CollectionSchema.h5_txt, CollectionSchema.h6_txt,
         };
     static final Set<String> SOLR_FIELDS = new HashSet<String>();
@@ -163,7 +163,8 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
             List<IndexableField> fields = doc.getFields();
             int fieldc = fields.size();
             List<String> texts = new ArrayList<String>();
-            String description = "", title = "";
+            List<String> descriptions = new ArrayList<String>();
+            String title = "";
             for (int j = 0; j < fieldc; j++) {
                 IndexableField value = fields.get(j);
                 String fieldName = value.name();
@@ -204,8 +205,9 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                     solitaireTag(writer, RSSMessage.Token.pubDate.name(), HeaderFramework.formatRFC1123(d));
                     continue;
                 }
-                if (CollectionSchema.description.getSolrFieldName().equals(fieldName)) {
-                    description = value.stringValue();
+                if (CollectionSchema.description_txt.getSolrFieldName().equals(fieldName)) {
+                    String description = value.stringValue();
+                    descriptions.add(description);
                     solitaireTag(writer, DublinCore.Description.getURIref(), description);
                     texts.add(description);
                     continue;
@@ -233,10 +235,17 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
             solitaireTag(writer, RSSMessage.Token.title.name(), title.length() == 0 ? (texts.size() == 0 ? "" : texts.get(0)) : title);
             List<String> snippet = urlhash == null ? null : snippets.get(urlhash);
             String tagname = RSSMessage.Token.description.name();
-            writer.write("<"); writer.write(tagname); writer.write('>');
-            XML.escapeCharData(snippet == null || snippet.size() == 0 ? description : snippet.get(0), writer);
-            writer.write("</"); writer.write(tagname); writer.write(">\n");
-            
+            if (snippet == null || snippet.size() == 0) {
+                for (String d: descriptions) {
+                    writer.write("<"); writer.write(tagname); writer.write('>');
+                    XML.escapeCharData(snippet == null || snippet.size() == 0 ? d : snippet.get(0), writer);
+                    writer.write("</"); writer.write(tagname); writer.write(">\n");
+                }
+            } else {
+                writer.write("<"); writer.write(tagname); writer.write('>');
+                XML.escapeCharData(snippet.get(0), writer);
+                writer.write("</"); writer.write(tagname); writer.write(">\n");
+            }
             // open: where do we get the subject?
             //solitaireTag(writer, DublinCore.Subject.getURIref(), ""); // TODO: fill with actual data
             

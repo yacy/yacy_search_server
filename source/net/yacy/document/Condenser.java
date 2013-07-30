@@ -129,7 +129,9 @@ public final class Condenser {
             // phrase  99 is taken from the media Link url and anchor description
             // phrase 100 and above are lines from the text
             insertTextToWords(new SentenceReader(document.dc_title()),       1, WordReferenceRow.flag_app_dc_title, this.RESULT_FLAGS, true, meaningLib);
-            insertTextToWords(new SentenceReader(document.dc_description()), 3, WordReferenceRow.flag_app_dc_description, this.RESULT_FLAGS, true, meaningLib);
+            for (String description: document.dc_description()) {
+                insertTextToWords(new SentenceReader(description), 3, WordReferenceRow.flag_app_dc_description, this.RESULT_FLAGS, true, meaningLib);
+            }
             insertTextToWords(new SentenceReader(document.dc_creator()),     4, WordReferenceRow.flag_app_dc_creator, this.RESULT_FLAGS, true, meaningLib);
             insertTextToWords(new SentenceReader(document.dc_publisher()),   5, WordReferenceRow.flag_app_dc_creator, this.RESULT_FLAGS, true, meaningLib);
             insertTextToWords(new SentenceReader(document.dc_subject(' ')),  6, WordReferenceRow.flag_app_dc_description, this.RESULT_FLAGS, true, meaningLib);

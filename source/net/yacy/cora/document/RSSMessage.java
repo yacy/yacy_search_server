@@ -25,11 +25,13 @@
 package net.yacy.cora.document;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -158,8 +160,11 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     }
 
     @Override
-    public String getDescription() {
-        return Token.description.valueFrom(this.map, "");
+    public List<String> getDescriptions() {
+        List<String> ds = new ArrayList<String>();
+        String d = Token.description.valueFrom(this.map, "");
+        if (d.length() > 0) ds.add(d);
+        return ds;
     }
 
     @Override
@@ -216,7 +221,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         String guid = Token.guid.valueFrom(this.map, "");
         if ((guid.isEmpty() || guid.startsWith(artificialGuidPrefix)) &&
             (this.map.containsKey("title") || this.map.containsKey("description") || this.map.containsKey("link"))) {
-            guid = calculatedGuidPrefix + Integer.toHexString(getTitle().hashCode() + getDescription().hashCode() + getLink().hashCode());
+            guid = calculatedGuidPrefix + Integer.toHexString(getTitle().hashCode() + getDescriptions().hashCode() + getLink().hashCode());
             this.map.put("guid", guid);
         }
         return guid;

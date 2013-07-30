@@ -245,16 +245,16 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             add(doc, CollectionSchema.title_words_val, cv);
         }
 
-        String description = md.snippet(); if (description == null) description = "";
-        if (allAttr || contains(CollectionSchema.description)) add(doc, CollectionSchema.description, description);
-        if (allAttr || contains(CollectionSchema.description_count_i)) add(doc, CollectionSchema.description_count_i, 1);
+        String description = md.snippet();
+        boolean description_exist = description != null;
+        if (description == null) description = "";
+        if (allAttr || contains(CollectionSchema.description_txt)) add(doc, CollectionSchema.description_txt, description_exist ? new String[]{description} : new String[0]);
+        if (allAttr || contains(CollectionSchema.description_count_i)) add(doc, CollectionSchema.description_count_i, description_exist ? 1 : 0);
         if (allAttr || contains(CollectionSchema.description_chars_val)) {
-            Integer[] cv = new Integer[]{new Integer(description.length())};
-            add(doc, CollectionSchema.description_chars_val, cv);
+            add(doc, CollectionSchema.description_chars_val, description_exist ? new Integer[]{new Integer(description.length())} : new Integer[0]);
         }
         if (allAttr || contains(CollectionSchema.description_words_val)) {
-            Integer[] cv = new Integer[]{new Integer(CommonPattern.SPACE.split(description).length)};
-            add(doc, CollectionSchema.description_words_val, cv);
+            add(doc, CollectionSchema.description_words_val, description_exist ? new Integer[]{new Integer(description.length() == 0 ? 0 : CommonPattern.SPACE.split(description).length)} : new Integer[0]);
         }
 
         String filename = digestURI.getFileName();
@@ -424,23 +424,21 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             add(doc, CollectionSchema.title_words_val, cv);
         }
 
-        String description = document.dc_description();
-        List<String> descriptions = new ArrayList<String>();
-        for (String s: CommonPattern.NEWLINE.split(description)) descriptions.add(s);
-        if (allAttr || contains(CollectionSchema.description)) {
-            add(doc, CollectionSchema.description, description);
-            if ((allAttr || contains(CollectionSchema.description_exact_signature_l)) && description != null && description.length() > 0) {
-                add(doc, CollectionSchema.description_exact_signature_l, EnhancedTextProfileSignature.getSignatureLong(description));
+        String[] descriptions = document.dc_description();
+        if (allAttr || contains(CollectionSchema.description_txt)) {
+            add(doc, CollectionSchema.description_txt, descriptions);
+            if ((allAttr || contains(CollectionSchema.description_exact_signature_l)) && descriptions != null && descriptions.length > 0) {
+                add(doc, CollectionSchema.description_exact_signature_l, EnhancedTextProfileSignature.getSignatureLong(descriptions));
             }
         }
-        if (allAttr || contains(CollectionSchema.description_count_i)) add(doc, CollectionSchema.description_count_i, descriptions.size());
+        if (allAttr || contains(CollectionSchema.description_count_i)) add(doc, CollectionSchema.description_count_i, descriptions.length);
         if (allAttr || contains(CollectionSchema.description_chars_val)) {
-            ArrayList<Integer> cv = new ArrayList<Integer>(descriptions.size());
+            ArrayList<Integer> cv = new ArrayList<Integer>(descriptions.length);
             for (String s: descriptions) cv.add(new Integer(s.length()));
             add(doc, CollectionSchema.description_chars_val, cv);
         }
         if (allAttr || contains(CollectionSchema.description_words_val)) {
-            ArrayList<Integer> cv = new ArrayList<Integer>(descriptions.size());
+            ArrayList<Integer> cv = new ArrayList<Integer>(descriptions.length);
             for (String s: descriptions) cv.add(new Integer(CommonPattern.SPACE.split(s).length));
             add(doc, CollectionSchema.description_words_val, cv);
         }

@@ -34,9 +34,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -100,7 +102,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         String title = null;
         String author = null;
         String keywords = null;
-        String description = null;
+        List<String> descriptions = new ArrayList<String>();
         String filename = location.getFileName();
         String ext = MultiProtocolURI.getFileExtension(filename);
         double gpslat = 0;
@@ -179,10 +181,11 @@ public class genericImageParser extends AbstractParser implements Parser {
                 if (keywords == null || keywords.isEmpty()) keywords = props.get("Category");
                 if (keywords == null || keywords.isEmpty()) keywords = props.get("Supplemental Category(s)");
 
-                description = props.get("Caption/Abstract");
-                if (description == null || description.isEmpty()) description = props.get("Country/Primary Location");
-                if (description == null || description.isEmpty()) description = props.get("Province/State");
-                if (description == null || description.isEmpty()) description = props.get("Copyright Notice");
+                String description;
+                description = props.get("Caption/Abstract"); if (description != null && description.length() > 0) descriptions.add("Abstract: " + description);
+                description = props.get("Country/Primary Location"); if (description != null && description.length() > 0) descriptions.add("Location: " + description);
+                description = props.get("Province/State"); if (description != null && description.length() > 0) descriptions.add("State: " + description);
+                description = props.get("Copyright Notice"); if (description != null && description.length() > 0) descriptions.add("Copyright: " + description);
                 
             } catch (final JpegProcessingException e) {
                 //Log.logException(e);
@@ -212,7 +215,7 @@ public class genericImageParser extends AbstractParser implements Parser {
              author == null ? "" : author, // author
              location.getHost(), // Publisher
              new String[]{}, // sections
-             description == null ? "" : description, // description
+             descriptions, // description
              gpslon, gpslat, //  location
              infoString, // content text
              anchors, // anchors

@@ -37,12 +37,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
 
+import org.apache.solr.common.params.MultiMapSolrParams;
+
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 
-public class DCEntry extends TreeMap<String, String> {
+public class DCEntry extends MultiMapSolrParams {
 
     private static final long    serialVersionUID = -2050291583515701559L;
 
@@ -55,7 +57,7 @@ public class DCEntry extends TreeMap<String, String> {
     public  static final DCEntry poison = new DCEntry();
 
     public DCEntry() {
-        super((Collator) insensitiveCollator.clone());
+        super(new TreeMap<String, String[]>((Collator) insensitiveCollator.clone()));
     }
 
     public DCEntry(
@@ -67,14 +69,14 @@ public class DCEntry extends TreeMap<String, String> {
             double lat,
             double lon
             ) {
-        super((Collator) insensitiveCollator.clone());
-        this.put("dc:identifier", url.toNormalform(true));
-        this.put("dc:date", ISO8601Formatter.FORMATTER.format(date));
-        this.put("dc:title", title);
-        this.put("dc:creator", author);
-        this.put("dc:description", body);
-        this.put("geo:lat", Double.toString(lat));
-        this.put("geo:long", Double.toString(lon));
+        super(new TreeMap<String, String[]>((Collator) insensitiveCollator.clone()));
+        this.getMap().put("dc:identifier", new String[]{url.toNormalform(true)});
+        this.getMap().put("dc:date", new String[]{ISO8601Formatter.FORMATTER.format(date)});
+        this.getMap().put("dc:title", new String[]{title});
+        this.getMap().put("dc:creator", new String[]{author});
+        this.getMap().put("dc:description", new String[]{body});
+        this.getMap().put("geo:lat", new String[]{Double.toString(lat)});
+        this.getMap().put("geo:long", new String[]{Double.toString(lon)});
     }
 
     /*
@@ -222,14 +224,12 @@ public class DCEntry extends TreeMap<String, String> {
         return t;
     }
 
-    public String getDescription() {
-        String t = this.get("body");
-        if (t == null) t = this.get("dc:description");
-        if (t == null) t = this.get("dc:subject");
-        if (t == null) t = this.get("categories");
-        t = stripCDATA(t);
-        if (t == null) return "";
-        return t;
+    public List<String> getDescriptions() {
+        String[] t = this.getParams("dc:description");
+        List<String> descriptions = new ArrayList<String>();
+        if (t == null) return descriptions;
+        for (String s: t) descriptions.add(stripCDATA(s));
+        return descriptions;
     }
 
     public String[] getSubject() {
@@ -280,9 +280,9 @@ public class DCEntry extends TreeMap<String, String> {
             getCreator(),
             getPublisher(),
             null,
-            "",
+            getDescriptions(),
             getLon(), getLat(),
-            getDescription(),
+            "",
             null,
             null,
             null,

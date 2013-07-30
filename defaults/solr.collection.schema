@@ -123,8 +123,8 @@ coordinate_p
 ## content of author-tag, texgen
 author
 
-## content of description-tag, text
-description
+## content of description-tag(s), text
+description_txt
 
 ## the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of description, used to compute description_unique_b
 #description_exact_signature_l

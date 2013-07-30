@@ -625,7 +625,7 @@ public class Segment {
         if (this.fulltext.getDefaultConfiguration().contains(CollectionSchema.host_id_s)) {
             uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][]{
                     {CollectionSchema.title, CollectionSchema.title_exact_signature_l, CollectionSchema.title_unique_b},
-                    {CollectionSchema.description, CollectionSchema.description_exact_signature_l, CollectionSchema.description_unique_b}}) {
+                    {CollectionSchema.description_txt, CollectionSchema.description_exact_signature_l, CollectionSchema.description_unique_b}}) {
                 CollectionSchema checkfield = checkfields[0];
                 CollectionSchema signaturefield = checkfields[1];
                 CollectionSchema uniquefield = checkfields[2];

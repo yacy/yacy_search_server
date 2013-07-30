@@ -132,7 +132,7 @@ public class YMarkMetadata {
 			metadata.put(METADATA.CREATOR, this.document.dc_creator());
 			metadata.put(METADATA.KEYWORDS, this.document.dc_subject(' '));
 			metadata.put(METADATA.PUBLISHER, this.document.dc_publisher());
-			metadata.put(METADATA.DESCRIPTION, this.document.dc_description());
+			metadata.put(METADATA.DESCRIPTION, this.document.dc_description().length > 0 ? this.document.dc_description()[0] : "");
 			metadata.put(METADATA.MIMETYPE, this.document.dc_format());
 			metadata.put(METADATA.LANGUAGE, this.document.dc_language());
 			metadata.put(METADATA.CHARSET, this.document.getCharset());

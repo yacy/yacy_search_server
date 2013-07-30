@@ -166,7 +166,7 @@ public class YMarkEntry extends TreeMap<String, String> {
     public YMarkEntry(final DCEntry dc) {
         super();
     	for (BOOKMARK b : BOOKMARK.values()) {
-            if(dc.containsKey(b.dc_attrb)) {
+            if (dc.getMap().containsKey(b.dc_attrb)) {
                 this.put(b.key(), dc.get(b.dc_attrb));
             }
         }
@@ -218,7 +218,7 @@ public class YMarkEntry extends TreeMap<String, String> {
         final DCEntry dc = new DCEntry();
         for (BOOKMARK b : BOOKMARK.values()) {
             if(!b.dc_attrb.isEmpty() && this.containsKey(b.key())) {
-                dc.put(b.dc_attrb, this.get(b.key()));
+                dc.getMap().put(b.dc_attrb, new String[]{this.get(b.key())});
             }
         }
         return dc;

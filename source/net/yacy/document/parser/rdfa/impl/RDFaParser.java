@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -78,7 +79,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 		}
 
 		Document doc = new Document(url, mimeType, charset, null, null, null, singleList(""), "",
-				"", null, "", 0, 0, null, null, null, null, false);
+				"", null, new ArrayList<String>(0), 0, 0, null, null, null, null, false);
 
 		try {
 			if (allTriples.length > 0)
@@ -137,7 +138,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 		}
 
 		Document doc = new Document(url, mimeType, charset, null, null, null, singleList(""), "",
-				"", null, "", 0, 0, all, null, null, null, false);
+				"", null, new ArrayList<String>(0), 0, 0, all, null, null, null, false);
 		return doc;
 	}
 

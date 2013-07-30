@@ -29,7 +29,9 @@ package net.yacy.document.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -76,7 +78,7 @@ public class swfParser extends AbstractParser implements Parser {
             String urlnr = null;
             final String linebreak = System.getProperty("line.separator");
             final String[] sections =  null;
-            final String abstrct = null;
+            final List<String> abstrct = new ArrayList<String>();
             //TreeSet images = null;
             final Map<DigestURI, Properties> anchors = new HashMap<DigestURI, Properties>();
             int urls = 0;

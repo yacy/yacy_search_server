@@ -60,9 +60,10 @@ public class feed {
             if (feed == null || feed.isEmpty()) continue channelIteration;
 
             RSSMessage message = feed.getChannel();
+            String description = message.getDescriptions().size() > 0 ? message.getDescriptions().get(0) : "";
             if (message != null) {
                 prop.putXML("channel_title", message.getTitle());
-                prop.putXML("channel_description", message.getDescription());
+                prop.putXML("channel_description", description);
                 prop.put("channel_pubDate", message.getPubDate());
             }
             while (messageMaxCount > 0 && !feed.isEmpty()) {
@@ -71,7 +72,7 @@ public class feed {
 
                 // create RSS entry
                 prop.putXML("item_" + messageCount + "_title", channelName + ": " + message.getTitle());
-                prop.putXML("item_" + messageCount + "_description", message.getDescription());
+                prop.putXML("item_" + messageCount + "_description", description);
                 prop.putXML("item_" + messageCount + "_link", message.getLink());
                 prop.put("item_" + messageCount + "_pubDate", message.getPubDate());
                 prop.putXML("item_" + messageCount + "_guid", message.getGuid());

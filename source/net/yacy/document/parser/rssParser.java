@@ -95,7 +95,7 @@ public class rssParser extends AbstractParser implements Parser {
                     item.getAuthor(),
                     item.getCopyright(),
                     new String[0],
-                    item.getDescription(),
+                    item.getDescriptions(),
                     item.getLon(),
                     item.getLat(),
                     null,

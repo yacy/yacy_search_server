@@ -202,7 +202,7 @@ public class select {
             // add options for snippet generation
             if (!post.containsKey("hl.q")) post.put("hl.q", q);
             if (!post.containsKey("hl.fl")) post.put("hl.fl", CollectionSchema.h1_txt.getSolrFieldName() + "," + CollectionSchema.h2_txt.getSolrFieldName() + "," + CollectionSchema.text_t.getSolrFieldName());
-            if (!post.containsKey("hl.alternateField")) post.put("hl.alternateField", CollectionSchema.description.getSolrFieldName());
+            if (!post.containsKey("hl.alternateField")) post.put("hl.alternateField", CollectionSchema.description_txt.getSolrFieldName());
             if (!post.containsKey("hl.simple.pre")) post.put("hl.simple.pre", "<b>");
             if (!post.containsKey("hl.simple.post")) post.put("hl.simple.post", "</b>");
             if (!post.containsKey("hl.fragsize")) post.put("hl.fragsize", Integer.toString(SearchEvent.SNIPPET_MAX_LENGTH));

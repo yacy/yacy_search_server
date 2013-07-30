@@ -32,9 +32,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 import net.yacy.cora.document.UTF8;
@@ -207,6 +209,7 @@ public class vcfParser extends AbstractParser implements Parser {
 
             final String[] sections = parsedNames.toArray(new String[parsedNames.size()]);
             final byte[] text = UTF8.getBytes(parsedDataText.toString());
+            final List<String> descriptions = new ArrayList<String>(1); descriptions.add("vCard");
             return new Document[]{new Document(
                     url,                        // url of the source document
                     mimeType,                   // the documents mime type
@@ -218,7 +221,7 @@ public class vcfParser extends AbstractParser implements Parser {
                     "",                         // TODO: AUTHOR
                     "",                         // the publisher
                     sections,                   // an array of section headlines
-                    "vCard",                    // an abstract
+                    descriptions,               // an abstract
                     0.0f, 0.0f,
                     text,                       // the parsed document text
                     anchors,                    // a map of extracted anchors

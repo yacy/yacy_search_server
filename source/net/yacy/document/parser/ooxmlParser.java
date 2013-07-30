@@ -29,8 +29,10 @@ package net.yacy.document.parser;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -161,6 +163,8 @@ public class ooxmlParser extends AbstractParser implements Parser {
             // create the parser document
             Document[] docs = null;
             final byte[] contentBytes = (writer == null) ? null : UTF8.getBytes(writer.toString());
+            List<String> descriptions = new ArrayList<String>();
+            if (docDescription != null && docDescription.length() > 0) descriptions.add(docDescription);
             docs = new Document[]{new Document(
                     location,
                     mimeType,
@@ -172,7 +176,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
                     docAuthor,
                     "",
                     null,
-                    docDescription,
+                    descriptions,
                     0.0f, 0.0f,
                     contentBytes,
                     null,

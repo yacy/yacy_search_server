@@ -806,10 +806,11 @@ public final class Fulltext {
                 } else {
                     BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", 0, 100000000, 10 * 60 * 60 * 1000, 100,
                             CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.title.getSolrFieldName(),
-                            CollectionSchema.author.getSolrFieldName(), CollectionSchema.description.getSolrFieldName(), CollectionSchema.size_i.getSolrFieldName(), CollectionSchema.last_modified.getSolrFieldName());
+                            CollectionSchema.author.getSolrFieldName(), CollectionSchema.description_txt.getSolrFieldName(), CollectionSchema.size_i.getSolrFieldName(), CollectionSchema.last_modified.getSolrFieldName());
                     SolrDocument doc;
                     ArrayList<?> title;
-                    String url, author, description, hash;
+                    String url, author, hash;
+                    String[] descriptions;
                     Integer size;
                     Date date;
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
@@ -817,7 +818,7 @@ public final class Fulltext {
                         url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
                         title = (ArrayList<?>) doc.getFieldValue(CollectionSchema.title.getSolrFieldName());
                         author = (String) doc.getFieldValue(CollectionSchema.author.getSolrFieldName());
-                        description = (String) doc.getFieldValue(CollectionSchema.description.getSolrFieldName());
+                        descriptions = (String[]) doc.getFieldValue(CollectionSchema.description_txt.getSolrFieldName());
                         size = (Integer) doc.getFieldValue(CollectionSchema.size_i.getSolrFieldName());
                         date = (Date) doc.getFieldValue(CollectionSchema.last_modified.getSolrFieldName());
                         if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
@@ -832,7 +833,9 @@ public final class Fulltext {
                             if (title != null) pw.println("<title>" + CharacterCoding.unicode2xml((String) title.iterator().next(), true) + "</title>");
                             pw.println("<link>" + MultiProtocolURI.escape(url) + "</link>");
                             if (author != null && !author.isEmpty()) pw.println("<author>" + CharacterCoding.unicode2xml(author, true) + "</author>");
-                            if (description != null && !description.isEmpty()) pw.println("<description>" + CharacterCoding.unicode2xml(description, true) + "</description>");
+                            if (descriptions != null && descriptions.length > 0) {
+                                for (String d: descriptions) pw.println("<description>" + CharacterCoding.unicode2xml(d, true) + "</description>");
+                            }
                             if (date != null) pw.println("<pubDate>" + HeaderFramework.formatRFC1123(date) + "</pubDate>");
                             if (size != null) pw.println("<yacy:size>" + size.intValue() + "</yacy:size>");
                             pw.println("<guid isPermaLink=\"false\">" + hash + "</guid>");

@@ -121,7 +121,7 @@ public class getpageinfo {
                     }
                     prop.put("tags", count);
                     // put description
-                    prop.putXML("desc", removelinebreaks(scraper.dc_description()));
+                    prop.putXML("desc", removelinebreaks(scraper.dc_description().length > 0 ? scraper.dc_description()[0] : ""));
                     // put language
                     final Set<String> languages = scraper.getContentLanguages();
                     prop.putXML("lang", (languages == null || languages.size() == 0) ? "unknown" : languages.iterator().next());

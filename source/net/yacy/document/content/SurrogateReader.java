@@ -169,7 +169,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             //System.out.println("BUFFER-SIZE=" + buffer.length());
             final String value = buffer.toString().trim();
             if (this.elementName != null) {
-                this.surrogate.put(this.elementName, value);
+                this.surrogate.getMap().put(this.elementName, new String[]{value});
             }
             this.buffer.setLength(0);
             this.parsingValue = false;
@@ -179,9 +179,9 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
                 value.replaceAll(";", ",");
                 String oldcontent = this.surrogate.get(this.elementName);
                 if (oldcontent == null) {
-                    this.surrogate.put(this.elementName, value);
+                    this.surrogate.getMap().put(this.elementName, new String[]{value});
                 } else {
-                    this.surrogate.put(this.elementName, oldcontent + ";" + value);
+                    this.surrogate.getMap().put(this.elementName, new String[]{oldcontent + ";" + value});
                 }
             }
             this.buffer.setLength(0);
@@ -222,7 +222,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
                 System.out.println("Publisher: " + s.getPublisher());
                 System.out.println("URL: " + s.getIdentifier(true));
                 System.out.println("Language: " + s.getLanguage());
-                System.out.println("Body: " + s.getDescription());
+                System.out.println("Body: " + s.getDescriptions().toString());
             }
         } catch (final IOException e) {
             ConcurrentLog.logException(e);

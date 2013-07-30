@@ -312,8 +312,8 @@ public class URIMetadataNode {
         return getString(CollectionSchema.text_t);
     }
 
-    public String getDescription() {
-        return getString(CollectionSchema.description);
+    public ArrayList<String> getDescription() {
+        return getStringList(CollectionSchema.description_txt);
     }    
 
     public boolean isOlder(URIMetadataRow other) {

@@ -489,7 +489,8 @@ public final class HTTPDFileHandler {
                     File f;
                     String size;
                     long sz;
-                    String headline, author, description, publisher;
+                    String headline, author, publisher;
+                    List<String> descriptions;
                     int images, links;
                     ContentScraper scraper;
                     for (final String element : list) {
@@ -503,14 +504,14 @@ public final class HTTPDFileHandler {
                                 headline = t.size() > 0 ? t.iterator().next() : "";
                                 author = scraper.getAuthor();
                                 publisher = scraper.getPublisher();
-                                description = scraper.getDescription();
+                                descriptions = scraper.getDescriptions();
                                 images = scraper.getImages().size();
                                 links = scraper.getAnchors().size();
                             } else {
                                 headline = null;
                                 author = null;
                                 publisher = null;
-                                description = null;
+                                descriptions = null;
                                 images = 0;
                                 links = 0;
                             }
@@ -527,7 +528,11 @@ public final class HTTPDFileHandler {
                             aBuffer.append("<a href=\"" + path + element + "\">" + element + "</a><br/>");
                             if (author != null && author.length() > 0) aBuffer.append("Author: " + author + "<br/>");
                             if (publisher != null && publisher.length() > 0) aBuffer.append("Publisher: " + publisher + "<br/>");
-                            if (description != null && description.length() > 0) aBuffer.append("Description: " + description + "<br/>");
+                            if (descriptions != null && descriptions.size() > 0) {
+                                for (String d: descriptions) {
+                                    aBuffer.append("Description: " + d + "<br/>");
+                                }
+                            }
                             aBuffer.append(GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(f.lastModified())) + ", " + size + ((images > 0) ? ", " + images + " images" : "") + ((links > 0) ? ", " + links + " links" : "") + "<br/></li>\n");
                         }
                     }
