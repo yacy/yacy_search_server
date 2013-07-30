@@ -131,7 +131,8 @@ public class serverObjects implements Serializable, Cloneable {
     }
 
     public boolean containsKey(String key) {
-        return this.map.get(key) != null;
+        String[] arr = this.map.getParams(key);
+        return arr != null && arr.length > 0;
     }
     
     public MultiMapSolrParams getSolrParams() {
