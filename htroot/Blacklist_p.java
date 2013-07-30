@@ -57,11 +57,7 @@ public class Blacklist_p {
     private final static String BLACKLIST_SHARED = "BlackLists.Shared";
 
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-
-        // initialize the list manager
-        ListManager.switchboard = (Switchboard) env;
-        ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
 
         // load all blacklist files located in the directory
         List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);
@@ -549,14 +545,8 @@ public class Blacklist_p {
         }
         
         for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
-            if (Switchboard.urlBlacklist.getFileName(supportedBlacklistType) != blacklistToUse) {
-            	Switchboard.urlBlacklist.remove(supportedBlacklistType, host, path);
-            }
-            else {
-	            Blacklist bl = new Blacklist(ListManager.listsPath);
-	        	bl.loadList(supportedBlacklistType, blacklistToUse, "/");
-	        	
-	        	bl.remove(host, path);
+        	if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists",blacklistToUse)) {
+            	Switchboard.urlBlacklist.remove(supportedBlacklistType, blacklistToUse, host, path);
             }
         }
         
@@ -618,14 +608,8 @@ public class Blacklist_p {
         String path = newEntry.substring(pos + 1);
         
         for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
-            if (Switchboard.urlBlacklist.getFileName(supportedBlacklistType) == blacklistToUse) {
-            	Switchboard.urlBlacklist.add(supportedBlacklistType, host, path);
-            }
-            else {
-		    	Blacklist bl = new Blacklist(ListManager.listsPath);
-		    	bl.loadList(supportedBlacklistType, blacklistToUse, "/");
-		    	
-		    	bl.add(supportedBlacklistType, host, path); 
+        	if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists",blacklistToUse)) {
+            	Switchboard.urlBlacklist.add(supportedBlacklistType, blacklistToUse, host, path);
             }
         }
         

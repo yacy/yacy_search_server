@@ -133,6 +133,7 @@ import org.apache.solr.common.SolrInputDocument;
                             }
                         }                        
                     } catch (final IOException ex) {
+                        ConcurrentLog.warn("MIGRATION-REINDEX", "remove following query from list due to error, q=" + querylist.remove(0));
                         ConcurrentLog.logException(ex);
                     } finally {
                         sem.release();

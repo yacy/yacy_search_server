@@ -25,10 +25,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -367,72 +364,58 @@ public class IndexControlRWIs_p {
                         URIMetadataRow.rowdef.objectOrder,
                         urlb.size());
                 if ( post.containsKey("blacklisturls") ) {
-                    PrintWriter pw;
-                    try {
-                        final String[] supportedBlacklistTypes =
-                            env.getConfig("BlackLists.types", "").split(",");
-                        pw =
-                            new PrintWriter(new FileWriter(new File(ListManager.listsPath, blacklist), true));
-                        DigestURI url;
-                        for ( final byte[] b : urlb ) {
-                            try {
-                                urlHashes.put(b);
-                            } catch (final SpaceExceededException e ) {
-                                ConcurrentLog.logException(e);
-                            }
-                            url = segment.fulltext().getURL(b);
-                            segment.fulltext().remove(b);
-                            if ( url != null ) {
-                                pw.println(url.getHost() + "/" + url.getFile());
-                                for ( final String supportedBlacklistType : supportedBlacklistTypes ) {
-                                    if ( ListManager.listSetContains(
-                                        supportedBlacklistType + ".BlackLists",
-                                        blacklist) ) {
-                                        Switchboard.urlBlacklist.add(
-                                            BlacklistType.valueOf(supportedBlacklistType),
-                                            url.getHost(),
-                                            url.getFile());
-                                    }
-                                }
-                                SearchEventCache.cleanupEvents(true);
-                            }
-                        }
-                        pw.close();
-                    } catch (final IOException e ) {
-                    }
+                    final String[] supportedBlacklistTypes =
+					    env.getConfig("BlackLists.types", "").split(",");
+					DigestURI url;
+					for ( final byte[] b : urlb ) {
+					    try {
+					        urlHashes.put(b);
+					    } catch (final SpaceExceededException e ) {
+					        ConcurrentLog.logException(e);
+					    }
+					    url = segment.fulltext().getURL(b);
+					    segment.fulltext().remove(b);
+					    if ( url != null ) {
+					        for ( final String supportedBlacklistType : supportedBlacklistTypes ) {
+					            if ( ListManager.listSetContains(
+					                supportedBlacklistType + ".BlackLists",
+					                blacklist) ) {
+					                Switchboard.urlBlacklist.add(
+					                    BlacklistType.valueOf(supportedBlacklistType),
+					                    blacklist,
+					                    url.getHost(),
+					                    url.getFile());
+					            }
+					        }
+					        SearchEventCache.cleanupEvents(true);
+					    }
+					}
                 }
 
                 if ( post.containsKey("blacklistdomains") ) {
-                    PrintWriter pw;
-                    try {
-                        pw =
-                            new PrintWriter(new FileWriter(new File(ListManager.listsPath, blacklist), true));
-                        DigestURI url;
-                        for ( final byte[] b : urlb ) {
-                            try {
-                                urlHashes.put(b);
-                            } catch (final SpaceExceededException e ) {
-                                ConcurrentLog.logException(e);
-                            }
-                            url = segment.fulltext().getURL(b);
-                            segment.fulltext().remove(b);
-                            if ( url != null ) {
-                                pw.println(url.getHost() + "/.*");
-                                for ( final BlacklistType supportedBlacklistType : BlacklistType.values() ) {
-                                    if ( ListManager.listSetContains(
-                                        supportedBlacklistType + ".BlackLists",
-                                        blacklist) ) {
-                                        Switchboard.urlBlacklist.add(
-                                            supportedBlacklistType,
-                                            url.getHost(),
-                                            ".*");
-                                    }
-                                }
-                            }
-                        }
-                        pw.close();
-                    } catch (final IOException e ) {
-                    }
+                    DigestURI url;
+					for ( final byte[] b : urlb ) {
+					    try {
+					        urlHashes.put(b);
+					    } catch (final SpaceExceededException e ) {
+					        ConcurrentLog.logException(e);
+					    }
+					    url = segment.fulltext().getURL(b);
+					    segment.fulltext().remove(b);
+					    if ( url != null ) {
+					        for ( final BlacklistType supportedBlacklistType : BlacklistType.values() ) {
+					            if ( ListManager.listSetContains(
+					                supportedBlacklistType + ".BlackLists",
+					                blacklist) ) {
+					                Switchboard.urlBlacklist.add(
+					                    supportedBlacklistType,
+					                    blacklist,
+					                    url.getHost(),
+					                    ".*");
+					            }
+					        }
+					    }
+					}
                 }
                 try {
                     segment.termIndex().remove(keyhash, urlHashes);

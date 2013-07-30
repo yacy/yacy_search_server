@@ -56,6 +56,7 @@ import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 public class Blacklist {
 
@@ -131,7 +132,7 @@ public class Blacklist {
         ConcurrentLog.fine("Blacklist", "All blacklists has been shutdown.");
     }
 
-    public final void setRootPath(final File rootPath) {
+    private final void setRootPath(final File rootPath) {
         if (rootPath == null) {
             throw new NullPointerException("The blacklist root path must not be null.");
         }
@@ -153,10 +154,6 @@ public class Blacklist {
         return this.cachedUrlHashs.get(blacklistType);
     }
 
-    public final String getFileName(BlacklistType type) {
-    	return blacklistFiles.get(type);
-    }
-    
     public final File getRootPath() {
     	return blacklistRootPath;
     }
@@ -172,8 +169,6 @@ public class Blacklist {
             entry.clear();
         }
         blacklistFiles.clear();
-        blacklistRootPath = null;
-        
     }
 
     public final int size() {
@@ -270,16 +265,7 @@ public class Blacklist {
         getBlacklistMap(blacklistType, false).remove(host);
     }
 
-    /**
-     * Removes entry for all blacklist types.
-     */
-    public final void remove(final String host, final String path) {
-        for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
-            Switchboard.urlBlacklist.remove(supportedBlacklistType, host, path);
-        }    	
-    }
-    
-    public final void remove(final BlacklistType blacklistType, final String host, final String path) {
+    public final void remove(final BlacklistType blacklistType, final String blacklistToUse, final String host, final String path) {
 
         final Map<String, Set<Pattern>> blacklistMap = getBlacklistMap(blacklistType, true);
         Set<Pattern> hostList = blacklistMap.get(host);
@@ -300,7 +286,7 @@ public class Blacklist {
         }
 
         // load blacklist data from file
-        final List<String> list = FileUtils.getListArray(new File(ListManager.listsPath, getFileName(blacklistType)));
+        final List<String> list = FileUtils.getListArray(new File(ListManager.listsPath, blacklistToUse));
         
         // delete the old entry from file
         if (list != null) {
@@ -310,20 +296,11 @@ public class Blacklist {
                     break;
                 }
             }
-            FileUtils.writeList(new File(ListManager.listsPath, getFileName(blacklistType)), list.toArray(new String[list.size()]));
+            FileUtils.writeList(new File(ListManager.listsPath, blacklistToUse), list.toArray(new String[list.size()]));
         }
     }
     
-    /**
-     * Adds a new blacklist entry for all types.
-     */
-    public final void add(final String host, final String path) {
-        for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
-	    	add(supportedBlacklistType, host, path);	    	
-        }
-    }
-
-    public final void add(final BlacklistType blacklistType, final String host, final String path) {
+    public final void add(final BlacklistType blacklistType, final String blacklistToUse, final String host, final String path) {
     	if (contains(blacklistType, host, path)) {
     		return;
     	}
@@ -354,12 +331,13 @@ public class Blacklist {
 
         // Append the line to the file.
         PrintWriter pw = null;
-        try {        	
+        try {
+        	final String newEntry = h + "/" + pattern;
         	if (!blacklistFileContains(blacklistRootPath, 
-        			getFileName(blacklistType), pattern.toString())) {
+        			blacklistToUse, newEntry)) {
 	            pw = new PrintWriter(new FileWriter(new File(blacklistRootPath, 
-	            		getFileName(blacklistType)), true));
-	            pw.println(pattern);
+	            		blacklistToUse), true));
+	            pw.println(newEntry);
 	            pw.close();
         	}
         } catch (final IOException e) {
@@ -370,7 +348,7 @@ public class Blacklist {
                 		pw.close();
                 } catch (final Exception e) {
                     ConcurrentLog.warn("Blacklist", "could not close stream to " + 
-                    		getFileName(blacklistType) + "! " + e.getMessage());
+                    		blacklistToUse + "! " + e.getMessage());
                 }
         	}
         }
@@ -630,7 +608,7 @@ public class Blacklist {
     }
 
     private static File DHTCacheFile(final BlacklistType type) {
-        String BLACKLIST_DHT_CACHEFILE_NAME = "DATA/LISTS/blacklist_" + type.name() + "_Cache.ser";
+        final String BLACKLIST_DHT_CACHEFILE_NAME = SwitchboardConstants.LISTS_PATH_DEFAULT + "/blacklist_" + type.name() + "_Cache.ser";
         return new File(Switchboard.getSwitchboard().dataPath, BLACKLIST_DHT_CACHEFILE_NAME);
     }
 

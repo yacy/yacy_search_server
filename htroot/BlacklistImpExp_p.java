@@ -29,12 +29,12 @@
 // javac -classpath .:../classes Blacklist_p.java
 // if the shell's current path is HTROOT
 
-import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.ListManager;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Seed;
@@ -49,12 +49,8 @@ public class BlacklistImpExp_p {
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
 
-        // initialize the list manager
-        ListManager.switchboard = (Switchboard) env;
-        ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
-
         // loading all blacklist files located in the directory
-        final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath);
+        final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);
 
         String blacklistToUse = null;
         final serverObjects prop = new serverObjects();
@@ -84,7 +80,10 @@ public class BlacklistImpExp_p {
                     hostList.remove(peername);
                     peerCount++;
                 }
-            } catch (final Exception e) {/* */}
+            } catch (final Exception e) {
+                // Log exception for debug purposes ("catch-all catch")
+                ConcurrentLog.logException(e);
+            }
             prop.put(DISABLED + "otherHosts", peerCount);
         }
 
@@ -93,10 +92,8 @@ public class BlacklistImpExp_p {
 
         int count = 0;
         for (String element : dirlist) {
-            if (element.endsWith(".black")) {
-                prop.putHTML("blackListNames_" + count + "_blackListName", element);
-                count++;
-            }
+            prop.putHTML("blackListNames_" + count + "_blackListName", element);
+            count++;
         }
         prop.put("blackListNames", count);
 

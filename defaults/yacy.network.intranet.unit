@@ -35,4 +35,4 @@ network.unit.access.blacklist =
 
 # greedy learning: fast information acquisition heuristic for new peers 
 greedylearning.enabled = false
-greedylearning.limit.doccount = 15000
+greedylearning.limit.doccount = 1000

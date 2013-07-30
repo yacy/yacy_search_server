@@ -30,9 +30,7 @@
 //if the shell's current path is HTROOT
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -50,6 +48,7 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Seed;
+import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
@@ -69,8 +68,6 @@ public class sharedBlacklist_p {
     public static final int STATUS_WRONG_INVOCATION = 5;
     public static final int STATUS_PARSE_ERROR = 6;
 
-    private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
-
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         // return variable that accumulates replacements
@@ -89,13 +86,8 @@ public class sharedBlacklist_p {
 
         if (post != null) {
 
-            // initialize the list manager
-            ListManager.switchboard = (Switchboard) env;
-            ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
-
-
             // loading all blacklist files located in the directory
-            final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, BLACKLIST_FILENAME_FILTER);
+            final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);
 
             // List BlackLists
             int blacklistCount = 0;
@@ -210,11 +202,7 @@ public class sharedBlacklist_p {
                 prop.put("page", "1"); //result page
                 prop.put("status", STATUS_ENTRIES_ADDED); //list of added Entries
 
-                PrintWriter pw = null;
                 try {
-                    // open the blacklist file
-                    pw = new PrintWriter(new FileWriter(new File(ListManager.listsPath, selectedBlacklistName), true));
-
                     // loop through the received entry list
                     final int num = post.getInt("num", 0);
                     for(int i = 0; i < num; i++){
@@ -234,13 +222,10 @@ public class sharedBlacklist_p {
                                 newItem = newItem + "/.*";
                             }
 
-                            // append the item to the file
-                            pw.println(newItem);
-
                             if (Switchboard.urlBlacklist != null) {
                                 for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
                                     if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists",selectedBlacklistName)) {
-                                        Switchboard.urlBlacklist.add(supportedBlacklistType,newItem.substring(0, pos), newItem.substring(pos + 1));
+                                        Switchboard.urlBlacklist.add(supportedBlacklistType,selectedBlacklistName,newItem.substring(0, pos), newItem.substring(pos + 1));
                                     }
                                 }
                                 SearchEventCache.cleanupEvents(true);
@@ -250,8 +235,6 @@ public class sharedBlacklist_p {
                 } catch (final Exception e) {
                     prop.put("status", "1");
                     prop.putHTML("status_error", e.getLocalizedMessage());
-                } finally {
-                    if (pw != null) try { pw.close(); } catch (final Exception e){ /* */}
                 }
 
                 /* unable to use prop.putHTML() or prop.putXML() here because they

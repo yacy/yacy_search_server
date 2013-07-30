@@ -1045,7 +1045,7 @@ public final class Switchboard extends serverSwitch {
                 Long.MAX_VALUE,
                 30000,
                 Long.MAX_VALUE),
-            8000);
+            10000);
         deployThread(
             SwitchboardConstants.INDEX_DIST,
             "DHT Distribution",
@@ -2720,7 +2720,7 @@ public final class Switchboard extends serverSwitch {
             return;
         }
 
-        if ( !profile.indexText() && !profile.indexMedia() ) {
+        if ( profile != null && !profile.indexText() && !profile.indexMedia() ) {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
             addURLtoErrorDB(
                 url,
@@ -3475,7 +3475,6 @@ public final class Switchboard extends serverSwitch {
                         }
                     }
                 } catch (final Throwable e) {
-                    ConcurrentLog.logException(e);
                 }
             }
         }.start();

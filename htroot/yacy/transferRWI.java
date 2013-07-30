@@ -40,6 +40,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.Memory;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -105,7 +106,14 @@ public final class transferRWI {
         String result = "ok";
         final StringBuilder unknownURLs = new StringBuilder(6000);
 
-        if ((youare == null) || (!youare.equals(sb.peers.mySeed().hash))) {
+        double load = Memory.load();
+        float maxload = sb.getConfigFloat(SwitchboardConstants.INDEX_TRANSFER_MAXLOAD, 1.5f);
+        if (load > maxload) {
+            // too high local load. this is bad but we must reject this to protect ourself!
+            sb.getLog().info("Rejecting RWIs from peer " + otherPeerName + ", system has too high load = " + load + ", maxload = " + maxload);
+            result = "not_granted";
+            pause = (int) (load * 20000);
+        } else if ((youare == null) || (!youare.equals(sb.peers.mySeed().hash))) {
         	sb.getLog().info("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.peers.mySeed().hash);
             result = "wrong_target";
             pause = 0;
