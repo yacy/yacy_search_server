@@ -87,6 +87,18 @@ a:hover {
   text-decoration:underline;
 }
 
+/* mark external links */
+a[href^="http://"], a[href^="https://"]  {
+  background: url(/env/grafics/external.png) center right no-repeat;
+  padding-right: 14px;
+}
+
+/* exception for links to yacy.net and search results */
+a[href^="http://yacy.net"], a[target="_self"] {
+  background: transparent;
+  padding-right: 0px;
+}
+
 img {
   border:0;
 }
