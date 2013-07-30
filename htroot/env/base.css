@@ -93,14 +93,10 @@ a[href^="http://"], a[href^="https://"]  {
   padding-right: 14px;
 }
 
-/* exception for links to yacy.net and search results */
-a[href^="http://yacy.net"], a[target="_self"] {
+/* exception for links in search results and image links */
+a[target="_self"], a[class="forceNoExternalIcon"], a[class="yacylogo"] {
   background: transparent;
   padding-right: 0px;
-}
-
-img {
-  border:0;
 }
 
 td {
