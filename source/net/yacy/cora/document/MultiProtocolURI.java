@@ -975,11 +975,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     public static final boolean isCGI(final String extension) {
-        return "cgi.exe.jpg.jpeg".indexOf(extension.toLowerCase()) >= 0;
+        return extension != null && extension.length() > 0 && "cgi.exe".indexOf(extension.toLowerCase()) >= 0;
     }
 
     public static final boolean isImage(final String extension) {
-        return "png.gif.jpg.jpeg".indexOf(extension.toLowerCase()) >= 0;
+        return extension != null && extension.length() > 0 && "png.gif.jpg.jpeg.tif.tiff.ico".indexOf(extension.toLowerCase()) >= 0;
     }
 
     public final boolean isIndividual() {
