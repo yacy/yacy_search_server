@@ -327,10 +327,10 @@ public enum CollectionSchema implements SchemaDeclaration {
         if (value == null || value.size() == 0) {
             if (this.type == SolrType.num_integer) {
                 doc.setField(this.getSolrFieldName(), new Integer[0]);
-            } else if (this.type == SolrType.string) {
+            } else if (this.type == SolrType.string || this.type == SolrType.text_general) {
                 doc.setField(this.getSolrFieldName(), new String[0]);
             } else {
-                assert false;
+                assert false : "ADD(1): type is " + this.type.name();
                 doc.setField(this.getSolrFieldName(), new Object[0]);
             }
             return;
@@ -342,7 +342,7 @@ public enum CollectionSchema implements SchemaDeclaration {
             assert (value.iterator().next() instanceof String);
             doc.setField(this.getSolrFieldName(), value.toArray(new String[value.size()]));
         } else {
-            assert false : "ADD: type is " + this.type.name();
+            assert false : "ADD(2): type is " + this.type.name();
             doc.setField(this.getSolrFieldName(), value.toArray(new Object[value.size()]));
         }
     }
