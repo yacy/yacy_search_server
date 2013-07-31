@@ -65,7 +65,7 @@ public class Table_API_p {
             startRecord = 0;
             maximumRecords = 1000;
         }
-        final boolean inline = (post != null && post.getBoolean("inline", false));
+        final boolean inline = (post != null && post.getBoolean("inline"));
 
         prop.put("inline", (inline) ? 1 : 0);
 

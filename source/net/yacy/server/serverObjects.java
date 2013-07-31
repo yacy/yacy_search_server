@@ -445,9 +445,18 @@ public class serverObjects implements Serializable, Cloneable {
         }
     }
 
-    public boolean getBoolean(final String key, final boolean dflt) {
+    /**
+     * get the boolean value of a post field
+     * DO NOT INTRODUCE A DEFAULT FIELD HERE,
+     * this is an application for html checkboxes which do not appear
+     * in the post if they are not selected.
+     * Therefore the default value MUST be always FALSE.
+     * @param key
+     * @return the boolean value of a field or false, if the field does not appear.
+     */
+    public boolean getBoolean(final String key) {
         String s = removeByteOrderMark(get(key));
-        if (s == null) return dflt;
+        if (s == null) return false;
         s = s.toLowerCase();
         return s.equals("true") || s.equals("on") || s.equals("1");
     }

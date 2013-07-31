@@ -22,7 +22,7 @@ public class PeerLoadPicture {
         if (post != null) {
             width = post.getInt("width", 800);
             height = post.getInt("height", 600);
-            showidle = post.getBoolean("showidle", false);
+            showidle = post.getBoolean("showidle");
         }
 
         final CircleThreadPiece idle = new CircleThreadPiece("Idle", new Color(170, 255, 170));

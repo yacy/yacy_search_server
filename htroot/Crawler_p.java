@@ -171,7 +171,7 @@ public class Crawler_p {
                     long t = timeParser(true, post.getInt("deleteIfOlderNumber", -1), post.get("deleteIfOlderUnit","year")); // year, month, day, hour
                     if (t > 0) deleteageDate = new Date(t);
                 }
-                final boolean deleteold = (deleteage && deleteageDate != null) || (restrictedcrawl && post.getBoolean("deleteold", false));
+                final boolean deleteold = (deleteage && deleteageDate != null) || (restrictedcrawl && post.getBoolean("deleteold"));
                 
                 String crawlingStart0 = post.get("crawlingURL","").trim(); // the crawljob start url
                 String[] rootURLs0 = crawlingStart0.indexOf('\n') > 0 || crawlingStart0.indexOf('\r') > 0 ? crawlingStart0.split("[\\r\\n]+") : crawlingStart0.split(Pattern.quote("|"));
@@ -207,7 +207,7 @@ public class Crawler_p {
                 String ipMustMatch = post.get("ipMustmatch", CrawlProfile.MATCH_ALL_STRING);
                 final String ipMustNotMatch = post.get("ipMustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
                 if (ipMustMatch.length() < 2) ipMustMatch = CrawlProfile.MATCH_ALL_STRING;
-                final String countryMustMatch = post.getBoolean("countryMustMatchSwitch", false) ? post.get("countryMustMatchList", "") : "";
+                final String countryMustMatch = post.getBoolean("countryMustMatchSwitch") ? post.get("countryMustMatchList", "") : "";
                 sb.setConfig("crawlingIPMustMatch", ipMustMatch);
                 sb.setConfig("crawlingIPMustNotMatch", ipMustNotMatch);
                 if (countryMustMatch.length() > 0) sb.setConfig("crawlingCountryMustMatch", countryMustMatch);

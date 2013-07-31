@@ -61,7 +61,7 @@ public final class Connections_p {
         // determines if name lookup should be done or not
         final boolean doNameLookup;
         if (post != null) {
-            doNameLookup = post.getBoolean("nameLookup", false);
+            doNameLookup = post.getBoolean("nameLookup");
             if (post.containsKey("closeServerSession")) {
                 final String sessionName = post.get("closeServerSession", null);
                 sb.closeSessions(sessionName);

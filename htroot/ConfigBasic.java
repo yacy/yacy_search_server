@@ -97,7 +97,7 @@ public class ConfigBasic {
         boolean ssl;
         if (post != null && post.getInt("port", 0) > 1023) {
             port = post.getLong("port", 8090);
-            ssl = post.getBoolean("withssl", false);
+            ssl = post.getBoolean("withssl");
         } else {
             port = env.getConfigLong("port", 8090); //this allows a low port, but it will only get one, if the user edits the config himself.
             ssl = env.getConfigBool("server.https", false);

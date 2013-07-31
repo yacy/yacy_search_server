@@ -83,15 +83,15 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.SEARCH_ITEMS, post.getInt("maximumRecords", 10));
                 sb.setConfig(SwitchboardConstants.INDEX_FORWARD, post.get(SwitchboardConstants.INDEX_FORWARD, ""));
                 HTTPDFileHandler.indexForward = post.get(SwitchboardConstants.INDEX_FORWARD, "");
-                sb.setConfig("publicTopmenu", !post.containsKey("publicTopmenu") || post.getBoolean("publicTopmenu", true));
-                sb.setConfig("publicSearchpage", !post.containsKey("publicSearchpage") || post.getBoolean("publicSearchpage", true));
-                sb.setConfig("search.options", post.getBoolean("search.options", false));
+                sb.setConfig("publicTopmenu", !post.containsKey("publicTopmenu") || post.getBoolean("publicTopmenu"));
+                sb.setConfig("publicSearchpage", !post.containsKey("publicSearchpage") || post.getBoolean("publicSearchpage"));
+                sb.setConfig("search.options", post.getBoolean("search.options"));
 
-                sb.setConfig("interaction.userlogon.enabled", post.getBoolean("interaction.userlogon", false));
-                sb.setConfig(SwitchboardConstants.GREEDYLEARNING_ACTIVE, post.getBoolean(SwitchboardConstants.GREEDYLEARNING_ACTIVE, true));
+                sb.setConfig("interaction.userlogon.enabled", post.getBoolean("interaction.userlogon"));
+                sb.setConfig(SwitchboardConstants.GREEDYLEARNING_ACTIVE, post.getBoolean(SwitchboardConstants.GREEDYLEARNING_ACTIVE));
 
                 sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, post.get("search.verify", "ifexist"));
-                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, post.getBoolean("search.verify.delete", false));
+                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, post.getBoolean("search.verify.delete"));
 
                 sb.setConfig("about.headline", post.get("about.headline", ""));
                 sb.setConfig("about.body", post.get("about.body", ""));

@@ -46,9 +46,9 @@ public class IndexFederated_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
-        if (post != null && post.containsKey("set")) {
+        if (post != null && post.containsKey("setrwi")) {
             //yacy
-            boolean post_core_rwi = post.getBoolean(SwitchboardConstants.CORE_SERVICE_RWI, false);
+            boolean post_core_rwi = post.getBoolean(SwitchboardConstants.CORE_SERVICE_RWI);
             final boolean previous_core_rwi = sb.index.connectedRWI() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, false);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, post_core_rwi);
             if (previous_core_rwi && !post_core_rwi) sb.index.disconnectRWI(); // switch off
@@ -57,8 +57,10 @@ public class IndexFederated_p {
                 final long fileSizeMax = (OS.isWindows) ? sb.getConfigLong("filesize.max.win", Integer.MAX_VALUE) : sb.getConfigLong( "filesize.max.other", Integer.MAX_VALUE);
                 sb.index.connectRWI(wordCacheMaxCount, fileSizeMax);
             } catch (final IOException e) { ConcurrentLog.logException(e); } // switch on
+        }
 
-            boolean post_core_citation = post.getBoolean(SwitchboardConstants.CORE_SERVICE_CITATION, false);
+        if (post != null && post.containsKey("setcitation")) {
+            boolean post_core_citation = post.getBoolean(SwitchboardConstants.CORE_SERVICE_CITATION);
             final boolean previous_core_citation = sb.index.connectedCitation() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_CITATION, post_core_citation);
             if (previous_core_citation && !post_core_citation) sb.index.disconnectCitation(); // switch off
@@ -67,8 +69,18 @@ public class IndexFederated_p {
                 final long fileSizeMax = (OS.isWindows) ? sb.getConfigLong("filesize.max.win", Integer.MAX_VALUE) : sb.getConfigLong( "filesize.max.other", Integer.MAX_VALUE);
                 sb.index.connectCitation(wordCacheMaxCount, fileSizeMax);
             } catch (final IOException e) { ConcurrentLog.logException(e); } // switch on
+            boolean webgraph = post.getBoolean(SwitchboardConstants.CORE_SERVICE_WEBGRAPH);
+            sb.index.fulltext().writeWebgraph(webgraph);
+            env.setConfig(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, webgraph);
+        }
 
-            boolean post_core_fulltext = post.getBoolean(SwitchboardConstants.CORE_SERVICE_FULLTEXT, true);
+        if (post != null && post.containsKey("setjena")) {
+            boolean jena = post.getBoolean(SwitchboardConstants.CORE_SERVICE_JENA);
+            env.setConfig(SwitchboardConstants.CORE_SERVICE_JENA, jena);
+        }
+        
+        if (post != null && post.containsKey("setsolr")) {
+            boolean post_core_fulltext = post.getBoolean(SwitchboardConstants.CORE_SERVICE_FULLTEXT);
             final boolean previous_core_fulltext = sb.index.fulltext().connectedLocalSolr() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, false);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_FULLTEXT, post_core_fulltext);
 
@@ -82,18 +94,11 @@ public class IndexFederated_p {
                 sb.index.connectUrlDb(sb.useTailCache, sb.exceed134217727);
                 try { sb.index.fulltext().connectLocalSolr(); } catch (final IOException e) { ConcurrentLog.logException(e); }
             }
-
-            boolean webgraph = post.getBoolean(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false);
-            sb.index.fulltext().writeWebgraph(webgraph);
-            env.setConfig(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, webgraph);
-            
-            boolean jena = post.getBoolean(SwitchboardConstants.CORE_SERVICE_JENA, false);
-            env.setConfig(SwitchboardConstants.CORE_SERVICE_JENA, jena);
             
             // solr
             final boolean solrRemoteWasOn = sb.index.fulltext().connectedRemoteSolr() && env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, true);
             String solrurls = post.get("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr"));
-            final boolean solrRemoteIsOnAfterwards = post.getBoolean("solr.indexing.solrremote", false) & solrurls.length() > 0;
+            final boolean solrRemoteIsOnAfterwards = post.getBoolean("solr.indexing.solrremote") & solrurls.length() > 0;
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, solrRemoteIsOnAfterwards);
             final BufferedReader r = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(UTF8.getBytes(solrurls))));
             final StringBuilder s = new StringBuilder();
@@ -148,7 +153,7 @@ public class IndexFederated_p {
                 ConcurrentLog.severe("IndexFederated_p", "change of solr connection failed", e);
             }
             
-            boolean lazy = post.getBoolean("solr.indexing.lazy", true);
+            boolean lazy = post.getBoolean("solr.indexing.lazy");
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, lazy);
         }
 

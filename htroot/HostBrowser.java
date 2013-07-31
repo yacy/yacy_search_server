@@ -228,7 +228,7 @@ public class HostBrowser {
                 delete = true;
             }
             int facetcount=post.getInt("facetcount", 0);
-            boolean complete = post.getBoolean("complete", false);
+            boolean complete = post.getBoolean("complete");
             if (complete) { // we want only root paths for complete lists
                 p = path.indexOf('/', 10);
                 if (p > 0) path = path.substring(0, p + 1);

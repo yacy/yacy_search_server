@@ -21,12 +21,12 @@
       Solr stores the main search index. It is the home of two cores, the default 'collection1' core for documents and the 'webgraph' core for a web structure graph. Detailed information about the used Solr fields can be edited in the <a href="/IndexSchema_p.html">Schema Editor</a>.
       <dl>
       
-      <dt class="TableCellDark"><input type="checkbox" name="solr.indexing.lazy" id="solr.indexing.lazy" #(solr.indexing.lazy.checked)#:: checked="checked"#(/solr.indexing.lazy.checked)# /></dt>
-      <dd>Lazy Value Initialization. If checked, only non-zero values and non-empty strings are written to Solr fields.</dd>
+      <dt class="TableCellDark">Lazy Value Initialization&nbsp;<input type="checkbox" name="solr.indexing.lazy" id="solr.indexing.lazy" #(solr.indexing.lazy.checked)#:: checked="checked"#(/solr.indexing.lazy.checked)# /></dt>
+      <dd>If checked, only non-zero values and non-empty strings are written to Solr fields.</dd>
         
       <dt>&nbsp;</dt><dd>&nbsp;</dd>
-      <dt>Use deep-embedded local Solr</dt>
-      <dd><input type="checkbox" name="core.service.fulltext" id="core_service_fulltext" #(core.service.fulltext.checked)#:: checked="checked"#(/core.service.fulltext.checked)# onclick="if(!document.getElementById('config').core_service_fulltext.checked) {document.getElementById('config').solr_indexing_solrremote.checked = true;}"/><br/>
+      <dt>Use deep-embedded local Solr&nbsp;<input type="checkbox" name="core.service.fulltext" id="core_service_fulltext" #(core.service.fulltext.checked)#:: checked="checked"#(/core.service.fulltext.checked)# onclick="if(!document.getElementById('config').core_service_fulltext.checked) {document.getElementById('config').solr_indexing_solrremote.checked = true;}"/></dt>
+      <dd>
       This will write the YaCy-embedded Solr index which stored within the YaCy DATA directory.<br/>
       The Solr native search interface is accessible at<br/>
       <a href="/solr/select?q=*:*&start=0&rows=3&core=collection1">/solr/select?q=*:*&start=0&rows=3&core=collection1</a>
@@ -34,12 +34,10 @@
       <a href="/solr/select?q=*:*&start=0&rows=3&core=webgraph">/solr/select?q=*:*&start=0&rows=3&core=webgraph</a> for the webgraph core.<br/>
       If you switch off this index, a remote Solr must be activated.</dd>
       
-      <dt><input type="submit" name="set" value="Set" /></dt><dd></dd>
-      <dt>Use remote Solr server(s)</dt>
-      <dd><input type="checkbox" name="solr.indexing.solrremote" id="solr_indexing_solrremote" #(solr.indexing.solrremote.checked)#:: checked="checked"#(/solr.indexing.solrremote.checked)# onclick="if(!document.getElementById('config').solr_indexing_solrremote.checked) {document.getElementById('config').core_service_fulltext.checked = true;}"/><br/>
-      Here you can define a single or a set of remote solr servers. If both, an internal and an external Solr is used, then both are mirrored.
-      That means, every write request goes to internal and external Solr, but a read request goes only to the internal index.
-      Only if the internal index does not give any result on a search request, also the remote is requested.</dd>	
+      <dt>Use remote Solr server(s)&nbsp;<input type="checkbox" name="solr.indexing.solrremote" id="solr_indexing_solrremote" #(solr.indexing.solrremote.checked)#:: checked="checked"#(/solr.indexing.solrremote.checked)# onclick="if(!document.getElementById('config').solr_indexing_solrremote.checked) {document.getElementById('config').core_service_fulltext.checked = true;}"/></dt>
+      <dd>It's easy to <a href="http://www.yacy-websearch.net/wiki/index.php/Dev:Solr" target="_blank">attach an external Solr to YaCy</a>.
+      This external Solr can be used instead the internal Solr. It can also be used additionally to the internal Solr, then both Solr indexes are mirrored. 
+      </dd>	
       
       #(table)#::
         <dt class="TableCellDark">&nbsp;</dt>
@@ -70,34 +68,14 @@
       <dt class="TableCellDark"></dt>
       <dd>Sharding Method<br/><input type="text" size="50" maxlength="50" value="#[solr.indexing.sharding]#" name="solr.indexing.sharding" id="solr.indexing.sharding" disabled="disabled"/></dd>
 
-      <dt><input type="submit" name="set" value="Set" /></dt><dd></dd>
-      <dt></dt><dd>
-      An <strong>external Solr installation</strong> is easily done following these steps (by example for Solr 4.1.0):
-      <ul>
-      <li>Download solr-4.1.0.tgz from http://lucene.apache.org/solr/</li>
-      <li>Decompress solr-4.1.0.tgz (with 'tar xfz solr-4.1.0.tgz') and put solr-4.1.0 into ~/</li>
-      <li>Consider that YaCy is already running and stored in  ~/yacy/</li>
-      <li>To configure the multi-core configuration of YaCy, execute:<br>
-      <pre>mkdir ~/solr-4.1.0/example/solr/webgraph
-cp -R ~/solr-4.1.0/example/solr/collection1/conf ~/solr-4.1.0/example/solr/webgraph/conf
-~/yacy/bin/apicat.sh /api/schema.xml?core=collection1 > ~/solr-4.1.0/example/solr/collection1/conf/schema.xml
-~/yacy/bin/apicat.sh /api/schema.xml?core=webgraph > ~/solr-4.1.0/example/solr/webgraph/conf/schema.xml</pre></li>
-      <li>edit ~/solr-4.1.0/example/solr/solr.xml and put in the following content:<br/>
-      <pre>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
-&lt;solr persistent="true"&gt;
-  &lt;cores adminPath="/admin/cores" defaultCoreName="collection1"&gt;
-    &lt;core name="collection1" instanceDir="collection1" /&gt;
-    &lt;core name="webgraph" instanceDir="webgraph" /&gt;
-  &lt;/cores&gt;
-&lt;/solr&gt;</pre></li>
-     <li>Finally, start the external Solr with:<br>
-      <pre>cd ~/solr-4.1.0/example/ && java -jar start.jar</pre></li>
-      <li>open <a href="http://localhost:8983/solr/">http://localhost:8983/solr/</a> to visit Solr's administration console.</li>
-      </ul>
+      <dt><input type="submit" name="setsolr" value="Set" /></dt><dd></dd>
+
       </dd>
       </dl>
       </fieldset>
-      
+    </form>
+    
+    <form id="config" action="IndexFederated_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
       <legend>
         Web Structure Index
@@ -111,11 +89,13 @@ cp -R ~/solr-4.1.0/example/solr/collection1/conf ~/solr-4.1.0/example/solr/webgr
       <dt><input type="checkbox" name="core.service.webgraph.tmp" id="core_service_webgraph" #(core.service.webgraph.tmp.checked)#:: checked="checked"#(/core.service.webgraph.tmp.checked)# /></dt>
       <dd>use webgraph search index (rich information in second Solr core)</dd>
       
-      <dt><input type="submit" name="set" value="Set" /></dt><dd></dd>
+      <dt><input type="submit" name="setcitation" value="Set" /></dt><dd></dd>
       </dl>
       </fieldset>
+    </form>
       
       <!--
+    <form id="config" action="IndexFederated_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
       <legend>
         Content Semantics
@@ -126,11 +106,13 @@ cp -R ~/solr-4.1.0/example/solr/collection1/conf ~/solr-4.1.0/example/solr/webgr
       <dt><input type="checkbox" name="core.service.jena.tmp" id="core_service_jena" #(core.service.jena.tmp.checked)#:: checked="checked"#(/core.service.jena.tmp.checked)# /></dt>
       <dd>write document metadata to the Jena index.</dd>
       
-      <dt><input type="submit" name="set" value="Set" /></dt><dd></dd>
+      <dt><input type="submit" name="setjena" value="Set" /></dt><dd></dd>
       </dl>
       </fieldset>
+    </form>
       -->
       
+    <form id="config" action="IndexFederated_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
       <legend>
         Peer-to-Peer Operation
@@ -141,7 +123,7 @@ cp -R ~/solr-4.1.0/example/solr/collection1/conf ~/solr-4.1.0/example/solr/webgr
       <dt><input type="checkbox" name="core.service.rwi.tmp" id="core_service_rwi" #(core.service.rwi.tmp.checked)#:: checked="checked"#(/core.service.rwi.tmp.checked)# /></dt>
       <dd>support peer-to-peer index transmission (DHT RWI index)</dd>
       
-      <dt><input type="submit" name="set" value="Set" /></dt><dd></dd>
+      <dt><input type="submit" name="setrwi" value="Set" /></dt><dd></dd>
       </dl>
       </fieldset>
     </form>
