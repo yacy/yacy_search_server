@@ -30,6 +30,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import net.yacy.cora.document.RSSMessage.Token;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
@@ -184,7 +186,7 @@ public class RSSReader extends DefaultHandler {
             this.parsingItem = true;
         } else if (this.parsingItem && this.type == Type.atom && "link".equals(tag) && (atts.getValue("type") == null || atts.getValue("type").startsWith("text"))) {
             final String url = atts.getValue("href");
-            if (url != null && url.length() > 0) this.item.setValue("link", url);
+            if (url != null && url.length() > 0) this.item.setValue(Token.link, url);
         } else if ("image".equals(tag) || (this.parsingItem && this.type == Type.atom && "link".equals(tag) && (atts.getValue("type") == null || atts.getValue("type").startsWith("image")))) {
             this.parsingImage = true;
         }
@@ -208,11 +210,11 @@ public class RSSReader extends DefaultHandler {
         } else if (this.parsingItem)  {
             final String value = this.buffer.toString().trim();
             this.buffer.setLength(0);
-            if (RSSMessage.tags.contains(tag) && value.length() > 0) this.item.setValue(tag, value);
+            if (RSSMessage.tags.contains(tag) && value.length() > 0) this.item.setValue(Token.valueOf(tag), value);
         } else if (this.parsingChannel) {
             final String value = this.buffer.toString().trim();
             this.buffer.setLength(0);
-            if (RSSMessage.tags.contains(tag)) this.item.setValue(tag, value);
+            if (RSSMessage.tags.contains(tag)) this.item.setValue(Token.valueOf(tag), value);
         }
     }
 

@@ -1,6 +1,7 @@
 
 
 import java.util.Date;
+import java.util.List;
 
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
@@ -60,7 +61,8 @@ public class feed {
             if (feed == null || feed.isEmpty()) continue channelIteration;
 
             RSSMessage message = feed.getChannel();
-            String description = message.getDescriptions().size() > 0 ? message.getDescriptions().get(0) : "";
+            List<String> descriptions = message.getDescriptions();
+            String description = descriptions.size() > 0 ? descriptions.get(0) : "";
             if (message != null) {
                 prop.putXML("channel_title", message.getTitle());
                 prop.putXML("channel_description", description);
@@ -72,6 +74,8 @@ public class feed {
 
                 // create RSS entry
                 prop.putXML("item_" + messageCount + "_title", channelName + ": " + message.getTitle());
+                descriptions = message.getDescriptions();
+                description = descriptions.size() > 0 ? descriptions.get(0) : "";
                 prop.putXML("item_" + messageCount + "_description", description);
                 prop.putXML("item_" + messageCount + "_link", message.getLink());
                 prop.put("item_" + messageCount + "_pubDate", message.getPubDate());
