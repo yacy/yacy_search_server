@@ -113,8 +113,14 @@ public final class hello {
         final String reportedPeerType = remoteSeed.get(Seed.PEERTYPE, Seed.PEERTYPE_JUNIOR);
         final double clientversion = remoteSeed.getVersion();
 
+        if ((reportedip + ':' + remoteSeed.getPort()).equals(sb.peers.mySeed().getPublicAddress())) {
+            // reject a self-ping
+            prop.put("message", "I am I");
+            return prop;
+        }
+        
         if (sb.isRobinsonMode() && !sb.isPublicRobinson()) {
-        	// if we are a robinson cluster, answer only if this client is known by our network definition
+            // if we are a robinson cluster, answer only if this client is known by our network definition
             prop.put("message", "I am robinson, I do not answer");
             return prop;
         }
