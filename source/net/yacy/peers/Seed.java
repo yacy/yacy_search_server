@@ -185,7 +185,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     // class variables
     /** the peer-hash */
-    public String hash;
+    public final String hash;
     /** a set of identity founding values, eg. IP, name of the peer, YaCy-version, ... */
     private final ConcurrentMap<String, String> dna;
     private String alternativeIP = null;
