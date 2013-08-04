@@ -98,6 +98,8 @@ a[target="_self"], a[class="forceNoExternalIcon"], a[class="yacylogo"] {
   background: transparent;
   padding-right: 0px;
 }
+/* (fix for IE 10) prevent borders on img within links */
+a img {border: none}
 
 td {
   padding:1px 2px;
