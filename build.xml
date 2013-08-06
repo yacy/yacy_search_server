@@ -58,6 +58,9 @@
   <property name="git" location=".git"/>
   <property name="defaults" location="defaults"/>
   <property name="RDFaParser" location="RDFaParser"/>
+	
+  <!-- pseudo default branch as fallback -->
+  <property name="branch" value="" />
 
   <!-- pseudo default releaseNr as fallback --> 
   <property name="releaseNr" value="9000" />
@@ -98,7 +101,7 @@
 			<pathelement location="${libbuild}/org.eclipse.jgit-1.1.0.201109151100-r.jar" />
 		</classpath>
   	</taskdef>
-  	<gitRev repoPath="${yacyroot}" revprop="releaseNr" dateprop="DSTAMP" />
+  	<gitRev repoPath="${yacyroot}" branchprop="branch" revprop="releaseNr" dateprop="DSTAMP" />
   </target>
 
   <!-- reading the build properties from file -->
@@ -115,6 +118,9 @@
     <!-- YaCy Release Date -->
     <filter token="REPL_DATE" value="${DSTAMP}"/>
     <filter token="REPL_RELEASE" value="${stdReleaseFile}"/>
+  	
+  	<!-- YaCy Brach -->
+  	<echo message="YaCy Branch: ${branch}" />
 
     <!-- YaCy Release Version number -->
     <echo message="YaCy Version number: ${releaseVersion}" />

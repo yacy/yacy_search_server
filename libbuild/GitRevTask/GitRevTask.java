@@ -21,18 +21,23 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 public class GitRevTask extends org.apache.tools.ant.Task {
 	
 	private String repoPath;
+	private String branchprop;
 	private String revprop;
 	private String dateprop;
 	
 	public void setRepoPath(final String repoPath) {
 		this.repoPath = repoPath;
 	}
+	
+	public void setBranchprop(final String branchprop) {
+		this.branchprop = branchprop;
+	}
 
-    public void setRevprop(String revprop) {
+    public void setRevprop(final String revprop) {
         this.revprop = revprop;
     }
 
-    public void setDateprop(String dateprop) {
+    public void setDateprop(final String dateprop) {
         this.dateprop = dateprop;
     }
 	
@@ -46,6 +51,7 @@ public class GitRevTask extends org.apache.tools.ant.Task {
             return;
         }
 
+		String branch = null;
         String revision = null;
 		String lastTag = null;
 		String commitDate = null;
@@ -53,6 +59,8 @@ public class GitRevTask extends org.apache.tools.ant.Task {
 			final File src = new File(repoPath);
 			final Repository repo = new FileRepositoryBuilder().readEnvironment()
 					.findGitDir(src).build();
+			branch = repo.getBranch();
+			branch = "master".equals(branch)? "" : "_" + branch;
 			final ObjectId head = repo.resolve("HEAD");
 			
 			final Git git = new Git(repo);
@@ -86,7 +94,9 @@ public class GitRevTask extends org.apache.tools.ant.Task {
         
         Project theProject = getProject();
         if (theProject != null) {
-            theProject.setProperty(this.revprop, revision);
+        	theProject.setProperty(this.branchprop, branch);
+            log("Property '" + this.branchprop + "' set to '" + branch + "'", Project.MSG_VERBOSE);
+        	theProject.setProperty(this.revprop, revision);
             log("Property '" + this.revprop + "' set to '" + revision + "'", Project.MSG_VERBOSE);
             theProject.setProperty(this.dateprop, commitDate);
             log("Property '" + this.dateprop + "' set to '" + commitDate + "'", Project.MSG_VERBOSE);
@@ -105,12 +115,14 @@ public class GitRevTask extends org.apache.tools.ant.Task {
         } else {
             gitRevTask.setRepoPath(args[0]);
         }
+        gitRevTask.setBranchprop("brnach");
         gitRevTask.setRevprop("baseRevisionNr");
         gitRevTask.setDateprop("DSTAMP");
 
         Project p = new Project();
         gitRevTask.setProject(p);
         gitRevTask.execute();
+        String branch = gitRevTask.getProject().getProperty("branch");
         String version = gitRevTask.getProject().getProperty("baseRevisionNr");
         String commitDate = gitRevTask.getProject().getProperty("DSTAMP");
 
@@ -123,7 +135,7 @@ public class GitRevTask extends org.apache.tools.ant.Task {
         try {
             f.createNewFile();
             FileWriter w = new FileWriter(f);
-            
+            w.append("branch=" + branch + "\n");
             w.append("releaseNr=" + version + "\n");
             w.append("DSTAMP=" + commitDate + "\n");
             w.close();
