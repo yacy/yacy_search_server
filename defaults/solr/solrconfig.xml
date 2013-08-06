@@ -171,7 +171,7 @@
          will be allowed before they are merged into one.
          Default is 10 for both merge policies.
          -->
-         <mergeFactor>10</mergeFactor>
+         <mergeFactor>5</mergeFactor>
         
         <!-- Expert: Merge Scheduler
          The Merge Scheduler in Lucene controls how merges are
@@ -314,7 +314,7 @@
          searcher to be opened to make those changes visible.
          -->
         <autoCommit>
-            <maxTime>10000</maxTime>
+            <maxTime>180000</maxTime>
             <openSearcher>false</openSearcher>
         </autoCommit>
         
