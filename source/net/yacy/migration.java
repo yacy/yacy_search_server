@@ -363,10 +363,11 @@ public class migration {
         }
         
         boolean lukeCheckok = false;
-        Set<String> omitFields = new HashSet<String>(3);
+        Set<String> omitFields = new HashSet<String>(4);
         omitFields.add(CollectionSchema.author_sxt.getSolrFieldName()); // special fields to exclude from disabled check
         omitFields.add(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
         omitFields.add(CollectionSchema.coordinate_p_1_coordinate.getSolrFieldName());
+        omitFields.add("_version_"); // exclude internal Solr std. field from obsolete check
         CollectionConfiguration colcfg = Switchboard.getSwitchboard().index.fulltext().getDefaultConfiguration();
         ReindexSolrBusyThread reidx = new ReindexSolrBusyThread(null); // ("*:*" would reindex all);
         
