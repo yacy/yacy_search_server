@@ -87,15 +87,6 @@ public class ResourceObserver {
     			this.sb.peers.mySeed().setFlagAcceptRemoteIndex(false);
     			this.sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true);
     		}
-    		if (this.normalizedMemoryFree.compareTo(Space.HIGH) < 0 ) {
-    			// clear some caches - @all: are there more of these, we could clear here?
-    			this.sb.index.clearCache();
-                SearchEventCache.cleanupEvents(true);
-                this.sb.trail.clear();
-                Switchboard.urlBlacklist.clearblacklistCache();
-                WordCache.clearCommonWords();
-                Domains.clear();
-    		}
     	}
 
     	else {
@@ -135,8 +126,17 @@ public class ResourceObserver {
     }
 
     private Space getNormalizedMemoryFree() {
-    	if(!MemoryControl.properState()) return Space.LOW;
-        return Space.HIGH;
+    	if(MemoryControl.properState()) return Space.HIGH;
+    	
+        // clear some caches - @all: are there more of these, we could clear here?
+		this.sb.index.clearCache();
+        SearchEventCache.cleanupEvents(true);
+        this.sb.trail.clear();
+        Switchboard.urlBlacklist.clearblacklistCache();
+        WordCache.clearCommonWords();
+        Domains.clear();
+        
+    	return MemoryControl.properState()? Space.HIGH : Space.LOW;
     }
 
     /**
