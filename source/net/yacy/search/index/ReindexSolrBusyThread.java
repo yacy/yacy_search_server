@@ -174,6 +174,18 @@ import org.apache.solr.common.SolrInputDocument;
         public String getCurrentQuery() {            
             return querylist.isEmpty() ? "" : querylist.get(0);
         }
+
+        /**          
+         * @return copy of all Solr select queries in the queue or null if empty
+         */
+        public String[] getQueryList() {
+            if (querylist != null) {
+                String[] list = new String[querylist.size()];
+                list = querylist.toArray(list);
+                return list;
+            }
+            return null;
+        }
         
         /**
          * @return number of currently selected (found) documents

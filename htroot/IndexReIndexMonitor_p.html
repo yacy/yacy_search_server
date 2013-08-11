@@ -11,12 +11,13 @@
         <h2>Field Re-Indexing</h2>
         <p>In case that an index schema has changed, all documents with missing field entries can be indexed again with a reindex job.</p>
         <form action="IndexReIndexMonitor_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-            <fieldset> 
+          <table><tr valign="top"><td>
+            <fieldset>                 
                 <table>
                     <tr>
                         <td>Documents in current queue</td>
                         <td>#[querysize]#</td>
-                        <td>#(showstartbutton)#<input type="submit" value="refresh page"/>::#(/showstartbutton)#</td>
+                        <td>#(reindexjobrunning)#::<input type="submit" value="refresh page"/>#(/reindexjobrunning)#</td>
                     </tr>
                     <tr>
                         <td>Documents processed</td>
@@ -34,13 +35,21 @@
                         <td></td>
                     </tr>                    
                 </table>
-                #(showstartbutton)#
-                <input type="submit" name="stopreindex" value="stop reindexing"/>
-                ::<input type="submit" name="reindexnow" value="start reindex job now"/>
-                #(/showstartbutton)#
-                <p class="info">#[infomessage]#</p>
+                #(reindexjobrunning)#                
+                <input type="submit" name="reindexnow" value="start reindex job now"/>
+                ::<input type="submit" name="stopreindex" value="stop reindexing"/>
+                #(/reindexjobrunning)# 
+                <p class="info">#[infomessage]#</p>                            
             </fieldset>
-        </form>
+          </td><td>
+            #(reindexjobrunning)#::
+            <fieldset><legend>Remaining field list</legend>
+              <p>reindex documents containing these fields: </p>
+              <p>#[fieldlist]#</p>
+            </fieldset>
+            #(/reindexjobrunning)#
+          </td></tr></table>
+        </form>    
         #%env/templates/footer.template%#
     </body>
 </html>

@@ -36,33 +36,48 @@ public class IndexReIndexMonitor_p {
         prop.put("docsprocessed", "0");
         prop.put("currentselectquery","");
         BusyThread bt = sb.getThread("reindexSolr");
+        if (bt == null) {
+            if (post != null && post.containsKey("reindexnow") && sb.index.fulltext().connectedLocalSolr()) {
+                migration.reindexToschema(sb);
+                prop.put("querysize", "0");
+                prop.put("infomessage","reindex job started");
+                
+                bt = sb.getThread("reindexSolr"); //get new created job for following posts
+            }          
+        }
+        
         if (bt != null) {
+            prop.put("reindexjobrunning", 1);
             prop.put("querysize", bt.getJobCount());
 
             if (bt instanceof ReindexSolrBusyThread) {                
                 prop.put("docsprocessed", ((ReindexSolrBusyThread) bt).getProcessed());
                 prop.put("currentselectquery","q="+((ReindexSolrBusyThread) bt).getCurrentQuery());
+                // prepare list of fields in queue
+                final String[] querylist = ((ReindexSolrBusyThread) bt).getQueryList();
+                if (querylist != null) {
+                    String allfieldnames = "";
+                    for (String oneqs : querylist) { // just use fieldname from query (fieldname:[* TO *])
+                        allfieldnames = allfieldnames + oneqs.substring(0, oneqs.indexOf(':')) + "<br> ";
+                    }
+                    prop.put("reindexjobrunning_fieldlist", allfieldnames);
+                } else {
+                    prop.put("reindexjobrunning_fieldlist", "");
+                }
             }
             
             if (post != null && post.containsKey("stopreindex")) {
                 sb.terminateThread("reindexSolr", false);
                 prop.put("infomessage", "reindex job stopped");
-                prop.put("showstartbutton", 1);
+                prop.put("reindexjobrunning",0);
             } else {
                 prop.put("infomessage", "reindex is running");
-                prop.put("showstartbutton", 0);
             }            
         } else {
-            if (post != null && post.containsKey("reindexnow") && sb.index.fulltext().connectedLocalSolr()) {
-                migration.reindexToschema(sb);
-                prop.put("showstartbutton", 0);
-                prop.put("querysize", "0");
-                prop.put("infomessage","reindex job started");
-            } else {
-                prop.put("showstartbutton", 1);
-                prop.put("querysize", "is empty");
-                prop.put("infomessage", "no reindex job running");
-            }
+            prop.put("reindexjobrunning", 0);
+
+            prop.put("querysize", "is empty");
+            prop.put("infomessage", "no reindex job running");
         }
         // return rewrite properties
         return prop;
