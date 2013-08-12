@@ -226,7 +226,7 @@ public final class QueryParams {
                 this.urlMask_isCatchall = false;
             }
             if (tld != null) {
-                this.urlMask = Pattern.compile(".*" + tld + ".*");
+                this.urlMask = Pattern.compile(".*\\." + tld + ".*");
                 this.urlMask_isCatchall = false;
             }
             if (modifier.filetype != null) {
