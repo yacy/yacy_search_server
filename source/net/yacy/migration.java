@@ -37,8 +37,10 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
 import com.google.common.io.Files;
+import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.storage.Configuration.Entry;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
@@ -368,6 +370,10 @@ public class migration {
         omitFields.add(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
         omitFields.add(CollectionSchema.coordinate_p_1_coordinate.getSolrFieldName());
         omitFields.add("_version_"); // exclude internal Solr std. field from obsolete check
+        Collection<Tagging> vocs = LibraryProvider.autotagging.getVocabularies();
+        for (Tagging v: vocs) { //exclude configured vocabulary index fields (not in CollectionSchema but valid)
+            omitFields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_SUFFIX);
+        }        
         CollectionConfiguration colcfg = Switchboard.getSwitchboard().index.fulltext().getDefaultConfiguration();
         ReindexSolrBusyThread reidx = new ReindexSolrBusyThread(null); // ("*:*" would reindex all);
         
