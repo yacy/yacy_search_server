@@ -27,6 +27,7 @@
 package net.yacy.search.query;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -91,6 +92,7 @@ import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.snippet.ResultEntry;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.search.snippet.TextSnippet.ResultClass;
+import org.apache.solr.common.SolrDocument;
 
 public final class SearchEvent {
     
@@ -992,7 +994,7 @@ public final class SearchEvent {
         // returns from the current RWI list the best URL entry and removes this entry from the list
         int p = -1;
         URIMetadataNode page;
-        while ((page = pullOneRWI(skipDoubleDom)) != null) {
+        mainloop: while ((page = pullOneRWI(skipDoubleDom)) != null) {
 
             if (!this.query.urlMask_isCatchall && !page.matches(this.query.urlMask)) {
                 if (log.isFine()) log.fine("dropped RWI: no match with urlMask");
@@ -1088,7 +1090,25 @@ public final class SearchEvent {
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
                 continue;
             }
-
+            
+          
+            // check vocabulary terms (metatags) {only available in Solr index as vocabulary_xxyyzzz_sxt field}
+            // TODO: vocabulary is only valid and available in local Solr index (considere to auto-switch to Searchdom.LOCAL)
+            if (this.query.metatags != null && !this.query.metatags.isEmpty()) {
+                tagloop: for (Tagging.Metatag tag : this.query.metatags) {
+                    SolrDocument sdoc = page.getDocument();
+                    if (sdoc != null) {
+                        Collection<Object> tagvalues = sdoc.getFieldValues(CollectionSchema.VOCABULARY_PREFIX + tag.getVocabularyName() + CollectionSchema.VOCABULARY_SUFFIX);
+                        if (tagvalues != null && tagvalues.contains(tag.getObject())) {
+                            continue tagloop; // metatag exists check next tag (filter may consist of several tags)                            
+                        } 
+                    } // if we reach this point the metatag was not found (= drop entry)
+                    if (log.isFine()) log.fine("dropped RWI: url not tagged with vocabulary " + tag.getVocabularyName());
+                    if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                    continue mainloop;
+                }
+            }
+            
             // from here: collect navigation information
 
             // namespace navigation
