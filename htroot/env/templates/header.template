@@ -60,7 +60,7 @@
     <h3>The YaCy Project</h3>
     <ul class="menu">
       <li><a href="http://www.yacy.net/" target="_blank" class="MenuItemLink">Project Home</a></li>
-      <li><a href="/Help.html" target="_blank" class="MenuItemLink">Tutorials</a></li>
+      <li><a href="/Help.html" class="MenuItemLink">Tutorials</a></li>
       <li><a href="http://forum.yacy.de" target="_blank" class="MenuItemLink">Forum/Discussion</a></li>
       <li><a href="http://wiki.yacy.de" target="_blank" class="MenuItemLink">Project Wiki</a></li>
       <li><a href="https://gitorious.org/yacy/rc1/commits/master" target="_blank" class="MenuItemLink">Git Repository</a></li>
