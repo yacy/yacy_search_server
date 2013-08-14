@@ -73,8 +73,9 @@ public final class TextParser {
     private static final Object v = new Object();
 
     private static final Parser genericIdiom = new genericParser();
-    private static final Map<String, Set<Parser>> mime2parser = new ConcurrentHashMap<String, Set<Parser>>();
-    private static final Map<String, Set<Parser>> ext2parser = new ConcurrentHashMap<String, Set<Parser>>();
+    //use LinkedHashSet for parser collection to use (init) order to prefered parser for same ext or mime
+    private static final Map<String, LinkedHashSet<Parser>> mime2parser = new ConcurrentHashMap<String, LinkedHashSet<Parser>>();
+    private static final ConcurrentHashMap<String, LinkedHashSet<Parser>> ext2parser = new ConcurrentHashMap<String, LinkedHashSet<Parser>>();
     private static final Map<String, String> ext2mime = new ConcurrentHashMap<String, String>();
     private static final Map<String, Object> denyMime = new ConcurrentHashMap<String, Object>();
     private static final Map<String, Object> denyExtensionx = new ConcurrentHashMap<String, Object>();
@@ -84,7 +85,11 @@ public final class TextParser {
         initParser(new csvParser());
         initParser(new docParser());
         initParser(new gzipParser());
-        initParser(new htmlParser());
+        // AugmentParser calls internally RDFaParser (therefore add before RDFa)
+        if (Switchboard.getSwitchboard().getConfigBool("parserAugmentation", true)) initParser(new AugmentParser()); 
+        // RDFaParser calls internally htmlParser (therefore add before html)
+        if (Switchboard.getSwitchboard().getConfigBool("parserAugmentation.RDFa", true)) initParser(new RDFaParser());          
+        initParser(new htmlParser()); // called within rdfa parser
         initParser(new genericImageParser());
         initParser(new mmParser());
         initParser(new odtParser());
@@ -103,12 +108,9 @@ public final class TextParser {
         initParser(new vsdParser());
         initParser(new xlsParser());
         initParser(new zipParser());
-        initParser(new RDFaParser());
         initParser(new rdfParser());
         initParser(new audioTagParser());
         
-        if (Switchboard.getSwitchboard().getConfigBool("parserAugmentation.RDFa", true)) initParser(new RDFaParser());
-        if (Switchboard.getSwitchboard().getConfigBool("parserAugmentation", true)) initParser(new AugmentParser());
     }
 
     public static Set<Parser> parsers() {
@@ -124,9 +126,9 @@ public final class TextParser {
             // process the mime types
             final String mimeType = normalizeMimeType(mime);
             if (prototypeMime == null) prototypeMime = mimeType;
-            Set<Parser> p0 = mime2parser.get(mimeType);
+            LinkedHashSet<Parser> p0 = mime2parser.get(mimeType);
             if (p0 == null) {
-                p0 = new HashSet<Parser>();
+                p0 = new LinkedHashSet<Parser>();
                 mime2parser.put(mimeType, p0);
             }
             p0.add(parser);
@@ -143,9 +145,9 @@ public final class TextParser {
         for (String ext: parser.supportedExtensions()) {
             // process the extensions
             ext = ext.toLowerCase();
-            Set<Parser> p0 = ext2parser.get(ext);
+            LinkedHashSet<Parser> p0 = ext2parser.get(ext);
             if (p0 == null) {
-                p0 = new HashSet<Parser>();
+                p0 = new LinkedHashSet<Parser>();
                 ext2parser.put(ext, p0);
             }
             p0.add(parser);
