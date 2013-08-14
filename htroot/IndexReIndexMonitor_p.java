@@ -43,7 +43,7 @@ public class IndexReIndexMonitor_p {
                 prop.put("infomessage","reindex job started");
                 
                 bt = sb.getThread("reindexSolr"); //get new created job for following posts
-            }          
+            }             
         }
         
         if (bt != null) {
@@ -75,9 +75,13 @@ public class IndexReIndexMonitor_p {
             }            
         } else {
             prop.put("reindexjobrunning", 0);
-
-            prop.put("querysize", "is empty");
-            prop.put("infomessage", "no reindex job running");
+            if (sb.index.fulltext().connectedLocalSolr()) {
+                prop.put("querysize", "is empty");
+                prop.put("infomessage", "no reindex job running");
+            } else {
+                prop.put("querysize", "");
+                prop.putHTML("infomessage", "! reindex works only with embedded Solr index !");
+            }
         }
         // return rewrite properties
         return prop;
