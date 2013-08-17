@@ -896,7 +896,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 ConcurrentLog.info("CollectionConfiguration.CRHost", "convergence for host " + host + " after " + convergence_attempts + " steps");
                 // we have now the cr for all documents of a specific host; we store them for later use
                 Map<byte[], CRV> crn = crh.normalize();
-                crh.log(crn);
+                //crh.log(crn);
                 ranking.putAll(crn); // accumulate this here for usage in document update later
             }
         } catch (final IOException e2) {
@@ -1048,6 +1048,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
          * log out a complete CRHost set of urls and ranking values
          * @param rm
          */
+        @SuppressWarnings("unused")
         public void log(final Map<byte[], CRV> rm) {
             // print out all urls with their cr-values
             SolrConnector connector = segment.fulltext().getDefaultConnector();
