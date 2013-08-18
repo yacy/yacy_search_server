@@ -291,7 +291,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
             }
             // compute snippet from texts
             List<String> snippet = urlhash == null ? null : snippets.get(urlhash);
-            OpensearchResponseWriter.solitaireTag(writer, GSAToken.S.name(), snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : snippet.get(0)) : snippet.get(0));
+            OpensearchResponseWriter.solitaireTag(writer, GSAToken.S.name(), snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : "") : snippet.get(0));
             OpensearchResponseWriter.solitaireTag(writer, GSAToken.GD.name(), descriptions.size() > 0 ? descriptions.get(0) : "");
             writer.write("<HAS><L/><C SZ=\""); writer.write(Integer.toString(size / 1024)); writer.write("k\" CID=\""); writer.write(urlhash); writer.write("\" ENC=\"UTF-8\"/></HAS>");
             if (YaCyVer == null) YaCyVer = yacyVersion.thisVersion().getName() + "/" + Switchboard.getSwitchboard().peers.mySeed().hash;
