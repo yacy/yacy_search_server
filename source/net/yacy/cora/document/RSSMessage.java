@@ -89,7 +89,18 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
             return this.keys.size() == 0 ? "" : this.keys.iterator().next();
         }
     }
+    
+    private static Map<String, Token> tokenNick2Token = new HashMap<String, Token>();
+    static {
+        for (Token t: Token.values()) {
+            for (String nick: t.keys) tokenNick2Token.put(nick, t);
+        }
+    }
 
+    public static Token valueOfNick(String nick) {
+        return tokenNick2Token.get(nick);
+    }
+    
     private static String artificialGuidPrefix = "c0_";
     private static String calculatedGuidPrefix = "c1_";
     public static final RSSMessage POISON = new RSSMessage("", "", "");

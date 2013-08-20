@@ -210,11 +210,11 @@ public class RSSReader extends DefaultHandler {
         } else if (this.parsingItem)  {
             final String value = this.buffer.toString().trim();
             this.buffer.setLength(0);
-            if (RSSMessage.tags.contains(tag) && value.length() > 0) this.item.setValue(Token.valueOf(tag), value);
+            if (RSSMessage.tags.contains(tag) && value.length() > 0) this.item.setValue(RSSMessage.valueOfNick(tag), value);
         } else if (this.parsingChannel) {
             final String value = this.buffer.toString().trim();
             this.buffer.setLength(0);
-            if (RSSMessage.tags.contains(tag)) this.item.setValue(Token.valueOf(tag), value);
+            if (RSSMessage.tags.contains(tag)) this.item.setValue(RSSMessage.valueOfNick(tag), value);
         }
     }
 
