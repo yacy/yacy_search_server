@@ -42,6 +42,7 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.cora.util.SpaceExceededException;
@@ -53,7 +54,6 @@ import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.util.ByteArray;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 

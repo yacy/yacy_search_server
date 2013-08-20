@@ -40,9 +40,9 @@ import java.util.zip.GZIPOutputStream;
 
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.MemoryControl;
 
 

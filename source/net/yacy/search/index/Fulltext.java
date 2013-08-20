@@ -415,6 +415,9 @@ public final class Fulltext {
         if (MemoryControl.shortStatus()) clearCache();
     }
 
+    /**
+     * deprecated method to store document metadata, use Solr documents wherever possible
+     */
     public void putMetadata(final URIMetadataRow entry) throws IOException {
         byte[] idb = entry.hash();
         String id = ASCII.String(idb);

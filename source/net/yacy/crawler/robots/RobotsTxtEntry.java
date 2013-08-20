@@ -39,7 +39,7 @@ import java.util.Map;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.util.ByteArray;
+import net.yacy.cora.util.ByteArray;
 
 
 public class RobotsTxtEntry {

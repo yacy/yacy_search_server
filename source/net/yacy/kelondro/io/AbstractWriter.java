@@ -33,7 +33,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.cora.util.ByteBuffer;
 
 
 public abstract class AbstractWriter extends AbstractReader implements Writer {

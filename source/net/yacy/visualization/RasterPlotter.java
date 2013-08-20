@@ -55,8 +55,8 @@ import java.util.zip.DeflaterOutputStream;
 
 import javax.imageio.ImageIO;
 
+import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.util.ByteBuffer;
 
 
 public class RasterPlotter {

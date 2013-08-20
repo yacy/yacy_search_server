@@ -39,10 +39,10 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.index.RowHandleSet;
-import net.yacy.kelondro.util.ByteArray;
 
 /**
  * URI-object providing YaCy-hash computation

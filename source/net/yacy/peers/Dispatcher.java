@@ -36,6 +36,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -43,7 +44,6 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.rwi.ReferenceContainer;
-import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.search.index.Segment;
 

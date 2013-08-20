@@ -36,11 +36,11 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.util.ByteBuffer;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
-import net.yacy.kelondro.util.ByteBuffer;
 
 public class WordReferenceFactory implements ReferenceFactory<WordReference>, Serializable {
 

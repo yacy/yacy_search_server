@@ -44,10 +44,10 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.order.Order;
+import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.kelondro.util.Bitfield;
-import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.kelondroException;
 
 

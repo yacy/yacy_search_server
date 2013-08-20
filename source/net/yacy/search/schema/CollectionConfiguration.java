@@ -195,29 +195,14 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         return sd;
     }
     
-    public SolrInputDocument metadata2solr(final URIMetadataRow md) {
-
-        final SolrInputDocument doc = new SolrInputDocument();
-        final DigestURI digestURI = md.url();
-        boolean allAttr = this.isEmpty();
-
-        add(doc, CollectionSchema.id, ASCII.String(md.hash()));
+    public void addURIAttributes(final SolrInputDocument doc, final boolean allAttr, final DigestURI digestURI, final char doctype) {
+        add(doc, CollectionSchema.id, ASCII.String(digestURI.hash()));
         String us = digestURI.toNormalform(true);
         add(doc, CollectionSchema.sku, us);
         if (allAttr || contains(CollectionSchema.ip_s)) {
-        	final InetAddress address = digestURI.getInetAddress();
-        	if (address != null) add(doc, CollectionSchema.ip_s, address.getHostAddress());
+            final InetAddress address = digestURI.getInetAddress();
+            if (address != null) add(doc, CollectionSchema.ip_s, address.getHostAddress());
         }
-        if (allAttr || contains(CollectionSchema.url_protocol_s)) add(doc, CollectionSchema.url_protocol_s, digestURI.getProtocol());
-        Map<String, String> searchpart = digestURI.getSearchpartMap();
-        if (searchpart == null) {
-            if (allAttr || contains(CollectionSchema.url_parameter_i)) add(doc, CollectionSchema.url_parameter_i, 0);
-        } else {
-            if (allAttr || contains(CollectionSchema.url_parameter_i)) add(doc, CollectionSchema.url_parameter_i, searchpart.size());
-            if (allAttr || contains(CollectionSchema.url_parameter_key_sxt)) add(doc, CollectionSchema.url_parameter_key_sxt, searchpart.keySet().toArray(new String[searchpart.size()]));
-            if (allAttr || contains(CollectionSchema.url_parameter_value_sxt)) add(doc, CollectionSchema.url_parameter_value_sxt,  searchpart.values().toArray(new String[searchpart.size()]));
-        }
-        if (allAttr || contains(CollectionSchema.url_chars_i)) add(doc, CollectionSchema.url_chars_i, us.length());
         String host = null;
         if ((host = digestURI.getHost()) != null) {
             String dnc = Domains.getDNC(host);
@@ -231,6 +216,34 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             if (allAttr || contains(CollectionSchema.host_organizationdnc_s)) add(doc, CollectionSchema.host_organizationdnc_s, orga + '.' + dnc);
             if (allAttr || contains(CollectionSchema.host_subdomain_s)) add(doc, CollectionSchema.host_subdomain_s, subdom);
         }
+        
+        // path elements of link
+        String filename = digestURI.getFileName();
+        String extension = MultiProtocolURI.getFileExtension(filename);
+        if (allAttr || contains(CollectionSchema.url_chars_i)) add(doc, CollectionSchema.url_chars_i, us.length());
+        if (allAttr || contains(CollectionSchema.url_protocol_s)) add(doc, CollectionSchema.url_protocol_s, digestURI.getProtocol());
+        if (allAttr || contains(CollectionSchema.url_paths_sxt)) add(doc, CollectionSchema.url_paths_sxt, digestURI.getPaths());
+        if (allAttr || contains(CollectionSchema.url_file_name_s)) add(doc, CollectionSchema.url_file_name_s, filename.toLowerCase().endsWith("." + extension) ? filename.substring(0, filename.length() - extension.length() - 1) : filename);
+        if (allAttr || contains(CollectionSchema.url_file_ext_s)) add(doc, CollectionSchema.url_file_ext_s, extension);
+        if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, Response.doctype2mime(extension, doctype));
+        
+
+        Map<String, String> searchpart = digestURI.getSearchpartMap();
+        if (searchpart == null) {
+            if (allAttr || contains(CollectionSchema.url_parameter_i)) add(doc, CollectionSchema.url_parameter_i, 0);
+        } else {
+            if (allAttr || contains(CollectionSchema.url_parameter_i)) add(doc, CollectionSchema.url_parameter_i, searchpart.size());
+            if (allAttr || contains(CollectionSchema.url_parameter_key_sxt)) add(doc, CollectionSchema.url_parameter_key_sxt, searchpart.keySet().toArray(new String[searchpart.size()]));
+            if (allAttr || contains(CollectionSchema.url_parameter_value_sxt)) add(doc, CollectionSchema.url_parameter_value_sxt,  searchpart.values().toArray(new String[searchpart.size()]));
+        }
+    }
+    
+    public SolrInputDocument metadata2solr(final URIMetadataRow md) {
+
+        final SolrInputDocument doc = new SolrInputDocument();
+        boolean allAttr = this.isEmpty();
+
+        addURIAttributes(doc, allAttr, md.url(), md.doctype());
 
         String title = md.dc_title();
         if (allAttr || contains(CollectionSchema.title)) add(doc, CollectionSchema.title, new String[]{title});
@@ -256,10 +269,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             add(doc, CollectionSchema.description_words_val, description_exist ? new Integer[]{new Integer(description.length() == 0 ? 0 : CommonPattern.SPACE.split(description).length)} : new Integer[0]);
         }
 
-        String filename = digestURI.getFileName();
-        String extension = MultiProtocolURI.getFileExtension(filename);
         if (allAttr || contains(CollectionSchema.author)) add(doc, CollectionSchema.author, md.dc_creator());
-        if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, Response.doctype2mime(extension, md.doctype()));
         if (allAttr || contains(CollectionSchema.last_modified)) add(doc, CollectionSchema.last_modified, md.moddate());
         if (allAttr || contains(CollectionSchema.wordcount_i)) add(doc, CollectionSchema.wordcount_i, md.wordCount());
 
@@ -273,11 +283,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.keywords)) {
         	add(doc, CollectionSchema.keywords, keywords);
         }
-
-        // path elements of link
-        if (allAttr || contains(CollectionSchema.url_paths_sxt)) add(doc, CollectionSchema.url_paths_sxt, digestURI.getPaths());
-        if (allAttr || contains(CollectionSchema.url_file_name_s)) add(doc, CollectionSchema.url_file_name_s, filename.toLowerCase().endsWith("." + extension) ? filename.substring(0, filename.length() - extension.length() - 1) : filename);
-        if (allAttr || contains(CollectionSchema.url_file_ext_s)) add(doc, CollectionSchema.url_file_ext_s, extension);
 
         if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, md.limage());
         if (allAttr || contains(CollectionSchema.inboundlinkscount_i)) add(doc, CollectionSchema.inboundlinkscount_i, md.llocal());
@@ -310,7 +315,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         	accText(sb, md.dc_creator());
         	accText(sb, md.dc_publisher());
         	accText(sb, md.snippet());
-        	accText(sb, digestURI.toTokens());
+        	accText(sb, md.url().toTokens());
         	accText(sb, keywords);
         	add(doc, CollectionSchema.text_t, sb.toString());
         }
@@ -349,12 +354,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         SolrVector doc = new SolrVector();
         final DigestURI digestURI = document.dc_source();
         boolean allAttr = this.isEmpty();
+        addURIAttributes(doc, allAttr, digestURI, Response.docType(digestURI));
         
         Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
         
         add(doc, CollectionSchema.id, id);
-        String docurl = digestURI.toNormalform(true);
-        add(doc, CollectionSchema.sku, docurl);
+        String us = digestURI.toNormalform(true);
 
         int clickdepth = 999;
         if ((allAttr || contains(CollectionSchema.clickdepth_i)) && citations != null) {
@@ -373,35 +378,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             processTypes.add(ProcessType.CITATION); // postprocessing needed
         }
         
-        if (allAttr || contains(CollectionSchema.ip_s)) {
-            final InetAddress address = digestURI.getInetAddress();
-            if (address != null) add(doc, CollectionSchema.ip_s, address.getHostAddress());
-        }
         if (allAttr || contains(CollectionSchema.collection_sxt) && collections != null && collections.length > 0) add(doc, CollectionSchema.collection_sxt, collections);
-        if (allAttr || contains(CollectionSchema.url_protocol_s)) add(doc, CollectionSchema.url_protocol_s, digestURI.getProtocol());
-        Map<String, String> searchpart = digestURI.getSearchpartMap();
-        if (searchpart == null) {
-            if (allAttr || contains(CollectionSchema.url_parameter_i)) add(doc, CollectionSchema.url_parameter_i, 0);
-        } else {
-            if (allAttr || contains(CollectionSchema.url_parameter_i)) add(doc, CollectionSchema.url_parameter_i, searchpart.size());
-            if (allAttr || contains(CollectionSchema.url_parameter_key_sxt)) add(doc, CollectionSchema.url_parameter_key_sxt, searchpart.keySet().toArray(new String[searchpart.size()]));
-            if (allAttr || contains(CollectionSchema.url_parameter_value_sxt)) add(doc, CollectionSchema.url_parameter_value_sxt,  searchpart.values().toArray(new String[searchpart.size()]));
-        }
-        if (allAttr || contains(CollectionSchema.url_chars_i)) add(doc, CollectionSchema.url_chars_i, docurl.length());
-        String host = null;
-        if ((host = digestURI.getHost()) != null) {
-            String dnc = Domains.getDNC(host);
-            String subdomOrga = host.length() - dnc.length() <= 0 ? "" : host.substring(0, host.length() - dnc.length() - 1);
-            int p = subdomOrga.lastIndexOf('.');
-            String subdom = (p < 0) ? "" : subdomOrga.substring(0, p);
-            String orga = (p < 0) ? subdomOrga : subdomOrga.substring(p + 1);
-            if (allAttr || contains(CollectionSchema.host_s)) add(doc, CollectionSchema.host_s, host);
-            if (allAttr || contains(CollectionSchema.host_dnc_s)) add(doc, CollectionSchema.host_dnc_s, dnc);
-            if (allAttr || contains(CollectionSchema.host_organization_s)) add(doc, CollectionSchema.host_organization_s, orga);
-            if (allAttr || contains(CollectionSchema.host_organizationdnc_s)) add(doc, CollectionSchema.host_organizationdnc_s, orga + '.' + dnc);
-            if (allAttr || contains(CollectionSchema.host_subdomain_s)) add(doc, CollectionSchema.host_subdomain_s, subdom);
-        }
-
+        
         List<String> titles = document.titles();
         if (allAttr || contains(CollectionSchema.title)) {
             add(doc, CollectionSchema.title, titles);
@@ -472,13 +450,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         add(doc, CollectionSchema.fuzzy_signature_l, condenser.fuzzySignature());
         add(doc, CollectionSchema.fuzzy_signature_text_t, condenser.fuzzySignatureText());
         add(doc, CollectionSchema.fuzzy_signature_unique_b, true); // this must be corrected afterwards!
-
-        // path elements of link
-        String filename = digestURI.getFileName();
-        String extension = MultiProtocolURI.getFileExtension(filename);
-        if (allAttr || contains(CollectionSchema.url_paths_sxt)) add(doc, CollectionSchema.url_paths_sxt, digestURI.getPaths());
-        if (allAttr || contains(CollectionSchema.url_file_name_s)) add(doc, CollectionSchema.url_file_name_s, filename.toLowerCase().endsWith("." + extension) ? filename.substring(0, filename.length() - extension.length() - 1) : filename);
-        if (allAttr || contains(CollectionSchema.url_file_ext_s)) add(doc, CollectionSchema.url_file_ext_s, extension);
 
         // get list of all links; they will be shrinked by urls that appear in other fields of the solr schema
         Set<DigestURI> inboundLinks = document.inboundLinks();
@@ -719,7 +690,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     add(doc, CollectionSchema.canonical_s, canonical.toNormalform(false));
                     // set a flag if this is equal to sku
                     if (contains(CollectionSchema.canonical_equal_sku_b)) {
-                        add(doc, CollectionSchema.canonical_equal_sku_b, canonical.equals(docurl));
+                        add(doc, CollectionSchema.canonical_equal_sku_b, canonical.equals(us));
                     }
                 }
             }
@@ -1196,57 +1167,19 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @throws IOException
      */
     public SolrInputDocument err(final DigestURI digestURI, final String[] collections, final String failReason, final FailType failType, final int httpstatus) throws IOException {
-        final SolrInputDocument solrdoc = new SolrInputDocument();
-        add(solrdoc, CollectionSchema.id, ASCII.String(digestURI.hash()));
-        add(solrdoc, CollectionSchema.sku, digestURI.toNormalform(true));
-        final InetAddress address = digestURI.getInetAddress();
-        if (contains(CollectionSchema.ip_s) && address != null) add(solrdoc, CollectionSchema.ip_s, address.getHostAddress());
-        if (contains(CollectionSchema.host_s) && digestURI.getHost() != null) add(solrdoc, CollectionSchema.host_s, digestURI.getHost());
-        if (contains(CollectionSchema.load_date_dt)) add(solrdoc, CollectionSchema.load_date_dt, new Date());
-
-        // path elements of link
-        String filename = digestURI.getFileName();
-        String extension = MultiProtocolURI.getFileExtension(filename);
-        if (contains(CollectionSchema.url_protocol_s)) add(solrdoc, CollectionSchema.url_protocol_s, digestURI.getProtocol());
-        if (contains(CollectionSchema.url_paths_sxt)) add(solrdoc, CollectionSchema.url_paths_sxt, digestURI.getPaths());
-        if (contains(CollectionSchema.url_file_name_s)) add(solrdoc, CollectionSchema.url_file_name_s, filename.toLowerCase().endsWith("." + extension) ? filename.substring(0, filename.length() - extension.length() - 1) : filename);
-        if (contains(CollectionSchema.url_file_ext_s)) add(solrdoc, CollectionSchema.url_file_ext_s, extension);
+        boolean allAttr = this.isEmpty();
+        assert allAttr || contains(CollectionSchema.failreason_s);
+        
+        final SolrInputDocument doc = new SolrInputDocument();
+        addURIAttributes(doc, allAttr, digestURI, Response.docType(digestURI));
+        if (allAttr || contains(CollectionSchema.load_date_dt)) add(doc, CollectionSchema.load_date_dt, new Date());
         
         // fail reason and status
-        if (contains(CollectionSchema.failreason_s)) add(solrdoc, CollectionSchema.failreason_s, failReason);
-        if (contains(CollectionSchema.failtype_s)) add(solrdoc, CollectionSchema.failtype_s, failType.name());
-        if (contains(CollectionSchema.httpstatus_i)) add(solrdoc, CollectionSchema.httpstatus_i, httpstatus);
-        if (contains(CollectionSchema.collection_sxt)) add(solrdoc, CollectionSchema.collection_sxt, collections);
-        return solrdoc;
+        if (allAttr || contains(CollectionSchema.failreason_s)) add(doc, CollectionSchema.failreason_s, failReason);
+        if (allAttr || contains(CollectionSchema.failtype_s)) add(doc, CollectionSchema.failtype_s, failType.name());
+        if (allAttr || contains(CollectionSchema.httpstatus_i)) add(doc, CollectionSchema.httpstatus_i, httpstatus);
+        if (allAttr || contains(CollectionSchema.collection_sxt)) add(doc, CollectionSchema.collection_sxt, collections);
+        return doc;
     }
 
-
-    /*
-   standard solr schema
-
-   <field name="name" type="textgen" indexed="true" stored="true"/>
-   <field name="cat" type="string" indexed="true" stored="true" multiValued="true"/>
-   <field name="features" type="text" indexed="true" stored="true" multiValued="true"/>
-   <field name="includes" type="text" indexed="true" stored="true" termVectors="true" termPositions="true" termOffsets="true" />
-
-   <field name="weight" type="float" indexed="true" stored="true"/>
-   <field name="price"  type="float" indexed="true" stored="true"/>
-   <field name="popularity" type="int" indexed="true" stored="true" />
-
-   <!-- Common metadata fields, named specifically to match up with
-     SolrCell metadata when parsing rich documents such as Word, PDF.
-     Some fields are multiValued only because Tika currently may return
-     multiple values for them.
-   -->
-   <field name="title" type="text" indexed="true" stored="true" multiValued="true"/>
-   <field name="subject" type="text" indexed="true" stored="true"/>
-   <field name="description" type="text" indexed="true" stored="true"/>
-   <field name="comments" type="text" indexed="true" stored="true"/>
-   <field name="author" type="textgen" indexed="true" stored="true"/>
-   <field name="keywords" type="textgen" indexed="true" stored="true"/>
-   <field name="category" type="textgen" indexed="true" stored="true"/>
-   <field name="content_type" type="string" indexed="true" stored="true" multiValued="true"/>
-   <field name="last_modified" type="date" indexed="true" stored="true"/>
-   <field name="links" type="string" indexed="true" stored="true" multiValued="true"/>
-     */
 }

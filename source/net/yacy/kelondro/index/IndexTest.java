@@ -36,8 +36,8 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleMap;
+import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.MemoryControl;
 
 

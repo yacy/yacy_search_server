@@ -60,8 +60,8 @@ import javax.net.ssl.SSLSocketFactory;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.utils.PKCS12Tool;

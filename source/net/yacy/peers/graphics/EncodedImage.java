@@ -23,7 +23,7 @@ package net.yacy.peers.graphics;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.cora.util.ByteBuffer;
 import net.yacy.visualization.AnimationGIF;
 import net.yacy.visualization.RasterPlotter;
 

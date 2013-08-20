@@ -40,6 +40,7 @@ import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.word.WordReference;
@@ -48,7 +49,6 @@ import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.Bitfield;
-import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.kelondro.util.kelondroException;
 import net.yacy.search.query.QueryParams;
@@ -237,7 +237,9 @@ public class URIMetadataRow {
         // the result is a String of 12 bytes within a 72-bit space
         // (each byte has an 6-bit range)
         // that should be enough for all web pages on the world
-        return this.entry.getPrimaryKeyBytes();
+        final byte[] h = this.entry.getPrimaryKeyBytes();
+        assert ByteBuffer.equals(h, url().hash());
+        return h;
     }
 
     private String hostHash = null;

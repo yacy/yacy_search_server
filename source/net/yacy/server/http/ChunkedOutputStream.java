@@ -31,7 +31,7 @@ import java.io.OutputStream;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.cora.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.server.serverCore;
 

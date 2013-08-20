@@ -103,7 +103,7 @@ public class MapColumnIndex implements Serializable {
         } else {
             // update the existing index entry
             // check if value already exist
-            if (!net.yacy.kelondro.util.ByteBuffer.contains(indexes, primarykey)) {
+            if (!net.yacy.cora.util.ByteBuffer.contains(indexes, primarykey)) {
                 indexes.add(primarykey);
             }
         }
@@ -125,7 +125,7 @@ public class MapColumnIndex implements Serializable {
         Map.Entry<String, Collection<byte[]>> ref;
         while (i.hasNext()) {
             ref = i.next();
-            net.yacy.kelondro.util.ByteBuffer.remove(ref.getValue(), index);
+            net.yacy.cora.util.ByteBuffer.remove(ref.getValue(), index);
             if (ref.getValue().isEmpty()) {
                 i.remove();
             }

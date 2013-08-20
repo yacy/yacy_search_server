@@ -34,6 +34,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
 import net.yacy.cora.sorting.ConcurrentScoreMap;
+import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
@@ -44,7 +45,6 @@ import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.Bitfield;
-import net.yacy.kelondro.util.ByteBuffer;
 
 
 public class ReferenceOrder {

@@ -34,7 +34,7 @@ import java.util.HashMap;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.cora.util.ByteBuffer;
 
 
 public class ServerSideIncludes {

@@ -40,12 +40,12 @@ import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.sorting.Rating;
 import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.HeapWriter;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.FileUtils;
 
 /**

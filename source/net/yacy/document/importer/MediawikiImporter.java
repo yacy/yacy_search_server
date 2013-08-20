@@ -51,6 +51,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.data.wiki.WikiCode;
@@ -60,7 +61,6 @@ import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.util.ByteBuffer;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 

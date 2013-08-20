@@ -33,6 +33,7 @@ import java.util.List;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -43,7 +44,6 @@ import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.util.Bitfield;
-import net.yacy.kelondro.util.ByteArray;
 import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
 import net.yacy.search.index.Segment;

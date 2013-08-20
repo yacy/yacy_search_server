@@ -31,10 +31,10 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ymark.YMarkUtil;
-import net.yacy.kelondro.util.ByteBuffer;
 
 public class TablesColumnBLOBIndex extends TablesColumnIndex{
 
