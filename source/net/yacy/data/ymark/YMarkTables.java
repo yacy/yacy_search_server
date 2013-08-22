@@ -43,6 +43,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.WorkTables;
@@ -362,15 +363,15 @@ public class YMarkTables {
     	addBookmark(bmk_user, bmk, true, true);
     }
 
-    public void createBookmark(final LoaderDispatcher loader, final String url, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure {
-    	createBookmark(loader, new DigestURI(url), bmk_user, autotag, tagsString, foldersString);
+    public void createBookmark(final LoaderDispatcher loader, final String url, final ClientIdentification.Agent agent, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure {
+    	createBookmark(loader, new DigestURI(url), agent, bmk_user, autotag, tagsString, foldersString);
     }
 
-    public void createBookmark(final LoaderDispatcher loader, final DigestURI url, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure {
+    public void createBookmark(final LoaderDispatcher loader, final DigestURI url, final ClientIdentification.Agent agent, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure {
 
     	final YMarkEntry bmk_entry = new YMarkEntry(false);
         final YMarkMetadata meta = new YMarkMetadata(url);
-		final Document document = meta.loadDocument(loader);
+		final Document document = meta.loadDocument(loader, agent);
 		final EnumMap<YMarkMetadata.METADATA, String> metadata = meta.loadMetadata();
 		final String urls = url.toNormalform(true);
 		bmk_entry.put(YMarkEntry.BOOKMARK.URL.key(), urls);

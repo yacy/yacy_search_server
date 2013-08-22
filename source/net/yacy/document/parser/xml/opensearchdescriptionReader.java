@@ -98,6 +98,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
     private boolean parsingDescription, parsingTextValue;
     private final HashMap<String, String> items; // Opensearchdescription Item map
     private String rssurl, atomurl; // search url templates
+    private ClientIdentification.Agent agent;
 
     public opensearchdescriptionReader() {
         this.items = new HashMap<String, String>();
@@ -106,6 +107,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
         this.parsingTextValue = false;
         this.rssurl = null;
         this.atomurl = null;
+        this.agent = ClientIdentification.yacyInternetCrawlerAgent;
     }
 
     private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
@@ -142,10 +144,11 @@ public class opensearchdescriptionReader extends DefaultHandler {
         }
     }
 
-    public opensearchdescriptionReader(final String path, int timeout) {
+    public opensearchdescriptionReader(final String path, final ClientIdentification.Agent agent) {
         this();
+        this.agent = agent;
         try {
-            HTTPClient www = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
+            HTTPClient www = new HTTPClient(agent);
             www.GET(path);
             final SAXParser saxParser = getParser();
             saxParser.parse(www.getContentstream(), this);
@@ -163,7 +166,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
         this.rssurl = null;
         this.atomurl = null;
         try {
-            HTTPClient www = new HTTPClient(ClientIdentification.getUserAgent(), 1000);
+            HTTPClient www = new HTTPClient(this.agent);
             www.GET(path);
             final SAXParser saxParser = getParser();
             try {

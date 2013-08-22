@@ -57,7 +57,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
-import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -183,6 +182,7 @@ public class Bookmarks {
                 prop.put("mode", "2");
                 prop.put("display", "1");
                 display = 1;
+                ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
                 if (urlHash.isEmpty()) {
                     prop.put("mode_edit", "0"); // create mode
                     prop.putHTML("mode_title", post.get("title"));
@@ -202,7 +202,7 @@ public class Bookmarks {
                         // try to get the bookmark from the LURL database
                         final URIMetadataNode urlentry = sb.index.fulltext().getMetadata(ASCII.getBytes(urlHash));
                         if (urlentry != null) try {
-                            final Document document = Document.mergeDocuments(urlentry.url(), null, sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT));
+                            final Document document = Document.mergeDocuments(urlentry.url(), null, sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, agent));
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", urlentry.url().toNormalform(false));
                             prop.putHTML("mode_title", urlentry.dc_title());

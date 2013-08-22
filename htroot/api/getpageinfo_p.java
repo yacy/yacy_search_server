@@ -96,7 +96,8 @@ public class getpageinfo_p {
                 }
                 net.yacy.document.Document scraper = null;
                 if (u != null) try {
-                    scraper = sb.loader.loadDocument(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
+                    ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+                    scraper = sb.loader.loadDocument(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER, agent);
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                     // bad things are possible, i.e. that the Server responds with "403 Bad Behavior"
@@ -148,8 +149,9 @@ public class getpageinfo_p {
                     final DigestURI theURL = new DigestURI(url);
 
                 	// determine if crawling of the current URL is allowed
-                    sb.robots.ensureExist(theURL, sb.peers.myBotIDs(), true);
-                    RobotsTxtEntry robotsEntry = sb.robots.getEntry(theURL, sb.peers.myBotIDs());
+                    ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+                    sb.robots.ensureExist(theURL, agent, true);
+                    RobotsTxtEntry robotsEntry = sb.robots.getEntry(theURL, agent);
                 	prop.put("robots-allowed", robotsEntry == null ? 1 : robotsEntry.isDisallowed(theURL) ? 0 : 1);
                     prop.putHTML("robotsInfo", robotsEntry == null ? "" : robotsEntry.getInfo());
 

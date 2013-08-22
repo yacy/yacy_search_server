@@ -192,7 +192,7 @@ public class yacysearchitem {
 
             String resultFileName = resultURL.getFileName();
             prop.putHTML("content_target", target);
-            if (faviconURL != null && fileType == FileType.HTML) sb.loader.loadIfNotExistBackground(faviconURL, 1024 * 1024 * 10, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+            if (faviconURL != null && fileType == FileType.HTML) sb.loader.loadIfNotExistBackground(faviconURL, 1024 * 1024 * 10, null, ClientIdentification.yacyIntranetCrawlerAgent);
             prop.putHTML("content_faviconCode", URLLicense.aquireLicense(faviconURL)); // acquire license for favicon url loading
             prop.put("content_urlhash", resulthashString);
             prop.put("content_ranking", result.ranking());
@@ -286,7 +286,7 @@ public class yacysearchitem {
                 final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
 
                 final String license = URLLicense.aquireLicense(ms.url());
-                sb.loader.loadIfNotExistBackground(ms.url(), 1024 * 1024 * 10, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+                sb.loader.loadIfNotExistBackground(ms.url(), 1024 * 1024 * 10, null, ClientIdentification.yacyIntranetCrawlerAgent);
                 prop.putHTML("content_item_hrefCache", (auth) ? "/ViewImage.png?url=" + resultUrlstring : resultUrlstring);
                 prop.putHTML("content_item_href", resultUrlstring);
                 prop.putHTML("content_item_target", target);

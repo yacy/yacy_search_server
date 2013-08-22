@@ -34,6 +34,7 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -134,7 +135,7 @@ public class FileLoader {
         }
 
         // load the resource
-        InputStream is = url.getInputStream(null, -1);
+        InputStream is = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
         byte[] b = FileUtils.read(is);
         is.close();
 

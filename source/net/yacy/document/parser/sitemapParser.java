@@ -72,7 +72,7 @@ public class sitemapParser extends AbstractParser implements Parser {
             final String charset, final InputStream source)
             throws Failure, InterruptedException {
         final List<Document> docs = new ArrayList<Document>();
-        SitemapReader sitemap = new SitemapReader(source);
+        SitemapReader sitemap = new SitemapReader(source, ClientIdentification.yacyInternetCrawlerAgent);
         sitemap.start();
         DigestURI uri;
         Document doc;
@@ -107,11 +107,11 @@ public class sitemapParser extends AbstractParser implements Parser {
         return da;
     }
 
-    public static SitemapReader parse(final DigestURI sitemapURL) throws IOException {
+    public static SitemapReader parse(final DigestURI sitemapURL, final ClientIdentification.Agent agent) throws IOException {
         // download document
         ConcurrentLog.info("SitemapReader", "loading sitemap from " + sitemapURL.toNormalform(true));
         final RequestHeader requestHeader = new RequestHeader();
-        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), 5000);
+        final HTTPClient client = new HTTPClient(agent);
         client.setHeader(requestHeader.entrySet());
         try {
             client.GET(sitemapURL.toString());
@@ -130,7 +130,7 @@ public class sitemapParser extends AbstractParser implements Parser {
                 contentStream = new GZIPInputStream(contentStream);
             }
             final ByteCountInputStream counterStream = new ByteCountInputStream(contentStream, null);
-            return new SitemapReader(counterStream);
+            return new SitemapReader(counterStream, agent);
         } catch (final IOException e) {
             throw e;
         }
@@ -144,9 +144,11 @@ public class sitemapParser extends AbstractParser implements Parser {
     public static class SitemapReader extends Thread {
         private final InputStream source;
         private final BlockingQueue<URLEntry> queue;
-        public SitemapReader(final InputStream source) {
+        private final ClientIdentification.Agent agent;
+        public SitemapReader(final InputStream source, final ClientIdentification.Agent agent) {
             this.source = source;
             this.queue = new ArrayBlockingQueue<URLEntry>(10000);
+            this.agent = agent;
         }
         @Override
         public void run() {
@@ -157,7 +159,7 @@ public class sitemapParser extends AbstractParser implements Parser {
                     String url = new SitemapEntry((Element) sitemapNodes.item(i)).url();
                     if (url != null && url.length() > 0) {
                         try {
-                            final SitemapReader r = parse(new DigestURI(url));
+                            final SitemapReader r = parse(new DigestURI(url), agent);
                             r.start();
                             URLEntry item;
                             while ((item = r.take()) != POISON_URLEntry) {

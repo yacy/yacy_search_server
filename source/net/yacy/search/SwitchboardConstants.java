@@ -444,10 +444,11 @@ public final class SwitchboardConstants {
      *
      */
     public static final String NETWORK_NAME = "network.unit.name";
-    public static final String NETWORK_DOMAIN = "network.unit.domain";
+    public static final String NETWORK_DOMAIN = "network.unit.domain"; // can be filled with: global, local, any
     public static final String NETWORK_DOMAIN_NOCHECK = "network.unit.domain.nocheck";
     public static final String NETWORK_WHITELIST = "network.unit.access.whitelist";
     public static final String NETWORK_BLACKLIST = "network.unit.access.blacklist";
+    public static final String NETWORK_BOOTSTRAP_SEEDLIST_STUB = "network.unit.bootstrap.seedlist";
 
     public static final String NETWORK_SEARCHVERIFY = "network.unit.inspection.searchverify";
 

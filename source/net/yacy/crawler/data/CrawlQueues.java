@@ -41,7 +41,6 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
-import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.HarvestProcess;
@@ -82,7 +81,7 @@ public class CrawlQueues {
 
         // start crawling management
         this.log.config("Starting Crawling Management");
-        this.noticeURL = new NoticedURL(queuePath, sb.peers.myBotIDs(), sb.useTailCache, sb.exceed134217727);
+        this.noticeURL = new NoticedURL(queuePath, sb.useTailCache, sb.exceed134217727);
         FileUtils.deletedelete(new File(queuePath, ERROR_DB_FILENAME));
         this.errorURL = new ZURL(sb.index.fulltext(), queuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
         this.delegatedURL = new ZURL(sb.index.fulltext(), queuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
@@ -94,7 +93,7 @@ public class CrawlQueues {
         this.workers = new ConcurrentHashMap<Integer, Loader>();
         this.remoteCrawlProviderHashes.clear();
 
-        this.noticeURL = new NoticedURL(newQueuePath, this.sb.peers.myBotIDs(), this.sb.useTailCache, this.sb.exceed134217727);
+        this.noticeURL = new NoticedURL(newQueuePath, this.sb.useTailCache, this.sb.exceed134217727);
         FileUtils.deletedelete(new File(newQueuePath, ERROR_DB_FILENAME));
         this.errorURL = new ZURL(this.sb.index.fulltext(), newQueuePath, ERROR_DB_FILENAME, false, this.sb.useTailCache, this.sb.exceed134217727);
         this.delegatedURL = new ZURL(this.sb.index.fulltext(), newQueuePath, DELEGATED_DB_FILENAME, true, this.sb.useTailCache, this.sb.exceed134217727);
@@ -634,7 +633,7 @@ public class CrawlQueues {
                 this.request.setStatus("worker-checkingrobots", WorkflowJob.STATUS_STARTED);
                 RobotsTxtEntry robotsEntry;
                 if ((this.request.url().getProtocol().equals("http") || this.request.url().getProtocol().equals("https")) &&
-                    (robotsEntry = CrawlQueues.this.sb.robots.getEntry(this.request.url(), CrawlQueues.this.sb.peers.myBotIDs())) != null &&
+                    (robotsEntry = CrawlQueues.this.sb.robots.getEntry(this.request.url(), this.profile.getAgent())) != null &&
                     robotsEntry.isDisallowed(this.request.url())) {
                     //if (log.isFine()) log.logFine("Crawling of URL '" + request.url().toString() + "' disallowed by robots.txt.");
                     CrawlQueues.this.errorURL.push(
@@ -655,7 +654,7 @@ public class CrawlQueues {
                     // returns null if everything went fine, a fail reason string if a problem occurred
                     try {
                         this.request.setStatus("loading", WorkflowJob.STATUS_RUNNING);
-                        final Response response = CrawlQueues.this.sb.loader.load(this.request, profile == null ? CacheStrategy.IFEXIST : profile.cacheStrategy(), BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
+                        final Response response = CrawlQueues.this.sb.loader.load(this.request, profile == null ? CacheStrategy.IFEXIST : profile.cacheStrategy(), BlacklistType.CRAWLER, this.profile.getAgent());
                         if (response == null) {
                             this.request.setStatus("error", WorkflowJob.STATUS_FINISHED);
                             if (CrawlQueues.this.log.isFine()) {

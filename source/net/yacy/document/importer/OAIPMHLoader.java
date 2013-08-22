@@ -32,7 +32,6 @@ import net.yacy.crawler.retrieval.Response;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
-import net.yacy.search.snippet.TextSnippet;
 
 
 // get one server with
@@ -46,7 +45,7 @@ public class OAIPMHLoader {
     private final DigestURI source;
     private final ResumptionToken resumptionToken;
 
-    public OAIPMHLoader(final LoaderDispatcher loader, final DigestURI source, final File targetDir) throws IOException {
+    public OAIPMHLoader(final LoaderDispatcher loader, final DigestURI source, final File targetDir, final ClientIdentification.Agent agent) throws IOException {
         this.source = source;
 
         // load the file from the net
@@ -56,7 +55,7 @@ public class OAIPMHLoader {
         for (int i = 0; i < 5; i++) {
             // make some retries if first attempt fails
             try {
-                response = loader.load(loader.request(source, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+                response = loader.load(loader.request(source, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
                 break;
             } catch (final IOException e) {
                 ConcurrentLog.warn("OAIPMHLoader", "loading failed at attempt " + (i + 1) + ": " + source.toNormalform(true));

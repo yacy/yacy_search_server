@@ -34,6 +34,7 @@ import java.util.Date;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -151,7 +152,8 @@ public class QuickCrawlLink_p {
                         indexText, indexMedia,
                         storeHTCache, remoteIndexing,
                         CacheStrategy.IFFRESH,
-                        collection);
+                        collection,
+                        ClientIdentification.yacyIntranetCrawlerAgentName);
                 sb.crawler.putActive(pe.handle().getBytes(), pe);
             } catch (final Exception e) {
                 // mist

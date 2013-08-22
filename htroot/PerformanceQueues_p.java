@@ -290,18 +290,6 @@ public class PerformanceQueues_p {
             sb.setConfig(SwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseRemotesearch", 30000)));
         }
 
-        if ((post != null) && (post.containsKey("minimumDeltaSubmit"))) {
-            final int minimumLocalDelta = post.getInt("minimumLocalDelta", sb.crawlQueues.noticeURL.getMinimumLocalDelta());
-            final int minimumGlobalDelta = post.getInt("minimumGlobalDelta", sb.crawlQueues.noticeURL.getMinimumGlobalDelta());
-            sb.setConfig("minimumLocalDelta", minimumLocalDelta);
-            sb.setConfig("minimumGlobalDelta", minimumGlobalDelta);
-            sb.crawlQueues.noticeURL.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
-        }
-
-        // delta settings
-        prop.put("minimumLocalDelta", sb.crawlQueues.noticeURL.getMinimumLocalDelta());
-        prop.put("minimumGlobalDelta", sb.crawlQueues.noticeURL.getMinimumGlobalDelta());
-
         // table cache settings
         prop.putNum("wordCacheSize", indexSegment.RWIBufferCount());
         prop.putNum("wordCacheSizeKBytes", rwi == null ? 0 : rwi.getBufferSizeBytes()/1024);

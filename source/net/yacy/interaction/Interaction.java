@@ -187,7 +187,7 @@ public static String Tableentry(String url, String type, String comment, String 
 
 				Seed host = sb.peers.lookupByName(sb.getConfig("interaction.contribution.accumulationpeer", ""));
 
-				return (UTF8.String(new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT).POSTbytes(
+				return (UTF8.String(new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent).POSTbytes(
 						"http://"+host.getPublicAddress()+"/interaction/Contribution.json"
 								+ "?url=" + url + "&comment=" + comment
 								+ "&from=" + from + "&peer=" + peer,

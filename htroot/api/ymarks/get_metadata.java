@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
@@ -49,7 +50,8 @@ public class get_metadata {
 
         	try {
 				final YMarkMetadata meta = new YMarkMetadata(new DigestURI(url), sb.index);
-				final Document document = meta.loadDocument(sb.loader);
+                ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+				final Document document = meta.loadDocument(sb.loader, agent);
 				final EnumMap<YMarkMetadata.METADATA, String> metadata = meta.loadMetadata();
 
 				prop.putXML("title", metadata.get(YMarkMetadata.METADATA.TITLE));

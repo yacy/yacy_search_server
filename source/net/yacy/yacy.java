@@ -301,7 +301,7 @@ public final class yacy {
             yacyRelease.deleteOldDownloads(sb.releasePath, deleteOldDownloadsAfterDays );
 
             // set user-agent
-            HTTPClient.setDefaultUserAgent(ClientIdentification.getUserAgent());
+            HTTPClient.setDefaultUserAgent(ClientIdentification.yacyInternetCrawlerAgent.userAgent);
 
             // initial fill of the triplestore
             File triplestore = new File(sb.getConfig("triplestore", new File(dataHome, "DATA/TRIPLESTORE").getAbsolutePath()));
@@ -549,7 +549,7 @@ public final class yacy {
         final RequestHeader requestHeader = new RequestHeader();
         requestHeader.put(RequestHeader.AUTHORIZATION, "realm=" + encodedPassword); // for http-authentify
 //        final Client con = new Client(10000, requestHeader);
-        final HTTPClient con = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
+        final HTTPClient con = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
         con.setHeader(requestHeader.entrySet());
 //        ResponseContainer res = null;
         try {

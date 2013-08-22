@@ -263,6 +263,27 @@
 		  </dd>
 	      </dl>
         </fieldset>
+	    #(agentSelect)#<input type="hidden" name="agentName" id="agentName" value="#[defaultAgentName]#" />::
+        <fieldset>
+          <legend><label>Robot Behaviour</label></legend>
+          <dl>
+          <dt><label for="collection">Use Special User Agent and robot identification</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            You are running YaCy in non-p2p mode and because YaCy can be used as replacement for commercial search appliances
+            (like the GSA) the user must be able to crawl all web pages that are granted to such commercial plattforms.
+            Not having this option would be a strong handicap for professional usage of this software. Therefore you are able to select
+            alternative user agents here which have different crawl timings and also identify itself with another user agent and obey the corresponding robots rule.
+            </span></span>
+			<select name="agentName" id="agentName">
+			#{list}#
+              <option value="#[name]#">#[name]#</option>
+			#{/list}#
+			</select>
+	      </dd>
+	      </dl>
+        </fieldset>
+	    #(/agentSelect)#
         <fieldset>
           <legend><label>Index Administration</label></legend>
           <dl>
@@ -310,6 +331,7 @@
             </span></span>
 			<input name="collection" id="collection" type="text" size="60" maxlength="100" value="#[collection]#" #(collectionEnabled)#disabled="disabled"::#(/collectionEnabled)# />
 	      </dd>
+	      
 	      </dl>
         </fieldset>
 

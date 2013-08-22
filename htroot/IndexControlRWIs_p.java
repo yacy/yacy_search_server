@@ -34,6 +34,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ByteBuffer;
@@ -95,6 +96,7 @@ public class IndexControlRWIs_p {
         Segment segment = sb.index;
 
         if ( post != null ) {
+            ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
             final String keystring = post.get("keystring", "").trim();
             byte[] keyhash = post.get("keyhash", "").trim().getBytes();
             if (keystring.length() > 0 && !keystring.contains(errmsg)) {
@@ -175,7 +177,7 @@ public class IndexControlRWIs_p {
                         index = null;
                     }
                     if ( delurlref ) {
-                        segment.removeAllUrlReferences(urlb, sb.loader, CacheStrategy.IFEXIST);
+                        segment.removeAllUrlReferences(urlb, sb.loader, agent, CacheStrategy.IFEXIST);
                     }
                     // delete the word first because that is much faster than the deletion of the urls from the url database
                     segment.termIndex().delete(keyhash);
@@ -196,7 +198,7 @@ public class IndexControlRWIs_p {
             if ( post.containsKey("keyhashdelete") ) {
                 try {
                     if ( delurlref ) {
-                        segment.removeAllUrlReferences(urlb, sb.loader, CacheStrategy.IFEXIST);
+                        segment.removeAllUrlReferences(urlb, sb.loader, agent, CacheStrategy.IFEXIST);
                     }
                     if ( delurl || delurlref ) {
                         for ( final byte[] b : urlb ) {

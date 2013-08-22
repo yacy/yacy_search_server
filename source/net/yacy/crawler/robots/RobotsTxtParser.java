@@ -36,7 +36,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
@@ -75,10 +74,10 @@ public final class RobotsTxtParser {
     private final ArrayList<String> denyList;
     private       String sitemap;
     private       long crawlDelayMillis;
-    private final Set<String> myNames; // a list of own name lists
+    private final String[] myNames; // a list of own name lists
     private       String agentName; // the name of the agent that was used to return the result
 
-    protected RobotsTxtParser(final Set<String> myNames) {
+    protected RobotsTxtParser(final String[] myNames) {
         this.allowList = new ArrayList<String>(0);
         this.denyList = new ArrayList<String>(0);
         this.sitemap = "";
@@ -87,7 +86,7 @@ public final class RobotsTxtParser {
         this.agentName = null;
     }
 
-    protected RobotsTxtParser(final Set<String> myNames, final byte[] robotsTxt) {
+    protected RobotsTxtParser(final String[] myNames, final byte[] robotsTxt) {
         this(myNames);
         if (robotsTxt != null && robotsTxt.length != 0) {
             final ByteArrayInputStream bin = new ByteArrayInputStream(robotsTxt);
@@ -158,7 +157,7 @@ public final class RobotsTxtParser {
                         final String userAgent = line.substring(pos).trim();
                         isRule4AllAgents |= userAgent.equals("*");
                         for (final String agent: this.myNames) {
-                            if (userAgent.toLowerCase().equals(agent)) {
+                            if (userAgent.toLowerCase().equals(agent.toLowerCase())) {
                                 this.agentName = agent;
                                 isRule4ThisAgents = true;
                                 break;

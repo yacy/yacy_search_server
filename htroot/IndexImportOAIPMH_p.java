@@ -31,6 +31,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
@@ -61,7 +62,8 @@ public class IndexImportOAIPMH_p {
                 DigestURI url = null;
                 try {
                     url = new DigestURI(oaipmhurl);
-                    final OAIPMHLoader r = new OAIPMHLoader(sb.loader, url, sb.surrogatesInPath);
+                    ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+                    final OAIPMHLoader r = new OAIPMHLoader(sb.loader, url, sb.surrogatesInPath, agent);
                     final ResumptionToken rt = r.getResumptionToken();
                     prop.put("import-one", 1);
                     prop.put("import-one_count", (rt == null) ? "not available" : Integer.toString(rt.getRecordCounter()));
@@ -95,7 +97,8 @@ public class IndexImportOAIPMH_p {
                 DigestURI url = null;
                 try {
                     url = new DigestURI(oaipmhurl);
-                    final OAIPMHImporter job = new OAIPMHImporter(sb.loader, url);
+                    ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+                    final OAIPMHImporter job = new OAIPMHImporter(sb.loader, agent, url);
                     job.start();
                     prop.put("status", 1);
                     prop.put("optiongetlist", 1);
@@ -127,11 +130,12 @@ public class IndexImportOAIPMH_p {
 
                 // start jobs for the sources
                 DigestURI url = null;
+                ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
                 while (!sourceList.isEmpty()) {
                     final String oaipmhurl = sourceList.remove(r.nextInt(sourceList.size()));
                     try {
                         url = new DigestURI(oaipmhurl);
-                        final OAIPMHImporter job = new OAIPMHImporter(sb.loader, url);
+                        final OAIPMHImporter job = new OAIPMHImporter(sb.loader, agent, url);
                         job.start();
                     } catch (final MalformedURLException e) {
                         ConcurrentLog.logException(e);

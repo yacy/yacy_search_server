@@ -53,7 +53,7 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
     final CacheStrategy verify;
     final boolean global;
     final Map<RSSMessage, List<Integer>> result;
-    final String userAgent;
+    final ClientIdentification.Agent agent;
 
     private final BlockingQueue<RSSMessage> results;
 
@@ -65,7 +65,7 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
             final int maximumRecordsInit,
             final CacheStrategy verify,
             final boolean global,
-            final String userAgent) {
+            final ClientIdentification.Agent agent) {
         this.results = new LinkedBlockingQueue<RSSMessage>();
         this.result = result;
         this.query = query;
@@ -74,12 +74,12 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
         this.maximumRecordsInit = maximumRecordsInit;
         this.verify = verify;
         this.global = global;
-        this.userAgent = userAgent;
+        this.agent = agent;
     }
 
     @Override
     public void run() {
-        searchSRURSS(this.results, this.urlBase, this.query, this.timeoutInit, this.maximumRecordsInit, this.verify, this.global, this.userAgent);
+        searchSRURSS(this.results, this.urlBase, this.query, this.timeoutInit, this.maximumRecordsInit, this.verify, this.global, this.agent);
         int p = 1;
         RSSMessage message;
         try {
@@ -103,7 +103,7 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
             final int maximumRecordsInit,
             final CacheStrategy verify,
             final boolean global,
-            final String userAgent) {
+            final ClientIdentification.Agent agent) {
         final Thread job = new Thread() {
             @Override
             public void run() {
@@ -116,7 +116,7 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
                     final long st = System.currentTimeMillis();
                     RSSFeed feed;
                     try {
-                        feed = loadSRURSS(urlBase, query, timeout, startRecord, recordsPerSession, verify, global, userAgent);
+                        feed = loadSRURSS(urlBase, query, timeout, startRecord, recordsPerSession, verify, global, agent);
                     } catch (final IOException e1) {
                         //e1.printStackTrace();
                         break mainloop;
@@ -162,7 +162,7 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
             final int maximumRecords,
             final CacheStrategy cacheStrategy,
             final boolean global,
-            final String userAgent) throws IOException {
+            final ClientIdentification.Agent agent) throws IOException {
         MultiProtocolURI uri = null;
         try {
             uri = new MultiProtocolURI(rssSearchServiceURL);
@@ -181,7 +181,7 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
             parts.put("resource", UTF8.StringBody(global ? "global" : "local"));
             parts.put("nav", UTF8.StringBody("none"));
             // result = HTTPConnector.getConnector(userAgent == null ? MultiProtocolURI.yacybotUserAgent : userAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);
-            final HTTPClient httpClient = new HTTPClient(userAgent == null ? ClientIdentification.getUserAgent() : userAgent, (int) timeout);
+            final HTTPClient httpClient = new HTTPClient(agent);
             result = httpClient.POSTbytes(new MultiProtocolURI(rssSearchServiceURL), uri.getHost(), parts, false);
 
             final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);

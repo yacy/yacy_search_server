@@ -23,12 +23,12 @@ package net.yacy.crawler;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Set;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
@@ -55,25 +55,13 @@ public class CrawlQueue {
     
     private BufferedObjectIndex  urlFileIndex;
     private final HandleSet      double_push_check;
-    private final Set<String>    myAgentIDs;
-    private final RobotsTxt      robots;
-    private final int            minimumLocalDelta;
-    private final int            minimumGlobalDelta;
 
     public CrawlQueue(
             final File cachePath,
             final String filename,
-            final int minimumLocalDelta,
-            final int minimumGlobalDelta,
-            final Set<String> myAgentIDs,
-            final RobotsTxt robots,
             final boolean useTailCache,
             final boolean exceed134217727) {
 
-        this.myAgentIDs = myAgentIDs;
-        this.robots = robots;
-        this.minimumLocalDelta = minimumLocalDelta;
-        this.minimumGlobalDelta = minimumGlobalDelta;
         // create a stack for newly entered entries
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
         cachePath.mkdirs();
@@ -184,7 +172,7 @@ public class CrawlQueue {
      * @throws IOException
      * @throws SpaceExceededException
      */
-    public String push(final Request entry, CrawlProfile profile) throws IOException, SpaceExceededException {
+    public String push(final Request entry, CrawlProfile profile, final RobotsTxt robots) throws IOException, SpaceExceededException {
         assert entry != null;
         final byte[] hash = entry.url().hash();
         synchronized (this) {
@@ -210,7 +198,7 @@ public class CrawlQueue {
             // now disabled to prevent that a crawl 'freezes' to a specific domain which hosts a lot of pages; the queues are filled anyway
             //if (!this.domainStacks.containsKey(entry.url().getHost())) pushHashToDomainStacks(entry.url().getHost(), entry.url().hash());
         }
-        this.robots.ensureExist(entry.url(), CrawlQueue.this.myAgentIDs, true); // concurrently load all robots.txt
+        robots.ensureExist(entry.url(), profile.getAgent(), true); // concurrently load all robots.txt
         return null;
     }
 
@@ -222,12 +210,12 @@ public class CrawlQueue {
      * @param crawlURL
      * @return the sleep time in milliseconds; may be negative for no sleep time
      */
-    private long getDomainSleepTime(final CrawlProfile profileEntry, final DigestURI crawlURL) {
+    private long getDomainSleepTime(final RobotsTxt robots, final CrawlProfile profileEntry, final DigestURI crawlURL) {
         if (profileEntry == null) return 0;
         long sleeptime = (
             profileEntry.cacheStrategy() == CacheStrategy.CACHEONLY ||
             (profileEntry.cacheStrategy() == CacheStrategy.IFEXIST && Cache.has(crawlURL.hash()))
-            ) ? Integer.MIN_VALUE : Latency.waitingRemaining(crawlURL, robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
+            ) ? Integer.MIN_VALUE : Latency.waitingRemaining(crawlURL, robots, profileEntry.getAgent()); // this uses the robots.txt database and may cause a loading of robots.txt from the server
         return sleeptime;
     }
     
@@ -240,8 +228,8 @@ public class CrawlQueue {
      * @param crawlURL
      * @return
      */
-    private long getRobotsTime(final RobotsTxt robots, final DigestURI crawlURL) {
-        long sleeptime = Latency.waitingRobots(crawlURL, robots, this.myAgentIDs); // this uses the robots.txt database and may cause a loading of robots.txt from the server
+    private long getRobotsTime(final RobotsTxt robots, final DigestURI crawlURL, ClientIdentification.Agent agent) {
+        long sleeptime = Latency.waitingRobots(crawlURL, robots, agent); // this uses the robots.txt database and may cause a loading of robots.txt from the server
         return sleeptime < 0 ? 0 : sleeptime;
     }
 
@@ -291,17 +279,17 @@ public class CrawlQueue {
             }
         }
         // depending on the caching policy we need sleep time to avoid DoS-like situations
-        sleeptime = getDomainSleepTime(profileEntry, crawlEntry.url());
+        sleeptime = getDomainSleepTime(robots, profileEntry, crawlEntry.url());
 
-
-        long robotsTime = getRobotsTime(robots, crawlEntry.url());
+        ClientIdentification.Agent agent = profileEntry == null ? ClientIdentification.yacyInternetCrawlerAgent : profileEntry.getAgent();
+        long robotsTime = getRobotsTime(robots, crawlEntry.url(), agent);
         Latency.updateAfterSelection(crawlEntry.url(), profileEntry == null ? 0 : robotsTime);
         if (delay && sleeptime > 0) {
             // force a busy waiting here
             // in best case, this should never happen if the balancer works propertly
             // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
-            ConcurrentLog.info("CrawlQueue", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta));
+            ConcurrentLog.info("CrawlQueue", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, agent));
             long loops = sleeptime / 1000;
             long rest = sleeptime % 1000;
             if (loops < 3) {

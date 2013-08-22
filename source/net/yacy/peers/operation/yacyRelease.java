@@ -238,7 +238,7 @@ public final class yacyRelease extends yacyVersion {
         try {
             final DigestURI uri = location.getLocationURL();
             Thread.currentThread().setName("allReleaseFrom - host " + uri.getHost()); // makes it more easy to see which release blocks process in thread dump
-            scraper = Switchboard.getSwitchboard().loader.loadDocument(uri, CacheStrategy.NOCACHE, null, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
+            scraper = Switchboard.getSwitchboard().loader.loadDocument(uri, CacheStrategy.NOCACHE, null, ClientIdentification.yacyInternetCrawlerAgent);
         } catch (final IOException e) {
             return null;
         }
@@ -288,7 +288,7 @@ public final class yacyRelease extends yacyVersion {
 
         final String name = getUrl().getFileName();
         byte[] signatureBytes = null;
-        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
+        final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
 
         // download signature first, if public key is available
         try {

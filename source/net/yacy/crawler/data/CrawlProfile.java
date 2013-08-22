@@ -38,6 +38,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.CrawlSwitchboard;
@@ -54,7 +55,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final Pattern MATCH_NEVER_PATTERN = Pattern.compile(MATCH_NEVER_STRING);
 
     // this is a simple record structure that hold all properties of a single crawl start
-    private static final String HANDLE           = "handle";
+    private static final String HANDLE          = "handle";
+    public static final String AGENT_NAME       = "agentName";
     public static final String NAME             = "name";
     public static final String DEPTH            = "generalDepth";
     public static final String DIRECT_DOC_BY_URL= "directDocByURL";
@@ -135,7 +137,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final boolean storeHTCache,
                  final boolean remoteIndexing,
                  final CacheStrategy cacheStrategy,
-                 final String collections) {
+                 final String collections,
+                 final String userAgentName) {
         super(40);
         if (name == null || name.isEmpty()) {
             throw new NullPointerException("name must not be null or empty");
@@ -145,6 +148,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         final String handle = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(name)).substring(0, Word.commonHashLength);
         put(HANDLE,           handle);
         put(NAME,             name);
+        put(AGENT_NAME, userAgentName);
         put(CRAWLER_URL_MUSTMATCH,     (crawlerUrlMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerUrlMustMatch);
         put(CRAWLER_URL_MUSTNOTMATCH,  (crawlerUrlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerUrlMustNotMatch);
         put(CRAWLER_IP_MUSTMATCH,      (crawlerIpMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerIpMustMatch);
@@ -209,6 +213,11 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return domname;
     }
 
+    public ClientIdentification.Agent getAgent() {
+        String agentName = this.get(AGENT_NAME);
+        return ClientIdentification.getAgent(agentName);
+    }
+    
     public AtomicInteger getCount(final String domain) {
         return this.doms.get(domain);
     }

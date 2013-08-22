@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.BookmarksDB;
@@ -86,6 +87,7 @@ public class import_ymark {
             if(post.containsKey("root") && post.get("root").length() > 0) {
                 root = post.get("root");
             }
+            ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
         	if(post.containsKey("bmkfile") && !post.get("bmkfile").isEmpty() && post.containsKey("importer")){
         		final byte[] bytes = UTF8.getBytes(post.get("bmkfile$file"));
         		stream = new ByteArrayInputStream(bytes);
@@ -156,7 +158,7 @@ public class import_ymark {
 	    				row = APIcalls.next();
 	    				if(row.get(WorkTables.TABLE_API_COL_TYPE, "").equals("crawler")) {
 	    					final String url = row.get(WorkTables.TABLE_API_COL_COMMENT, "").substring(16);
-	    					sb.tables.bookmarks.createBookmark(sb.loader, url, bmk_user, autotag, "crawlStart", "/Crawl Start");
+	    					sb.tables.bookmarks.createBookmark(sb.loader, url, agent, bmk_user, autotag, "crawlStart", "/Crawl Start");
 	    				}
 	    			}
 	    			prop.put("status", "1");
@@ -186,7 +188,7 @@ public class import_ymark {
                                 bmk_entry.put(YMarkEntry.BOOKMARK.FOLDERS.key(), root+bookmark.getFoldersString().replaceAll(".*"+YMarkUtil.TAGS_SEPARATOR+YMarkUtil.FOLDERS_SEPARATOR, root+YMarkUtil.FOLDERS_SEPARATOR));
                             }
                             if(autotag) {
-                                bmk_entry.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkAutoTagger.autoTag(bookmark.getUrl(), sb.loader, 3, sb.tables.bookmarks.getTags(bmk_user)));
+                                bmk_entry.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkAutoTagger.autoTag(bookmark.getUrl(), sb.loader, agent, 3, sb.tables.bookmarks.getTags(bmk_user)));
                             }
                             sb.tables.bookmarks.addBookmark(bmk_user, bmk_entry, merge, true);
                             prop.put("status", "1");

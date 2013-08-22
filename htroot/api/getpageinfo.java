@@ -74,7 +74,9 @@ public class getpageinfo {
         if (post != null && post.containsKey("url")) {
             if (post.containsKey("actions"))
                 actions=post.get("actions");
-            String url=post.get("url");
+            String url = post.get("url");
+            String agentName = post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName);
+            ClientIdentification.Agent agent = ClientIdentification.getAgent(agentName);
 			if (url.toLowerCase().startsWith("ftp://")) {
 				prop.put("robots-allowed", "1"); // ok to crawl
 		        prop.put("robotsInfo", "ftp does not follow robots.txt");
@@ -96,7 +98,7 @@ public class getpageinfo {
                 }
                 net.yacy.document.Document scraper = null;
                 if (u != null) try {
-                    scraper = sb.loader.loadDocument(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
+                    scraper = sb.loader.loadDocument(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER, agent);
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                     // bad things are possible, i.e. that the Server responds with "403 Bad Behavior"
@@ -148,7 +150,7 @@ public class getpageinfo {
                     final DigestURI theURL = new DigestURI(url);
 
                 	// determine if crawling of the current URL is allowed
-                    RobotsTxtEntry robotsEntry = sb.robots.getEntry(theURL, sb.peers.myBotIDs());
+                    RobotsTxtEntry robotsEntry = sb.robots.getEntry(theURL, agent);
                 	prop.put("robots-allowed", robotsEntry == null ? 1 : robotsEntry.isDisallowed(theURL) ? 0 : 1);
                     prop.putHTML("robotsInfo", robotsEntry == null ? "" : robotsEntry.getInfo());
 

@@ -97,7 +97,8 @@ public class webstructure {
                 prop.put("references", 1);
                 net.yacy.document.Document scraper = null;
                 if (url != null) try {
-                    scraper = sb.loader.loadDocument(url, CacheStrategy.IFEXIST, null, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
+                    ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+                    scraper = sb.loader.loadDocument(url, CacheStrategy.IFEXIST, null, agent);
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 }

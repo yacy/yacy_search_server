@@ -264,6 +264,9 @@ public class Crawler_p {
                 env.setConfig("indexMedia", indexMedia);
 
                 env.setConfig("storeHTCache", storeHTCache);
+                
+                String agentName = post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName);
+                ClientIdentification.Agent agent = ClientIdentification.getAgent(agentName);
 
                 CacheStrategy cachePolicy = CacheStrategy.parse(post.get("cachePolicy", "iffresh"));
                 if (cachePolicy == null) cachePolicy = CacheStrategy.IFFRESH;
@@ -290,7 +293,7 @@ public class Crawler_p {
                         // download document
                         Document scraper;
                         try {
-                            scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
+                            scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, agent);
                             // get links and generate filter
                             for (DigestURI u: scraper.getAnchors().keySet()) {
                                 newRootURLs.add(u);
@@ -375,7 +378,8 @@ public class Crawler_p {
                         storeHTCache,
                         crawlOrder,
                         cachePolicy,
-                        collection);
+                        collection,
+                        agentName);
                 byte[] handle = ASCII.getBytes(profile.handle());
                 
                 // before we fire up a new crawl, we make sure that another crawl with the same name is not running

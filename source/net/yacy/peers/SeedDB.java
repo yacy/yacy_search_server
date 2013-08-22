@@ -95,7 +95,6 @@ public final class SeedDB implements AlternativeDomainNames {
     public  Distribution scheme;
 
     private Seed mySeed; // my own seed
-    private final Set<String> myBotIDs; // list of id's that this bot accepts as robots.txt identification
 
     public SeedDB(
             final File networkRoot,
@@ -112,10 +111,6 @@ public final class SeedDB implements AlternativeDomainNames {
         this.seedPotentialDBFile = new File(networkRoot, seedPotentialDBFileName);
         this.mySeed = null; // my own seed
         this.myOwnSeedFile = myOwnSeedFile;
-        this.myBotIDs = new HashSet<String>();
-        this.myBotIDs.add("yacy");
-        this.myBotIDs.add("yacybot");
-        this.myBotIDs.add("yacyproxy");
         this.netRedundancy = redundancy;
         this.scheme = new Distribution(partitionExponent);
 
@@ -221,14 +216,8 @@ public final class SeedDB implements AlternativeDomainNames {
                 System.exit(-1);
             }
         }
-        this.myBotIDs.add(this.mySeed.getName() + ".yacy");
-        this.myBotIDs.add(this.mySeed.hash + ".yacyh");
         this.mySeed.setIP("");       // we delete the old information to see what we have now
         this.mySeed.put(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN); // markup startup condition
-    }
-
-    public Set<String> myBotIDs() {
-        return this.myBotIDs;
     }
 
     public int redundancy() {
@@ -253,9 +242,7 @@ public final class SeedDB implements AlternativeDomainNames {
     }
 
     public void setMyName(final String name) {
-        this.myBotIDs.remove(this.mySeed.getName() + ".yacy");
         this.mySeed.setName(name);
-        this.myBotIDs.add(name + ".yacy");
     }
 
     @Override
@@ -821,9 +808,9 @@ public final class SeedDB implements AlternativeDomainNames {
         final RequestHeader reqHeader = new RequestHeader();
         reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
         reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?
-        reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
+        reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.yacyInternetCrawlerAgent.userAgent);
 
-        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
+        final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
         client.setHeader(reqHeader.entrySet());
         byte[] content = null;
         try {

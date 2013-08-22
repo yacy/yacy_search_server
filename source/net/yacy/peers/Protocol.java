@@ -150,7 +150,8 @@ public final class Protocol {
         final String filename,
         final Map<String, ContentBody> parts,
         final int timeout) throws IOException {
-        final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
+        final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
+        httpClient.setTimout(timeout);
         return httpClient.POSTbytes(
             new MultiProtocolURI("http://" + targetAddress + "/yacy/" + filename),
             Seed.b64Hash2hexHash(targetPeerHash) + ".yacyh",
@@ -192,7 +193,7 @@ public final class Protocol {
             // send request
             final long start = System.currentTimeMillis();
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/hello.html"), 30000, yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", parts);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 30000);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 30000);
             content =
                 httpClient.POSTbytes(
                     new MultiProtocolURI("http://" + address + "/yacy/hello.html"),
@@ -513,7 +514,7 @@ public final class Protocol {
             parts.put("count", UTF8.StringBody(Integer.toString(maxCount)));
             parts.put("time", UTF8.StringBody(Long.toString(maxTime)));
             // final byte[] result = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/urls.xml"), (int) maxTime, target.getHexHash() + ".yacyh", parts);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), (int) maxTime);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, (int) maxTime);
             final byte[] result =
                 httpClient.POSTbytes(new MultiProtocolURI("http://"
                     + target.getClusterAddress()
@@ -935,7 +936,7 @@ public final class Protocol {
                 //resultMap = FileUtils.table(HTTPConnector.getConnector(MultiProtocolURI.crawlerUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/search.html"), 60000, target.getHexHash() + ".yacyh", parts));
             }
 
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 8000);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 8000);
             byte[] a = httpClient.POSTbytes(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), hostname, parts, false);
             if (a != null && a.length > 200000) {
                 // there is something wrong. This is too large, maybe a hack on the other side?
@@ -1286,7 +1287,7 @@ public final class Protocol {
                 UTF8.StringBody(((entry == null) ? "" : crypt.simpleEncode(entry.toString(), salt))));
             // send request
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/crawlReceipt.html"), 10000, target.getHexHash() + ".yacyh", parts);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 10000);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 10000);
             final byte[] content =
                 httpClient.POSTbytes(
                     new MultiProtocolURI("http://" + address + "/yacy/crawlReceipt.html"),
@@ -1465,7 +1466,7 @@ public final class Protocol {
             parts.put("entryc", UTF8.StringBody(Integer.toString(indexcount)));
             parts.put("indexes", UTF8.StringBody(entrypost.toString()));
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/transferRWI.html"), timeout, targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
             final byte[] content =
                 httpClient.POSTbytes(
                     new MultiProtocolURI("http://" + address + "/yacy/transferRWI.html"),
@@ -1523,7 +1524,7 @@ public final class Protocol {
         try {
             parts.put("urlc", UTF8.StringBody(Integer.toString(urlc)));
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/transferURL.html"), timeout, targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
             final byte[] content =
                 httpClient.POSTbytes(
                     new MultiProtocolURI("http://" + address + "/yacy/transferURL.html"),
@@ -1556,7 +1557,7 @@ public final class Protocol {
             final Map<String, ContentBody> parts =
                 basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/profile.html"), 5000, targetSeed.getHexHash() + ".yacyh", parts);
-            final HTTPClient httpclient = new HTTPClient(ClientIdentification.getUserAgent(), 15000);
+            final HTTPClient httpclient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 15000);
             final byte[] content =
                 httpclient.POSTbytes(
                     new MultiProtocolURI("http://" + address + "/yacy/profile.html"),

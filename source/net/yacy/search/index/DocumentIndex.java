@@ -34,6 +34,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.solr.common.SolrInputDocument;
 
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -151,7 +152,7 @@ public class DocumentIndex extends Segment {
             length = -1;
         }
         try {
-            documents = TextParser.parseSource(url, null, null, length, url.getInputStream(null, -1));
+            documents = TextParser.parseSource(url, null, null, length, url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent));
         } catch (final Exception e ) {
             throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
         }

@@ -382,7 +382,7 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_ssl", (seed.getFlagSSLAvailable()) ? 1 : 0);
                             userAgent = null;
                             if (seed.hash != null && seed.hash.equals(sb.peers.mySeed().hash)) {
-                                userAgent = ClientIdentification.getUserAgent();
+                                userAgent = ClientIdentification.yacyInternetCrawlerAgent.userAgent;
                                 location = ClientIdentification.generateLocation();
                             } else {
                                 userAgent = sb.peers.peerActions.getUserAgent(seed.getIP());

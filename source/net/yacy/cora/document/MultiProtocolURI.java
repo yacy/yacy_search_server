@@ -50,6 +50,7 @@ import jcifs.smb.SmbFileInputStream;
 import net.yacy.cora.document.Punycode.PunycodeException;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.ftp.FTPClient;
@@ -2038,7 +2039,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return null;
     }
 
-    public InputStream getInputStream(final String userAgent, final int timeout) throws IOException {
+    public InputStream getInputStream(final ClientIdentification.Agent agent) throws IOException {
         if (isFile()) return new BufferedInputStream(new FileInputStream(getFSFile()));
         if (isSMB()) return new BufferedInputStream(new SmbFileInputStream(getSmbFile()));
         if (isFTP()) {
@@ -2049,7 +2050,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             return new ByteArrayInputStream(b);
         }
         if (isHTTP() || isHTTPS()) {
-                final HTTPClient client = new HTTPClient(userAgent, timeout);
+                final HTTPClient client = new HTTPClient(agent);
                 client.setHost(getHost());
                 return new ByteArrayInputStream(client.GETbytes(this));
         }
@@ -2057,7 +2058,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return null;
     }
 
-    public byte[] get(final String userAgent, final int timeout) throws IOException {
+    public byte[] get(final ClientIdentification.Agent agent) throws IOException {
         if (isFile()) return read(new FileInputStream(getFSFile()));
         if (isSMB()) return read(new SmbFileInputStream(getSmbFile()));
         if (isFTP()) {
@@ -2068,7 +2069,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             return b;
         }
         if (isHTTP() || isHTTPS()) {
-                final HTTPClient client = new HTTPClient(userAgent, timeout);
+                final HTTPClient client = new HTTPClient(agent);
                 client.setHost(getHost());
                 return client.GETbytes(this);
         }

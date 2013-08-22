@@ -70,15 +70,15 @@ public final class HTTPLoader {
         this.socketTimeout = (int) sb.getConfigLong("crawler.clientTimeout", 30000);
     }
 
-    public Response load(final Request entry, CrawlProfile profile, final int maxFileSize, final BlacklistType blacklistType, int timeout) throws IOException {
+    public Response load(final Request entry, CrawlProfile profile, final int maxFileSize, final BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
         Latency.updateBeforeLoad(entry.url());
         final long start = System.currentTimeMillis();
-        final Response doc = load(entry, profile, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize, blacklistType, timeout);
+        final Response doc = load(entry, profile, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize, blacklistType, agent);
         Latency.updateAfterLoad(entry.url(), System.currentTimeMillis() - start);
         return doc;
     }
 
-    private Response load(final Request request, CrawlProfile profile, final int retryCount, final int maxFileSize, final BlacklistType blacklistType, int timeout) throws IOException {
+    private Response load(final Request request, CrawlProfile profile, final int retryCount, final int maxFileSize, final BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
 
         byte[] myHash = ASCII.getBytes(this.sb.peers.mySeed().hash);
 
@@ -117,7 +117,7 @@ public final class HTTPLoader {
 
         // create a request header
         final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
+        requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent);
         DigestURI refererURL = null;
         if (request.referrerhash() != null) refererURL = this.sb.getURL(request.referrerhash());
         if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true));
@@ -127,7 +127,7 @@ public final class HTTPLoader {
         requestHeader.put(HeaderFramework.ACCEPT_ENCODING, this.sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
 
         // HTTP-Client
-        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
+        final HTTPClient client = new HTTPClient(agent);
         client.setRedirecting(false); // we want to handle redirection ourselves, so we don't index pages twice
         client.setTimout(this.socketTimeout);
         client.setHeader(requestHeader.entrySet());
@@ -178,7 +178,7 @@ public final class HTTPLoader {
 
                 // retry crawling with new url
                 request.redirectURL(redirectionUrl);
-                return load(request, profile, retryCount - 1, maxFileSize, blacklistType, timeout);
+                return load(request, profile, retryCount - 1, maxFileSize, blacklistType, agent);
     	    }
             // we don't want to follow redirects
             this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
@@ -218,11 +218,11 @@ public final class HTTPLoader {
         }
     }
 
-    public static Response load(final Request request) throws IOException {
-        return load(request, 3);
+    public static Response load(final Request request, ClientIdentification.Agent agent) throws IOException {
+        return load(request, agent, 3);
     }
 
-    private static Response load(final Request request, final int retryCount) throws IOException {
+    private static Response load(final Request request, ClientIdentification.Agent agent, final int retryCount) throws IOException {
 
         if (retryCount < 0) {
             throw new IOException("Redirection counter exceeded for URL " + request.url().toString() + ". Processing aborted.");
@@ -246,12 +246,12 @@ public final class HTTPLoader {
 
         // create a request header
         final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
+        requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent);
         requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE, DEFAULT_LANGUAGE);
         requestHeader.put(HeaderFramework.ACCEPT_CHARSET, DEFAULT_CHARSET);
         requestHeader.put(HeaderFramework.ACCEPT_ENCODING, DEFAULT_ENCODING);
 
-        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
+        final HTTPClient client = new HTTPClient(agent);
         client.setTimout(20000);
         client.setHeader(requestHeader.entrySet());
         	final byte[] responseBody = client.GETbytes(request.url());
@@ -300,7 +300,7 @@ public final class HTTPLoader {
 
                     // retry crawling with new url
                     request.redirectURL(redirectionUrl);
-                    return load(request, retryCount - 1);
+                    return load(request, agent, retryCount - 1);
                 }
             } else {
                 // if the response has not the right response type then reject file

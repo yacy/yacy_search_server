@@ -60,8 +60,8 @@ public class loaderThreads {
         this.failed = 0;
     }
 
-    public void newThread(final String name, final DigestURI url, final loaderProcess process) {
-        final Thread t = new loaderThread(url, process);
+    public void newThread(final String name, final DigestURI url, final loaderProcess process, final ClientIdentification.Agent agent) {
+        final Thread t = new loaderThread(url, process, agent);
         this.threads.put(name, t);
         t.start();
     }
@@ -108,19 +108,21 @@ public class loaderThreads {
         private final loaderProcess process;
         private byte[] page;
         private boolean loaded;
+        final ClientIdentification.Agent agent;
 
-        public loaderThread(final DigestURI url, final loaderProcess process) {
+        public loaderThread(final DigestURI url, final loaderProcess process, final ClientIdentification.Agent agent) {
             this.url = url;
             this.process = process;
             this.error = null;
             this.page = null;
             this.loaded = false;
+            this.agent = agent;
         }
 
         @Override
         public void run() {
             try {
-                this.page = this.url.get(ClientIdentification.getUserAgent(), loaderThreads.this.timeout);
+                this.page = this.url.get(this.agent);
                 this.loaded = true;
                 this.process.feed(this.page);
                 if (this.process.status() == loaderCore.STATUS_FAILED) {

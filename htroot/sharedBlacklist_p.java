@@ -102,6 +102,7 @@ public class sharedBlacklist_p {
 
             Iterator<String> otherBlacklist = null;
             ListAccumulator otherBlacklists = null;
+            ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
 
             if (post.containsKey("hash")) {
                 /* ======================================================
@@ -138,7 +139,7 @@ public class sharedBlacklist_p {
                         // get List
                         final DigestURI u = new DigestURI(downloadURLOld);
 
-                        otherBlacklist = FileUtils.strings(u.get(ClientIdentification.getUserAgent(), 10000));
+                        otherBlacklist = FileUtils.strings(u.get(agent));
                     } catch (final Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.putHTML("status_name", hash);
@@ -155,7 +156,7 @@ public class sharedBlacklist_p {
 
                 try {
                     final DigestURI u = new DigestURI(downloadURL);
-                    otherBlacklist = FileUtils.strings(u.get(ClientIdentification.getUserAgent(), 10000));
+                    otherBlacklist = FileUtils.strings(u.get(agent));
                 } catch (final Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
                     prop.putHTML("status_address",downloadURL);

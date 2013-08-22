@@ -287,7 +287,7 @@ public final class HTTPDProxyHandler {
      * @param respond the OutputStream to the client
      * @see de.anomic.http.httpdHandler#doGet(java.util.Properties, net.yacy.cora.protocol.HeaderFramework, java.io.OutputStream)
      */
-    public static void doGet(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream respond) {
+    public static void doGet(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream respond, final ClientIdentification.Agent agent) {
         ByteCountOutputStream countedRespond = null;
         try {
             final int reqID = requestHeader.hashCode();
@@ -387,7 +387,7 @@ public final class HTTPDProxyHandler {
             // case 1 and case 3
             if (cachedResponseHeader == null) {
                 if (log.isFinest()) log.finest(reqID + " page not in cache: fulfill request from web");
-                    fulfillRequestFromWeb(conProp, url, requestHeader, cachedResponseHeader, countedRespond);
+                    fulfillRequestFromWeb(conProp, url, requestHeader, cachedResponseHeader, countedRespond, agent);
             } else {
             	final Request request = new Request(
             			null,
@@ -413,7 +413,7 @@ public final class HTTPDProxyHandler {
                     fulfillRequestFromCache(conProp, url, requestHeader, cachedResponseHeader, cacheContent, countedRespond);
                 } else {
                     if (log.isFinest()) log.finest(reqID + " fulfill request from web");
-                    fulfillRequestFromWeb(conProp, url, requestHeader, cachedResponseHeader, countedRespond);
+                    fulfillRequestFromWeb(conProp, url, requestHeader, cachedResponseHeader, countedRespond, agent);
                 }
             }
 
@@ -443,7 +443,7 @@ public final class HTTPDProxyHandler {
         }
     }
 
-    private static void fulfillRequestFromWeb(final HashMap<String, Object> conProp, final DigestURI url, final RequestHeader requestHeader, final ResponseHeader cachedResponseHeader, final OutputStream respond) {
+    private static void fulfillRequestFromWeb(final HashMap<String, Object> conProp, final DigestURI url, final RequestHeader requestHeader, final ResponseHeader cachedResponseHeader, final OutputStream respond, final ClientIdentification.Agent agent) {
         try {
         	final boolean proxyAugmentation = sb.getConfigBool("proxyAugmentation", false);
             final int reqID = requestHeader.hashCode();
@@ -488,7 +488,7 @@ public final class HTTPDProxyHandler {
 
             requestHeader.remove(HeaderFramework.HOST);
 
-            final HTTPClient client = setupHttpClient(requestHeader, connectHost);
+            final HTTPClient client = setupHttpClient(requestHeader, agent, connectHost);
 
             // send request
             try {
@@ -761,7 +761,7 @@ public final class HTTPDProxyHandler {
         return;
     }
 
-    public static void doHead(final HashMap<String, Object> conProp, final RequestHeader requestHeader, OutputStream respond) {
+    public static void doHead(final HashMap<String, Object> conProp, final RequestHeader requestHeader, OutputStream respond, final ClientIdentification.Agent agent) {
 
 //        ResponseContainer res = null;
         DigestURI url = null;
@@ -832,7 +832,7 @@ public final class HTTPDProxyHandler {
             final String getUrl = "http://"+ connectHost + remotePath;
             if (log.isFinest()) log.finest(reqID +"    using url: "+ getUrl);
 
-            final HTTPClient client = setupHttpClient(requestHeader, connectHost);
+            final HTTPClient client = setupHttpClient(requestHeader, agent, connectHost);
 
             // send request
 //            try {
@@ -877,7 +877,7 @@ public final class HTTPDProxyHandler {
         }
     }
 
-    public static void doPost(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream respond, final InputStream body) throws IOException {
+    public static void doPost(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream respond, final InputStream body, final ClientIdentification.Agent agent) throws IOException {
         assert conProp != null : "precondition violated: conProp != null";
         assert requestHeader != null : "precondition violated: requestHeader != null";
         assert body != null : "precondition violated: body != null";
@@ -942,7 +942,7 @@ public final class HTTPDProxyHandler {
             final int contentLength = requestHeader.getContentLength();
             requestHeader.remove(HeaderFramework.CONTENT_LENGTH);
 
-            final HTTPClient client = setupHttpClient(requestHeader, connectHost);
+            final HTTPClient client = setupHttpClient(requestHeader, agent, connectHost);
 
             // check input
             if(body == null) {
@@ -1073,9 +1073,9 @@ public final class HTTPDProxyHandler {
      * @param connectHost may be 'host:port' or 'host:port/path'
      * @return
      */
-    private static HTTPClient setupHttpClient(final RequestHeader requestHeader, final String connectHost) {
+    private static HTTPClient setupHttpClient(final RequestHeader requestHeader, final ClientIdentification.Agent agent, final String connectHost) {
         // setup HTTP-client
-    	final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
+    	final HTTPClient client = new HTTPClient(agent, timeout);
     	client.setHeader(requestHeader.entrySet());
     	client.setRedirecting(false);
         return client;
@@ -1215,7 +1215,7 @@ public final class HTTPDProxyHandler {
         }
     }
 
-    public static void doConnect(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final InputStream clientIn, final OutputStream clientOut) throws IOException {
+    public static void doConnect(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final InputStream clientIn, final OutputStream clientOut, final ClientIdentification.Agent agent) throws IOException {
 
         sb.proxyLastAccess = System.currentTimeMillis();
 
@@ -1247,7 +1247,7 @@ public final class HTTPDProxyHandler {
 
         // possibly branch into PROXY-PROXY connection
         if (ProxySettings.useForHost(host, Protocol.HTTPS)) {
-        	final HTTPClient remoteProxy = setupHttpClient(requestHeader, host);
+        	final HTTPClient remoteProxy = setupHttpClient(requestHeader, agent, host);
 
             try {
             	remoteProxy.HEADResponse("http://" + host + ":" + port);

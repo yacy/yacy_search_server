@@ -55,6 +55,7 @@ import java.util.zip.GZIPInputStream;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -410,7 +411,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 // pass to proxy
                 if (((allowYaCyHop()) && (handleYaCyHopAuthentication(header, prop))) ||
                     ((allowProxy(session)) && (handleProxyAuthentication(header, prop, session)))) {
-                    HTTPDProxyHandler.doGet(prop, header, session.out);
+                    HTTPDProxyHandler.doGet(prop, header, session.out, ClientIdentification.yacyProxyAgent);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted, 2)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using a non-granted IP (" + session.userAddress.getHostAddress() + "). allowed are only connections that match with the following filter (2): " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING));
@@ -478,7 +479,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 // pass to proxy
                 if (((allowYaCyHop()) && (handleYaCyHopAuthentication(header, prop))) ||
                     ((allowProxy(session)) && (handleProxyAuthentication(header, prop, session)))) {
-                    HTTPDProxyHandler.doHead(prop, header, session.out);
+                    HTTPDProxyHandler.doHead(prop, header, session.out, ClientIdentification.yacyProxyAgent);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING));
@@ -544,7 +545,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 // pass to proxy
                 if (((allowYaCyHop()) && (handleYaCyHopAuthentication(header, prop))) ||
                     ((allowProxy(session)) && (handleProxyAuthentication(header, prop, session)))) {
-                    HTTPDProxyHandler.doPost(prop, header, session.out, sessionIn);
+                    HTTPDProxyHandler.doPost(prop, header, session.out, sessionIn, ClientIdentification.yacyProxyAgent);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + session.userAddress.getHostAddress() + ". allowed are only connections that match with the following filter (4): " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING));
@@ -633,7 +634,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // pass to proxy
         if (((allowYaCyHop()) && (handleYaCyHopAuthentication(header, prop))) ||
             ((allowProxy(session)) && (handleProxyAuthentication(header, prop, session)))) {
-            HTTPDProxyHandler.doConnect(prop, header, session.in, session.out);
+            HTTPDProxyHandler.doConnect(prop, header, session.in, session.out, ClientIdentification.yacyProxyAgent);
         } else {
             // not authorized through firewall blocking (ip does not match filter)
             session.out.write(UTF8.getBytes(httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + session.userAddress.getHostAddress() + ". allowed are only connections that match with the following filter (6): " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING));

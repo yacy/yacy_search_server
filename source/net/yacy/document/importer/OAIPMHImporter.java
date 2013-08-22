@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.LoaderDispatcher;
@@ -59,8 +60,10 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     private final ResumptionToken resumptionToken;
     private String message;
     private final int serialNumber;
+    private final ClientIdentification.Agent agent;
 
-    public OAIPMHImporter(LoaderDispatcher loader, DigestURI source) {
+    public OAIPMHImporter(final LoaderDispatcher loader, final ClientIdentification.Agent agent, final DigestURI source) {
+        this.agent = agent;
         this.serialNumber = importerCounter--;
         this.loader = loader;
         this.recordsCount = 0;
@@ -134,7 +137,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         this.message = "loading first part of records";
         while (true) {
             try {
-                OAIPMHLoader loader = new OAIPMHLoader(this.loader, this.source, Switchboard.getSwitchboard().surrogatesInPath);
+                OAIPMHLoader loader = new OAIPMHLoader(this.loader, this.source, Switchboard.getSwitchboard().surrogatesInPath, this.agent);
                 this.completeListSize = Math.max(this.completeListSize, loader.getResumptionToken().getCompleteListSize());
                 this.chunkCount++;
                 this.recordsCount += loader.getResumptionToken().getRecordCounter();
@@ -183,8 +186,9 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
             LoaderDispatcher loader,
             File surrogatesIn,
             File surrogatesOut,
-            long staleLimit) {
-        Set<String> plainList = OAIListFriendsLoader.getListFriends(loader).keySet();
+            long staleLimit,
+            ClientIdentification.Agent agent) {
+        Set<String> plainList = OAIListFriendsLoader.getListFriends(loader, agent).keySet();
         Map<String, Date> loaded = getLoadedOAIServer(surrogatesIn, surrogatesOut);
         long limit = System.currentTimeMillis() - staleLimit;
         for (Map.Entry<String, Date> a: loaded.entrySet()) {

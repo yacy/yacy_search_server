@@ -85,7 +85,6 @@ import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.query.SearchEventType;
 import net.yacy.search.ranking.RankingProfile;
-import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -579,7 +578,7 @@ public class yacysearch {
                             sb.loader.loadDocuments(
                                 sb.loader.request(urlentry.url(), true, false),
                                 CacheStrategy.IFEXIST,
-                                Integer.MAX_VALUE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+                                Integer.MAX_VALUE, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
                     } catch (final IOException e ) {
                     } catch (final Parser.Failure e ) {
                     }
@@ -613,6 +612,7 @@ public class yacysearch {
                         sb.tables.bookmarks.createBookmark(
                             sb.loader,
                             url,
+                            ClientIdentification.yacyInternetCrawlerAgent,
                             YMarkTables.USER_ADMIN,
                             true,
                             "searchresult",

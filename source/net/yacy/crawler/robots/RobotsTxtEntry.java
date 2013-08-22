@@ -160,7 +160,16 @@ public class RobotsTxtEntry {
     public String toString() {
         final StringBuilder str = new StringBuilder(6000);
         str.append((this.hostName == null) ? "null" : this.hostName).append(": ");
-        if (this.mem != null) str.append(this.mem.toString());
+        if (this.mem != null) {
+            str.append('{');
+            for (Map.Entry<String, byte[]> entry: this.mem.entrySet()) {
+                str.append(entry.getKey());
+                str.append('=');
+                str.append(UTF8.String(entry.getValue()));
+                str.append(',');
+            }
+            str.append('}');
+        }
         return str.toString();
     }
 

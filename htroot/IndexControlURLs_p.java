@@ -36,6 +36,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.lod.JenaTripleStore;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.util.ConcurrentLog;
@@ -177,7 +178,8 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdeleteall")) {
-            int i = segment.removeAllUrlReferences(urlhash.getBytes(), sb.loader, CacheStrategy.IFEXIST);
+            ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+            int i = segment.removeAllUrlReferences(urlhash.getBytes(), sb.loader, agent, CacheStrategy.IFEXIST);
             prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
         }
 

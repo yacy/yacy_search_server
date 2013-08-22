@@ -57,7 +57,7 @@ public class SitemapImporter extends Thread {
     public void run() {
         try {
             logger.info("Start parsing sitemap file " + this.siteMapURL);
-            sitemapParser.SitemapReader parser = sitemapParser.parse(this.siteMapURL);
+            sitemapParser.SitemapReader parser = sitemapParser.parse(this.siteMapURL, this.crawlingProfile.getAgent());
             parser.start();
             URLEntry item;
             while ((item = parser.take()) != sitemapParser.POISON_URLEntry) {

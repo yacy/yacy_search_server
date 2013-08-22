@@ -767,8 +767,8 @@ public class Segment {
         return vector;
     }
 
-    public void removeAllUrlReferences(final HandleSet urls, final LoaderDispatcher loader, final CacheStrategy cacheStrategy) {
-        for (final byte[] urlhash: urls) removeAllUrlReferences(urlhash, loader, cacheStrategy);
+    public void removeAllUrlReferences(final HandleSet urls, final LoaderDispatcher loader, final ClientIdentification.Agent agent, final CacheStrategy cacheStrategy) {
+        for (final byte[] urlhash: urls) removeAllUrlReferences(urlhash, loader, agent, cacheStrategy);
     }
 
     /**
@@ -779,7 +779,7 @@ public class Segment {
      * @param cacheStrategy
      * @return number of removed words
      */
-    public int removeAllUrlReferences(final byte[] urlhash, final LoaderDispatcher loader, final CacheStrategy cacheStrategy) {
+    public int removeAllUrlReferences(final byte[] urlhash, final LoaderDispatcher loader, final ClientIdentification.Agent agent, final CacheStrategy cacheStrategy) {
 
         if (urlhash == null) return 0;
         // determine the url string
@@ -788,7 +788,7 @@ public class Segment {
 
         try {
             // parse the resource
-            final Document document = Document.mergeDocuments(url, null, loader.loadDocuments(loader.request(url, true, false), cacheStrategy, Integer.MAX_VALUE, null, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT));
+            final Document document = Document.mergeDocuments(url, null, loader.loadDocuments(loader.request(url, true, false), cacheStrategy, Integer.MAX_VALUE, null, agent));
             if (document == null) {
                 // delete just the url entry
                 fulltext().remove(urlhash);

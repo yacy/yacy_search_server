@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.HandleSet;
@@ -60,7 +61,6 @@ import net.yacy.search.query.QueryGoal;
 
 public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnippet> {
 
-    public static final long snippetMinLoadDelay = 10;
     private static final int MAX_CACHE = 1000;
 
 
@@ -204,7 +204,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                     final Request request = loader == null ? null : loader.request(url, true, reindexing);
                     Response response;
                     try {
-                        response = loader == null || request == null ? null : loader.load(request, CacheStrategy.CACHEONLY, BlacklistType.SEARCH, snippetMinLoadDelay, 3000);
+                        response = loader == null || request == null ? null : loader.load(request, CacheStrategy.CACHEONLY, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
                     } catch (final IOException e1) {
                         response = null;
                     }
@@ -258,7 +258,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             // try to load the resource from the cache
             Response response = null;
             try {
-                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), (url.isFile() || url.isSMB()) ? CacheStrategy.NOCACHE : (cacheStrategy == null ? CacheStrategy.CACHEONLY : cacheStrategy), BlacklistType.SEARCH, snippetMinLoadDelay, 3000);
+                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), (url.isFile() || url.isSMB()) ? CacheStrategy.NOCACHE : (cacheStrategy == null ? CacheStrategy.CACHEONLY : cacheStrategy), BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
             } catch (final IOException e) {
                 response = null;
             }

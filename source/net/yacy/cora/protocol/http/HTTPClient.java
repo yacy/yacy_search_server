@@ -116,22 +116,24 @@ public class HTTPClient {
 	private HttpUriRequest currentRequest = null;
 	private long upbytes = 0L;
 	private int timeout = 10000;
-	private String userAgent = null;
+	private ClientIdentification.Agent agent = null;
 	private String host = null;
 	private boolean redirecting = true;
 	private String realm = null;
 
-	public HTTPClient(final String userAgent) {
-        super();
-        this.userAgent = userAgent;
-        HttpProtocolParams.setUserAgent(httpClient.getParams(), userAgent);
-    }
 
-	public HTTPClient(final String userAgent, final int timeout) {
+    public HTTPClient(final ClientIdentification.Agent agent) {
         super();
-        this.userAgent = userAgent;
+        this.agent = agent;
+        this.timeout = agent.clientTimeout;
+        HttpProtocolParams.setUserAgent(httpClient.getParams(), agent.userAgent);
+    }
+    
+    public HTTPClient(final ClientIdentification.Agent agent, final int timeout) {
+        super();
+        this.agent = agent;
         this.timeout = timeout;
-        HttpProtocolParams.setUserAgent(httpClient.getParams(), userAgent);
+        HttpProtocolParams.setUserAgent(httpClient.getParams(), agent.userAgent);
     }
 
     public static void setDefaultUserAgent(final String defaultAgent) {
@@ -165,7 +167,7 @@ public class HTTPClient {
 		 */
 		HttpProtocolParams.setVersion(httpParams, HttpVersion.HTTP_1_1);
 		// UserAgent
-		HttpProtocolParams.setUserAgent(httpParams, ClientIdentification.getUserAgent());
+		HttpProtocolParams.setUserAgent(httpParams, ClientIdentification.yacyInternetCrawlerAgent.userAgent);
 		HttpProtocolParams.setUseExpectContinue(httpParams, false); // IMPORTANT - if not set to 'false' then servers do not process the request until a time-out of 2 seconds
 		/**
 		 * HTTP connection settings
@@ -267,8 +269,8 @@ public class HTTPClient {
      *
      * @param userAgent
      */
-    public void setUserAgent(final String userAgent) {
-    	this.userAgent = userAgent;
+    public void setUserAgent(final ClientIdentification.Agent agent) {
+    	this.agent = agent;
     }
 
     /**
@@ -671,8 +673,8 @@ public class HTTPClient {
     	HttpClientParams.setRedirecting(httpParams, this.redirecting);
     	HttpConnectionParams.setConnectionTimeout(httpParams, this.timeout);
     	HttpConnectionParams.setSoTimeout(httpParams, this.timeout);
-    	if (this.userAgent != null)
-    		HttpProtocolParams.setUserAgent(httpParams, this.userAgent);
+    	if (this.agent != null)
+    		HttpProtocolParams.setUserAgent(httpParams, this.agent.userAgent);
     	if (this.host != null)
     		httpParams.setParameter(HTTP.TARGET_HOST, this.host);
     }
@@ -778,8 +780,7 @@ public class HTTPClient {
         } catch (final UnsupportedEncodingException e) {
             System.out.println(e.getStackTrace());
         }
-        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
-        client.setUserAgent("foobar");
+        final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
         client.setRedirecting(false);
         // Get some
         for (final String arg : args) {

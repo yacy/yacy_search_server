@@ -589,8 +589,8 @@ public class serverSwitch
                 netdef = netdef.trim();
                 try {
                     final RequestHeader reqHeader = new RequestHeader();
-                    reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
-                    final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
+                    reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.yacyInternetCrawlerAgent.userAgent);
+                    final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
                     client.setHeader(reqHeader.entrySet());
                     byte[] data = client.GETbytes(uri);
                     if ( data == null || data.length == 0 ) {

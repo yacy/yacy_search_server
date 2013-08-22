@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.importer.OAIPMHImporter;
@@ -45,7 +46,8 @@ public class IndexImportOAIPMHList_p {
         prop.put("source", 0);
 
         if (post != null && post.containsKey("source")) {
-            final Set<String> oaiRoots = OAIListFriendsLoader.getListFriends(sb.loader).keySet();
+            ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+            final Set<String> oaiRoots = OAIListFriendsLoader.getListFriends(sb.loader, agent).keySet();
 
             boolean dark = false;
             int count = 0;

@@ -41,7 +41,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.index.Segment;
-import net.yacy.search.snippet.TextSnippet;
 
 public class YMarkMetadata {
 	private DigestURI uri;
@@ -96,10 +95,10 @@ public class YMarkMetadata {
 		this.indexSegment = null;
 	}
 
-	public Document loadDocument(final LoaderDispatcher loader) throws IOException, Failure {
+	public Document loadDocument(final LoaderDispatcher loader, ClientIdentification.Agent agent) throws IOException, Failure {
 		if(this.document == null) {
 			Response response = null;
-			response = loader.load(loader.request(this.uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+			response = loader.load(loader.request(this.uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, agent);
 			this.document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
 		}
 		return this.document;

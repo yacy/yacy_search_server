@@ -31,13 +31,13 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
@@ -89,13 +89,13 @@ public class RobotsTxt {
         return this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME).size();
     }
 
-    public RobotsTxtEntry getEntry(final MultiProtocolURI theURL, final Set<String> thisAgents) {
+    public RobotsTxtEntry getEntry(final MultiProtocolURI theURL, final ClientIdentification.Agent agent) {
         if (theURL == null) throw new IllegalArgumentException();
         if (!theURL.getProtocol().startsWith("http")) return null;
-        return getEntry(getHostPort(theURL), thisAgents, true);
+        return getEntry(getHostPort(theURL), agent, true);
     }
 
-    public RobotsTxtEntry getEntry(final String urlHostPort, final Set<String> thisAgents, final boolean fetchOnlineIfNotAvailableOrNotFresh) {
+    public RobotsTxtEntry getEntry(final String urlHostPort, final ClientIdentification.Agent agent, final boolean fetchOnlineIfNotAvailableOrNotFresh) {
             // this method will always return a non-null value
         RobotsTxtEntry robotsTxt4Host = null;
         Map<String, byte[]> record;
@@ -164,7 +164,7 @@ public class RobotsTxt {
                     if (log.isFine()) log.fine("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
                     Request request = new Request(robotsURL, null);
                     try {
-                        response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE, null, 0, 3000);
+                        response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE, null, agent);
                     } catch (final Throwable e) {
                         log.info("Trying to download the robots.txt file from URL '" + robotsURL + "' failed - " + e.getMessage());
                         response = null;
@@ -174,7 +174,7 @@ public class RobotsTxt {
                 if (response == null) {
                     processOldEntry(robotsTxt4Host, robotsURL, robotsTable);
                 } else {
-                    processNewEntry(robotsURL, response, thisAgents);
+                    processNewEntry(robotsURL, response, agent.robotIDs);
                 }
             }
         }
@@ -182,7 +182,7 @@ public class RobotsTxt {
         return robotsTxt4Host;
     }
 
-    public void ensureExist(final MultiProtocolURI theURL, final Set<String> thisAgents, boolean concurrent) {
+    public void ensureExist(final MultiProtocolURI theURL, final ClientIdentification.Agent agent, boolean concurrent) {
         if (theURL.isLocal()) return;
         final String urlHostPort = getHostPort(theURL);
         if (urlHostPort == null) return;
@@ -220,7 +220,7 @@ public class RobotsTxt {
                         if (log.isFine()) log.fine("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
                         Request request = new Request(robotsURL, null);
                         try {
-                            response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE, null, 0, 3000);
+                            response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE, null, agent);
                         } catch (final IOException e) {
                             response = null;
                         }
@@ -229,7 +229,7 @@ public class RobotsTxt {
                     if (response == null) {
                         processOldEntry(null, robotsURL, robotsTable);
                     } else {
-                        processNewEntry(robotsURL, response, thisAgents);
+                        processNewEntry(robotsURL, response, agent.robotIDs);
                     }
                 }
             }
@@ -265,7 +265,7 @@ public class RobotsTxt {
         }
     }
     
-    private void processNewEntry(DigestURI robotsURL, Response response, final Set<String> thisAgents) {
+    private void processNewEntry(DigestURI robotsURL, Response response, final String[] thisAgents) {
         final byte[] robotsTxt = response.getContent();
         //Log.logInfo("RobotsTxt", "robots of " + robotsURL.toNormalform(true, true) + ":\n" + ((robotsTxt == null) ? "null" : UTF8.String(robotsTxt))); // debug TODO remove
         RobotsTxtParser parserResult;
@@ -282,6 +282,8 @@ public class RobotsTxt {
 
         // store the data into the robots DB
         String etag = response.getResponseHeader().containsKey(HeaderFramework.ETAG) ? (response.getResponseHeader().get(HeaderFramework.ETAG)).trim() : null;
+        boolean isBrowserAgent = thisAgents.length == 1 && thisAgents[0].equals("Mozilla");
+        if (isBrowserAgent) denyPath.clear();
         final RobotsTxtEntry robotsTxt4Host = new RobotsTxtEntry(
                     robotsURL,
                     parserResult.allowList(),

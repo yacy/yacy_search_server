@@ -47,7 +47,6 @@ import net.yacy.crawler.retrieval.Response;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
-import net.yacy.search.snippet.TextSnippet;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -60,11 +59,11 @@ public class OAIListFriendsLoader implements Serializable {
 
     private static final HashMap<String, File> listFriends = new HashMap<String, File>();
 
-    public static void init(final LoaderDispatcher loader, final Map<String, File> moreFriends) {
+    public static void init(final LoaderDispatcher loader, final Map<String, File> moreFriends, final ClientIdentification.Agent agent) {
         listFriends.putAll(moreFriends);
         if (loader != null) for (final Map.Entry<String, File> oaiFriend: listFriends.entrySet()) {
             try {
-                loader.loadIfNotExistBackground(new DigestURI(oaiFriend.getKey()), oaiFriend.getValue(), Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+                loader.loadIfNotExistBackground(new DigestURI(oaiFriend.getKey()), oaiFriend.getValue(), Integer.MAX_VALUE, null, agent);
             } catch (final MalformedURLException e) {
             }
         }
@@ -84,12 +83,12 @@ public class OAIListFriendsLoader implements Serializable {
     }
 
 
-    public static Map<String, String> getListFriends(final LoaderDispatcher loader) {
+    public static Map<String, String> getListFriends(final LoaderDispatcher loader, final ClientIdentification.Agent agent) {
         final Map<String, String> map = new TreeMap<String, String>();
         Map<String, String> m;
         for (final Map.Entry<String, File> oaiFriend: listFriends.entrySet()) try {
             if (!oaiFriend.getValue().exists()) {
-                final Response response = loader == null ? null : loader.load(loader.request(new DigestURI(oaiFriend.getKey()), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+                final Response response = loader == null ? null : loader.load(loader.request(new DigestURI(oaiFriend.getKey()), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
                 if (response != null) FileUtils.copy(response.getContent(), oaiFriend.getValue());
             }
 

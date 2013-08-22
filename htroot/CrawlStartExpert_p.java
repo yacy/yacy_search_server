@@ -24,6 +24,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.util.ArrayList;
+import java.util.List;
+
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.search.Switchboard;
@@ -82,8 +86,22 @@ public class CrawlStartExpert_p {
 
         boolean collectionEnabled = sb.index.fulltext().getDefaultConfiguration().isEmpty() || sb.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.collection_sxt);
         prop.put("collectionEnabled", collectionEnabled ? 1 : 0);
-        prop.put("collection", collectionEnabled ? "user" : "");
-
+        prop.put("collection", collectionEnabled ? "user" : "");   
+        if (sb.isP2PMode()) {
+            prop.put("agentSelect", 0);
+        } else {
+            prop.put("agentSelect", 1); 
+            List<String> agentNames = new ArrayList<String>();
+            if (sb.isIntranetMode()) agentNames.add(ClientIdentification.yacyIntranetCrawlerAgentName);
+            if (sb.isGlobalMode()) agentNames.add(ClientIdentification.yacyInternetCrawlerAgentName);
+            agentNames.add(ClientIdentification.googleAgentName);
+            if (sb.isAllIPMode()) agentNames.add(ClientIdentification.browserAgentName);
+            for (int i = 0; i < agentNames.size(); i++) {
+                prop.put("agentSelect_list_" + i + "_name", agentNames.get(i)); 
+            }
+            prop.put("agentSelect_list", agentNames.size()); 
+        }
+        prop.put("agentSelect_defaultAgentName", ClientIdentification.yacyInternetCrawlerAgentName);     
         // return rewrite properties
         return prop;
     }

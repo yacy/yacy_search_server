@@ -34,15 +34,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import org.openjena.atlas.logging.Log;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.storage.HandleSet;
@@ -72,9 +74,6 @@ public class Balancer {
 
     // class variables filled with external values
     private final File                 cacheStacksPath;
-    private       int                  minimumLocalDelta;
-    private       int                  minimumGlobalDelta;
-    private final Set<String>          myAgentIDs;
     private       BufferedObjectIndex  urlFileIndex;
 
     // class variables computed during operation
@@ -97,16 +96,10 @@ public class Balancer {
     public Balancer(
             final File cachePath,
             final String stackname,
-            final int minimumLocalDelta,
-            final int minimumGlobalDelta,
-            final Set<String> myAgentIDs,
             final boolean useTailCache,
             final boolean exceed134217727) {
         this.cacheStacksPath = cachePath;
         this.domainStacks = new ConcurrentHashMap<String, HostHandles>();
-        this.minimumLocalDelta = minimumLocalDelta;
-        this.minimumGlobalDelta = minimumGlobalDelta;
-        this.myAgentIDs = myAgentIDs;
         this.domStackInitSize = Integer.MAX_VALUE;
         this.double_push_check = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
         this.zeroWaitingCandidates = new ArrayList<Map.Entry<String, byte[]>>();
@@ -127,19 +120,6 @@ public class Balancer {
         }
         this.lastDomainStackFill = 0;
         ConcurrentLog.info("Balancer", "opened balancer file with " + this.urlFileIndex.size() + " entries from " + f.toString());
-    }
-
-    public int getMinimumLocalDelta() {
-        return this.minimumLocalDelta;
-    }
-
-    public int getMinimumGlobalDelta() {
-        return this.minimumGlobalDelta;
-    }
-
-    public void setMinimumDelta(final int minimumLocalDelta, final int minimumGlobalDelta) {
-        this.minimumLocalDelta = minimumLocalDelta;
-        this.minimumGlobalDelta = minimumGlobalDelta;
     }
 
     public synchronized void close() {
@@ -293,7 +273,7 @@ public class Balancer {
 	        // now disabled to prevent that a crawl 'freezes' to a specific domain which hosts a lot of pages; the queues are filled anyway
 	        //if (!this.domainStacks.containsKey(entry.url().getHost())) pushHashToDomainStacks(entry.url().getHost(), entry.url().hash());
         }
-        robots.ensureExist(entry.url(), Balancer.this.myAgentIDs, true); // concurrently load all robots.txt
+        robots.ensureExist(entry.url(), profile.getAgent(), true); // concurrently load all robots.txt
         return null;
     }
 
@@ -307,7 +287,7 @@ public class Balancer {
             final String hostname = entry.getKey();
             final HostHandles hosthandles = entry.getValue();
             int size = hosthandles.handleSet.size();
-            int delta = Latency.waitingRemainingGuessed(hostname, hosthandles.hosthash, robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta);
+            int delta = Latency.waitingRemainingGuessed(hostname, hosthandles.hosthash, robots, ClientIdentification.yacyInternetCrawlerAgent);
             map.put(hostname, new Integer[]{size, delta});
         }
         return map;
@@ -326,7 +306,7 @@ public class Balancer {
         long sleeptime = (
             profileEntry.cacheStrategy() == CacheStrategy.CACHEONLY ||
             (profileEntry.cacheStrategy() == CacheStrategy.IFEXIST && Cache.has(crawlURL.hash()))
-            ) ? Integer.MIN_VALUE : Latency.waitingRemaining(crawlURL, robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
+            ) ? Integer.MIN_VALUE : Latency.waitingRemaining(crawlURL, robots, profileEntry.getAgent()); // this uses the robots.txt database and may cause a loading of robots.txt from the server
         return sleeptime;
     }
     
@@ -339,8 +319,8 @@ public class Balancer {
      * @param crawlURL
      * @return
      */
-    private long getRobotsTime(final RobotsTxt robots, final DigestURI crawlURL) {
-        long sleeptime = Latency.waitingRobots(crawlURL, robots, this.myAgentIDs); // this uses the robots.txt database and may cause a loading of robots.txt from the server
+    private long getRobotsTime(final RobotsTxt robots, final DigestURI crawlURL, ClientIdentification.Agent agent) {
+        long sleeptime = Latency.waitingRobots(crawlURL, robots, agent); // this uses the robots.txt database and may cause a loading of robots.txt from the server
         return sleeptime < 0 ? 0 : sleeptime;
     }
 
@@ -430,7 +410,7 @@ public class Balancer {
     	CrawlProfile profileEntry = null;
 	    byte[] failhash = null;
 		while (!this.urlFileIndex.isEmpty()) {
-		    byte[] nexthash = getbest(robots);
+		    byte[] nexthash = getbest(robots, cs);
             if (nexthash == null) return null;
             
 	        synchronized (this) {
@@ -464,15 +444,15 @@ public class Balancer {
 	        }
     	}
     	if (crawlEntry == null) return null;
-
-    	long robotsTime = getRobotsTime(robots, crawlEntry.url());
+    	ClientIdentification.Agent agent = profileEntry == null ? ClientIdentification.yacyInternetCrawlerAgent : profileEntry.getAgent();
+    	long robotsTime = getRobotsTime(robots, crawlEntry.url(), agent);
         Latency.updateAfterSelection(crawlEntry.url(), profileEntry == null ? 0 : robotsTime);
         if (delay && sleeptime > 0) {
             // force a busy waiting here
             // in best case, this should never happen if the balancer works propertly
             // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
-            ConcurrentLog.info("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta) + ", domainStacks.size() = " + this.domainStacks.size() + ", domainStacksInitSize = " + this.domStackInitSize);
+            ConcurrentLog.info("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, agent) + ", domainStacks.size() = " + this.domainStacks.size() + ", domainStacksInitSize = " + this.domStackInitSize);
             long loops = sleeptime / 1000;
             long rest = sleeptime % 1000;
             if (loops < 3) {
@@ -493,7 +473,7 @@ public class Balancer {
         return crawlEntry;
     }
 
-    private byte[] getbest(final RobotsTxt robots) {
+    private byte[] getbest(final RobotsTxt robots, final CrawlSwitchboard cs) {
 
         synchronized (this.zeroWaitingCandidates) {
             if (this.zeroWaitingCandidates.size() > 0) {
@@ -535,11 +515,15 @@ public class Balancer {
                     rowEntry = this.urlFileIndex.get(urlhash, false);
                     if (rowEntry == null) continue; // may have been deleted there manwhile
                     Request crawlEntry = new Request(rowEntry);
-                    w = Latency.waitingRemaining(crawlEntry.url(), robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta);
-                    //System.out.println("*** waitingRemaining = " + w + ", guessed = " + Latency.waitingRemainingGuessed(hostname, this.minimumLocalDelta, this.minimumGlobalDelta));
-                    //System.out.println("*** explained: " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta));
+                    CrawlProfile profileEntry = cs.getActive(UTF8.getBytes(crawlEntry.profileHandle()));
+                    if (profileEntry == null) {
+                        ConcurrentLog.warn("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
+                        continue;
+                    }
+                    w = Latency.waitingRemaining(crawlEntry.url(), robots, profileEntry.getAgent());
                 } catch (final IOException e1) {
-                    w = Latency.waitingRemainingGuessed(hostname, hosthandles.hosthash, robots, this.myAgentIDs, this.minimumLocalDelta, this.minimumGlobalDelta);
+                    Log.warn("Balancer", e1.getMessage(), e1);
+                    continue;
                 }
 
                 if (w <= 0) {

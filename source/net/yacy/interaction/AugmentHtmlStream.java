@@ -20,8 +20,6 @@ import net.yacy.server.http.ServerSideIncludes;
 
 import org.jsoup.Jsoup;
 
-
-
 public class AugmentHtmlStream {
 
     static RequestHeader globalrequestHeader;
@@ -32,7 +30,7 @@ public class AugmentHtmlStream {
      * @return the web page with integrated REFLECT elements
      */
     private static String processExternal(String url, String fieldname, String data) throws IOException {
-        final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), ClientIdentification.DEFAULT_TIMEOUT);
+        final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
         try {
             StringBuilder postdata = new StringBuilder();
             postdata.append(fieldname);

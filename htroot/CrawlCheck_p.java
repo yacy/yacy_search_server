@@ -72,6 +72,7 @@ public class CrawlCheck_p {
                 prop.put("table", 0);
             } else {
                 prop.put("table", 1);
+                ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
                 
                 // make a string that is used to fill the starturls field again
                 // and analyze the urls to make the table rows
@@ -84,22 +85,22 @@ public class CrawlCheck_p {
                     // try to load the robots
                     RobotsTxtEntry robotsEntry;
                     boolean robotsAllowed = true;
-                    robotsEntry = sb.robots.getEntry(u, sb.peers.myBotIDs());
+                    robotsEntry = sb.robots.getEntry(u, agent);
                     if (robotsEntry == null) {
                         prop.put("table_list_" + row + "_robots", "no robots");
-                        prop.put("table_list_" + row + "_crawldelay", ClientIdentification.minLoadDelay() + " ms");
+                        prop.put("table_list_" + row + "_crawldelay", agent.minimumDelta + " ms");
                         prop.put("table_list_" + row + "_sitemap", "");
                     } else {
                         robotsAllowed = !robotsEntry.isDisallowed(u);
                         prop.put("table_list_" + row + "_robots", "robots exist: " + (robotsAllowed ? "crawl allowed" : "url disallowed"));
-                        prop.put("table_list_" + row + "_crawldelay", Math.max(ClientIdentification.minLoadDelay(), robotsEntry.getCrawlDelayMillis()) + " ms");
+                        prop.put("table_list_" + row + "_crawldelay", Math.max(agent.minimumDelta, robotsEntry.getCrawlDelayMillis()) + " ms");
                         prop.put("table_list_" + row + "_sitemap", robotsEntry.getSitemap() == null ? "-" : robotsEntry.getSitemap().toNormalform(true));
                     }
                     
                     // try to load the url
                     if (robotsAllowed) try {
                         Request request = sb.loader.request(u, true, false);
-                        final Response response = sb.loader.load(request, CacheStrategy.NOCACHE, BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
+                        final Response response = sb.loader.load(request, CacheStrategy.NOCACHE, BlacklistType.CRAWLER, agent);
                         if (response == null) {
                             prop.put("table_list_" + row + "_access", "no response");
                         } else {

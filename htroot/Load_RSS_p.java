@@ -154,6 +154,7 @@ public class Load_RSS_p {
         }
 
         if (post != null && post.containsKey("addSelectedFeedScheduler")) {
+            ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
             for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) {
                     Row row;
@@ -175,7 +176,7 @@ public class Load_RSS_p {
                         continue;
                     }
                     // load feeds concurrently to get better responsibility in web interface
-                    new RSSLoader(sb, url, collections).start();
+                    new RSSLoader(sb, url, collections, agent).start();
                 }
             }
         }
@@ -262,11 +263,13 @@ public class Load_RSS_p {
             ConcurrentLog.warn("Load_RSS_p", "url not well-formed: '" + post.get("url", "") + "'");
         }
 
+        ClientIdentification.Agent agent = post == null ? ClientIdentification.yacyInternetCrawlerAgent : ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+        
         // if we have an url then try to load the rss
         RSSReader rss = null;
         if (url != null) try {
             prop.put("url", url.toNormalform(true));
-            final Response response = sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
+            final Response response = sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, BlacklistType.CRAWLER, agent);
             final byte[] resource = response == null ? null : response.getContent();
             rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
         } catch (final IOException e) {

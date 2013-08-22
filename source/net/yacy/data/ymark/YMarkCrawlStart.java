@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Request;
@@ -185,7 +186,8 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 		                crawlingQ,
 		                true, true, true, true, true, false,
 		                CacheStrategy.IFFRESH,
-		                "robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA); // TODO: make this a default profile in CrawlSwitchboard
+		                "robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA,
+		                ClientIdentification.yacyIntranetCrawlerAgentName); // TODO: make this a default profile in CrawlSwitchboard
 		sb.crawler.putActive(pe.handle().getBytes(), pe);
 		return sb.crawlStacker.stackCrawl(new Request(
         sb.peers.mySeed().hash.getBytes(),

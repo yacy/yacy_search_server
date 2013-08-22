@@ -101,7 +101,7 @@ public class ConfigLanguage_p {
                 Iterator<String> it;
                 try {
                     final DigestURI u = new DigestURI(url);
-                    it = FileUtils.strings(u.get(ClientIdentification.getUserAgent(), 10000));
+                    it = FileUtils.strings(u.get(ClientIdentification.yacyInternetCrawlerAgent));
                 } catch(final IOException e) {
                     prop.put("status", "1");//unable to get url
                     prop.put("status_url", url);

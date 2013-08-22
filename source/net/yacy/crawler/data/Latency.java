@@ -25,13 +25,12 @@ package net.yacy.crawler.data;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.crawler.robots.RobotsTxtEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -120,17 +119,17 @@ public class Latency {
      * @param thisAgents
      * @return the waiting time in milliseconds; 0 if not known; -1 if host gives us special rights
      */
-    public static int waitingRobots(final MultiProtocolURI url, final RobotsTxt robots, final Set<String> thisAgents) {
+    public static int waitingRobots(final MultiProtocolURI url, final RobotsTxt robots, final ClientIdentification.Agent agent) {
         int robotsDelay = 0;
-        RobotsTxtEntry robotsEntry = robots.getEntry(url, thisAgents);
+        RobotsTxtEntry robotsEntry = robots.getEntry(url, agent);
         robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
         if (robotsEntry != null && robotsDelay == 0 && robotsEntry.getAgentName() != null) return -1; // no limits if granted exclusively for this peer
         return robotsDelay;
     }
     
-    private static int waitingRobots(final String hostport, final RobotsTxt robots, final Set<String> thisAgents, final boolean fetchOnlineIfNotAvailableOrNotFresh) {
+    private static int waitingRobots(final String hostport, final RobotsTxt robots, final ClientIdentification.Agent agent, final boolean fetchOnlineIfNotAvailableOrNotFresh) {
         int robotsDelay = 0;
-        RobotsTxtEntry robotsEntry = robots.getEntry(hostport, thisAgents, fetchOnlineIfNotAvailableOrNotFresh);
+        RobotsTxtEntry robotsEntry = robots.getEntry(hostport, agent, fetchOnlineIfNotAvailableOrNotFresh);
         robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
         if (robotsEntry != null && robotsDelay == 0 && robotsEntry.getAgentName() != null) return -1; // no limits if granted exclusively for this peer
         return robotsDelay;
@@ -143,20 +142,18 @@ public class Latency {
      * @param hostname
      * @param hosthash
      * @param robots
-     * @param thisAgents
-     * @param minimumLocalDelta
-     * @param minimumGlobalDelta
+     * @param agent
      * @return the remaining waiting time in milliseconds. The return value may be negative
      *         which expresses how long the time is over the minimum waiting time.
      */
-    public static int waitingRemainingGuessed(final String hostname, final String hosthash, final RobotsTxt robots, final Set<String> thisAgents, final int minimumLocalDelta, final int minimumGlobalDelta) {
+    public static int waitingRemainingGuessed(final String hostname, final String hosthash, final RobotsTxt robots, final ClientIdentification.Agent agent) {
 
         // first check if the domain was _ever_ accessed before
         final Host host = map.get(hosthash);
         if (host == null) return Integer.MIN_VALUE; // no delay if host is new; use Integer because there is a cast to int somewhere
 
         // find the minimum waiting time based on the network domain (local or global)
-        int waiting = (Domains.isLocal(hostname, null)) ? minimumLocalDelta : minimumGlobalDelta;
+        int waiting = agent.minimumDelta;
 
         // if we have accessed the domain many times, get slower (the flux factor)
         waiting += host.flux(waiting);
@@ -171,7 +168,7 @@ public class Latency {
         
         // find the delay as given by robots.txt on target site
         if (robots != null) {
-            int robotsDelay = waitingRobots(hostname + ":80", robots, thisAgents, false);
+            int robotsDelay = waitingRobots(hostname + ":80", robots, agent, false);
             if (robotsDelay < 0) return -timeSinceLastAccess; // no limits if granted exclusively for this peer
             waiting = Math.max(waiting, robotsDelay);
         }
@@ -187,11 +184,10 @@ public class Latency {
      * - the times that the domain was accessed (flux factor)
      * - the response latency of the domain
      * - and a given minimum access time as given in robots.txt
-     * @param minimumLocalDelta
-     * @param minimumGlobalDelta
+     * @param agent
      * @return the remaining waiting time in milliseconds. can be negative to reflect the due-time after a possible nex loading time
      */
-    public static int waitingRemaining(final DigestURI url, final RobotsTxt robots, final Set<String> thisAgents, final int minimumLocalDelta, final int minimumGlobalDelta) {
+    public static int waitingRemaining(final DigestURI url, final RobotsTxt robots, final ClientIdentification.Agent agent) {
 
         // first check if the domain was _ever_ accessed before
         final Host host = host(url);
@@ -199,7 +195,7 @@ public class Latency {
 
         // find the minimum waiting time based on the network domain (local or global)
         boolean local = url.isLocal();
-        int waiting = (local) ? minimumLocalDelta : minimumGlobalDelta;
+        int waiting = agent.minimumDelta;
 
         // for CGI accesses, we double the minimum time
         // mostly there is a database access in the background
@@ -216,14 +212,14 @@ public class Latency {
         final int timeSinceLastAccess = (int) (System.currentTimeMillis() - host.lastacc());
         
         // find the delay as given by robots.txt on target site
-        int robotsDelay = waitingRobots(url, robots, thisAgents);
+        int robotsDelay = waitingRobots(url, robots, agent);
         if (robotsDelay < 0) return -timeSinceLastAccess; // no limits if granted exclusively for this peer
 
         waiting = Math.max(waiting, robotsDelay);
         return Math.min(60000, waiting) - timeSinceLastAccess;
     }
     
-    public static String waitingRemainingExplain(final DigestURI url, final RobotsTxt robots, final Set<String> thisAgents, final int minimumLocalDelta, final int minimumGlobalDelta) {
+    public static String waitingRemainingExplain(final DigestURI url, final RobotsTxt robots, final ClientIdentification.Agent agent) {
 
         // first check if the domain was _ever_ accessed before
         final Host host = host(url);
@@ -232,7 +228,7 @@ public class Latency {
         final StringBuilder s = new StringBuilder(50);
 
         // find the minimum waiting time based on the network domain (local or global)
-        int waiting = (url.isLocal()) ? minimumLocalDelta : minimumGlobalDelta;
+        int waiting = agent.minimumDelta;
         s.append("minimumDelta = ").append(waiting);
 
         // for CGI accesses, we double the minimum time
@@ -252,7 +248,7 @@ public class Latency {
         waiting = Math.max(waiting, host.average() * 3 / 2);
 
         // find the delay as given by robots.txt on target site
-        int robotsDelay = waitingRobots(url, robots, thisAgents);
+        int robotsDelay = waitingRobots(url, robots, agent);
         if (robotsDelay < 0) return "no waiting for exclusive granted peer"; // no limits if granted exclusively for this peer
 
         waiting = Math.max(waiting, robotsDelay);

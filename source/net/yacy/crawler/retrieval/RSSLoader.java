@@ -56,21 +56,23 @@ public class RSSLoader extends Thread {
 
     public static final ARC<byte[], Date> indexTriggered = new ComparableARC<byte[], Date>(1000, Base64Order.enhancedCoder);
 
-    DigestURI urlf;
-    Switchboard sb;
-    String[] collections;
+    private final DigestURI urlf;
+    private final Switchboard sb;
+    private final String[] collections;
+    private final ClientIdentification.Agent agent;
 
-    public RSSLoader(final Switchboard sb, final DigestURI urlf, final String[] collections) {
+    public RSSLoader(final Switchboard sb, final DigestURI urlf, final String[] collections, final ClientIdentification.Agent agent) {
         this.sb = sb;
         this.urlf = urlf;
         this.collections = collections;
+        this.agent = agent;
     }
 
     @Override
     public void run() {
         RSSReader rss = null;
         try {
-            final Response response = this.sb.loader.load(this.sb.loader.request(this.urlf, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
+            final Response response = this.sb.loader.load(this.sb.loader.request(this.urlf, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, BlacklistType.CRAWLER, this.agent);
             final byte[] resource = response == null ? null : response.getContent();
             rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
         } catch (final MalformedURLException e) {

@@ -191,7 +191,6 @@ import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphConfiguration;
-import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.RobotsTxtConfig;
@@ -792,11 +791,8 @@ public final class Switchboard extends serverSwitch {
             OAIListFriendsLoader.loadListFriendsSources(
                 new File("defaults/oaiListFriendsSource.xml"),
                 getDataPath());
-        OAIListFriendsLoader.init(this.loader, oaiFriends);
+        OAIListFriendsLoader.init(this.loader, oaiFriends, ClientIdentification.yacyInternetCrawlerAgent);
         this.crawlQueues = new CrawlQueues(this, this.queuesRoot);
-        this.crawlQueues.noticeURL.setMinimumDelta(
-            getConfigInt("minimumLocalDelta", this.crawlQueues.noticeURL.getMinimumLocalDelta()),
-            getConfigInt("minimumGlobalDelta", this.crawlQueues.noticeURL.getMinimumGlobalDelta()));
 
         // on startup, resume all crawls
         setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused", "false");
@@ -1233,16 +1229,9 @@ public final class Switchboard extends serverSwitch {
         }
         */
         // write the YaCy network identification inside the yacybot client user agent to distinguish networks
-        String newagent =
-            ClientIdentification.generateYaCyBot(getConfig(SwitchboardConstants.NETWORK_NAME, "")
+        ClientIdentification.generateYaCyBot(getConfig(SwitchboardConstants.NETWORK_NAME, "")
                 + (isRobinsonMode() ? "-" : "/")
                 + getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global"));
-        if ( !getConfigBool(SwitchboardConstants.DHT_ENABLED, false)
-            && getConfig("network.unit.tenant.agent", "").length() > 0 ) {
-            newagent = getConfig("network.unit.tenant.agent", "").trim();
-            this.log.info("new user agent: '" + newagent + "'");
-        }
-        ClientIdentification.setUserAgent(newagent);
     }
 
     public void switchNetwork(final String networkDefinition) throws FileNotFoundException, IOException {
@@ -1484,6 +1473,10 @@ public final class Switchboard extends serverSwitch {
 
     public static Switchboard getSwitchboard() {
         return sb;
+    }
+
+    public boolean isP2PMode() {
+        return getConfig(SwitchboardConstants.NETWORK_BOOTSTRAP_SEEDLIST_STUB + "0", null) != null;
     }
 
     public boolean isIntranetMode() {
@@ -2910,7 +2903,7 @@ public final class Switchboard extends serverSwitch {
         // get a scraper to get the title
         Document scraper;
         try {
-            scraper = this.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
+            scraper = this.loader.loadDocument(url, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, profile.getAgent());
         } catch (final IOException e) {
             return "scraper cannot load URL: " + e.getMessage();
         }
@@ -2964,7 +2957,7 @@ public final class Switchboard extends serverSwitch {
         // do the same for ymarks
         // TODO: could a non admin user add crawls?
         try {
-            this.tables.bookmarks.createBookmark(this.loader, url, YMarkTables.USER_ADMIN, true, "crawlStart", "/Crawl Start");
+            this.tables.bookmarks.createBookmark(this.loader, url, profile.getAgent(), YMarkTables.USER_ADMIN, true, "crawlStart", "/Crawl Start");
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
         } catch (final Failure e) {
@@ -3017,7 +3010,7 @@ public final class Switchboard extends serverSwitch {
                     String urlName = url.toNormalform(true);
                     Thread.currentThread().setName("Switchboard.addToIndex:" + urlName);
                     try {
-                        final Response response = Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, ClientIdentification.minLoadDelay(), ClientIdentification.DEFAULT_TIMEOUT);
+                        final Response response = Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, ClientIdentification.yacyIntranetCrawlerAgent);
                         if (response == null) {
                             throw new IOException("response == null");
                         }
@@ -3418,7 +3411,7 @@ public final class Switchboard extends serverSwitch {
                 final Map<DigestURI, String> links;
                 searchEvent.oneFeederStarted();
                 try {
-                    links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay, 2000);
+                    links = Switchboard.this.loader.loadLinks(url, CacheStrategy.NOCACHE, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
                     if ( links != null ) {
                         final Iterator<DigestURI> i = links.keySet().iterator();
                         while ( i.hasNext() ) {
@@ -3457,7 +3450,7 @@ public final class Switchboard extends serverSwitch {
                 final Map<DigestURI, String> links;
                 DigestURI url;
                 try {
-                    links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay, 2000);
+                    links = Switchboard.this.loader.loadLinks(startUrl, CacheStrategy.IFFRESH, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
                     if (links != null) {
                         if (links.size() < 1000) { // limit to 1000 to skip large index pages
                             final Iterator<DigestURI> i = links.keySet().iterator();
@@ -3521,7 +3514,7 @@ public final class Switchboard extends serverSwitch {
                 searchEvent.oneFeederStarted();
                 try {
                     final Response response =
-                        Switchboard.this.loader.load(Switchboard.this.loader.request(url, true, false), CacheStrategy.NOCACHE, BlacklistType.SEARCH, TextSnippet.snippetMinLoadDelay, ClientIdentification.DEFAULT_TIMEOUT);
+                        Switchboard.this.loader.load(Switchboard.this.loader.request(url, true, false), CacheStrategy.NOCACHE, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
                     final byte[] resource = (response == null) ? null : response.getContent();
                     //System.out.println("BLEKKO: " + UTF8.String(resource));
                     rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
@@ -3629,7 +3622,7 @@ public final class Switchboard extends serverSwitch {
             if ( Thread.currentThread().isInterrupted() ) {
                 break;
             }
-            seedListFileURL = this.getConfig("network.unit.bootstrap.seedlist" + c, "");
+            seedListFileURL = this.getConfig(SwitchboardConstants.NETWORK_BOOTSTRAP_SEEDLIST_STUB + c, "");
             if ( seedListFileURL.isEmpty() ) {
                 break;
             }
@@ -3653,7 +3646,7 @@ public final class Switchboard extends serverSwitch {
                     final RequestHeader reqHeader = new RequestHeader();
                     reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
                     reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache");
-                    final HTTPClient client = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
+                    final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
                     client.setHeader(reqHeader.entrySet());
 
                     client.HEADResponse(url.toString());

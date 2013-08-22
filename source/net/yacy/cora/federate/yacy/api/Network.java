@@ -49,7 +49,7 @@ public class Network {
      */
     public static Peers getNetwork(final String address) throws IOException {
         Peers peers = new Peers();
-        final HTTPClient httpclient = new HTTPClient(ClientIdentification.getUserAgent(), 15000);
+        final HTTPClient httpclient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
             final byte[] content = httpclient.GETbytes("http://" + address  + "/Network.xml?page=1&maxCount=1000&ip=");
             ByteArrayInputStream bais = new ByteArrayInputStream(content);
             Document doc = null;

@@ -33,13 +33,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.crawler.Balancer;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.retrieval.Request;
@@ -59,30 +57,14 @@ public class NoticedURL {
 
     protected NoticedURL(
             final File cachePath,
-            final Set<String> myAgentIDs,
             final boolean useTailCache,
             final boolean exceed134217727) {
         ConcurrentLog.info("NoticedURL", "CREATING STACKS at " + cachePath.toString());
-        this.coreStack = new Balancer(cachePath, "urlNoticeCoreStack", ClientIdentification.minimumLocalDeltaInit, ClientIdentification.minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
-        this.limitStack = new Balancer(cachePath, "urlNoticeLimitStack", ClientIdentification.minimumLocalDeltaInit, ClientIdentification.minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
+        this.coreStack = new Balancer(cachePath, "urlNoticeCoreStack", useTailCache, exceed134217727);
+        this.limitStack = new Balancer(cachePath, "urlNoticeLimitStack", useTailCache, exceed134217727);
         //overhangStack = new plasmaCrawlBalancer(overhangStackFile);
-        this.remoteStack = new Balancer(cachePath, "urlNoticeRemoteStack", ClientIdentification.minimumLocalDeltaInit, ClientIdentification.minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
-        this.noloadStack = new Balancer(cachePath, "urlNoticeNoLoadStack", ClientIdentification.minimumLocalDeltaInit, ClientIdentification.minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
-    }
-
-    public int getMinimumLocalDelta() {
-        return this.coreStack.getMinimumLocalDelta();
-    }
-
-    public int getMinimumGlobalDelta() {
-        return this.coreStack.getMinimumGlobalDelta();
-    }
-
-    public void setMinimumDelta(final int minimumLocalDelta, final int minimumGlobalDelta) {
-        this.coreStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
-        this.limitStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
-        this.remoteStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
-        this.noloadStack.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
+        this.remoteStack = new Balancer(cachePath, "urlNoticeRemoteStack", useTailCache, exceed134217727);
+        this.noloadStack = new Balancer(cachePath, "urlNoticeNoLoadStack", useTailCache, exceed134217727);
     }
 
     public void clear() {

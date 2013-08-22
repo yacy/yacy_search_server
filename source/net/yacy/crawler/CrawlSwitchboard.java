@@ -41,6 +41,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.CrawlProfile;
@@ -273,7 +274,8 @@ public final class CrawlSwitchboard {
                 true,
                 sb.getConfigBool(SwitchboardConstants.PROXY_INDEXING_REMOTE, false),
                 CacheStrategy.IFFRESH,
-                "robot_" + CRAWL_PROFILE_PROXY);
+                "robot_" + CRAWL_PROFILE_PROXY,
+                ClientIdentification.yacyProxyAgentName);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultProxyProfile.handle()),
             this.defaultProxyProfile);
@@ -301,7 +303,8 @@ public final class CrawlSwitchboard {
                 false,
                 false,
                 CacheStrategy.IFFRESH,
-                "robot_" + CRAWL_PROFILE_REMOTE);
+                "robot_" + CRAWL_PROFILE_REMOTE,
+                ClientIdentification.yacyInternetCrawlerAgentName);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultRemoteProfile.handle()),
             this.defaultRemoteProfile);
@@ -329,7 +332,8 @@ public final class CrawlSwitchboard {
                 true,
                 false,
                 CacheStrategy.IFEXIST,
-                "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_TEXT);
+                "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_TEXT,
+                ClientIdentification.yacyIntranetCrawlerAgentName);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultTextSnippetLocalProfile.handle()),
             this.defaultTextSnippetLocalProfile);
@@ -357,7 +361,8 @@ public final class CrawlSwitchboard {
                 true,
                 false,
                 CacheStrategy.IFEXIST,
-                "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT);
+                "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT,
+                ClientIdentification.yacyIntranetCrawlerAgentName);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultTextSnippetGlobalProfile.handle()),
             this.defaultTextSnippetGlobalProfile);
@@ -386,7 +391,8 @@ public final class CrawlSwitchboard {
                 true,
                 false,
                 CacheStrategy.IFEXIST,
-                "robot_" + CRAWL_PROFILE_GREEDY_LEARNING_TEXT);
+                "robot_" + CRAWL_PROFILE_GREEDY_LEARNING_TEXT,
+                ClientIdentification.browserAgentName);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultTextSnippetGlobalProfile.handle()),
             this.defaultTextSnippetGlobalProfile);
@@ -414,7 +420,8 @@ public final class CrawlSwitchboard {
                 true,
                 false,
                 CacheStrategy.IFEXIST,
-                "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA);
+                "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA,
+                ClientIdentification.yacyIntranetCrawlerAgentName);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultMediaSnippetLocalProfile.handle()),
             this.defaultMediaSnippetLocalProfile);
@@ -442,7 +449,8 @@ public final class CrawlSwitchboard {
                 true,
                 false,
                 CacheStrategy.IFEXIST,
-                "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA);
+                "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA,
+                ClientIdentification.yacyIntranetCrawlerAgentName);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultMediaSnippetGlobalProfile.handle()),
             this.defaultMediaSnippetGlobalProfile);
@@ -470,7 +478,8 @@ public final class CrawlSwitchboard {
                 false,
                 false,
                 CacheStrategy.NOCACHE,
-                "robot_" + CRAWL_PROFILE_SURROGATE);
+                "robot_" + CRAWL_PROFILE_SURROGATE,
+                ClientIdentification.yacyIntranetCrawlerAgentName);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultSurrogateProfile.handle()),
             this.defaultSurrogateProfile);

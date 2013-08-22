@@ -97,6 +97,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.order.Digest;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -1532,7 +1533,7 @@ public final class HTTPDFileHandler {
 		requestHeader.put("YACYACTION", action);
 
 		final ByteArrayOutputStream o = new ByteArrayOutputStream();
-		HTTPDProxyHandler.doGet(prop, requestHeader, o);
+		HTTPDProxyHandler.doGet(prop, requestHeader, o, ClientIdentification.yacyProxyAgent);
 
 		// reparse header to extract content-length and mimetype
 		final ResponseHeader outgoingHeader = new ResponseHeader(200);

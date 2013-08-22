@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
@@ -212,7 +213,8 @@ public class get_treeview {
 	        } else if (isAutoTagger || isMetadata || isURLdb || isCrawlStart) {
 	        	try {
 	                final YMarkMetadata meta = new YMarkMetadata(new DigestURI(post.get(ROOT).substring(2)), sb.index);
-        			final Document document = meta.loadDocument(sb.loader);
+	                ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+        			final Document document = meta.loadDocument(sb.loader, agent);
         			final TreeMap<String, YMarkTag> tags = sb.tables.bookmarks.getTags(bmk_user);
         			if(isAutoTagger)  {
         				prop.put("folders_"+count+"_foldername","<small><b>meta-"+YMarkMetadata.METADATA.KEYWORDS.name().toLowerCase()+":</b> " + meta.loadMetadata().get(YMarkMetadata.METADATA.KEYWORDS) + "</small>");
