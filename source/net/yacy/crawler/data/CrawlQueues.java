@@ -85,6 +85,7 @@ public class CrawlQueues {
         FileUtils.deletedelete(new File(queuePath, ERROR_DB_FILENAME));
         this.errorURL = new ZURL(sb.index.fulltext(), queuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
         this.delegatedURL = new ZURL(sb.index.fulltext(), queuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
+        try {this.errorURL.clear();} catch (IOException e) {} // start with empty errors each time
     }
 
     public void relocate(final File newQueuePath) {
@@ -97,6 +98,7 @@ public class CrawlQueues {
         FileUtils.deletedelete(new File(newQueuePath, ERROR_DB_FILENAME));
         this.errorURL = new ZURL(this.sb.index.fulltext(), newQueuePath, ERROR_DB_FILENAME, false, this.sb.useTailCache, this.sb.exceed134217727);
         this.delegatedURL = new ZURL(this.sb.index.fulltext(), newQueuePath, DELEGATED_DB_FILENAME, true, this.sb.useTailCache, this.sb.exceed134217727);
+        try {this.errorURL.clear();} catch (IOException e) {} // start with empty errors each time
     }
 
     public synchronized void close() {

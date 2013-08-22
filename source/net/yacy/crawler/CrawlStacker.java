@@ -148,7 +148,7 @@ public final class CrawlStacker {
             final String rejectReason = stackCrawl(entry);
 
             // if the url was rejected we store it into the error URL db
-            if (rejectReason != null) {
+            if (rejectReason != null && !rejectReason.startsWith("double in")) {
                 final CrawlProfile profile = this.crawler.getActive(UTF8.getBytes(entry.profileHandle()));
                 this.nextQueue.errorURL.push(entry, profile, ASCII.getBytes(this.peers.mySeed().hash), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
             }
@@ -436,11 +436,12 @@ public final class CrawlStacker {
                 if (dbocc == null) {
                     return "double in: LURL-DB, oldDate = " + oldDate.toString();
                 }
-                if (this.log.isInfo()) this.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "'. " + "Stack processing time:");
                 if (dbocc == HarvestProcess.ERRORS) {
                     final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
+                    if (this.log.isInfo()) this.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "', previous cause: " + errorEntry.anycause());
                     return "double in: errors (" + errorEntry.anycause() + "), oldDate = " + oldDate.toString();
                 }
+                if (this.log.isInfo()) this.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "'. ");
                 return "double in: " + dbocc.toString() + ", oldDate = " + oldDate.toString();
             }
         }
