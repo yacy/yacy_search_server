@@ -238,7 +238,6 @@ public class URIMetadataRow {
         // (each byte has an 6-bit range)
         // that should be enough for all web pages on the world
         final byte[] h = this.entry.getPrimaryKeyBytes();
-        assert ByteBuffer.equals(h, url().hash());
         return h;
     }
 
