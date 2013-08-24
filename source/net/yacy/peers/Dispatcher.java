@@ -317,7 +317,7 @@ public class Dispatcher {
             }
 
             // put the entry into the cloud
-            if (entry.containersSize() > 0) this.transmissionCloud.put(pTArray, entry);
+            if (this.transmissionCloud != null && entry.containersSize() > 0) this.transmissionCloud.put(pTArray, entry);
         }
     }
 
