@@ -42,6 +42,7 @@ import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.HarvestProcess;
+import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.RSSLoader;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.WorkTables;
@@ -62,7 +63,7 @@ public class Load_RSS_p {
         final Switchboard sb = (Switchboard)env;
 
         final String collection = post == null ? "user" : CommonPattern.SPACE.matcher(post.get("collection", "user").trim()).replaceAll("");
-        final String[] collections = collection.length() == 0 ? new String[0] : collection.split(",");
+        Map<String, Pattern> collections = CrawlProfile.collectionParser(collection);
         boolean collectionEnabled = sb.index.fulltext().getDefaultConfiguration().isEmpty() || sb.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.collection_sxt);
         prop.put("showload_collectionEnabled", collectionEnabled ? 1 : 0);
         prop.put("showload_collection", collection);

@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
+import java.util.regex.Pattern;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -575,7 +576,7 @@ public class Segment {
     public SolrInputDocument storeDocument(
             final DigestURI url,
             final DigestURI referrerURL,
-            final String[] collections,
+            final Map<String, Pattern> collections,
             final ResponseHeader responseHeader,
             final Document document,
             final Condenser condenser,

@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.regex.Pattern;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -114,7 +115,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     
     public void addEdges(
             final Subgraph subgraph,
-            final DigestURI source, final ResponseHeader responseHeader, String[] collections, int clickdepth_source,
+            final DigestURI source, final ResponseHeader responseHeader, Map<String, Pattern> collections, int clickdepth_source,
             final Map<DigestURI, Properties> alllinks, final Map<DigestURI, ImageEntry> images,
             final boolean inbound, final Set<DigestURI> links,
             final IndexCell<CitationReference> citations) {
@@ -146,11 +147,17 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                 add(edge, WebgraphSchema.load_date_dt, loadDate);
             }
             if (allAttr || contains(WebgraphSchema.last_modified)) add(edge, WebgraphSchema.last_modified, responseHeader == null ? new Date() : responseHeader.lastModified());
-            add(edge, WebgraphSchema.collection_sxt, collections);
+            final String source_url_string = source.toNormalform(false);
+            if (allAttr || contains(CollectionSchema.collection_sxt) && collections != null && collections.size() > 0) {
+                List<String> cs = new ArrayList<String>();
+                for (Map.Entry<String, Pattern> e: collections.entrySet()) {
+                    if (e.getValue().matcher(source_url_string).matches()) cs.add(e.getKey());
+                }
+                add(edge, WebgraphSchema.collection_sxt, cs);
+            }
 
             // add the source attributes
             add(edge, WebgraphSchema.source_id_s, source_id);
-            final String source_url_string = source.toNormalform(false);
             int pr_source = source_url_string.indexOf("://",0);
             if (allAttr || contains(WebgraphSchema.source_protocol_s)) add(edge, WebgraphSchema.source_protocol_s, source_url_string.substring(0, pr_source));
             if (allAttr || contains(WebgraphSchema.source_urlstub_s)) add(edge, WebgraphSchema.source_urlstub_s, source_url_string.substring(pr_source + 3));

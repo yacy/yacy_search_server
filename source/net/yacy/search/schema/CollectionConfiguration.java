@@ -42,6 +42,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
@@ -195,7 +196,15 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         return sd;
     }
     
-    public void addURIAttributes(final SolrInputDocument doc, final boolean allAttr, final DigestURI digestURI, final char doctype) {
+    /**
+     * add uri attributes to solr document
+     * @param doc
+     * @param allAttr
+     * @param digestURI
+     * @param doctype
+     * @return the normalized url
+     */
+    public String addURIAttributes(final SolrInputDocument doc, final boolean allAttr, final DigestURI digestURI, final char doctype) {
         add(doc, CollectionSchema.id, ASCII.String(digestURI.hash()));
         String us = digestURI.toNormalform(true);
         add(doc, CollectionSchema.sku, us);
@@ -236,6 +245,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             if (allAttr || contains(CollectionSchema.url_parameter_key_sxt)) add(doc, CollectionSchema.url_parameter_key_sxt, searchpart.keySet().toArray(new String[searchpart.size()]));
             if (allAttr || contains(CollectionSchema.url_parameter_value_sxt)) add(doc, CollectionSchema.url_parameter_value_sxt,  searchpart.values().toArray(new String[searchpart.size()]));
         }
+        return us;
     }
     
     public SolrInputDocument metadata2solr(final URIMetadataRow md) {
@@ -346,7 +356,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     }
     
     public SolrVector yacy2solr(
-            final String id, final String[] collections, final ResponseHeader responseHeader,
+            final String id, final Map<String, Pattern> collections, final ResponseHeader responseHeader,
             final Document document, final Condenser condenser, final DigestURI referrerURL, final String language,
             final IndexCell<CitationReference> citations,
             final WebgraphConfiguration webgraph) {
@@ -354,7 +364,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         SolrVector doc = new SolrVector();
         final DigestURI digestURI = document.dc_source();
         boolean allAttr = this.isEmpty();
-        addURIAttributes(doc, allAttr, digestURI, Response.docType(digestURI));
+        String url = addURIAttributes(doc, allAttr, digestURI, Response.docType(digestURI));
         
         Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
         
@@ -378,7 +388,13 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             processTypes.add(ProcessType.CITATION); // postprocessing needed
         }
         
-        if (allAttr || contains(CollectionSchema.collection_sxt) && collections != null && collections.length > 0) add(doc, CollectionSchema.collection_sxt, collections);
+        if (allAttr || contains(CollectionSchema.collection_sxt) && collections != null && collections.size() > 0) {
+            List<String> cs = new ArrayList<String>();
+            for (Map.Entry<String, Pattern> e: collections.entrySet()) {
+                if (e.getValue().matcher(url).matches()) cs.add(e.getKey());
+            }
+            add(doc, CollectionSchema.collection_sxt, cs);
+        }
         
         List<String> titles = document.titles();
         if (allAttr || contains(CollectionSchema.title)) {
@@ -1166,19 +1182,25 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param httpstatus
      * @throws IOException
      */
-    public SolrInputDocument err(final DigestURI digestURI, final String[] collections, final String failReason, final FailType failType, final int httpstatus) throws IOException {
+    public SolrInputDocument err(final DigestURI digestURI, final Map<String, Pattern> collections, final String failReason, final FailType failType, final int httpstatus) throws IOException {
         boolean allAttr = this.isEmpty();
         assert allAttr || contains(CollectionSchema.failreason_s);
         
         final SolrInputDocument doc = new SolrInputDocument();
-        addURIAttributes(doc, allAttr, digestURI, Response.docType(digestURI));
+        String url = addURIAttributes(doc, allAttr, digestURI, Response.docType(digestURI));
         if (allAttr || contains(CollectionSchema.load_date_dt)) add(doc, CollectionSchema.load_date_dt, new Date());
         
         // fail reason and status
         if (allAttr || contains(CollectionSchema.failreason_s)) add(doc, CollectionSchema.failreason_s, failReason);
         if (allAttr || contains(CollectionSchema.failtype_s)) add(doc, CollectionSchema.failtype_s, failType.name());
         if (allAttr || contains(CollectionSchema.httpstatus_i)) add(doc, CollectionSchema.httpstatus_i, httpstatus);
-        if (allAttr || contains(CollectionSchema.collection_sxt)) add(doc, CollectionSchema.collection_sxt, collections);
+        if (allAttr || contains(CollectionSchema.collection_sxt) && collections != null && collections.size() > 0) {
+            List<String> cs = new ArrayList<String>();
+            for (Map.Entry<String, Pattern> e: collections.entrySet()) {
+                if (e.getValue().matcher(url).matches()) cs.add(e.getKey());
+            }
+            add(doc, CollectionSchema.collection_sxt, cs);
+        }
         return doc;
     }
 

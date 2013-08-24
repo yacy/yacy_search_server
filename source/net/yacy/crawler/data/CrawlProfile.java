@@ -26,7 +26,9 @@
 package net.yacy.crawler.data;
 
 import java.text.DateFormat;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,6 +45,7 @@ import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.search.query.QueryParams;
 import net.yacy.server.serverObjects;
 
 public class CrawlProfile extends ConcurrentHashMap<String, String> implements Map<String, String> {
@@ -259,15 +262,29 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         //if (r == null) return null;
         return r;
     }
+    
+    private Map<String, Pattern> cmap = null;
 
     /**
      * get the collections for this crawl
      * @return a list of collection names
      */
-    public String[] collections() {
+    public Map<String, Pattern> collections() {
+        if (cmap != null) return cmap;
         final String r = get(COLLECTIONS);
-        if (r == null) return new String[0];
-        return r.split(",");
+        this.cmap = collectionParser(r);
+        return this.cmap;
+    }
+    
+    public static Map<String, Pattern> collectionParser(String collectionString) {
+        if (collectionString == null || collectionString.length() == 0) return new HashMap<String, Pattern>();
+        String[] cs = collectionString.split(",");
+        final Map<String, Pattern> cm = new LinkedHashMap<String, Pattern>();
+        for (String c: cs) {
+            int p = c.indexOf(':');
+            if (p < 0) cm.put(c, QueryParams.catchall_pattern); else cm.put(c.substring(0, p), Pattern.compile(c.substring(p + 1)));
+        }
+        return cm;
     }
 
     /**

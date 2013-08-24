@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSFeed;
@@ -58,10 +59,10 @@ public class RSSLoader extends Thread {
 
     private final DigestURI urlf;
     private final Switchboard sb;
-    private final String[] collections;
+    private final Map<String, Pattern> collections;
     private final ClientIdentification.Agent agent;
 
-    public RSSLoader(final Switchboard sb, final DigestURI urlf, final String[] collections, final ClientIdentification.Agent agent) {
+    public RSSLoader(final Switchboard sb, final DigestURI urlf, final Map<String, Pattern> collections, final ClientIdentification.Agent agent) {
         this.sb = sb;
         this.urlf = urlf;
         this.collections = collections;
@@ -93,7 +94,7 @@ public class RSSLoader extends Thread {
         recordAPI(this.sb, null, this.urlf, feed, 7, "seldays");
     }
 
-    public static void indexAllRssFeed(final Switchboard sb, final DigestURI url, final RSSFeed feed, String[] collections) {
+    public static void indexAllRssFeed(final Switchboard sb, final DigestURI url, final RSSFeed feed, Map<String, Pattern> collections) {
         int loadCount = 0;
         List<DigestURI> list = new ArrayList<DigestURI>();
         Map<String, DigestURI> urlmap = new HashMap<String, DigestURI>();

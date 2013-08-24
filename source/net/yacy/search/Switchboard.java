@@ -2685,7 +2685,7 @@ public final class Switchboard extends serverSwitch {
 
     private void storeDocumentIndex(
         final Response queueEntry,
-        final String[] collections,
+        final Map<String, Pattern> collections,
         final Document document,
         final Condenser condenser,
         final SearchEvent searchEvent,
@@ -2808,7 +2808,7 @@ public final class Switchboard extends serverSwitch {
         final Map<DigestURI, String> links,
         final SearchEvent searchEvent,
         final String heuristicName,
-        final String[] collections) {
+        final Map<String, Pattern> collections) {
 
         List<DigestURI> urls = new ArrayList<DigestURI>();
         // add the landing page to the index. should not load that again since it should be in the cache
@@ -2978,7 +2978,7 @@ public final class Switchboard extends serverSwitch {
      * @throws IOException
      * @throws Parser.Failure
      */
-    public void addToIndex(final Collection<DigestURI> urls, final SearchEvent searchEvent, final String heuristicName, final String[] collections) {
+    public void addToIndex(final Collection<DigestURI> urls, final SearchEvent searchEvent, final String heuristicName, final Map<String, Pattern> collections) {
         Map<String, DigestURI> urlmap = new HashMap<String, DigestURI>();
         for (DigestURI url: urls) urlmap.put(ASCII.String(url.hash()), url);
         if (searchEvent != null) {
@@ -3421,7 +3421,7 @@ public final class Switchboard extends serverSwitch {
                         }
 
                         // add all pages to the index
-                        addAllToIndex(url, links, searchEvent, "site", new String[]{"site"});
+                        addAllToIndex(url, links, searchEvent, "site", CrawlProfile.collectionParser("site"));
                     }
                 } catch (final Throwable e ) {
                     ConcurrentLog.logException(e);
@@ -3535,7 +3535,7 @@ public final class Switchboard extends serverSwitch {
                             + feedName
                             + "' rss feed");
                         // add all pages to the index
-                        addAllToIndex(null, links, searchEvent, feedName, new String[]{"rss"});
+                        addAllToIndex(null, links, searchEvent, feedName, CrawlProfile.collectionParser("rss"));
                     }
                 } catch (final Throwable e ) {
                     //Log.logException(e);
