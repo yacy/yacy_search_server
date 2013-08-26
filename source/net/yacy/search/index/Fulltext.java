@@ -85,8 +85,8 @@ import org.apache.solr.core.CoreContainer;
 
 public final class Fulltext {
 
-    private static final String SOLR_PATH = "solr_40"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
-    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36"};
+    private static final String SOLR_PATH = "solr_44"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
+    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40"};
     
     // class objects
 	private final File                    segmentPath;
