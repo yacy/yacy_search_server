@@ -288,7 +288,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     
     public Collection<FieldInfo> getFields() throws SolrServerException {
         // get all fields contained in index
-        return getIndexBrowser(true).getFieldInfo().values();
+        return getIndexBrowser(false).getFieldInfo().values();
     }
     
     private LukeResponse getIndexBrowser(final boolean showSchema) throws SolrServerException {
