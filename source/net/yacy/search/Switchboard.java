@@ -437,8 +437,8 @@ public final class Switchboard extends serverSwitch {
                     CollectionSchema.host_s, CollectionSchema.load_date_dt,
                     CollectionSchema.url_file_ext_s, CollectionSchema.last_modified,                      // needed for media search and /date operator
                     /*YaCySchema.url_paths_sxt,*/ CollectionSchema.host_organization_s,                   // needed to search in the url
-                    /*YaCySchema.inboundlinks_protocol_sxt,*/ CollectionSchema.inboundlinks_urlstub_txt,  // needed for HostBrowser
-                    /*YaCySchema.outboundlinks_protocol_sxt,*/ CollectionSchema.outboundlinks_urlstub_txt,// needed to enhance the crawler
+                    /*YaCySchema.inboundlinks_protocol_sxt,*/ CollectionSchema.inboundlinks_urlstub_sxt,  // needed for HostBrowser
+                    /*YaCySchema.outboundlinks_protocol_sxt,*/ CollectionSchema.outboundlinks_urlstub_sxt,// needed to enhance the crawler
                     CollectionSchema.httpstatus_i                                                         // used in all search queries to filter out error documents
                 }) {
                 SchemaConfiguration.Entry entry = solrCollectionConfigurationWork.get(field.name()); entry.setEnable(true); solrCollectionConfigurationWork.put(field.name(), entry);

@@ -284,7 +284,7 @@ public class URIMetadataNode {
     }
 
     public static Iterator<String> getLinks(SolrDocument doc, boolean inbound) {
-        Collection<Object> urlstub = doc.getFieldValues((inbound ? CollectionSchema.inboundlinks_urlstub_txt :  CollectionSchema.outboundlinks_urlstub_txt).getSolrFieldName());
+        Collection<Object> urlstub = doc.getFieldValues((inbound ? CollectionSchema.inboundlinks_urlstub_sxt :  CollectionSchema.outboundlinks_urlstub_sxt).getSolrFieldName());
         Collection<String> urlprot = urlstub == null ? null : indexedList2protocolList(doc.getFieldValues((inbound ? CollectionSchema.inboundlinks_protocol_sxt : CollectionSchema.outboundlinks_protocol_sxt).getSolrFieldName()), urlstub.size());
         String u;
         LinkedHashSet<String> list = new LinkedHashSet<String>();

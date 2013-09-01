@@ -231,13 +231,13 @@ h6_txt
 inboundlinks_protocol_sxt
 
 ## internal links, the url only without the protocol
-inboundlinks_urlstub_txt
+inboundlinks_urlstub_sxt
 
 ## external links, only the protocol
 outboundlinks_protocol_sxt
 
 ## external links, the url only without the protocol
-outboundlinks_urlstub_txt
+outboundlinks_urlstub_sxt
 
 ## all text/words appearing in image alt texts or the tokenized url
 images_text_t

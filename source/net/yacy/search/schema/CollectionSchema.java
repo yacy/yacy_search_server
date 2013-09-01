@@ -116,9 +116,9 @@ public enum CollectionSchema implements SchemaDeclaration {
     robots_i(SolrType.num_integer, true, true, false, false, false, "content of <meta name=\"robots\" content=#content#> tag and the \"X-Robots-Tag\" HTTP property"),
     metagenerator_t(SolrType.text_general, true, true, false, false, false, "content of <meta name=\"generator\" content=#content#> tag"),
     inboundlinks_protocol_sxt(SolrType.string, true, true, true, false, false, "internal links, only the protocol"),
-    inboundlinks_urlstub_txt(SolrType.text_general, true, true, true, false, false, "internal links, the url only without the protocol"),
+    inboundlinks_urlstub_sxt(SolrType.string, true, true, true, false, false, "internal links, the url only without the protocol"),
     outboundlinks_protocol_sxt(SolrType.string, true, true, true, false, false, "external links, only the protocol"),
-    outboundlinks_urlstub_txt(SolrType.text_general, true, true, true, false, false, "external links, the url only without the protocol"),
+    outboundlinks_urlstub_sxt(SolrType.string, true, true, true, false, false, "external links, the url only without the protocol"),
     
     images_text_t(SolrType.text_general, true, true, false, false, true, "all text/words appearing in image alt texts or the tokenized url"),
     images_urlstub_sxt(SolrType.string, true, true, true, false, true, "all image links without the protocol and '://'"),

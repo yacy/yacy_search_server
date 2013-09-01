@@ -470,7 +470,7 @@ public final class QueryParams {
         }
         
         if (this.inlink != null) {
-            fq.append(" AND ").append(CollectionSchema.outboundlinks_urlstub_txt.getSolrFieldName()).append(":\"").append(this.inlink).append('\"');
+            fq.append(" AND ").append(CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName()).append(":\"").append(this.inlink).append('\"');
         }
         
         if (!this.urlMask_isCatchall) {
