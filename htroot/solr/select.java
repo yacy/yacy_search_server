@@ -58,6 +58,7 @@ import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestInfo;
+import org.apache.solr.response.BinaryResponseWriter;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
@@ -228,15 +229,25 @@ public class select {
         }
 
         // write the result directly to the output stream
-        Writer ow = new FastWriter(new OutputStreamWriter(out, UTF8.charset));
-        try {
-            responseWriter.write(ow, req, response);
-            ow.flush();
-        } catch (final IOException e1) {
-        } finally {
-            req.close();
-            SolrRequestInfo.clearRequestInfo();
-            try {ow.close();} catch (final IOException e1) {}
+        if (responseWriter instanceof BinaryResponseWriter) {
+            try {
+                ((BinaryResponseWriter) responseWriter).write(out, req, response);
+            } catch (final IOException e1) {
+            } finally {
+                req.close();
+                SolrRequestInfo.clearRequestInfo();
+            }
+        } else {
+            Writer ow = new FastWriter(new OutputStreamWriter(out, UTF8.charset));
+            try {
+                responseWriter.write(ow, req, response);
+                ow.flush();
+            } catch (final IOException e1) {
+            } finally {
+                req.close();
+                SolrRequestInfo.clearRequestInfo();
+                try {ow.close();} catch (final IOException e1) {}
+            }
         }
 
         // log result
