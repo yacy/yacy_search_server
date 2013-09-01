@@ -252,12 +252,12 @@ public class select {
 
         // log result
         Object rv = response.getValues().get("response");
-        int matches = ((ResultContext) rv).docs.matches();
         if (rv != null && rv instanceof ResultContext) {
+            int matches = ((ResultContext) rv).docs.matches();
             AccessTracker.addToDump(q, Integer.toString(matches));
+            ConcurrentLog.info("SOLR Query", "results: " + matches + ", for query:" + post.toString());
         }
 
-        ConcurrentLog.info("SOLR Query", "results: " + matches + ", for query:" + post.toString());
         return null;
     }
 }
