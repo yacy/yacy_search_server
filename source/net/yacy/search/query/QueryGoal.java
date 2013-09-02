@@ -240,8 +240,9 @@ public class QueryGoal {
         final StringBuilder q = new StringBuilder(80);
 
         // add filter to prevent that results come from failed urls
-        q.append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200").append(" AND ");
-        q.append(CollectionSchema.images_urlstub_sxt.getSolrFieldName()).append(":[* TO *]").append(" AND (");
+        q.append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200").append(" AND (");
+        q.append(CollectionSchema.images_urlstub_sxt.getSolrFieldName()).append(":[* TO *] OR ");
+        q.append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":(jpg OR png OR gif)) AND (");
         
         // parse special requests
         if (include_strings.size() == 1 && exclude_strings.size() == 0) {
