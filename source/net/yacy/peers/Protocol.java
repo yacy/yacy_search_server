@@ -69,6 +69,7 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.federate.opensearch.SRURSSConnector;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
@@ -1017,14 +1018,17 @@ public final class Protocol {
         solrQuery.setRows(count);
         
         // set highlighting query attributes
-        solrQuery.setHighlight(true);
-        solrQuery.setHighlightFragsize(SearchEvent.SNIPPET_MAX_LENGTH);
-        //solrQuery.setHighlightRequireFieldMatch();
-        solrQuery.setHighlightSimplePost("</b>");
-        solrQuery.setHighlightSimplePre("<b>");
-        solrQuery.setHighlightSnippets(1);
-        for (CollectionSchema field: snippetFields) solrQuery.addHighlightField(field.getSolrFieldName());
-        
+        if (event.query.contentdom == Classification.ContentDomain.TEXT || event.query.contentdom == Classification.ContentDomain.ALL) {
+            solrQuery.setHighlight(true);
+            solrQuery.setHighlightFragsize(SearchEvent.SNIPPET_MAX_LENGTH);
+            //solrQuery.setHighlightRequireFieldMatch();
+            solrQuery.setHighlightSimplePost("</b>");
+            solrQuery.setHighlightSimplePre("<b>");
+            solrQuery.setHighlightSnippets(1);
+            for (CollectionSchema field: snippetFields) solrQuery.addHighlightField(field.getSolrFieldName());
+        } else {
+            solrQuery.setHighlight(false);
+        }
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
         if (localsearch &&  Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
             target = event.peers.mySeed();

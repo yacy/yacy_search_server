@@ -277,32 +277,32 @@ public class yacysearchitem {
             // image search; shows thumbnails
 
             prop.put("content", theSearch.query.contentdom.getCode() + 1); // switch on specific content
-            //final MediaSnippet ms = theSearch.result().oneImage(item);
-            final ResultEntry ms = theSearch.oneResult(item, timeout);
-            if (ms == null) {
-                prop.put("content_item", "0");
-            } else {
-                final String resultUrlstring = ms.url().toNormalform(true);
-                final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
+            SearchEvent.ImageResult image = null;
+            try {
+                image = theSearch.oneImageResult(item, timeout);
+                final String imageUrlstring = image.imageUrl.toNormalform(true);
+                final String target = sb.getConfig(imageUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
 
-                final String license = URLLicense.aquireLicense(ms.url());
-                sb.loader.loadIfNotExistBackground(ms.url(), 1024 * 1024 * 10, null, ClientIdentification.yacyIntranetCrawlerAgent);
-                prop.putHTML("content_item_hrefCache", (auth) ? "/ViewImage.png?url=" + resultUrlstring : resultUrlstring);
-                prop.putHTML("content_item_href", resultUrlstring);
+                final String license = URLLicense.aquireLicense(image.imageUrl);
+                sb.loader.loadIfNotExistBackground(image.imageUrl, 1024 * 1024 * 10, null, ClientIdentification.yacyIntranetCrawlerAgent);
+                prop.putHTML("content_item_hrefCache", (auth) ? "/ViewImage.png?url=" + imageUrlstring : imageUrlstring);
+                prop.putHTML("content_item_href", imageUrlstring);
                 prop.putHTML("content_item_target", target);
                 prop.put("content_item_code", license);
-                prop.putHTML("content_item_name", shorten(ms.title(), MAX_NAME_LENGTH));
-                prop.put("content_item_mimetype", "");
+                prop.putHTML("content_item_name", shorten(image.imagetext, MAX_NAME_LENGTH));
+                prop.put("content_item_mimetype", image.mimetype);
                 prop.put("content_item_fileSize", 0);
-                prop.put("content_item_width", 0);
-                prop.put("content_item_height", 0);
+                prop.put("content_item_width", image.width);
+                prop.put("content_item_height", image.height);
                 prop.put("content_item_attr", ""/*(ms.attr.equals("-1 x -1")) ? "" : "(" + ms.attr + ")"*/); // attributes, here: original size of image
-                prop.put("content_item_urlhash", ASCII.String(ms.url().hash()));
-                prop.put("content_item_source", ms.url().toNormalform(true));
-                prop.putXML("content_item_source-xml", ms.url().toNormalform(true));
-                prop.put("content_item_sourcedom", ms.url().getHost());
+                prop.put("content_item_urlhash", ASCII.String(image.imageUrl.hash()));
+                prop.put("content_item_source", image.sourceUrl.toNormalform(true));
+                prop.putXML("content_item_source-xml", image.sourceUrl.toNormalform(true));
+                prop.put("content_item_sourcedom", image.sourceUrl.getHost());
                 prop.put("content_item_nl", (item == theSearch.query.offset) ? 0 : 1);
                 prop.put("content_item", 1);
+            } catch (MalformedURLException e) {
+                prop.put("content_item", "0");
             }
             theSearch.query.transmitcount = item + 1;
             return prop;

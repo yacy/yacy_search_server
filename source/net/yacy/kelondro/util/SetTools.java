@@ -559,6 +559,13 @@ public final class SetTools {
         return sb.toString();
     }
 
+    public static Object nth(Collection<?> c, int n) {
+        if (c == null || c.size() <= n) return null;
+        int i = 0;
+        for (Object o: c) if (i++ == n) return o;
+        return null;
+    }
+    
     // ------------------------------------------------------------------------------------------------
 
 

@@ -26,11 +26,13 @@
 
 package net.yacy.search.query;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -66,6 +68,7 @@ import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -77,6 +80,7 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.RemoteSearch;
 import net.yacy.peers.SeedDB;
 import net.yacy.peers.graphics.ProfilingGraph;
@@ -278,7 +282,7 @@ public final class SearchEvent {
 
         // start a local solr search
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-            this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(true), 0, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
+            this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, true), 0, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
         }
         this.localsolroffset = this.query.itemsPerPage;
         
@@ -1322,7 +1326,6 @@ public final class SearchEvent {
         return new ResultEntry(page, this.query.getSegment(), this.peers, null, null, 0); // result without snippet
     }
     
-    
     public ResultEntry oneResult(final int item, final long timeout) {        
         // check if we already retrieved this item
         // (happens if a search pages is accessed a second time)
@@ -1337,7 +1340,7 @@ public final class SearchEvent {
             int nextitems = item - this.localsolroffset + this.query.itemsPerPage; // example: suddenly switch to item 60, just 10 had been shown, 20 loaded.
             if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (final InterruptedException e) {}}
             if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-                this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.localsolroffset == 0), this.localsolroffset, nextitems, null /*this peer*/, Switchboard.urlBlacklist);
+                this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, this.localsolroffset == 0), this.localsolroffset, nextitems, null /*this peer*/, Switchboard.urlBlacklist);
             }
             this.localsolroffset += nextitems;
         }
@@ -1358,7 +1361,7 @@ public final class SearchEvent {
             if (this.localsolrsearch == null || !this.localsolrsearch.isAlive() && this.local_solr_stored.get() > this.localsolroffset && (item + 1) % this.query.itemsPerPage == 0) {
                 // at the end of a list, trigger a next solr search
                 if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-                    this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.localsolroffset == 0), this.localsolroffset, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
+                    this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, this.localsolroffset == 0), this.localsolroffset, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
                 }
                 this.localsolroffset += this.query.itemsPerPage;
             }
@@ -1370,6 +1373,81 @@ public final class SearchEvent {
         return null;
     }
 
+    private LinkedHashMap<String, ImageResult> imageViewed = new LinkedHashMap<String, ImageResult>();
+    private LinkedHashMap<String, ImageResult> imageSpare = new LinkedHashMap<String, ImageResult>();
+    private ImageResult nthImage(int item) {
+        Object o = SetTools.nth(this.imageViewed.values(), item);
+        if (o == null) return null;
+        return (ImageResult) o;
+    }
+    private ImageResult nextSpare() {
+        Map.Entry<String, ImageResult> next = imageSpare.entrySet().iterator().next();
+        imageViewed.put(next.getKey(), next.getValue());
+        imageSpare.remove(next.getKey());
+        return next.getValue();
+    }
+    
+    public ImageResult oneImageResult(final int item, final long timeout) throws MalformedURLException {
+        if (item < imageViewed.size()) return nthImage(item);
+        if (imageSpare.size() > 0) return nextSpare();
+        
+        ResultEntry ms = oneResult(item, timeout);
+        // check if the match was made in the url or in the image links
+        if (ms == null) throw new MalformedURLException("nUll");
+        int height = 0, width = 0, fileSize = 0;
+        SolrDocument doc = ms.getNode().getDocument();
+        Collection<Object> alt = doc.getFieldValues(CollectionSchema.images_alt_txt.getSolrFieldName());
+        Collection<Object> img = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
+        Collection<Object> prt = doc.getFieldValues(CollectionSchema.images_protocol_sxt.getSolrFieldName());
+        if (img != null) {
+            int c = 0;
+            for (Object i: img) {
+                String a = alt != null && alt.size() > c ? (String) SetTools.nth(alt, c) : "";
+                if (query.getQueryGoal().matches((String) i) || query.getQueryGoal().matches(a)) {
+                    try {
+                        DigestURI imageUrl = new DigestURI((prt != null && prt.size() > c ? SetTools.nth(prt, c) : "http") + "://" + i);
+                        Object heightO = SetTools.nth(doc.getFieldValues(CollectionSchema.images_height_val.getSolrFieldName()), c);
+                        Object widthO = SetTools.nth(doc.getFieldValues(CollectionSchema.images_width_val.getSolrFieldName()), c);
+                        if (heightO != null) height = (Integer) heightO;
+                        if (widthO != null) width = (Integer) widthO;
+                        String id = ASCII.String(imageUrl.hash());
+                        if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), imageUrl, "", a, width, height, fileSize));
+                    } catch (MalformedURLException e) {
+                        continue;
+                    }
+                }
+                c++;
+            }
+        }
+        if (MultiProtocolURI.isImage(MultiProtocolURI.getFileExtension(ms.url().getFileName()))) {
+            String id = ASCII.String(ms.hash());
+            if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), ms.url(), "", ms.title(), width, height, fileSize));
+        }
+        if (img != null && img.size() > 0) {
+            DigestURI imageUrl = new DigestURI((prt != null && prt.size() > 0 ? SetTools.nth(prt, 0) : "http") + "://" + SetTools.nth(img, 0));
+            String imagetext =  alt != null && alt.size() > 0 ? (String) SetTools.nth(alt, 0) : "";
+            String id = ASCII.String(imageUrl.hash());
+            if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), imageUrl, "", imagetext, width, height, fileSize));
+        }
+        if (imageSpare.size() > 0) return nextSpare();
+        throw new MalformedURLException("no image url found");
+    }
+
+    public class ImageResult {
+        public DigestURI imageUrl, sourceUrl;
+        public String mimetype = "", imagetext = "";
+        public int width = 0, height = 0, fileSize = 0;
+        public ImageResult(DigestURI sourceUrl, DigestURI imageUrl, String mimetype, String imagetext, int width, int height, int fileSize) {
+            this.sourceUrl = sourceUrl;
+            this.imageUrl = imageUrl;
+            this.mimetype = mimetype;
+            this.imagetext = imagetext;
+            this.width = width;
+            this.height = height;
+            this.fileSize = fileSize;
+        }
+    }
+    
     public ArrayList<WeakPriorityBlockingQueue.Element<ResultEntry>> completeResults(final long waitingtime) {
         final long timeout = waitingtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + waitingtime;
         int i = 0;

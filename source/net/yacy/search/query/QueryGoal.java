@@ -179,6 +179,14 @@ public class QueryGoal {
         return exclude_strings;
     }
     
+    public boolean matches(String text) {
+        if (text == null || text.length() == 0) return false;
+        String t = text.toLowerCase();
+        for (String i: this.include_strings) if (t.indexOf(i.toLowerCase()) < 0) return false;
+        for (String e: this.exclude_strings) if (t.indexOf(e.toLowerCase()) >= 0) return false;
+        return true;
+    }
+    
     public ArrayList<String> getAllStrings() {
         return all_strings;
     }
@@ -189,30 +197,22 @@ public class QueryGoal {
         final HandleSet blues = Word.words2hashesHandles(blueList);
         for (final byte[] b: blues) this.include_hashes.remove(b);
     }
-    
-    public StringBuilder collectionQueryString(CollectionConfiguration configuration, int rankingProfile) {
+
+    public StringBuilder collectionTextQueryString(CollectionConfiguration configuration, int rankingProfile) {
         final StringBuilder q = new StringBuilder(80);
 
+        // add filter to prevent that results come from failed urls
+        q.append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200").append(" AND (");
+        
         // parse special requests
         if (include_strings.size() == 1 && exclude_strings.size() == 0) {
             String w = include_strings.get(0);
             if (Segment.catchallString.equals(w)) return new StringBuilder(AbstractSolrConnector.CATCHALL_TERM);
         }
         
-        // add text query
+        // add goal query
         int wc = 0;
-        StringBuilder w = new StringBuilder(80);
-        for (String s: include_strings) {
-            if (wc > 0) w.append(" AND ");
-            w.append(dq).append(s).append(dq);
-            wc++;
-        }
-        for (String s: exclude_strings){
-            if (wc > 0) w.append(" AND -");
-            w.append(dq).append(s).append(dq);
-            wc++;
-        }
-        if (wc > 1) {w.insert(0, '('); w.append(')');}
+        StringBuilder w = getGoalQuery();
         
         // combine these queries for all relevant fields
         wc = 0;
@@ -231,14 +231,52 @@ public class QueryGoal {
             q.append(')');
             wc++;
         }
-        q.insert(0, '(');
         q.append(')');
 
+        return q;
+    }
+    
+    public StringBuilder collectionImageQueryString() {
+        final StringBuilder q = new StringBuilder(80);
+
         // add filter to prevent that results come from failed urls
-        q.append(" AND ").append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200");
-        //q.append(" AND -").append(YaCySchema.failreason_s.getSolrFieldName()).append(":[* TO *]");
+        q.append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200").append(" AND ");
+        q.append(CollectionSchema.images_urlstub_sxt.getSolrFieldName()).append(":[* TO *]").append(" AND (");
+        
+        // parse special requests
+        if (include_strings.size() == 1 && exclude_strings.size() == 0) {
+            String w = include_strings.get(0);
+            if (Segment.catchallString.equals(w)) return new StringBuilder(AbstractSolrConnector.CATCHALL_TERM);
+        }
+        
+        // add goal query
+        StringBuilder w = getGoalQuery();
+        
+        // combine these queries for all relevant fields
+        q.append('(').append(CollectionSchema.images_alt_txt.getSolrFieldName()).append(':').append(w).append("^20.0) OR ");
+        q.append('(').append(CollectionSchema.images_text_t.getSolrFieldName()).append(':').append(w).append("^10.0) OR ");
+        q.append('(').append(CollectionSchema.text_t.getSolrFieldName()).append(':').append(w).append(')');
+        
+        q.append(')');
 
         return q;
+    }
+    
+    private StringBuilder getGoalQuery() {
+        int wc = 0;
+        StringBuilder w = new StringBuilder(80);
+        for (String s: include_strings) {
+            if (wc > 0) w.append(" AND ");
+            w.append(dq).append(s).append(dq);
+            wc++;
+        }
+        for (String s: exclude_strings){
+            if (wc > 0) w.append(" AND -");
+            w.append(dq).append(s).append(dq);
+            wc++;
+        }
+        if (wc > 1) {w.insert(0, '('); w.append(')');}
+        return w;
     }
 
 }

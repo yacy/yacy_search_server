@@ -122,6 +122,9 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         ResultEntry other = (ResultEntry) obj;
         return Base64Order.enhancedCoder.equal(this.urlentry.hash(), other.urlentry.hash());
     }
+    public URIMetadataNode getNode() {
+        return this.urlentry;
+    }
     public byte[] hash() {
         return this.urlentry.hash();
     }

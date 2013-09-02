@@ -168,7 +168,7 @@ public class select {
             querystring = modifier.parse(querystring);
             modifier.apply(post);
             QueryGoal qg = new QueryGoal(querystring, querystring);
-            StringBuilder solrQ = qg.collectionQueryString(sb.index.fulltext().getDefaultConfiguration(), profileNr);
+            StringBuilder solrQ = qg.collectionTextQueryString(sb.index.fulltext().getDefaultConfiguration(), profileNr);
             post.put(CommonParams.Q, solrQ.toString()); // sru patch
         }
         String q = post.get(CommonParams.Q, "");
