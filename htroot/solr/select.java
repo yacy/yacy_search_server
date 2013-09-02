@@ -51,6 +51,7 @@ import net.yacy.search.schema.WebgraphSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
@@ -252,11 +253,14 @@ public class select {
 
         // log result
         Object rv = response.getValues().get("response");
+        int matches = 0;
         if (rv != null && rv instanceof ResultContext) {
-            int matches = ((ResultContext) rv).docs.matches();
-            AccessTracker.addToDump(q, Integer.toString(matches));
-            ConcurrentLog.info("SOLR Query", "results: " + matches + ", for query:" + post.toString());
+            matches = ((ResultContext) rv).docs.matches();
+        } else if (rv != null && rv instanceof SolrDocumentList) {
+            matches = (int) ((SolrDocumentList) rv).getNumFound();
         }
+        AccessTracker.addToDump(q, Integer.toString(matches));
+        ConcurrentLog.info("SOLR Query", "results: " + matches + ", for query:" + post.toString());
 
         return null;
     }

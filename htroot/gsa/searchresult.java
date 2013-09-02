@@ -41,6 +41,7 @@ import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.request.SolrQueryRequest;
@@ -220,9 +221,15 @@ public class searchresult {
 
         // log result
         Object rv = response.getValues().get("response");
+        int matches = 0;
         if (rv != null && rv instanceof ResultContext) {
-            AccessTracker.addToDump(originalQuery, Integer.toString(((ResultContext) rv).docs.matches()));
+            matches = ((ResultContext) rv).docs.matches();
+        } else if (rv != null && rv instanceof SolrDocumentList) {
+            matches = (int) ((SolrDocumentList) rv).getNumFound();
         }
+        AccessTracker.addToDump(originalQuery, Integer.toString(matches));
+        ConcurrentLog.info("GSA Query", "results: " + matches + ", for query:" + post.toString());
+        
         return null;
     }
 }
