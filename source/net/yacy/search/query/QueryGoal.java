@@ -50,18 +50,16 @@ public class QueryGoal {
     
     private String query_original;
     private HandleSet include_hashes, exclude_hashes;
-    private final ArrayList<String> include_words, exclude_words, all_words;
-    private final ArrayList<String> include_strings, exclude_strings, all_strings;
+    private final ArrayList<String> include_words, exclude_words;
+    private final ArrayList<String> include_strings, exclude_strings;
 
 
     public QueryGoal(HandleSet include_hashes, HandleSet exclude_hashes) {
         this.query_original = null;
         this.include_words = new ArrayList<String>();
         this.exclude_words = new ArrayList<String>();
-        this.all_words = new ArrayList<String>();
         this.include_strings = new ArrayList<String>();
         this.exclude_strings = new ArrayList<String>();
-        this.all_strings = new ArrayList<String>();
         this.include_hashes = include_hashes;
         this.exclude_hashes = exclude_hashes;
     }
@@ -72,10 +70,8 @@ public class QueryGoal {
         this.query_original = query_original;
         this.include_words = new ArrayList<String>();
         this.exclude_words = new ArrayList<String>();
-        this.all_words = new ArrayList<String>();
         this.include_strings = new ArrayList<String>();
         this.exclude_strings = new ArrayList<String>();
-        this.all_strings = new ArrayList<String>();
 
         // remove funny symbols
         query_words = CharacterCoding.html2unicode(AbstractScraper.stripAllTags(query_words.toCharArray())).toLowerCase().trim();
@@ -87,11 +83,11 @@ public class QueryGoal {
         }
 
         // parse first quoted strings
-        parseQuery(query_words, this.include_strings, this.exclude_strings, this.all_strings);
-
+        parseQuery(query_words, this.include_strings, this.exclude_strings);
+        
         // .. end then take these strings apart to generate word lists
-        for (String s: this.include_strings) parseQuery(s, this.include_words, this.include_words, this.all_words);
-        for (String s: this.exclude_strings) parseQuery(s, this.exclude_words, this.exclude_words, this.all_words);
+        for (String s: this.include_strings) parseQuery(s, this.include_words, this.include_words);
+        for (String s: this.exclude_strings) parseQuery(s, this.exclude_words, this.exclude_words);
 
         WordCache.learn(this.include_strings);
         WordCache.learn(this.exclude_strings);
@@ -112,7 +108,7 @@ public class QueryGoal {
  * sq         = '\''
  * dq         = '"'
  */
-    private static void parseQuery(String s, ArrayList<String> include_string, ArrayList<String> exclude_string, ArrayList<String> all_string) {
+    private static void parseQuery(String s, ArrayList<String> include_string, ArrayList<String> exclude_string) {
         while (s.length() > 0) {
             // parse query
             int p = 0;
@@ -136,7 +132,6 @@ public class QueryGoal {
             p++; // go behind the stop character (eats up space, sq and dq)
             s = p < s.length() ? s.substring(p) : "";
             if (string.length() > 0) {
-                if (!all_string.contains(string)) all_string.add(string);
                 if (inc) {
                     if (!include_string.contains(string)) include_string.add(string);
                 } else {
@@ -186,11 +181,7 @@ public class QueryGoal {
         for (String e: this.exclude_strings) if (t.indexOf(e.toLowerCase()) >= 0) return false;
         return true;
     }
-    
-    public ArrayList<String> getAllStrings() {
-        return all_strings;
-    }
-    
+       
     public void filterOut(final SortedSet<String> blueList) {
         // filter out words that appear in this set
         // this is applied to the queryHashes
