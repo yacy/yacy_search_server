@@ -609,7 +609,7 @@ public class IndexControlRWIs_p {
         final Bitfield filter) {
         
         final HandleSet queryhashes = QueryParams.hashes2Set(ASCII.String(keyhash));        
-        final QueryGoal qg = new QueryGoal(queryhashes, null, queryhashes);
+        final QueryGoal qg = new QueryGoal(queryhashes, null);
         final QueryParams query = new QueryParams(
                 qg,
                 new QueryModifier(),

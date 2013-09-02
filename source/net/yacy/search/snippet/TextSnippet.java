@@ -382,7 +382,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
      * @return line with marked words
      */
     public String getLineMarked(final QueryGoal queryGoal) {
-        final HandleSet queryHashes = queryGoal.getAllHashes();
+        final HandleSet queryHashes = queryGoal.getIncludeHashes();
         if (this.line == null) {
             return "";
         }

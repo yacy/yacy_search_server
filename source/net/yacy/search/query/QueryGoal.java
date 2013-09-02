@@ -49,12 +49,12 @@ public class QueryGoal {
     private static String seps = ".,/&_";
     
     private String query_original;
-    private HandleSet include_hashes, exclude_hashes, all_hashes;
+    private HandleSet include_hashes, exclude_hashes;
     private final ArrayList<String> include_words, exclude_words, all_words;
     private final ArrayList<String> include_strings, exclude_strings, all_strings;
 
 
-    public QueryGoal(HandleSet include_hashes, HandleSet exclude_hashes, HandleSet all_hashes) {
+    public QueryGoal(HandleSet include_hashes, HandleSet exclude_hashes) {
         this.query_original = null;
         this.include_words = new ArrayList<String>();
         this.exclude_words = new ArrayList<String>();
@@ -64,7 +64,6 @@ public class QueryGoal {
         this.all_strings = new ArrayList<String>();
         this.include_hashes = include_hashes;
         this.exclude_hashes = exclude_hashes;
-        this.all_hashes = all_hashes;
     }
     
     public QueryGoal(String query_original, String query_words) {
@@ -99,7 +98,6 @@ public class QueryGoal {
         
         this.include_hashes = null;
         this.exclude_hashes = null;
-        this.all_hashes = null;
     }
 
     
@@ -172,12 +170,7 @@ public class QueryGoal {
         if (exclude_hashes == null) exclude_hashes = Word.words2hashesHandles(exclude_words);
         return exclude_hashes;
     }
-
-    public HandleSet getAllHashes() {
-        if (all_hashes == null) all_hashes = Word.words2hashesHandles(all_words);
-        return all_hashes;
-    }
-    
+   
     public ArrayList<String> getIncludeStrings() {
         return include_strings;
     }

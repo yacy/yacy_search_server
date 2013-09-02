@@ -222,7 +222,7 @@ public final class search {
         if (query.isEmpty() && abstractSet != null) {
             // this is _not_ a normal search, only a request for index abstracts
             final Segment indexSegment = sb.index;
-            QueryGoal qg = new QueryGoal(abstractSet, new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0), abstractSet);
+            QueryGoal qg = new QueryGoal(abstractSet, new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0));
             theQuery = new QueryParams(
                     qg,
                     modifier,
@@ -286,7 +286,7 @@ public final class search {
             RowHandleSet allHashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             try {allHashes.putAll(queryhashes);} catch (final SpaceExceededException e) {}
             try {allHashes.putAll(excludehashes);} catch (final SpaceExceededException e) {}
-            QueryGoal qg = new QueryGoal(queryhashes, excludehashes, allHashes);
+            QueryGoal qg = new QueryGoal(queryhashes, excludehashes);
             theQuery = new QueryParams(
                     qg,
                     modifier,
