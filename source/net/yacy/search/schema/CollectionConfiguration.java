@@ -443,20 +443,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, new String[]{document.dc_format()});
         if (allAttr || contains(CollectionSchema.last_modified)) add(doc, CollectionSchema.last_modified, responseHeader == null ? new Date() : responseHeader.lastModified());
         if (allAttr || contains(CollectionSchema.keywords)) add(doc, CollectionSchema.keywords, document.dc_subject(' '));
-        String content = document.getTextString();
-        if (content == null || content.length() == 0) {
-            content = digestURI.toTokens();
-        }
-        if (allAttr || contains(CollectionSchema.text_t)) add(doc, CollectionSchema.text_t, content);
-        if (allAttr || contains(CollectionSchema.wordcount_i)) {
-            if (content.length() == 0) {
-                add(doc, CollectionSchema.wordcount_i, 0);
-            } else {
-                int contentwc = 1;
-                for (int i = content.length() - 1; i >= 0; i--) if (content.charAt(i) == ' ') contentwc++;
-                add(doc, CollectionSchema.wordcount_i, contentwc);
-            }
-        }
         if (allAttr || contains(CollectionSchema.synonyms_sxt)) {
             List<String> synonyms = condenser.synonyms();
             add(doc, CollectionSchema.synonyms_sxt, synonyms);
@@ -788,7 +774,29 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 add(doc, CollectionSchema.publisher_url_s, html.getPublisherLink().toNormalform(true));
             }
         }
-
+        
+        String content = document.getTextString();
+        if (content == null || content.length() == 0) {
+            content = digestURI.toTokens();
+        }
+        
+        if ((allAttr || contains(CollectionSchema.images_text_t)) && MultiProtocolURI.isImage(MultiProtocolURI.getFileExtension(digestURI.getFileName()))) {
+            add(doc, CollectionSchema.images_text_t, content); // the content may contain the exif data from the image parser
+            content = digestURI.toTokens(); // remove all other entry but the url tokens
+        }
+        
+        // content (must be written after special parser data, since this can influence the content)
+        if (allAttr || contains(CollectionSchema.text_t)) add(doc, CollectionSchema.text_t, content);
+        if (allAttr || contains(CollectionSchema.wordcount_i)) {
+            if (content.length() == 0) {
+                add(doc, CollectionSchema.wordcount_i, 0);
+            } else {
+                int contentwc = 1;
+                for (int i = content.length() - 1; i >= 0; i--) if (content.charAt(i) == ' ') contentwc++;
+                add(doc, CollectionSchema.wordcount_i, contentwc);
+            }
+        }
+        
         // statistics about the links
         if (allAttr || contains(CollectionSchema.inboundlinkscount_i)) add(doc, CollectionSchema.inboundlinkscount_i, inboundLinks.size());
         if (allAttr || contains(CollectionSchema.inboundlinksnofollowcount_i)) add(doc, CollectionSchema.inboundlinksnofollowcount_i, document.inboundLinkNofollowCount());
