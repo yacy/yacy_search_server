@@ -384,6 +384,7 @@ public final class QueryParams {
     private SolrQuery solrTextQuery(final boolean getFacets, final boolean excludeintext_image) {
         if (this.cachedQuery != null) {
             this.cachedQuery.setStart(this.offset);
+            if (!getFacets) this.cachedQuery.setFacet(false);
             return this.cachedQuery;
         }
         if (this.queryGoal.getIncludeStrings().size() == 0) return null;
@@ -408,6 +409,7 @@ public final class QueryParams {
     private SolrQuery solrImageQuery(boolean getFacets) {
         if (this.cachedQuery != null) {
             this.cachedQuery.setStart(this.offset);
+            if (!getFacets) this.cachedQuery.setFacet(false);
             return this.cachedQuery;
         }
         if (this.queryGoal.getIncludeStrings().size() == 0) return null;
