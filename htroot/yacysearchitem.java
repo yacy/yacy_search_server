@@ -218,7 +218,7 @@ public class yacysearchitem {
             prop.putHTML("content_publisher", result.publisher());
             prop.putHTML("content_creator", result.creator());// author
             prop.putHTML("content_subject", result.subject());
-            final List<String> query = theSearch.query.getQueryGoal().getAllStrings();
+            final List<String> query = theSearch.query.getQueryGoal().getIncludeStrings();
             final StringBuilder s = new StringBuilder(query.size() * 20);
             for (final String t: query) {
                 s.append('+').append(t);
