@@ -336,9 +336,10 @@ public final class CrawlStacker {
 
         // check availability of parser and maxfilesize
         String warning = null;
+        boolean loadImages = Switchboard.getSwitchboard().getConfigBool("crawler.load.image", true);
         if ((maxFileSize >= 0 && entry.size() > maxFileSize) ||
             entry.url().getContentDomain() == ContentDomain.APP  ||
-            entry.url().getContentDomain() == ContentDomain.IMAGE  ||
+            (!loadImages && entry.url().getContentDomain() == ContentDomain.IMAGE) ||
             entry.url().getContentDomain() == ContentDomain.AUDIO  ||
             entry.url().getContentDomain() == ContentDomain.VIDEO ||
             entry.url().getContentDomain() == ContentDomain.CTRL) {

@@ -2512,10 +2512,12 @@ public final class Switchboard extends serverSwitch {
            ) {
             // get the hyperlinks
             final Map<DigestURI, String> hl = Document.getHyperlinks(documents);
+            boolean loadImages = getConfigBool("crawler.load.image", true);
+            if (loadImages) hl.putAll(Document.getImagelinks(documents));
             
             // add all media links also to the crawl stack. They will be re-sorted to the NOLOAD queue and indexed afterwards as pure links
             if (response.profile().directDocByURL()) {
-                hl.putAll(Document.getImagelinks(documents));
+                if (!loadImages) hl.putAll(Document.getImagelinks(documents));
                 hl.putAll(Document.getApplinks(documents));
                 hl.putAll(Document.getVideolinks(documents));
                 hl.putAll(Document.getAudiolinks(documents));
