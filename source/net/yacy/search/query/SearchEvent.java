@@ -760,9 +760,12 @@ public final class SearchEvent {
                 Iterator<String> i = fcts.iterator();
                 while (i.hasNext()) {
                     String ext = i.next();
-                    if (TextParser.supportsExtension(ext) != null && !Classification.isAnyKnownExtension(ext)) {
-                        //Log.logInfo("SearchEvent", "removed unknown extension " + ext + " from navigation.");
-                        i.remove();
+                    if (this.query.contentdom == ContentDomain.TEXT) {
+                        if ((Classification.isImageExtension(ext) && this.excludeintext_image) ||
+                            (TextParser.supportsExtension(ext) != null && !Classification.isAnyKnownExtension(ext))) {
+                            //Log.logInfo("SearchEvent", "removed unknown extension " + ext + " from navigation.");
+                            i.remove();
+                        }
                     }
                 }
                 this.filetypeNavigator.inc(fcts);
