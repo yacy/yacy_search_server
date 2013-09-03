@@ -246,7 +246,7 @@ public class ViewFile {
                 prop.put("viewMode_title", document.dc_title());
                 prop.put("viewMode_creator", document.dc_creator());
                 prop.put("viewMode_subject", document.dc_subject(','));
-                prop.put("viewMode_description", document.dc_description());
+                prop.put("viewMode_description", document.dc_description().length == 0 ? new String[]{""} : document.dc_description());
                 prop.put("viewMode_publisher", document.dc_publisher());
                 prop.put("viewMode_format", document.dc_format());
                 prop.put("viewMode_identifier", document.dc_identifier());
