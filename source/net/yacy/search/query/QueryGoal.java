@@ -31,7 +31,6 @@ import net.yacy.cora.document.WordCache;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.federate.solr.SolrType;
-import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
@@ -179,8 +178,18 @@ public class QueryGoal {
         return exclude_strings;
     }
     
+    public boolean isCatchall() {
+        if (include_strings.size() != 1 || exclude_strings.size() != 0) return false;
+        String w = include_strings.get(0);
+        return (Segment.catchallString.equals(w));
+    }
+    
     public boolean matches(String text) {
         if (text == null || text.length() == 0) return false;
+        
+        // parse special requests
+        if (isCatchall()) return true;
+        
         String t = text.toLowerCase();
         for (String i: this.include_strings) if (t.indexOf(i.toLowerCase()) < 0) return false;
         for (String e: this.exclude_strings) if (t.indexOf(e.toLowerCase()) >= 0) return false;
@@ -202,13 +211,12 @@ public class QueryGoal {
         final StringBuilder q = new StringBuilder(80);
 
         // add filter to prevent that results come from failed urls
-        q.append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200").append(" AND (");
+        q.append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200");
         
         // parse special requests
-        if (include_strings.size() == 1 && exclude_strings.size() == 0) {
-            String w = include_strings.get(0);
-            if (Segment.catchallString.equals(w)) return new StringBuilder(AbstractSolrConnector.CATCHALL_TERM);
-        }
+        if (isCatchall()) return q;
+        
+        q.append(" AND (");
         
         // add goal query
         int wc = 0;
@@ -242,22 +250,19 @@ public class QueryGoal {
         // add filter to prevent that results come from failed urls
         q.append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200").append(" AND (");
         q.append(CollectionSchema.images_urlstub_sxt.getSolrFieldName()).append(":[* TO *] OR ");
-        q.append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":(jpg OR png OR gif)) AND (");
+        q.append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":(jpg OR png OR gif))");
         
         // parse special requests
-        if (include_strings.size() == 1 && exclude_strings.size() == 0) {
-            String w = include_strings.get(0);
-            if (Segment.catchallString.equals(w)) return new StringBuilder(AbstractSolrConnector.CATCHALL_TERM);
-        }
-        
+        if (isCatchall()) return q;
+
         // add goal query
         StringBuilder w = getGoalQuery();
         
         // combine these queries for all relevant fields
+        q.append(" AND (");
         q.append('(').append(CollectionSchema.images_alt_txt.getSolrFieldName()).append(':').append(w).append("^20.0) OR ");
         q.append('(').append(CollectionSchema.images_text_t.getSolrFieldName()).append(':').append(w).append("^10.0) OR ");
         q.append('(').append(CollectionSchema.text_t.getSolrFieldName()).append(':').append(w).append(')');
-        
         q.append(')');
 
         return q;
