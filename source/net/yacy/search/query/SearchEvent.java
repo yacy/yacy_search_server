@@ -164,7 +164,8 @@ public final class SearchEvent {
     private final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack; // thats the bag where the solr results are written to
     private final WeakPriorityBlockingQueue<ResultEntry>  resultList; // thats the result list where the actual search result is waiting to be displayed
     private final boolean pollImmediately; // if this is true, then every entry in result List is polled immediately to prevent a re-ranking in the resultList. This is usefull if there is only one index source.
-
+    public  final boolean excludeintext_image;
+    
     // the following values are filled during the search process as statistics for the search
     public final AtomicInteger local_rwi_available;  // the number of hits generated/ranked by the local search in rwi index
     public final AtomicInteger local_rwi_stored;     // the number of existing hits by the local search in rwi index
@@ -220,6 +221,7 @@ public final class SearchEvent {
         this.nodeStack = new WeakPriorityBlockingQueue<URIMetadataNode>(100, false);
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
+        this.excludeintext_image = Switchboard.getSwitchboard().getConfigBool("search.excludeintext.image", true);
         // prepare configured search navigation
         final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "");
         this.authorNavigator = navcfg.contains("authors") ? new ConcurrentScoreMap<String>() : null;
@@ -282,7 +284,7 @@ public final class SearchEvent {
 
         // start a local solr search
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-            this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, true), 0, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
+            this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, true, this.excludeintext_image), 0, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
         }
         this.localsolroffset = this.query.itemsPerPage;
         
@@ -837,6 +839,13 @@ public final class SearchEvent {
                     if (log.isFine()) log.fine("dropped Node: content domain does not match");
                     continue pollloop;
                 }
+                
+                // filter out media links in text search, if wanted
+                String ext = MultiProtocolURI.getFileExtension(iEntry.url().getFileName());
+                if (this.query.contentdom == ContentDomain.TEXT && Classification.isImageExtension(ext) && this.excludeintext_image) {
+                    if (log.isFine()) log.fine("dropped Node: file name domain does not match");
+                    continue pollloop;
+                }
 
                 // check site constraints
                 final String hosthash = iEntry.hosthash();
@@ -1014,13 +1023,20 @@ public final class SearchEvent {
             }
 
             // check content domain
-            if (((this.query.contentdom == Classification.ContentDomain.TEXT && page.url().getContentDomain() == Classification.ContentDomain.IMAGE) ||
+            if (this.query.contentdom.getCode() > 0 && (
                 (this.query.contentdom == Classification.ContentDomain.IMAGE && page.url().getContentDomain() != Classification.ContentDomain.IMAGE) ||
                 (this.query.contentdom == Classification.ContentDomain.AUDIO && page.url().getContentDomain() != Classification.ContentDomain.AUDIO) ||
                 (this.query.contentdom == Classification.ContentDomain.VIDEO && page.url().getContentDomain() != Classification.ContentDomain.VIDEO) ||
                 (this.query.contentdom == Classification.ContentDomain.APP && page.url().getContentDomain() != Classification.ContentDomain.APP)) && this.query.urlMask_isCatchall) {
                 if (log.isFine()) log.fine("dropped RWI: wrong contentdom = " + this.query.contentdom + ", domain = " + page.url().getContentDomain());
                 if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                continue;
+            }
+            
+            // filter out media links in text search, if wanted
+            String ext = MultiProtocolURI.getFileExtension(page.url().getFileName());
+            if (this.query.contentdom == ContentDomain.TEXT && Classification.isImageExtension(ext) && this.excludeintext_image) {
+                if (log.isFine()) log.fine("dropped RWI: file name domain does not match");
                 continue;
             }
             
@@ -1340,7 +1356,7 @@ public final class SearchEvent {
             int nextitems = item - this.localsolroffset + this.query.itemsPerPage; // example: suddenly switch to item 60, just 10 had been shown, 20 loaded.
             if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (final InterruptedException e) {}}
             if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-                this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, this.localsolroffset == 0), this.localsolroffset, nextitems, null /*this peer*/, Switchboard.urlBlacklist);
+                this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, this.localsolroffset == 0, this.excludeintext_image), this.localsolroffset, nextitems, null /*this peer*/, Switchboard.urlBlacklist);
             }
             this.localsolroffset += nextitems;
         }
@@ -1361,7 +1377,7 @@ public final class SearchEvent {
             if (this.localsolrsearch == null || !this.localsolrsearch.isAlive() && this.local_solr_stored.get() > this.localsolroffset && (item + 1) % this.query.itemsPerPage == 0) {
                 // at the end of a list, trigger a next solr search
                 if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-                    this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, this.localsolroffset == 0), this.localsolroffset, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
+                    this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, this.localsolroffset == 0, this.excludeintext_image), this.localsolroffset, this.query.itemsPerPage, null /*this peer*/, Switchboard.urlBlacklist);
                 }
                 this.localsolroffset += this.query.itemsPerPage;
             }

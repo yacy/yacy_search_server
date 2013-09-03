@@ -376,12 +376,12 @@ public final class QueryParams {
     	return SetTools.anymatch(wordhashes, keyhashes);
     }
 
-    public SolrQuery solrQuery(ContentDomain cd, boolean getFacets) {
+    public SolrQuery solrQuery(final ContentDomain cd, final boolean getFacets, final boolean excludeintext_image) {
         if (cd == ContentDomain.IMAGE) return solrImageQuery(getFacets);
-        return solrTextQuery(getFacets);
+        return solrTextQuery(getFacets, excludeintext_image);
     }
     
-    private SolrQuery solrTextQuery(boolean getFacets) {
+    private SolrQuery solrTextQuery(final boolean getFacets, final boolean excludeintext_image) {
         if (this.cachedQuery != null) {
             this.cachedQuery.setStart(this.offset);
             return this.cachedQuery;
@@ -391,43 +391,13 @@ public final class QueryParams {
         // construct query
         final SolrQuery params = getBasicParams(getFacets);
         int rankingProfile = this.ranking.coeff_date == RankingProfile.COEFF_MAX ? 1 : (this.modifier.sitehash != null || this.modifier.sitehost != null) ? 2 : 0;
-        params.setQuery(this.queryGoal.collectionTextQueryString(this.indexSegment.fulltext().getDefaultConfiguration(), rankingProfile).toString());
+        params.setQuery(this.queryGoal.collectionTextQueryString(this.indexSegment.fulltext().getDefaultConfiguration(), rankingProfile, excludeintext_image).toString());
         Ranking ranking = indexSegment.fulltext().getDefaultConfiguration().getRanking(rankingProfile); // for a by-date ranking select different ranking profile
         
         String bq = ranking.getBoostQuery();
         String bf = ranking.getBoostFunction();
         if (bq.length() > 0) params.setParam("bq", bq);
         if (bf.length() > 0) params.setParam("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
-        
-        /*
-        if (this.contentdom == ContentDomain.IMAGE) {
-            fq.append(" AND (").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"jpg\"");
-            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tif\"");
-            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tiff\"");
-            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"png\")");
-        }
-        
-        if (this.contentdom == ContentDomain.AUDIO) {
-            fq.append(" AND (").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"aif\"");
-            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"aiff\"");
-            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"mp3\"");
-            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"ogg\")");
-        }
-        
-        if (this.contentdom == ContentDomain.VIDEO) {
-            fq.append(" AND (").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"mpg\"");
-            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"avi\"");
-            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"mp4\"");
-            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"mkv\")");
-        }
-        
-        if (this.contentdom == ContentDomain.APP) {
-            fq.append(" AND (").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"apk\"");
-            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"exe\"");
-            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"dmg\"");
-            fq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"gz\")");
-        }
-        */
         
         // prepare result
         ConcurrentLog.info("Protocol", "SOLR QUERY: " + params.toString());

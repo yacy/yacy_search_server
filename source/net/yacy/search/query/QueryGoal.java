@@ -207,11 +207,12 @@ public class QueryGoal {
         for (final byte[] b: blues) this.include_hashes.remove(b);
     }
 
-    public StringBuilder collectionTextQueryString(CollectionConfiguration configuration, int rankingProfile) {
+    public StringBuilder collectionTextQueryString(CollectionConfiguration configuration, int rankingProfile, boolean noimages) {
         final StringBuilder q = new StringBuilder(80);
 
         // add filter to prevent that results come from failed urls
         q.append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200");
+        if (noimages) q.append(" AND -").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":(jpg OR png OR gif)");
         
         // parse special requests
         if (isCatchall()) return q;
