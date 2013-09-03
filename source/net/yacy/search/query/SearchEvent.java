@@ -1394,7 +1394,6 @@ public final class SearchEvent {
         ResultEntry ms = oneResult(item, timeout);
         // check if the match was made in the url or in the image links
         if (ms == null) throw new MalformedURLException("nUll");
-        int height = 0, width = 0, fileSize = 0;
         SolrDocument doc = ms.getNode().getDocument();
         Collection<Object> alt = doc.getFieldValues(CollectionSchema.images_alt_txt.getSolrFieldName());
         Collection<Object> img = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
@@ -1408,10 +1407,8 @@ public final class SearchEvent {
                         DigestURI imageUrl = new DigestURI((prt != null && prt.size() > c ? SetTools.nth(prt, c) : "http") + "://" + i);
                         Object heightO = SetTools.nth(doc.getFieldValues(CollectionSchema.images_height_val.getSolrFieldName()), c);
                         Object widthO = SetTools.nth(doc.getFieldValues(CollectionSchema.images_width_val.getSolrFieldName()), c);
-                        if (heightO != null) height = (Integer) heightO;
-                        if (widthO != null) width = (Integer) widthO;
                         String id = ASCII.String(imageUrl.hash());
-                        if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), imageUrl, "", a, width, height, fileSize));
+                        if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), imageUrl, "", a, widthO == null ? 0 : (Integer) widthO, heightO == null ? 0 : (Integer) heightO, 0));
                     } catch (MalformedURLException e) {
                         continue;
                     }
@@ -1421,13 +1418,13 @@ public final class SearchEvent {
         }
         if (MultiProtocolURI.isImage(MultiProtocolURI.getFileExtension(ms.url().getFileName()))) {
             String id = ASCII.String(ms.hash());
-            if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), ms.url(), "", ms.title(), width, height, fileSize));
+            if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), ms.url(), "", ms.title(), 0, 0, 0));
         }
         if (img != null && img.size() > 0) {
             DigestURI imageUrl = new DigestURI((prt != null && prt.size() > 0 ? SetTools.nth(prt, 0) : "http") + "://" + SetTools.nth(img, 0));
             String imagetext =  alt != null && alt.size() > 0 ? (String) SetTools.nth(alt, 0) : "";
             String id = ASCII.String(imageUrl.hash());
-            if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), imageUrl, "", imagetext, width, height, fileSize));
+            if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), imageUrl, "", imagetext, 0, 0, 0));
         }
         if (imageSpare.size() > 0) return nextSpare();
         throw new MalformedURLException("no image url found");
@@ -1445,6 +1442,9 @@ public final class SearchEvent {
             this.width = width;
             this.height = height;
             this.fileSize = fileSize;
+        }
+        public String toString() {
+            return this.imageUrl.toString();
         }
     }
     
