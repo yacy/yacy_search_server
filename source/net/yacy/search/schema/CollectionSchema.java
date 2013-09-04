@@ -123,7 +123,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     images_text_t(SolrType.text_general, true, true, false, false, true, "all text/words appearing in image alt texts or the tokenized url"),
     images_urlstub_sxt(SolrType.string, true, true, true, false, true, "all image links without the protocol and '://'"),
     images_protocol_sxt(SolrType.string, true, true, true, false, false, "all image link protocols"),
-    images_alt_txt(SolrType.text_general, true, true, true, false, true, "all image link alt tag"),
+    images_alt_sxt(SolrType.string, true, true, true, false, true, "all image link alt tag"), // no need to index this; don't turn it into a txt field; use images_text_t instead
     images_height_val(SolrType.num_integer, true, true, true, false, false, "size of images:height"),
     images_width_val(SolrType.num_integer, true, true, true, false, false, "size of images:width"),
     images_pixel_val(SolrType.num_integer, true, true, true, false, false, "size of images as number of pixels (easier for a search restriction than with and height)"),

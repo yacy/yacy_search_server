@@ -1414,7 +1414,7 @@ public final class SearchEvent {
         // check if the match was made in the url or in the image links
         if (ms == null) throw new MalformedURLException("nUll");
         SolrDocument doc = ms.getNode().getDocument();
-        Collection<Object> alt = doc.getFieldValues(CollectionSchema.images_alt_txt.getSolrFieldName());
+        Collection<Object> alt = doc.getFieldValues(CollectionSchema.images_alt_sxt.getSolrFieldName());
         Collection<Object> img = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
         Collection<Object> prt = doc.getFieldValues(CollectionSchema.images_protocol_sxt.getSolrFieldName());
         if (img != null) {

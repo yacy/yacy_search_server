@@ -249,7 +249,7 @@ images_urlstub_sxt
 images_protocol_sxt
 
 ## all image link alt tag
-images_alt_txt
+images_alt_sxt
 
 ## size of images:height
 images_height_val

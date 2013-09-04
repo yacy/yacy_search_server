@@ -252,7 +252,6 @@ public class QueryGoal {
         
         // combine these queries for all relevant fields
         q.append(" AND (");
-        q.append('(').append(CollectionSchema.images_alt_txt.getSolrFieldName()).append(':').append(w).append("^20.0) OR ");
         q.append('(').append(CollectionSchema.images_text_t.getSolrFieldName()).append(':').append(w).append("^10.0) OR ");
         q.append('(').append(CollectionSchema.text_t.getSolrFieldName()).append(':').append(w).append(')');
         q.append(')');
