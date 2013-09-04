@@ -42,6 +42,9 @@ exact_signature_l
 ## flag shows if exact_signature_l is unique at the time of document creation, used for double-check during search
 exact_signature_unique_b
 
+## counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)
+#exact_signature_copycount_i
+
 ## 64 bit of the Lookup3Signature from EnhancedTextProfileSignature of text_t
 fuzzy_signature_l
 
@@ -50,6 +53,9 @@ fuzzy_signature_l
     
 ## flag shows if fuzzy_signature_l is unique at the time of document creation, used for double-check during search
 fuzzy_signature_unique_b
+
+## counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)
+#fuzzy_signature_copycount_i
 
 ## the size of the raw source (mandatory field)
 size_i

@@ -1408,42 +1408,42 @@ public final class SearchEvent {
     
     public ImageResult oneImageResult(final int item, final long timeout) throws MalformedURLException {
         if (item < imageViewed.size()) return nthImage(item);
-        if (imageSpare.size() > 0) return nextSpare();
         
         ResultEntry ms = oneResult(item, timeout);
         // check if the match was made in the url or in the image links
-        if (ms == null) throw new MalformedURLException("nUll");
-        SolrDocument doc = ms.getNode().getDocument();
-        Collection<Object> alt = doc.getFieldValues(CollectionSchema.images_alt_sxt.getSolrFieldName());
-        Collection<Object> img = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
-        Collection<Object> prt = doc.getFieldValues(CollectionSchema.images_protocol_sxt.getSolrFieldName());
-        if (img != null) {
-            int c = 0;
-            for (Object i: img) {
-                String a = alt != null && alt.size() > c ? (String) SetTools.nth(alt, c) : "";
-                if (query.getQueryGoal().matches((String) i) || query.getQueryGoal().matches(a)) {
-                    try {
-                        DigestURI imageUrl = new DigestURI((prt != null && prt.size() > c ? SetTools.nth(prt, c) : "http") + "://" + i);
-                        Object heightO = SetTools.nth(doc.getFieldValues(CollectionSchema.images_height_val.getSolrFieldName()), c);
-                        Object widthO = SetTools.nth(doc.getFieldValues(CollectionSchema.images_width_val.getSolrFieldName()), c);
-                        String id = ASCII.String(imageUrl.hash());
-                        if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), imageUrl, "", a, widthO == null ? 0 : (Integer) widthO, heightO == null ? 0 : (Integer) heightO, 0));
-                    } catch (MalformedURLException e) {
-                        continue;
+        if (ms != null) {
+            SolrDocument doc = ms.getNode().getDocument();
+            Collection<Object> alt = doc.getFieldValues(CollectionSchema.images_alt_sxt.getSolrFieldName());
+            Collection<Object> img = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
+            Collection<Object> prt = doc.getFieldValues(CollectionSchema.images_protocol_sxt.getSolrFieldName());
+            if (img != null) {
+                int c = 0;
+                for (Object i: img) {
+                    String a = alt != null && alt.size() > c ? (String) SetTools.nth(alt, c) : "";
+                    if (query.getQueryGoal().matches((String) i) || query.getQueryGoal().matches(a)) {
+                        try {
+                            DigestURI imageUrl = new DigestURI((prt != null && prt.size() > c ? SetTools.nth(prt, c) : "http") + "://" + i);
+                            Object heightO = SetTools.nth(doc.getFieldValues(CollectionSchema.images_height_val.getSolrFieldName()), c);
+                            Object widthO = SetTools.nth(doc.getFieldValues(CollectionSchema.images_width_val.getSolrFieldName()), c);
+                            String id = ASCII.String(imageUrl.hash());
+                            if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), imageUrl, "", a, widthO == null ? 0 : (Integer) widthO, heightO == null ? 0 : (Integer) heightO, 0));
+                        } catch (MalformedURLException e) {
+                            continue;
+                        }
                     }
+                    c++;
                 }
-                c++;
             }
-        }
-        if (MultiProtocolURI.isImage(MultiProtocolURI.getFileExtension(ms.url().getFileName()))) {
-            String id = ASCII.String(ms.hash());
-            if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), ms.url(), "", ms.title(), 0, 0, 0));
-        }
-        if (img != null && img.size() > 0) {
-            DigestURI imageUrl = new DigestURI((prt != null && prt.size() > 0 ? SetTools.nth(prt, 0) : "http") + "://" + SetTools.nth(img, 0));
-            String imagetext =  alt != null && alt.size() > 0 ? (String) SetTools.nth(alt, 0) : "";
-            String id = ASCII.String(imageUrl.hash());
-            if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), imageUrl, "", imagetext, 0, 0, 0));
+            if (MultiProtocolURI.isImage(MultiProtocolURI.getFileExtension(ms.url().getFileName()))) {
+                String id = ASCII.String(ms.hash());
+                if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), ms.url(), "", ms.title(), 0, 0, 0));
+            }
+            if (img != null && img.size() > 0) {
+                DigestURI imageUrl = new DigestURI((prt != null && prt.size() > 0 ? SetTools.nth(prt, 0) : "http") + "://" + SetTools.nth(img, 0));
+                String imagetext =  alt != null && alt.size() > 0 ? (String) SetTools.nth(alt, 0) : "";
+                String id = ASCII.String(imageUrl.hash());
+                if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), imageUrl, "", imagetext, 0, 0, 0));
+            }
         }
         if (imageSpare.size() > 0) return nextSpare();
         throw new MalformedURLException("no image url found");

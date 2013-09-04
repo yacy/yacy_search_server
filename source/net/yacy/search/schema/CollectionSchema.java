@@ -43,9 +43,11 @@ public enum CollectionSchema implements SchemaDeclaration {
     md5_s(SolrType.string, true, true, false, false, false, "the md5 of the raw source"),// String md5();
     exact_signature_l(SolrType.num_long, true, true, false, false, false, "the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of text_t"),
     exact_signature_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if exact_signature_l is unique at the time of document creation, used for double-check during search"),
+    exact_signature_copycount_i(SolrType.num_integer, true, true, false, false, false, "counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)"),
     fuzzy_signature_l(SolrType.num_long, true, true, false, false, false, "64 bit of the Lookup3Signature from EnhancedTextProfileSignature of text_t"),
     fuzzy_signature_text_t(SolrType.text_general, true, true, false, false, false, "intermediate data produced in EnhancedTextProfileSignature: a list of word frequencies"),
     fuzzy_signature_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if fuzzy_signature_l is unique at the time of document creation, used for double-check during search"),
+    fuzzy_signature_copycount_i(SolrType.num_integer, true, true, false, false, false, "counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)"),
     size_i(SolrType.num_integer, true, true, false, false, false, "the size of the raw source"),// int size();
     failreason_s(SolrType.string, true, true, false, false, false, "fail reason if a page was not loaded. if the page was loaded then this field is empty"),
     failtype_s(SolrType.string, true, true, false, false, false, "fail type if a page was not loaded. This field is either empty, 'excl' or 'fail'"),

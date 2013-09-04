@@ -28,8 +28,10 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.document.ASCII;
@@ -74,6 +76,77 @@ public class SchemaConfiguration extends Configuration implements Serializable {
                 log.warn(ex);
             }
         }
+    }
+    
+    public boolean postprocessing_doublecontent(Segment segment, Set<String> uniqueURLs, SolrInputDocument sid, DigestURI url) {
+        boolean changed = false;
+        // FIND OUT IF THIS IS A DOUBLE DOCUMENT
+        String hostid = url.hosthash();
+        for (CollectionSchema[] checkfields: new CollectionSchema[][]{
+                {CollectionSchema.exact_signature_l, CollectionSchema.exact_signature_unique_b, CollectionSchema.exact_signature_copycount_i},
+                {CollectionSchema.fuzzy_signature_l, CollectionSchema.fuzzy_signature_unique_b, CollectionSchema.fuzzy_signature_copycount_i}}) {
+            CollectionSchema checkfield = checkfields[0];
+            CollectionSchema uniquefield = checkfields[1];
+            CollectionSchema countfield = checkfields[2];
+            if (this.contains(checkfield) && this.contains(uniquefield)) {
+                // lookup the document with the same signature
+                long signature = ((Long) sid.getField(checkfield.getSolrFieldName()).getValue()).longValue();
+                try {
+                    long count = segment.fulltext().getDefaultConnector().getCountByQuery(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + checkfield.getSolrFieldName() + ":\"" + Long.toString(signature) + "\"");
+                    if (count > 1) {
+                        String urlhash = ASCII.String(url.hash());
+                        if (uniqueURLs.contains(urlhash)) {
+                            // this is not the first appearance, therefore this is a non-unique document
+                            sid.setField(uniquefield.getSolrFieldName(), false);
+                        } else {
+                            // this is the first appearance, therefore this shall be treated as unique document
+                            sid.setField(uniquefield.getSolrFieldName(), true);
+                            uniqueURLs.add(urlhash);
+                        }
+                        sid.setField(countfield.getSolrFieldName(), count);
+                        changed = true;
+                    }
+                } catch (final IOException e) {}
+            }
+        }
+        
+        // CHECK IF TITLE AND DESCRIPTION IS UNIQUE (this is by default not switched on)
+        if (segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.host_id_s)) {
+            uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][]{
+                    {CollectionSchema.title, CollectionSchema.title_exact_signature_l, CollectionSchema.title_unique_b},
+                    {CollectionSchema.description_txt, CollectionSchema.description_exact_signature_l, CollectionSchema.description_unique_b}}) {
+                CollectionSchema checkfield = checkfields[0];
+                CollectionSchema signaturefield = checkfields[1];
+                CollectionSchema uniquefield = checkfields[2];
+                if (this.contains(checkfield) && this.contains(signaturefield) && this.contains(uniquefield)) {
+                    // lookup in the index within the same hosts for the same title or description
+                    //String checkstring = checkfield == CollectionSchema.title ? document.dc_title() : document.dc_description();
+                    Long checkhash = (Long) sid.getFieldValue(signaturefield.getSolrFieldName());
+                    if (checkhash == null) {
+                        sid.setField(uniquefield.getSolrFieldName(), false);
+                        changed = true;
+                        continue uniquecheck;
+                    }
+                    try {
+                        if (segment.fulltext().getDefaultConnector().existsByQuery(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\"")) {
+                            // switch unique attribute in new document
+                            sid.setField(uniquefield.getSolrFieldName(), false);
+                            // switch attribute also in all existing documents (which should be exactly only one!)
+                            SolrDocumentList docs = segment.fulltext().getDefaultConnector().getDocumentListByQuery(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\" AND " + uniquefield.getSolrFieldName() + ":true", 0, 1000);
+                            for (SolrDocument doc: docs) {
+                                SolrInputDocument sidContext = segment.fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
+                                sidContext.setField(uniquefield.getSolrFieldName(), false);
+                                segment.putDocumentInQueue(sidContext);
+                                changed = true;
+                            }
+                        } else {
+                            sid.setField(uniquefield.getSolrFieldName(), true);
+                        }
+                    } catch (final IOException e) {}
+                }
+            }
+        }
+        return changed;
     }
 
     public boolean postprocessing_clickdepth(Segment segment, SolrDocument doc, SolrInputDocument sid, DigestURI url, SchemaDeclaration clickdepthfield) {

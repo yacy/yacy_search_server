@@ -448,11 +448,17 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             add(doc, CollectionSchema.synonyms_sxt, synonyms);
         }
         add(doc, CollectionSchema.exact_signature_l, condenser.exactSignature());
-        add(doc, CollectionSchema.exact_signature_unique_b, true); // this must be corrected afterwards!
+        add(doc, CollectionSchema.exact_signature_unique_b, true); // this must be corrected afterwards during storage!
+        add(doc, CollectionSchema.exact_signature_copycount_i, 0); // this must be corrected afterwards during postprocessing!
         add(doc, CollectionSchema.fuzzy_signature_l, condenser.fuzzySignature());
         add(doc, CollectionSchema.fuzzy_signature_text_t, condenser.fuzzySignatureText());
-        add(doc, CollectionSchema.fuzzy_signature_unique_b, true); // this must be corrected afterwards!
-
+        add(doc, CollectionSchema.fuzzy_signature_unique_b, true); // this must be corrected afterwards during storage!
+        add(doc, CollectionSchema.fuzzy_signature_copycount_i, 0); // this must be corrected afterwards during postprocessing!
+        if (this.contains(CollectionSchema.exact_signature_unique_b) || this.contains(CollectionSchema.exact_signature_copycount_i) ||
+            this.contains(CollectionSchema.fuzzy_signature_l) || this.contains(CollectionSchema.fuzzy_signature_copycount_i)) {
+            processTypes.add(ProcessType.UNIQUE); 
+        }
+        
         // get list of all links; they will be shrinked by urls that appear in other fields of the solr schema
         Set<DigestURI> inboundLinks = document.inboundLinks();
         Set<DigestURI> outboundLinks = document.outboundLinks();
@@ -900,8 +906,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // process all documents
         BlockingQueue<SolrDocument> docs = connector.concurrentDocumentsByQuery(CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 10000, 60000, 50);
         SolrDocument doc;
-        int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0, proccount_citationchange = 0;
+        int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0, proccount_citationchange = 0, proccount_uniquechange = 0;
         Map<String, Long> hostExtentCache = new HashMap<String, Long>(); // a mapping from the host id to the number of documents which contain this host-id
+        Set<String> uniqueURLs = new HashSet<String>();
         try {
             while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                 // for each to-be-processed entry work on the process tag
@@ -929,6 +936,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                 proccount_citationchange++;
                             }
                         }
+
+                        if (tagtype == ProcessType.UNIQUE) {
+                            if (postprocessing_doublecontent(segment, uniqueURLs, sid, url)) proccount_uniquechange++;
+                        }
                         
                     }
                     
@@ -954,7 +965,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
             ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount+ " new documents, " +
                         proccount_clickdepthchange + " clickdepth changes, " +
-                        proccount_referencechange + " reference-count changes," +
+                        proccount_referencechange + " reference-count changes, " +
+                        proccount_uniquechange + " unique field changes, " +
                         proccount_citationchange + " citation ranking changes.");
         } catch (final InterruptedException e) {
         }

@@ -39,7 +39,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.regex.Pattern;
 
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.document.ASCII;
@@ -602,61 +601,6 @@ public class Segment {
         
         // CREATE SOLR DOCUMENT
         final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(id, collections, responseHeader, document, condenser, referrerURL, language, urlCitationIndex, this.fulltext.getWebgraphConfiguration());
-        
-        // FIND OUT IF THIS IS A DOUBLE DOCUMENT
-        String hostid = url.hosthash();
-        for (CollectionSchema[] checkfields: new CollectionSchema[][]{
-                {CollectionSchema.exact_signature_l, CollectionSchema.exact_signature_unique_b},
-                {CollectionSchema.fuzzy_signature_l, CollectionSchema.fuzzy_signature_unique_b}}) {
-            CollectionSchema checkfield = checkfields[0];
-            CollectionSchema uniquefield = checkfields[1];
-            if (this.fulltext.getDefaultConfiguration().contains(checkfield) && this.fulltext.getDefaultConfiguration().contains(uniquefield)) {
-                // lookup the document with the same signature
-                long signature = ((Long) vector.getField(checkfield.getSolrFieldName()).getValue()).longValue();
-                try {
-                    if (this.fulltext.getDefaultConnector().existsByQuery(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + checkfield.getSolrFieldName() + ":\"" + Long.toString(signature) + "\"")) {
-                        // change unique attribut in content
-                        vector.setField(uniquefield.getSolrFieldName(), false);
-                    }
-                } catch (final IOException e) {}
-            }
-        }
-        
-        // CHECK IF TITLE AND DESCRIPTION IS UNIQUE (this is by default not switched on)
-        if (this.fulltext.getDefaultConfiguration().contains(CollectionSchema.host_id_s)) {
-            uniquecheck: for (CollectionSchema[] checkfields: new CollectionSchema[][]{
-                    {CollectionSchema.title, CollectionSchema.title_exact_signature_l, CollectionSchema.title_unique_b},
-                    {CollectionSchema.description_txt, CollectionSchema.description_exact_signature_l, CollectionSchema.description_unique_b}}) {
-                CollectionSchema checkfield = checkfields[0];
-                CollectionSchema signaturefield = checkfields[1];
-                CollectionSchema uniquefield = checkfields[2];
-                if (this.fulltext.getDefaultConfiguration().contains(checkfield) && this.fulltext.getDefaultConfiguration().contains(signaturefield) && this.fulltext.getDefaultConfiguration().contains(uniquefield)) {
-                    // lookup in the index within the same hosts for the same title or description
-                    //String checkstring = checkfield == CollectionSchema.title ? document.dc_title() : document.dc_description();
-                    Long checkhash = (Long) vector.getFieldValue(signaturefield.getSolrFieldName());
-                    if (checkhash == null) {
-                        vector.setField(uniquefield.getSolrFieldName(), false);
-                        continue uniquecheck;
-                    }
-                    try {
-                        if (this.fulltext.getDefaultConnector().existsByQuery(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\"")) {
-                            // switch unique attribute in new document
-                            vector.setField(uniquefield.getSolrFieldName(), false);
-                            // switch attribute also in all existing documents (which should be exactly only one!)
-                            SolrDocumentList docs = this.fulltext.getDefaultConnector().getDocumentListByQuery(CollectionSchema.host_id_s + ":\"" + hostid + "\" AND " + signaturefield.getSolrFieldName() + ":\"" + checkhash.toString() + "\" AND " + uniquefield.getSolrFieldName() + ":true", 0, 1000);
-                            for (SolrDocument doc: docs) {
-                                SolrInputDocument sid = this.fulltext.getDefaultConfiguration().toSolrInputDocument(doc);
-                                sid.setField(uniquefield.getSolrFieldName(), false);
-                                this.putDocumentInQueue(sid);
-                                //this.fulltext.getDefaultConnector().add(sid);
-                            }
-                        } else {
-                            vector.setField(uniquefield.getSolrFieldName(), true);
-                        }
-                    } catch (final IOException e) {}
-                }
-            }
-        }
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
         if (this.connectedCitation()) {
