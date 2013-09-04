@@ -2901,6 +2901,9 @@ public final class Switchboard extends serverSwitch {
                 return "problem crawling an ftp site: " + e.getMessage();
             }
         }
+        
+        // remove the document from the error-db
+        this.crawlQueues.urlRemove(urlhash);
 
         // get a scraper to get the title
         Document scraper;
