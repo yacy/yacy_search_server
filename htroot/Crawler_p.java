@@ -392,7 +392,7 @@ public class Crawler_p {
                 for (DigestURI u: rootURLs) {
                     hosthashes.add(ASCII.getBytes(u.hosthash()));
                 }
-                sb.crawlQueues.errorURL.removeHost(hosthashes, true);
+                sb.crawlQueues.errorURL.removeHosts(hosthashes, false);
                 for (byte[] hosthash: hosthashes) {
                     try {
                         String deletequery = CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]";

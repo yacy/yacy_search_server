@@ -161,6 +161,7 @@ public class CrawlQueues {
     }
 
     public void removeURL(final byte[] hash) {
+        assert hash != null && hash.length == 12;
         this.noticeURL.removeByURLHash(hash);
         this.delegatedURL.remove(hash);
         this.errorURL.remove(hash);

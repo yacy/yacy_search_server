@@ -27,7 +27,9 @@ package net.yacy.crawler;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -184,6 +186,9 @@ public final class CrawlStacker {
             final byte[] urlhash = url.hash();
             if (replace) {
                 this.indexSegment.fulltext().remove(urlhash);
+                byte[] hosthash = new byte[6]; System.arraycopy(urlhash, 6, hosthash, 0, 6);
+                List<byte[]> hosthashes = new ArrayList<byte[]>(); hosthashes.add(hosthash);
+                this.nextQueue.errorURL.removeHosts(hosthashes, false);
                 this.nextQueue.removeURL(urlhash);
                 String u = url.toNormalform(true);
                 if (u.endsWith("/")) {

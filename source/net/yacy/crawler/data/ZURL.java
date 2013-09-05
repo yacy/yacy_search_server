@@ -136,13 +136,18 @@ public class ZURL implements Iterable<ZURL.Entry> {
         if (hash == null) return false;
         //System.out.println("*** DEBUG ZURL " + this.urlIndex.filename() + " remove " + hash);
         try {
+            Iterator<byte[]> i = ZURL.this.stack.iterator();
+            while (i.hasNext()) {
+                byte[] b = i.next();
+                if (NaturalOrder.naturalOrder.equal(hash, b)) i.remove();
+            }
             return this.urlIndex.delete(hash);
         } catch (final IOException e) {
             return false;
         }
     }
     
-    public void removeHost(final Iterable<byte[]> hosthashes, final boolean concurrent) {
+    public void removeHosts(final Iterable<byte[]> hosthashes, final boolean concurrent) {
         if (hosthashes == null) return;
         Thread t = new Thread() {
             public void run() {
