@@ -142,7 +142,7 @@ public class CrawlQueues {
      * @param hash
      * @return if the hash exists, the name of the database is returned, otherwise null is returned
      */
-    public HarvestProcess urlExists(final byte[] hash) {
+    public HarvestProcess exists(final byte[] hash) {
         if (this.delegatedURL.exists(hash)) {
             return HarvestProcess.DELEGATED;
         }
@@ -160,7 +160,7 @@ public class CrawlQueues {
         return null;
     }
 
-    public void urlRemove(final byte[] hash) {
+    public void removeURL(final byte[] hash) {
         this.noticeURL.removeByURLHash(hash);
         this.delegatedURL.remove(hash);
         this.errorURL.remove(hash);

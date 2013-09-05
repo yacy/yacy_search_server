@@ -423,7 +423,7 @@ public class HostBrowser {
                         prop.put("files_list_" + c + "_type_url", entry.getKey());
                         StoreType type = (StoreType) entry.getValue();
                         try {uri = new DigestURI(entry.getKey());} catch (final MalformedURLException e) {uri = null;}
-                        HarvestProcess process = uri == null ? null : sb.crawlQueues.urlExists(uri.hash());
+                        HarvestProcess process = uri == null ? null : sb.crawlQueues.exists(uri.hash());
                         boolean loading = load.equals(entry.getKey()) || (process != null && process != HarvestProcess.ERRORS);
                         boolean error =  process == HarvestProcess.ERRORS || type == StoreType.EXCLUDED || type == StoreType.FAILED;
                         boolean dc = type != StoreType.INDEX && !error && !loading && list.containsKey(entry.getKey() + "/");

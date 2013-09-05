@@ -184,7 +184,7 @@ public final class CrawlStacker {
             final byte[] urlhash = url.hash();
             if (replace) {
                 this.indexSegment.fulltext().remove(urlhash);
-                this.nextQueue.urlRemove(urlhash);
+                this.nextQueue.removeURL(urlhash);
                 String u = url.toNormalform(true);
                 if (u.endsWith("/")) {
                     u = u + "index.html";
@@ -416,7 +416,7 @@ public final class CrawlStacker {
         }
 
         // check if the url is double registered
-        final HarvestProcess dbocc = this.nextQueue.urlExists(url.hash()); // returns the name of the queue if entry exists
+        final HarvestProcess dbocc = this.nextQueue.exists(url.hash()); // returns the name of the queue if entry exists
         final Date oldDate = this.indexSegment.fulltext().getLoadDate(ASCII.String(url.hash()));
         if (oldDate == null) {
             if (dbocc != null) {

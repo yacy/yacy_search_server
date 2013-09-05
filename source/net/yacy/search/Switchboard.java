@@ -1565,7 +1565,7 @@ public final class Switchboard extends serverSwitch {
     @Deprecated
     public HarvestProcess urlExists(final String hash) {
         if (this.index.exists(hash)) return HarvestProcess.LOADED;
-        return this.crawlQueues.urlExists(ASCII.getBytes(hash));
+        return this.crawlQueues.exists(ASCII.getBytes(hash));
     }
 
     /**
@@ -1577,7 +1577,7 @@ public final class Switchboard extends serverSwitch {
         Set<String> e = this.index.exists(ids);
         Map<String, HarvestProcess> m = new HashMap<String, HarvestProcess>();
         for (String id: ids) {
-            m.put(id, e.contains(id) ? HarvestProcess.LOADED : this.crawlQueues.urlExists(ASCII.getBytes(id)));
+            m.put(id, e.contains(id) ? HarvestProcess.LOADED : this.crawlQueues.exists(ASCII.getBytes(id)));
         }
         return m;
     }
@@ -1585,7 +1585,7 @@ public final class Switchboard extends serverSwitch {
     public void urlRemove(final Segment segment, final byte[] hash) {
         segment.fulltext().remove(hash);
         ResultURLs.remove(ASCII.String(hash));
-        this.crawlQueues.urlRemove(hash);
+        this.crawlQueues.removeURL(hash);
     }
 
     public DigestURI getURL(final byte[] urlhash) {
@@ -2836,13 +2836,13 @@ public final class Switchboard extends serverSwitch {
     public void remove(final Collection<String> deleteIDs) {
         this.index.fulltext().remove(deleteIDs);
         for (String id: deleteIDs) {
-            this.crawlQueues.urlRemove(ASCII.getBytes(id));
+            this.crawlQueues.removeURL(ASCII.getBytes(id));
         }
     }
     
     public void remove(final byte[] urlhash) {
         this.index.fulltext().remove(urlhash);
-        this.crawlQueues.urlRemove(urlhash);
+        this.crawlQueues.removeURL(urlhash);
     }
 
     public void stackURLs(Set<DigestURI> rootURLs, final CrawlProfile profile, final Set<DigestURI> successurls, final Map<DigestURI,String> failurls) {
@@ -2903,7 +2903,7 @@ public final class Switchboard extends serverSwitch {
         }
         
         // remove the document from the error-db
-        this.crawlQueues.urlRemove(urlhash);
+        this.crawlQueues.removeURL(urlhash);
 
         // get a scraper to get the title
         Document scraper;
