@@ -54,6 +54,9 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
@@ -92,7 +95,11 @@ public class RasterPlotter {
     private         DrawMode       defaultMode;
     private byte[]  frame;
 
-    public RasterPlotter(final int width, final int height, final long backgroundColor) {
+    public RasterPlotter(final int width, final int height, final DrawMode drawMode, final String backgroundColor) {
+        this(width, height, drawMode, Long.parseLong(backgroundColor, 16));
+    }
+
+    public RasterPlotter(final int width, final int height, final DrawMode drawMode, final long backgroundColor) {
         this.cc = new int[3];
         this.width = width;
         this.height = height;
@@ -100,14 +107,6 @@ public class RasterPlotter {
         this.defaultColR = 0xFF;
         this.defaultColG = 0xFF;
         this.defaultColB = 0xFF;
-    }
-    
-    public RasterPlotter(final int width, final int height, final DrawMode drawMode, final String backgroundColor) {
-        this(width, height, drawMode, Long.parseLong(backgroundColor, 16));
-    }
-
-    public RasterPlotter(final int width, final int height, final DrawMode drawMode, final long backgroundColor) {
-        this(width, height, backgroundColor);
         this.defaultMode = drawMode;
         try {
             // we need our own frame buffer to get a very, very fast transformation to png because we can omit the PixedGrabber, which is up to 800 times slower
@@ -939,6 +938,30 @@ public class RasterPlotter {
             ConcurrentLog.logException(e);
             return null;
         }
+    }
+    
+    /**
+     * save the image to a file
+     * @param file the storage file
+     * @param type the file type, may be i.e. 'png' or 'gif'
+     * @throws IOException
+     */
+    public void save(File file, String type) throws IOException {
+        final FileOutputStream fos = new FileOutputStream(file);
+        ImageIO.write(this.image, type, fos);
+        fos.close();
+    }
+
+    /**
+     * show the image as JFrame on desktop
+     */
+    public void show() {
+        JLabel label = new JLabel(new ImageIcon(this.image));
+        JFrame f = new JFrame();
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        f.getContentPane().add(label);
+        f.pack();
+        f.setVisible(true);
     }
     
     /*

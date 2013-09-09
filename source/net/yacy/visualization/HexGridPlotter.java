@@ -25,10 +25,8 @@
 package net.yacy.visualization;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-
-import javax.imageio.ImageIO;
+import net.yacy.cora.util.ConcurrentLog;
 
 /*
  * hexagonal grid plotter
@@ -151,23 +149,21 @@ public class HexGridPlotter extends RasterPlotter {
         }
     }
     
-    public static void main(final String[] args) {
-        // go into headless awt mode
-        System.setProperty("java.awt.headless", "true");
-        
-        final HexGridPlotter picture = new HexGridPlotter(640, 480, DrawMode.MODE_SUB, "FFFFFF", 18);
-        picture.drawGrid("555555");
-        picture.setColor(Long.parseLong("33ff33", 16));
+    private static HexGridPlotter testImage0(int width, int height, String bgcolor, String gridcolor, String dotcolor) {
+        final HexGridPlotter picture = new HexGridPlotter(width, height, bgcolor.equals("000000") ? DrawMode.MODE_ADD : DrawMode.MODE_SUB, bgcolor, 18);
+        picture.drawGrid(gridcolor);
+        long dotcolori = Long.parseLong(dotcolor, 16);
+        picture.setColor(dotcolori);
         picture.gridDot(0, 0, 5, true, 100); picture.gridPrint(0, 0, 5, "", "0,0", -1);
         for (int i = 1; i < picture.gridHeight() -1; i++) {
-            picture.setColor(Long.parseLong("33ff33", 16));picture.gridDot(0, i, 3, true, 100);
-            picture.setColor(Long.parseLong("334433", 16));picture.gridPrint(0, i, 3, "", "0," + i, -1);
+            picture.setColor(dotcolori);picture.gridDot(0, i, 3, true, 100);
+            picture.setColor(dotcolori);picture.gridPrint(0, i, 3, "", "0," + i, -1);
         }
         for (int i = 1; i < picture.gridWidth() -1; i++) {
-            picture.setColor(Long.parseLong("33ff33", 16));picture.gridDot(i, 0, 3, true, 100);
-            picture.setColor(Long.parseLong("334433", 16));picture.gridPrint315(i, 0, 3, i + ",0");
+            picture.setColor(dotcolori);picture.gridDot(i, 0, 3, true, 100);
+            picture.setColor(dotcolori);picture.gridPrint315(i, 0, 3, i + ",0");
         }
-        picture.setColor(Long.parseLong("33ff33", 16));
+        picture.setColor(dotcolori);
         picture.gridDot(0, picture.gheight - 1, 5, true, 100); picture.gridPrint(0, picture.gheight - 1, 5, "0, grid.gheight - 1", "", -1);
         picture.gridDot(picture.gwidth - 1, 0, 5, true, 100); picture.gridPrint(picture.gwidth - 1, 0, 5, "", "grid.gwidth - 1, 0", -1);
         picture.gridDot(picture.gwidth - 1, picture.gheight - 1, 5, true, 100); picture.gridPrint(picture.gwidth - 1, picture.gheight - 1, 5, "grid.gwidth - 1, grid.gheight - 1", "", 1);
@@ -191,13 +187,23 @@ public class HexGridPlotter extends RasterPlotter {
         picture.gridPrint(picture.gwidth / 2, picture.gheight / 2, 5, "HOME PEER", "ANON_23", 0);
         //grid.gridLine(grid.gwidth - 2, grid.gheight - 2, grid.gwidth / 2, grid.gheight / 2);
         picture.gridLine(picture.gwidth / 2, picture.gheight / 2, picture.gwidth - 1, picture.gheight - 4);
+        return picture;
+    }
+    
+    public static void main(final String[] args) {
+        // go into headless awt mode
+        //System.setProperty("java.awt.headless", "true");
+        AnimationPlotter animation = new AnimationPlotter();
+        for (int i = 640; i < 700; i++) {
+            animation.addFrame(testImage0(i, 480, "000000", "555555", "33ff33").getImage(), 10);
+        }
+        animation.show();
+        HexGridPlotter picture = testImage0(640, 480, "FFFFFF", "555555", "33ff33");
         
         final File file = new File("/Users/admin/Desktop/testimage.png");
-        try {
-            final FileOutputStream fos = new FileOutputStream(file);
-            ImageIO.write(picture.getImage(), "png", fos);
-            fos.close();
-        } catch (final IOException e) {}
+        try {picture.save(file, "png");} catch (final IOException e) {}
+        ConcurrentLog.shutdown();
+        if (!System.getProperty("java.awt.headless", "false").equals("true")) picture.show();
     }
     
 }

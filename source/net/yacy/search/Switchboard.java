@@ -2885,8 +2885,8 @@ public final class Switchboard extends serverSwitch {
         while (t-- > 0 && this.index.exists(ids).size() > 0) {
             try {Thread.sleep(100);} catch (final InterruptedException e) {}
             ConcurrentLog.fine("Switchboard", "STACKURL: waiting for deletion, t=" + t);
-            if (t == 20) this.index.fulltext().commit(true);
-            if (t == 40) this.index.fulltext().commit(false);
+            //if (t == 20) this.index.fulltext().commit(true);
+            if (t == 1) this.index.fulltext().commit(false);
         }
         
         // special handling of ftp protocol
