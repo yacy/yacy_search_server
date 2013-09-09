@@ -33,18 +33,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ClientIdentification;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -57,13 +57,11 @@ import org.w3c.dom.CharacterData;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 public class sitemapParser extends AbstractParser implements Parser {
 
     public sitemapParser() {
-        super("RSS Parser");
+        super("sitemap Parser");
         // unfortunately sitemap files have neither a mime type nor a typical file extension.
         //SUPPORTED_EXTENSIONS.add("php");
         //SUPPORTED_EXTENSIONS.add("xml");
@@ -73,17 +71,13 @@ public class sitemapParser extends AbstractParser implements Parser {
     public Document[] parse(final DigestURI url, final String mimeType,
             final String charset, final InputStream source)
             throws Failure, InterruptedException {
-        SitemapReader sitemap;
-        try {
-            sitemap = new SitemapReader(source);
-        } catch (IOException e) {
-            throw new Parser.Failure("Load error:" + e.getMessage(), url);
-        }
-
         final List<Document> docs = new ArrayList<Document>();
+        SitemapReader sitemap = new SitemapReader(source, ClientIdentification.yacyInternetCrawlerAgent);
+        sitemap.start();
         DigestURI uri;
         Document doc;
-        for (final URLEntry item: sitemap) try {
+        URLEntry item;
+        while ((item = sitemap.take()) != POISON_URLEntry) try {
             uri = new DigestURI(item.loc);
             doc = new Document(
                     uri,
@@ -92,19 +86,19 @@ public class sitemapParser extends AbstractParser implements Parser {
                     this,
                     null,
                     null,
-                    "",
+                    singleList(""),
                     "",
                     "",
                     new String[0],
-                    "",
+                    new ArrayList<String>(),
                     0.0f, 0.0f,
                     null,
                     null,
                     null,
-                    new HashMap<MultiProtocolURI, ImageEntry>(),
+                    new HashMap<DigestURI, ImageEntry>(),
                     false);
             docs.add(doc);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             continue;
         }
 
@@ -113,12 +107,11 @@ public class sitemapParser extends AbstractParser implements Parser {
         return da;
     }
 
-    public static SitemapReader parse(final DigestURI sitemapURL) throws IOException {
+    public static SitemapReader parse(final DigestURI sitemapURL, final ClientIdentification.Agent agent) throws IOException {
         // download document
+        ConcurrentLog.info("SitemapReader", "loading sitemap from " + sitemapURL.toNormalform(true));
         final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
-        final HTTPClient client = new HTTPClient();
-        client.setTimout(5000);
+        final HTTPClient client = new HTTPClient(agent);
         client.setHeader(requestHeader.entrySet());
         try {
             client.GET(sitemapURL.toString());
@@ -137,16 +130,10 @@ public class sitemapParser extends AbstractParser implements Parser {
                 contentStream = new GZIPInputStream(contentStream);
             }
             final ByteCountInputStream counterStream = new ByteCountInputStream(contentStream, null);
-            return sitemapParser.parse(counterStream);
-        } catch (IOException e) {
+            return new SitemapReader(counterStream, agent);
+        } catch (final IOException e) {
             throw e;
-        } finally {
-            client.finish();
         }
-    }
-
-    public static SitemapReader parse(final InputStream stream) throws IOException {
-        return new SitemapReader(stream);
     }
 
     /**
@@ -154,39 +141,69 @@ public class sitemapParser extends AbstractParser implements Parser {
      * http://www.sitemaps.org/schemas/sitemap/0.9
      * http://www.google.com/schemas/sitemap/0.84
      */
-    public static class SitemapReader extends ArrayList<URLEntry> {
-        private static final long serialVersionUID = 1337L;
-        public SitemapReader(final InputStream source) throws IOException {
-            org.w3c.dom.Document doc;
-            try { doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(source); }
-            catch (ParserConfigurationException e) { throw new IOException (e); }
-            catch (SAXParseException e) { throw new IOException (e); }
-            catch (SAXException e) { throw new IOException (e); }
-            catch (OutOfMemoryError e) { throw new IOException (e); }
-            NodeList sitemapNodes = doc.getElementsByTagName("sitemap");
-            for (int i = 0; i < sitemapNodes.getLength(); i++) {
-                String url = new SitemapEntry((Element) sitemapNodes.item(i)).url();
-                if (url != null && url.length() > 0) {
-                    try {
-                        final SitemapReader r = parse(new DigestURI(url));
-                        for (final URLEntry ue: r) this.add(ue);
-                    } catch (IOException e) {}
-                }
-            }
-            final NodeList urlEntryNodes = doc.getElementsByTagName("url");
-            for (int i = 0; i < urlEntryNodes.getLength(); i++) {
-                this.add(new URLEntry((Element) urlEntryNodes.item(i)));
-            }
+    public static class SitemapReader extends Thread {
+        private final InputStream source;
+        private final BlockingQueue<URLEntry> queue;
+        private final ClientIdentification.Agent agent;
+        public SitemapReader(final InputStream source, final ClientIdentification.Agent agent) {
+            this.source = source;
+            this.queue = new ArrayBlockingQueue<URLEntry>(10000);
+            this.agent = agent;
         }
         @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder(300);
-            for (final URLEntry entry: this) {
-                sb.append(entry.toString());
+        public void run() {
+            try {
+                org.w3c.dom.Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(this.source);
+                NodeList sitemapNodes = doc.getElementsByTagName("sitemap");
+                for (int i = 0; i < sitemapNodes.getLength(); i++) {
+                    String url = new SitemapEntry((Element) sitemapNodes.item(i)).url();
+                    if (url != null && url.length() > 0) {
+                        try {
+                            final SitemapReader r = parse(new DigestURI(url), agent);
+                            r.start();
+                            URLEntry item;
+                            while ((item = r.take()) != POISON_URLEntry) {
+                                try {
+                                    this.queue.put(item);
+                                } catch (final InterruptedException e) {
+                                    break;
+                                }
+                            }
+                        } catch (final IOException e) {}
+                    }
+                }
+                final NodeList urlEntryNodes = doc.getElementsByTagName("url");
+                for (int i = 0; i < urlEntryNodes.getLength(); i++) {
+                    try {
+                        this.queue.put(new URLEntry((Element) urlEntryNodes.item(i)));
+                    } catch (final InterruptedException e) {
+                        break;
+                    }
+                }
+            } catch (final Throwable e) {
+                ConcurrentLog.logException(e);
             }
-            return sb.toString();
+
+            try {
+                this.queue.put(POISON_URLEntry);
+            } catch (final InterruptedException e) {
+            }
+        }
+        /**
+         * retrieve the next entry, waiting until one becomes available.
+         * if no more are available, POISON_URLEntry is returned
+         * @return the next entry from the sitemap or POISON_URLEntry if no more are there
+         */
+        public URLEntry take() {
+            try {
+                return this.queue.take();
+            } catch (final InterruptedException e) {
+                return POISON_URLEntry;
+            }
         }
     }
+
+    public final static URLEntry POISON_URLEntry = new URLEntry(null);
 
     public static class URLEntry {
         public String loc, lastmod, changefreq, priority;
@@ -233,6 +250,7 @@ public class sitemapParser extends AbstractParser implements Parser {
     }
 
     private static String val(final Element parent, final String label, final String dflt) {
+        if (parent == null) return null;
         final Element e = (Element) parent.getElementsByTagName(label).item(0);
         if (e == null) return dflt;
         final Node child = e.getFirstChild();

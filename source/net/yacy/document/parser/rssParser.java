@@ -37,7 +37,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import net.yacy.cora.document.Hit;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.document.AbstractParser;
@@ -66,7 +65,7 @@ public class rssParser extends AbstractParser implements Parser {
         RSSReader rssReader;
         try {
             rssReader = new RSSReader(RSSFeed.DEFAULT_MAXSIZE, source, RSSReader.Type.none);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new Parser.Failure("Load error:" + e.getMessage(), url, e);
         }
 
@@ -75,13 +74,13 @@ public class rssParser extends AbstractParser implements Parser {
         final List<Document> docs = new ArrayList<Document>();
         DigestURI uri;
         Set<String> languages;
-        Map<MultiProtocolURI, Properties> anchors;
+        Map<DigestURI, Properties> anchors;
         Document doc;
         for (final Hit item: feed) try {
             uri = new DigestURI(item.getLink());
             languages = new HashSet<String>();
             languages.add(item.getLanguage());
-            anchors = new HashMap<MultiProtocolURI, Properties>();
+            anchors = new HashMap<DigestURI, Properties>();
             Properties p = new Properties();
             p.put("name", item.getTitle());
             anchors.put(uri, p);
@@ -92,20 +91,20 @@ public class rssParser extends AbstractParser implements Parser {
                     this,
                     languages,
                     item.getSubject(),
-                    item.getTitle(),
+                    singleList(item.getTitle()),
                     item.getAuthor(),
                     item.getCopyright(),
                     new String[0],
-                    item.getDescription(),
+                    item.getDescriptions(),
                     item.getLon(),
                     item.getLat(),
                     null,
                     anchors,
                     null,
-                    new HashMap<MultiProtocolURI, ImageEntry>(),
+                    new HashMap<DigestURI, ImageEntry>(),
                     false);
             docs.add(doc);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             continue;
         }
 

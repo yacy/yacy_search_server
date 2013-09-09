@@ -1,4 +1,4 @@
-// imagetest.java 
+// imagetest.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -25,45 +25,15 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 import net.yacy.visualization.PrintTool;
 import net.yacy.visualization.RasterPlotter;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class imagetest {
-    
-    public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        /*
-        BufferedImage bi = new BufferedImage(640, 400, BufferedImage.TYPE_INT_RGB); 
-        Graphics2D g = bi.createGraphics();
-        g.setBackground(Color.white);
-        g.clearRect(0, 0, 640, 400);
-        
-        g.setColor(new Color(200, 200, 0));
-        g.drawRect(100, 50, 40, 30);
-        
-        g.setColor(new Color(0, 0, 200));
-        try {
-            Class[] pType    = {Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE};
-            Object[] pParam = new Integer[]{new Integer(66), new Integer(55), new Integer(80), new Integer(80)};
-            
-            String com = "drawRect";
-            Method m = g.getClass().getMethod(com, pType);
-            Object result = m.invoke(g, pParam);
-        } catch (NoSuchMethodException e) {
-            Log.logException(e);
-        } catch (IllegalAccessException e) {
-            Log.logException(e);
-        } catch (InvocationTargetException e) {
-            Log.logException(e);
-        }
-        
-        WritableRaster r = bi.getRaster();
-        for (int i = 20; i < 100; i++) r.setPixel(i, 30, new int[]{255, 0, 0});
-        for (int i = 20; i < 100; i++) r.setPixel(i, 32, new int[]{0, 255, 0});
-        for (int i = 20; i < 100; i++) r.setPixel(i, 34, new int[]{0, 0, 255});
-        return bi;
-        */
+
+    public static RasterPlotter respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
+
         final RasterPlotter img = new RasterPlotter(800, 600, RasterPlotter.DrawMode.MODE_SUB, "FFFFFF");
         img.setColor(RasterPlotter.GREY);
         for (int y = 0; y < 600; y = y + 50) PrintTool.print(img, 0, 6 + y, 0, Integer.toString(y), -1);
@@ -76,7 +46,7 @@ public class imagetest {
         img.dot(620, 200, 90, true, 100);
         img.setColor(RasterPlotter.RED);
         img.arc(300, 270, 30, 70, 100);
-        img.setColor("330000");
+        img.setColor(Long.parseLong("330000", 16));
         img.arc(220, 110, 50, 90, 30, 110);
         img.arc(210, 120, 50, 90, 30, 110);
         img.setColor(RasterPlotter.GREY);
@@ -87,7 +57,7 @@ public class imagetest {
             img.setColor(i);
             img.dot(10 + 14 * (int) (i / 16), 200 + 14 * (int) (i % 16), 6, true, 100);
         }
-        img.setColor("008000");
+        img.setColor(Long.parseLong("008000", 16));
         img.dot(10 + 14 * 8, 200 + 14 * 8, 90, true, 100);
         /*
         for (long r = 0; r < 256; r = r + 16) {
@@ -98,9 +68,9 @@ public class imagetest {
                 }
             }
         }*/
-        img.setColor("0000A0");
+        img.setColor(Long.parseLong("0000A0", 16));
         img.arc(550, 400, 40, 81, 100);
-        img.setColor("010100");
+        img.setColor(Long.parseLong("010100", 16));
         for (int i = 0; i <= 360; i++) {
             img.arc(550, 400, 40, 41 + i/9, 0, i);
         }
@@ -112,7 +82,7 @@ public class imagetest {
             PrintTool.arcPrint(img, 550, 400, 100, angle, "ANGLE" + angle + ":" + (char) c);
         }
         return img;
-        
+
     }
-    
+
 }

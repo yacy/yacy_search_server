@@ -12,18 +12,18 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.table.SQLTable;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.table.Table;
-import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.visualization.ChartPlotter;
 
@@ -71,7 +71,7 @@ public class dbtest {
 
         public boolean isValid() {
             final String s = UTF8.String(this.value).trim();
-            if (s.length() == 0) return false;
+            if (s.isEmpty()) return false;
             final long source = Long.parseLong(s);
             return ByteBuffer.equals(this.key, randomHash(source, source));
         }
@@ -132,11 +132,11 @@ public class dbtest {
                 if (getTable_reference() != null) getTable_reference().put(getTable_test().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
             } catch (final IOException e) {
                 System.err.println(e);
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 System.exit(0);
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 System.err.println(e);
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 System.exit(0);
             }
         }
@@ -156,7 +156,7 @@ public class dbtest {
                 if (getTable_reference() != null) getTable_reference().delete(entry.getKey());
             } catch (final IOException e) {
                 System.err.println(e);
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 System.exit(0);
             }
         }
@@ -195,7 +195,7 @@ public class dbtest {
                 }
             } catch (final IOException e) {
                 System.err.println(e);
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 System.exit(0);
             }
         }
@@ -267,7 +267,7 @@ public class dbtest {
         System.out.println("*** YaCy Database Test");
         // print out command line
         boolean assertionenabled = false;
-        assert assertionenabled = true;
+        assert (assertionenabled = true) == true; // compare to true to remove warning: "Possible accidental assignement"
         if (assertionenabled) System.out.println("*** Asserts are enabled"); else System.out.println("*** HINT: YOU SHOULD ENABLE ASSERTS! (include -ea in start arguments");
         final long mb = MemoryControl.available() / 1024 / 1024;
         System.out.println("*** RAM = " + mb + " MB");
@@ -431,7 +431,7 @@ public class dbtest {
                     ", total=" + (afterclose - startup));
             profiler.terminate();
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 }
@@ -461,7 +461,7 @@ final class memprofiler extends Thread {
             int seconds0 = 0, kilobytes0 = 0;
             int seconds1 = 0, kilobytes1 = 0;
             while (this.run) {
-                this.memChart.setColor("FF0000");
+                this.memChart.setColor(Long.parseLong("FF0000", 16));
                 seconds1 = (int) ((System.currentTimeMillis() - this.start) / 1000);
                 kilobytes1 = (int) (MemoryControl.used() / 1024);
                 this.memChart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_LEFT, seconds0, kilobytes0, seconds1, kilobytes1);
@@ -470,7 +470,7 @@ final class memprofiler extends Thread {
                 try {Thread.sleep(100);} catch (final InterruptedException e) {}
             }
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         ImageIO.setUseCache(false);
         try {
@@ -478,7 +478,7 @@ final class memprofiler extends Thread {
         } catch (final IOException e) {
             // do noting
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 

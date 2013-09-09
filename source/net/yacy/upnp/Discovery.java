@@ -156,7 +156,7 @@ public class Discovery {
   }
  
   private static UPNPRootDevice[] discoverDevices( int timeOut, int ttl, int mx, String searchTarget, NetworkInterface ni ) throws IOException {
-    if ( searchTarget == null || searchTarget.trim().length() == 0  ) {
+    if ( searchTarget == null || searchTarget.trim().isEmpty()  ) {
       throw new IllegalArgumentException( "Illegal searchTarget" );
     }
     
@@ -170,7 +170,7 @@ public class Discovery {
             try {
               UPNPRootDevice device = new UPNPRootDevice( location, maxAge, firmware, usn, udn );
               devices.put( usn, device );
-            } catch ( Exception ex ) {
+            } catch (final  Exception ex ) {
               log.error( "Error occured during upnp root device object creation from location " + location, ex );             
             }
           }
@@ -200,7 +200,7 @@ public class Discovery {
 
     try {
         Thread.sleep( timeOut );
-    } catch ( InterruptedException ex ) {
+    } catch (final  InterruptedException ex ) {
       // don't care
     }
 

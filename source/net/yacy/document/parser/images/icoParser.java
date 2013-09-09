@@ -32,7 +32,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public class icoParser {
@@ -107,9 +107,9 @@ public class icoParser {
             fis = new FileInputStream(in);
             fis.read(file);
         } catch (final FileNotFoundException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         
         final icoParser parser = new icoParser(file);
@@ -117,7 +117,7 @@ public class icoParser {
         try {
             ImageIO.write(parser.getImage(0), "PNG", out);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
     

@@ -30,6 +30,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import net.yacy.cora.document.RSSMessage.Token;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
@@ -46,7 +48,7 @@ public class RSSReader extends DefaultHandler {
     private final RSSFeed theChannel;
     private Type type;
 
-    public enum Type { rss, atom, rdf, none };
+    public enum Type { rss, atom, rdf, none }
 
     private RSSReader(final int maxsize) {
         this.theChannel = new RSSFeed(maxsize);
@@ -57,21 +59,21 @@ public class RSSReader extends DefaultHandler {
         this.parsingItem = false;
         this.type = Type.none;
     }
-    
+
     private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
     private static SAXParser getParser() throws SAXException {
     	SAXParser parser = tlSax.get();
     	if (parser == null) {
     		try {
 				parser = SAXParserFactory.newInstance().newSAXParser();
-			} catch (ParserConfigurationException e) {
+			} catch (final ParserConfigurationException e) {
 				throw new SAXException(e.getMessage(), e);
 			}
     		tlSax.set(parser);
     	}
     	return parser;
     }
-    
+
     public RSSReader(final int maxsize, InputStream stream, final Type type) throws IOException {
         this(maxsize);
         this.type = type;
@@ -182,10 +184,10 @@ public class RSSReader extends DefaultHandler {
             }
             this.item = new RSSMessage();
             this.parsingItem = true;
-        } else if (this.parsingItem && this.type == Type.atom && "link".equals(tag)) {
+        } else if (this.parsingItem && this.type == Type.atom && "link".equals(tag) && (atts.getValue("type") == null || atts.getValue("type").startsWith("text"))) {
             final String url = atts.getValue("href");
-            if (url != null && url.length() > 0) this.item.setValue("link", url);
-        } else if ("image".equals(tag)) {
+            if (url != null && url.length() > 0) this.item.setValue(Token.link, url);
+        } else if ("image".equals(tag) || (this.parsingItem && this.type == Type.atom && "link".equals(tag) && (atts.getValue("type") == null || atts.getValue("type").startsWith("image")))) {
             this.parsingImage = true;
         }
     }
@@ -208,11 +210,11 @@ public class RSSReader extends DefaultHandler {
         } else if (this.parsingItem)  {
             final String value = this.buffer.toString().trim();
             this.buffer.setLength(0);
-            if (RSSMessage.tags.contains(tag) && value.length() > 0) this.item.setValue(tag, value);
+            if (RSSMessage.tags.contains(tag) && value.length() > 0) this.item.setValue(RSSMessage.valueOfNick(tag), value);
         } else if (this.parsingChannel) {
             final String value = this.buffer.toString().trim();
             this.buffer.setLength(0);
-            if (RSSMessage.tags.contains(tag)) this.item.setValue(tag, value);
+            if (RSSMessage.tags.contains(tag)) this.item.setValue(RSSMessage.valueOfNick(tag), value);
         }
     }
 

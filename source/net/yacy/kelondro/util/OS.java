@@ -34,9 +34,9 @@ import java.util.Properties;
 import java.util.Vector;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
-import net.yacy.kelondro.logging.Log;
-import de.anomic.server.serverCore;
+import net.yacy.server.serverCore;
 
 
 public final class OS {
@@ -54,9 +54,9 @@ public final class OS {
 	public static final String blankTypeString = "____";
 
 	// system-identification statics
-	public static final System  systemOS;
+	private static final System  systemOS;
 	public static final boolean isMacArchitecture;
-	public static final boolean isUnixFS;
+	private static final boolean isUnixFS;
 	public static final boolean canExecUnix;
 	public static final boolean isWindows;
 	public static final boolean isWin32;
@@ -95,7 +95,7 @@ public final class OS {
 	 * @return heap in -Xmx<i>[heap]</i>m
 	 * @author [DW], 07.02.2009
 	 */
-	public static int getWin32MaxHeap() {
+	private static int getWin32MaxHeap() {
 		int maxmem = 1000;
 		while(checkWin32Heap(maxmem)) maxmem += 100;
 		while(!checkWin32Heap(maxmem)) maxmem -= 10;
@@ -108,14 +108,14 @@ public final class OS {
 	 * @return true if possible
 	 * @author [DW], 07.02.2009
 	 */
-	public static boolean checkWin32Heap(final int mem){
+	private static boolean checkWin32Heap(final int mem){
 		String line = "";
         final List<String> processArgs = new ArrayList<String>();
         processArgs.add("java");
         processArgs.add("-Xms4m");
         processArgs.add("-Xmx" + Integer.toString(mem) + "m");
         try {
-    		line = ConsoleInterface.getLastLineConsoleOutput(processArgs, new Log("MEMCHECK"));
+    		line = ConsoleInterface.getLastLineConsoleOutput(processArgs, new ConcurrentLog("MEMCHECK"));
 		} catch (final IOException e) {
 			return false;
 		}
@@ -157,7 +157,7 @@ public final class OS {
 			try {
 				Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
 			} catch (final InterruptedException e) {
-				Log.logSevere("DEPLOY", "deploy of script file failed. file = " + scriptFile.getAbsolutePath(), e);
+				ConcurrentLog.severe("DEPLOY", "deploy of script file failed. file = " + scriptFile.getAbsolutePath(), e);
 				throw new IOException(e.getMessage());
 			}
 		}

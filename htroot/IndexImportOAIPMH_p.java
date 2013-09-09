@@ -31,20 +31,21 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.WorkTables;
 import net.yacy.document.importer.OAIPMHImporter;
 import net.yacy.document.importer.OAIPMHLoader;
 import net.yacy.document.importer.ResumptionToken;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.data.WorkTables;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class IndexImportOAIPMH_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
@@ -61,7 +62,8 @@ public class IndexImportOAIPMH_p {
                 DigestURI url = null;
                 try {
                     url = new DigestURI(oaipmhurl);
-                    final OAIPMHLoader r = new OAIPMHLoader(sb.loader, url, sb.surrogatesInPath, "oaipmh-one");
+                    ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+                    final OAIPMHLoader r = new OAIPMHLoader(sb.loader, url, sb.surrogatesInPath, agent);
                     final ResumptionToken rt = r.getResumptionToken();
                     prop.put("import-one", 1);
                     prop.put("import-one_count", (rt == null) ? "not available" : Integer.toString(rt.getRecordCounter()));
@@ -71,7 +73,7 @@ public class IndexImportOAIPMH_p {
                     // set next default url
                     try {
                         final DigestURI nexturl = (rt == null) ? null : rt.resumptionURL();
-                        if (rt != null) prop.put("defaulturl", (nexturl == null) ? "" : nexturl.toNormalform(true, false));
+                        if (rt != null) prop.put("defaulturl", (nexturl == null) ? "" : nexturl.toNormalform(true));
                     } catch (final MalformedURLException e) {
                         prop.put("defaulturl", e.getMessage());
                     } catch (final IOException e) {
@@ -79,11 +81,11 @@ public class IndexImportOAIPMH_p {
                         prop.put("defaulturl", e.getMessage());
                     }
                 } catch (final MalformedURLException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     prop.put("import-one", 2);
                     prop.put("import-one_error", e.getMessage());
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     prop.put("import-one", 2);
                     prop.put("import-one_error", e.getMessage());
                 }
@@ -95,13 +97,14 @@ public class IndexImportOAIPMH_p {
                 DigestURI url = null;
                 try {
                     url = new DigestURI(oaipmhurl);
-                    final OAIPMHImporter job = new OAIPMHImporter(sb.loader, url);
+                    ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+                    final OAIPMHImporter job = new OAIPMHImporter(sb.loader, agent, url);
                     job.start();
                     prop.put("status", 1);
                     prop.put("optiongetlist", 1);
                     prop.put("iframetype", 1);
                 } catch (final MalformedURLException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     prop.put("status", 2);
                     prop.put("status_message", e.getMessage());
                 }
@@ -127,14 +130,15 @@ public class IndexImportOAIPMH_p {
 
                 // start jobs for the sources
                 DigestURI url = null;
-                while (sourceList.size() > 0) {
+                ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+                while (!sourceList.isEmpty()) {
                     final String oaipmhurl = sourceList.remove(r.nextInt(sourceList.size()));
                     try {
                         url = new DigestURI(oaipmhurl);
-                        final OAIPMHImporter job = new OAIPMHImporter(sb.loader, url);
+                        final OAIPMHImporter job = new OAIPMHImporter(sb.loader, agent, url);
                         job.start();
                     } catch (final MalformedURLException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 }
             }

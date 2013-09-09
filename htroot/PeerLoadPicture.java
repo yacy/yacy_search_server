@@ -8,12 +8,12 @@ import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.peers.graphics.NetworkGraph;
 import net.yacy.peers.graphics.NetworkGraph.CircleThreadPiece;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class PeerLoadPicture {
 
-    public static Image respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static Image respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         int width = 800;
         int height = 600;

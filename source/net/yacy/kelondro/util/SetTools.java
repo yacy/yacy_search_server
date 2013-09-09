@@ -44,8 +44,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
 
 public final class SetTools {
 
@@ -157,8 +157,8 @@ public final class SetTools {
                             result.put(mentry1.getKey(), mentry1.getValue());
                         }
                     }
-                } catch (ConcurrentModificationException e) {
-                    Log.logWarning("SetTools", e.getMessage(), e);
+                } catch (final ConcurrentModificationException e) {
+                    ConcurrentLog.warn("SetTools", e.getMessage(), e);
                     break loop;
                 }
             }
@@ -485,7 +485,7 @@ public final class SetTools {
             int pos;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if ((line.length() > 0 && line.charAt(0) != '#') && ((pos = line.indexOf(sep)) > 0))
+                if ((!line.isEmpty() && line.charAt(0) != '#') && ((pos = line.indexOf(sep)) > 0))
                     map.put(line.substring(0, pos).trim().toLowerCase(), line.substring(pos + sep.length()).trim());
             }
         } catch (final IOException e) {
@@ -504,7 +504,7 @@ public final class SetTools {
             int pos;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if ((line.length() > 0 && line.charAt(0) != '#') && ((pos = line.indexOf(sep)) > 0)) {
+                if ((!line.isEmpty() && line.charAt(0) != '#') && ((pos = line.indexOf(sep)) > 0)) {
                     key = line.substring(0, pos).trim().toLowerCase();
                     value = line.substring(pos + sep.length()).trim();
                     if (!map.containsKey(key)) map.put(key, new ArrayList<String>());
@@ -527,10 +527,11 @@ public final class SetTools {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             String line;
             while ((line = br.readLine()) != null) {
+                int i = line.indexOf("|"); // ignore text after char (Solr stopwordfile syntax allows for # and | )
+                if (i>0) line = line.substring(0,i-1);
                 line = line.trim();
-                if (line.length() > 0 && line.charAt(0) != '#') list.add(line.trim().toLowerCase());
+                if (!line.isEmpty() && line.charAt(0) != '#') list.add(line.trim().toLowerCase());
             }
-            br.close();
         } catch (final IOException e) {
         } finally {
             if (br != null) try{br.close();}catch(final Exception e){}
@@ -558,6 +559,13 @@ public final class SetTools {
         return sb.toString();
     }
 
+    public static Object nth(Collection<?> c, int n) {
+        if (c == null || c.size() <= n) return null;
+        int i = 0;
+        for (Object o: c) if (i++ == n) return o;
+        return null;
+    }
+    
     // ------------------------------------------------------------------------------------------------
 
 

@@ -40,9 +40,10 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.NumberTools;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 
 /**
@@ -250,9 +251,11 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     private static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss Z"; // with numeric time zone indicator as defined in RFC5322
     private static final String PATTERN_RFC1036 = "EEEE, dd-MMM-yy HH:mm:ss zzz";
     private static final String PATTERN_ANSIC   = "EEE MMM d HH:mm:ss yyyy";
+    private static final String PATTERN_GSAFS = "yyyy-MM-dd";
     private static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
     private static final SimpleDateFormat FORMAT_RFC1036      = new SimpleDateFormat(PATTERN_RFC1036, Locale.US);
     private static final SimpleDateFormat FORMAT_ANSIC        = new SimpleDateFormat(PATTERN_ANSIC, Locale.US);
+    private static final SimpleDateFormat FORMAT_GSAFS        = new SimpleDateFormat(PATTERN_GSAFS, Locale.US);
     private static final TimeZone TZ_GMT = TimeZone.getTimeZone("GMT");
     private static final Calendar CAL_GMT = Calendar.getInstance(TZ_GMT, Locale.US);
 
@@ -284,6 +287,22 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             lastRFC1123long = date.getTime();
             lastRFC1123string = s;
             return s;
+        }
+    }
+
+    public static final String formatGSAFS(final Date date) {
+        if (date == null) return "";
+        synchronized (FORMAT_GSAFS) {
+            final String s = FORMAT_GSAFS.format(date);
+            return s;
+        }
+    }
+    
+    public static final Date parseGSAFS(final String datestring) {
+        try {
+            return FORMAT_GSAFS.parse(datestring);
+        } catch (final ParseException e) {
+            return null;
         }
     }
 
@@ -413,7 +432,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         final String mimeType = mime();
         if (mimeType == null) return null;
 
-        final String[] parts = mimeType.split(";");
+        final String[] parts = CommonPattern.SEMICOLON.split(mimeType);
         if (parts == null || parts.length <= 1) return null;
 
         for (int i=1; i < parts.length; i++) {
@@ -549,7 +568,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         theHeader.append("\r\n");
     }
 
-    public static MultiProtocolURI getRequestURL(final HashMap<String, Object> conProp) throws MalformedURLException {
+    public static DigestURI getRequestURL(final HashMap<String, Object> conProp) throws MalformedURLException {
         String host =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
         final String path =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH);     // always starts with leading '/'
         final String args =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);     // may be null if no args were given
@@ -563,7 +582,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             host = host.substring(0, pos);
         }
 
-        final MultiProtocolURI url = new MultiProtocolURI("http", host, port, (args == null) ? path : path + "?" + args);
+        final DigestURI url = new DigestURI("http", host, port, (args == null) ? path : path + "?" + args);
         return url;
     }
 
@@ -578,7 +597,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         int p;
         String line;
         while ((line = reader.readLine()) != null) {
-            if (line.length() == 0) break;
+            if (line.isEmpty()) break;
             if ((p = line.indexOf(':')) >= 0) {
                 // store a property
                 add(line.substring(0, p).trim(), line.substring(p + 1).trim());
@@ -611,12 +630,15 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             this.k = k;
             this.v = v;
         }
+        @Override
         public String getKey() {
             return this.k;
         }
+        @Override
         public String getValue() {
             return this.v;
         }
+        @Override
         public String setValue(final String v) {
             final String r = this.v;
             this.v = v;

@@ -27,10 +27,10 @@ import java.util.Random;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.crawler.data.ResultImages;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.ResultImages;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class Collage {
     private static           int fifoMax  = 20;
@@ -65,7 +65,7 @@ public class Collage {
         prop.put("emb", (embed) ? "0" : "1");
 
         if (nextOrigin != null) {
-        	System.out.println("NEXTORIGIN=" + nextOrigin.imageEntry.url().toNormalform(true, false));
+        	System.out.println("NEXTORIGIN=" + nextOrigin.imageEntry.url().toNormalform(true));
             if (fifoSize == 0 || origins[fifoPos] != nextOrigin) {
                 fifoPos = fifoPos + 1 >= fifoMax ? 0 : fifoPos + 1;
                 fifoSize = fifoSize + 1 > fifoMax ? fifoMax : fifoSize + 1;
@@ -99,17 +99,17 @@ public class Collage {
 
                 final long z = imgZIndex[i];
                 prop.put("imgurl_list_" + c + "_url",
-                       "<a href=\"" + baseURL.toNormalform(true, false) + "\">"
-                       + "<img src=\"" + imageURL.toNormalform(true, false) + "\" "
+                       "<a href=\"" + baseURL.toNormalform(true) + "\">"
+                       + "<img src=\"" + imageURL.toNormalform(true) + "\" "
                        + "style=\""
                        + ((imgWidth[i] == 0 || imgHeight[i] == 0) ? "" : "width:" + imgWidth[i] + "px;height:" + imgHeight[i] + "px;")
                        + "position:absolute;top:" + (imgPosY[i] + yOffset)
                        + "px;left:" + imgPosX[i]
                        + "px;z-index:" + z + "\" "
                        + "id=\"col" + z + "\" "
-					   + "alt=\"" + baseURL.toNormalform(true, false) + "\" "
+					   + "alt=\"" + baseURL.toNormalform(true) + "\" "
                        + "onmouseover=\"raise(" + z + ")\" onmouseout=\"lower(" + z + ")\" "
-                       + "title=\"" + baseURL.toNormalform(true, false) + "\" />"
+                       + "title=\"" + baseURL.toNormalform(true) + "\" />"
                        + "</a><br />");
                 c++;
             }

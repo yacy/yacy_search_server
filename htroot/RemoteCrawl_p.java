@@ -31,18 +31,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.WorkTables;
 import net.yacy.peers.PeerActions;
 import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.data.WorkTables;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class RemoteCrawl_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -69,14 +69,16 @@ public class RemoteCrawl_p {
             }
         }
 
+        // set seed information directly
+        sb.peers.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
+        
         // write remote crawl request settings
-        prop.put("crawlResponse", sb.getConfigBool("crawlResponse", false) ? "1" : "0");
+        prop.put("disabled", !sb.peers.mySeed().isActive() && !sb.peers.mySeed().getFlagAcceptRemoteCrawl() ? 1 : 0);
+        prop.put("crawlResponse", sb.peers.mySeed().getFlagAcceptRemoteCrawl() ? 1 : 0);
         long RTCbusySleep = Math.max(1, env.getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 100));
         final int RTCppm = (int) (60000L / RTCbusySleep);
         prop.put("acceptCrawlLimit", RTCppm);
 
-        // set seed information directly
-        sb.peers.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
 
         // -------------------------------------------------------------------------------------
         // write network list

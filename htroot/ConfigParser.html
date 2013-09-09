@@ -16,7 +16,7 @@
   </head>
   <body id="Settings">
     #%env/templates/header.template%#
-    #%env/templates/submenuConfig.template%#
+    #%env/templates/submenuIndexControl.template%#
     <h2>Parser Configuration</h2>
 <form id="parsersettings" action="ConfigParser.html" method="post" enctype="multipart/form-data">
 <fieldset><legend id="parser">Content Parser Settings</legend>
@@ -47,7 +47,7 @@
   </tr>#{/mime}#
   #{/parser}#
   <tr class="TableCellDark">
-    <td colspan="2" class="small" ><input type="submit" name="parserSettings" value="Submit" /></td>
+    <td colspan="2" class="small" ><input type="submit" name="parserSettings" value="Submit" class="submitready"/></td>
   </tr>
 </table>
 </fieldset>

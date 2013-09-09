@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -31,19 +32,19 @@ import java.util.regex.Pattern;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.WorkTables;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.QueryParams;
-import de.anomic.data.WorkTables;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class Table_API_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
@@ -73,58 +74,53 @@ public class Table_API_p {
             typefilter = Pattern.compile(post.get("filter", ".*"));
         }
 
-        boolean scheduleevent = false; // flag if schedule info of row changes
-        String current_schedule_pk = ""; // pk of changed schedule data row
-        if (post != null && post.containsKey("scheduleevent")) {
-            scheduleevent = post.get("scheduleevent", "false").equalsIgnoreCase("true");
-            prop.put("scheduleevent", "false");
-            current_schedule_pk = post.get("current_schedule_pk", "");
+        // process scheduler and event input actions
+        boolean scheduleeventaction = false; // flag if schedule info of row changes
+        String current_pk = ""; // pk of changed schedule data row
+        if (post != null && post.containsKey("scheduleeventaction")) {
+            scheduleeventaction = post.get("scheduleeventaction", "false").equalsIgnoreCase("true");
+            prop.put("scheduleeventaction", "false");
+            current_pk = post.get("current_pk", "");
         }
-        if (scheduleevent && !current_schedule_pk.isEmpty()) {
-            if (post != null && post.containsKey("repeat_select_" + current_schedule_pk)  ) {
-                try {
-                    final String action = post.get("repeat_select_" + current_schedule_pk, "off");
-                    if (action.equals("on")) {
-                        Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME, current_schedule_pk.getBytes());
-                        if (row != null) {
-                            row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 7);
-                            row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "days");
-                            WorkTables.calculateAPIScheduler(row, false);
-                            sb.tables.update(WorkTables.TABLE_API_NAME, row);
-                        }
+        if (post != null && scheduleeventaction && !current_pk.isEmpty()) {
+            try {
+                Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME, current_pk.getBytes());
+                if (row != null) {
+                    String action;
+                    
+                    // events
+                    if (post.containsKey("event_select_" + current_pk) && post.get("event_select_" + current_pk, "off").equals("on")) {
+                        row.put(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "regular");
+                        row.put(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, "startup");
                     }
-                } catch (IOException e) {
-                    Log.logException(e);
-                } catch (RowSpaceExceededException e) {
-                    Log.logException(e);
-                }
-            }
-
-            if (post != null && post.containsKey("repeat_time_" + current_schedule_pk)  ) {
-                try {
-                    final String action = post.get("repeat_time_" + current_schedule_pk, "off");
-                    final Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME, current_schedule_pk.getBytes());
-                    if (row != null) {
-                        if ("off".equals(action)) {
+    
+                    if (post.containsKey("event_kind_" + current_pk)  ) {
+                        if ("off".equals(action = post.get("event_kind_" + current_pk, "off"))) {
+                            row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, "");
+                        }
+                        row.put(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, action);
+                    }
+    
+                    if (post.containsKey("event_action_" + current_pk)  ) {
+                        row.put(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, post.get("event_action_" + current_pk, "startup"));
+                    }
+                    
+                    // scheduler
+                    if (post.containsKey("repeat_select_" + current_pk) && post.get("repeat_select_" + current_pk, "off").equals("on")) {
+                        row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 7);
+                        row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "days");
+                    }
+    
+                    if (post.containsKey("repeat_time_" + current_pk)  ) {
+                        if ("off".equals(action = post.get("repeat_time_" + current_pk, "off"))) {
                             row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
                         } else {
                             row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, Integer.parseInt(action));
                         }
-                        WorkTables.calculateAPIScheduler(row, false);
-                        sb.tables.update(WorkTables.TABLE_API_NAME, row);
                     }
-                } catch (IOException e) {
-                    Log.logException(e);
-                } catch (RowSpaceExceededException e) {
-                    Log.logException(e);
-                }
-            }
-
-            if (post != null && post.containsKey("repeat_unit_" + current_schedule_pk)  ) {
-                try {
-                    final String action = post.get("repeat_unit_" + current_schedule_pk, "seldays");
-                    final Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME, current_schedule_pk.getBytes());
-                    if (row != null) {
+    
+                    if (post.containsKey("repeat_unit_" + current_pk)  ) {
+                        action = post.get("repeat_unit_" + current_pk, "seldays");
                         int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 1);
                         row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, action.substring(3));
                         if (action.equals("selminutes") && time > 0 && time < 10) {
@@ -139,25 +135,64 @@ public class Table_API_p {
                         if (action.equals("seldays") && time > 30) {
                             row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 30);
                         }
-                        WorkTables.calculateAPIScheduler(row, false);
-                        sb.tables.update(WorkTables.TABLE_API_NAME, row);
                     }
-                } catch (IOException e) {
-                    Log.logException(e);
-                } catch (RowSpaceExceededException e) {
-                    Log.logException(e);
+                    
+                    // switch scheduler off if event kind is 'regular'
+                    final String kind = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
+                    if ("regular".equals(kind)) row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
+                    
+                    WorkTables.calculateAPIScheduler(row, false);
+                    sb.tables.update(WorkTables.TABLE_API_NAME, row);
                 }
-            }
+            } catch (final Throwable e) { ConcurrentLog.logException(e); }
         }
+        
         if (post != null && !post.get("deleterows", "").isEmpty()) {
             for (final Map.Entry<String, String> entry : post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) {
                     try {
                         sb.tables.delete(WorkTables.TABLE_API_NAME, entry.getValue().substring(5).getBytes());
-                    } catch (IOException e) {
-                        Log.logException(e);
+                    } catch (final IOException e) {
+                        ConcurrentLog.logException(e);
                     }
                 }
+            }
+        }
+        
+        if (post != null && !post.get("deleteold", "").isEmpty()) {
+            int days = post.getInt("deleteoldtime", 365);
+            try {
+                Iterator<Row> ri = sb.tables.iterator(WorkTables.TABLE_API_NAME);
+                Row row;
+                Date now = new Date();
+                Date limit = new Date(now.getTime() - 1000L * 60L * 60L * 24L * days);
+                List<byte[]> pkl = new ArrayList<byte[]>();
+                while (ri.hasNext()) {
+                    row = ri.next();
+                    Date d = row.get(WorkTables.TABLE_API_COL_DATE_RECORDING, now);
+                    if (d.before(limit)) {
+                        pkl.add(row.getPK());
+                    }
+                }
+                for (byte[] pk: pkl) {
+                    sb.tables.delete(WorkTables.TABLE_API_NAME, pk);
+                }
+                
+                // store this call as api call; clean the call a bit before
+                Iterator<Entry<String, String[]>> ei = post.getSolrParams().getMap().entrySet().iterator();
+                Entry<String, String[]> entry;
+                while (ei.hasNext()) {
+                    entry = ei.next();
+                    if (entry.getKey().startsWith("event_select")) {
+                        ei.remove();
+                    }
+                    if (entry.getKey().startsWith("repeat_select")) {
+                        ei.remove();
+                    }
+                }
+                sb.tables.recordAPICall(post, "Table_API_p.html", WorkTables.TABLE_API_TYPE_STEERING, "delete API calls older than " + days + " days");
+            } catch (final IOException e) {
+                ConcurrentLog.logException(e);
             }
         }
 
@@ -174,7 +209,7 @@ public class Table_API_p {
             final Map<String, Integer> l = sb.tables.execAPICalls(Domains.LOCALHOST, (int) sb.getConfigLong("port", 8090), sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""), pks);
 
             // construct result table
-            prop.put("showexec", l.size() > 0 ? 1 : 0);
+            prop.put("showexec", l.isEmpty() ? 0 : 1);
 
             final Iterator<Map.Entry<String, Integer>> resultIterator = l.entrySet().iterator();
             Map.Entry<String, Integer> record;
@@ -241,8 +276,6 @@ public class Table_API_p {
                 final Date date_last_exec = row.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, date);
                 final Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
                 final int callcount = row.get(WorkTables.TABLE_API_COL_APICALL_COUNT, 1);
-                final String unit = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "days");
-                final int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
                 prop.put("showtable_list_" + count + "_inline", inline ? 1 : 0);
                 prop.put("showtable_list_" + count + "_dark", dark ? 1 : 0);
                 dark = !dark;
@@ -252,21 +285,50 @@ public class Table_API_p {
                 prop.put("showtable_list_" + count + "_dateRecording", date_recording == null ? "-" : DateFormat.getDateTimeInstance().format(date_recording));
                 prop.put("showtable_list_" + count + "_dateLastExec", date_last_exec == null ? "-" : DateFormat.getDateTimeInstance().format(date_last_exec));
                 prop.put("showtable_list_" + count + "_dateNextExec", date_next_exec == null ? "-" : DateFormat.getDateTimeInstance().format(date_next_exec));
-                prop.put("showtable_list_" + count + "_selectedMinutes", unit.equals("minutes") ? 1 : 0);
-                prop.put("showtable_list_" + count + "_selectedHours", unit.equals("hours") ? 1 : 0);
-                prop.put("showtable_list_" + count + "_selectedDays", (unit.length() == 0 || unit.equals("days")) ? 1 : 0);
-                prop.put("showtable_list_" + count + "_repeatTime", time);
                 prop.put("showtable_list_" + count + "_type", row.get(WorkTables.TABLE_API_COL_TYPE));
                 prop.put("showtable_list_" + count + "_comment", row.get(WorkTables.TABLE_API_COL_COMMENT));
                 prop.putHTML("showtable_list_" + count + "_inline_url", "http://" + sb.myPublicIP() + ":" + sb.getConfig("port", "8090") + UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)));
+                prop.put("showtable_list_" + count + "_scheduler_inline", inline ? "true" : "false");
+                prop.put("showtable_list_" + count + "_scheduler_filter", typefilter.pattern());
+                prop.put("showtable_list_" + count + "_scheduler_query", query.pattern());
+                prop.put("showtable_list_" + count + "_scheduler_startRecord", startRecord);
+                prop.put("showtable_list_" + count + "_scheduler_maximumRecords", maximumRecords);
+                
+                // events
+                final String kind = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
+                final String action = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, "startup");
+                prop.put("showtable_list_" + count + "_event_pk", UTF8.String(row.getPK()));
+                boolean schedulerDisabled = "regular".equals(kind);
+                if ("off".equals(kind)) {
+                    prop.put("showtable_list_" + count + "_event", 0);
+                } else {
+                    prop.put("showtable_list_" + count + "_event", 1);
+                    prop.put("showtable_list_" + count + "_event_selectedoff", "off".equals(kind) ? 1 : 0);
+                    prop.put("showtable_list_" + count + "_event_selectedonce", "once".equals(kind) ? 1 : 0);
+                    prop.put("showtable_list_" + count + "_event_selectedregular", "regular".equals(kind) ? 1 : 0);
+                    prop.put("showtable_list_" + count + "_event_selectedstartup", "startup".equals(action) ? 1 : 0);
+                    for (int i = 0; i < 24; i++) {
+                        String is = Integer.toString(i);
+                        if (is.length() == 1) is = "0" + is;
+                        is = is + "00";
+                        prop.put("showtable_list_" + count + "_event_selected" + is, is.equals(action) ? 1 : 0);
+                    }
+                }
 
+                // scheduler
+                final String unit = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "days");
+                final int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
+                prop.put("showtable_list_" + count + "_selectedMinutes", unit.equals("minutes") ? 1 : 0);
+                prop.put("showtable_list_" + count + "_selectedHours", unit.equals("hours") ? 1 : 0);
+                prop.put("showtable_list_" + count + "_selectedDays", (unit.isEmpty() || unit.equals("days")) ? 1 : 0);
+                prop.put("showtable_list_" + count + "_scheduler_pk", UTF8.String(row.getPK()));
+                prop.put("showtable_list_" + count + "_scheduler_disabled", schedulerDisabled ? 1 : 0);
+                prop.put("showtable_list_" + count + "_repeatTime", time);
                 if (time == 0) {
                     prop.put("showtable_list_" + count + "_scheduler", 0);
-                    prop.put("showtable_list_" + count + "_scheduler_pk", UTF8.String(row.getPK()));
                 } else {
                     scheduledactions = true;
                     prop.put("showtable_list_" + count + "_scheduler", 1);
-                    prop.put("showtable_list_" + count + "_scheduler_pk", UTF8.String(row.getPK()));
                     prop.put("showtable_list_" + count + "_scheduler_scale_" + 0 + "_time", "off");
                     prop.put("showtable_list_" + count + "_scheduler_selectedMinutes", 0);
                     prop.put("showtable_list_" + count + "_scheduler_selectedHours", 0);
@@ -296,12 +358,8 @@ public class Table_API_p {
                         prop.put("showtable_list_" + count + "_scheduler_scale", 31);
                         prop.put("showtable_list_" + count + "_scheduler_selectedDays", 1);
                     }
+                    
                 }
-                prop.put("showtable_list_" + count + "_scheduler_inline", inline ? "true" : "false");
-                prop.put("showtable_list_" + count + "_scheduler_filter", typefilter.pattern());
-                prop.put("showtable_list_" + count + "_scheduler_query", query.pattern());
-                prop.put("showtable_list_" + count + "_scheduler_startRecord", startRecord);
-                prop.put("showtable_list_" + count + "_scheduler_maximumRecords", maximumRecords);
                 count++;
             }
             if (scheduledactions) {
@@ -310,8 +368,8 @@ public class Table_API_p {
             } else {
                 prop.put("showschedulerhint", 0);
             }
-        } catch (IOException e) {
-            Log.logException(e);
+        } catch (final IOException e) {
+            ConcurrentLog.logException(e);
         }
         prop.put("showtable_list", count);
         prop.put("showtable_num", count);
@@ -322,7 +380,7 @@ public class Table_API_p {
         prop.put("showtable_inline", (inline) ? 1 : 0);
         prop.put("showtable_filter", typefilter.pattern());
         prop.put("showtable_query", query.pattern().replaceAll("\\.\\*", ""));
-        if (tablesize >= 50) {
+        if (tablesize >= maximumRecords) {
             prop.put("showtable_navigation", 1);
             prop.put("showtable_navigation_startRecord", startRecord);
             prop.put("showtable_navigation_to", Math.min(tablesize, startRecord + maximumRecords));

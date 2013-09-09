@@ -26,21 +26,25 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.Memory;
+import net.yacy.crawler.CrawlSwitchboard;
+import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.io.ByteCount;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class status_p {
 
     public static final String STATE_RUNNING = "running";
     public static final String STATE_PAUSED = "paused";
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -51,24 +55,17 @@ public class status_p {
         prop.put("rejected", "0");
         sb.updateMySeed();
         final int cacheMaxSize = (int) sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 10000);
-        prop.putNum("ppm", sb.currentPPM());
+        prop.putNum("ppm", Switchboard.currentPPM());
         prop.putNum("qpm", sb.peers.mySeed().getQPM());
-        prop.putNum("wordCacheSize", segment.termIndex().getBufferSize());
+        prop.putNum("wordCacheSize", segment.RWIBufferCount());
         prop.putNum("wordCacheMaxSize", cacheMaxSize);
-
-        // crawl queues
-        prop.putNum("localCrawlSize", sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount());
-        prop.putNum("limitCrawlSize", sb.crawlQueues.limitCrawlJobSize());
-        prop.putNum("remoteCrawlSize", sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount());
-        prop.putNum("noloadCrawlSize", sb.crawlQueues.noloadCrawlJobSize());
-        prop.putNum("loaderSize", sb.crawlQueues.workerSize());
-        prop.putNum("loaderMax", sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10));
-
+        
 		// memory usage and system attributes
         prop.putNum("freeMemory", MemoryControl.free());
         prop.putNum("totalMemory", MemoryControl.total());
         prop.putNum("maxMemory", MemoryControl.maxMemory());
         prop.putNum("processors", WorkflowProcessor.availableCPU);
+        prop.putNum("load", Memory.load());
 
 		// proxy traffic
 		prop.put("trafficIn", ByteCount.getGlobalCount());
@@ -76,8 +73,12 @@ public class status_p {
 		prop.put("trafficCrawler", ByteCount.getAccountCount(ByteCount.CRAWLER));
 
         // index size
-        prop.putNum("urlpublictextSize", segment.urlMetadata().size());
-        prop.putNum("rwipublictextSize", segment.termIndex().sizesMax());
+        prop.putNum("urlpublictextSize", segment.fulltext().collectionSize());
+        prop.putNum("urlpublictextSegmentCount", segment.fulltext().getDefaultConnector().getSegmentCount());
+        prop.putNum("webgraphSize", segment.fulltext().writeToWebgraph() ? segment.fulltext().webgraphSize() : 0);
+        prop.putNum("webgraphSegmentCount", segment.fulltext().writeToWebgraph() ? segment.fulltext().getWebgraphConnector().getSegmentCount() : 0);
+        prop.putNum("rwipublictextSize", segment.RWICount());
+        prop.putNum("rwipublictextSegmentCount", segment.RWISegmentCount());
 
         // loader queue
         prop.putNum("loaderSize", sb.crawlQueues.workerSize());
@@ -99,6 +100,29 @@ public class status_p {
         prop.putNum("noloadCrawlSize", sb.crawlQueues.noloadCrawlJobSize());
         prop.put("noloadCrawlState", STATE_RUNNING);
 
+        // generate crawl profile table
+        int count = 0;
+        final int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
+        CrawlProfile profile;
+        // put active crawls into list
+        String hosts = "";
+        for (final byte[] h: sb.crawler.getActive()) {
+            profile = sb.crawler.getActive(h);
+            if (CrawlSwitchboard.DEFAULT_PROFILES.contains(profile.name())) continue;
+            profile.putProfileEntry("crawlProfiles_list_", prop, true, false, count, domlistlength);
+            RowHandleSet urlhashes = sb.crawler.getURLHashes(h);
+            prop.put("crawlProfiles_list_" + count + "_count", urlhashes == null ? "unknown" : Integer.toString(urlhashes.size()));
+            if (profile.urlMustMatchPattern() == CrawlProfile.MATCH_ALL_PATTERN) {
+                hosts = hosts + "," + profile.name();
+            }
+            count++;
+        }
+        prop.put("crawlProfiles_list", count);
+        prop.put("crawlProfiles_count", count);
+        prop.put("crawlProfiles", count == 0 ? 0 : 1);
+        
+        prop.put("postprocessingRunning", Switchboard.postprocessingRunning ? 1 : 0);
+        
         // return rewrite properties
         return prop;
     }

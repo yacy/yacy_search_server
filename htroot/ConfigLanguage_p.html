@@ -6,7 +6,7 @@
   </head>
   <body id="ConfigLanguage">
     #%env/templates/header.template%#
-    #%env/templates/submenuPortalIntegration.template%#
+    #%env/templates/submenuSearchConfiguration.template%#
     <h2>Language selection</h2>
     <p>
       You can change the language of the YaCy-webinterface with translation files. 
@@ -29,9 +29,10 @@
               <option value="#[file]#" #[selected]#>#[name]#</option>#{/langlist}#
             </select>
           </dd>
+          <dt></dt>
           <dd>
-            <input type="submit" name="use_button" value="Use" />
-            <input type="submit" name="delete" value="Delete" />
+            <input type="submit" name="use_button" value="Use" class="submitready"/>
+            <input type="submit" name="delete" value="Delete" class="submitready"/>
           </dd>
         </dl>
       </fieldset>
@@ -49,7 +50,8 @@
           <dd>
             <input type="checkbox" name="use_lang" id="use_lang" value="on" checked="checked" />
           </dd>
-          <dd><input type="submit" value="Install" /></dd>
+          <dt></dt>
+          <dd><input type="submit" value="Install" class="submitready"/></dd>
         </dl>
         <p>Make sure that you only download data from trustworthy sources. The new language file
            might overwrite existing data if a file of the same name exists already.</p>

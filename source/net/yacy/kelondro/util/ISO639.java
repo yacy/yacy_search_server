@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ISO639 {
 
-    static final String[] codes = {
+    private static final String[] codes = {
         "aa-Afar",
         "ab-Abkhazian",
         "af-Afrikaans",
@@ -169,7 +169,7 @@ public class ISO639 {
         "zh-Chinese",
         "zu-Zulu"};
 
-    static Map<String, String> mapping = new ConcurrentHashMap<String, String>(codes.length);
+    private static Map<String, String> mapping = new ConcurrentHashMap<String, String>(codes.length);
 
     static {
         for (int i = 0; i < codes.length; i++) {

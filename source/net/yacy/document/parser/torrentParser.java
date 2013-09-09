@@ -28,7 +28,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +60,7 @@ public class torrentParser extends AbstractParser implements Parser {
         byte[] b = null;
         try {
             b = FileUtils.read(source);
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             throw new Parser.Failure(e1.toString(), location);
         }
         final BDecoder bd = new BDecoder(b);
@@ -93,29 +92,25 @@ public class torrentParser extends AbstractParser implements Parser {
             final BObject nameo = info.get("name");
             if (nameo != null) title = UTF8.String(nameo.getString());
         }
-        if (title == null || title.length() == 0) title = MultiProtocolURI.unescape(location.getFileName());
-        try {
-            return new Document[]{new Document(
-                    location,
-                    mimeType,
-                    charset,
-                    this,
-                    null,
-                    null,
-                    title, // title
-                    comment, // author
-                    location.getHost(),
-                    null,
-                    null,
-                    0.0f, 0.0f,
-                    filenames.toString().getBytes(charset),
-                    null,
-                    null,
-                    null,
-                    false)};
-        } catch (UnsupportedEncodingException e) {
-            throw new Parser.Failure("error in torrentParser, getBytes: " + e.getMessage(), location);
-        }
+        if (title == null || title.isEmpty()) title = MultiProtocolURI.unescape(location.getFileName());
+        return new Document[]{new Document(
+		        location,
+		        mimeType,
+		        charset,
+		        this,
+		        null,
+		        null,
+		        singleList(title), // title
+		        comment, // author
+		        location.getHost(),
+		        null,
+		        null,
+		        0.0f, 0.0f,
+		        filenames.toString(),
+		        null,
+		        null,
+		        null,
+		        false)};
     }
 
     public static void main(String[] args) {
@@ -123,14 +118,14 @@ public class torrentParser extends AbstractParser implements Parser {
             byte[] b = FileUtils.read(new File(args[0]));
             torrentParser parser = new torrentParser();
             Document[] d = parser.parse(new DigestURI("http://localhost/test.torrent"), null, "UTF-8", new ByteArrayInputStream(b));
-            Condenser c = new Condenser(d[0], true, true, LibraryProvider.dymLib, false);
+            Condenser c = new Condenser(d[0], true, true, LibraryProvider.dymLib, LibraryProvider.synonyms, false);
             Map<String, Word> w = c.words();
             for (Map.Entry<String, Word> e: w.entrySet()) System.out.println("Word: " + e.getKey() + " - " + e.getValue().posInText);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
-        } catch (Parser.Failure e) {
+        } catch (final Parser.Failure e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             e.printStackTrace();
         }
     }

@@ -24,6 +24,7 @@
 
 package net.yacy.cora.sorting;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -65,8 +66,10 @@ public interface ScoreMap<E> extends Iterable<E> {
     
     @Override
     public String toString();
-    
+
     public Iterator<E> keys(final boolean up);
+    
+    public Collection<E> keyList(final boolean up);
 
     public void inc(final E obj);
     public void inc(final E obj, final int incrementScore);

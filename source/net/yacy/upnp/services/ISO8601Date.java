@@ -26,8 +26,8 @@
  *    prior written permission. For written permission, please contact
  *    info@sbbi.net.
  *
- * 5. Products  derived from this software may not be called 
- *    "SuperBonBon Industries", nor may "SBBI" appear in their name, 
+ * 5. Products  derived from this software may not be called
+ *    "SuperBonBon Industries", nor may "SBBI" appear in their name,
  *    without prior written permission of SuperBonBon Industries.
  *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
@@ -42,7 +42,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This software  consists of voluntary contributions made by many individuals
- * on behalf of SuperBonBon Industries. For more information on 
+ * on behalf of SuperBonBon Industries. For more information on
  * SuperBonBon Industries, please see <http://www.sbbi.net/>.
  */
 package net.yacy.upnp.services;
@@ -62,19 +62,18 @@ import java.util.TimeZone;
  */
 
 public class ISO8601Date {
-  
+
   private static boolean check(StringTokenizer st, String token) throws NumberFormatException {
     try {
       if (st.nextToken().equals(token)) {
         return true;
-      } else {
-        throw new NumberFormatException("Missing [" + token + "]");
       }
-    } catch (NoSuchElementException ex) {
+      throw new NumberFormatException("Missing [" + token + "]");
+    } catch (final NoSuchElementException ex) {
       return false;
     }
   }
-  
+
   private static Calendar getCalendar( String isodate ) throws NumberFormatException {
     // YYYY-MM-DDThh:mm:ss.sTZD or hh:mm:ss.sTZD
     // does it contains a date ?
@@ -111,7 +110,7 @@ public class ISO8601Date {
         return calendar;
       }
     }
-    // Hour    
+    // Hour
     if ( ( check(st, "T") ) && ( st.hasMoreTokens() ) ) {
       int hour = Integer.parseInt(st.nextToken());
       calendar.set(Calendar.HOUR_OF_DAY, hour);
@@ -132,11 +131,11 @@ public class ISO8601Date {
       calendar.set(Calendar.MILLISECOND, 0);
       return calendar;
     }
-    
+
     //
     // Not mandatory now
     //
-    
+
     // Secondes
     if (!st.hasMoreTokens()) {
       return calendar;
@@ -201,7 +200,7 @@ public class ISO8601Date {
     }
     return calendar;
   }
-  
+
   /**
    * Parse the given string in ISO 8601 format and build a Date object.
    * @param isodate the date in ISO 8601 format
@@ -213,14 +212,14 @@ public class ISO8601Date {
     Calendar calendar = getCalendar(isodate);
     return calendar.getTime();
   }
-  
+
   private static String twoDigit(int i) {
     if (i >= 0 && i < 10) {
       return "0" + String.valueOf(i);
     }
     return String.valueOf(i);
   }
-  
+
   /**
    * Generate a ISO 8601 date
    * @param date a Date instance
@@ -237,7 +236,7 @@ public class ISO8601Date {
     buffer.append(twoDigit(calendar.get(Calendar.DAY_OF_MONTH)));
     return buffer.toString();
   }
-  
+
   /**
    * Generate a ISO 8601 date time without timezone
    * @param date a Date instance
@@ -262,7 +261,7 @@ public class ISO8601Date {
     buffer.append(twoDigit(calendar.get(Calendar.MILLISECOND) / 10));
     return buffer.toString();
   }
-  
+
   /**
    * Generate a ISO 8601 date time with timezone
    * @param date a Date instance
@@ -288,7 +287,7 @@ public class ISO8601Date {
     buffer.append("Z");
     return buffer.toString();
   }
-  
+
   /**
    * Generate a ISO 8601 time
    * @param date a Date instance
@@ -307,7 +306,7 @@ public class ISO8601Date {
     buffer.append(twoDigit(calendar.get(Calendar.MILLISECOND) / 10));
     return buffer.toString();
   }
-  
+
   /**
    * Generate a ISO 8601 time
    * @param date a Date instance
@@ -327,5 +326,5 @@ public class ISO8601Date {
     buffer.append("Z");
     return buffer.toString();
   }
-  
+
 }

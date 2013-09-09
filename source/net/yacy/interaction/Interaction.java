@@ -9,19 +9,20 @@ import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.data.UserDB;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 
 import org.apache.http.entity.mime.content.ContentBody;
 
-import de.anomic.data.UserDB;
 
 
 public class Interaction {
@@ -88,7 +89,7 @@ public class Interaction {
 			DigestURI uri = new DigestURI (url);
 
 			domain = uri.getHost();
-		} catch (MalformedURLException e) {
+		} catch (final MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -112,7 +113,7 @@ public class Interaction {
 
 
 
-		} catch (MalformedURLException e) {
+		} catch (final MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -124,7 +125,7 @@ public class Interaction {
 
 
 
-public static String GetTableentry(String url, String type, String username, String peer) {
+public static String GetTableentry(String url, String type, String username) {
 
 	final Switchboard sb = Switchboard.getSwitchboard();
 
@@ -133,7 +134,7 @@ public static String GetTableentry(String url, String type, String username, Str
 	try {
 		Iterator<Row> it = sb.tables.iterator(username+"_contribution", "url", url.getBytes());
 
-		Log.logInfo ("TABLE", "GET "+username+" / "+url+" - "+type+" ...");
+		ConcurrentLog.info ("TABLE", "GET "+username+" / "+url+" - "+type+" ...");
 
 		it = sb.tables.orderBy(it, -1, "timestamp_creation").iterator();
 
@@ -146,12 +147,12 @@ public static String GetTableentry(String url, String type, String username, Str
 			}
 
 		}
-	} catch (IOException e) {
+	} catch (final IOException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
 
-	Log.logInfo ("TABLE", "GET "+username+" / "+url+" - "+type+" - "+retvalue);
+	ConcurrentLog.info ("TABLE", "GET "+username+" / "+url+" - "+type+" - "+retvalue);
 
 	return retvalue;
 
@@ -168,7 +169,7 @@ public static String Tableentry(String url, String type, String comment, String 
 
 	Boolean processlocal = false;
 
-	Log.logInfo ("TABLE", "PUT "+from+" / "+url+" - "+type+" - "+comment);
+	ConcurrentLog.info ("TABLE", "PUT "+from+" / "+url+" - "+type+" - "+comment);
 
 	if (!sb.getConfig("interaction.contribution.accumulationpeer", "").equals("")) {
 
@@ -180,18 +181,18 @@ public static String Tableentry(String url, String type, String comment, String 
 		} else {
 
 			// Forward feedback to other peer
-			Log.logInfo("INTERACTION", "Forwarding contribution to "+sb.getConfig("interaction.contribution.accumulationpeer", "")+": " + url + ": "
+			ConcurrentLog.info("INTERACTION", "Forwarding contribution to "+sb.getConfig("interaction.contribution.accumulationpeer", "")+": " + url + ": "
 					+ comment);
 			try {
 
 				Seed host = sb.peers.lookupByName(sb.getConfig("interaction.contribution.accumulationpeer", ""));
 
-				return (UTF8.String(new HTTPClient().POSTbytes(
+				return (UTF8.String(new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent).POSTbytes(
 						"http://"+host.getPublicAddress()+"/interaction/Contribution.json"
 								+ "?url=" + url + "&comment=" + comment
 								+ "&from=" + from + "&peer=" + peer,
 						new HashMap<String, ContentBody>(), false)));
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return "";
@@ -219,8 +220,8 @@ public static String Tableentry(String url, String type, String comment, String 
         try {
             sb.tables.insert(from+"_contribution", map);
         } catch (final IOException e) {
-            Log.logException(e);
-        } catch (RowSpaceExceededException e) {
+            ConcurrentLog.logException(e);
+        } catch (final SpaceExceededException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

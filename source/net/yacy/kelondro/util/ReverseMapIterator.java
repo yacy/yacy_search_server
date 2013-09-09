@@ -32,8 +32,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class ReverseMapIterator <E, F> implements Iterator<Map.Entry<E, F>> {
-    ArrayList<E> a;
-    Map<E, F> map;
+    private ArrayList<E> a;
+    private Map<E, F> map;
     E last;
 
     public ReverseMapIterator(Map<E, F> map) {
@@ -46,7 +46,7 @@ public class ReverseMapIterator <E, F> implements Iterator<Map.Entry<E, F>> {
                         a.add(e);
                     }
                     break;
-                } catch (ConcurrentModificationException e) {
+                } catch (final ConcurrentModificationException e) {
                     continue;
                 }
             }
@@ -54,7 +54,7 @@ public class ReverseMapIterator <E, F> implements Iterator<Map.Entry<E, F>> {
     }
     
     public boolean hasNext() {
-        return a.size() > 0;
+        return !a.isEmpty();
     }
 
     public Map.Entry<E, F> next() {
@@ -66,7 +66,7 @@ public class ReverseMapIterator <E, F> implements Iterator<Map.Entry<E, F>> {
         this.map.remove(this.last);
     }
     
-    public class Entry0 implements Map.Entry<E, F> {
+    private class Entry0 implements Map.Entry<E, F> {
         E e;
         F f;
         public Entry0(final E e, final F f) {

@@ -35,7 +35,7 @@ public class CloneableMapIterator<E> implements CloneableIterator<E> {
 	E next, last;
 	Object start;
 	Iterator<E> iter;
-	
+
 
 	public CloneableMapIterator(final TreeMap<E, ?> map, final E start) {
 		// map must contain eiter a byte[]/Object or a String/Object mapping.
@@ -52,7 +52,7 @@ public class CloneableMapIterator<E> implements CloneableIterator<E> {
 		}
 		this.last = null;
 	}
-	
+
     @Override
     @SuppressWarnings("unchecked")
 	public CloneableMapIterator<E> clone(final Object modifier) {
@@ -80,5 +80,9 @@ public class CloneableMapIterator<E> implements CloneableIterator<E> {
     public void remove() {
 		this.map.remove(this.last);
 	}
+
+    @Override
+    public void close() {
+    }
 
 }

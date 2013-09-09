@@ -1,0 +1,13 @@
+<div class="SubMenu">
+  <h3>Integrated Search Configuration</h3>
+  <ul class="SubMenu">
+    <li><a href="/ConfigPortal.html" class="MenuItemLink">Generic Search Portal</a></li>
+    <li><a href="/ConfigSearchPage_p.html" class="MenuItemLink lock">Search Page Layout</a></li>
+    <li><a href="/ConfigAppearance_p.html" class="MenuItemLink lock">Appearance</a></li>
+    <li><a href="/ConfigLanguage_p.html" class="MenuItemLink lock">Language</a></li>
+    <li><a href="/ConfigProfile_p.html" class="MenuItemLink lock">User Profile</a></li>
+    <li><a href="/ConfigHeuristics_p.html" class="MenuItemLink lock">Heuristics</a></li>
+    <li><a href="/RankingSolr_p.html" class="MenuItemLink lock">Solr Ranking Config</a></li>
+    <li><a href="/RankingRWI_p.html" class="MenuItemLink lock">RWI Ranking Config</a></li>
+  </ul>
+</div>

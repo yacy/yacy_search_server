@@ -65,9 +65,16 @@
           #{networks}#
             <option>#[network]#</option>
           #{/networks}#
-        </select>
+        </select> <a href="#" onclick="document.getElementById('networkDefinitionURLfield').style.display = ''; return false;" style="font-style: italic;">Enter custom URL...</a>
         
         </dd>
+        <span id="networkDefinitionURLfield" style="display: none;">
+        <dt>Remote Network Definition URL</dt>
+        <dd>
+        <input type="text" id="networkDefinitionURL" name="networkDefinitionURL" value="" size="100">
+        </select>        
+        </dd>
+        </span>
         <dt>Network Nick</dt>
         <dd>#[network.unit.name]#</dd>
         <dt>Long Description</dt>
@@ -77,7 +84,7 @@
         <dt>DHT</dt>
         <dd>#[network.unit.dht]#</dd>
         <dt>&nbsp;</dt>
-        <dd><input type="submit" name="changeNetwork" value="Change Network" /></dd>
+        <dd><input type="submit" name="changeNetwork" value="Change Network" class="submitready"/></dd>
       </dl>
     </fieldset>
     </form>
@@ -138,10 +145,10 @@
                  #(indexReceiveBlockBlacklistChecked.off)#::checked="checked" #(/indexReceiveBlockBlacklistChecked.off)#/>
           <label for="indexReceiveBlockBlacklistOff">accept transmitted URLs that match your blacklist</label>.
         </dd>
-        <dt>
-          <input type="submit" name="save" value="Save" />
-        </dt>
-        <dd></dd>
+        <dt></dt>
+        <dd>
+          <input type="submit" name="save" value="Save" class="submitready"/>
+        </dd>
       </dl>
     </fieldset>
         
@@ -192,10 +199,10 @@
           If you leave the field empty, no peer asks your peer. If you fill in a '*', your peer is always asked.
           <input type="text" id="peertags" name="peertags" value="#[peertags]#" size="40" maxlength="80" />
         </dd>
-        <dt>
-          <input type="submit" name="save" value="Save" />
-        </dt>
-        <dd></dd>
+        <dt></dt>
+        <dd>
+          <input type="submit" name="save" value="Save" class="submitready"/>
+        </dd>
       </dl>
 	</fieldset>
     </form>

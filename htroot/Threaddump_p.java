@@ -37,12 +37,12 @@ import net.yacy.kelondro.logging.ThreadDump;
 import net.yacy.kelondro.util.OS;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class Threaddump_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
     	serverObjects prop = new serverObjects();
     	Switchboard sb = (Switchboard) env;
@@ -75,7 +75,7 @@ public class Threaddump_p {
             for (int i = 0; i < multipleCount; i++) {
                 try {
                     traces.add(ThreadDump.getAllStackTraces());
-                } catch (OutOfMemoryError e) {
+                } catch (final OutOfMemoryError e) {
                     break;
                 }
             }
@@ -86,7 +86,7 @@ public class Threaddump_p {
             if (ThreadDump.canProduceLockedBy(logFile)) {
                 try {
                     new ThreadDump(logFile).appendBlockTraces(buffer, plain);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     e.printStackTrace();
                 }
             } else if (OS.canExecUnix) {

@@ -21,18 +21,35 @@ package net.yacy;
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import net.yacy.search.index.ReindexSolrBusyThread;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
 import com.google.common.io.Files;
+import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.storage.Configuration.Entry;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.document.LibraryProvider;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.index.Index;
+import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.workflow.BusyThread;
+import net.yacy.search.index.Fulltext;
+import net.yacy.search.schema.CollectionConfiguration;
+import net.yacy.search.schema.CollectionSchema;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.LukeResponse.FieldInfo;
 
 public class migration {
     //SVN constants
@@ -40,7 +57,7 @@ public class migration {
     public static final int TAGDB_WITH_TAGHASH=1635; //tagDB keys are tagHashes instead of plain tagname.
     public static final int NEW_OVERLAYS=4422;
     public static final int IDX_HOST=7724; // api for index retrieval: host index
-
+   
     public static void migrate(final Switchboard sb, final int fromRev, final int toRev){
         if(fromRev < toRev){
             if(fromRev < TAGDB_WITH_TAGHASH){
@@ -49,16 +66,12 @@ public class migration {
             if(fromRev < NEW_OVERLAYS){
                 migrateDefaultFiles(sb);
             }
-            Log.logInfo("MIGRATION", "Migrating from "+ fromRev + " to " + toRev);
+            ConcurrentLog.info("MIGRATION", "Migrating from "+ fromRev + " to " + toRev);
             presetPasswords(sb);
             migrateSwitchConfigSettings(sb);
             migrateWorkFiles(sb);
         }
         installSkins(sb); // FIXME: yes, bad fix for quick release 0.47
-        // add new navigation
-        if (sb.getConfig("search.navigation", "").equals("hosts,authors,namespace,topics")) {
-            sb.setConfig("search.navigation", "hosts,authors,namespace,topics,filetype,protocol");
-        }
     }
     /*
      * remove the static defaultfiles. We use them through a overlay now.
@@ -88,7 +101,7 @@ public class migration {
      * copy skins from the release to DATA/SKINS.
      */
     public static void installSkins(final Switchboard sb){
-        final File skinsPath = sb.getDataPath("skinPath", "DATA/SKINS");
+        final File skinsPath = sb.getDataPath("skinPath", SwitchboardConstants.SKINS_PATH_DEFAULT);
         final File defaultSkinsPath = new File(sb.getAppPath(), "skins");
         if (defaultSkinsPath.exists()) {
             final List<String> skinFiles = FileUtils.getDirListing(defaultSkinsPath.getAbsolutePath());
@@ -107,23 +120,23 @@ public class migration {
         if(skin.equals("")){
             skin="default";
         }
-        final File skinsDir=sb.getDataPath("skinPath", "DATA/SKINS");
+        final File skinsDir=sb.getDataPath("skinPath", SwitchboardConstants.SKINS_PATH_DEFAULT);
         final File skinFile=new File(skinsDir, skin+".css");
         final File htdocsPath=new File(sb.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT), "env");
         final File styleFile=new File(htdocsPath, "style.css");
         if(!skinFile.exists()){
             if(styleFile.exists()){
-                Log.logInfo("MIGRATION", "Skin "+skin+" not found. Keeping old skin.");
+                ConcurrentLog.info("MIGRATION", "Skin "+skin+" not found. Keeping old skin.");
             }else{
-                Log.logSevere("MIGRATION", "Skin "+skin+" and no existing Skin found.");
+                ConcurrentLog.severe("MIGRATION", "Skin "+skin+" and no existing Skin found.");
             }
         }else{
             try {
                 mkdirs(styleFile.getParentFile());
                 Files.copy(skinFile, styleFile);
-                Log.logInfo("MIGRATION", "copied new Skinfile");
+                ConcurrentLog.info("MIGRATION", "copied new Skinfile");
             } catch (final IOException e) {
-                Log.logSevere("MIGRATION", "Cannot copy skinfile.");
+                ConcurrentLog.severe("MIGRATION", "Cannot copy skinfile.");
             }
         }
     }
@@ -134,20 +147,20 @@ public class migration {
 	private static void mkdirs(final File path) {
 		if (!path.exists()) {
 			if(!path.mkdirs())
-				Log.logWarning("MIGRATION", "could not create directories for "+ path);
+				ConcurrentLog.warn("MIGRATION", "could not create directories for "+ path);
 		}
 	}
     public static void migrateBookmarkTagsDB(final Switchboard sb){
-        sb.bookmarksDB.close();
+        if (sb.bookmarksDB != null) sb.bookmarksDB.close();
         final File tagsDBFile=new File(sb.workPath, "bookmarkTags.db");
         if(tagsDBFile.exists()){
             delete(tagsDBFile);
-            Log.logInfo("MIGRATION", "Migrating bookmarkTags.db to use wordhashs as keys.");
+            ConcurrentLog.info("MIGRATION", "Migrating bookmarkTags.db to use wordhashs as keys.");
         }
         try {
             sb.initBookmarks();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
@@ -156,13 +169,13 @@ public class migration {
 	 */
 	private static void delete(final File filename) {
 		if(!filename.delete())
-			Log.logWarning("MIGRATION", "could not delete "+ filename);
+			ConcurrentLog.warn("MIGRATION", "could not delete "+ filename);
 	}
     public static void migrateWorkFiles(final Switchboard sb){
         File file=new File(sb.getDataPath(), "DATA/SETTINGS/wiki.db");
         File file2;
         if (file.exists()) {
-            Log.logInfo("MIGRATION", "Migrating wiki.db to "+ sb.workPath);
+            ConcurrentLog.info("MIGRATION", "Migrating wiki.db to "+ sb.workPath);
             sb.wikiDB.close();
             file2 = new File(sb.workPath, "wiki.db");
             try {
@@ -173,7 +186,7 @@ public class migration {
 
             file = new File(sb.getDataPath(), "DATA/SETTINGS/wiki-bkp.db");
             if (file.exists()) {
-                Log.logInfo("MIGRATION", "Migrating wiki-bkp.db to "+ sb.workPath);
+                ConcurrentLog.info("MIGRATION", "Migrating wiki-bkp.db to "+ sb.workPath);
                 file2 = new File(sb.workPath, "wiki-bkp.db");
                 try {
                     Files.copy(file, file2);
@@ -183,14 +196,14 @@ public class migration {
             try {
                 sb.initWiki();
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
 
 
         file=new File(sb.getDataPath(), "DATA/SETTINGS/message.db");
         if(file.exists()){
-            Log.logInfo("MIGRATION", "Migrating message.db to "+ sb.workPath);
+            ConcurrentLog.info("MIGRATION", "Migrating message.db to "+ sb.workPath);
             sb.messageDB.close();
             file2=new File(sb.workPath, "message.db");
             try {
@@ -200,7 +213,7 @@ public class migration {
             try {
                 sb.initMessages();
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -255,5 +268,167 @@ public class migration {
             sb.setConfig("crawler.http.acceptLanguage", sb.getConfig("crawler.acceptLanguage","en-us,en;q=0.5"));
             sb.setConfig("crawler.http.acceptCharset",  sb.getConfig("crawler.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7"));
         }
+    }
+    /**
+     * converts old urldb to Solr.
+     * In chunks of 1000 entries.
+     * Creates a lock file in workdir to allow only one active migration thread
+     * @return current size of urldb index
+     */
+    @SuppressWarnings("deprecation")
+    public static int migrateUrldbtoSolr(final Switchboard sb) {
+        int ret = 0;
+        final File f;
+        final Fulltext ft = sb.index.fulltext();
+
+        if (ft.getURLDb() != null) {
+            ret = ft.getURLDb().size();
+            f = new File(sb.workPath, "migrateUrldbtoSolr.lck");
+            f.deleteOnExit();
+            if (f.exists()) {
+                return ret;
+            }
+            try {
+                f.createNewFile();                    
+            } catch (final IOException ex) {
+                ConcurrentLog.info("migrateUrldbtoSolr","could not create lock file");
+            }
+
+            final Thread t = new Thread() {
+                boolean go = true;
+                final Index urldb = ft.getURLDb();
+
+                public void run() {
+                    try {
+                        Thread.currentThread().setName("migration.migrateUrldbtoSolr");
+
+                        int i = urldb.size();
+                        while (go && i > 0) {
+
+                            List<Row.Entry> chunk = urldb.random(1000);
+                            if ((chunk == null) || (chunk.size() == 0)) {
+                                go = false;
+                                break;
+                            }
+                            Iterator<Row.Entry> chunkit = chunk.iterator();
+
+                            while (go && chunkit.hasNext()) {
+                                try { // to catch any data errors 
+                                    URIMetadataRow row = new URIMetadataRow(chunkit.next(), null);
+                                    ft.putMetadata(row); // this deletes old urldb-entry first and inserts into Solr
+                                    i--;
+                                    if (Switchboard.getSwitchboard().shallTerminate()) {
+                                        go = false;
+                                    }
+                                } catch (final Exception e) {
+                                    ConcurrentLog.info("migrateUrldbtoSolr", "some error while adding old data to new index, continue with next entry");
+                                }
+                            }
+                            ConcurrentLog.info("migrateUrldbtoSolr", Integer.toString(i) + " entries left (convert next chunk of 1000 entries)");
+                        }
+                        ft.commit(true);
+
+                    } catch (final IOException ex) {
+                        ConcurrentLog.info("migrateUrldbtoSolr", "error reading old urldb index");
+                    } finally {
+                        if (f.exists()) {
+                            f.delete(); // delete lock file
+                        }
+                    }
+                }
+
+                public void exit() {
+                    go = false;
+                }
+            };
+            t.setPriority(Thread.MIN_PRIORITY);
+            t.start();
+        }
+        return ret;
+    }
+    
+    /**
+     * Reindex embedded solr index
+     *   - all documents with inactive fields (according to current schema)
+     *   - all documents with obsolete fields
+     * A worker thread is initialized with fieldnames or a solr query which selects the documents for reindexing
+     * implemented via deployed BusyThread which is called repeatedly by system
+     * reindexes a fixed chunk of documents per cycle (allowing to easy interrupt process after completion of a chunck)
+     * and monitoring in default process monitor (PerformanceQueues_p.html)
+     */
+    public static int reindexToschema (final Switchboard sb) {
+
+        BusyThread bt = sb.getThread("reindexSolr");
+        // a reindex job is already running 
+        if (bt != null) {
+            return bt.getJobCount();
+        }
+        
+        boolean lukeCheckok = false;
+        Set<String> omitFields = new HashSet<String>(4);
+        omitFields.add(CollectionSchema.author_sxt.getSolrFieldName()); // special fields to exclude from disabled check
+        omitFields.add(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
+        omitFields.add(CollectionSchema.coordinate_p_1_coordinate.getSolrFieldName());
+        omitFields.add("_version_"); // exclude internal Solr std. field from obsolete check
+        Collection<Tagging> vocs = LibraryProvider.autotagging.getVocabularies();
+        for (Tagging v: vocs) { //exclude configured vocabulary index fields (not in CollectionSchema but valid)
+            omitFields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_SUFFIX);
+        }        
+        CollectionConfiguration colcfg = Switchboard.getSwitchboard().index.fulltext().getDefaultConfiguration();
+        ReindexSolrBusyThread reidx = new ReindexSolrBusyThread(null); // ("*:*" would reindex all);
+        
+        try { // get all fields contained in index
+            Collection<FieldInfo> solrfields = Switchboard.getSwitchboard().index.fulltext().getDefaultEmbeddedConnector().getFields();
+            for (FieldInfo solrfield : solrfields) {
+                if (!colcfg.contains(solrfield.getName()) && !omitFields.contains(solrfield.getName())) { // add found fields not in config for reindexing
+                    reidx.addSelectFieldname(solrfield.getName());
+                }
+            }
+            lukeCheckok = true;
+        } catch (final SolrServerException ex) {
+            ConcurrentLog.logException(ex);
+        }
+  
+        if (!lukeCheckok) {  // if luke failed alternatively use config and manual list                
+            // add all disabled fields
+            Iterator<Entry> itcol = colcfg.entryIterator();
+            while (itcol.hasNext()) { // check for disabled fields in config
+                Entry etr = itcol.next();
+                if (!etr.enabled() && !omitFields.contains(etr.key())) {
+                    reidx.addSelectFieldname(etr.key());
+                }
+            }
+
+            // add obsolete fields (not longer part of main index)
+            reidx.addSelectFieldname("author_s");
+            reidx.addSelectFieldname("css_tag_txt");
+            reidx.addSelectFieldname("css_url_txt");
+            reidx.addSelectFieldname("scripts_txt");
+            reidx.addSelectFieldname("images_tag_txt");
+            reidx.addSelectFieldname("images_urlstub_txt");
+            reidx.addSelectFieldname("canonical_t");
+            reidx.addSelectFieldname("frames_txt");
+            reidx.addSelectFieldname("iframes_txt");
+
+            reidx.addSelectFieldname("inboundlinks_tag_txt");
+            reidx.addSelectFieldname("inboundlinks_relflags_val");
+            reidx.addSelectFieldname("inboundlinks_name_txt");
+            reidx.addSelectFieldname("inboundlinks_rel_sxt");
+            reidx.addSelectFieldname("inboundlinks_text_txt");
+            reidx.addSelectFieldname("inboundlinks_text_chars_val");
+            reidx.addSelectFieldname("inboundlinks_text_words_val");
+            reidx.addSelectFieldname("inboundlinks_alttag_txt");
+
+            reidx.addSelectFieldname("outboundlinks_tag_txt");
+            reidx.addSelectFieldname("outboundlinks_relflags_val");
+            reidx.addSelectFieldname("outboundlinks_name_txt");
+            reidx.addSelectFieldname("outboundlinks_rel_sxt");
+            reidx.addSelectFieldname("outboundlinks_text_txt");
+            reidx.addSelectFieldname("outboundlinks_text_chars_val");
+            reidx.addSelectFieldname("outboundlinks_text_words_val");
+            reidx.addSelectFieldname("outboundlinks_alttag_txt");
+        }
+        sb.deployThread("reindexSolr", "Reindex Solr", "reindex documents with obsolete fields in embedded Solr index", "/IndexReIndexMonitor_p.html",reidx , 0);
+        return 0;
     }
 }

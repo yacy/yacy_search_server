@@ -81,7 +81,7 @@ public class Metaphone implements StringEncoder {
      */
     public String metaphone(String txt) {
         boolean hard = false ;
-        if ((txt == null) || (txt.length() == 0)) {
+        if ((txt == null) || (txt.isEmpty())) {
             return "" ;
         }
         // single character is itself
@@ -91,8 +91,8 @@ public class Metaphone implements StringEncoder {
       
         char[] inwd = txt.toUpperCase(java.util.Locale.ENGLISH).toCharArray() ;
       
-        StringBuffer local = new StringBuffer(40); // manipulate
-        StringBuffer code = new StringBuffer(10) ; //   output
+        StringBuilder local = new StringBuilder(40); // manipulate
+        StringBuilder code = new StringBuilder(10) ; //   output
         // handle initial 2 characters exceptions
         switch(inwd[0]) {
         case 'K' : 
@@ -314,11 +314,11 @@ public class Metaphone implements StringEncoder {
         return code.toString();
     }
 
-    private boolean isVowel(StringBuffer string, int index) {
+    private boolean isVowel(StringBuilder string, int index) {
         return VOWELS.indexOf(string.charAt(index)) >= 0;
     }
 
-    private boolean isPreviousChar(StringBuffer string, int index, char c) {
+    private boolean isPreviousChar(StringBuilder string, int index, char c) {
         boolean matches = false;
         if( index > 0 &&
             index < string.length() ) {
@@ -327,7 +327,7 @@ public class Metaphone implements StringEncoder {
         return matches;
     }
 
-    private boolean isNextChar(StringBuffer string, int index, char c) {
+    private boolean isNextChar(StringBuilder string, int index, char c) {
         boolean matches = false;
         if( index >= 0 &&
             index < string.length() - 1 ) {
@@ -336,7 +336,7 @@ public class Metaphone implements StringEncoder {
         return matches;
     }
 
-    private boolean regionMatch(StringBuffer string, int index, String test) {
+    private boolean regionMatch(StringBuilder string, int index, String test) {
         boolean matches = false;
         if( index >= 0 &&
             (index + test.length() - 1) < string.length() ) {

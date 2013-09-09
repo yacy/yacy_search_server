@@ -33,8 +33,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.LookAheadIterator;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.LookAheadIterator;
 
 public class ChunkIterator extends LookAheadIterator<byte[]> implements Iterator<byte[]> {
 
@@ -82,7 +82,7 @@ public class ChunkIterator extends LookAheadIterator<byte[]> implements Iterator
             // no real exception, this is the normal termination
             return null;
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }

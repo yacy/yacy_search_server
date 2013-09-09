@@ -5,19 +5,19 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.UserDB;
+import net.yacy.data.ymark.YMarkCrawlStart;
+import net.yacy.data.ymark.YMarkDate;
+import net.yacy.data.ymark.YMarkEntry;
+import net.yacy.data.ymark.YMarkTables;
+import net.yacy.data.ymark.YMarkUtil;
+import net.yacy.data.ymark.YMarkTables.TABLES;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
-import de.anomic.data.ymark.YMarkCrawlStart;
-import de.anomic.data.ymark.YMarkDate;
-import de.anomic.data.ymark.YMarkEntry;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.data.ymark.YMarkTables.TABLES;
-import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 
 public class get_ymark {
@@ -31,7 +31,7 @@ public class get_ymark {
         prop = new serverObjects();
 
         int rp;         // items per page
-        int page;                 // page
+        int page;       // page
         int total;
         String sortorder;
         String sortname;
@@ -68,8 +68,8 @@ public class get_ymark {
                 if(!query.isEmpty()) {
                     if(!qtype.isEmpty()) {
                         if(qtype.equals("_tags")) {
-                        	final String[] tagArray = YMarkUtil.cleanTagsString(query).split(YMarkUtil.TAGS_SEPARATOR);
-                        	result = sb.tables.bookmarks.orderBookmarksBy(sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray), sortname, sortorder);
+                        	final String tags = YMarkUtil.cleanTagsString(query);
+                        	result = sb.tables.bookmarks.orderBookmarksBy(sb.tables.bookmarks.getBookmarksByTag(bmk_user, tags), sortname, sortorder);
                         } else if(qtype.equals("_folder")) {
                         	result = sb.tables.bookmarks.orderBookmarksBy(sb.tables.bookmarks.getBookmarksByFolder(bmk_user, query), sortname, sortorder);
                         } else {
@@ -84,12 +84,11 @@ public class get_ymark {
                 total = result.size();
                 bookmarks = result.iterator();
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             prop.put("page", page);
             prop.put("total", total);
 	    	putProp(bookmarks, rp, page);
-
         } else {
         	prop.put(serverObjects.ACTION_AUTHENTICATE, YMarkTables.USER_AUTHENTICATE_MSG);
         }

@@ -28,19 +28,17 @@ package net.yacy.kelondro.data.word;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
+import net.yacy.cora.date.MicroDate;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.util.ByteArray;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Bitfield;
-import net.yacy.kelondro.order.MicroDate;
 import net.yacy.kelondro.rwi.AbstractReference;
 import net.yacy.kelondro.rwi.Reference;
-import net.yacy.kelondro.util.ByteArray;
+import net.yacy.kelondro.util.Bitfield;
 
 /**
  * this object stores attributes to URL references inside RWI collections
@@ -78,10 +76,9 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     /**
 	 * object for termination of concurrent blocking queue processing
 	 */
-    public static final Row.Entry poisonRowEntry = urlEntryRow.newEntry();
-	public static final WordReferenceRow poison = new WordReferenceRow(poisonRowEntry);
-
-    // static properties
+    protected static final Row.Entry poisonRowEntry = urlEntryRow.newEntry();
+    
+	// static properties
     private static final int col_urlhash       =  0; // h 12 the url hash b64-encoded
     private static final int col_lastModified  =  1; // a  2 last-modified time of the document where word appears
     private static final int col_freshUntil    =  2; // s  2 TTL for the word, so it can be removed easily if the TTL is short
@@ -117,7 +114,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
 
     private final Row.Entry entry;
 
-    public WordReferenceRow(
+    protected WordReferenceRow(
             final byte[]   urlHash,
             final int      urlLength,     // byte-length of complete URL
             final int      urlComps,      // number of path components
@@ -204,82 +201,16 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
                         this.entry.setCol(col_posinphrase, word.posInPhrase);
                         this.entry.setCol(col_posofphrase, word.numOfPhrase);
     }
-
-    public static class ExternalParser {
-        private static final String PIN = "_";
-        private final BlockingQueue<String> in;
-        private final BlockingQueue<WordReferenceRow> out;
-        Thread[] worker;
-        public ExternalParser(final int concurrency) {
-            this.in = new LinkedBlockingQueue<String>();
-            this.out = new LinkedBlockingQueue<WordReferenceRow>();
-            for (int i = 0; i < concurrency; i++) {
-                this.worker[i] = new Thread() {
-                    @Override
-                    public void run() {
-                        String s;
-                        try {
-                            while ((s = ExternalParser.this.in.take()) != PIN) {
-                                ExternalParser.this.out.put(new WordReferenceRow(s));
-                            }
-                        } catch (final InterruptedException e) {
-                        }
-                    }
-                };
-                this.worker[i].start();
-            }
-        }
-        public ExternalParser() {
-            this(Runtime.getRuntime().availableProcessors());
-        }
-        public void put(final String s) {
-            try {
-                this.in.put(s);
-            } catch (final InterruptedException e) {
-            }
-        }
-        public void terminate() {
-            for (@SuppressWarnings("unused") final Thread w : this.worker) {
-                try {
-                    this.in.put(PIN);
-                } catch (final InterruptedException e) {
-                }
-            }
-            for (final Thread w : this.worker) {
-                try {
-                    if (w.isAlive()) w.join();
-                } catch (final InterruptedException e) {
-                }
-            }
-            try {
-                this.out.put(poison);
-            } catch (final InterruptedException e) {
-            }
-        }
-        public WordReferenceRow take() {
-            WordReferenceRow row;
-            try {
-                row = this.out.take();
-            } catch (final InterruptedException e) {
-                return poison;
-            }
-            return row;
-        }
-    }
-
+    
     public WordReferenceRow(final String external) {
         this.entry = urlEntryRow.newEntry(external, true);
     }
 
-    public WordReferenceRow(final byte[] row) {
+    private WordReferenceRow(final byte[] row) {
         this.entry = urlEntryRow.newEntry(row);
     }
 
-    public WordReferenceRow(final byte[] row, final int offset, final boolean clone) {
-        this.entry = urlEntryRow.newEntry(row, offset, clone);
-    }
-
-    public WordReferenceRow(final Row.Entry rentry) {
+    protected WordReferenceRow(final Row.Entry rentry) {
         // no cloning is necessary since there is no further manipulation after this initial instantiation
         this.entry = rentry;
     }
@@ -316,10 +247,6 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return MicroDate.reverseMicroDateDays((int) this.entry.getColLong(col_lastModified));
     }
 
-    public long freshUntil() {
-        return MicroDate.reverseMicroDateDays((int) this.entry.getColLong(col_freshUntil));
-    }
-
     @Override
     public int hitcount() {
         return (0xff & this.entry.getColByte(col_hitcount));
@@ -328,11 +255,6 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     @Override
     public Collection<Integer> positions() {
         return new ArrayList<Integer>(0);
-    }
-
-    public int position(final int p) {
-        assert p == 0 : "p = " + p;
-        return (int) this.entry.getColLong(col_posintext);
     }
 
     @Override
@@ -429,5 +351,11 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         throw new UnsupportedOperationException("");
 
     }
+
+    @Override
+    public String hosthash() {
+        return ASCII.String(this.urlhash(), 6, 6);
+    }
+
 
 }

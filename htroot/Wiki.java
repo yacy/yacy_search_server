@@ -42,13 +42,13 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.cora.util.ByteBuffer;
+import net.yacy.data.Diff;
+import net.yacy.data.wiki.WikiBoard;
 import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
-import de.anomic.data.Diff;
-import de.anomic.data.wiki.WikiBoard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class Wiki {
     private static final String ANONYMOUS = "anonymous";
@@ -229,7 +229,7 @@ public class Wiki {
                     final Diff diff = new Diff(
                             UTF8.String(oentry.page()),
                             UTF8.String(nentry.page()), 3);
-                    prop.put("mode_versioning_diff", de.anomic.data.Diff.toHTML(new Diff[] { diff }));
+                    prop.put("mode_versioning_diff", net.yacy.data.Diff.toHTML(new Diff[] { diff }));
                     prop.put("mode_versioning", "1");
                 } else if (post.containsKey("viewold") && oentry != null) {
                     prop.put("mode_versioning", "2");

@@ -7,19 +7,19 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.data.ymark.YMarkEntry;
+import net.yacy.data.ymark.YMarkTables;
+import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.data.ymark.YMarkEntry;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 
 public class Table_YMark_p {
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
@@ -83,9 +83,9 @@ public class Table_YMark_p {
 				count++;
 			}
 			prop.put("showselection_folders", count);
-		} catch (IOException e) {
+		} catch (final IOException e) {
             Log.logException(e);
-		} catch (RowSpaceExceededException e) {
+		} catch (final RowSpaceExceededException e) {
             Log.logException(e);
 		}
 		*/
@@ -105,7 +105,7 @@ public class Table_YMark_p {
         if (columns.isEmpty() && table != null) try {
             columns = sb.tables.columns(table);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         count = 0;
@@ -121,7 +121,7 @@ public class Table_YMark_p {
                     count++;
     	        }
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
         prop.put("showselection_columns", count);
@@ -139,7 +139,7 @@ public class Table_YMark_p {
         if (!post.get("rebuildindex", "").isEmpty()) try {
             sb.tables.bookmarks.folders.rebuildIndex(bmk_user);
             sb.tables.bookmarks.tags.rebuildIndex(bmk_user);
-        }  catch (IOException e) {
+        }  catch (final IOException e) {
             Log.logException(e);
         }
         */
@@ -149,9 +149,9 @@ public class Table_YMark_p {
                 if (entry.getValue().startsWith("mark_")) try {
                     sb.tables.bookmarks.deleteBookmark(bmk_user, entry.getValue().substring(5).getBytes());
                 } catch (final IOException e) {
-                    Log.logException(e);
-                } catch (final RowSpaceExceededException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
+                } catch (final SpaceExceededException e) {
+                    ConcurrentLog.logException(e);
                 }
             }
         }
@@ -166,9 +166,7 @@ public class Table_YMark_p {
             try {
                 sb.tables.bookmarks.addBookmark(bmk_user, bmk, false, false);
             } catch (final IOException e) {
-                Log.logException(e);
-            } catch (final RowSpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
 
@@ -192,18 +190,18 @@ public class Table_YMark_p {
                         setEdit(sb, prop, table, pk, columns);
                     }
                 } catch (final IOException e) {
-                    Log.logException(e);
-                } catch (final RowSpaceExceededException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
+                } catch (final SpaceExceededException e) {
+                    ConcurrentLog.logException(e);
                 }
             } else if (post.containsKey("addrow")) try {
                 // get a new key
                 final String pk = UTF8.String(sb.tables.createRow(table));
                 setEdit(sb, prop, table, pk, columns);
             } catch (final IOException e) {
-                Log.logException(e);
-            } catch (final RowSpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
+            } catch (final SpaceExceededException e) {
+                ConcurrentLog.logException(e);
             } else {
                 prop.put("showtable", 1);
                 prop.put("showtable_table", table);
@@ -214,7 +212,7 @@ public class Table_YMark_p {
                     prop.put("showtable_tagsize", sb.tables.size(YMarkTables.TABLES.TAGS.tablename(bmk_user)));
                     prop.put("showtable_foldersize", sb.tables.size(YMarkTables.TABLES.FOLDERS.tablename(bmk_user)));
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     prop.put("showtable_bmksize", 0);
                     prop.put("showtable_tagsize", 0);
                     prop.put("showtable_foldersize", 0);
@@ -231,7 +229,7 @@ public class Table_YMark_p {
                 try {
                     maxcount = Math.min(maxcount, sb.tables.size(table));
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     maxcount = 0;
                 }
                 count = 0;
@@ -242,8 +240,8 @@ public class Table_YMark_p {
                     	mapIterator = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, post.get("folders"));
                     } else if(post.containsKey("tags") && !post.get("tags").isEmpty()) {
                     	// mapIterator = sb.tables.orderByPK(sb.tables.bookmarks.tags.getBookmarks(bmk_user, post.get("tags")), maxcount).iterator();
-                    	final String[] tagArray = YMarkUtil.cleanTagsString(post.get(YMarkEntry.BOOKMARK.TAGS.key())).split(YMarkUtil.TAGS_SEPARATOR);
-                    	mapIterator = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray);
+                    	final String tagsString = YMarkUtil.cleanTagsString(post.get(YMarkEntry.BOOKMARK.TAGS.key()));
+                    	mapIterator = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagsString);
                     } else {
                     	mapIterator = sb.tables.orderByPK(sb.tables.iterator(table, matcher), maxcount).iterator();
                     }
@@ -267,7 +265,7 @@ public class Table_YMark_p {
                         count++;
                     }
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
                 prop.put("showtable_list", count);
                 prop.put("showtable_num", count);
@@ -282,7 +280,7 @@ public class Table_YMark_p {
         return prop;
     }
 
-    private static void setEdit(final Switchboard sb, final serverObjects prop, final String table, final String pk, final List<String> columns) throws IOException, RowSpaceExceededException {
+    private static void setEdit(final Switchboard sb, final serverObjects prop, final String table, final String pk, final List<String> columns) throws IOException, SpaceExceededException {
         prop.put("showedit", 1);
         prop.put("showedit_table", table);
         prop.put("showedit_pk", pk);

@@ -64,7 +64,7 @@ public class Gap extends TreeMap<Long, Integer> {
         DataInputStream is;
         try {
             is = new DataInputStream(new BufferedInputStream(new FileInputStream(file), 1024 * 1024));
-        } catch (OutOfMemoryError e) {
+        } catch (final OutOfMemoryError e) {
             is = new DataInputStream(new FileInputStream(file));
         }
         long p;
@@ -74,7 +74,7 @@ public class Gap extends TreeMap<Long, Integer> {
                 p = is.readLong();
                 l = is.readInt();
                 this.put(Long.valueOf(p), Integer.valueOf(l));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 break;
             }
         }
@@ -94,7 +94,7 @@ public class Gap extends TreeMap<Long, Integer> {
         DataOutputStream os;
         try {
             os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(tmp), 4 * 1024 * 1024));
-        } catch (OutOfMemoryError e) {
+        } catch (final OutOfMemoryError e) {
             os = new DataOutputStream(new FileOutputStream(tmp));
         }
         int c = 0;

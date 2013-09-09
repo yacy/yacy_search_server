@@ -26,53 +26,49 @@
 
 package net.yacy.search.query;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrQuery.SortClause;
+import org.apache.solr.common.params.FacetParams;
+
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Classification;
-import net.yacy.cora.document.Classification.ContentDomain;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
+import net.yacy.cora.federate.solr.Ranking;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.lod.vocabulary.Tagging;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
-import net.yacy.document.parser.html.AbstractScraper;
-import net.yacy.document.parser.html.CharacterCoding;
+import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.index.RowHandleSet;
+import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.Seed;
 import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.RankingProfile;
+import net.yacy.search.schema.CollectionConfiguration;
+import net.yacy.search.schema.CollectionSchema;
 
 public final class QueryParams {
 
     public enum Searchdom {
         LOCAL, CLUSTER, GLOBAL;
-
-        public static Searchdom contentdomParser(final String dom) {
-            if ("local".equals(dom)) return LOCAL;
-            else if ("global".equals(dom)) return GLOBAL;
-            else if ("cluster".equals(dom)) return CLUSTER;
-            return LOCAL;
-        }
 
         @Override
         public String toString() {
@@ -83,99 +79,69 @@ public final class QueryParams {
         }
     }
 
+    private static final CollectionSchema[] defaultfacetfields = new CollectionSchema[]{
+        CollectionSchema.host_s, CollectionSchema.url_protocol_s, CollectionSchema.url_file_ext_s, CollectionSchema.author_sxt};
+    
+    private static final int defaultmaxfacets = 30;
     private static final String ampersand = "&amp;";
-
-    public static enum FetchMode {
-    	NO_FETCH_NO_VERIFY,
-    	FETCH_BUT_ACCEPT_OFFLINE_OR_USE_CACHE,
-    	FETCH_AND_VERIFY_ONLINE;
-    }
-
-    public static class Modifier {
-        String s;
-        public Modifier(final String modifier) {
-            this.s = modifier;
-        }
-        public String getModifier() {
-            return this.s;
-        }
-    }
-
-
     public static final Bitfield empty_constraint    = new Bitfield(4, "AAAAAA");
     public static final Pattern catchall_pattern = Pattern.compile(".*");
-    public static final Pattern matchnothing_pattern = Pattern.compile("");
+    private static final Pattern matchnothing_pattern = Pattern.compile("");
 
-    public final String queryString;
-    public HandleSet fullqueryHashes, queryHashes, excludeHashes;
-    public Pattern snippetMatcher;
-    public final int itemsPerPage;
+    private final QueryGoal queryGoal;
+    public int itemsPerPage;
     public int offset;
-    public final Pattern urlMask, prefer;
-    public final boolean urlMask_isCatchall, prefer_isMatchnothing;
+    public Pattern urlMask;
+
+    public final Pattern prefer;
+    public final String tld, inlink;
+    boolean urlMask_isCatchall;
     public final Classification.ContentDomain contentdom;
     public final String targetlang;
-    public final Collection<Tagging.Metatag> metatags;
-    public final String navigators;
+    protected final Collection<Tagging.Metatag> metatags;
     public final Searchdom domType;
-    public final int zonecode;
-    public final int domMaxTargets;
+    private final int zonecode;
     public final int maxDistance;
     public final Bitfield constraint;
     public final boolean allofconstraint;
-    public CacheStrategy snippetCacheStrategy;
+    protected CacheStrategy snippetCacheStrategy;
     public final RankingProfile ranking;
     private final Segment indexSegment;
-    public final String host; // this is the client host that starts the query, not a site operator
-    public final String sitehash; // this is a domain hash, 6 bytes long or null
-    public final Set<String> siteexcludes; // set of domain hashes that are excluded if not included by sitehash
-    public final String authorhash;
-    public final String tenant;
-    public final Modifier modifier;
+    public final String clienthost; // this is the client host that starts the query, not a site operator
+    protected final Set<String> siteexcludes; // set of domain hashes that are excluded if not included by sitehash
+    public final QueryModifier modifier;
     public Seed remotepeer;
-    public final long starttime, maxtime, timeout; // the time when the query started, how long it should take and the time when the timeout is reached (milliseconds)
+    public final long starttime; // the time when the query started, how long it should take and the time when the timeout is reached (milliseconds)
+    protected final long maxtime;
+    private final long timeout;
     // values that are set after a search:
-    public int resultcount; // number of found results
     public int transmitcount; // number of results that had been shown to the user
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
-    public boolean specialRights; // is true if the user has a special authorization and my use more database-extensive options
     public final String userAgent;
-    public boolean filterfailurls;
-    public double lat, lon, radius;
+    protected boolean filterfailurls, filterscannerfail;
+    protected double lat, lon, radius;
+    public LinkedHashSet<String> facetfields;
+    public int maxfacets;
+    private SolrQuery cachedQuery;
+    private CollectionConfiguration solrSchema;
 
     public QueryParams(
-            final String queryString,
+            final String query_original,
+            final String query_words,
             final int itemsPerPage,
             final Bitfield constraint,
             final Segment indexSegment,
             final RankingProfile ranking,
             final String userAgent) {
-        byte[] queryHash;
-    	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(queryHash = UTF8.getBytes(queryString)))) {
-            this.queryString = null;
-            this.queryHashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-            this.excludeHashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-            try {
-                this.queryHashes.put(queryHash);
-            } catch (final RowSpaceExceededException e) {
-                Log.logException(e);
-            }
-    	} else {
-    		this.queryString = queryString;
-    		final Collection<String>[] cq = cleanQuery(queryString);
-    		this.queryHashes = Word.words2hashesHandles(cq[0]);
-    		this.excludeHashes = Word.words2hashesHandles(cq[1]);
-    		this.fullqueryHashes = Word.words2hashesHandles(cq[2]);
-    	}
-    	this.snippetMatcher = QueryParams.catchall_pattern;
+        this.queryGoal = new QueryGoal(query_original, query_words);
     	this.ranking = ranking;
-    	this.tenant = null;
-    	this.modifier = new Modifier("");
+    	this.modifier = new QueryModifier();
         this.maxDistance = Integer.MAX_VALUE;
         this.urlMask = catchall_pattern;
         this.urlMask_isCatchall = true;
+        this.tld = null;
+        this.inlink = null;
         this.prefer = matchnothing_pattern;
-        this.prefer_isMatchnothing = true;
         this.contentdom = ContentDomain.ALL;
         this.itemsPerPage = itemsPerPage;
         this.offset = 0;
@@ -183,47 +149,52 @@ public final class QueryParams {
         this.metatags = new ArrayList<Tagging.Metatag>(0);
         this.domType = Searchdom.LOCAL;
         this.zonecode = DigestURI.TLD_any_zone_filter;
-        this.domMaxTargets = 0;
         this.constraint = constraint;
         this.allofconstraint = false;
         this.snippetCacheStrategy = null;
-        this.host = null;
-        this.sitehash = null;
+        this.clienthost = null;
         this.siteexcludes = null;
-        this.authorhash = null;
         this.remotepeer = null;
         this.starttime = Long.valueOf(System.currentTimeMillis());
         this.maxtime = 10000;
         this.timeout = this.starttime + this.timeout;
-        this.specialRights = false;
-        this.navigators = "all";
         this.indexSegment = indexSegment;
         this.userAgent = userAgent;
         this.transmitcount = 0;
         this.filterfailurls = false;
+        this.filterscannerfail = false;
         this.lat = 0.0d;
         this.lon = 0.0d;
         this.radius = 0.0d;
+        this.facetfields = new LinkedHashSet<String>();
+
+        this.solrSchema = indexSegment.fulltext().getDefaultConfiguration();
+        for (CollectionSchema f: defaultfacetfields) {
+            if (solrSchema.contains(f)) facetfields.add(f.getSolrFieldName());
+        }
+        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_SUFFIX);
+        this.maxfacets = defaultmaxfacets;
+        this.cachedQuery = null;
     }
 
     public QueryParams(
-        final String queryString, final HandleSet queryHashes,
-        final HandleSet excludeHashes,
-        final HandleSet fullqueryHashes,
-        final Pattern snippetMatcher,
-        final String tenant,
-        final String modifier,
-        final int maxDistance, final String prefer, final ContentDomain contentdom,
+        final QueryGoal queryGoal,
+        final QueryModifier modifier,
+        final int maxDistance,
+        final String prefer,
+        final ContentDomain contentdom,
         final String language,
         final Collection<Tagging.Metatag> metatags,
-        final String navigators,
         final CacheStrategy snippetCacheStrategy,
-        final int itemsPerPage, final int offset, final String urlMask,
-        final Searchdom domType, final int domMaxTargets,
-        final Bitfield constraint, final boolean allofconstraint,
-        final String site,
+        final int itemsPerPage,
+        final int offset,
+        final String urlMask,
+        final String tld,
+        final String inlink,
+        final Searchdom domType,
+        final Bitfield constraint,
+        final boolean allofconstraint,
         final Set<String> siteexcludes,
-        final String authorhash,
         final int domainzone,
         final String host,
         final boolean specialRights,
@@ -231,15 +202,13 @@ public final class QueryParams {
         final RankingProfile ranking,
         final String userAgent,
         final boolean filterfailurls,
-        final double lat, final double lon, final double radius) {
-
-        this.queryString = queryString;
-        this.queryHashes = queryHashes;
-        this.excludeHashes = excludeHashes;
-        this.fullqueryHashes = fullqueryHashes;
-        this.snippetMatcher = snippetMatcher;
-        this.tenant = (tenant != null && tenant.length() == 0) ? null : tenant;
-        this.modifier = new Modifier(modifier == null ? "" : modifier);
+        final boolean filterscannerfail,
+        final double lat,
+        final double lon,
+        final double radius
+        ) {
+        this.queryGoal = queryGoal;
+        this.modifier = modifier;
         this.ranking = ranking;
         this.maxDistance = maxDistance;
         this.contentdom = contentdom;
@@ -251,43 +220,64 @@ public final class QueryParams {
             throw new IllegalArgumentException("Not a valid regular expression: " + urlMask, ex);
         }
         this.urlMask_isCatchall = this.urlMask.toString().equals(catchall_pattern.toString());
+        if (this.urlMask_isCatchall) {
+            if (modifier.protocol != null) {
+                this.urlMask = Pattern.compile(modifier.protocol + ".*");
+                this.urlMask_isCatchall = false;
+            }
+            if (tld != null) {
+                this.urlMask = Pattern.compile(".*\\." + tld + ".*");
+                this.urlMask_isCatchall = false;
+            }
+            if (modifier.filetype != null) {
+                this.urlMask = Pattern.compile(".*" + modifier.filetype + ".*");
+                this.urlMask_isCatchall = false;
+            }
+        }
+        this.tld = tld;
+        this.inlink = inlink;
         try {
             this.prefer = Pattern.compile(prefer);
         } catch (final PatternSyntaxException ex) {
             throw new IllegalArgumentException("Not a valid regular expression: " + prefer, ex);
         }
-        this.prefer_isMatchnothing = this.prefer.toString().equals(matchnothing_pattern.toString());
+        this.prefer.toString().equals(matchnothing_pattern.toString());
         assert language != null;
         this.targetlang = language;
         this.metatags = metatags;
-        this.navigators = navigators;
         this.domType = domType;
         this.zonecode = domainzone;
-        this.domMaxTargets = domMaxTargets;
         this.constraint = constraint;
         this.allofconstraint = allofconstraint;
-        this.sitehash = site; assert site == null || site.length() == 6;
-        this.siteexcludes = siteexcludes != null && siteexcludes.size() == 0 ? null: siteexcludes;
-        this.authorhash = authorhash; assert authorhash == null || !authorhash.isEmpty();
-        this.snippetCacheStrategy = snippetCacheStrategy;
-        this.host = host;
+        this.siteexcludes = siteexcludes != null && siteexcludes.isEmpty() ? null: siteexcludes;
+        this.snippetCacheStrategy = contentdom == ContentDomain.TEXT ? snippetCacheStrategy : contentdom == null ? null : CacheStrategy.CACHEONLY;
+        this.clienthost = host;
         this.remotepeer = null;
         this.starttime = Long.valueOf(System.currentTimeMillis());
         this.maxtime = 10000;
         this.timeout = this.starttime + this.timeout;
-        this.specialRights = specialRights;
         this.indexSegment = indexSegment;
         this.userAgent = userAgent;
         this.transmitcount = 0;
         this.filterfailurls = filterfailurls;
+        this.filterscannerfail = filterscannerfail;
         // we normalize here the location and radius because that should cause a better caching
         // and as surplus it will increase privacy
         this.lat = Math.floor(lat * this.kmNormal) / this.kmNormal;
         this.lon = Math.floor(lon * this.kmNormal) / this.kmNormal;
         this.radius = Math.floor(radius * this.kmNormal + 1) / this.kmNormal;
+        this.facetfields = new LinkedHashSet<String>();
+        
+        this.solrSchema = indexSegment.fulltext().getDefaultConfiguration();
+        for (CollectionSchema f: defaultfacetfields) {
+            if (solrSchema.contains(f)) facetfields.add(f.getSolrFieldName());
+        }
+        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_SUFFIX);
+        this.maxfacets = defaultmaxfacets;
+        this.cachedQuery = null;
     }
 
-    double kmNormal = 100.d; // 100 =ca 40000.d / 360.d == 111.11 - if lat/lon is multiplied with this, rounded and diveded by this, the location is normalized to a 1km grid
+    private double kmNormal = 100.d; // 100 =ca 40000.d / 360.d == 111.11 - if lat/lon is multiplied with this, rounded and diveded by this, the location is normalized to a 1km grid
 
     public Segment getSegment() {
         return this.indexSegment;
@@ -302,7 +292,7 @@ public final class QueryParams {
         // the number of result lines that are displayed at once (size of result page)
         return this.itemsPerPage;
     }
-
+    
     public void setOffset(final int newOffset) {
         this.offset = newOffset;
     }
@@ -312,24 +302,12 @@ public final class QueryParams {
     }
 
     public static HandleSet hashes2Set(final String query) {
-        final HandleSet keyhashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+        final HandleSet keyhashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
         if (query != null) {
             for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
                 keyhashes.put(ASCII.getBytes(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)));
-            } catch (final RowSpaceExceededException e) {
-                Log.logException(e);
-            }
-        }
-        return keyhashes;
-    }
-
-    public static HandleSet hashes2Handles(final String query) {
-        final HandleSet keyhashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-        if (query != null) {
-            for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
-                keyhashes.put(ASCII.getBytes(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)));
-            } catch (final RowSpaceExceededException e) {
-                Log.logException(e);
+            } catch (final SpaceExceededException e) {
+                ConcurrentLog.logException(e);
             }
         }
         return keyhashes;
@@ -341,6 +319,17 @@ public final class QueryParams {
         for (final byte[] b : hashes) {
             assert b.length == Word.commonHashLength : "hash = " + ASCII.String(b);
             System.arraycopy(b, 0, bb, p, Word.commonHashLength);
+            p += Word.commonHashLength;
+        }
+        return ASCII.String(bb);
+    }
+
+    public static String hashSet2hashString(final Set<String> hashes) {
+        final byte[] bb = new byte[hashes.size() * Word.commonHashLength];
+        int p = 0;
+        for (final String s : hashes) {
+            assert s.length() == Word.commonHashLength : "hash = " + s;
+            System.arraycopy(ASCII.getBytes(s), 0, bb, p, Word.commonHashLength);
             p += Word.commonHashLength;
         }
         return ASCII.String(bb);
@@ -370,16 +359,16 @@ public final class QueryParams {
      * @param text
      * @return true if the query matches with the given text
      */
-    public final boolean matchesText(final String text) {
+    private final boolean matchesText(final String text) {
         boolean ret = false;
         final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text, null).keySet());
-        if (!SetTools.anymatch(wordhashes, this.excludeHashes)) {
-            ret = SetTools.totalInclusion(this.queryHashes, wordhashes);
+        if (!SetTools.anymatch(wordhashes, this.queryGoal.getExcludeHashes())) {
+            ret = SetTools.totalInclusion(this.queryGoal.getIncludeHashes(), wordhashes);
         }
         return ret;
     }
 
-    public static final boolean anymatch(final String text, final HandleSet keyhashes) {
+    protected static final boolean anymatch(final String text, final HandleSet keyhashes) {
     	// returns true if any of the word hashes in keyhashes appear in the String text
     	// to do this, all words in the string must be recognized and transcoded to word hashes
         if (keyhashes == null || keyhashes.isEmpty()) return false;
@@ -387,87 +376,185 @@ public final class QueryParams {
     	return SetTools.anymatch(wordhashes, keyhashes);
     }
 
-    private static String seps = "'.,/&_"; static {seps += '"';}
+    public SolrQuery solrQuery(final ContentDomain cd, final boolean getFacets, final boolean excludeintext_image) {
+        if (cd == ContentDomain.IMAGE) return solrImageQuery(getFacets);
+        return solrTextQuery(getFacets, excludeintext_image);
+    }
+    
+    private SolrQuery solrTextQuery(final boolean getFacets, final boolean excludeintext_image) {
+        if (this.cachedQuery != null) {
+            this.cachedQuery.setStart(this.offset);
+            if (!getFacets) this.cachedQuery.setFacet(false);
+            return this.cachedQuery;
+        }
+        if (this.queryGoal.getIncludeStrings().size() == 0) return null;
+        
+        // construct query
+        final SolrQuery params = getBasicParams(getFacets);
+        int rankingProfile = this.ranking.coeff_date == RankingProfile.COEFF_MAX ? 1 : (this.modifier.sitehash != null || this.modifier.sitehost != null) ? 2 : 0;
+        params.setQuery(this.queryGoal.collectionTextQueryString(this.indexSegment.fulltext().getDefaultConfiguration(), rankingProfile, excludeintext_image).toString());
+        Ranking ranking = indexSegment.fulltext().getDefaultConfiguration().getRanking(rankingProfile); // for a by-date ranking select different ranking profile
+        
+        String bq = ranking.getBoostQuery();
+        String bf = ranking.getBoostFunction();
+        if (bq.length() > 0) params.setParam("bq", bq);
+        if (bf.length() > 0) params.setParam("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
+        
+        // prepare result
+        ConcurrentLog.info("Protocol", "SOLR QUERY: " + params.toString());
+        this.cachedQuery = params;
+        return params;
+    }
+    
+    private SolrQuery solrImageQuery(boolean getFacets) {
+        if (this.cachedQuery != null) {
+            this.cachedQuery.setStart(this.offset);
+            if (!getFacets) this.cachedQuery.setFacet(false);
+            return this.cachedQuery;
+        }
+        if (this.queryGoal.getIncludeStrings().size() == 0) return null;
+        
+        // construct query
+        final SolrQuery params = getBasicParams(getFacets);
+        params.setQuery(this.queryGoal.collectionImageQueryString().toString());
+        
+        // set boosts
+        StringBuilder bq = new StringBuilder();
+        bq.append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"jpg\"");
+        bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tif\"");
+        bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tiff\"");
+        bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"png\"");
+        params.setParam("bq", bq.toString());
+        
+        // prepare result
+        ConcurrentLog.info("Protocol", "SOLR QUERY: " + params.toString());
+        this.cachedQuery = params;
+        return params;
+    }
+    
+    private SolrQuery getBasicParams(boolean getFacets) {
+        final SolrQuery params = new SolrQuery();
+        params.setParam("defType", "edismax");
+        params.setStart(this.offset);
+        params.setRows(this.itemsPerPage);
+        params.setFacet(false);
 
-    @SuppressWarnings("unchecked")
-    public static Collection<String>[] cleanQuery(String querystring) {
-        // returns three sets: a query set, a exclude set and a full query set
-        final Collection<String> query = new ArrayList<String>();
-        final Collection<String> exclude = new ArrayList<String>();
-        final Collection<String> fullquery = new ArrayList<String>();
-
-        if ((querystring != null) && (!querystring.isEmpty())) {
-
-            // convert Umlaute
-            querystring = AbstractScraper.stripAll(querystring.toCharArray()).toLowerCase().trim();
-            int c;
-            for (int i = 0; i < seps.length(); i++) {
-                while ((c = querystring.indexOf(seps.charAt(i))) >= 0) {
-                    querystring = querystring.substring(0, c) + (((c + 1) < querystring.length()) ? (" " + querystring.substring(c + 1)) : "");
+        if (this.ranking.coeff_date == RankingProfile.COEFF_MAX) {
+            // set a most-recent ordering
+            params.setSort(new SortClause(CollectionSchema.last_modified.getSolrFieldName(), SolrQuery.ORDER.desc));
+            //params.setSortField(CollectionSchema.last_modified.getSolrFieldName(), ORDER.desc); // deprecated in Solr 4.2
+        }
+        
+        // add site facets
+        final String fq = getFacets();
+        if (fq.length() > 0) {
+            params.setFilterQueries(fq);
+        }
+        
+        // set facet query attributes
+        if (getFacets && this.facetfields.size() > 0) {
+            params.setFacet(true);
+            params.setFacetLimit(this.maxfacets);
+            params.setFacetSort(FacetParams.FACET_SORT_COUNT);
+            params.setParam(FacetParams.FACET_METHOD, FacetParams.FACET_METHOD_fcs);
+            for (String field: this.facetfields) params.addFacetField(field);
+        } else {
+            params.setFacet(false);
+        }
+        params.setFields("*", "score"); // we need the score for post-ranking
+        return params;
+    }
+    
+    private String getFacets() {
+        
+        // add site facets
+        final StringBuilder fq = new StringBuilder();
+        if (this.modifier.sitehash == null && this.modifier.sitehost == null) {
+            if (this.siteexcludes != null) {
+                for (String ex: this.siteexcludes) {
+                    fq.append(" AND -").append(CollectionSchema.host_id_s.getSolrFieldName()).append(':').append(ex);
                 }
             }
-
-            String s;
-            int l;
-            // the string is clean now, but we must generate a set out of it
-            final String[] queries = querystring.split(" ");
-            for (String quer : queries) {
-                if (quer.startsWith("-")) {
-                    String x = quer.substring(1);
-                    if (!exclude.contains(x)) exclude.add(x);
+        } else {
+            if (this.modifier.sitehost != null) {
+                // consider to search for hosts with 'www'-prefix, if not already part of the host name
+                if (this.modifier.sitehost.startsWith("www.")) {
+                    fq.append(" AND (").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehost.substring(4)).append('\"');
+                    fq.append(" OR ").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehost).append("\")");
                 } else {
-                    while ((c = quer.indexOf('-')) >= 0) {
-                        s = quer.substring(0, c);
-                        l = s.length();
-                        if (l >= Condenser.wordminsize && !query.contains(s)) {query.add(s);}
-                        if (l > 0 && !fullquery.contains(s)) {fullquery.add(s);}
-                        quer = quer.substring(c + 1);
-                    }
-                    l = quer.length();
-                    if (l >= Condenser.wordminsize && !query.contains(quer)) {query.add(quer);}
-                    if (l > 0 && !fullquery.contains(quer)) {fullquery.add(quer);}
+                    fq.append(" AND (").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehost).append('\"');
+                    fq.append(" OR ").append(CollectionSchema.host_s.getSolrFieldName()).append(":\"www.").append(this.modifier.sitehost).append("\")");
                 }
-            }
+            } else
+                fq.append(" AND ").append(CollectionSchema.host_id_s.getSolrFieldName()).append(":\"").append(this.modifier.sitehash).append('\"');
         }
-        return new Collection[]{query, exclude, fullquery};
-    }
 
-    public String queryString(final boolean encodeHTML) {
-        final String ret;
-    	if (encodeHTML){
-            ret = CharacterCoding.unicode2html(this.queryString, true);
-    	} else {
-            ret = this.queryString;
+        // add vocabulary facets
+        for (Tagging.Metatag tag: this.metatags) {
+            fq.append(" AND ").append(CollectionSchema.VOCABULARY_PREFIX).append(tag.getVocabularyName()).append(CollectionSchema.VOCABULARY_SUFFIX).append(":\"").append(tag.getObject()).append('\"');
         }
-    	return ret;
-    }
-
-    public String queryStringForUrl() {
-    	try {
-            return URLEncoder.encode(this.queryString, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            Log.logException(e);
-            return this.queryString;
+        
+        // add author facets
+        if (this.modifier.author != null && this.modifier.author.length() > 0 && this.solrSchema.contains(CollectionSchema.author_sxt)) {
+            fq.append(" AND ").append(CollectionSchema.author_sxt.getSolrFieldName()).append(":\"").append(this.modifier.author).append('\"');
         }
+        
+        if (this.modifier.protocol != null) {
+            fq.append(" AND ").append(CollectionSchema.url_protocol_s.getSolrFieldName()).append(':').append(this.modifier.protocol);
+        }
+        
+        if (this.tld != null) {
+            fq.append(" AND ").append(CollectionSchema.host_dnc_s.getSolrFieldName()).append(":\"").append(this.tld).append('\"');
+        }
+        
+        if (this.modifier.filetype != null) {
+            fq.append(" AND ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"").append(this.modifier.filetype).append('\"');
+        }
+        
+        if (this.inlink != null) {
+            fq.append(" AND ").append(CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName()).append(":\"").append(this.inlink).append('\"');
+        }
+        
+        if (!this.urlMask_isCatchall) {
+            // add a filter query on urls
+            String urlMaskPattern = this.urlMask.pattern();
+            
+            // solr doesn't like slashes, backslashes or doublepoints; remove them // urlmask = ".*\\." + ft + "(\\?.*)?";
+            int p;
+            while ((p = urlMaskPattern.indexOf(':')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 1);
+            while ((p = urlMaskPattern.indexOf('/')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 1);
+            while ((p = urlMaskPattern.indexOf('\\')) >= 0) urlMaskPattern = urlMaskPattern.substring(0, p) + "." + urlMaskPattern.substring(p + 2);
+            fq.append(" AND ").append(CollectionSchema.sku.getSolrFieldName() + ":/" + urlMaskPattern + "/");
+        }
+        
+        if (this.radius > 0.0d && this.lat != 0.0d && this.lon != 0.0d) {
+            // localtion search, no special ranking
+            // try http://localhost:8090/solr/select?q=*:*&fq={!bbox sfield=coordinate_p pt=50.17,8.65 d=1}
+
+            //params.setQuery("!bbox " + q.toString());
+            //params.set("sfield", YaCySchema.coordinate_p.name());
+            //params.set("pt", Double.toString(this.lat) + "," + Double.toString(this.lon));
+            //params.set("d", GeoLocation.degreeToKm(this.radius));
+            fq.append(" AND ").append("{!bbox sfield=" + CollectionSchema.coordinate_p.getSolrFieldName() + " pt=" + Double.toString(this.lat) + "," + Double.toString(this.lon) + " d=" + GeoLocation.degreeToKm(this.radius) + "}");
+            //params.setRows(Integer.MAX_VALUE);
+        }
+        
+        if (this.modifier.collection != null && this.modifier.collection.length() > 0) {
+            fq.append(" AND ").append(QueryModifier.parseCollectionExpression(this.modifier.collection));
+        }
+        
+        return fq.length() > 0 ? fq.substring(5) : fq.toString();
+    }
+    
+    public QueryGoal getQueryGoal() {
+        return this.queryGoal;
     }
 
-    public Collection<String>[] queryWords() {
-        return cleanQuery(this.queryString);
-    }
-
-    public void filterOut(final SortedSet<String> blueList) {
-        // filter out words that appear in this set
-    	// this is applied to the queryHashes
-    	final HandleSet blues = Word.words2hashesHandles(blueList);
-    	for (final byte[] b: blues) this.queryHashes.remove(b);
-    }
-
-
-    public final Map<MultiProtocolURI, String> separateMatches(final Map<MultiProtocolURI, String> links) {
-        final Map<MultiProtocolURI, String> matcher = new HashMap<MultiProtocolURI, String>();
-        final Iterator <Map.Entry<MultiProtocolURI, String>> i = links.entrySet().iterator();
-        Map.Entry<MultiProtocolURI, String> entry;
-        MultiProtocolURI url;
+    public final Map<DigestURI, String> separateMatches(final Map<DigestURI, String> links) {
+        final Map<DigestURI, String> matcher = new HashMap<DigestURI, String>();
+        final Iterator <Map.Entry<DigestURI, String>> i = links.entrySet().iterator();
+        Map.Entry<DigestURI, String> entry;
+        DigestURI url;
         String anchorText;
         while (i.hasNext()) {
             entry = i.next();
@@ -499,13 +586,13 @@ public final class QueryParams {
             // generate a string that identifies a search so results can be re-used in a cache
             final StringBuilder context = new StringBuilder(180);
             if (anonymized) {
-                context.append(anonymizedQueryHashes(this.queryHashes));
+                context.append(anonymizedQueryHashes(this.queryGoal.getIncludeHashes()));
                 context.append('-');
-                context.append(anonymizedQueryHashes(this.excludeHashes));
+                context.append(anonymizedQueryHashes(this.queryGoal.getExcludeHashes()));
             } else {
-                context.append(hashSet2hashString(this.queryHashes));
+                context.append(hashSet2hashString(this.queryGoal.getIncludeHashes()));
                 context.append('-');
-                context.append(hashSet2hashString(this.excludeHashes));
+                context.append(hashSet2hashString(this.queryGoal.getExcludeHashes()));
             }
             //context.append(asterisk);
             //context.append(this.domType);
@@ -515,13 +602,18 @@ public final class QueryParams {
             context.append(ASCII.String(Word.word2hash(this.ranking.toExternalString()))).append(asterisk);
             context.append(Base64Order.enhancedCoder.encodeString(this.prefer.toString())).append(asterisk);
             context.append(Base64Order.enhancedCoder.encodeString(this.urlMask.toString())).append(asterisk);
-            context.append(this.sitehash).append(asterisk);
+            context.append(this.modifier.sitehash).append(asterisk);
+            context.append(this.modifier.author).append(asterisk);
+            context.append(this.modifier.protocol).append(asterisk);
+            context.append(this.modifier.filetype).append(asterisk);
+            context.append(this.modifier.collection).append(asterisk);
+            context.append(this.modifier.toString()).append(asterisk);
             context.append(this.siteexcludes).append(asterisk);
-            context.append(this.authorhash).append(asterisk);
             context.append(this.targetlang).append(asterisk);
             context.append(this.constraint).append(asterisk);
             context.append(this.maxDistance).append(asterisk);
-            context.append(this.modifier.s).append(asterisk);
+            context.append(this.tld).append(asterisk);
+            context.append(this.inlink).append(asterisk);
             context.append(this.lat).append(asterisk).append(this.lon).append(asterisk).append(this.radius).append(asterisk);
             context.append(this.snippetCacheStrategy == null ? "null" : this.snippetCacheStrategy.name());
             String result = context.toString();
@@ -542,11 +634,9 @@ public final class QueryParams {
      * @param addToQuery
      * @return
      */
-    public static StringBuilder navurl(
-            final String ext, final int page, final QueryParams theQuery,
-            final String newQueryString, final String originalUrlMask, final String nav) {
+    public static StringBuilder navurl(final String ext, final int page, final QueryParams theQuery, final String newQueryString) {
 
-        final StringBuilder sb = navurlBase(ext, theQuery, newQueryString, originalUrlMask, nav);
+        final StringBuilder sb = navurlBase(ext, theQuery, newQueryString);
 
         sb.append(ampersand);
         sb.append("startRecord=");
@@ -555,15 +645,13 @@ public final class QueryParams {
         return sb;
     }
 
-    public static StringBuilder navurlBase(
-                    final String ext, final QueryParams theQuery,
-                    final String newQueryString, final String originalUrlMask, final String nav) {
+    public static StringBuilder navurlBase(final String ext, final QueryParams theQuery, final String newQueryString) {
 
         final StringBuilder sb = new StringBuilder(120);
         sb.append("/yacysearch.");
         sb.append(ext);
         sb.append("?query=");
-        sb.append(newQueryString == null ? theQuery.queryStringForUrl() : newQueryString);
+        sb.append(newQueryString == null ? theQuery.getQueryGoal().getOriginalQueryString(true) : newQueryString);
 
         sb.append(ampersand);
         sb.append("maximumRecords=");
@@ -576,14 +664,6 @@ public final class QueryParams {
         sb.append(ampersand);
         sb.append("verify=");
         sb.append(theQuery.snippetCacheStrategy == null ? "false" : theQuery.snippetCacheStrategy.toName());
-
-        sb.append(ampersand);
-        sb.append("nav=");
-        sb.append(nav);
-
-        sb.append(ampersand);
-        sb.append("urlmaskfilter=");
-        sb.append(originalUrlMask);
 
         sb.append(ampersand);
         sb.append("prefermaskfilter=");
@@ -602,35 +682,9 @@ public final class QueryParams {
 
         sb.append(ampersand);
         sb.append("former=");
-        sb.append(theQuery.queryStringForUrl());
+        sb.append(theQuery.getQueryGoal().getOriginalQueryString(true));
 
         return sb;
     }
 
-    private static Pattern StringMatchPattern = Pattern.compile(".*?(\".*?\").*");
-    /**
-     * calculate a pattern to match with a string search
-     * @param query
-     * @return
-     */
-    public static Pattern stringSearchPattern(String query) {
-        final StringBuilder p = new StringBuilder(query.length());
-        p.append("(?iu)");
-        int seqc = 0;
-        while (query.length() > 0) {
-            final Matcher m = StringMatchPattern.matcher(query);
-            if (!m.matches()) break;
-            p.append(".*?").append(query.substring(m.start(1) + 1, m.end(1) - 1));
-            query = query.substring(m.end(1));
-            seqc++;
-        }
-        if (seqc == 0) return QueryParams.catchall_pattern;
-        p.append(".*");
-        return Pattern.compile(p.toString());
-    }
-
-    public static void main(final String[] args) {
-        final Pattern p = stringSearchPattern("die \"peer-to-peer Suchmaschine\" ohne Zensur als \"freie Software\" runterladen");
-        System.out.println(p.toString());
-    }
 }

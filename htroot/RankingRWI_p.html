@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': RWI Ranking Configuration</title>
+    #%env/templates/metas.template%#
+  	<script>
+	$(function() {
+		$("select").each(function(){
+			var name = $(this).attr("name");
+			$("<div style='width:360px; float:left; display: inline;' name='"+name+"' id='slider_"+name+"'></div>").insertAfter($(this)).slider({
+				min: 0,
+				max: 15,
+				range: "min",
+				value: $(this).val(),
+				slide: function(event, ui) {					
+					select = $(ui.handle).parents("dd").children("select");
+					select.val(ui.value);
+				}
+			});
+			$(this).change(function(event) {
+				$(event.target).next().slider("value", this.selectedIndex);
+			});
+		});
+	});
+	</script>
+  </head>
+  <body id="RankingRWI_p">
+    #%env/templates/header.template%#
+    #%env/templates/submenuSearchConfiguration.template%#
+    <h2>RWI Ranking Configuration</h2>
+    <p>The document ranking influences the order of the search result entities.
+    A ranking is computed using a number of attributes from the documents that match with the search word.
+    The attributes are first normalized over all search results and then the normalized attribut is multiplied with the ranking coefficient computed from this list.
+    The ranking coefficient grows exponentially with the ranking levels given in the following table. If you increase a single value by one, then the strength of the parameter doubles.
+    </p>
+    <form class="dsearch" action="RankingRWI_p.html" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <legend>Pre-Ranking</legend>
+        <dl>#{attrPre}# 
+          <dt style="width:260px"><label for="#[nameorg]#">#[name]#</label>&nbsp;<span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span>#[info]#</span></span></dt>
+          <dd style="width:360px; float:left; display:inline;" id="#[nameorg]#">
+            <select style="float:left; display:inline;" name="#[nameorg]#">#{select}# 
+				<option value="#[value]#" #(checked)#:: selected="selected"#(/checked)#>#[value]#</option>#{/select}#
+			</select>
+          </dd>#{/attrPre}# 
+        </dl>
+      </fieldset>
+      <p>There are two ranking stages: first all results are ranked using the pre-ranking and from the resulting list the documents are ranked again with a post-ranking.
+      The two stages are separated because they need statistical information from the result of the pre-ranking.
+      </p>
+      <fieldset>
+        <legend>Post-Ranking</legend>
+        <dl>#{attrPost}# 
+          <dt style="width:260px"><label for="#[nameorg]#">#[name]#</label>&nbsp;<span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span>#[info]#</span></span></dt>
+          <dd style="width:360px" id="#[nameorg]#">            
+          	<select name="#[nameorg]#">#{select}# 
+				<option value="#[value]#" #(checked)#:: selected="selected"#(/checked)#>#[value]#</option>#{/select}#
+			</select>
+          </dd>#{/attrPost}# 
+        </dl>
+      </fieldset>
+      <fieldset>
+        <input type="submit" name="EnterRanking" value="Set as Default Ranking" />
+        <input type="submit" name="ResetRanking" value="Re-Set to Built-In Ranking" />
+      </fieldset>
+    </form>
+
+  #%env/templates/footer.template%#
+  </body>
+</html>

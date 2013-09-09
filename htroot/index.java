@@ -28,22 +28,19 @@
 // javac -classpath .:../classes index.java
 // if the shell's current path is HTROOT
 
-
-import net.yacy.cora.document.Classification;
-import net.yacy.cora.document.Classification.ContentDomain;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.ranking.BlockRank;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class index {
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        BlockRank.ensureLoaded(); // lazy initialization of block rank tables
 
         final String forwardTarget = sb.getConfig(SwitchboardConstants.INDEX_FORWARD, "");
         if (forwardTarget.length() > 0) {
@@ -61,7 +58,7 @@ public class index {
                 return prop;
             }
         }
-
+        
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean focus  = (post == null) ? true : post.get("focus", "1").equals("1");
 
@@ -70,7 +67,6 @@ public class index {
         final String former = (post == null) ? "" : post.get("former", "");
         final int count = Math.min(100, (post == null) ? 10 : post.getInt("count", 10));
         final int maximumRecords = sb.getConfigInt(SwitchboardConstants.SEARCH_ITEMS, 10);
-        final String urlmaskfilter = (post == null) ? ".*" : post.get("urlmaskfilter", ".*");
         final String prefermaskfilter = (post == null) ? "" : post.get("prefermaskfilter", "");
         final String constraint = (post == null) ? "" : post.get("constraint", "");
         final String cat = (post == null) ? "href" : post.get("cat", "href");
@@ -106,11 +102,7 @@ public class index {
         prop.put("searchoptions_count-10", (count == 10) ? "1" : "0");
         prop.put("searchoptions_count-50", (count == 50) ? "1" : "0");
         prop.put("searchoptions_count-100", (count == 100) ? "1" : "0");
-        prop.put("searchoptions_resource-select", (sb.peers == null || sb.peers.sizeConnected() == 0 || !global) ?  0 : 1);
-        prop.put("searchoptions_resource-select_global", global ? "1" : "0");
-        prop.put("searchoptions_resource-select_global-disabled", indexReceiveGranted ? "0" : "1");
-        prop.put("searchoptions_resource-select_local", global ? "0" : "1");
-        prop.putHTML("searchoptions_urlmaskfilter", urlmaskfilter);
+        prop.put("searchoptions_resource-select", (sb.peers == null || sb.peers.sizeConnected() == 0 || !indexReceiveGranted) ?  0 : global ? 1 : 2);
         prop.put("searchoptions_prefermaskoptions", "0");
         prop.putHTML("searchoptions_prefermaskoptions_prefermaskfilter", prefermaskfilter);
         prop.put("searchoptions_indexofChecked", "");

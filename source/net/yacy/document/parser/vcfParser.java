@@ -28,21 +28,23 @@
 package net.yacy.document.parser;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.order.Base64Order;
 
 /**
  * Vcard specification: http://www.imc.org/pdi/vcard-21.txt
@@ -69,7 +71,7 @@ public class vcfParser extends AbstractParser implements Parser {
             final StringBuilder parsedTitle = new StringBuilder();
             final StringBuilder parsedDataText = new StringBuilder();
             final HashMap<String, String> parsedData = new HashMap<String, String>();
-            final HashMap<MultiProtocolURI, Properties> anchors = new HashMap<MultiProtocolURI, Properties>();
+            final HashMap<DigestURI, Properties> anchors = new HashMap<DigestURI, Properties>();
             final LinkedList<String> parsedNames = new LinkedList<String>();
 
             boolean useLastLine = false;
@@ -88,7 +90,7 @@ public class vcfParser extends AbstractParser implements Parser {
                 }
 
                 if (line == null) break;
-                else if (line.length() == 0) continue;
+                else if (line.isEmpty()) continue;
 
                 lineNr++;
                 final int pos = line.indexOf(':',0);
@@ -176,7 +178,7 @@ public class vcfParser extends AbstractParser implements Parser {
                         parsedData.clear();
                     } else if (key.toUpperCase().startsWith("URL")) {
                         try {
-                            final MultiProtocolURI newURL = new MultiProtocolURI(value);
+                            final DigestURI newURL = new DigestURI(value);
                             final Properties p = new Properties();
                             p.put("name", newURL.toString());
                             anchors.put(newURL, p);
@@ -197,15 +199,17 @@ public class vcfParser extends AbstractParser implements Parser {
                     }
 
                 } else {
-                    if (this.log.isFinest()) this.log.logFinest("Invalid data in vcf file" +
+                    if (AbstractParser.log.isFinest()) AbstractParser.log.finest("Invalid data in vcf file" +
                                              "\n\tURL: " + url +
                                              "\n\tLine: " + line +
                                              "\n\tLine-Nr: " + lineNr);
                 }
             }
+            try {inputReader.close();} catch (final IOException e) {}
 
             final String[] sections = parsedNames.toArray(new String[parsedNames.size()]);
             final byte[] text = UTF8.getBytes(parsedDataText.toString());
+            final List<String> descriptions = new ArrayList<String>(1); descriptions.add("vCard");
             return new Document[]{new Document(
                     url,                        // url of the source document
                     mimeType,                   // the documents mime type
@@ -213,11 +217,11 @@ public class vcfParser extends AbstractParser implements Parser {
                     this,
                     null,                       // set of languages
                     null,                       // a list of extracted keywords
-                    parsedTitle.toString(),     // a long document title
+                    singleList(parsedTitle.toString()), // a long document title
                     "",                         // TODO: AUTHOR
                     "",                         // the publisher
                     sections,                   // an array of section headlines
-                    "vCard",                    // an abstract
+                    descriptions,               // an abstract
                     0.0f, 0.0f,
                     text,                       // the parsed document text
                     anchors,                    // a map of extracted anchors

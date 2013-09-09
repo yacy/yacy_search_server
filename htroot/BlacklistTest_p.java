@@ -1,4 +1,4 @@
-// BlacklistTest_p.java 
+// BlacklistTest_p.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -29,30 +29,24 @@
 // javac -classpath .:../classes Blacklist_p.java
 // if the shell's current path is HTROOT
 
-import java.io.File;
 import java.net.MalformedURLException;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-
-import de.anomic.data.ListManager;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class BlacklistTest_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        
-        // initialize the list manager
-        ListManager.switchboard = (Switchboard) env;
-        ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
-        prop.putHTML("blacklistEngine", Switchboard.urlBlacklist.getEngineInfo());
-       
-        // do all post operations            
+        prop.putHTML("blacklistEngine", Blacklist.getEngineInfo());
+
+        // do all post operations
         if(post != null && post.containsKey("testList")) {
             prop.put("testlist", "1");
             String urlstring = post.get("testurl", "");
@@ -70,18 +64,36 @@ public class BlacklistTest_p {
             if(testurl != null) {
                 prop.putHTML("url",testurl.toString());
                 prop.putHTML("testlist_url",testurl.toString());
-                if(Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, testurl))
-                        prop.put("testlist_listedincrawler", "1");
-                if(Switchboard.urlBlacklist.isListed(BlacklistType.DHT, testurl))
-                        prop.put("testlist_listedindht", "1");
-                if(Switchboard.urlBlacklist.isListed(BlacklistType.NEWS, testurl))
-                        prop.put("testlist_listedinnews", "1");
-                if(Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, testurl))
-                        prop.put("testlist_listedinproxy", "1");
-                if(Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, testurl))
-                        prop.put("testlist_listedinsearch", "1");
-                if(Switchboard.urlBlacklist.isListed(BlacklistType.SURFTIPS, testurl))
-                        prop.put("testlist_listedinsurftips", "1");
+                boolean isblocked = false;
+
+                if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, testurl)) {
+                    prop.put("testlist_listedincrawler", "1");
+                    isblocked = true;
+                }
+                if (Switchboard.urlBlacklist.isListed(BlacklistType.DHT, testurl)) {
+                    prop.put("testlist_listedindht", "1");
+                    isblocked = true;
+                }
+                if (Switchboard.urlBlacklist.isListed(BlacklistType.NEWS, testurl)) {
+                    prop.put("testlist_listedinnews", "1");
+                    isblocked = true;
+                }
+                if (Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, testurl)) {
+                    prop.put("testlist_listedinproxy", "1");
+                    isblocked = true;
+                }
+                if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, testurl)) {
+                    prop.put("testlist_listedinsearch", "1");
+                    isblocked = true;
+                }
+                if (Switchboard.urlBlacklist.isListed(BlacklistType.SURFTIPS, testurl)) {
+                    prop.put("testlist_listedinsurftips", "1");
+                    isblocked = true;
+                }
+
+                if (!isblocked) {
+                    prop.put("testlist_isnotblocked", "1");
+                }
             }
             else {
                 prop.putHTML("url",urlstring);

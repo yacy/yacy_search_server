@@ -44,6 +44,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -52,42 +53,39 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.lod.JenaTripleStore;
-import net.yacy.cora.lod.vocabulary.DCTerms;
-import net.yacy.cora.lod.vocabulary.Owl;
+import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.lod.vocabulary.Tagging;
-import net.yacy.cora.lod.vocabulary.YaCyMetadata;
+import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.retrieval.Request;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
-import de.anomic.crawler.retrieval.Request;
 
 
 public class Document {
 
-    private final DigestURI source;      // the source url
+    private final DigestURI source;             // the source url
     private final String mimeType;              // mimeType as taken from http header
     private final String charset;               // the charset of the document
     private final List<String> keywords;        // most resources provide a keyword field
-    private       StringBuilder title;          // a document title, taken from title or h1 tag; shall appear as headline of search result
+    private       List<String> titles;          // the document titles, taken from title and/or h1 tag; shall appear as headline of search result
     private final StringBuilder creator;        // author or copyright
     private final String publisher;             // publisher
-    private final List<String>  sections;       // if present: more titles/headlines appearing in the document
-    private final StringBuilder description;    // an abstract, if present: short content description
+    private final List<String> sections;        // if present: more titles/headlines appearing in the document
+    private final List<String> descriptions;    // an abstract, if present: short content description
     private Object text;                        // the clear text, all that is visible
-    private final Map<MultiProtocolURI, Properties> anchors; // all links embedded as clickeable entities (anchor tags)
-    private final Map<MultiProtocolURI, String> rss; // all embedded rss feeds
-    private final Map<MultiProtocolURI, ImageEntry> images; // all visible pictures in document
+    private final Map<DigestURI, Properties> anchors; // all links embedded as clickeable entities (anchor tags)
+    private final Map<DigestURI, String> rss;   // all embedded rss feeds
+    private final Map<DigestURI, ImageEntry> images; // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
-    private Map<MultiProtocolURI, String> hyperlinks, audiolinks, videolinks, applinks, inboundlinks, outboundlinks;
+    private Map<DigestURI, String> audiolinks, videolinks, applinks, hyperlinks;
+    private Map<DigestURI, String> inboundlinks, outboundlinks;
     private Map<String, String> emaillinks;
     private MultiProtocolURI favicon;
     private boolean resorted;
@@ -95,17 +93,20 @@ public class Document {
     private final boolean indexingDenied;
     private final double lon, lat;
     private final Object parserObject; // the source object that was used to create the Document
+    private final Map<String, Set<String>> generic_facets; // a map from vocabulary names to the set of tags for that vocabulary which apply for this document
 
     public Document(final DigestURI location, final String mimeType, final String charset,
                     final Object parserObject,
                     final Set<String> languages,
-                    final String[] keywords, final String title, final String author, final String publisher,
-                    final String[] sections, final String abstrct,
+                    final String[] keywords,
+                    final List<String> titles,
+                    final String author, final String publisher,
+                    final String[] sections, final List<String> abstrcts,
                     final double lon, final double lat,
                     final Object text,
-                    final Map<MultiProtocolURI, Properties> anchors,
-                    final Map<MultiProtocolURI, String> rss,
-                    final Map<MultiProtocolURI, ImageEntry> images,
+                    final Map<DigestURI, Properties> anchors,
+                    final Map<DigestURI, String> rss,
+                    final Map<DigestURI, ImageEntry> images,
                     final boolean indexingDenied) {
         this.source = location;
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
@@ -113,15 +114,22 @@ public class Document {
         this.parserObject = parserObject;
         this.keywords = new LinkedList<String>();
         if (keywords != null) this.keywords.addAll(Arrays.asList(keywords));
-        this.title = (title == null) ? new StringBuilder(0) : new StringBuilder(title);
+        this.titles = (titles == null) ? new ArrayList<String>(1) : titles;
         this.creator = (author == null) ? new StringBuilder(0) : new StringBuilder(author);
-        this.sections = (sections == null) ? new LinkedList<String>() : Arrays.asList(sections);
-        this.description = (abstrct == null) ? new StringBuilder(0) : new StringBuilder(abstrct);
-        this.lon = lon;
-        this.lat = lat;
-        this.anchors = (anchors == null) ? new HashMap<MultiProtocolURI, Properties>(0) : anchors;
-        this.rss = (rss == null) ? new HashMap<MultiProtocolURI, String>(0) : rss;
-        this.images =  (images == null) ? new HashMap<MultiProtocolURI, ImageEntry>() : images;
+        this.sections =  new LinkedList<String>() ;
+        if (sections != null) this.sections.addAll(Arrays.asList(sections));
+        this.descriptions = (abstrcts == null) ? new ArrayList<String>() : abstrcts;
+        if (lat >= -90.0d && lat <= 90.0d && lon >= -180.0d && lon <= 180.0d) {
+            this.lon = lon;
+            this.lat = lat;
+        } else {
+            // we ignore false values because otherwise solr will cause an error when we input the coordinates into the index
+            this.lon = 0.0d;
+            this.lat = 0.0d;
+        }
+        this.anchors = (anchors == null) ? new HashMap<DigestURI, Properties>(0) : anchors;
+        this.rss = (rss == null) ? new HashMap<DigestURI, String>(0) : rss;
+        this.images = (images == null) ? new HashMap<DigestURI, ImageEntry>() : images;
         this.publisher = publisher;
         this.hyperlinks = null;
         this.audiolinks = null;
@@ -133,7 +141,8 @@ public class Document {
         this.outboundlinks = null;
         this.languages = languages;
         this.indexingDenied = indexingDenied;
-        this.text = text == null ? new ByteArrayOutputStream() : text;
+        this.text = text == null ? "" : text;
+        this.generic_facets = new HashMap<String, Set<String>>();
     }
 
     public Object getParserObject() {
@@ -144,10 +153,14 @@ public class Document {
         return this.languages;
     }
 
-    public String getFileExtension() {
-    	return this.source.getFileExtension();
+    public String getFileName() {
+    	return this.source.getFileName();
     }
 
+    public Map<String, Set<String>> getGenericFacets() {
+        return this.generic_facets;
+    }
+    
     /**
      * compute a set of languages that this document contains
      * the language is not computed using a statistical analysis of the content, only from given metadata that came with the document
@@ -186,12 +199,19 @@ dc_rights
      */
 
     public String dc_title() {
-        return (this.title == null) ? "" : this.title.toString();
+        return (this.titles == null || this.titles.size() == 0) ? "" : this.titles.iterator().next();
+    }
+
+    public List<String> titles() {
+        return this.titles;
     }
 
     public void setTitle(final String title) {
-        this.title = new StringBuilder(title);
+        this.titles = new ArrayList<String>();
+        if (title != null) this.titles.add(title);
     }
+
+    
 
     public String dc_creator() {
         return (this.creator == null) ? "" : this.creator.toString();
@@ -216,26 +236,31 @@ dc_rights
      * These keywords will appear in dc_subject
      * @param tags
      */
-    public void addMetatags(Map<String, Set<Tagging.Metatag>> tags) {
-        String subject = YaCyMetadata.hashURI(this.source.hash());
+    protected void addMetatags(Map<String, Set<Tagging.Metatag>> tags) {
+        //String subject = YaCyMetadata.hashURI(this.source.hash());
         //for (String s: this.keywords) {
         //    tags.remove(s);
         //}
         for (Map.Entry<String, Set<Tagging.Metatag>> e: tags.entrySet()) {
             Tagging vocabulary = LibraryProvider.autotagging.getVocabulary(e.getKey());
             if (vocabulary == null) continue;
-            String objectspace = vocabulary.getObjectspace();
-            StringBuilder sb = new StringBuilder(e.getValue().size() * 20);
+            //String objectspace = vocabulary.getObjectspace();
+            //StringBuilder sb = new StringBuilder(e.getValue().size() * 20);
+            Set<String> objects = new HashSet<String>();
             for (Tagging.Metatag s: e.getValue()) {
-                sb.append(',').append(s.getObject());
+                objects.add(s.getObject());
+                //sb.append(',').append(s.getObject());
+                /*
                 String objectlink = vocabulary.getObjectlink(s.getObject());
                 if ((objectspace != null && objectspace.length() > 0) || (objectlink != null && objectlink.length() > 0)) {
-                    JenaTripleStore.addTriple(subject, DCTerms.references.getPredicate(), objectlink == null || objectlink.length() == 0 ? objectspace + s.getObject() + "#" + s.getObject() : objectlink + "#" + s.getObject());
+                    JenaTripleStore.addTriple(subject, DCTerms.references.getPredicate(), objectlink == null || objectlink.isEmpty() ? objectspace + s.getObject() + "#" + s.getObject() : objectlink + "#" + s.getObject());
                 }
+                */
             }
             // put to triplestore
-            JenaTripleStore.addTriple(subject, vocabulary.getPredicate(), sb.substring(1));
-            JenaTripleStore.addTriple(subject, Owl.SameAs.getPredicate(), this.source.toNormalform(true, false));
+            //JenaTripleStore.addTriple(subject, Owl.SameAs.getPredicate(), this.source.toNormalform(true));
+            //JenaTripleStore.addTriple(subject, vocabulary.getPredicate(), sb.substring(1)); // superfluous with the generic_facets
+            this.generic_facets.put(vocabulary.getName(), objects);
         }
     }
 
@@ -246,7 +271,7 @@ dc_rights
         for (int i = 0; i < this.keywords.size(); i++) {
             if (this.keywords.get(i) == null) continue;
             s = (this.keywords.get(i)).trim();
-            if (s.length() > 0) hs.add(s);
+            if (!s.isEmpty()) hs.add(s);
         }
         final String[] t = new String[hs.size()];
         int i = 0;
@@ -263,10 +288,9 @@ dc_rights
         return sb.substring(0, sb.length() - 1);
     }
 
-    public String dc_description() {
-        if (this.description == null)
-            return dc_title();
-        return this.description.toString();
+    public String[] dc_description() {
+        if (descriptions == null) return new String[0];
+        return this.descriptions.toArray(new String[this.descriptions.size()]);
     }
 
     public String dc_publisher() {
@@ -278,10 +302,10 @@ dc_rights
     }
 
     public String dc_identifier() {
-        return this.source.toNormalform(true, false);
+        return this.source.toNormalform(true);
     }
 
-    public MultiProtocolURI dc_source() {
+    public DigestURI dc_source() {
         return this.source;
     }
 
@@ -299,7 +323,7 @@ dc_rights
         return this.sections.toArray(new String[this.sections.size()]);
     }
 
-    public InputStream getText() {
+    public InputStream getTextStream() {
         try {
             if (this.text == null) return new ByteArrayInputStream(UTF8.getBytes(""));
             if (this.text instanceof String) {
@@ -317,31 +341,30 @@ dc_rights
             assert false : this.text.getClass().toString();
             return null;
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return new ByteArrayInputStream(UTF8.getBytes(""));
     }
 
-    public byte[] getTextBytes() {
+    public String getTextString() {
         try {
-            if (this.text == null) return new byte[0];
-            if (this.text instanceof String) {
-                return UTF8.getBytes((String) this.text);
+            if (this.text == null) {
+                this.text = "";
             } else if (this.text instanceof InputStream) {
-                return FileUtils.read((InputStream) this.text);
+                this.text = UTF8.String(FileUtils.read((InputStream) this.text));
             } else if (this.text instanceof File) {
-                return FileUtils.read((File) this.text);
+                this.text = UTF8.String(FileUtils.read((File) this.text));
             } else if (this.text instanceof byte[]) {
-                return (byte[]) this.text;
+                this.text = UTF8.String((byte[]) this.text);
             } else if (this.text instanceof ByteArrayOutputStream) {
-                return ((ByteArrayOutputStream) this.text).toByteArray();
+                this.text = UTF8.String(((ByteArrayOutputStream) this.text).toByteArray());
             }
-            assert false : this.text.getClass().toString();
-            return null;
+            assert this.text instanceof String : this.text.getClass().toString();
+            return (String) this.text;
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
-        return new byte[0];
+        return "";
     }
 
     public long getTextLength() {
@@ -361,22 +384,16 @@ dc_rights
             assert false : this.text.getClass().toString();
             return -1;
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         return -1;
     }
 
     public List<StringBuilder> getSentences(final boolean pre) {
-        return getSentences(pre, getText());
-    }
-
-    public static List<StringBuilder> getSentences(final boolean pre, final InputStream text) {
-        if (text == null) return null;
-        final SentenceReader e = new SentenceReader(text);
-        e.pre(pre);
-        final List<StringBuilder> sentences = new ArrayList<StringBuilder>();
-        while (e.hasNext()) {
-            sentences.add(e.next());
+        final SentenceReader sr = new SentenceReader(getTextString(), pre);
+        List<StringBuilder> sentences = new ArrayList<StringBuilder>();
+        while (sr.hasNext()) {
+            sentences.add(sr.next());
         }
         return sentences;
     }
@@ -385,13 +402,13 @@ dc_rights
         return this.keywords;
     }
 
-    public Map<MultiProtocolURI, Properties> getAnchors() {
+    public Map<DigestURI, Properties> getAnchors() {
         // returns all links embedded as anchors (clickeable entities)
         // this is a url(String)/text(String) map
         return this.anchors;
     }
 
-    public Map<MultiProtocolURI, String> getRSS() {
+    public Map<DigestURI, String> getRSS() {
         // returns all links embedded as anchors (clickeable entities)
         // this is a url(String)/text(String) map
         return this.rss;
@@ -400,30 +417,30 @@ dc_rights
 
     // the next three methods provide a calculated view on the getAnchors/getImages:
 
-    public Map<MultiProtocolURI, String> getHyperlinks() {
+    public Map<DigestURI, String> getHyperlinks() {
         // this is a subset of the getAnchor-set: only links to other hyperrefs
         if (!this.resorted) resortLinks();
         return this.hyperlinks;
     }
 
-    public Map<MultiProtocolURI, String> getAudiolinks() {
+    public Map<DigestURI, String> getAudiolinks() {
         if (!this.resorted) resortLinks();
         return this.audiolinks;
     }
 
-    public Map<MultiProtocolURI, String> getVideolinks() {
+    public Map<DigestURI, String> getVideolinks() {
         if (!this.resorted) resortLinks();
         return this.videolinks;
     }
 
-    public Map<MultiProtocolURI, ImageEntry> getImages() {
+    public Map<DigestURI, ImageEntry> getImages() {
         // returns all links enbedded as pictures (visible in document)
         // this resturns a htmlFilterImageEntry collection
         if (!this.resorted) resortLinks();
         return this.images;
     }
 
-    public Map<MultiProtocolURI, String> getApplinks() {
+    public Map<DigestURI, String> getApplinks() {
         if (!this.resorted) resortLinks();
         return this.applinks;
     }
@@ -447,23 +464,23 @@ dc_rights
         synchronized (this) {
             if (this.resorted) return;
             // extract hyperlinks, medialinks and emaillinks from anchorlinks
-            MultiProtocolURI url;
+            DigestURI url;
             String u;
             int extpos, qpos;
             String ext = null;
             final String thishost = this.source.getHost();
-            this.inboundlinks = new HashMap<MultiProtocolURI, String>();
-            this.outboundlinks = new HashMap<MultiProtocolURI, String>();
-            this.hyperlinks = new HashMap<MultiProtocolURI, String>();
-            this.videolinks = new HashMap<MultiProtocolURI, String>();
-            this.audiolinks = new HashMap<MultiProtocolURI, String>();
-            this.applinks   = new HashMap<MultiProtocolURI, String>();
+            this.inboundlinks = new HashMap<DigestURI, String>();
+            this.outboundlinks = new HashMap<DigestURI, String>();
+            this.hyperlinks = new HashMap<DigestURI, String>();
+            this.videolinks = new HashMap<DigestURI, String>();
+            this.audiolinks = new HashMap<DigestURI, String>();
+            this.applinks   = new HashMap<DigestURI, String>();
             this.emaillinks = new HashMap<String, String>();
-            final Map<MultiProtocolURI, ImageEntry> collectedImages = new HashMap<MultiProtocolURI, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
-            for (final Map.Entry<MultiProtocolURI, ImageEntry> entry: collectedImages.entrySet()) {
+            final Map<DigestURI, ImageEntry> collectedImages = new HashMap<DigestURI, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
+            for (final Map.Entry<DigestURI, ImageEntry> entry: collectedImages.entrySet()) {
                 if (entry.getKey().getHost().equals(thishost)) this.inboundlinks.put(entry.getKey(), "image"); else this.outboundlinks.put(entry.getKey(), "image");
             }
-            for (final Map.Entry<MultiProtocolURI, Properties> entry: this.anchors.entrySet()) {
+            for (final Map.Entry<DigestURI, Properties> entry: this.anchors.entrySet()) {
                 url = entry.getKey();
                 if (url == null) continue;
                 final boolean noindex = entry.getValue().getProperty("rel", "").toLowerCase().indexOf("noindex",0) >= 0;
@@ -476,7 +493,7 @@ dc_rights
                 } else {
                     this.outboundlinks.put(url, "anchor" + (noindex ? " noindex" : "") + (nofollow ? " nofollow" : ""));
                 }
-                u = url.toNormalform(true, false);
+                u = url.toNormalform(true);
                 final String name = entry.getValue().getProperty("name", "");
                 if (u.startsWith("mailto:")) {
                     this.emaillinks.put(u.substring(7), name);
@@ -546,7 +563,7 @@ dc_rights
                     assert false;
                     continue;
                 }
-                u = url.toNormalform(true, true);
+                u = url.toNormalform(true);
                 if (u.endsWith("/"))
                     u = u.substring(0, u.length() - 1);
                 pos = u.lastIndexOf('/');
@@ -573,23 +590,23 @@ dc_rights
         return v;
     }
 
-    public static Map<MultiProtocolURI, String> allReflinks(final Collection<?> links) {
+    private static Map<DigestURI, String> allReflinks(final Collection<?> links) {
         // links is either a Set of Strings (with urls) or
         // htmlFilterImageEntries
         // we find all links that are part of a reference inside a url
-        final Map<MultiProtocolURI, String> v = new HashMap<MultiProtocolURI, String>();
+        final Map<DigestURI, String> v = new HashMap<DigestURI, String>();
         final Iterator<?> i = links.iterator();
         Object o;
-        MultiProtocolURI url = null;
+        DigestURI url = null;
         String u;
         int pos;
         loop: while (i.hasNext())
             try {
                 o = i.next();
-                if (o instanceof MultiProtocolURI)
-                    url = (MultiProtocolURI) o;
+                if (o instanceof DigestURI)
+                    url = (DigestURI) o;
                 else if (o instanceof String)
-                    url = new MultiProtocolURI((String) o);
+                    url = new DigestURI((String) o);
                 else if (o instanceof ImageEntry)
                     url = ((ImageEntry) o).url();
                 else {
@@ -597,13 +614,13 @@ dc_rights
                     continue loop;
                 }
                 if (url == null) continue loop;
-                u = url.toNormalform(true, true);
+                u = url.toNormalform(true);
                 if ((pos = u.toLowerCase().indexOf("http://", 7)) > 0) {
                     i.remove();
                     u = u.substring(pos);
                     while ((pos = u.toLowerCase().indexOf("http://", 7)) > 0)
                         u = u.substring(pos);
-                    url = new MultiProtocolURI(u);
+                    url = new DigestURI(u);
                     if (!(v.containsKey(url)))
                         v.put(url, "ref");
                     continue loop;
@@ -613,7 +630,7 @@ dc_rights
                     u = "http:/" + u.substring(pos);
                     while ((pos = u.toLowerCase().indexOf("/www.", 7)) > 0)
                         u = "http:/" + u.substring(pos);
-                    url = new MultiProtocolURI(u);
+                    url = new DigestURI(u);
                     if (!(v.containsKey(url)))
                         v.put(url, "ref");
                     continue loop;
@@ -625,20 +642,15 @@ dc_rights
 
     public void addSubDocuments(final Document[] docs) throws IOException {
         for (final Document doc: docs) {
-            this.sections.addAll(Arrays.asList(doc.getSectionTitles()));
-
-            if (this.title.length() > 0) this.title.append('\n');
-            this.title.append(doc.dc_title());
-
+            this.sections.addAll(doc.sections);
+            this.titles.addAll(doc.titles());
             this.keywords.addAll(doc.getKeywords());
-
-            if (this.description.length() > 0) this.description.append('\n');
-            this.description.append(doc.dc_description());
+            for (String d: doc.dc_description()) this.descriptions.add(d);
 
             if (!(this.text instanceof ByteArrayOutputStream)) {
                 this.text = new ByteArrayOutputStream();
             }
-            FileUtils.copy(doc.getText(), (ByteArrayOutputStream) this.text);
+            FileUtils.copy(doc.getTextStream(), (ByteArrayOutputStream) this.text);
 
             this.anchors.putAll(doc.getAnchors());
             this.rss.putAll(doc.getRSS());
@@ -680,12 +692,12 @@ dc_rights
         return c;
     }
 
-    public Set<MultiProtocolURI> inboundLinks() {
+    public Set<DigestURI> inboundLinks() {
         if (this.inboundlinks == null) resortLinks();
         return (this.inboundlinks == null) ? null : this.inboundlinks.keySet();
     }
 
-    public Set<MultiProtocolURI> outboundLinks() {
+    public Set<DigestURI> outboundLinks() {
         if (this.outboundlinks == null) resortLinks();
         return (this.outboundlinks == null) ? null : this.outboundlinks.keySet();
     }
@@ -707,17 +719,13 @@ dc_rights
         if (subject != null && subject.length() > 0) os.write("<dc:subject><![CDATA[" + subject + "]]></dc:subject>\n");
         if (this.text != null) {
             os.write("<dc:description><![CDATA[");
-            final byte[] buffer = new byte[1000];
-            int c = 0;
-            final InputStream is = getText();
-            while ((c = is.read(buffer)) > 0) os.write(UTF8.String(buffer, 0, c));
-            is.close();
+            os.write(getTextString());
             os.write("]]></dc:description>\n");
         }
         final String language = dc_language();
         if (language != null && language.length() > 0) os.write("<dc:language>" + dc_language() + "</dc:language>\n");
         os.write("<dc:date>" + ISO8601Formatter.FORMATTER.format(date) + "</dc:date>\n");
-        if (this.lon != 0.0f && this.lat != 0.0f) os.write("<geo:Point><geo:long>" + this.lon +"</geo:long><geo:lat>" + this.lat + "</geo:lat></geo:Point>\n");
+        if (this.lon != 0.0 && this.lat != 0.0) os.write("<geo:Point><geo:long>" + this.lon +"</geo:long><geo:lat>" + this.lat + "</geo:lat></geo:Point>\n");
         os.write("</record>\n");
     }
 
@@ -759,9 +767,7 @@ dc_rights
      * @param docs
      * @return
      */
-    public static Document mergeDocuments(final DigestURI location,
-            final String globalMime, final Document[] docs)
-    {
+    public static Document mergeDocuments(final DigestURI location, final String globalMime, final Document[] docs) {
         if (docs == null || docs.length == 0) return null;
         if (docs.length == 1) return docs[0];
 
@@ -770,13 +776,12 @@ dc_rights
         final StringBuilder      authors       = new StringBuilder(80);
         final StringBuilder      publishers    = new StringBuilder(80);
         final StringBuilder      subjects      = new StringBuilder(80);
-        final StringBuilder      title         = new StringBuilder(80);
-        final StringBuilder      description   = new StringBuilder(80);
-        final LinkedList<String> sectionTitles = new LinkedList<String>();
-
-        final Map<MultiProtocolURI, Properties> anchors = new HashMap<MultiProtocolURI, Properties>();
-        final Map<MultiProtocolURI, String> rss = new HashMap<MultiProtocolURI, String>();
-        final Map<MultiProtocolURI, ImageEntry> images = new HashMap<MultiProtocolURI, ImageEntry>();
+        final List<String>       descriptions  = new ArrayList<String>();
+        final Collection<String> titles        = new LinkedHashSet<String>();
+        final Collection<String> sectionTitles = new LinkedHashSet<String>();
+        final Map<DigestURI, Properties> anchors = new HashMap<DigestURI, Properties>();
+        final Map<DigestURI, String> rss = new HashMap<DigestURI, String>();
+        final Map<DigestURI, ImageEntry> images = new HashMap<DigestURI, ImageEntry>();
         double lon = 0.0d, lat = 0.0d;
 
         for (final Document doc: docs) {
@@ -800,27 +805,36 @@ dc_rights
                 subjects.append(subject);
             }
 
-            if (title.length() > 0) title.append("\n");
-            title.append(doc.dc_title());
-
+            titles.addAll(doc.titles());
             sectionTitles.addAll(Arrays.asList(doc.getSectionTitles()));
-
-            if (description.length() > 0) description.append("\n");
-            description.append(doc.dc_description());
+            for (String d: doc.dc_description()) descriptions.add(d);
 
             if (doc.getTextLength() > 0) {
                 if (docTextLength > 0) content.write('\n');
                 try {
-                    docTextLength += FileUtils.copy(doc.getText(), content);
+                    docTextLength += FileUtils.copy(doc.getTextStream(), content);
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
             anchors.putAll(doc.getAnchors());
             rss.putAll(doc.getRSS());
             ContentScraper.addAllImages(images, doc.getImages());
-            if (doc.lon() != 0.0f && doc.lat() != 0.0f) { lon = doc.lon(); lat = doc.lat(); }
+            if (doc.lon() != 0.0 && doc.lat() != 0.0) { lon = doc.lon(); lat = doc.lat(); }
         }
+
+        // clean up parser data
+        for (final Document doc: docs) {
+            Object parserObject = doc.getParserObject();
+            if (parserObject instanceof ContentScraper) {
+                final ContentScraper html = (ContentScraper) parserObject;
+                html.close();
+            }
+        }
+
+        // return consolidation
+        ArrayList<String> titlesa = new ArrayList<String>();
+        titlesa.addAll(titles);
         return new Document(
                 location,
                 globalMime,
@@ -828,11 +842,11 @@ dc_rights
                 null,
                 null,
                 subjects.toString().split(" |,"),
-                title.toString(),
+                titlesa,
                 authors.toString(),
                 publishers.toString(),
                 sectionTitles.toArray(new String[sectionTitles.size()]),
-                description.toString(),
+                descriptions,
                 lon, lat,
                 content.getBytes(),
                 anchors,
@@ -841,16 +855,24 @@ dc_rights
                 false);
     }
 
-    public static Map<MultiProtocolURI, String> getHyperlinks(final Document[] documents) {
-        final Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
+    public static Map<DigestURI, String> getHyperlinks(final Document[] documents) {
+        final Map<DigestURI, String> result = new HashMap<DigestURI, String>();
         for (final Document d: documents) {
             result.putAll(d.getHyperlinks());
+            final Object parser = d.getParserObject();
+            if (parser instanceof ContentScraper) {
+                final ContentScraper html = (ContentScraper) parser;
+                String refresh = html.getRefreshPath();
+                if (refresh != null && refresh.length() > 0) try {result.put(new DigestURI(refresh), "refresh");} catch (final MalformedURLException e) {}
+                DigestURI canonical = html.getCanonical();
+                if (canonical != null) result.put(canonical, "canonical");
+            }
         }
         return result;
     }
 
-    public static Map<MultiProtocolURI, String> getImagelinks(final Document[] documents) {
-        final Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
+    public static Map<DigestURI, String> getImagelinks(final Document[] documents) {
+        final Map<DigestURI, String> result = new HashMap<DigestURI, String>();
         for (final Document d: documents) {
             for (final ImageEntry imageReference : d.getImages().values()) {
                 // construct a image name which contains the document title to enhance the search process for images
@@ -860,30 +882,30 @@ dc_rights
         return result;
     }
 
-    public static Map<MultiProtocolURI, String> getAudiolinks(final Document[] documents) {
-        final Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
+    public static Map<DigestURI, String> getAudiolinks(final Document[] documents) {
+        final Map<DigestURI, String> result = new HashMap<DigestURI, String>();
         for (final Document d: documents) {
-            for (Map.Entry<MultiProtocolURI, String> e: d.audiolinks.entrySet()) {
+            for (Map.Entry<DigestURI, String> e: d.audiolinks.entrySet()) {
                 result.put(e.getKey(), description(d, e.getValue()));
             }
         }
         return result;
     }
 
-    public static Map<MultiProtocolURI, String> getVideolinks(final Document[] documents) {
-        final Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
+    public static Map<DigestURI, String> getVideolinks(final Document[] documents) {
+        final Map<DigestURI, String> result = new HashMap<DigestURI, String>();
         for (final Document d: documents) {
-            for (Map.Entry<MultiProtocolURI, String> e: d.videolinks.entrySet()) {
+            for (Map.Entry<DigestURI, String> e: d.videolinks.entrySet()) {
                 result.put(e.getKey(), description(d, e.getValue()));
             }
         }
         return result;
     }
 
-    public static Map<MultiProtocolURI, String> getApplinks(final Document[] documents) {
-        final Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
+    public static Map<DigestURI, String> getApplinks(final Document[] documents) {
+        final Map<DigestURI, String> result = new HashMap<DigestURI, String>();
         for (final Document d: documents) {
-            for (Map.Entry<MultiProtocolURI, String> e: d.applinks.entrySet()) {
+            for (Map.Entry<DigestURI, String> e: d.applinks.entrySet()) {
                 result.put(e.getKey(), description(d, e.getValue()));
             }
         }
@@ -891,7 +913,7 @@ dc_rights
     }
 
     private static final String description(Document d, String tagname) {
-        if (tagname == null || tagname.length() == 0) {
+        if (tagname == null || tagname.isEmpty()) {
             tagname = d.source.toTokens();
         }
         StringBuilder sb = new StringBuilder(60);

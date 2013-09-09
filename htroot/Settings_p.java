@@ -31,9 +31,9 @@ import net.yacy.peers.Network;
 import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacySeedUploader;
 import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public final class Settings_p {
     
@@ -167,7 +167,7 @@ public final class Settings_p {
             final String[] configOptions = theUploader.getConfigurationOptions();
             if (configOptions != null) {
                 for (int i=0; i<configOptions.length; i++) {
-                    prop.put("seedUploadMethods_" +count+ "_" + configOptions[i], env.getConfig(configOptions[i], ""));
+                    prop.put(configOptions[i], env.getConfig(configOptions[i], ""));
                     // prop.put("seedUpload" + uploaderName,1);
                 }
             }

@@ -13,12 +13,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -39,9 +39,9 @@ public class ASCII implements Comparator<String> {
 
     public static final ASCII insensitiveASCIIComparator = new ASCII(true);
     public static final ASCII identityASCIIComparator = new ASCII(false);
-  
+
     public boolean insensitive;
-    
+
     public ASCII(boolean insensitive) {
         this.insensitive = insensitive;
     }
@@ -51,6 +51,7 @@ public class ASCII implements Comparator<String> {
         return this; // because we do not have any class variables that changes
     }
 
+    @Override
     public int compare(String s0, String s1) {
         if (s0 == null && s1 == null) return 0;
         if (s0 == null) return -1;
@@ -72,7 +73,7 @@ public class ASCII implements Comparator<String> {
         if (l1 > l0) return -1;
         return 0;
     }
-    
+
     public boolean equals(String s0, String s1) {
         if (s0 == null && s1 == null) return true;
         if (s0 == null) return false;
@@ -102,16 +103,16 @@ public class ASCII implements Comparator<String> {
     public int hashCode() {
         return System.identityHashCode(this);
     }
-    
+
     public final static String String(final byte[] bytes) {
         StringBuilder sb = new StringBuilder(bytes.length);
-        for (int i = 0; i < bytes.length; ++ i) {
-            if (bytes[i] < 0) throw new IllegalArgumentException();
-            sb.append((char) bytes[i]);
+        for (byte b : bytes) {
+            if (b < 0) throw new IllegalArgumentException();
+            sb.append((char) b);
         }
         return sb.toString();
     }
-    
+
     public final static String String(final byte[] bytes, final int offset, final int length) {
         int l = Math.min(length, bytes.length - offset);
         StringBuilder sb = new StringBuilder(l);
@@ -121,11 +122,25 @@ public class ASCII implements Comparator<String> {
         }
         return sb.toString();
     }
-    
+
     public final static byte[] getBytes(final String s) {
-        final byte[] b = new byte[s.length()];
-        for (int i = 0; i < s.length(); i++) {
+        assert s != null;
+        //assert s.length() < 3 || s.charAt(2) != '@';
+        int count = s.length();
+        final byte[] b = new byte[count];
+        for (int i = 0; i < count; i++) {
             b[i] = (byte) s.charAt(i);
+        }
+        return b;
+    }
+
+    public final static byte[] getBytes(final String s, final int beginIndex, final int endIndex) {
+        assert s != null;
+        //assert s.length() < 3 || s.charAt(2) != '@';
+        int count = endIndex - beginIndex;
+        final byte[] b = new byte[count];
+        for (int i = 0; i < count; i++) {
+            b[i] = (byte) s.charAt(i + beginIndex);
         }
         return b;
     }

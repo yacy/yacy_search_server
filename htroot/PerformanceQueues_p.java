@@ -31,6 +31,8 @@ import java.util.Map;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
@@ -40,9 +42,9 @@ import net.yacy.kelondro.workflow.WorkflowThread;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class PerformanceQueues_p {
     /**
@@ -76,7 +78,7 @@ public class PerformanceQueues_p {
             if (post.containsKey("Xmx")) {
                 int xmx = post.getInt("Xmx", 600); // default maximum heap size
                 if (OS.isWin32) xmx = Math.min(2000, xmx);
-                int xms = Math.min(xmx, Math.max(90, xmx / 10));
+                int xms = xmx; //Math.min(xmx, Math.max(90, xmx / 10));
 	            sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
 	            sb.setConfig("javastart_Xms", "Xms" + xms + "m");
 	            prop.put("setStartupCommit", "1");
@@ -132,6 +134,7 @@ public class PerformanceQueues_p {
         	sb.setConfig("performanceSpeed", post.getInt("profileSpeed", 100));
         }
 
+        IndexCell<WordReference> rwi = indexSegment.termIndex();
         while (threads.hasNext()) {
             threadName = threads.next();
             thread = sb.getThread(threadName);
@@ -212,9 +215,10 @@ public class PerformanceQueues_p {
             prop.put("table_" + c + "_busysleep", busysleep);
             prop.put("table_" + c + "_memprereq", memprereq / 1024);
             // disallow setting of memprereq for indexer to prevent db from throwing OOMs
-            prop.put("table_" + c + "_disabled", /*(threadName.endsWith("_indexing")) ? 1 :*/ "0");
+            // prop.put("table_" + c + "_disabled", /*(threadName.endsWith("_indexing")) ? 1 :*/ "0");
+            prop.put("table_" + c + "_disabled", threadName.equals("10_httpd") ? "1" : "0" ); // httpd hardcoded defaults
             prop.put("table_" + c + "_recommendation", threadName.endsWith("_indexing") ? "1" : "0");
-            prop.putNum("table_" + c + "_recommendation_value", threadName.endsWith("_indexing") ? (indexSegment.termIndex().minMem() / 1024) : 0);
+            prop.putNum("table_" + c + "_recommendation_value", rwi == null ? 0 : threadName.endsWith("_indexing") ? (rwi.minMem() / 1024) : 0);
             c++;
         }
         prop.put("table", c);
@@ -244,7 +248,7 @@ public class PerformanceQueues_p {
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
             final int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);
             sb.setConfig(SwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
-            indexSegment.termIndex().setBufferMaxWordCount(wordCacheMaxCount);
+            if (rwi != null) rwi.setBufferMaxWordCount(wordCacheMaxCount);
         }
 
         if ((post != null) && (post.containsKey("poolConfig"))) {
@@ -286,25 +290,12 @@ public class PerformanceQueues_p {
             sb.setConfig(SwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseRemotesearch", 30000)));
         }
 
-        if ((post != null) && (post.containsKey("minimumDeltaSubmit"))) {
-            final long minimumLocalDelta = post.getLong("minimumLocalDelta", sb.crawlQueues.noticeURL.getMinimumLocalDelta());
-            final long minimumGlobalDelta = post.getLong("minimumGlobalDelta", sb.crawlQueues.noticeURL.getMinimumGlobalDelta());
-            sb.setConfig("minimumLocalDelta", minimumLocalDelta);
-            sb.setConfig("minimumGlobalDelta", minimumGlobalDelta);
-            sb.crawlQueues.noticeURL.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
-        }
-
-        // delta settings
-        prop.put("minimumLocalDelta", sb.crawlQueues.noticeURL.getMinimumLocalDelta());
-        prop.put("minimumGlobalDelta", sb.crawlQueues.noticeURL.getMinimumGlobalDelta());
-
         // table cache settings
-        prop.putNum("urlCacheSize", indexSegment.urlMetadata().writeCacheSize());
-        prop.putNum("wordCacheSize", indexSegment.termIndex().getBufferSize());
-        prop.putNum("wordCacheSizeKBytes", indexSegment.termIndex().getBufferSizeBytes()/1024);
-        prop.putNum("maxURLinCache", indexSegment.termIndex().getBufferMaxReferences());
-        prop.putNum("maxAgeOfCache", indexSegment.termIndex().getBufferMaxAge() / 1000 / 60); // minutes
-        prop.putNum("minAgeOfCache", indexSegment.termIndex().getBufferMinAge() / 1000 / 60); // minutes
+        prop.putNum("wordCacheSize", indexSegment.RWIBufferCount());
+        prop.putNum("wordCacheSizeKBytes", rwi == null ? 0 : rwi.getBufferSizeBytes()/1024);
+        prop.putNum("maxURLinCache", rwi == null ? 0 : rwi.getBufferMaxReferences());
+        prop.putNum("maxAgeOfCache", rwi == null ? 0 : rwi.getBufferMaxAge() / 1000 / 60); // minutes
+        prop.putNum("minAgeOfCache", rwi == null ? 0 : rwi.getBufferMinAge() / 1000 / 60); // minutes
         prop.putNum("maxWaitingWordFlush", sb.getConfigLong("maxWaitingWordFlush", 180));
         prop.put("wordCacheMaxCount", sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000));
         prop.put("crawlPauseProxy", sb.getConfigLong(SwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, 30000));
@@ -334,7 +325,7 @@ public class PerformanceQueues_p {
         // parse initialization memory settings
         final String Xmx = sb.getConfig("javastart_Xmx", "Xmx600m").substring(3);
         prop.put("Xmx", Xmx.substring(0, Xmx.length() - 1));
-        final String Xms = sb.getConfig("javastart_Xms", "Xms90m").substring(3);
+        final String Xms = sb.getConfig("javastart_Xms", "Xms600m").substring(3);
         prop.put("Xms", Xms.substring(0, Xms.length() - 1));
 
         final long diskFree = sb.getConfigLong(SwitchboardConstants.DISK_FREE, 3000L);

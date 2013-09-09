@@ -36,9 +36,9 @@ import net.yacy.document.ImageParser;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class cytag {
     
@@ -51,7 +51,7 @@ public class cytag {
         StringBuilder connect = new StringBuilder();
         connect.append('{');
         appendJSON(connect, "time", GenericFormatter.SHORT_MILSEC_FORMATTER.format());
-        appendJSON(connect, "trail", (referer == null) ? "" : referer.toNormalform(false, false));
+        appendJSON(connect, "trail", (referer == null) ? "" : referer.toNormalform(false));
         appendJSON(connect, "nick",  (post == null) ? "" : post.get("nick", ""));
         appendJSON(connect, "tag",   (post == null) ? "" : post.get("tag", ""));
         appendJSON(connect, "icon",  (post == null) ? "" : post.get("icon", ""));

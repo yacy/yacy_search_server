@@ -30,9 +30,7 @@
 //if the shell's current path is HTROOT
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -43,21 +41,22 @@ import java.util.Set;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.ListManager;
+import net.yacy.data.list.ListAccumulator;
+import net.yacy.data.list.XMLBlacklistImporter;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Seed;
+import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 import org.xml.sax.SAXException;
 
-import de.anomic.data.ListManager;
-import de.anomic.data.list.ListAccumulator;
-import de.anomic.data.list.XMLBlacklistImporter;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class sharedBlacklist_p {
 
@@ -69,9 +68,7 @@ public class sharedBlacklist_p {
     public static final int STATUS_WRONG_INVOCATION = 5;
     public static final int STATUS_PARSE_ERROR = 6;
 
-    private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
-
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
@@ -89,13 +86,8 @@ public class sharedBlacklist_p {
 
         if (post != null) {
 
-            // initialize the list manager
-            ListManager.switchboard = (Switchboard) env;
-            ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
-
-
             // loading all blacklist files located in the directory
-            final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, BLACKLIST_FILENAME_FILTER);
+            final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);
 
             // List BlackLists
             int blacklistCount = 0;
@@ -110,6 +102,7 @@ public class sharedBlacklist_p {
 
             Iterator<String> otherBlacklist = null;
             ListAccumulator otherBlacklists = null;
+            ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
 
             if (post.containsKey("hash")) {
                 /* ======================================================
@@ -146,7 +139,7 @@ public class sharedBlacklist_p {
                         // get List
                         final DigestURI u = new DigestURI(downloadURLOld);
 
-                        otherBlacklist = FileUtils.strings(u.get(ClientIdentification.getUserAgent(), 10000));
+                        otherBlacklist = FileUtils.strings(u.get(agent));
                     } catch (final Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.putHTML("status_name", hash);
@@ -163,7 +156,7 @@ public class sharedBlacklist_p {
 
                 try {
                     final DigestURI u = new DigestURI(downloadURL);
-                    otherBlacklist = FileUtils.strings(u.get(ClientIdentification.getUserAgent(), 10000));
+                    otherBlacklist = FileUtils.strings(u.get(agent));
                 } catch (final Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
                     prop.putHTML("status_address",downloadURL);
@@ -210,11 +203,7 @@ public class sharedBlacklist_p {
                 prop.put("page", "1"); //result page
                 prop.put("status", STATUS_ENTRIES_ADDED); //list of added Entries
 
-                PrintWriter pw = null;
                 try {
-                    // open the blacklist file
-                    pw = new PrintWriter(new FileWriter(new File(ListManager.listsPath, selectedBlacklistName), true));
-
                     // loop through the received entry list
                     final int num = post.getInt("num", 0);
                     for(int i = 0; i < num; i++){
@@ -234,13 +223,10 @@ public class sharedBlacklist_p {
                                 newItem = newItem + "/.*";
                             }
 
-                            // append the item to the file
-                            pw.println(newItem);
-
                             if (Switchboard.urlBlacklist != null) {
                                 for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
                                     if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists",selectedBlacklistName)) {
-                                        Switchboard.urlBlacklist.add(supportedBlacklistType,newItem.substring(0, pos), newItem.substring(pos + 1));
+                                        Switchboard.urlBlacklist.add(supportedBlacklistType,selectedBlacklistName,newItem.substring(0, pos), newItem.substring(pos + 1));
                                     }
                                 }
                                 SearchEventCache.cleanupEvents(true);
@@ -250,8 +236,6 @@ public class sharedBlacklist_p {
                 } catch (final Exception e) {
                     prop.put("status", "1");
                     prop.putHTML("status_error", e.getLocalizedMessage());
-                } finally {
-                    if (pw != null) try { pw.close(); } catch (final Exception e){ /* */}
                 }
 
                 /* unable to use prop.putHTML() or prop.putXML() here because they

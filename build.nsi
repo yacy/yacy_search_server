@@ -63,11 +63,11 @@ SetCompressor /SOLID LZMA
 ; at least we need Java 6
 !define JRE_VERSION6 "1.6"
 
-; download link Oracle Java 7 Update 4
-; 32 bit
-!define JRE_32 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=63691"
-; 64 bit
-!define JRE_64 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=63692"
+; download link Oracle Java 7 Update 25
+; 32 bit / jre-7u25-windows-i586.exe
+!define JRE_32 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=79063"
+; 64 bit / jre-7u25-windows-x64.exe
+!define JRE_64 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=79065"
 
 ;!define JRE_32 "http://yacy.berlios.de/download.php?what=jre&version=32&yacyrevnr=@REPL_REVISION_NR@"
 ;!define JRE_64 "http://yacy.berlios.de/download.php?what=jre&version=64&yacyrevnr=@REPL_REVISION_NR@"
@@ -166,7 +166,7 @@ Section "YaCy"
     	nsExec::Exec 'attrib +I "$INSTDIR"'
 	nsExec::Exec 'attrib +I "$INSTDIR\*" /S /D'
     
-	File /r "RELEASE\MAIN\*"
+	File /r /x *.sh "RELEASE\MAIN\*"
 
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DisplayName" "YaCy"
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString" '"$INSTDIR\uninstall.exe"'
@@ -226,7 +226,9 @@ Section "Uninstall"
 	RMDir /r "$INSTDIR\classes"
 	RMDir /r "$INSTDIR\defaults"
 	RMDir /r "$INSTDIR\htroot"
+	RMDir /r "$INSTDIR\langstats"
 	RMDir /r "$INSTDIR\lib"
+	RMDir /r "$INSTDIR\libbuild"
 	RMDir /r "$INSTDIR\libx"
 	RMDir /r "$INSTDIR\locales"
 	RMDir /r "$INSTDIR\ranking"

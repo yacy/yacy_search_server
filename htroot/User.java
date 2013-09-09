@@ -27,22 +27,22 @@
 //javac -classpath .:../Classes Message.java
 //if the shell's current path is HTROOT
 
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.data.UserDB;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.server.servletProperties;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.servletProperties;
 
 public class User{
 
-    public static servletProperties respond(final RequestHeader requestHeader, final serverObjects post, final serverSwitch env) {
+    public static servletProperties respond(final RequestHeader requestHeader, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         final Switchboard sb = Switchboard.getSwitchboard();
         UserDB.Entry entry=null;
@@ -135,7 +135,7 @@ public class User{
 							entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(entry.getUserName()+":"+post.get("newpass", "")));
 							prop.put("status_password", "0"); //changes
 						} catch (final Exception e) {
-						    Log.logException(e);
+						    ConcurrentLog.logException(e);
 						}
         			}else{
         				prop.put("status_password", "3"); //empty

@@ -32,19 +32,19 @@ import java.util.Set;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.WorkTables;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.data.WorkTables;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class ConfigNetwork_p
 {
 
     public static serverObjects respond(
-        final RequestHeader header,
+        @SuppressWarnings("unused") final RequestHeader header,
         final serverObjects post,
         final serverSwitch env) throws FileNotFoundException, IOException {
 
@@ -67,8 +67,13 @@ public class ConfigNetwork_p
                 "network settings");
 
             if ( post.containsKey("changeNetwork") ) {
-                final String networkDefinition =
+                String networkDefinition =
                     post.get("networkDefinition", "defaults/yacy.network.freeworld.unit");
+                final String networkDefinitionURL =
+                        post.get("networkDefinitionURL", "");
+                if ( !networkDefinitionURL.equals("")) {
+                	networkDefinition = networkDefinitionURL;
+                }
                 if ( networkDefinition.equals(sb.getConfig("network.unit.definition", "")) ) {
                     // no change
                     commit = 3;
@@ -86,8 +91,9 @@ public class ConfigNetwork_p
                 boolean indexReceive = "on".equals(post.get("indexReceive", ""));
                 if ( !indexReceive ) {
                     // remove heuristics
-                    sb.setConfig("heuristic.site", false);
-                    sb.setConfig("heuristic.blekko", false);
+                    sb.setConfig(SwitchboardConstants.HEURISTIC_SITE, false);
+                    sb.setConfig(SwitchboardConstants.HEURISTIC_BLEKKO, false);
+                    sb.setConfig(SwitchboardConstants.HEURISTIC_TWITTER, false);
                 }
                 final boolean robinsonmode = "robinson".equals(post.get("network", ""));
                 if ( robinsonmode ) {
@@ -229,7 +235,7 @@ public class ConfigNetwork_p
         prop.putHTML("network.unit.name", sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""));
         prop.putHTML("network.unit.description", sb.getConfig("network.unit.description", ""));
         prop.putHTML("network.unit.domain", sb.getConfig(SwitchboardConstants.NETWORK_DOMAIN, ""));
-        prop.putHTML("network.unit.dht", sb.getConfig("network.unit.dht", ""));
+        prop.putHTML("network.unit.dht", sb.getConfig(SwitchboardConstants.DHT_ENABLED, ""));
         networkBootstrapLocations.remove(sb.getConfig("network.unit.definition", ""));
         int c = 0;
         for ( final String s : networkBootstrapLocations ) {
@@ -279,7 +285,7 @@ public class ConfigNetwork_p
                 output.append(",").append(element);
             }
         }
-        if ( input.length() == 0 ) {
+        if ( input.isEmpty() ) {
             return input;
         }
         return output.delete(0, 1).toString();

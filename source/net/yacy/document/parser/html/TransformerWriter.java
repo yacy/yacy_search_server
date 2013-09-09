@@ -45,9 +45,9 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
-import net.yacy.kelondro.logging.Log;
 
 
 public final class TransformerWriter extends Writer {
@@ -80,7 +80,7 @@ public final class TransformerWriter extends Writer {
             final Transformer transformer,
             final boolean passbyIfBinarySuspect
     ) {
-    	this(outStream, charSet, scraper, transformer, passbyIfBinarySuspect, 4096);
+    	this(outStream, charSet, scraper, transformer, passbyIfBinarySuspect, 64);
     }
 
     public TransformerWriter(
@@ -411,7 +411,7 @@ public final class TransformerWriter extends Writer {
                     this.buffer.reset();
                 }
             } else {
-                if (this.buffer.length() == 0) {
+                if (this.buffer.isEmpty()) {
                     if (c == rb) {
                         // very strange error case; we just let it pass
                         if (this.out != null) this.out.write(c);
@@ -493,6 +493,7 @@ public final class TransformerWriter extends Writer {
 
     @Override
     public void close() throws IOException {
+        flush();
         final char quotechar = (this.inSingleQuote) ? singlequote : doublequote;
         if (this.buffer != null) {
             if (this.buffer.length() > 0) {
@@ -544,7 +545,7 @@ public final class TransformerWriter extends Writer {
         System.exit(0);
         final char[] buffer = new char[512];
         try {
-            final ContentScraper scraper = new ContentScraper(new DigestURI("http://localhost:8090"));
+            final ContentScraper scraper = new ContentScraper(new DigestURI("http://localhost:8090"), 1000);
             final Transformer transformer = new ContentTransformer();
             final Reader is = new FileReader(args[0]);
             final FileOutputStream fos = new FileOutputStream(new File(args[0] + ".out"));
@@ -556,9 +557,9 @@ public final class TransformerWriter extends Writer {
             is.close();
             scraper.print();
         } catch (final MalformedURLException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 

@@ -39,7 +39,7 @@
         <dd>
           <table border="0" cellpadding="0" cellspacing="0"><tr valign="top">
             <td valign="top"><input type="radio" name="crawlingMode" id="url" value="url" checked="checked"
-            onmousedown="document.getElementById('rangeDomain').disabled=false;document.getElementById('rangeSubpath').disabled=false;document.getElementById('crawlingDomMaxCheck').disabled=false;document.getElementById('crawlingDomMaxPages').disabled=false;document.getElementById('crawlingQ').disabled=false;"/>Start URL&nbsp;(must start with<br/>http:// https:// ftp:// smb:// file://)</td>
+            onmousedown="document.getElementById('rangeDomain').disabled=false;document.getElementById('rangeSubpath').disabled=false;document.getElementById('crawlingDomMaxCheck').disabled=false;document.getElementById('crawlingDomMaxPages').disabled=false;"/>Start URL&nbsp;(must start with<br/>http:// https:// ftp:// smb:// file://)</td>
             <td valign="top">
             <input name="crawlingURL" id="crawlingURL" type="text" size="50" maxlength="256" value="#[starturl]#" onkeypress="changed()" onfocus="check('url')" style="font-size:16px"/><br/>
             <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="50" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/>
@@ -53,34 +53,17 @@
             <td><div id="sitelistURLs"></div></td>
           </tr><tr>
             <td><input type="radio" name="crawlingMode" id="sitemap" value="sitemap" disabled="disabled"
-            onmousedown="document.getElementById('rangeDomain').disabled=true;document.getElementById('rangeSubpath').disabled=true;document.getElementById('crawlingDomMaxCheck').disabled=true;document.getElementById('crawlingDomMaxPages').disabled=true;document.getElementById('crawlingQ').disabled=true;"/>Sitemap URL</td>
+            onmousedown="document.getElementById('rangeDomain').disabled=true;document.getElementById('rangeSubpath').disabled=true;document.getElementById('crawlingDomMaxCheck').disabled=true;document.getElementById('crawlingDomMaxPages').disabled=true;"/>Sitemap URL</td>
             <td><input name="sitemapURL" type="text" size="41" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/></td>
           </tr>
           </table><br/>
 		  <input type="hidden" name="crawlingDepth" id="crawlingDepth" value="99" />
-        </dd>      
-        <dt><label>Scheduler</label></dt>
-        <dd>
-            <input type="radio" name="recrawl" value="nodoubles" #(crawlingIfOlderCheck)#checked="checked"::#(/crawlingIfOlderCheck)#/>run this crawl once<br/>
-			<input type="radio" name="recrawl" value="scheduler"/>scheduled, look every
-			<select name="repeat_time">
-              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-              <option value="7" selected="selected">7</option>
-              <option value="8">8</option><option value="9">9</option><option value="10">10</option>
-              <option value="12">12</option><option value="14">14</option><option value="21">21</option>
-              <option value="28">28</option><option value="30">30</option>
-			</select>
-			<select name="repeat_unit">
-              <option value="selminutes">minutes</option>
-              <option value="selhours">hours</option>
-              <option value="seldays" selected="selected">days</option>
-            </select> for new documents automatically.
         </dd>
         <dt><label>Path</label></dt>
         <dd>
             <input type="radio" name="range" id="rangeDomain" value="domain" checked="checked"/>load all files in domain<br />
 			<input type="radio" name="range" id="rangeSubpath" value="subpath" />load only files in a sub-path of given url
+			<input type="hidden" name="deleteold" id="deleteold" value="on" />
 			<input type="hidden" name="mustnotmatch" id="mustnotmatch" value="" />
 			<input type="hidden" name="crawlingDomFilterCheck" id="crawlingDomFilterCheck" value="off" />
 			<input type="hidden" name="crawlingDomFilterDepth" id="crawlingDomFilterDepth" value="#[crawlingDomFilterDepth]#" />
@@ -92,22 +75,26 @@
           <td valign="top">documents</td>
           </tr></table>
         </dd>
-        <dt><label>Dynamic URLs</label></dt>
+        <dt><label>Collection</label></dt>
         <dd>
-		<input type="checkbox" name="crawlingQ" id="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# /> allow <a href="http://en.wikipedia.org/wiki/Query_string">query-strings</a> (urls with a '?' in the path)
-        <input type="hidden" name="directDocByURL" id="directDocByURL" value="on" />
-		<input type="hidden" name="storeHTCache" id="storeHTCache" value="on" />
-        <input type="hidden" name="cachePolicy" id="cachePolicy" value="iffresh" />
-        <input type="hidden" name="indexText" id="indexText" value="on" />
-        <input type="hidden" name="indexMedia" id="indexMedia" value="on" />
-        <input type="hidden" name="intention" id="intention" value="" />
-        <input type="hidden" name="xsstopw" id="xsstopw" value="on" />
-        <input type="hidden" name="xdstopw" id="xdstopw" value="off" />
-        <input type="hidden" name="xpstopw" id="xpstopw" value="off" />
+          <input name="collection" id="collection" type="text" size="60" maxlength="100" value="#[collection]#" #(collectionEnabled)#disabled="disabled"::#(/collectionEnabled)# />
         </dd>
-        <!-- <dt>&nbsp;</dt><dd>&nbsp;</dd><dt>&nbsp;</dt><dd>&nbsp;</dd> -->
         <dt><label>Start</label></dt>
-        <dd><input type="submit" name="crawlingstart" value="Start New Crawl" />
+        <dd>
+          <input type="hidden" name="directDocByURL" id="directDocByURL" value="off" />
+          <input type="hidden" name="recrawl" id="recrawl" value="reload" />
+          <input type="hidden" name="reloadIfOlderNumber" id="reloadIfOlderNumber" value="3" />
+          <input type="hidden" name="reloadIfOlderUnit" id="reloadIfOlderUnit" value="day" />
+		  <input type="hidden" name="deleteold" id="deleteold" value="on" />
+		  <input type="hidden" name="storeHTCache" id="storeHTCache" value="on" />
+          <input type="hidden" name="cachePolicy" id="cachePolicy" value="iffresh" />
+          <input type="hidden" name="crawlingQ" id="crawlingQ" value="on" />
+          <input type="hidden" name="followFrames" id="followFrames" value="on" />
+          <input type="hidden" name="obeyHtmlRobotsNoindex" id="obeyHtmlRobotsNoindex" value="on" />
+          <input type="hidden" name="indexText" id="indexText" value="on" />
+          <input type="hidden" name="indexMedia" id="indexMedia" value="on" />
+          <input type="hidden" name="intention" id="intention" value="" />
+          <input type="submit" name="crawlingstart" value="Start New Crawl" class="submitready"/>
         </dd>
       </dl>
       

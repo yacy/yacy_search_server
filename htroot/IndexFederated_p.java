@@ -3,10 +3,6 @@
  *  Copyright 2011 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 25.05.2011 at http://yacy.net
  *
- *  $LastChangedDate: 2011-04-14 00:04:23 +0200 (Do, 14 Apr 2011) $
- *  $LastChangedRevision: 7653 $
- *  $LastChangedBy: orbiter $
- *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -26,40 +22,84 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Iterator;
+import java.util.ArrayList;
+
+import org.apache.solr.common.SolrException;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
+import net.yacy.cora.federate.solr.connector.SolrConnector;
+import net.yacy.cora.federate.solr.instance.RemoteInstance;
+import net.yacy.cora.federate.solr.instance.ShardInstance;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.solr.ShardSelection;
-import net.yacy.cora.services.federated.solr.ShardSolrConnector;
-import net.yacy.cora.services.federated.solr.SingleSolrConnector;
-import net.yacy.cora.services.federated.solr.SolrConnector;
-import net.yacy.cora.storage.ConfigurationSet;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.kelondro.util.OS;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.SolrField;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class IndexFederated_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
-        if (post != null && post.containsKey("set")) {
-            // yacy
-            String localindex = post.get("yacy.indexing", "off");
-            env.setConfig("federated.service.yacy.indexing.engine", localindex);
+        if (post != null && post.containsKey("setrwi")) {
+            //yacy
+            boolean post_core_rwi = post.getBoolean(SwitchboardConstants.CORE_SERVICE_RWI);
+            final boolean previous_core_rwi = sb.index.connectedRWI() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, false);
+            env.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, post_core_rwi);
+            if (previous_core_rwi && !post_core_rwi) sb.index.disconnectRWI(); // switch off
+            if (!previous_core_rwi && post_core_rwi) try {
+                final int wordCacheMaxCount = (int) sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
+                final long fileSizeMax = (OS.isWindows) ? sb.getConfigLong("filesize.max.win", Integer.MAX_VALUE) : sb.getConfigLong( "filesize.max.other", Integer.MAX_VALUE);
+                sb.index.connectRWI(wordCacheMaxCount, fileSizeMax);
+            } catch (final IOException e) { ConcurrentLog.logException(e); } // switch on
+        }
 
+        if (post != null && post.containsKey("setcitation")) {
+            boolean post_core_citation = post.getBoolean(SwitchboardConstants.CORE_SERVICE_CITATION);
+            final boolean previous_core_citation = sb.index.connectedCitation() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false);
+            env.setConfig(SwitchboardConstants.CORE_SERVICE_CITATION, post_core_citation);
+            if (previous_core_citation && !post_core_citation) sb.index.disconnectCitation(); // switch off
+            if (!previous_core_citation && post_core_citation) try {
+                final int wordCacheMaxCount = (int) sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
+                final long fileSizeMax = (OS.isWindows) ? sb.getConfigLong("filesize.max.win", Integer.MAX_VALUE) : sb.getConfigLong( "filesize.max.other", Integer.MAX_VALUE);
+                sb.index.connectCitation(wordCacheMaxCount, fileSizeMax);
+            } catch (final IOException e) { ConcurrentLog.logException(e); } // switch on
+            boolean webgraph = post.getBoolean(SwitchboardConstants.CORE_SERVICE_WEBGRAPH);
+            sb.index.fulltext().writeWebgraph(webgraph);
+            env.setConfig(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, webgraph);
+        }
+
+        if (post != null && post.containsKey("setjena")) {
+            boolean jena = post.getBoolean(SwitchboardConstants.CORE_SERVICE_JENA);
+            env.setConfig(SwitchboardConstants.CORE_SERVICE_JENA, jena);
+        }
+        
+        if (post != null && post.containsKey("setsolr")) {
+            boolean post_core_fulltext = post.getBoolean(SwitchboardConstants.CORE_SERVICE_FULLTEXT);
+            final boolean previous_core_fulltext = sb.index.fulltext().connectedLocalSolr() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, false);
+            env.setConfig(SwitchboardConstants.CORE_SERVICE_FULLTEXT, post_core_fulltext);
+
+            if (previous_core_fulltext && !post_core_fulltext) {
+                // switch off
+                sb.index.fulltext().disconnectLocalSolr();
+                sb.index.fulltext().disconnectUrlDb();
+            }
+            if (!previous_core_fulltext && post_core_fulltext) {
+                // switch on
+                sb.index.connectUrlDb(sb.useTailCache, sb.exceed134217727);
+                try { sb.index.fulltext().connectLocalSolr(); } catch (final IOException e) { ConcurrentLog.logException(e); }
+            }
+            
             // solr
-            final boolean solrWasOn = env.getConfigBool("federated.service.solr.indexing.enabled", true);
-            final boolean solrIsOnAfterwards = post.getBoolean("solr.indexing.solrremote");
-            env.setConfig("federated.service.solr.indexing.enabled", solrIsOnAfterwards);
-            String solrurls = post.get("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr"));
-            int commitWithinMs = post.getInt("solr.indexing.commitWithinMs", env.getConfigInt("federated.service.solr.indexing.commitWithinMs", 180000));
-            boolean lazy = post.getBoolean("solr.indexing.lazy");
+            final boolean solrRemoteWasOn = sb.index.fulltext().connectedRemoteSolr() && env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, true);
+            String solrurls = post.get("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr"));
+            final boolean solrRemoteIsOnAfterwards = post.getBoolean("solr.indexing.solrremote") & solrurls.length() > 0;
+            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, solrRemoteIsOnAfterwards);
             final BufferedReader r = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(UTF8.getBytes(solrurls))));
             final StringBuilder s = new StringBuilder();
             String s0;
@@ -76,123 +116,75 @@ public class IndexFederated_p {
                 s.setLength(s.length() - 1);
             }
             solrurls = s.toString().trim();
-            env.setConfig("federated.service.solr.indexing.url", solrurls);
-            env.setConfig("federated.service.solr.indexing.commitWithinMs", commitWithinMs);
-            env.setConfig("federated.service.solr.indexing.lazy", lazy);
-            env.setConfig("federated.service.solr.indexing.sharding", post.get("solr.indexing.sharding", env.getConfig("federated.service.solr.indexing.sharding", "modulo-host-md5")));
-            final String schemename = post.get("solr.indexing.schemefile", env.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list"));
-            env.setConfig("federated.service.solr.indexing.schemefile", schemename);
-
-            if (solrWasOn) {
+            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, solrurls);
+            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, post.get("solr.indexing.sharding", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, "modulo-host-md5")));
+            
+            if (solrRemoteWasOn && !solrRemoteIsOnAfterwards) {
                 // switch off
-                sb.index.getRemoteSolr().close();
-                sb.index.connectRemoteSolr(null);
+                try {
+                    sb.index.fulltext().disconnectRemoteSolr();
+                } catch (final Throwable e) {
+                    ConcurrentLog.logException(e);
+                }
             }
 
-            if (solrIsOnAfterwards) {
+            if (solrRemoteIsOnAfterwards) try {
+                if (solrRemoteWasOn) sb.index.fulltext().disconnectRemoteSolr();
                 // switch on
-                final boolean usesolr = sb.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
+                final boolean usesolr = sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;
+                final int solrtimeout = sb.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 10000);
+
                 try {
                     if (usesolr) {
-                        SolrConnector solr = new ShardSolrConnector(solrurls, ShardSelection.Method.MODULO_HOST_MD5, 10000, true);
-                        solr.setCommitWithinMs(commitWithinMs);
-                        sb.index.connectRemoteSolr(solr);
+                        ArrayList<RemoteInstance> instances = RemoteInstance.getShardInstances(solrurls, null, null, solrtimeout);
+                        sb.index.fulltext().connectRemoteSolr(instances);
                     } else {
-                        sb.index.connectRemoteSolr(null);
+                        sb.index.fulltext().disconnectRemoteSolr();
                     }
-                } catch (final IOException e) {
-                    Log.logException(e);
-                    sb.index.connectRemoteSolr(null);
-                }
-            }
-
-            // read index scheme table flags
-            final Iterator<ConfigurationSet.Entry> i = sb.solrScheme.entryIterator();
-            ConfigurationSet.Entry entry;
-            boolean modified = false; // flag to remember changes
-            while (i.hasNext()) {
-                entry = i.next();
-                final String v = post.get("scheme_" + entry.key());
-                final String sfn = post.get("scheme_solrfieldname_" + entry.key());
-                if (sfn != null ) {
-                    // set custom solr field name
-                    if (!sfn.equals(entry.getValue())) {
-                        entry.setValue(sfn);
-                        modified = true;
+                } catch (final Throwable e) {
+                    ConcurrentLog.logException(e);
+                    try {
+                        sb.index.fulltext().disconnectRemoteSolr();
+                    } catch (final Throwable ee) {
+                        ConcurrentLog.logException(ee);
                     }
                 }
-                // set enable flag
-                final boolean c = v != null && v.equals("checked");
-                if (entry.enabled() != c) {
-                    entry.setEnable(c);
-                    modified = true;
-                }
+            } catch (final SolrException e) {
+                ConcurrentLog.severe("IndexFederated_p", "change of solr connection failed", e);
             }
-            if (modified) { // save settings to config file if modified
-                try {
-                    sb.solrScheme.commit();
-                    modified = false;
-                } catch (IOException ex) {}
-            }
+            
+            boolean lazy = post.getBoolean("solr.indexing.lazy");
+            env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, lazy);
         }
 
         // show solr host table
-        if (sb.index.getRemoteSolr() == null) {
+        if (!sb.index.fulltext().connectedRemoteSolr()) {
             prop.put("table", 0);
         } else {
             prop.put("table", 1);
-            final SolrConnector solr = sb.index.getRemoteSolr();
-            final long[] size = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getSizeList() : new long[]{((SingleSolrConnector) solr).getSize()};
-            final String[] urls = (solr instanceof ShardSolrConnector) ? ((ShardSolrConnector) solr).getAdminInterfaceList() : new String[]{((SingleSolrConnector) solr).getAdminInterface()};
+            final SolrConnector solr = sb.index.fulltext().getDefaultRemoteSolrConnector();
+            final long[] size = new long[]{((RemoteSolrConnector) solr).getSize()};
+            final ArrayList<String> urls = ((ShardInstance) ((RemoteSolrConnector) solr).getInstance()).getAdminInterfaces();
             boolean dark = false;
             for (int i = 0; i < size.length; i++) {
                 prop.put("table_list_" + i + "_dark", dark ? 1 : 0); dark = !dark;
-                prop.put("table_list_" + i + "_url", urls[i]);
+                prop.put("table_list_" + i + "_url", urls.get(i));
                 prop.put("table_list_" + i + "_size", size[i]);
             }
             prop.put("table_list", size.length);
         }
 
-        // write scheme
-        final String schemename = sb.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list");
+        prop.put(SwitchboardConstants.CORE_SERVICE_FULLTEXT + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, false) ? 1 : 0);
+        prop.put(SwitchboardConstants.CORE_SERVICE_RWI + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, false) ? 1 : 0);
+        prop.put(SwitchboardConstants.CORE_SERVICE_CITATION + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false) ? 1 : 0);
+        prop.put(SwitchboardConstants.CORE_SERVICE_WEBGRAPH + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false) ? 1 : 0);
+        prop.put(SwitchboardConstants.CORE_SERVICE_JENA + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_JENA, false) ? 1 : 0);
+        prop.put("solr.indexing.solrremote.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) ? 1 : 0);
+        prop.put("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr").replace(",", "\n"));
+        prop.put("solr.indexing.sharding", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_SHARDING, "modulo-host-md5"));
 
-        int c = 0;
-        boolean dark = false;
-        // use enum SolrField to keep defined order
-        for(SolrField field : SolrField.values()) {
-            prop.put("scheme_" + c + "_dark", dark ? 1 : 0); dark = !dark;
-            prop.put("scheme_" + c + "_checked", sb.solrScheme.contains(field.name()) ? 1 : 0);
-            prop.putHTML("scheme_" + c + "_key", field.name());
-            prop.putHTML("scheme_" + c + "_solrfieldname",field.name().equalsIgnoreCase(field.getSolrFieldName()) ? "" : field.getSolrFieldName());
-            if (field.getComment() != null) prop.putHTML("scheme_" + c + "_comment",field.getComment());
-            c++;
-        }
-  /*    final Iterator<ConfigurationSet.Entry> i = sb.solrScheme.entryIterator();
-        ConfigurationSet.Entry entry;
-        while (i.hasNext()) {
-            entry = i.next();
-            prop.put("scheme_" + c + "_dark", dark ? 1 : 0); dark = !dark;
-            prop.put("scheme_" + c + "_checked", entry.enabled() ? 1 : 0);
-            prop.putHTML("scheme_" + c + "_key", entry.key());
-            prop.putHTML("scheme_" + c + "_solrfieldname",entry.getValue() == null ? "" : entry.getValue());
-            if (entry.getComment() != null) prop.putHTML("scheme_" + c + "_comment",entry.getComment());
-            c++;
-        }*/
-        prop.put("scheme", c);
-
-        // fill attribute fields
-        // allowed values are: classic, solr, off
-        // federated.service.yacy.indexing.engine = classic
-        prop.put("yacy.indexing.engine.classic.checked", env.getConfig("federated.service.yacy.indexing.engine", "classic").equals("classic") ? 1 : 0);
-        prop.put("yacy.indexing.engine.solr.checked", env.getConfig("federated.service.yacy.indexing.engine", "classic").equals("solr") ? 1 : 0);
-        prop.put("yacy.indexing.engine.off.checked", env.getConfig("federated.service.yacy.indexing.engine", "classic").equals("off") ? 1 : 0);
-        prop.put("solr.indexing.solrremote.checked", env.getConfigBool("federated.service.solr.indexing.enabled", false) ? 1 : 0);
-        prop.put("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr").replace(",", "\n"));
-        prop.put("solr.indexing.commitWithinMs", env.getConfigInt("federated.service.solr.indexing.commitWithinMs", 180000));
-        prop.put("solr.indexing.lazy.checked", env.getConfigBool("federated.service.solr.indexing.lazy", true) ? 1 : 0);
-        prop.put("solr.indexing.sharding", env.getConfig("federated.service.solr.indexing.sharding", "modulo-host-md5"));
-        prop.put("solr.indexing.schemefile", schemename);
-
+        prop.put("solr.indexing.lazy.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, true) ? 1 : 0);
+        
         // return rewrite properties
         return prop;
     }

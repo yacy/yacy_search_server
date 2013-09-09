@@ -88,7 +88,7 @@
             </div>
           </form>
         </td>
-        <td><a href="http://#[domain]#/">#[domain]#</a></td>
+        <td><a href="http://#[domain]#/" target="_blank">#[domain]#</a></td>
         <td>#[count]#</td>
       </tr>
       #{/domains}#
@@ -111,6 +111,7 @@
             </div>
           </form>
         </td>
+        #(showCollection)#::<td><strong>Collection</strong></td>#(/showCollection)#
         #(showInit)#::<td><strong>Initiator</strong></td>#(/showInit)#
         #(showExec)#::<td><strong>Executor</strong></td>#(/showExec)#
         #(showDate)#::<td><strong>Modified</strong></td>#(/showDate)#
@@ -131,6 +132,7 @@
             </div>
           </form>
         </td>
+        #(showCollection)#::<td>#[collection]#</td>#(/showCollection)#
         #(showInit)#::<td>#[initiatorSeed]#</td>#(/showInit)#
         #(showExec)#::<td>#[executorSeed]#</td>#(/showExec)#
 

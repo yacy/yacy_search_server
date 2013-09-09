@@ -30,14 +30,13 @@ package net.yacy.kelondro.rwi;
 
 import java.io.IOException;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.sorting.Rating;
-import net.yacy.kelondro.index.HandleSet;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 
 
 public interface Index <ReferenceType extends Reference> extends Iterable<ReferenceContainer<ReferenceType>> {
@@ -52,7 +51,7 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
      * merge this index with another index
      * @param otherIndex
      */
-    public void merge(Index<ReferenceType> otherIndex) throws IOException, RowSpaceExceededException;
+    public void merge(Index<ReferenceType> otherIndex) throws IOException, SpaceExceededException;
 
 	/**
 	 * add references to the reverse index
@@ -61,9 +60,9 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
 	 * reference to be stored, then the old and the new references are merged
 	 * @param newEntries the References to be merged with existing references
 	 * @throws IOException
-	 * @throws RowSpaceExceededException
+	 * @throws SpaceExceededException
 	 */
-	public void add(ReferenceContainer<ReferenceType> newEntries) throws IOException, RowSpaceExceededException;
+	public void add(ReferenceContainer<ReferenceType> newEntries) throws IOException, SpaceExceededException;
 
 	/**
 	 * add a single reference to the reverse index
@@ -73,9 +72,9 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
 	 * @param termHash
 	 * @param entry
 	 * @throws IOException
-	 * @throws RowSpaceExceededException
+	 * @throws SpaceExceededException
 	 */
-    public void add(final byte[] termHash, final ReferenceType entry) throws IOException, RowSpaceExceededException;
+    public void add(final byte[] termHash, final ReferenceType entry) throws IOException, SpaceExceededException;
 
 	/**
 	 * check if there are references stored to the given word hash
@@ -138,9 +137,7 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
      * @throws IOException
      */
     public int remove(final byte[] termHash, HandleSet referenceHashes) throws IOException;
-    public void removeDelayed(final byte[] termHash, HandleSet referenceHashes) throws IOException;
     public int remove(final HandleSet termHashes, final byte[] urlHashBytes) throws IOException;
-    public void removeDelayed(final HandleSet termHashes, final byte[] urlHashBytes) throws IOException;
 
     public void removeDelayed() throws IOException;
 
@@ -170,14 +167,6 @@ public interface Index <ReferenceType extends Reference> extends Iterable<Refere
                             byte[] startHash,
                             boolean rot,
                             boolean excludePrivate
-                            ) throws IOException;
-
-
-    public TreeSet<ReferenceContainer<ReferenceType>> referenceContainer(
-                            byte[] startHash,
-                            boolean rot,
-                            boolean excludePrivate,
-                            int count
                             ) throws IOException;
 
     /**

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <solr persistent="false">
+  <logging enabled="true">
+        <watcher size="100" threshold="INFO" />
+  </logging>
   <cores adminPath="/admin/cores" defaultCoreName="collection1" host="${host:}" hostPort="${jetty.port:}">
-    <core name="collection1" instanceDir="." />
+    <core name="collection1" instanceDir="collection1" />
+    <core name="webgraph" instanceDir="webgraph" />
   </cores>
 </solr>

@@ -22,18 +22,18 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-import java.util.Iterator;
+import java.util.ConcurrentModificationException;
+import java.util.SortedSet;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.kelondro.data.word.Word;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.DidYouMean;
 import net.yacy.search.Switchboard;
-import net.yacy.search.index.Segment;
-import de.anomic.data.DidYouMean;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.server.servletProperties;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.servletProperties;
 
 /**
  * for json format:
@@ -59,37 +59,37 @@ public class suggest {
         final String ext = header.get("EXT", "");
         final boolean json = ext.equals("json");
         final boolean xml = ext.equals("xml");
-        final boolean more = post != null && post.containsKey("more");
+        final boolean more = sb.index.connectedRWI() || (post != null && post.containsKey("more")); // with RWIs connected the guessing is super-fast
 
         // get query
         final String originalquerystring = (post == null) ? "" : post.get("query", post.get("q", "")).trim();
         final String querystring =  originalquerystring.replace('+', ' ');
         final int timeout = (post == null) ? 300 : post.getInt("timeout", 300);
-        final int count = (post == null) ? 20 : post.getInt("count", 20);
-
-        // get segment
-        final Segment indexSegment = sb.index;
+        final int count = (post == null) ? 10 : Math.min(20, post.getInt("count", 10));
 
         int c = 0;
-        if (more ||
-                (indexSegment != null &&
-                !indexSegment.termIndex().has(Word.word2hash(querystring))))
-        {
-            final DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), new StringBuilder(querystring));
-            final Iterator<StringBuilder> meanIt = didYouMean.getSuggestions(timeout, count).iterator();
-            String suggestion;
+        if (more || (sb.index.getWordCountGuess(querystring) == 0)) {
+            final DidYouMean didYouMean = new DidYouMean(sb.index, new StringBuilder(querystring));
+            final SortedSet<StringBuilder> suggestions = didYouMean.getSuggestions(timeout, count);
             //[#[query]#,[#{suggestions}##[text]##(eol)#,::#(/eol)##{/suggestions}#]]
-            while (c < meanMax && meanIt.hasNext()) {
-                suggestion = meanIt.next().toString();
-                if (json) {
-                    prop.putJSON("suggestions_" + c + "_text", suggestion);
-                } else if (xml) {
-                    prop.putXML("suggestions_" + c + "_text", suggestion);
-                } else {
-                    prop.putHTML("suggestions_" + c + "_text", suggestion);
+            synchronized (suggestions) {
+                for (StringBuilder suggestion: suggestions) {
+                    if (c >= meanMax) break;
+                    try {
+                        String s = suggestion.toString();
+                        if (json) {
+                            prop.putJSON("suggestions_" + c + "_text", s);
+                        } else if (xml) {
+                            prop.putXML("suggestions_" + c + "_text", s);
+                        } else {
+                            prop.putHTML("suggestions_" + c + "_text", s);
+                        }
+                        prop.put("suggestions_" + c + "_eol", 0);
+                        c++;
+                    } catch (final ConcurrentModificationException e) {
+                        ConcurrentLog.logException(e);
+                    }
                 }
-                prop.put("suggestions_" + c + "_eol", 0);
-                c++;
             }
         }
 

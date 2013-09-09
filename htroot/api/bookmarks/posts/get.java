@@ -1,16 +1,17 @@
 
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.order.Digest;
+import net.yacy.data.BookmarksDB;
 import net.yacy.search.Switchboard;
-import de.anomic.data.BookmarksDB;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class get {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
@@ -46,23 +47,26 @@ public class get {
         final List<String> bookmark_hashes = switchboard.bookmarksDB.getDate(Long.toString(parsedDate.getTime())).getBookmarkList();
         BookmarksDB.Bookmark bookmark = null;
         for (final String bookmark_hash : bookmark_hashes){
-            bookmark=switchboard.bookmarksDB.getBookmark(bookmark_hash);
-            if (ISO8601Formatter.FORMATTER.format(new Date(bookmark.getTimeStamp())).equals(date) &&
-                    tag==null || bookmark.getTags().contains(tag) &&
-                    isAdmin || bookmark.getPublic()){
-                prop.putHTML("posts_"+count+"_url", bookmark.getUrl());
-                prop.putHTML("posts_"+count+"_title", bookmark.getTitle());
-                prop.putHTML("posts_"+count+"_description", bookmark.getDescription());
-                prop.put("posts_"+count+"_md5", Digest.encodeMD5Hex(bookmark.getUrl()));
-                prop.put("posts_"+count+"_time", date);
-                prop.putHTML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
+            try {
+                bookmark=switchboard.bookmarksDB.getBookmark(bookmark_hash);
+                if (ISO8601Formatter.FORMATTER.format(new Date(bookmark.getTimeStamp())).equals(date) &&
+                        tag==null || bookmark.getTags().contains(tag) &&
+                        isAdmin || bookmark.getPublic()){
+                    prop.putHTML("posts_"+count+"_url", bookmark.getUrl());
+                    prop.putHTML("posts_"+count+"_title", bookmark.getTitle());
+                    prop.putHTML("posts_"+count+"_description", bookmark.getDescription());
+                    prop.put("posts_"+count+"_md5", Digest.encodeMD5Hex(bookmark.getUrl()));
+                    prop.put("posts_"+count+"_time", date);
+                    prop.putHTML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
 
-                // additional XML tags
-                prop.put("posts_"+count+"_isExtended",extendedXML ? "1" : "0");
-                if (extendedXML) {
-                	prop.put("posts_"+count+"_isExtended_private", Boolean.toString(!bookmark.getPublic()));
+                    // additional XML tags
+                    prop.put("posts_"+count+"_isExtended",extendedXML ? "1" : "0");
+                    if (extendedXML) {
+                        prop.put("posts_"+count+"_isExtended_private", Boolean.toString(!bookmark.getPublic()));
+                    }
+                    count++;
                 }
-                count++;
+            } catch (final IOException e) {
             }
         }
         prop.put("posts", count);

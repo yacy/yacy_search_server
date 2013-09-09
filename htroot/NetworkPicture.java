@@ -27,13 +27,13 @@
 import java.util.concurrent.Semaphore;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.peers.graphics.NetworkGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 /** draw a picture of the yacy network */
 public class NetworkPicture
@@ -52,7 +52,7 @@ public class NetworkPicture
 
         final long timeSeconds = System.currentTimeMillis() / 1000;
         if ( buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2 ) {
-            Log.logInfo("NetworkPicture", "cache hit (1); authorized = "
+            ConcurrentLog.info("NetworkPicture", "cache hit (1); authorized = "
                 + authorized
                 + ", timeSeconds - lastAccessSeconds = "
                 + (timeSeconds - lastAccessSeconds));
@@ -65,7 +65,7 @@ public class NetworkPicture
         sync.acquireUninterruptibly();
 
         if ( buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2 ) {
-            Log.logInfo("NetworkPicture", "cache hit (2); authorized = "
+            ConcurrentLog.info("NetworkPicture", "cache hit (2); authorized = "
                 + authorized
                 + ", timeSeconds - lastAccessSeconds = "
                 + (timeSeconds - lastAccessSeconds));
@@ -73,8 +73,8 @@ public class NetworkPicture
             return buffer;
         }
 
-        int width = 1024; // 640x480 = VGA, 768x576 = SD/4:3, 1024x576 =SD/16:9 1280x720 = HD/16:9, 1920x1080 = FULL HD/16:9
-        int height = 576;
+        int width = 1280; // 640x480 = VGA, 768x576 = SD/4:3, 1024x576 =SD/16:9 1280x720 = HD/16:9, 1920x1080 = FULL HD/16:9
+        int height = 720;
         int passiveLimit = 1440; // minutes; 1440 = 1 day; 720 = 12 hours; 1440 = 24 hours, 10080 = 1 week;
         int potentialLimit = 1440;
         int maxCount = 9000;
@@ -90,7 +90,7 @@ public class NetworkPicture
             passiveLimit = post.getInt("pal", passiveLimit);
             potentialLimit = post.getInt("pol", potentialLimit);
             maxCount = post.getInt("max", maxCount);
-            corona = !post.containsKey("corona") || post.getBoolean("corona");
+            corona = post.getBoolean("corona");
             coronaangle = (corona) ? post.getInt("coronaangle", 0) : -1;
             communicationTimeout = post.getLong("ct", -1);
             bgcolor = post.get("bgcolor", bgcolor);
@@ -107,12 +107,12 @@ public class NetworkPicture
         if ( height < 240 ) {
             height = 240;
         }
-        if ( height > 1080 ) {
-            height = 1080;
+        if ( height > 1280 ) {
+            height = 1280;
         }
         if ( !authorized ) {
-            width = Math.min(1024, width);
-            height = Math.min(1024, height);
+            width = Math.min(1280, width);
+            height = Math.min(1280, height);
         }
         if ( passiveLimit > 1000000 ) {
             passiveLimit = 1000000;
@@ -126,7 +126,6 @@ public class NetworkPicture
         buffer =
             new EncodedImage(NetworkGraph.getNetworkPicture(
                 sb.peers,
-                10000,
                 width,
                 height,
                 passiveLimit,
@@ -137,7 +136,7 @@ public class NetworkPicture
                 env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"),
                 env.getConfig("network.unit.description", "unspecified"),
                 bgcolor,
-                cyc).getImage(), "png");
+                cyc), "png");
         lastAccessSeconds = System.currentTimeMillis() / 1000;
 
         sync.release();

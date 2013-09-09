@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
-import de.anomic.tools.nxTools;
+import net.yacy.utils.nxTools;
 
 public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> implements Map<ThreadDump.StackTrace, List<String>> {
 
@@ -51,8 +51,8 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
     private static final Pattern multiDumpFilterPattern = Pattern.compile(multiDumpFilter);
 
     public static class StackTrace {
-        public String text;
-        public Thread.State state;
+        private String text;
+        private Thread.State state;
         public StackTrace(final String text, final Thread.State state) {
             this.state = state;
             this.text = text;
@@ -75,7 +75,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
     }
 
     public static class Lock {
-        public String id;
+        private String id;
         public Lock(final String name) {
             this.id = name;
         }
@@ -242,7 +242,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
                         } else {
                             line = null;
                         }
-                        if ((line != null) && (line.length() > 0)) {
+                        if (line != null && !line.isEmpty()) {
                             bufferappend(sb, plain, tracename + "at " + CharacterCoding.unicode2html(ste.toString(), true) + " [" + line.trim() + "]");
                         } else {
                             bufferappend(sb, plain, tracename + "at " + CharacterCoding.unicode2html(ste.toString(), true));

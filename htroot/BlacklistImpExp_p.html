@@ -71,10 +71,10 @@
                 Here you can export a blacklist as an XML file. This file will contain additional
                 information about which cases a blacklist is activated for.<br /><br />
                 <select name="listname">
-                    <option value="">all</option>
                     #{blackListNames}#
                     <option value="#[blackListName]#">#[blackListName]#</option>
                     #{/blackListNames}#
+                    <option value="">all</option>
           </select>
                 <input type="submit" value="Export list as XML" />
             </fieldset>
@@ -86,10 +86,10 @@
                 Here you can export a blacklist as a regular text file with one blacklist entry per line.
                 This file will not contain any additional information.<br /><br />
                 <select name="listname">
-                    <option value="">all</option>
                     #{blackListNames}#
                     <option value="#[blackListName]#">#[blackListName]#</option>
                     #{/blackListNames}#
+                    <option value="">all</option>
                 </select>
                 <input type="hidden" name="col" value="black" />
                 <input type="submit" value="Export list as text" />

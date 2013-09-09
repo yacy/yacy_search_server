@@ -29,7 +29,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public class ChartPlotter extends RasterPlotter {
@@ -66,11 +66,11 @@ public class ChartPlotter extends RasterPlotter {
         //this.backgroundColor = backgroundColor;
         //this.foregroundColor = foregroundColor;
         if (name != null) {
-            this.setColor(foregroundColor);
+            if (foregroundColor != null) this.setColor(Long.parseLong(foregroundColor, 16));
             PrintTool.print(this, width / 2 - name.length() * 3, 6, 0, name, -1);
         }
         if (subline != null) {
-            this.setColor(lightColor);
+            if (lightColor != null) this.setColor(Long.parseLong(lightColor, 16));
             PrintTool.print(this, width / 2 - subline.length() * 3, 14, 0, subline, -1);
         }
     }
@@ -110,18 +110,20 @@ public class ChartPlotter extends RasterPlotter {
         final int y = (top) ? this.topborder : this.height - this.bottomborder;
         int x = this.leftborder;
         int s = offset;
+        Long colorScale_l = colorScale == null ? null : Long.parseLong(colorScale, 16);
+        Long colorNaming_l = colorNaming == null ? null : Long.parseLong(colorNaming, 16);
         while (x < this.width - this.rightborder) {
             if ((colorScale != null) && (x > this.leftborder) && (x < (this.width - this.rightborder))) {
-                setColor(colorScale);
+                setColor(colorScale_l);
                 line(x, this.topborder, x, this.height - this.bottomborder, 100);
             }
-            setColor(colorNaming);
+            setColor(colorNaming_l);
             line(x, y - 3, x, y + 3, 100);
             PrintTool.print(this, x, (top) ? y - 3 : y + 9, 0, Integer.toString(s), -1);
             x += pixelperscale;
             s += scale;
         }
-        setColor(colorNaming);
+        setColor(colorNaming_l);
         PrintTool.print(this, this.width - this.rightborder, (top) ? y - 9 : y + 15, 0, name, 1);
         line(this.leftborder - 4, y, this.width - this.rightborder + 4, y, 100);
     }
@@ -134,12 +136,14 @@ public class ChartPlotter extends RasterPlotter {
         int s = offset;
         String s1;
         int s1max = 0;
+        Long colorScale_l = colorScale == null ? null : Long.parseLong(colorScale, 16);
+        Long colorNaming_l = colorNaming == null ? null : Long.parseLong(colorNaming, 16);
         while (y > this.topborder) {
             if ((colorScale != null) && (y > this.topborder) && (y < (this.height - this.bottomborder))) {
-                setColor(colorScale);
+                setColor(colorScale_l);
                 line(this.leftborder, y, this.width - this.rightborder, y, 100);
             }
-            setColor(colorNaming);
+            setColor(colorNaming_l);
             line(x - 3, y, x + 3, y, 100);
             s1 = (s >= 1000000 && s % 10000 == 0) ? Integer.toString(s / 1000000) + "M" : (s >= 1000 && s % 1000 == 0) ? Integer.toString(s / 1000) + "K" : Integer.toString(s);
             if (s1.length() > s1max) s1max = s1.length();
@@ -147,7 +151,7 @@ public class ChartPlotter extends RasterPlotter {
             y -= pixelperscale;
             s += scale;
         }
-        setColor(colorNaming);
+        setColor(colorNaming_l);
         PrintTool.print(this, (left) ? x - s1max * 6 - 6 : x + s1max * 6 + 9, this.topborder, 90, name, 1);
         line(x, this.topborder - 4, x, this.height - this.bottomborder + 4, 100);
     }
@@ -164,10 +168,10 @@ public class ChartPlotter extends RasterPlotter {
         //ip.declareDimension(DIMENSION_TOP, 10, 40, "000000", null, "count");
         ip.declareDimension(DIMENSION_LEFT, 50, 40, 0, green, scale , "PPM [PAGES/MINUTE]");
         ip.declareDimension(DIMENSION_RIGHT, 100, 20, 0, blue, scale, "MEMORY/MEGABYTE");
-        ip.setColor(green);
+        ip.setColor(Long.parseLong(green, 16));
         ip.chartDot(DIMENSION_BOTTOM, DIMENSION_LEFT, -160, 100, 5, null, 0);
         ip.chartLine(DIMENSION_BOTTOM, DIMENSION_LEFT, -160, 100, -130, 200);
-        ip.setColor(blue);
+        ip.setColor(Long.parseLong(blue, 16));
         ip.chartDot(DIMENSION_BOTTOM, DIMENSION_RIGHT, -50, 300, 2, null, 0);
         ip.chartLine(DIMENSION_BOTTOM, DIMENSION_RIGHT, -80, 100, -50, 300);
         //ip.print(100, 100, 0, "TEXT", true);
@@ -177,10 +181,11 @@ public class ChartPlotter extends RasterPlotter {
         final File file = new File("/Users/admin/Desktop/testimage.png");
         try {
             final FileOutputStream fos = new FileOutputStream(file);
-            ImageIO.write(ip.getImage(), "png", fos);
+            fos.write(RasterPlotter.exportImage(ip.getImage(), "png").getBytes());
+            //ImageIO.write(ip.getImage(), "png", fos);
             fos.close();
         } catch (final IOException e) {}
-
+        ConcurrentLog.shutdown();
     }
 
 }

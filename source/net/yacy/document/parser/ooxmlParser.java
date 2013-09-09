@@ -29,8 +29,10 @@ package net.yacy.document.parser;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -40,6 +42,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -47,7 +50,6 @@ import net.yacy.document.parser.xml.ODContentHandler;
 import net.yacy.document.parser.xml.ODMetaHandler;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
 import org.xml.sax.SAXException;
@@ -80,7 +82,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
     	if (parser == null) {
     		try {
 				parser = SAXParserFactory.newInstance().newSAXParser();
-			} catch (ParserConfigurationException e) {
+			} catch (final ParserConfigurationException e) {
 				throw new SAXException(e.getMessage(), e);
 			}
     		tlSax.set(parser);
@@ -88,7 +90,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
     	return parser;
     }
 
-    private Document[] parse(final DigestURI location, final String mimeType, final String charset, final File dest) throws Parser.Failure, InterruptedException {
+    private Document[] parse(final DigestURI location, final String mimeType, @SuppressWarnings("unused") final String charset, final File dest) throws Parser.Failure, InterruptedException {
 
         CharBuffer writer = null;
         try {
@@ -116,21 +118,19 @@ public class ooxmlParser extends AbstractParser implements Parser {
                 	|| entryName.startsWith("xl/worksheets/sheet")) {
 
                     // create a writer for output
-                    writer = new CharBuffer(odtParser.MAX_DOCSIZE, (int)zipEntry.getSize());
-                    try {
-	                    // extract data
-	                    final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
-	                    try {
-		                    final SAXParser saxParser = getParser();
-		                    saxParser.parse(zipFileEntryStream, new ODContentHandler(writer));
+                    writer = new CharBuffer(odtParser.MAX_DOCSIZE, (int) zipEntry.getSize());
 
-		                    // close readers and writers
-	                    } finally {
-	                    	zipFileEntryStream.close();
-	                    }
+                    // extract data
+                    final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
+                    try {
+                        final SAXParser saxParser = getParser();
+                        saxParser.parse(zipFileEntryStream, new ODContentHandler(writer));
+
+                        // close readers and writers
                     } finally {
-                    	writer.close();
+                        zipFileEntryStream.close();
                     }
+   
                 } else if (entryName.equals("docProps/core.xml")) {
                     //  meta.xml contains metadata about the document
                     final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
@@ -148,11 +148,11 @@ public class ooxmlParser extends AbstractParser implements Parser {
 
             // make the languages set
             final Set<String> languages = new HashSet<String>(1);
-            if (docLanguage != null && docLanguage.length() == 0)
+            if (docLanguage != null && docLanguage.isEmpty())
         	languages.add(docLanguage);
 
             // if there is no title availabe we generate one
-            if ((docLongTitle == null || docLongTitle.length() == 0) && (docShortTitle != null)) {
+            if ((docLongTitle == null || docLongTitle.isEmpty()) && (docShortTitle != null)) {
                     docLongTitle = docShortTitle;
             }
 
@@ -162,7 +162,9 @@ public class ooxmlParser extends AbstractParser implements Parser {
 
             // create the parser document
             Document[] docs = null;
-            final byte[] contentBytes = UTF8.getBytes(writer.toString());
+            final byte[] contentBytes = (writer == null) ? null : UTF8.getBytes(writer.toString());
+            List<String> descriptions = new ArrayList<String>();
+            if (docDescription != null && docDescription.length() > 0) descriptions.add(docDescription);
             docs = new Document[]{new Document(
                     location,
                     mimeType,
@@ -170,11 +172,11 @@ public class ooxmlParser extends AbstractParser implements Parser {
                     this,
                     languages,
                     docKeywords,
-                    docLongTitle,
+                    singleList(docLongTitle),
                     docAuthor,
                     "",
                     null,
-                    docDescription,
+                    descriptions,
                     0.0f, 0.0f,
                     contentBytes,
                     null,
@@ -191,7 +193,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
                 writer.close();
             } catch (final Exception ex) {/* ignore this */}
 
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             throw new Parser.Failure("Unexpected error while parsing odt file. " + e.getMessage(),location);
         }
     }

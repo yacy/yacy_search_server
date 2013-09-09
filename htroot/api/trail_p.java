@@ -10,7 +10,7 @@
 // $LastChangedBy: orbiter $
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -27,15 +27,15 @@
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class trail_p {
- 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        
+
         int c = 0;
         for (String t: sb.trail) {
             prop.put("trails_" + c++ + "_trail", t); // don't put in putHTML or putXML in, this is wrong!
@@ -43,5 +43,5 @@ public class trail_p {
         prop.put("trails", c);
         return prop;
     }
- 
+
 }

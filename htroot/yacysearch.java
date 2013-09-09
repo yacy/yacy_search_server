@@ -40,28 +40,31 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Classification;
-import net.yacy.cora.document.Classification.ContentDomain;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
+
+import net.yacy.cora.federate.opensearch.OpenSearchConnector;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.DidYouMean;
+import net.yacy.data.UserDB;
+import net.yacy.data.ymark.YMarkTables;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
-import net.yacy.document.geolocation.GeoLocation;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
+import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
@@ -69,22 +72,23 @@ import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.graphics.ProfilingGraph;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryGoal;
+import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.query.SearchEventType;
 import net.yacy.search.ranking.RankingProfile;
-import de.anomic.data.DidYouMean;
-import de.anomic.data.UserDB;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.server.servletProperties;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.servletProperties;
 
 public class yacysearch {
 
@@ -95,27 +99,26 @@ public class yacysearch {
         final Switchboard sb = (Switchboard) env;
         sb.localSearchLastAccess = System.currentTimeMillis();
 
-        final boolean searchAllowed =
-            sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header);
+        final boolean authorized = sb.verifyAuthentication(header);
+        final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || authorized;
 
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         if ( !authenticated ) {
             final UserDB.Entry user = sb.userDB.getUser(header);
             authenticated = (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
         }
-        final boolean localhostAccess = sb.accessFromLocalhost(header);
+        final boolean localhostAccess = header.accessFromLocalhost();
         final String promoteSearchPageGreeting =
             (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ? env.getConfig(
                 "network.unit.description",
                 "") : env.getConfig(SwitchboardConstants.GREETING, "");
         final String client = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
-
+        
         // get query
-        final String originalquerystring =
-            (post == null) ? "" : post.get("query", post.get("search", "")).trim();
-        String querystring = originalquerystring.replace('+', ' ').replace('*', ' ').trim();
-        CacheStrategy snippetFetchStrategy =
-            (post == null) ? null : CacheStrategy.parse(post.get("verify", "cacheonly"));
+        final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
+        String querystring = originalquerystring.replace('+', ' ').trim();
+        CacheStrategy snippetFetchStrategy = (post == null) ? null : CacheStrategy.parse(post.get("verify", sb.getConfig("search.verify", "")));
+        
         final servletProperties prop = new servletProperties();
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
 
@@ -138,13 +141,29 @@ public class yacysearch {
         final boolean rss = EXT.equals("rss");
         final boolean json = EXT.equals("json");
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put(
-            "promoteSearchPageGreeting.homepage",
-            sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
-        prop.put(
-            "promoteSearchPageGreeting.smallImage",
-            sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+        prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
+        prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+        
+        // adding some additional properties needed for the rss feed
+        String hostName = header.get("Host", Domains.LOCALHOST);
+        if ( hostName.indexOf(':', 0) == -1 ) {
+            hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
+        }
+        prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
+        prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
+        prop.put("thisaddress", hostName);
+        final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
+        final boolean indexReceiveGranted =
+            sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true)
+                || sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true)
+                || clustersearch;
+        boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
+        boolean global = post == null || (post.get("resource", "local").equals("global") && p2pmode);
+        boolean stealthmode = p2pmode && !global;
+        prop.put("topmenu_resource-select", !authorized ? 0 : stealthmode ? 2 : global ? 1 : 0);
+        
         if ( post == null || indexSegment == null || env == null || !searchAllowed ) {
+            if (indexSegment == null) ConcurrentLog.info("yacysearch", "indexSegment == null");
             // we create empty entries for template strings
             prop.put("searchagain", "0");
             prop.put("former", "");
@@ -209,18 +228,10 @@ public class yacysearch {
                         ? 100
                         : 5000) : (snippetFetchStrategy != null
                         && snippetFetchStrategy.isAllowedToFetchOnline() ? 20 : 1000),
-                post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
-        int startRecord = post.getInt("startRecord", post.getInt("offset", 0));
+                post.getInt("maximumRecords", post.getInt("count", post.getInt("rows", 10)))); // SRU syntax with old property as alternative
+        int startRecord = post.getInt("startRecord", post.getInt("offset", post.getInt("start", 0)));
 
-        boolean global = post.get("resource", "local").equals("global") && sb.peers.sizeConnected() > 0;
         final boolean indexof = (post != null && post.get("indexof", "").equals("on"));
-
-        final String originalUrlMask;
-        if ( post.containsKey("urlmaskfilter") ) {
-            originalUrlMask = post.get("urlmaskfilter", ".*");
-        } else {
-            originalUrlMask = ".*";
-        }
 
         String prefermask = (post == null) ? "" : post.get("prefermaskfilter", "");
         if ( !prefermask.isEmpty() && prefermask.indexOf(".*", 0) < 0 ) {
@@ -237,12 +248,6 @@ public class yacysearch {
         }
 
         // SEARCH
-        final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
-        final boolean indexReceiveGranted =
-            sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true)
-                || sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true)
-                || clustersearch;
-        global = global && indexReceiveGranted; // if the user does not want indexes from remote peers, it cannot be a global searchnn
         final boolean intranetMode = sb.isIntranetMode() || sb.isAllIPMode();
 
         // increase search statistic counter
@@ -283,11 +288,11 @@ public class yacysearch {
                 snippetFetchStrategy = null;
             }
             block = true;
-            Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: BLACKLISTED CLIENT FROM "
+            ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: BLACKLISTED CLIENT FROM "
                 + client
                 + " gets no permission to search");
         } else if ( Domains.matchesList(client, sb.networkWhitelist) ) {
-            Log.logInfo("LOCAL_SEARCH", "ACCESS CONTROL: WHITELISTED CLIENT FROM "
+            ConcurrentLog.info("LOCAL_SEARCH", "ACCESS CONTROL: WHITELISTED CLIENT FROM "
                 + client
                 + " gets no search restrictions");
         } else if ( !authenticated && !localhostAccess && !intranetMode ) {
@@ -303,7 +308,7 @@ public class yacysearch {
                 if ( global ) {
                     if ( accInTenMinutes >= 60 || accInOneMinute >= 6 || accInThreeSeconds >= 1 ) {
                         global = false;
-                        Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
+                        ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
                             + client
                             + ": "
                             + accInThreeSeconds
@@ -319,7 +324,7 @@ public class yacysearch {
                 if ( snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ) {
                     if ( accInTenMinutes >= 20 || accInOneMinute >= 4 || accInThreeSeconds >= 1 ) {
                         snippetFetchStrategy = CacheStrategy.CACHEONLY;
-                        Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
+                        ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
                             + client
                             + ": "
                             + accInThreeSeconds
@@ -334,7 +339,7 @@ public class yacysearch {
                 // general load protection
                 if ( accInTenMinutes >= 3000 || accInOneMinute >= 600 || accInThreeSeconds >= 60 ) {
                     block = true;
-                    Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
+                    ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
                         + client
                         + ": "
                         + accInThreeSeconds
@@ -350,51 +355,37 @@ public class yacysearch {
 
         if ( !block && (post == null || post.get("cat", "href").equals("href")) ) {
             String urlmask = null;
+            String tld = null;
+            String inlink = null;
 
             // check available memory and clean up if necessary
             if ( !MemoryControl.request(8000000L, false) ) {
-                indexSegment.urlMetadata().clearCache();
+                indexSegment.clearCache();
                 SearchEventCache.cleanupEvents(false);
             }
 
             final RankingProfile ranking = sb.getRanking();
-            final StringBuilder modifier = new StringBuilder(20);
+            final QueryModifier modifier = new QueryModifier();
+            querystring = modifier.parse(querystring);
 
+            // read collection
+            modifier.collection = post.get("collection", "");
+            
+            int stp = querystring.indexOf('*');
+            if (stp >= 0) {
+                querystring = querystring.substring(0, stp) + Segment.catchallString + querystring.substring(stp + 1);
+            }
             if ( querystring.indexOf("/near", 0) >= 0 ) {
                 querystring = querystring.replace("/near", "");
+                ranking.allZero(); // switch off all attributes
                 ranking.coeff_worddistance = RankingProfile.COEFF_MAX;
-                modifier.append("/near ");
+                modifier.add("/near");
             }
             if ( querystring.indexOf("/date", 0) >= 0 ) {
                 querystring = querystring.replace("/date", "");
+                ranking.allZero(); // switch off all attributes
                 ranking.coeff_date = RankingProfile.COEFF_MAX;
-                modifier.append("/date ");
-            }
-            if ( querystring.indexOf("/http", 0) >= 0 ) {
-                querystring = querystring.replace("/http", "");
-                urlmask = "https?://.*";
-                modifier.append("/http ");
-            }
-            if ( querystring.indexOf("/https", 0) >= 0 ) {
-                querystring = querystring.replace("/https", "");
-                urlmask = "https?://.*";
-                modifier.append("/https ");
-            }
-            if ( querystring.indexOf("/ftp", 0) >= 0 ) {
-                querystring = querystring.replace("/ftp", "");
-                urlmask = "ftp://.*";
-                modifier.append("/ftp ");
-            }
-            if ( querystring.indexOf("/smb", 0) >= 0 ) {
-                querystring = querystring.replace("/smb", "");
-                urlmask = "smb://.*";
-                modifier.append("/smb ");
-            }
-
-            if ( querystring.indexOf("/file", 0) >= 0 ) {
-                querystring = querystring.replace("/file", "");
-                urlmask = "file://.*";
-                modifier.append("/file ");
+                modifier.add("/date");
             }
 
             if ( querystring.indexOf("/location", 0) >= 0 ) {
@@ -403,7 +394,7 @@ public class yacysearch {
                     constraint = new Bitfield(4);
                 }
                 constraint.set(Condenser.flag_cat_haslocation, true);
-                modifier.append("/location ");
+                modifier.add("/location");
             }
 
             final int lrp = querystring.indexOf("/language/", 0);
@@ -414,42 +405,32 @@ public class yacysearch {
                 }
                 querystring = querystring.replace("/language/" + language, "");
                 language = language.toLowerCase();
-                modifier.append("/language/").append(language).append(' ');
+                modifier.add("/language/" + language);
             }
 
-            final int inurl = querystring.indexOf("inurl:", 0);
-            if ( inurl >= 0 ) {
-                int ftb = querystring.indexOf(' ', inurl);
+            final int inurlp = querystring.indexOf("inurl:", 0);
+            if ( inurlp >= 0 ) {
+                int ftb = querystring.indexOf(' ', inurlp);
                 if ( ftb == -1 ) {
                     ftb = querystring.length();
                 }
-                final String urlstr = querystring.substring(inurl + 6, ftb);
+                final String urlstr = querystring.substring(inurlp + 6, ftb);
                 querystring = querystring.replace("inurl:" + urlstr, "");
                 if ( !urlstr.isEmpty() ) {
                     urlmask = urlmask == null ? ".*" + urlstr + ".*" : urlmask + urlstr + ".*";
                 }
-                modifier.append("inurl:").append(urlstr).append(' ');
+                modifier.add("inurl:" + urlstr);
             }
 
-            final int filetype = querystring.indexOf("filetype:", 0);
-            if ( filetype >= 0 ) {
-                int ftb = querystring.indexOf(' ', filetype);
+            final int inlinkp = querystring.indexOf("inlink:", 0);
+            if ( inlinkp >= 0 ) {
+                int ftb = querystring.indexOf(' ', inlinkp);
                 if ( ftb == -1 ) {
                     ftb = querystring.length();
                 }
-                String ft = querystring.substring(filetype + 9, ftb);
-                querystring = querystring.replace("filetype:" + ft, "");
-                while ( !ft.isEmpty() && ft.charAt(0) == '.' ) {
-                    ft = ft.substring(1);
-                }
-                if ( !ft.isEmpty() ) {
-                    if ( urlmask == null ) {
-                        urlmask = ".*\\." + ft;
-                    } else {
-                        urlmask = urlmask + ".*\\." + ft;
-                    }
-                }
-                modifier.append("filetype:").append(ft).append(' ');
+                inlink = querystring.substring(inlinkp + 7, ftb);
+                querystring = querystring.replace("inlink:" + inlink, "");
+                modifier.add("inlink:" + inlink);
             }
 
             int voc = 0;
@@ -464,7 +445,7 @@ public class yacysearch {
                     vocabulary = querystring.substring(voc, ve);
                     querystring = querystring.substring(0, voc) + querystring.substring(ve);
                 }
-                modifier.append(vocabulary).append(' ');
+                modifier.add(vocabulary);
                 vocabulary = vocabulary.substring(12);
                 int p = vocabulary.indexOf('/');
                 if (p > 0) {
@@ -492,100 +473,36 @@ public class yacysearch {
                     lat = Double.parseDouble(sp[0]);
                     lon = Double.parseDouble(sp[1]);
                     rad = Double.parseDouble(sp[2]);
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     lon = 0.0d; lat = 0.0d; rad = 0.0d;
                 }
-            }
-
-            String tenant = null;
-            if ( post.containsKey("tenant") ) {
-                tenant = post.get("tenant");
-                if ( tenant != null && tenant.isEmpty() ) {
-                    tenant = null;
-                }
-                if ( tenant != null ) {
-                    if ( urlmask == null ) {
-                        urlmask = ".*" + tenant + ".*";
-                    } else {
-                        urlmask = ".*" + tenant + urlmask;
-                    }
-                }
-            }
-
-            final int site = querystring.indexOf("site:", 0);
-            String sitehash = null;
-            String sitehost = null;
-            if ( site >= 0 ) {
-                int ftb = querystring.indexOf(' ', site);
-                if ( ftb == -1 ) {
-                    ftb = querystring.length();
-                }
-                sitehost = querystring.substring(site + 5, ftb);
-                querystring = querystring.replace("site:" + sitehost, "");
-                while ( sitehost.length() > 0 && sitehost.charAt(0) == '.' ) {
-                    sitehost = sitehost.substring(1);
-                }
-                while ( sitehost.endsWith(".") ) {
-                    sitehost = sitehost.substring(0, sitehost.length() - 1);
-                }
-                sitehash = DigestURI.hosthash(sitehost);
-                modifier.append("site:").append(sitehost).append(' ');
             }
 
             final int heuristicBlekko = querystring.indexOf("/heuristic/blekko", 0);
             if ( heuristicBlekko >= 0 ) {
                 querystring = querystring.replace("/heuristic/blekko", "");
-                modifier.append("/heuristic/blekko ");
+                modifier.add("/heuristic/blekko");
+            }
+            
+            final int heuristicTwitter = querystring.indexOf("/heuristic/twitter", 0);
+            if ( heuristicTwitter >= 0 ) {
+                querystring = querystring.replace("/heuristic/twitter", "");
+                modifier.add("/heuristic/twitter");
             }
 
-            final int authori = querystring.indexOf("author:", 0);
-            String authorhash = null;
-            if ( authori >= 0 ) {
-                // check if the author was given with single quotes or without
-                final boolean quotes = (querystring.charAt(authori + 7) == '(');
-                String author;
-                if ( quotes ) {
-                    int ftb = querystring.indexOf(')', authori + 8);
-                    if ( ftb == -1 ) {
-                        ftb = querystring.length() + 1;
-                    }
-                    author = querystring.substring(authori + 8, ftb);
-                    querystring = querystring.replace("author:(" + author + ")", "");
-                    modifier.append("author:(").append(author).append(") ");
-                } else {
-                    int ftb = querystring.indexOf(' ', authori);
-                    if ( ftb == -1 ) {
-                        ftb = querystring.length();
-                    }
-                    author = querystring.substring(authori + 7, ftb);
-                    querystring = querystring.replace("author:" + author, "");
-                    modifier.append("author:").append(author).append(' ');
+            final int tldp = querystring.indexOf("tld:", 0);
+            if (tldp >= 0) {
+                int ftb = querystring.indexOf(' ', tldp);
+                if (ftb == -1) ftb = querystring.length();
+                tld = querystring.substring(tldp + 4, ftb);
+                querystring = querystring.replace("tld:" + tld, "");
+                modifier.add("tld:" + tld);
+                while ( tld.length() > 0 && tld.charAt(0) == '.' ) {
+                    tld = tld.substring(1);
                 }
-                authorhash = ASCII.String(Word.word2hash(author));
+                if (tld.length() == 0) tld = null;
             }
-
-            final int tld = querystring.indexOf("tld:", 0);
-            if ( tld >= 0 ) {
-                int ftb = querystring.indexOf(' ', tld);
-                if ( ftb == -1 ) {
-                    ftb = querystring.length();
-                }
-                String domain = querystring.substring(tld + 4, ftb);
-                querystring = querystring.replace("tld:" + domain, "");
-                modifier.append("tld:").append(domain).append(' ');
-                while ( domain.length() > 0 && domain.charAt(0) == '.' ) {
-                    domain = domain.substring(1);
-                }
-                if ( domain.indexOf('.', 0) < 0 ) {
-                    domain = "\\." + domain;
-                } // is tld
-                if ( domain.length() > 0 ) {
-                    urlmask = "[a-zA-Z]*://[^/]*" + domain + "/.*" + ((urlmask != null) ? urlmask : "");
-                }
-            }
-            if ( urlmask == null || urlmask.isEmpty() ) {
-                urlmask = originalUrlMask;
-            } //if no urlmask was given
+            if (urlmask == null || urlmask.isEmpty()) urlmask = ".*"; //if no urlmask was given
 
             // read the language from the language-restrict option 'lr'
             // if no one is given, use the user agent or the system language as default
@@ -605,19 +522,14 @@ public class yacysearch {
                 }
             }
 
-            // navigation
-            final String navigation =
-                (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "");
-
             // the query
-            final Collection<String>[] query = QueryParams.cleanQuery(querystring.trim()); // converts also umlaute
-
-            final int maxDistance = (querystring.indexOf('"', 0) >= 0) ? query.length - 1 : Integer.MAX_VALUE;
+            final QueryGoal qg = new QueryGoal(originalquerystring, querystring.trim());
+            final int maxDistance = (querystring.indexOf('"', 0) >= 0) ? qg.getIncludeHashes().size() - 1 : Integer.MAX_VALUE;
 
             // filter out stopwords
-            final SortedSet<String> filtered = SetTools.joinConstructiveByTest(query[0], Switchboard.stopwords);
+            final SortedSet<String> filtered = SetTools.joinConstructiveByTest(qg.getIncludeStrings(), Switchboard.stopwords); //find matching stopwords
             if ( !filtered.isEmpty() ) {
-                SetTools.excludeDestructiveByTestSmallInLarge(query[0], Switchboard.stopwords);
+                SetTools.excludeDestructiveByTestSmallInLarge(qg.getIncludeStrings(), filtered); //remove stopwords
             }
 
             // if a minus-button was hit, remove a special reference first
@@ -630,7 +542,7 @@ public class yacysearch {
 
                     // delete the index entry locally
                     final String delHash = post.get("deleteref", ""); // urlhash
-                    indexSegment.termIndex().remove(Word.words2hashesHandles(query[0]), delHash.getBytes());
+                    if (indexSegment.termIndex() != null) indexSegment.termIndex().remove(qg.getIncludeHashes(), delHash.getBytes());
 
                     // make new news message with negative voting
                     if ( !sb.isRobinsonMode() ) {
@@ -646,8 +558,8 @@ public class yacysearch {
 
                     // delete the search history since this still shows the entry
                     SearchEventCache.delete(delHash);
-                } catch ( final IOException e ) {
-                    Log.logException(e);
+                } catch (final IOException e ) {
+                    ConcurrentLog.logException(e);
                 }
             }
 
@@ -658,7 +570,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                final URIMetadataRow urlentry = indexSegment.urlMetadata().load(UTF8.getBytes(recommendHash));
+                final URIMetadataNode urlentry = indexSegment.fulltext().getMetadata(UTF8.getBytes(recommendHash));
                 if ( urlentry != null ) {
                     Document[] documents = null;
                     try {
@@ -666,15 +578,14 @@ public class yacysearch {
                             sb.loader.loadDocuments(
                                 sb.loader.request(urlentry.url(), true, false),
                                 CacheStrategy.IFEXIST,
-                                5000,
-                                Integer.MAX_VALUE);
-                    } catch ( final IOException e ) {
-                    } catch ( final Parser.Failure e ) {
+                                Integer.MAX_VALUE, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent);
+                    } catch (final IOException e ) {
+                    } catch (final Parser.Failure e ) {
                     }
                     if ( documents != null ) {
                         // create a news message
                         final Map<String, String> map = new HashMap<String, String>();
-                        map.put("url", urlentry.url().toNormalform(false, true).replace(',', '|'));
+                        map.put("url", urlentry.url().toNormalform(true).replace(',', '|'));
                         map.put("title", urlentry.dc_title().replace(',', ' '));
                         map.put("description", documents[0].dc_title().replace(',', ' '));
                         map.put("author", documents[0].dc_creator());
@@ -695,30 +606,27 @@ public class yacysearch {
                     return prop;
                 }
                 final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
-                final URIMetadataRow urlentry = indexSegment.urlMetadata().load(UTF8.getBytes(bookmarkHash));
-                if ( urlentry != null ) {
+                final DigestURI url = indexSegment.fulltext().getURL(UTF8.getBytes(bookmarkHash));
+                if ( url != null ) {
                     try {
                         sb.tables.bookmarks.createBookmark(
                             sb.loader,
-                            urlentry.url(),
+                            url,
+                            ClientIdentification.yacyInternetCrawlerAgent,
                             YMarkTables.USER_ADMIN,
                             true,
                             "searchresult",
                             "/search");
-                    } catch ( final Throwable e ) {
+                    } catch (final Throwable e ) {
                     }
                 }
             }
 
-            // do the search
-            final HandleSet queryHashes = Word.words2hashesHandles(query[0]);
-            final Pattern snippetPattern = QueryParams.stringSearchPattern(originalquerystring);
-
             // check filters
             try {
                 Pattern.compile(urlmask);
-            } catch ( final PatternSyntaxException ex ) {
-                Log.logWarning("SEARCH", "Illegal URL mask, not a valid regex: " + urlmask);
+            } catch (final PatternSyntaxException ex ) {
+                SearchEvent.log.warn("Illegal URL mask, not a valid regex: " + urlmask);
                 prop.put("urlmaskerror", 1);
                 prop.putHTML("urlmaskerror_urlmask", urlmask);
                 urlmask = ".*";
@@ -726,41 +634,31 @@ public class yacysearch {
 
             try {
                 Pattern.compile(prefermask);
-            } catch ( final PatternSyntaxException ex ) {
-                Log.logWarning("SEARCH", "Illegal prefer mask, not a valid regex: " + prefermask);
+            } catch (final PatternSyntaxException ex ) {
+                SearchEvent.log.warn("Illegal prefer mask, not a valid regex: " + prefermask);
                 prop.put("prefermaskerror", 1);
                 prop.putHTML("prefermaskerror_prefermask", prefermask);
                 prefermask = "";
             }
 
+            // do the search
             final QueryParams theQuery =
                 new QueryParams(
-                    originalquerystring,
-                    queryHashes,
-                    Word.words2hashesHandles(query[1]),
-                    Word.words2hashesHandles(query[2]),
-                    snippetPattern,
-                    tenant,
-                    modifier.toString().trim(),
+                    qg,
+                    modifier,
                     maxDistance,
                     prefermask,
                     contentdom,
                     language,
                     metatags,
-                    navigation,
                     snippetFetchStrategy,
                     itemsPerPage,
                     startRecord,
-                    urlmask,
-                    clustersearch && global ? QueryParams.Searchdom.CLUSTER : (global && indexReceiveGranted
-                        ? QueryParams.Searchdom.GLOBAL
-                        : QueryParams.Searchdom.LOCAL),
-                    20,
+                    urlmask, tld, inlink,
+                    clustersearch && global ? QueryParams.Searchdom.CLUSTER : (global && indexReceiveGranted ? QueryParams.Searchdom.GLOBAL : QueryParams.Searchdom.LOCAL),
                     constraint,
                     true,
-                    sitehash,
                     DigestURI.hosthashess(sb.getConfig("search.excludehosth", "")),
-                    authorhash,
                     DigestURI.TLD_any_zone_filter,
                     client,
                     authenticated,
@@ -770,11 +668,12 @@ public class yacysearch {
                     sb.getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, false)
                         && sb.getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false)
                         && sb.peers.mySeed().getFlagAcceptRemoteIndex(),
+                    false,
                     lat, lon, rad);
             EventTracker.delete(EventTracker.EClass.SEARCH);
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
                 theQuery.id(true),
-                SearchEvent.Type.INITIALIZATION,
+                SearchEventType.INITIALIZATION,
                 "",
                 0,
                 0), false);
@@ -783,22 +682,22 @@ public class yacysearch {
             sb.intermissionAllThreads(3000);
 
             // filter out words that appear in bluelist
-            theQuery.filterOut(Switchboard.blueList);
+            theQuery.getQueryGoal().filterOut(Switchboard.blueList);
 
             // log
-            Log.logInfo(
+            ConcurrentLog.info(
                 "LOCAL_SEARCH",
                 "INIT WORD SEARCH: "
-                    + theQuery.queryString
+                    + theQuery.getQueryGoal().getOriginalQueryString(false)
                     + ":"
-                    + QueryParams.hashSet2hashString(theQuery.queryHashes)
+                    + QueryParams.hashSet2hashString(theQuery.getQueryGoal().getIncludeHashes())
                     + " - "
                     + theQuery.neededResults()
                     + " links to be computed, "
                     + theQuery.itemsPerPage()
                     + " lines to be displayed");
             EventChannel.channels(EventChannel.LOCALSEARCH).addMessage(
-                new RSSMessage("Local Search Request", theQuery.queryString, ""));
+                new RSSMessage("Local Search Request", theQuery.getQueryGoal().getOriginalQueryString(false), ""));
             final long timestamp = System.currentTimeMillis();
 
             // create a new search event
@@ -824,51 +723,49 @@ public class yacysearch {
                     (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
 
             if ( startRecord == 0 ) {
-                if ( sitehost != null && sb.getConfigBool("heuristic.site", false) && authenticated ) {
-                    sb.heuristicSite(theSearch, sitehost);
+                if ( modifier.sitehost != null && sb.getConfigBool(SwitchboardConstants.HEURISTIC_SITE, false) && authenticated && !stealthmode) {
+                    sb.heuristicSite(theSearch, modifier.sitehost);
                 }
-                if ( (heuristicBlekko >= 0 || sb.getConfigBool("heuristic.blekko", false)) && authenticated ) {
+                if ( (heuristicBlekko >= 0 || sb.getConfigBool(SwitchboardConstants.HEURISTIC_BLEKKO, false)) && authenticated && !stealthmode ) {
                     sb.heuristicRSS("http://blekko.com/ws/$+/rss", theSearch, "blekko");
+                }
+                if ( (heuristicTwitter >= 0 || sb.getConfigBool(SwitchboardConstants.HEURISTIC_TWITTER, false)) && authenticated && !stealthmode ) {
+                    sb.heuristicRSS("http://search.twitter.com/search.rss?rpp=50&q=$", theSearch, "twitter");
+                }
+                if (sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, false) && authenticated && !stealthmode) {
+                    OpenSearchConnector.query(sb, theSearch);
                 }
             }
 
             // log
-            Log.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: "
-                + theQuery.queryString
+            ConcurrentLog.info("LOCAL_SEARCH", "EXIT WORD SEARCH: "
+                + theQuery.getQueryGoal().getOriginalQueryString(false)
                 + " - "
-                + "local-unfiltered("
-                + theSearch.getRankingResult().getLocalIndexCount()
-                + "), "
-                + "local_miss("
-                + theSearch.getRankingResult().getMissCount()
-                + "), "
-                + "local_sortout("
-                + theSearch.getRankingResult().getSortOutCount()
-                + "), "
-                + "remote("
-                + theSearch.getRankingResult().getRemoteResourceSize()
-                + ") links found, "
+                + "local_rwi_available(" + theSearch.local_rwi_available.get() + "), "
+                + "local_rwi_stored(" + theSearch.local_rwi_stored.get() + "), "
+                + "remote_rwi_available(" + theSearch.remote_rwi_available.get() + "), "
+                + "remote_rwi_stored(" + theSearch.remote_rwi_stored.get() + "), "
+                + "remote_rwi_peerCount(" + theSearch.remote_rwi_peerCount.get() + "), "
+                + "local_solr_available(" + theSearch.local_solr_available.get() + "), "
+                + "local_solr_stored(" + theSearch.local_solr_stored.get() + "), "
+                + "remote_solr_available(" + theSearch.remote_solr_available.get() + "), "
+                + "remote_solr_stored(" + theSearch.remote_solr_stored.get() + "), "
+                + "remote_solr_peerCount(" + theSearch.remote_solr_peerCount.get() + "), "
                 + (System.currentTimeMillis() - timestamp)
                 + " ms");
 
             // prepare search statistics
-            theQuery.resultcount =
-                theSearch.getRankingResult().getLocalIndexCount()
-                    - theSearch.getRankingResult().getMissCount()
-                    - theSearch.getRankingResult().getSortOutCount()
-                    + theSearch.getRankingResult().getRemoteIndexCount();
             theQuery.searchtime = System.currentTimeMillis() - timestamp;
-            theQuery.urlretrievaltime = theSearch.result().getURLRetrievalTime();
-            theQuery.snippetcomputationtime = theSearch.result().getSnippetComputationTime();
-            AccessTracker.add(AccessTracker.Location.local, theQuery);
+            theQuery.urlretrievaltime = theSearch.getURLRetrievalTime();
+            theQuery.snippetcomputationtime = theSearch.getSnippetComputationTime();
+            AccessTracker.add(AccessTracker.Location.local, theQuery, theSearch.getResultCount());
 
             // check suggestions
             final int meanMax = (post != null) ? post.getInt("meanCount", 0) : 0;
 
             prop.put("meanCount", meanMax);
-            if ( meanMax > 0 && !json && !rss ) {
-                final DidYouMean didYouMean =
-                    new DidYouMean(indexSegment.termIndex(), new StringBuilder(querystring));
+            if ( meanMax > 0 && !json && !rss && sb.index.connectedRWI()) {
+                final DidYouMean didYouMean = new DidYouMean(indexSegment, new StringBuilder(querystring));
                 final Iterator<StringBuilder> meanIt = didYouMean.getSuggestions(100, 5).iterator();
                 int meanCount = 0;
                 String suggestion;
@@ -883,14 +780,17 @@ public class yacysearch {
                                     "html",
                                     0,
                                     theQuery,
-                                    suggestion,
-                                    originalUrlMask.toString(),
-                                    theQuery.navigators).toString());
+                                    suggestion).toString());
                             prop.put("didYouMean_suggestions_" + meanCount + "_sep", "|");
                             meanCount++;
-                        } catch (ConcurrentModificationException e) {break meanCollect;}
+                        } catch (final ConcurrentModificationException e) {
+                            ConcurrentLog.logException(e);
+                            break meanCollect;
+                        }
                     }
-                } catch (ConcurrentModificationException e) {}
+                } catch (final ConcurrentModificationException e) {
+                    ConcurrentLog.logException(e);
+                }
                 prop.put("didYouMean_suggestions_" + (meanCount - 1) + "_sep", "");
                 prop.put("didYouMean", meanCount > 0 ? 1 : 0);
                 prop.put("didYouMean_suggestions", meanCount);
@@ -934,41 +834,19 @@ public class yacysearch {
                 if ( MemoryControl.shortStatus() ) {
                     sb.localSearchTracker.clear();
                 }
-            } catch ( final Exception e ) {
-                Log.logException(e);
+            } catch (final Exception e ) {
+                ConcurrentLog.logException(e);
             }
 
-            final int indexcount =
-                theSearch.getRankingResult().getLocalIndexCount()
-                    - theSearch.getRankingResult().getMissCount()
-                    - theSearch.getRankingResult().getSortOutCount()
-                    + theSearch.getRankingResult().getRemoteIndexCount();
             prop.put("num-results_offset", startRecord == 0 ? 0 : startRecord + 1);
-            prop.put("num-results_itemscount", Formatter.number(
-                startRecord + theSearch.getQuery().itemsPerPage > indexcount ? startRecord
-                    + indexcount
-                    % theSearch.getQuery().itemsPerPage : startRecord + theSearch.getQuery().itemsPerPage,
-                true));
-            prop.put("num-results_itemsPerPage", itemsPerPage);
-            prop.put("num-results_totalcount", Formatter.number(indexcount, true));
-            prop.put("num-results_globalresults", global && (indexReceiveGranted || clustersearch)
-                ? "1"
-                : "0");
-            prop.put(
-                "num-results_globalresults_localResourceSize",
-                Formatter.number(theSearch.getRankingResult().getLocalIndexCount(), true));
-            prop.put(
-                "num-results_globalresults_localMissCount",
-                Formatter.number(theSearch.getRankingResult().getMissCount(), true));
-            prop.put(
-                "num-results_globalresults_remoteResourceSize",
-                Formatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
-            prop.put(
-                "num-results_globalresults_remoteIndexCount",
-                Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
-            prop.put(
-                "num-results_globalresults_remotePeerCount",
-                Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
+            prop.put("num-results_itemscount", Formatter.number(startRecord + theSearch.query.itemsPerPage > theSearch.getResultCount() ? startRecord + theSearch.getResultCount() % theSearch.query.itemsPerPage : startRecord + theSearch.query.itemsPerPage, true));
+            prop.put("num-results_itemsPerPage", Formatter.number(itemsPerPage));
+            prop.put("num-results_totalcount", Formatter.number(theSearch.getResultCount()));
+            prop.put("num-results_globalresults", global && (indexReceiveGranted || clustersearch) ? "1" : "0");
+            prop.put("num-results_globalresults_localResourceSize", Formatter.number(theSearch.local_rwi_stored.get() + theSearch.local_solr_stored.get(), true));
+            prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get(), true));
+            prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
+            prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
 
             // compose page navigation
             final StringBuilder resnav = new StringBuilder(200);
@@ -978,17 +856,11 @@ public class yacysearch {
                     .append("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");
             } else {
                 resnav.append("<a id=\"prevpage\" href=\"");
-                resnav.append(QueryParams.navurl(
-                    "html",
-                    thispage - 1,
-                    theQuery,
-                    null,
-                    originalUrlMask,
-                    navigation).toString());
+                resnav.append(QueryParams.navurl("html", thispage - 1, theQuery, null).toString());
                 resnav
                     .append("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
             }
-            final int numberofpages = Math.min(10, 1 + ((indexcount - 1) / theQuery.itemsPerPage()));
+            final int numberofpages = Math.min(10, 1 + ((theSearch.getResultCount() - 1) / theQuery.itemsPerPage()));
 
             for ( int i = 0; i < numberofpages; i++ ) {
                 if ( i == thispage ) {
@@ -999,9 +871,7 @@ public class yacysearch {
                     resnav.append("\" width=\"16\" height=\"16\" />&nbsp;");
                 } else {
                     resnav.append("<a href=\"");
-                    resnav.append(QueryParams
-                        .navurl("html", i, theQuery, null, originalUrlMask, navigation)
-                        .toString());
+                    resnav.append(QueryParams.navurl("html", i, theQuery, null).toString());
                     resnav.append("\"><img src=\"env/grafics/navd");
                     resnav.append(i + 1);
                     resnav.append(".gif\" alt=\"page");
@@ -1014,19 +884,12 @@ public class yacysearch {
                     .append("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" />");
             } else {
                 resnav.append("<a id=\"nextpage\" href=\"");
-                resnav.append(QueryParams.navurl(
-                    "html",
-                    thispage + 1,
-                    theQuery,
-                    null,
-                    originalUrlMask,
-                    navigation).toString());
-                resnav
-                    .append("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
+                resnav.append(QueryParams.navurl("html", thispage + 1, theQuery, null).toString());
+                resnav.append("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
             }
             final String resnavs = resnav.toString();
             prop.put("num-results_resnav", resnavs);
-            prop.put("pageNavBottom", (indexcount - startRecord > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
+            prop.put("pageNavBottom", (theSearch.getResultCount() - startRecord > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
             prop.put("pageNavBottom_resnav", resnavs);
 
             // generate the search result lines; the content will be produced by another servlet
@@ -1064,14 +927,6 @@ public class yacysearch {
             prop.put("cat", "href");
             prop.put("depth", "0");
 
-            // adding some additional properties needed for the rss feed
-            String hostName = header.get("Host", Domains.LOCALHOST);
-            if ( hostName.indexOf(':', 0) == -1 ) {
-                hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
-            }
-            prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
-            prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
-            prop.put("thisaddress", hostName);
         }
 
         prop.put("searchagain", global ? "1" : "0");
@@ -1079,7 +934,6 @@ public class yacysearch {
         prop.put("count", itemsPerPage);
         prop.put("offset", startRecord);
         prop.put("resource", global ? "global" : "local");
-        prop.putHTML("urlmaskfilter", originalUrlMask);
         prop.putHTML("prefermaskfilter", prefermask);
         prop.put("indexof", (indexof) ? "on" : "off");
         prop.put("constraint", (constraint == null) ? "" : constraint.exportB64());

@@ -43,14 +43,18 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.WordCache;
+import net.yacy.cora.geo.GeonamesLocation;
+import net.yacy.cora.geo.OpenGeoDBLocation;
+import net.yacy.cora.geo.OverarchingLocation;
+import net.yacy.cora.language.synonyms.AutotaggingLibrary;
+import net.yacy.cora.language.synonyms.SynonymLibrary;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
 import net.yacy.cora.storage.Files;
-import net.yacy.document.geolocation.GeonamesLocation;
-import net.yacy.document.geolocation.OpenGeoDBLocation;
-import net.yacy.document.geolocation.OverarchingLocation;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.retrieval.URLRewriterLibrary;
 import net.yacy.kelondro.util.FileUtils;
 
 import com.hp.hpl.jena.rdf.model.Resource;
@@ -60,19 +64,21 @@ public class LibraryProvider {
     public static final String path_to_source_dictionaries = "source";
     public static final String path_to_did_you_mean_dictionaries = "didyoumean";
     public static final String path_to_autotagging_dictionaries = "autotagging";
+    public static final String path_to_synonym_dictionaries = "synonyms";
+    public static final String path_to_rewriter_dictionaries = "rewriter";
 
     public static final String disabledExtension = ".disabled";
 
     public static WordCache dymLib = new WordCache(null);
-    public static Autotagging autotagging = null;
+    public static AutotaggingLibrary autotagging = null;
+    public static SynonymLibrary synonyms = null;
+    public static URLRewriterLibrary urlRewriter = null;
     public static OverarchingLocation geoLoc = new OverarchingLocation();
     private static File dictSource = null;
     private static File dictRoot = null;
 
     public static enum Dictionary {
-        GEODB0(
-            "geo0",
-            "http://downloads.sourceforge.net/project/opengeodb/Data/0.2.5a/opengeodb-0.2.5a-UTF8-sql.gz" ),
+        GEODB0( "geo0", "http://downloads.sourceforge.net/project/opengeodb/Data/0.2.5a/opengeodb-0.2.5a-UTF8-sql.gz" ),
         GEODB1( "geo1", "http://fa-technik.adfc.de/code/opengeodb/dump/opengeodb-02624_2011-10-17.sql.gz" ),
         GEON0( "geon0", "http://download.geonames.org/export/dump/cities1000.zip" ),
         GEON1( "geon1", "http://download.geonames.org/export/dump/cities5000.zip" ),
@@ -84,8 +90,8 @@ public class LibraryProvider {
 
         private Dictionary(final String nickname, final String url) {
             try {
-                this.filename = new MultiProtocolURI(url).getFileName();
-            } catch ( final MalformedURLException e ) {
+                this.filename = (new MultiProtocolURI(url)).getFileName();
+            } catch (final MalformedURLException e ) {
                 assert false;
             }
             this.nickname = nickname;
@@ -120,6 +126,8 @@ public class LibraryProvider {
         initAutotagging();
         activateDeReWo();
         initDidYouMean();
+        initSynonyms();
+        initRewriter();
         integrateOpenGeoDB();
         integrateGeonames0(-1);
         integrateGeonames1(-1);
@@ -168,8 +176,7 @@ public class LibraryProvider {
             geoLoc.activateLocation(Dictionary.GEON2.nickname, new GeonamesLocation(geon, dymLib, minPopulation));
             return;
         }
-    }
-
+    }    
     public static void initDidYouMean() {
         final File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
         if ( !dymDict.exists() ) {
@@ -183,9 +190,22 @@ public class LibraryProvider {
         if ( !autotaggingPath.exists() ) {
             autotaggingPath.mkdirs();
         }
-        autotagging = new Autotagging(autotaggingPath);
+        autotagging = new AutotaggingLibrary(autotaggingPath);
     }
-
+    public static void initSynonyms() {
+        final File synonymPath = new File(dictRoot, path_to_synonym_dictionaries);
+        if ( !synonymPath.exists() ) {
+            synonymPath.mkdirs();
+        }
+        synonyms = new SynonymLibrary(synonymPath);
+    }
+    public static void initRewriter() {
+        final File rewriterPath = new File(dictRoot, path_to_rewriter_dictionaries);
+        if ( !rewriterPath.exists() ) {
+            rewriterPath.mkdirs();
+        }
+        urlRewriter = new URLRewriterLibrary(rewriterPath);
+    }
     public static void activateDeReWo() {
         // translate input files (once..)
         final File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
@@ -199,8 +219,8 @@ public class LibraryProvider {
             final ArrayList<String> derewo = loadDeReWo(derewoInput, true);
             try {
                 writeWords(derewoOutput, derewo);
-            } catch ( final IOException e ) {
-                Log.logException(e);
+            } catch (final IOException e ) {
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -223,15 +243,15 @@ public class LibraryProvider {
         if ( dictInput.exists() ) {
             try {
             	JenaTripleStore.LoadNTriples(Files.read(dictInput));
-            } catch ( final IOException e ) {
-                Log.logException(e);
+            } catch (final IOException e ) {
+                ConcurrentLog.logException(e);
             }
         }
         // read the triplestore and generate a vocabulary
         Map<String, SOTuple> map = new HashMap<String, SOTuple>();
-        Log.logInfo("LibraryProvider", "retrieving PND data from triplestore");
+        ConcurrentLog.info("LibraryProvider", "retrieving PND data from triplestore");
         Iterator<Resource> i = JenaTripleStore.getSubjects("http://dbpedia.org/ontology/individualisedPnd");
-        Log.logInfo("LibraryProvider", "creating vocabulary map from PND triplestore");
+        ConcurrentLog.info("LibraryProvider", "creating vocabulary map from PND triplestore");
         String objectspace = "";
         while (i.hasNext()) {
         	Resource resource = i.next();
@@ -245,18 +265,18 @@ public class LibraryProvider {
         	p = term.indexOf('(');
         	if (p >= 0) term = term.substring(0, p);
         	term = term.replaceAll("_", " ").trim();
-        	if (term.length() == 0) continue;
+        	if (term.isEmpty()) continue;
         	if (term.indexOf(' ') < 0) continue; // accept only names that have at least two parts
 
         	// store the term into the vocabulary map
         	map.put(term, new SOTuple(Tagging.normalizeTerm(term), subject));
         }
-        if (map.size() > 0) try {
-            Log.logInfo("LibraryProvider", "adding vocabulary to autotagging");
+        if (!map.isEmpty()) try {
+            ConcurrentLog.info("LibraryProvider", "adding vocabulary to autotagging");
 			Tagging pndVoc = new Tagging("Persons", null, objectspace, map);
 			autotagging.addVocabulary(pndVoc);
-            Log.logInfo("LibraryProvider", "added pnd vocabulary to autotagging");
-		} catch (IOException e) {
+            ConcurrentLog.info("LibraryProvider", "added pnd vocabulary to autotagging");
+		} catch (final IOException e) {
 		}
     }
 
@@ -315,11 +335,11 @@ public class LibraryProvider {
         try {
             final ZipFile zip = new ZipFile(file);
             derewoTxtEntry = zip.getInputStream(zip.getEntry("derewo-v-100000t-2009-04-30-0.1"));
-        } catch ( final ZipException e ) {
-            Log.logException(e);
+        } catch (final ZipException e ) {
+            ConcurrentLog.logException(e);
             return list;
-        } catch ( final IOException e ) {
-            Log.logException(e);
+        } catch (final IOException e ) {
+            ConcurrentLog.logException(e);
             return list;
         }
 
@@ -358,13 +378,13 @@ public class LibraryProvider {
                 }
             }
             reader.close();
-        } catch ( final IOException e ) {
-            Log.logException(e);
+        } catch (final IOException e ) {
+            ConcurrentLog.logException(e);
         } finally {
             if ( reader != null ) {
                 try {
                     reader.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
         }

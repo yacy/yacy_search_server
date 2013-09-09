@@ -27,13 +27,13 @@ package net.yacy.kelondro.workflow;
 import java.net.SocketException;
 
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 
 
 public abstract class AbstractBusyThread extends AbstractThread implements BusyThread {
 
-    private final static Log log = new Log("BusyThread");
+    private final static ConcurrentLog log = new ConcurrentLog("BusyThread");
     private long startup = 0, intermission = 0, idlePause = 0, busyPause = 0;
     private long idletime = 0, memprereq = 0;
     private long idleCycles = 0, busyCycles = 0, outofmemoryCycles = 0;
@@ -53,10 +53,6 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
         this.minBusySleep = minBusySleep;
         this.maxBusySleep = maxBusySleep;
     }
-    
-    protected final void announceMoreSleepTime(final long millis) {
-        this.idletime += millis;
-    }
 
     public final void setStartupSleep(final long milliseconds) {
         // sets a sleep time before execution of the job-loop
@@ -69,9 +65,17 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
         return idlePause;
     }
     
+    public final long getIdleSleep() {
+        return idlePause;
+    }
+    
     public final long setBusySleep(final long milliseconds) {
         // sets a sleep time for pauses between two jobs
         busyPause = Math.min(this.maxBusySleep, Math.max(this.minBusySleep, milliseconds));
+        return busyPause;
+    }
+    
+    public final long getBusySleep() {
         return busyPause;
     }
     
@@ -183,14 +187,14 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
                 idletime += System.currentTimeMillis() - timestamp;
             } catch (final SocketException e) {
                 // in case that a socket is interrupted, this method must die silently (shutdown)
-                log.logFine("socket-job interrupted: " + e.getMessage());
+                log.fine("socket-job interrupted: " + e.getMessage());
             } catch (final Exception e) {
                 // handle exceptions: thread must not die on any unexpected exceptions
                 // if the exception is too bad it should call terminate()
                 this.jobExceptionHandler(e);
                 busyCycles++;
             } else {
-                log.logWarning("Thread '" + this.getName() + "' runs short memory cycle. Free mem: " +
+                log.warn("Thread '" + this.getName() + "' runs short memory cycle. Free mem: " +
                         (MemoryControl.available() / 1024) + " KB, needed: " + (memprereq / 1024) + " KB");
                 // omit job, not enough memory
                 // process scheduled pause
@@ -208,17 +212,11 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
 
     // ratzen: German for to sleep (coll.)
     private void ratz(final long millis) {
-        try {/*
-            if (this.syncObject != null) {
-                synchronized (this.syncObject) {
-                    this.syncObject.wait(millis);
-                }
-            } else {*/
-                Thread.sleep(millis);
-            //}
+        try {
+            Thread.sleep(millis);
         } catch (final InterruptedException e) {
             if (log != null)
-                log.logConfig("thread '" + this.getName() + "' interrupted because of shutdown.");
+                log.config("thread '" + this.getName() + "' interrupted because of shutdown.");
         }
     }
     
@@ -226,7 +224,7 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
         if (this.syncObject != null) {
             synchronized (this.syncObject) {
                 if (log != null)
-                    if (log.isFine()) log.logFine("thread '" + this.getName()
+                    if (log.isFine()) log.fine("thread '" + this.getName()
                             + "' has received a notification from thread '"
                             + Thread.currentThread().getName() + "'.");
                 this.syncObject.notifyAll();
@@ -235,7 +233,7 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
     }
     
     private void logSystem(final String text) {
-        if (log == null) Log.logConfig("THREAD-CONTROL", text);
-        else log.logConfig(text);
+        if (log == null) ConcurrentLog.config("THREAD-CONTROL", text);
+        else log.config(text);
     }
 }

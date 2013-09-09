@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.util.SpaceExceededException;
 
 
 public interface Index extends Iterable<Row.Entry> {
@@ -45,22 +46,23 @@ public interface Index extends Iterable<Row.Entry> {
     public boolean has(byte[] key); // use this only if there is no get in case that has returns true
     public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, boolean forcecopy) throws IOException, InterruptedException;
     public Row.Entry get(byte[] key, boolean forcecopy) throws IOException;
-    public Row.Entry replace(Row.Entry row) throws RowSpaceExceededException, IOException;
+    public Row.Entry replace(Row.Entry row) throws SpaceExceededException, IOException;
 
     /**
      * Adds the row to the index. The row is identified by the primary key of the row.
      * @param row a index row
      * @return true if this set did _not_ already contain the given row.
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
-    public boolean put(Row.Entry row) throws IOException, RowSpaceExceededException;
-    public void addUnique(Row.Entry row) throws RowSpaceExceededException, IOException; // no double-check
-    public List<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException; // removes all elements that are double (to be used after all addUnique)
+    public boolean put(Row.Entry row) throws IOException, SpaceExceededException;
+    public void addUnique(Row.Entry row) throws SpaceExceededException, IOException; // no double-check
+    public List<RowCollection> removeDoubles() throws IOException, SpaceExceededException; // removes all elements that are double (to be used after all addUnique)
     public boolean delete(byte[] key) throws IOException;
     public Row.Entry remove(byte[] key) throws IOException;
     public Row.Entry removeOne() throws IOException;
     public List<Row.Entry> top(int count) throws IOException;
+    public List<Row.Entry> random(int count) throws IOException;
     public CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException; // iterates only the key
     public CloneableIterator<Row.Entry> rows(boolean up, byte[] firstKey) throws IOException; // iterates the whole row using the order of the keys
     public CloneableIterator<Row.Entry> rows() throws IOException; // iterates the whole row without any order

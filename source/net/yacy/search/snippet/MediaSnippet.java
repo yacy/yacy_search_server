@@ -36,25 +36,26 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Classification;
-import net.yacy.cora.document.Classification.ContentDomain;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ByteArray;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.data.ZURL.FailCategory;
+import net.yacy.crawler.retrieval.Request;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.util.ByteArray;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.ZURL.FailCategory;
-import de.anomic.crawler.retrieval.Request;
 
 
 public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaSnippet> {
@@ -81,8 +82,8 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             this.height = NumberTools.parseIntDecSubstring(attr, p + 3);
         }
         this.ranking = ranking; // the smaller the better! small values should be shown first
-        if ((this.name == null) || (this.name.length() == 0)) this.name = "_";
-        if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
+        if ((this.name == null) || (this.name.isEmpty())) this.name = "_";
+        if ((this.attr == null) || (this.attr.isEmpty())) this.attr = "_";
     }
 
     public MediaSnippet(final ContentDomain type, final DigestURI href, final String mime, final String name, final long fileSize, final int width, final int height, final long ranking, final DigestURI source) {
@@ -96,8 +97,8 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         this.width = width;
         this.height = height;
         this.ranking = ranking; // the smaller the better! small values should be shown first
-        if ((this.name == null) || (this.name.length() == 0)) this.name = "_";
-        if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
+        if ((this.name == null) || (this.name.isEmpty())) this.name = "_";
+        if ((this.attr == null) || (this.attr.isEmpty())) this.attr = "_";
     }
 
     private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
@@ -134,20 +135,20 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return o1.compareTo(o2);
     }
 
-    public static List<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final Classification.ContentDomain mediatype, final CacheStrategy cacheStrategy, final int timeout, final boolean reindexing) {
+    public static List<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final Classification.ContentDomain mediatype, final CacheStrategy cacheStrategy, final boolean reindexing) {
         if (queryhashes.isEmpty()) {
-            Log.logFine("snippet fetch", "no query hashes given for url " + url);
+            ConcurrentLog.fine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();
         }
 
         Document document;
         try {
-            document = Document.mergeDocuments(url, null, Switchboard.getSwitchboard().loader.loadDocuments(Switchboard.getSwitchboard().loader.request(url, false, reindexing), cacheStrategy, timeout, Integer.MAX_VALUE));
+            document = Document.mergeDocuments(url, null, Switchboard.getSwitchboard().loader.loadDocuments(Switchboard.getSwitchboard().loader.request(url, false, reindexing), cacheStrategy, Integer.MAX_VALUE, BlacklistType.SEARCH, ClientIdentification.yacyIntranetCrawlerAgent));
         } catch (final IOException e) {
-            Log.logFine("snippet fetch", "load error: " + e.getMessage());
+            ConcurrentLog.fine("snippet fetch", "load error: " + e.getMessage());
             return new ArrayList<MediaSnippet>();
         } catch (final Parser.Failure e) {
-            Log.logFine("snippet fetch", "parser error: " + e.getMessage());
+            ConcurrentLog.fine("snippet fetch", "parser error: " + e.getMessage());
             return new ArrayList<MediaSnippet>();
         }
         final ArrayList<MediaSnippet> a = new ArrayList<MediaSnippet>();
@@ -163,23 +164,23 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     public static List<MediaSnippet> computeMediaSnippets(final DigestURI source, final Document document, final HandleSet queryhashes, final ContentDomain mediatype) {
 
         if (document == null) return new ArrayList<MediaSnippet>();
-        Map<MultiProtocolURI, String> media = null;
+        Map<DigestURI, String> media = null;
         if (mediatype == ContentDomain.AUDIO) media = document.getAudiolinks();
         else if (mediatype == ContentDomain.VIDEO) media = document.getVideolinks();
         else if (mediatype == ContentDomain.APP) media = document.getApplinks();
         if (media == null) return null;
 
-        final Iterator<Map.Entry<MultiProtocolURI, String>> i = media.entrySet().iterator();
-        Map.Entry<MultiProtocolURI, String> entry;
+        final Iterator<Map.Entry<DigestURI, String>> i = media.entrySet().iterator();
+        Map.Entry<DigestURI, String> entry;
         DigestURI url;
         String desc;
         final List<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             entry = i.next();
-            url = new DigestURI(entry.getKey());
+            url = entry.getKey();
             desc = entry.getValue();
             if (isUrlBlacklisted(BlacklistType.SEARCH, url)) continue;
-            final int ranking = removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() +
+            final int ranking = removeAppearanceHashes(url.toNormalform(true), queryhashes).size() +
                            removeAppearanceHashes(desc, queryhashes).size();
             if (ranking < 2 * queryhashes.size()) {
                 result.add(new MediaSnippet(mediatype, url, Classification.url2mime(url), desc, document.getTextLength(), null, ranking, source));
@@ -201,7 +202,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         final List<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             ientry = i.next();
-            url = new DigestURI(ientry.url());
+            url = ientry.url();
             final String u = url.toString();
             if (isUrlBlacklisted(BlacklistType.SEARCH, url)) continue;
             if (u.indexOf(".ico",0) >= 0 || u.indexOf("favicon",0) >= 0) continue;
@@ -209,7 +210,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             if (ientry.width() > 0 && ientry.width() < 32) continue;
             desc = ientry.alt();
             final int appcount = queryhashes.size()  * 2 -
-                           removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() -
+                           removeAppearanceHashes(url.toNormalform(true), queryhashes).size() -
                            removeAppearanceHashes(desc, queryhashes).size();
             final long ranking = Long.MAX_VALUE - (ientry.height() + 1) * (ientry.width() + 1) * (appcount + 1);
             result.add(new MediaSnippet(ContentDomain.IMAGE, url, Classification.url2mime(url), desc, ientry.fileSize(), ientry.width(), ientry.height(), ranking, source));
@@ -230,15 +231,15 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         final Iterator<byte[]> j = queryhashes.iterator();
         byte[] hash;
         Integer pos;
-        final HandleSet remaininghashes = new HandleSet(queryhashes.row().primaryKeyLength, queryhashes.comparator(), queryhashes.size());
+        final HandleSet remaininghashes = new RowHandleSet(queryhashes.keylen(), queryhashes.comparator(), queryhashes.size());
         while (j.hasNext()) {
             hash = j.next();
             pos = hs.get(hash);
             if (pos == null) {
                 try {
                     remaininghashes.put(hash);
-                } catch (final RowSpaceExceededException e) {
-                    Log.logException(e);
+                } catch (final SpaceExceededException e) {
+                    ConcurrentLog.logException(e);
                 }
             }
         }
@@ -258,8 +259,8 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
 
         // check if url is in blacklist
         if (Switchboard.urlBlacklist.isListed(blacklistType, url.getHost().toLowerCase(), url.getFile())) {
-            Switchboard.getSwitchboard().crawlQueues.errorURL.push(new Request(url, null), Switchboard.getSwitchboard().peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
-            Log.logFine("snippet fetch", "MEDIA-SNIPPET Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
+            Switchboard.getSwitchboard().crawlQueues.errorURL.push(new Request(url, null), null, ASCII.getBytes(Switchboard.getSwitchboard().peers.mySeed().hash), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
+            ConcurrentLog.fine("snippet fetch", "MEDIA-SNIPPET Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
             isBlacklisted = true;
         }
 

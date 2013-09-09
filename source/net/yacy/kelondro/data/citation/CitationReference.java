@@ -23,16 +23,15 @@ package net.yacy.kelondro.data.citation;
 import java.io.Serializable;
 import java.util.Collection;
 
+import net.yacy.cora.date.MicroDate;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.util.ByteArray;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.MicroDate;
 import net.yacy.kelondro.rwi.Reference;
-import net.yacy.kelondro.util.ByteArray;
 
 public class CitationReference implements Reference, Serializable {
 
@@ -67,21 +66,8 @@ public class CitationReference implements Reference, Serializable {
         this.entry.setCol(col_reserve, 0);
     }
 
-    public CitationReference(final String urlHash, final String code) {
-        // the code is the external form of the row minus the leading urlHash entry
-        this.entry = citationRow.newEntry(UTF8.getBytes((urlHash + code)));
-    }
-
-    public CitationReference(final String external) {
-        this.entry = citationRow.newEntry(external, true);
-    }
-
-    public CitationReference(final byte[] row) {
+    private CitationReference(final byte[] row) {
         this.entry = citationRow.newEntry(row);
-    }
-
-    public CitationReference(final byte[] row, final int offset, final boolean clone) {
-        this.entry = citationRow.newEntry(row, offset, clone);
     }
 
     public CitationReference(final Row.Entry rentry) {
@@ -109,6 +95,13 @@ public class CitationReference implements Reference, Serializable {
     @Override
     public byte[] urlhash() {
         return this.entry.getColBytes(col_urlhash, true);
+    }
+    
+    public byte[] hosthash() {
+        byte[] uh = this.entry.getColBytes(col_urlhash, true);
+        byte[] hh = new byte[6];
+        System.arraycopy(uh, 6, hh, 0, 6);
+        return hh;
     }
 
     public int virtualAge() {
@@ -169,10 +162,6 @@ public class CitationReference implements Reference, Serializable {
 
     @Override
     public int minposition() {
-        throw new UnsupportedOperationException();
-    }
-
-    public int position(int p) {
         throw new UnsupportedOperationException();
     }
 

@@ -29,11 +29,11 @@ package net.yacy.kelondro.data.navigation;
 import java.util.Collection;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.AbstractReference;
 import net.yacy.kelondro.rwi.Reference;
 
@@ -68,15 +68,6 @@ public final class NavigationReferenceRow extends AbstractReference implements N
     private static final int col_pos           =  2; // p the position of the first occurence
     private static final int col_flags         =  3; // f reserve, may be used for flags
 
-    // appearance flags, used in RWI entry
-    // some names are derived from the Dublin Core Metadata tag set
-    public  static final int flag_app_dc_description= 1; // word appears in anchor description text (the reference to an url), or any alternative text field of a link
-    public  static final int flag_app_dc_title      = 2; // word appears in title or headline or any description part
-    public  static final int flag_app_dc_creator    = 3; // word appears in author
-    public  static final int flag_app_dc_subject    = 4; // word appears in header tags or other descriptive part
-    public  static final int flag_app_dc_identifier = 5; // word appears in url or document identifier
-    public  static final int flag_app_emphasized    = 6; // word is emphasized in text (i.e. bold, italics, special size)
-
     private final Row.Entry entry;
 
     public NavigationReferenceRow(
@@ -95,7 +86,7 @@ public final class NavigationReferenceRow extends AbstractReference implements N
         this.entry.setCol(col_flags, flags);
     }
 
-    public NavigationReferenceRow(final byte[] row) {
+    private NavigationReferenceRow(final byte[] row) {
         this.entry = navEntryRow.newEntry(row);
     }
 
@@ -165,8 +156,7 @@ public final class NavigationReferenceRow extends AbstractReference implements N
     public boolean isOlder(final Reference other) {
         return false;
     }
-
-
+    
     // unsupported operations:
 
     public void join(final Reference oe) {

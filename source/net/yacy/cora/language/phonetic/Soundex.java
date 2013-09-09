@@ -225,7 +225,7 @@ public class Soundex implements StringEncoder {
             return null;
         }
         str = clean(str);
-        if (str.length() == 0) {
+        if (str.isEmpty()) {
             return str;
         }
         char out[] = {'0', '0', '0', '0'};
@@ -256,7 +256,7 @@ public class Soundex implements StringEncoder {
      * @return A clean String.
      */
     static String clean(String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.isEmpty()) {
             return str;
         }
         int len = str.length();

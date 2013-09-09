@@ -28,8 +28,8 @@
         <option #(selected)#::selected="selected"#(/selected)# value="#[url]#">#[name]# #(signatures)#(unsigned)::(signed)#(/signatures)#</option>
         #{/availreleases}#
         </select>
-    	&nbsp;&nbsp;<input type="submit" name="downloadRelease" value="Download Release" />
-    	&nbsp;&nbsp;<input type="submit" name="checkRelease" value="Check for new Release" />
+    	&nbsp;&nbsp;<input type="submit" name="downloadRelease" value="Download Release"/>
+    	&nbsp;&nbsp;<input type="submit" name="checkRelease" value="Check for new Release"/>
       </p></form></dd>
       <dt><br />Downloaded Releases</dt>
       <dd><form action="ConfigUpdate_p.html" method="get" accept-charset="UTF-8"><p>
@@ -117,6 +117,8 @@
       <p>You installed YaCy with a package manager. To update YaCy, use the package manager:</p>
       <p>manual update:<br/>apt-get update &amp;&amp; apt-get install yacy</p>
       <p>automatic update: add the following line to /etc/crontab<br/>0 6 * * * root apt-get update &amp;&amp; apt-get -y --force-yes install yacy</p>
+      ::
+      <p>YaCy has been installed to the Program Files directory. Automatic update is not possible.<br/>Download and install the latest version from the web page <a href="http://www.yacy.net/">http://www.yacy.net/</a></p>
       ::
     #(/candeploy)#
     

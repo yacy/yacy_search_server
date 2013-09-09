@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -65,7 +64,7 @@ public class zipParser extends AbstractParser implements Parser {
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
         // check memory for parser
-        if (!MemoryControl.request(200 * 1024 * 1024, true))
+        if (!MemoryControl.request(200 * 1024 * 1024, false))
             throw new Parser.Failure("Not enough Memory available for zip parser: " + MemoryControl.available(), url);
 
          Document[] docs = null;
@@ -87,18 +86,18 @@ public class zipParser extends AbstractParser implements Parser {
                 try {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
                     FileUtils.copy(zis, tmp, entry.getSize());
-                    final DigestURI virtualURL = new DigestURI(MultiProtocolURI.newURL(url, "#" + name));
+                    final DigestURI virtualURL = DigestURI.newURL(url, "#" + name);
                     //this.log.logInfo("ZIP file parser: " + virtualURL.toNormalform(false, false));
                     docs = TextParser.parseSource(virtualURL, mime, null, tmp);
                     if (docs == null) continue;
                     for (final Document d: docs) docacc.add(d);
                 } catch (final Parser.Failure e) {
-                    this.log.logWarning("ZIP parser entry " + name + ": " + e.getMessage());
+                    AbstractParser.log.warn("ZIP parser entry " + name + ": " + e.getMessage());
                 } finally {
                     if (tmp != null) FileUtils.deletedelete(tmp);
                 }
             } catch (final IOException e) {
-                this.log.logWarning("ZIP parser:" + e.getMessage());
+                AbstractParser.log.warn("ZIP parser:" + e.getMessage());
                 break;
             }
         }

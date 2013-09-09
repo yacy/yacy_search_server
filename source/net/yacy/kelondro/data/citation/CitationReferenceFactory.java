@@ -36,7 +36,7 @@ public class CitationReferenceFactory implements ReferenceFactory<CitationRefere
     }
 
     @Override
-    public CitationReference produceFast(final CitationReference r) {
+    public CitationReference produceFast(final CitationReference r, final boolean local) {
         throw new UnsupportedOperationException();
     }
 

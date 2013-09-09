@@ -35,7 +35,8 @@ public enum Rdf implements Vocabulary {
     Description,
     Bag,
     Seq,
-    Alt;
+    Alt,
+    type;
 
     public final static String IDENTIFIER = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
     public final static String PREFIX = "rdf";
@@ -64,6 +65,11 @@ public enum Rdf implements Vocabulary {
     @Override
     public String getPredicate() {
         return this.predicate;
+    }
+
+    @Override
+    public String getURIref() {
+        return PREFIX + ':' + this.name();
     }
 
 }

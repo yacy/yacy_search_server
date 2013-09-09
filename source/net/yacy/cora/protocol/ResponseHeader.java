@@ -27,17 +27,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.yacy.cora.util.ConcurrentLog;
+
 import org.apache.http.Header;
-import org.apache.log4j.Logger;
-
-
 
 public class ResponseHeader extends HeaderFramework {
 
     // response header properties
 
     private static final long serialVersionUID = 0L;
-    private static Logger log = Logger.getLogger(ResponseHeader.class);
+    private static ConcurrentLog log = new ConcurrentLog(ResponseHeader.class.getName());
 
     public ResponseHeader(final int statusCode) {
         super();
@@ -66,14 +65,15 @@ public class ResponseHeader extends HeaderFramework {
         if (statuscode == null) return 200;
         try {
             return Integer.parseInt(statuscode);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             return 200;
         }
     }
 
     public Date date() {
         final Date d = headerDate(HeaderFramework.DATE);
-        if (d == null) return new Date(); else return d;
+        final Date now = new Date();
+        return (d == null) ? now : d.after(now) ? now : d;
     }
 
     public Date expires() {
@@ -82,7 +82,8 @@ public class ResponseHeader extends HeaderFramework {
 
     public Date lastModified() {
         final Date d = headerDate(LAST_MODIFIED);
-        if (d == null) return date(); else return d;
+        final Date now = new Date();
+        return (d == null) ? date() : d.after(now) ? now : d;
     }
 
     public long age() {
@@ -99,7 +100,7 @@ public class ResponseHeader extends HeaderFramework {
 
     public static Object[] parseResponseLine(final String respLine) {
 
-        if ((respLine == null) || (respLine.length() == 0)) {
+        if ((respLine == null) || (respLine.isEmpty())) {
             return new Object[]{"HTTP/1.0",Integer.valueOf(500),"status line parse error"};
         }
 
@@ -158,5 +159,13 @@ public class ResponseHeader extends HeaderFramework {
             return Charset.defaultCharset();
         }
         return Charset.forName(charSetName);
+    }
+
+    public String getXRobotsTag() {
+        String x_robots_tag = this.get(HeaderFramework.X_ROBOTS_TAG, "");
+        if (x_robots_tag.isEmpty()) {
+            x_robots_tag = this.get(HeaderFramework.X_ROBOTS, "");
+        }
+        return x_robots_tag;
     }
 }

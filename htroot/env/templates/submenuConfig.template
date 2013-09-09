@@ -5,7 +5,6 @@
     <li><a href="/ConfigBasic.html" class="MenuItemLink lock">Basic Configuration</a></li>
     <li><a href="/ConfigAccounts_p.html" class="MenuItemLink lock">Accounts</a></li>
     <li><a href="/ConfigNetwork_p.html" class="MenuItemLink lock">Network Configuration</a></li>
-    <li><a href="/ConfigHeuristics_p.html" class="MenuItemLink lock">Heuristics</a></li>
     <li><a href="/ConfigUpdate_p.html" class="MenuItemLink lock">Download System Update</a></li>
   </ul>
 </div>
@@ -13,9 +12,7 @@
   <ul class="SubMenu">
     <li><a href="/Performance_p.html" class="MenuItemLink lock">Performance</a></li>
     <li><a href="/Settings_p.html" class="MenuItemLink lock">Advanced Settings</a></li>
-    <li><a href="/ConfigParser.html" class="MenuItemLink lock">Parser Configuration</a></li>
     <li><a href="/ConfigRobotsTxt_p.html" class="MenuItemLink lock">Local robots.txt</a></li>
-    <li><a href="/ConfigHTCache_p.html" class="MenuItemLink lock">Web Cache</a></li>
     <li><a href="/ConfigProperties_p.html" class="MenuItemLink lock">Advanced Properties</a></li>
     <li><a href="/Threaddump_p.html" class="MenuItemLink lock">Thread Dump</a></li>
   </ul>

@@ -62,20 +62,20 @@ import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.yacy.Distribution;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.storage.HandleSet;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.kelondro.util.OS;
-import net.yacy.peers.dht.FlatWordPartitionScheme;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
-import de.anomic.tools.bitfield;
-import de.anomic.tools.crypt;
+import net.yacy.utils.bitfield;
+import net.yacy.utils.crypt;
 
 public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 {
@@ -100,19 +100,27 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      */
     public static final String URL_IN = "rU";
     /**
-     * <b>substance</b> "virgin"
+     * <b>substance</b> "virgin", a peer which cannot reach any other peers
      */
     public static final String PEERTYPE_VIRGIN = "virgin";
     /**
-     * <b>substance</b> "junior"
+     * <b>substance</b> "junior", this is a peer which cannot be reached from the outside
      */
     public static final String PEERTYPE_JUNIOR = "junior";
     /**
-     * <b>substance</b> "senior"
+     * <b>substance</b> "mentee", this is a junior peer with an mentor peer attached as 'remote' server port
+     */
+    public static final String PEERTYPE_MENTEE = "mentee";
+    /**
+     * <b>substance</b> "senior", this is a peer with an open port to the public
      */
     public static final String PEERTYPE_SENIOR = "senior";
     /**
-     * <b>substance</b> "principal"
+     * <b>substance</b> "mentor", this is a senior peer which hosts server ports for mentee peers
+     */
+    public static final String PEERTYPE_MENTOR = "mentor";
+    /**
+     * <b>substance</b> "principal", a senior peer which distributes the seed list to an outside hoster (i.e. using ftp upload to a web server)
      */
     public static final String PEERTYPE_PRINCIPAL = "principal";
     /**
@@ -123,7 +131,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     /** static/dynamic (if the IP changes often for any reason) */
     private static final String IPTYPE = "IPType";
     private static final String FLAGS = "Flags";
-    private static final String FLAGSZERO = "____";
+    public static final String FLAGSZERO = "    ";
     /** the applications version */
     public static final String VERSION = "Version";
 
@@ -168,6 +176,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     private static final int FLAG_ACCEPT_REMOTE_CRAWL = 1;
     private static final int FLAG_ACCEPT_REMOTE_INDEX = 2;
     private static final int FLAG_ROOT_NODE = 3;
+    private static final int FLAG_SSL_AVAILABLE = 4;
 
     public static final String DFLT_NETWORK_UNIT = "freeworld";
     public static final String DFLT_NETWORK_GROUP = "";
@@ -176,7 +185,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     // class variables
     /** the peer-hash */
-    public String hash;
+    public final String hash;
     /** a set of identity founding values, eg. IP, name of the peer, YaCy-version, ... */
     private final ConcurrentMap<String, String> dna;
     private String alternativeIP = null;
@@ -187,10 +196,10 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         assert theHash != null;
         this.hash = theHash;
         this.dna = theDna;
-        final String flags = this.dna.get(Seed.FLAGS);
-        if ( (flags == null) || (flags.length() != 4) ) {
-            this.dna.put(Seed.FLAGS, Seed.FLAGSZERO);
-        }
+        String flags = this.dna.get(Seed.FLAGS);
+        if (flags == null) flags = Seed.FLAGSZERO;
+        while (flags.length() < 4) flags += " ";
+        this.dna.put(Seed.FLAGS, flags);
         this.dna.put(Seed.NAME, checkPeerName(get(Seed.NAME, "&empty;")));
         this.birthdate = -1; // this means 'not yet parsed', parse that later when it is used
     }
@@ -306,7 +315,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      */
     public final String getIP() {
         final String ip = get(Seed.IP, Domains.LOCALHOST);
-        return (ip == null || ip.length() == 0) ? Domains.LOCALHOST : ip;
+        return (ip == null || ip.isEmpty()) ? Domains.LOCALHOST : ip;
     }
 
     /**
@@ -376,7 +385,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( o instanceof String ) {
             try {
                 return Float.parseFloat((String) o);
-            } catch ( final NumberFormatException e ) {
+            } catch (final NumberFormatException e ) {
                 return dflt;
             }
         } else if ( o instanceof Float ) {
@@ -394,7 +403,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( o instanceof String ) {
             try {
                 return Long.parseLong((String) o);
-            } catch ( final NumberFormatException e ) {
+            } catch (final NumberFormatException e ) {
                 return dflt;
             }
         } else if ( o instanceof Long ) {
@@ -542,7 +551,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final Double getVersion() {
         try {
             return Double.parseDouble(get(Seed.VERSION, Seed.ZERO));
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             return 0.0d;
         }
     }
@@ -645,9 +654,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
             // of the local UTC offset is wrong. We correct this here by adding the local UTC
             // offset again.
             return t /*+ DateFormatter.UTCDiff()*/;
-        } catch ( final java.text.ParseException e ) { // in case of an error make seed look old!!!
+        } catch (final java.text.ParseException e ) { // in case of an error make seed look old!!!
             return System.currentTimeMillis() - AbstractFormatter.dayMillis;
-        } catch ( final java.lang.NumberFormatException e ) {
+        } catch (final java.lang.NumberFormatException e ) {
             return System.currentTimeMillis() - AbstractFormatter.dayMillis;
         }
     }
@@ -672,7 +681,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
             final GenericFormatter my_SHORT_SECOND_FORMATTER =
                 new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
             b = my_SHORT_SECOND_FORMATTER.parse(get(Seed.BDATE, "20040101000000")).getTime();
-        } catch ( final ParseException e ) {
+        } catch (final ParseException e ) {
             b = System.currentTimeMillis();
         }
         this.birthdate = b;
@@ -710,7 +719,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public int getPPM() {
         try {
             return Integer.parseInt(get(Seed.ISPEED, Seed.ZERO));
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             return 0;
         }
     }
@@ -718,7 +727,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public float getQPM() {
         try {
             return Float.parseFloat(get(Seed.RSPEED, Seed.ZERO));
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             return 0f;
         }
     }
@@ -726,7 +735,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final long getLinkCount() {
         try {
             return getLong(Seed.LCOUNT, 0);
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             return 0;
         }
     }
@@ -734,7 +743,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final long getWordCount() {
         try {
             return getLong(Seed.ICOUNT, 0);
-        } catch ( final NumberFormatException e ) {
+        } catch (final NumberFormatException e ) {
             return 0;
         }
     }
@@ -758,20 +767,12 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         setFlag(FLAG_DIRECT_CONNECT, value);
     }
 
-    public final void setFlagAcceptRemoteCrawl(final boolean value) {
-        setFlag(FLAG_ACCEPT_REMOTE_CRAWL, value);
-    }
-
-    public final void setFlagAcceptRemoteIndex(final boolean value) {
-        setFlag(FLAG_ACCEPT_REMOTE_INDEX, value);
-    }
-
-    public final void setFlagRootNode(final boolean value) {
-        setFlag(FLAG_ROOT_NODE, value);
-    }
-
     public final boolean getFlagDirectConnect() {
         return getFlag(FLAG_DIRECT_CONNECT);
+    }
+
+    public final void setFlagAcceptRemoteCrawl(final boolean value) {
+        setFlag(FLAG_ACCEPT_REMOTE_CRAWL, value);
     }
 
     public final boolean getFlagAcceptRemoteCrawl() {
@@ -780,9 +781,17 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         return getFlag(FLAG_ACCEPT_REMOTE_CRAWL);
     }
 
+    public final void setFlagAcceptRemoteIndex(final boolean value) {
+        setFlag(FLAG_ACCEPT_REMOTE_INDEX, value);
+    }
+
     public final boolean getFlagAcceptRemoteIndex() {
         //if (getVersion() < 0.335) return false;
         return getFlag(FLAG_ACCEPT_REMOTE_INDEX);
+    }
+
+    public final void setFlagRootNode(final boolean value) {
+        setFlag(FLAG_ROOT_NODE, value);
     }
 
     public final boolean getFlagRootNode() {
@@ -791,8 +800,17 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         return getFlag(FLAG_ROOT_NODE);
     }
 
+    public final void setFlagSSLAvailable(final boolean value) {
+        setFlag(FLAG_SSL_AVAILABLE, value);
+    }
+
+    public final boolean getFlagSSLAvailable() {
+        if (getVersion() < 1.5) return false;
+        return getFlag(FLAG_SSL_AVAILABLE);
+    }
+
     public final void setUnusedFlags() {
-        for ( int i = 4; i < 24; i++ ) {
+        for ( int i = 4; i < 20; i++ ) {
             setFlag(i, false);
         }
     }
@@ -859,14 +877,12 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         }
 
         // find dht position and size of gap
-        final long left =
-            FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(interval.substring(0, 12)), null);
-        final long right =
-            FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(interval.substring(12)), null);
-        final long gap8 = FlatWordPartitionScheme.dhtDistance(left, right) >> 3; //  1/8 of a gap
+        final long left = Distribution.horizontalDHTPosition(ASCII.getBytes(interval.substring(0, 12)));
+        final long right = Distribution.horizontalDHTPosition(ASCII.getBytes(interval.substring(12)));
+        final long gap8 = Distribution.horizontalDHTDistance(left, right) >> 3; //  1/8 of a gap
         final long gapx = gap8 + (Math.abs(random.nextLong()) % (6 * gap8));
         final long gappos = (Long.MAX_VALUE - left >= gapx) ? left + gapx : (left - Long.MAX_VALUE) + gapx;
-        final byte[] computedHash = FlatWordPartitionScheme.positionToHash(gappos);
+        final byte[] computedHash = Distribution.positionToHash(gappos);
         // the computed hash is the perfect position (modulo gap4 population and gap alternatives)
         // this is too tight. The hash must be more randomized. We take only (!) the first two bytes
         // of the computed hash and add random bytes at the remaining positions. The first two bytes
@@ -904,40 +920,35 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
                 first = s0;
                 continue;
             }
-            l =
-                FlatWordPartitionScheme.dhtDistance(
-                    FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(s0.hash), null),
-                    FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(s1.hash), null));
+            l = Distribution.horizontalDHTDistance(
+                            Distribution.horizontalDHTPosition(ASCII.getBytes(s0.hash)),
+                            Distribution.horizontalDHTPosition(ASCII.getBytes(s1.hash)));
             gaps.put(l, s0.hash + s1.hash);
             s0 = s1;
         }
         // compute also the last gap
         if ( (first != null) && (s0 != null) ) {
-            l =
-                FlatWordPartitionScheme.dhtDistance(
-                    FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(s0.hash), null),
-                    FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(first.hash), null));
+            l = Distribution.horizontalDHTDistance(
+                            Distribution.horizontalDHTPosition(ASCII.getBytes(s0.hash)),
+                            Distribution.horizontalDHTPosition(ASCII.getBytes(first.hash)));
             gaps.put(l, s0.hash + first.hash);
         }
         return gaps;
     }
 
     public static Seed genLocalSeed(final SeedDB db) {
-        return genLocalSeed(db, 0, null); // an anonymous peer
-    }
-
-    public static Seed genLocalSeed(final SeedDB db, final int port, final String name) {
-        // generate a seed for the local peer
+        // generate a seed for the local peer (as anonymous peer)
         // this is the birthplace of a seed, that then will start to travel to other peers
 
         final String hashs = ASCII.String(bestGap(db));
-        Network.log.logInfo("init: OWN SEED = " + hashs);
+        Network.log.info("init: OWN SEED = " + hashs);
 
         final Seed newSeed = new Seed(hashs);
 
         // now calculate other information about the host
-        newSeed.dna.put(Seed.NAME, (name) == null ? defaultPeerName() : name);
-        newSeed.dna.put(Seed.PORT, Integer.toString((port <= 0) ? 8090 : port));
+        final long port = Switchboard.getSwitchboard().getConfigLong("port", 8090); //get port from config
+        newSeed.dna.put(Seed.NAME, defaultPeerName() );
+        newSeed.dna.put(Seed.PORT, Long.toString(port));
         return newSeed;
     }
 
@@ -956,7 +967,6 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     public static Seed genRemoteSeed(
         final String seedStr,
-        final String key,
         final boolean ownSeed,
         final String patchIP) throws IOException {
         // this method is used to convert the external representation of a seed into a seed object
@@ -966,15 +976,15 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( seedStr == null ) {
             throw new IOException("seedStr == null");
         }
-        if ( seedStr.length() == 0 ) {
-            throw new IOException("seedStr.length() == 0");
+        if ( seedStr.isEmpty() ) {
+            throw new IOException("seedStr.isEmpty()");
         }
-        final String seed = crypt.simpleDecode(seedStr, key);
+        final String seed = crypt.simpleDecode(seedStr);
         if ( seed == null ) {
             throw new IOException("seed == null");
         }
-        if ( seed.length() == 0 ) {
-            throw new IOException("seed.length() == 0");
+        if ( seed.isEmpty() ) {
+            throw new IOException("seed.isEmpty()");
         }
 
         // extract hash
@@ -997,6 +1007,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( testResult != null ) {
             throw new IOException("seed is not proper (" + testResult + "): " + resultSeed);
         }
+        //assert resultSeed.toString().equals(seed) : "\nresultSeed.toString() = " + resultSeed.toString() + ",\n                 seed = " + seed; // debug
 
         // seed ok
         return resultSeed;
@@ -1041,7 +1052,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
         // seedURL
         final String seedURL = this.dna.get(SEEDLISTURL);
-        if ( seedURL != null && seedURL.length() > 0 ) {
+        if ( seedURL != null && !seedURL.isEmpty() ) {
             if ( !seedURL.startsWith("http://") && !seedURL.startsWith("https://") ) {
                 return "wrong protocol for seedURL";
             }
@@ -1051,7 +1062,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
                 if (Domains.isLocalhost(host)) {
                     return "seedURL in localhost rejected";
                 }
-            } catch ( final MalformedURLException e ) {
+            } catch (final MalformedURLException e ) {
                 return "seedURL malformed";
             }
         }
@@ -1063,7 +1074,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if ( ipString == null ) {
             return ipString + " -> IP is null";
         }
-        if ( ipString.length() > 0 && ipString.length() < 8 ) {
+        if ( !ipString.isEmpty() && ipString.length() < 8 ) {
             return ipString + " -> IP is too short: ";
         }
         if ( Switchboard.getSwitchboard().isAllIPMode() ) {
@@ -1082,7 +1093,8 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final ConcurrentMap<String, String> copymap = new ConcurrentHashMap<String, String>();
         copymap.putAll(this.dna);
         copymap.put(Seed.HASH, this.hash); // set hash into seed code structure
-        return MapTools.map2string(copymap, ",", true); // generate string representation
+        String s = MapTools.map2string(copymap, ",", true); // generate string representation
+        return s;
     }
 
     public final String genSeedStr(final String key) {
@@ -1092,11 +1104,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final String b = crypt.simpleEncode(r, key, 'b');
         // the compressed string may be longer that the uncompressed if there is too much overhead for compression meta-info
         // take simply that string that is shorter
-        if ( b.length() < z.length() ) {
-            return b;
-        } else {
-            return z;
-        }
+        return ( b.length() < z.length() ) ? b : z;
     }
 
     public final void save(final File f) throws IOException {
@@ -1111,7 +1119,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final char[] b = new char[(int) f.length()];
         fr.read(b, 0, b.length);
         fr.close();
-        final Seed mySeed = genRemoteSeed(new String(b), null, true, null);
+        final Seed mySeed = genRemoteSeed(new String(b), true, null);
         assert mySeed != null; // in case of an error, an IOException is thrown
         mySeed.dna.put(Seed.IP, ""); // set own IP as unknown
         return mySeed;
@@ -1148,6 +1156,11 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         return o1.compareTo(o2);
     }
 
+    @Override
+    public boolean equals(Object other) {
+    	return this.hash.equals(((Seed) other).hash);
+    }
+    		
     public static void main(final String[] args) {
         final ScoreMap<Integer> s = new ClusteredScoreMap<Integer>();
         for ( int i = 0; i < 10000; i++ ) {

@@ -34,16 +34,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
 import net.yacy.cora.sorting.ConcurrentScoreMap;
+import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.ReferenceContainer;
-import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.Bitfield;
 
 
 public class ReferenceOrder {
@@ -65,11 +66,11 @@ public class ReferenceOrder {
         this.language = language;
     }
 
-    public BlockingQueue<WordReferenceVars> normalizeWith(final ReferenceContainer<WordReference> container, long maxtime) {
+    public BlockingQueue<WordReferenceVars> normalizeWith(final ReferenceContainer<WordReference> container, long maxtime, final boolean local) {
         final LinkedBlockingQueue<WordReferenceVars> out = new LinkedBlockingQueue<WordReferenceVars>();
         int threads = cores;
         if (container.size() < 100) threads = 2;
-        final Thread distributor = new NormalizeDistributor(container, out, threads, maxtime);
+        final Thread distributor = new NormalizeDistributor(container, out, threads, maxtime, local);
         distributor.start();
 
         // return the resulting queue while the processing queues are still working
@@ -82,18 +83,20 @@ public class ReferenceOrder {
         LinkedBlockingQueue<WordReferenceVars> out;
         private final int threads;
         private final long maxtime;
-
-        public NormalizeDistributor(final ReferenceContainer<WordReference> container, final LinkedBlockingQueue<WordReferenceVars> out, final int threads, final long maxtime) {
+        private final boolean local;
+        
+        public NormalizeDistributor(final ReferenceContainer<WordReference> container, final LinkedBlockingQueue<WordReferenceVars> out, final int threads, final long maxtime, final boolean local) {
             this.container = container;
             this.out = out;
             this.threads = threads;
             this.maxtime = maxtime;
+            this.local = local;
         }
 
         @Override
         public void run() {
             // transform the reference container into a stream of parsed entries
-            final BlockingQueue<WordReferenceVars> vars = WordReferenceVars.transform(this.container, this.maxtime);
+            final BlockingQueue<WordReferenceVars> vars = WordReferenceVars.transform(this.container, this.maxtime, this.local);
 
             // start the transformation threads
             final Semaphore termination = new Semaphore(this.threads);
@@ -106,13 +109,13 @@ public class ReferenceOrder {
             // fill the queue
             WordReferenceVars iEntry;
             int p = 0;
-            long timeout = System.currentTimeMillis() + this.maxtime;
+            long timeout = this.maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + this.maxtime;
             try {
                 while ((iEntry = vars.take()) != WordReferenceVars.poison) {
                     worker[p % this.threads].add(iEntry);
                     p++;
                     if (System.currentTimeMillis() > timeout) {
-                        Log.logWarning("NormalizeDistributor", "adding of decoded rows to workers ended with timeout = " + this.maxtime);
+                        ConcurrentLog.warn("NormalizeDistributor", "adding of decoded rows to workers ended with timeout = " + this.maxtime);
                     }
                 }
             } catch (final InterruptedException e) {
@@ -160,7 +163,7 @@ public class ReferenceOrder {
                 String dom;
                 Integer count;
                 final Integer int1 = 1;
-                long timeout = System.currentTimeMillis() + this.maxtime;
+                long timeout = this.maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + this.maxtime;
                 while ((iEntry = this.decodedEntries.take()) != WordReferenceVars.poison) {
                     // find min/max
                     if (ReferenceOrder.this.min == null) ReferenceOrder.this.min = iEntry.clone(); else ReferenceOrder.this.min.min(iEntry);
@@ -176,7 +179,7 @@ public class ReferenceOrder {
                     }
 
                     if (System.currentTimeMillis() > timeout) {
-                        Log.logWarning("NormalizeWorker", "normlization of decoded rows ended with timeout = " + this.maxtime);
+                        ConcurrentLog.warn("NormalizeWorker", "normlization of decoded rows ended with timeout = " + this.maxtime);
                         break;
                     }
                 }
@@ -190,9 +193,9 @@ public class ReferenceOrder {
                 }
                 if (!ReferenceOrder.this.doms.isEmpty()) ReferenceOrder.this.maxdomcount = ReferenceOrder.this.doms.getMaxScore();
             } catch (final InterruptedException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch (final Exception e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } finally {
                 // insert poison to signal the termination to next queue
                 try {
@@ -213,7 +216,7 @@ public class ReferenceOrder {
      * @param t
      * @return a ranking: the higher the number, the better is the ranking
      */
-    public long cardinal(final WordReferenceVars t) {
+    public long cardinal(final WordReference t) {
         //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry
         final Bitfield flags = t.flags();
@@ -227,7 +230,6 @@ public class ReferenceOrder {
         final int minminpos = this.min.minposition();
         final long r =
              ((256 - DigestURI.domLengthNormalized(t.urlhash())) << this.ranking.coeff_domlength)
-           + ((this.ranking.coeff_ybr > 12) ? ((256 - (BlockRank.ranking(t.urlhash()) << 4)) << this.ranking.coeff_ybr) : 0)
            + ((this.max.urlcomps()      == this.min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - this.min.urlcomps()     ) << 8) / (this.max.urlcomps()     - this.min.urlcomps())     )) << this.ranking.coeff_urlcomps)
            + ((this.max.urllength()     == this.min.urllength()  )   ? 0 : (256 - (((t.urllength()    - this.min.urllength()    ) << 8) / (this.max.urllength()    - this.min.urllength())    )) << this.ranking.coeff_urllength)
            + ((maxmaxpos == minminpos)                               ? 0 : (256 - (((t.minposition() - minminpos) << 8) / (maxmaxpos - minminpos))) << this.ranking.coeff_posintext)
@@ -254,11 +256,40 @@ public class ReferenceOrder {
            + ((flags.get(Condenser.flag_cat_hasaudio))     ? 255 << this.ranking.coeff_cathasaudio        : 0)
            + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << this.ranking.coeff_cathasvideo        : 0)
            + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << this.ranking.coeff_cathasapp          : 0)
-           + ((ByteBuffer.equals(t.language, this.language)) ? 255 << this.ranking.coeff_language           : 0)
-           + ((DigestURI.probablyRootURL(t.urlhash())) ?  15 << this.ranking.coeff_urllength          : 0);
+           + ((ByteBuffer.equals(t.getLanguage(), this.language)) ? 255 << this.ranking.coeff_language    : 0);
 
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
 
+        return r; // the higher the number the better the ranking.
+    }
+    
+    public long cardinal(final URIMetadataNode t) {
+        //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
+        // the normalizedEntry must be a normalized indexEntry
+        final Bitfield flags = t.flags();
+        assert t != null;
+        assert this.ranking != null;
+        final long r =
+             ((256 - DigestURI.domLengthNormalized(t.hash())) << this.ranking.coeff_domlength)
+           + ((256 - (t.urllength() << 8)) << this.ranking.coeff_urllength)
+           + (t.virtualAge()  << this.ranking.coeff_date)
+           + (t.wordsintitle()<< this.ranking.coeff_wordsintitle)
+           + (t.wordCount()   << this.ranking.coeff_wordsintext)
+           + (t.llocal()      << this.ranking.coeff_llocal)
+           + (t.lother()      << this.ranking.coeff_lother)
+           + ((this.ranking.coeff_authority > 12) ? (authority(t.hosthash()) << this.ranking.coeff_authority) : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_identifier))  ? 255 << this.ranking.coeff_appurl             : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_title))       ? 255 << this.ranking.coeff_app_dc_title       : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_creator))     ? 255 << this.ranking.coeff_app_dc_creator     : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_subject))     ? 255 << this.ranking.coeff_app_dc_subject     : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_description)) ? 255 << this.ranking.coeff_app_dc_description : 0)
+           + ((flags.get(WordReferenceRow.flag_app_emphasized))     ? 255 << this.ranking.coeff_appemph            : 0)
+           + ((flags.get(Condenser.flag_cat_indexof))      ? 255 << this.ranking.coeff_catindexof         : 0)
+           + ((flags.get(Condenser.flag_cat_hasimage))     ? 255 << this.ranking.coeff_cathasimage        : 0)
+           + ((flags.get(Condenser.flag_cat_hasaudio))     ? 255 << this.ranking.coeff_cathasaudio        : 0)
+           + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << this.ranking.coeff_cathasvideo        : 0)
+           + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << this.ranking.coeff_cathasapp          : 0)
+           + ((ByteBuffer.equals(t.language(), this.language)) ? 255 << this.ranking.coeff_language    : 0);
         return r; // the higher the number the better the ranking.
     }
 

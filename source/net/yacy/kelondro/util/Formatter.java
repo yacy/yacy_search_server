@@ -69,7 +69,7 @@ public final class Formatter {
      * @param locale the {@link Locale} to set or <code>null</code> to set the special
      * empty locale to create unformatted numbers
      */
-    public static void setLocale(final Locale l) {
+    private static void setLocale(final Locale l) {
         locale = l;
     }
 
@@ -86,7 +86,7 @@ public final class Formatter {
         return (localized ? numForm.get().format(d) : cleanNumForm.get().format(d));
     }
 
-    public static String number(final double d) {
+    private static String number(final double d) {
         return numForm.get().format(d);
     }
 

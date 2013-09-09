@@ -32,12 +32,12 @@ import java.io.IOException;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.Network;
 import net.yacy.peers.Protocol;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public final class query {
 
@@ -49,8 +49,13 @@ public final class query {
 
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) ss;
-        final serverObjects prop = new serverObjects();
 
+        // remember the peer contact for peer statistics
+        final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
+        final String userAgent = header.get(HeaderFramework.USER_AGENT, "<unknown>");
+        sb.peers.peerActions.setUserAgent(clientip, userAgent);
+
+        final serverObjects prop = new serverObjects();
         prop.put("magic", Network.magic);
 
         if ((post == null) || (ss == null) || !Protocol.authentifyRequest(post, ss)) {
@@ -90,21 +95,21 @@ public final class query {
         if (obj.equals("rwiurlcount")) try {
             // the total number of different urls in the rwi is returned
             // <env> shall contain a word hash, the number of assigned lurls to this hash is returned
-            prop.put("response", sb.index.termIndex().get(env.getBytes(), null).size());
+            prop.put("response", sb.index.termIndex() == null ? 0 : sb.index.termIndex().get(env.getBytes(), null).size());
             return prop;
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         if (obj.equals("rwicount")) {
             // return the total number of available word indexes
-            prop.put("response", sb.index.termIndex().sizesMax());
+            prop.put("response", sb.index.RWICount());
             return prop;
         }
 
         if (obj.equals("lurlcount")) {
             // return the number of all available l-url's
-            prop.put("response", sb.index.urlMetadata().size());
+            prop.put("response", 1 /*sb.index.fulltext().collectionSize()*/); // patched to not call collectionSize() any more because the acutal size is not needed. Instead, rwicount should be called
             return prop;
         }
 

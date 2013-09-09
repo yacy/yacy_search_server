@@ -26,7 +26,8 @@ package net.yacy.peers.operation;
 
 import java.io.File;
 
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverSwitch;
+
 
 public interface yacySeedUploader {
     public String uploadSeedFile(serverSwitch sb, File seedFile) throws Exception;

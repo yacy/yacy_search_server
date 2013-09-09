@@ -33,18 +33,19 @@ import java.net.MalformedURLException;
 import java.util.Date;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.util.NumberTools;
+import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.retrieval.Request;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class QuickCrawlLink_p {
 
@@ -97,21 +98,21 @@ public class QuickCrawlLink_p {
         final String crawlingMustMatch  = post.get("mustmatch", CrawlProfile.MATCH_ALL_STRING);
         final String crawlingMustNotMatch  = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
         final int CrawlingDepth      = post.getInt("crawlingDepth", 0);
-        final boolean crawlDynamic   = post.get("crawlingQ", "").equals("on");
-        final boolean indexText      = post.get("indexText", "on").equals("on");
-        final boolean indexMedia     = post.get("indexMedia", "on").equals("on");
+        final boolean crawlingQ      = post.get("crawlingQ", "").equals("on");
+        final boolean followFrames   = post.get("followFrames", "").equals("on");
+        final boolean obeyHtmlRobotsNoindex = post.get("obeyHtmlRobotsNoindex", "").equals("on");
+        final boolean indexText      = post.get("indexText", "off").equals("on");
+        final boolean indexMedia     = post.get("indexMedia", "off").equals("on");
         final boolean storeHTCache   = post.get("storeHTCache", "").equals("on");
         final boolean remoteIndexing = post.get("crawlOrder", "").equals("on");
-        final boolean xsstopw        = post.get("xsstopw", "").equals("on");
-        final boolean xdstopw        = post.get("xdstopw", "").equals("on");
-        final boolean xpstopw        = post.get("xpstopw", "").equals("on");
+        final String collection      = post.get("collection", "user");
 
         prop.put("mode_url", (crawlingStart == null) ? "unknown" : crawlingStart);
         prop.putHTML("mode_title", (title == null) ? "unknown" : title);
 
         if (crawlingStart != null) {
             crawlingStart = crawlingStart.trim();
-            try {crawlingStart = new DigestURI(crawlingStart).toNormalform(true, true);} catch (final MalformedURLException e1) {}
+            try {crawlingStart = new DigestURI(crawlingStart).toNormalform(true);} catch (final MalformedURLException e1) {}
 
             // check if url is proper
             DigestURI crawlingStartURL = null;
@@ -124,7 +125,7 @@ public class QuickCrawlLink_p {
             }
 
             final byte[] urlhash = crawlingStartURL.hash();
-            indexSegment.urlMetadata().remove(urlhash);
+            indexSegment.fulltext().remove(urlhash);
             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
             sb.crawlQueues.errorURL.remove(urlhash);
 
@@ -132,26 +133,27 @@ public class QuickCrawlLink_p {
             CrawlProfile pe = null;
             try {
                 pe = new CrawlProfile(
-                        crawlingStartURL.getHost(),
-                        crawlingStartURL,
-                        crawlingMustMatch,
-                        CrawlProfile.MATCH_ALL_STRING,
-                        CrawlProfile.MATCH_NEVER_STRING,
-                        "",
-                        crawlingMustNotMatch,
+                        (crawlingStartURL.getHost() == null) ? crawlingStartURL.toNormalform(true) : crawlingStartURL.getHost(),
+                        crawlingMustMatch,               //crawlerUrlMustMatch
+                        crawlingMustNotMatch,            //crawlerUrlMustNotMatch
+                        CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
+                        CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
+                        CrawlProfile.MATCH_NEVER_STRING, //crawlerCountryMustMatch
+                        CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
+                        CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
+                        CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
+                        CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
+                        CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
                         CrawlingDepth,
                         true,
                         60 * 24 * 30, // recrawlIfOlder (minutes); here: one month
                         -1, // domMaxPages, if negative: no count restriction
-                        crawlDynamic,
-                        indexText,
-                        indexMedia,
-                        storeHTCache,
-                        remoteIndexing,
-                        xsstopw,
-                        xdstopw,
-                        xpstopw,
-                        CacheStrategy.IFFRESH);
+                        crawlingQ, followFrames, obeyHtmlRobotsNoindex,
+                        indexText, indexMedia,
+                        storeHTCache, remoteIndexing,
+                        CacheStrategy.IFFRESH,
+                        collection,
+                        ClientIdentification.yacyIntranetCrawlerAgentName);
                 sb.crawler.putActive(pe.handle().getBytes(), pe);
             } catch (final Exception e) {
                 // mist

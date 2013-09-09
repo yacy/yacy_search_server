@@ -34,32 +34,35 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.images.bmpParser.IMAGEMAP;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
 import com.drew.imaging.jpeg.JpegProcessingException;
 import com.drew.imaging.jpeg.JpegSegmentReader;
+import com.drew.lang.ByteArrayReader;
+import com.drew.lang.GeoLocation;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
-import com.drew.metadata.MetadataException;
 import com.drew.metadata.Tag;
 import com.drew.metadata.exif.ExifReader;
+import com.drew.metadata.exif.GpsDirectory;
 import com.drew.metadata.iptc.IptcReader;
 
 public class genericImageParser extends AbstractParser implements Parser {
@@ -99,22 +102,22 @@ public class genericImageParser extends AbstractParser implements Parser {
         String title = null;
         String author = null;
         String keywords = null;
-        String description = null;
-        if (mimeType.equals("image/bmp") ||
-            location.getFileExtension().equals("bmp")) {
+        List<String> descriptions = new ArrayList<String>();
+        String filename = location.getFileName();
+        String ext = MultiProtocolURI.getFileExtension(filename);
+        double gpslat = 0;
+        double gpslon = 0;        
+        if (mimeType.equals("image/bmp") || ext.equals("bmp")) {
             byte[] b;
             try {
                 b = FileUtils.read(sourceStream);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 throw new Parser.Failure(e.getMessage(), location);
             }
             final IMAGEMAP imap = bmpParser.parse(b);
             ii = parseJavaImage(location, imap.getImage());
-        } else if (mimeType.equals("image/jpg") ||
-                   location.getFileExtension().equals("jpg") ||
-                   location.getFileExtension().equals("jpeg") ||
-                   location.getFileExtension().equals("jpe")) {
+        } else if (mimeType.equals("image/jpeg") || ext.equals("jpg") || ext.equals("jpeg") || ext.equals("jpe")) {
             // use the exif parser from
             // http://www.drewnoakes.com/drewnoakes.com/code/exif/
             // javadoc is at: http://www.drewnoakes.com/drewnoakes.com/code/exif/javadoc/
@@ -123,7 +126,7 @@ public class genericImageParser extends AbstractParser implements Parser {
             try {
                 b = FileUtils.read(sourceStream);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 throw new Parser.Failure(e.getMessage(), location);
             }
 
@@ -131,51 +134,59 @@ public class genericImageParser extends AbstractParser implements Parser {
 
             JpegSegmentReader segmentReader;
             try {
-                segmentReader = new JpegSegmentReader(new ByteArrayInputStream(b));
+                /**/
+                segmentReader = new JpegSegmentReader(b);
 
                 final byte[] exifSegment = segmentReader.readSegment(JpegSegmentReader.SEGMENT_APP1);
                 final byte[] iptcSegment = segmentReader.readSegment(JpegSegmentReader.SEGMENT_APPD);
                 final Metadata metadata = new Metadata();
-                new ExifReader(exifSegment).extract(metadata);
-                new IptcReader(iptcSegment).extract(metadata);
-
-                @SuppressWarnings("unchecked")
-                final
-                Iterator<Directory> directories = metadata.getDirectoryIterator();
+                if (exifSegment != null) new ExifReader().extract(new ByteArrayReader(exifSegment),metadata);
+                if (iptcSegment != null) new IptcReader().extract(new ByteArrayReader(iptcSegment),metadata);
+                /**/
+                // alternative to above: to read all included jpeg tags and metadata 
+                // final Metadata metadata = JpegMetadataReader.readMetadata(new ByteArrayInputStream(b));                
+                
+                final Iterator<Directory> directories = metadata.getDirectories().iterator();
                 final HashMap<String, String> props = new HashMap<String, String>();
                 while (directories.hasNext()) {
                     final Directory directory = directories.next();
-                    @SuppressWarnings("unchecked")
-                    final
-                    Iterator<Tag> tags = directory.getTagIterator();
-                    while (tags.hasNext()) {
-                        final Tag tag = tags.next();
-                        try {
-                            props.put(tag.getTagName(), tag.getDescription());
-                            ii.info.append(tag.getTagName() + ": " + tag.getDescription() + " .\n");
-                        } catch (final MetadataException e) {
-                            //Log.logException(e);
+                    if (directory instanceof GpsDirectory) { // extracting GPS location                    
+                        GeoLocation geoloc = ((GpsDirectory) directory).getGeoLocation();
+                        if (geoloc != null) {
+                            gpslat = geoloc.getLatitude();
+                            gpslon = geoloc.getLongitude();
+                        }
+                    } else {
+                        final Iterator<Tag> tags = directory.getTags().iterator();
+                        while (tags.hasNext()) {
+                            final Tag tag = tags.next();
+                            if (!tag.getTagName().startsWith("Unknown")) { // filter out returned TagName of "Unknown tag"
+                                props.put(tag.getTagName(), tag.getDescription());
+                                ii.info.append(tag.getTagName() + ": " + tag.getDescription() + " .\n");
+                            }
                         }
                     }
-                    title = props.get("Image Description");
-                    if (title == null || title.length() == 0) title = props.get("Headline");
-                    if (title == null || title.length() == 0) title = props.get("Object Name");
-
-                    author = props.get("Artist");
-                    if (author == null || author.length() == 0) author = props.get("Writer/Editor");
-                    if (author == null || author.length() == 0) author = props.get("By-line");
-                    if (author == null || author.length() == 0) author = props.get("Credit");
-                    if (author == null || author.length() == 0) author = props.get("Make");
-
-                    keywords = props.get("Keywords");
-                    if (keywords == null || keywords.length() == 0) keywords = props.get("Category");
-                    if (keywords == null || keywords.length() == 0) keywords = props.get("Supplemental Category(s)");
-
-                    description = props.get("Caption/Abstract");
-                    if (description == null || description.length() == 0) description = props.get("Country/Primary Location");
-                    if (description == null || description.length() == 0) description = props.get("Province/State");
-                    if (description == null || description.length() == 0) description = props.get("Copyright Notice");
                 }
+                title = props.get("Image Description");
+                if (title == null || title.isEmpty()) title = props.get("Headline");
+                if (title == null || title.isEmpty()) title = props.get("Object Name");
+
+                author = props.get("Artist");
+                if (author == null || author.isEmpty()) author = props.get("Writer/Editor");
+                if (author == null || author.isEmpty()) author = props.get("By-line");
+                if (author == null || author.isEmpty()) author = props.get("Credit");
+                if (author == null || author.isEmpty()) author = props.get("Make");
+
+                keywords = props.get("Keywords");
+                if (keywords == null || keywords.isEmpty()) keywords = props.get("Category");
+                if (keywords == null || keywords.isEmpty()) keywords = props.get("Supplemental Category(s)");
+
+                String description;
+                description = props.get("Caption/Abstract"); if (description != null && description.length() > 0) descriptions.add("Abstract: " + description);
+                description = props.get("Country/Primary Location"); if (description != null && description.length() > 0) descriptions.add("Location: " + description);
+                description = props.get("Province/State"); if (description != null && description.length() > 0) descriptions.add("State: " + description);
+                description = props.get("Copyright Notice"); if (description != null && description.length() > 0) descriptions.add("Copyright: " + description);
+                
             } catch (final JpegProcessingException e) {
                 //Log.logException(e);
                 // just ignore
@@ -185,13 +196,13 @@ public class genericImageParser extends AbstractParser implements Parser {
         }
 
         final HashSet<String> languages = new HashSet<String>();
-        final HashMap<MultiProtocolURI, Properties> anchors = new HashMap<MultiProtocolURI, Properties>();
-        final HashMap<MultiProtocolURI, ImageEntry> images  = new HashMap<MultiProtocolURI, ImageEntry>();
+        final HashMap<DigestURI, Properties> anchors = new HashMap<DigestURI, Properties>();
+        final HashMap<DigestURI, ImageEntry> images  = new HashMap<DigestURI, ImageEntry>();
         // add this image to the map of images
         final String infoString = ii.info.toString();
         images.put(ii.location, new ImageEntry(location, "", ii.width, ii.height, -1));
 
-        if (title == null || title.length() == 0) title = MultiProtocolURI.unescape(location.getFileName());
+        if (title == null || title.isEmpty()) title = MultiProtocolURI.unescape(filename);
 
         return new Document[]{new Document(
              location,
@@ -200,13 +211,13 @@ public class genericImageParser extends AbstractParser implements Parser {
              this,
              languages,
              keywords == null ? new String[]{} : keywords.split(keywords.indexOf(',') > 0 ? "," : " "), // keywords
-             title, // title
+             singleList(title), // title
              author == null ? "" : author, // author
              location.getHost(), // Publisher
              new String[]{}, // sections
-             description == null ? "" : description, // description
-             0.0f, 0.0f, // TODO parse location
-             UTF8.getBytes(infoString), // content text
+             descriptions, // description
+             gpslon, gpslat, //  location
+             infoString, // content text
              anchors, // anchors
              null,
              images,
@@ -224,7 +235,7 @@ public class genericImageParser extends AbstractParser implements Parser {
     }
 
     public static ImageInfo parseJavaImage(
-                            final MultiProtocolURI location,
+                            final DigestURI location,
                             final InputStream sourceStream) throws Parser.Failure {
         BufferedImage image = null;
         try {
@@ -239,7 +250,7 @@ public class genericImageParser extends AbstractParser implements Parser {
     }
 
     public static ImageInfo parseJavaImage(
-                            final MultiProtocolURI location,
+                            final DigestURI location,
                             final BufferedImage image) {
         final ImageInfo ii = new ImageInfo(location);
         ii.image = image;
@@ -276,12 +287,12 @@ public class genericImageParser extends AbstractParser implements Parser {
     }
 
     public static class ImageInfo {
-        public MultiProtocolURI location;
+        public DigestURI location;
         public BufferedImage image;
         public StringBuilder info;
         public int height;
         public int width;
-        public ImageInfo(final MultiProtocolURI location) {
+        public ImageInfo(final DigestURI location) {
             this.location = location;
             this.image = null;
             this.info = new StringBuilder();
@@ -298,7 +309,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         DigestURI uri;
         try {
             uri = new DigestURI("http://localhost/" + image.getName());
-            final Document[] document = parser.parse(uri, "image/" + uri.getFileExtension(), "UTF-8", new FileInputStream(image));
+            final Document[] document = parser.parse(uri, "image/" + MultiProtocolURI.getFileExtension(uri.getFileName()), "UTF-8", new FileInputStream(image));
             System.out.println(document[0].toString());
         } catch (final MalformedURLException e) {
             e.printStackTrace();

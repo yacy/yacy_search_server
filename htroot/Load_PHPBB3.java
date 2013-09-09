@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -27,16 +27,16 @@
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class Load_PHPBB3 {
-    
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        
+
         // define visible variables
         String a = sb.peers.mySeed().getPublicAddress();
         if (a == null) a = "localhost:" + sb.getConfig("port", "8090");
@@ -44,7 +44,7 @@ public class Load_PHPBB3 {
         final String repository = "http://" + a + "/repository/";
         prop.put("starturl", (intranet) ? repository : "http://");
         prop.put("address", a);
-        
+
         // return rewrite properties
         return prop;
     }

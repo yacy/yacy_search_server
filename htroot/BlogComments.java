@@ -39,19 +39,19 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.BlogBoard;
+import net.yacy.data.BlogBoardComments;
+import net.yacy.data.MessageBoard;
+import net.yacy.data.UserDB;
+import net.yacy.data.BlogBoard.BlogEntry;
 import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 import com.google.common.io.Files;
 
-import de.anomic.data.BlogBoard;
-import de.anomic.data.BlogBoard.BlogEntry;
-import de.anomic.data.BlogBoardComments;
-import de.anomic.data.MessageBoard;
-import de.anomic.data.UserDB;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class BlogComments {
 
@@ -91,7 +91,7 @@ public class BlogComments {
         if ("anonymous".equals(strAuthor)) {
             strAuthor = sb.blogDB.guessAuthor(ip);
 
-            if (strAuthor == null || strAuthor.length() == 0) {
+            if (strAuthor == null || strAuthor.isEmpty()) {
                 if (sb.peers.mySeed() == null) {
                     strAuthor = "anonymous";
                 } else {
@@ -147,7 +147,7 @@ public class BlogComments {
                 try {
                     Files.copy(notifierSource, notifierDest);
                 } catch (final IOException e) {
-                    Log.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
+                    ConcurrentLog.severe("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
 
                 }
             }
@@ -320,7 +320,7 @@ public class BlogComments {
             email.print(new String(emailTxt));
             email.close();
         } catch (final Exception e) {
-            Network.log.logWarning("message: message forwarding via email failed. ",e);
+            Network.log.warn("message: message forwarding via email failed. ",e);
         }
     }
 }

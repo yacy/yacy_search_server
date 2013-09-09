@@ -28,19 +28,35 @@ package net.yacy.search.index;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.TreeMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.regex.Pattern;
+
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
+import net.yacy.cora.federate.solr.connector.SolrConnector;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
-import net.yacy.cora.services.federated.solr.SolrConnector;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.LookAheadIterator;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -52,23 +68,20 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
-import net.yacy.kelondro.data.word.WordReferenceVars;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
+import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ISO639;
-import net.yacy.kelondro.util.LookAheadIterator;
-import net.yacy.repository.Blacklist.BlacklistType;
+import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.repository.LoaderDispatcher;
-import net.yacy.search.Switchboard;
-import net.yacy.search.query.RWIProcess;
+import net.yacy.search.StorageQueueEntry;
 import net.yacy.search.query.SearchEvent;
-import de.anomic.crawler.retrieval.Response;
+import net.yacy.search.schema.CollectionConfiguration;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphConfiguration;
+import net.yacy.search.schema.WebgraphSchema;
 
 public class Segment {
 
@@ -88,90 +101,104 @@ public class Segment {
     public static final int  lowcachedivisor =  900;
     public static final long targetFileSize  = 64 * 1024 * 1024; // 256 MB
     public static final int  writeBufferSize = 4 * 1024 * 1024;
+    public static final String UrlDbName = "text.urlmd";
+    public static final String termIndexName = "text.index";
+    public static final String citationIndexName = "citation.index";
 
     // the reference factory
     public static final ReferenceFactory<WordReference> wordReferenceFactory = new WordReferenceFactory();
     public static final ReferenceFactory<CitationReference> citationReferenceFactory = new CitationReferenceFactory();
-    //public static final ReferenceFactory<NavigationReference> navigationReferenceFactory = new NavigationReferenceFactory();
     public static final ByteOrder wordOrder = Base64Order.enhancedCoder;
 
-    private   final Log                            log;
-    protected final IndexCell<WordReference>       termIndex;
-    protected final IndexCell<CitationReference>   urlCitationIndex;
-    //private   final IndexCell<NavigationReference> authorNavIndex;
-    protected final MetadataRepository             urlMetadata;
+    private   final ConcurrentLog                  log;
     private   final File                           segmentPath;
+    protected final Fulltext                       fulltext;
+    protected       IndexCell<WordReference>       termIndex;
+    protected       IndexCell<CitationReference>   urlCitationIndex;
+    private   WorkflowProcessor<StorageQueueEntry> indexingPutDocumentProcessor;
 
-    public Segment(
-            final Log log,
-            final File segmentPath,
-            final int entityCacheMaxSize,
-            final long maxFileSize,
-            final boolean useTailCache,
-            final boolean exceed134217727) throws IOException {
-
-        log.logInfo("Initializing Segment '" + segmentPath + ".");
-
+    /**
+     * create a new Segment
+     * @param log
+     * @param segmentPath that should be the path ponting to the directory "SEGMENT"
+     * @param collectionSchema
+     */
+    public Segment(final ConcurrentLog log, final File segmentPath,
+            final CollectionConfiguration collectionConfiguration, final WebgraphConfiguration webgraphConfiguration) {
+        log.info("Initializing Segment '" + segmentPath + ".");
         this.log = log;
         this.segmentPath = segmentPath;
 
-        this.termIndex = new IndexCell<WordReference>(
-                segmentPath,
-                "text.index",
-                wordReferenceFactory,
-                wordOrder,
-                Word.commonHashLength,
-                entityCacheMaxSize,
-                targetFileSize,
-                maxFileSize,
-                writeBufferSize);
-
-        this.urlCitationIndex = new IndexCell<CitationReference>(
-                segmentPath,
-                "citation.index",
-                citationReferenceFactory,
-                wordOrder,
-                Word.commonHashLength,
-                entityCacheMaxSize,
-                targetFileSize,
-                maxFileSize,
-                writeBufferSize);
-
         // create LURL-db
-        this.urlMetadata = new MetadataRepository(segmentPath, "text.urlmd", useTailCache, exceed134217727);
-        //this.connectLocalSolr();
+        this.fulltext = new Fulltext(segmentPath, collectionConfiguration, webgraphConfiguration);
+        this.termIndex = null;
+        this.urlCitationIndex = null;
+
+        this.indexingPutDocumentProcessor = new WorkflowProcessor<StorageQueueEntry>(
+                "putDocument",
+                "solr document put queueing",
+                new String[] {},
+                this,
+                "putDocument",
+                10,
+                null,
+                1);
+    }
+    
+    public boolean connectedRWI() {
+        return this.termIndex != null;
     }
 
-    public long URLCount() {
-        return this.urlMetadata.size();
+    public void connectRWI(final int entityCacheMaxSize, final long maxFileSize) throws IOException {
+        if (this.termIndex != null) return;
+        this.termIndex = new IndexCell<WordReference>(
+                        new File(this.segmentPath, "default"),
+                        termIndexName,
+                        wordReferenceFactory,
+                        wordOrder,
+                        Word.commonHashLength,
+                        entityCacheMaxSize,
+                        targetFileSize,
+                        maxFileSize,
+                        writeBufferSize);
     }
 
-    public long RWICount() {
-        return this.termIndex.sizesMax();
+    public void disconnectRWI() {
+        if (this.termIndex == null) return;
+        this.termIndex.close();
+        this.termIndex = null;
     }
 
-    public int RWIBufferCount() {
-        return this.termIndex.getBufferSize();
+    public boolean connectedCitation() {
+        return this.urlCitationIndex != null;
     }
 
-    public void connectRemoteSolr(final SolrConnector solr) {
-        this.urlMetadata.connectRemoteSolr(solr);
+    public void connectCitation(final int entityCacheMaxSize, final long maxFileSize) throws IOException {
+        if (this.urlCitationIndex != null) return;
+        this.urlCitationIndex = new IndexCell<CitationReference>(
+                        new File(this.segmentPath, "default"),
+                        citationIndexName,
+                        citationReferenceFactory,
+                        wordOrder,
+                        Word.commonHashLength,
+                        entityCacheMaxSize,
+                        targetFileSize,
+                        maxFileSize,
+                        writeBufferSize);
     }
 
-    public void connectLocalSolr() throws IOException {
-        this.urlMetadata.connectLocalSolr();
+    public void disconnectCitation() {
+        if (this.urlCitationIndex == null) return;
+        this.urlCitationIndex.close();
+        this.urlCitationIndex = null;
     }
 
-    public SolrConnector getRemoteSolr() {
-        return this.urlMetadata.getRemoteSolr();
+    public void connectUrlDb(final boolean useTailCache, final boolean exceed134217727) {
+        this.fulltext.connectUrlDb(UrlDbName, useTailCache, exceed134217727);
     }
 
-    public SolrConnector getLocalSolr() {
-        return this.urlMetadata.getLocalSolr();
-    }
-
-    public MetadataRepository urlMetadata() {
-        return this.urlMetadata;
+    public Fulltext fulltext() {
+        return this.fulltext;
     }
 
     public IndexCell<WordReference> termIndex() {
@@ -182,30 +209,218 @@ public class Segment {
         return this.urlCitationIndex;
     }
 
-    public boolean exists(final byte[] urlhash) {
-        return this.urlMetadata.exists(urlhash);
+    /**
+     * compute the click level using the citation reference database
+     * @param citations the citation database
+     * @param searchhash the hash of the url to be checked
+     * @return the clickdepth level or 999 if the root url cannot be found or a recursion limit is reached
+     * @throws IOException
+     */
+    public int getClickDepth(final DigestURI url) throws IOException {
+
+        final byte[] searchhash = url.hash();
+        RowHandleSet rootCandidates = url.getPossibleRootHashes();
+        
+        RowHandleSet ignore = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100); // a set of urlhashes to be ignored. This is generated from all hashes that are seen during recursion to prevent enless loops
+        RowHandleSet levelhashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 1); // all hashes of a clickdepth. The first call contains the target hash only and therefore just one entry
+        try {levelhashes.put(searchhash);} catch (final SpaceExceededException e) {throw new IOException(e);}
+        int leveldepth = 0; // the recursion depth and therefore the result depth-1. Shall be 0 for the first call
+        final byte[] hosthash = new byte[6]; // the host of the url to be checked
+        System.arraycopy(searchhash, 6, hosthash, 0, 6);
+        
+        long timeout = System.currentTimeMillis() + 10000;
+        for (int maxdepth = 0; maxdepth < 10 && System.currentTimeMillis() < timeout; maxdepth++) {
+            
+            RowHandleSet checknext = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
+            
+            // loop over all hashes at this clickdepth; the first call to this loop should contain only one hash and a leveldepth = 0
+            checkloop: for (byte[] urlhash: levelhashes) {
+    
+                // get all the citations for this url and iterate
+                ReferenceContainer<CitationReference> references = this.urlCitationIndex.get(urlhash, null);
+                if (references == null || references.size() == 0) continue checkloop; // don't know
+                Iterator<CitationReference> i = references.entries();
+                nextloop: while (i.hasNext()) {
+                    CitationReference ref = i.next();
+                    if (ref == null) continue nextloop;
+                    byte[] u = ref.urlhash();
+                    
+                    // check ignore
+                    if (ignore.has(u)) continue nextloop;
+                    
+                    // check if this is from the same host
+                    if (!ByteBuffer.equals(u, 6, hosthash, 0, 6)) continue nextloop;
+                    
+                    // check if the url is a root url
+                    if (rootCandidates.has(u)) {
+                        return leveldepth + 1;
+                    }
+                    
+                    // step to next depth level
+                    try {checknext.put(u);} catch (final SpaceExceededException e) {}
+                    try {ignore.put(u);} catch (final SpaceExceededException e) {}
+                }
+            }
+            leveldepth++;
+            levelhashes = checknext;
+        
+        }
+        return 999;
     }
 
+    public ReferenceReportCache getReferenceReportCache()  {
+        return new ReferenceReportCache();
+    }
+    
+    public class ReferenceReportCache {
+        Map<byte[], ReferenceReport> cache;
+        public ReferenceReportCache() {
+            this.cache = new TreeMap<byte[], ReferenceReport>(Base64Order.enhancedCoder);
+        }
+        public ReferenceReport getReferenceReport(final byte[] id, final boolean acceptSelfReference) throws IOException {
+            ReferenceReport rr = cache.get(id);
+            if (rr != null) return rr;
+            try {
+                rr = new ReferenceReport(id, acceptSelfReference);
+                cache.put(id, rr);
+                return rr;
+            } catch (final SpaceExceededException e) {
+                ConcurrentLog.logException(e);
+                throw new IOException(e.getMessage());
+            }
+        }
+    }
+    
     /**
-     * discover all urls that belong to a specific host
-     * and return an iterator for the url hashes of those urls
-     * @param host
-     * @return an iterator for all url hashes that belong to a specific host
+     * A ReferenceReport object is a container for all referenced to a specific url.
+     * The class stores the number of links from domain-internal and domain-external backlinks,
+     * and the host hashes of all externally linking documents,
+     * all IDs from external hosts and all IDs from the same domain.
      */
-    public Iterator<byte[]> hostSelector(String host) {
-        String hh = DigestURI.hosthash(host);
-        final HandleSet ref = new HandleSet(12, Base64Order.enhancedCoder, 100);
-        for (byte[] b: this.urlMetadata) {
-            if (hh.equals(ASCII.String(b, 6, 6))) {
+    public final class ReferenceReport {
+        private int internal, external;
+        private HandleSet externalHosts, externalIDs, internalIDs;
+        public ReferenceReport(final byte[] id, final boolean acceptSelfReference) throws IOException, SpaceExceededException {
+            this.internal = 0;
+            this.external = 0;
+            this.externalHosts = new RowHandleSet(6, Base64Order.enhancedCoder, 0);
+            this.internalIDs = new RowHandleSet(12, Base64Order.enhancedCoder, 0);
+            this.externalIDs = new RowHandleSet(12, Base64Order.enhancedCoder, 0);
+            if (Segment.this.fulltext.writeToWebgraph()) {
+                // reqd the references from the webgraph
+                SolrConnector webgraph = Segment.this.fulltext.getWebgraphConnector();
+                webgraph.commit(true);
+                BlockingQueue<SolrDocument> docs = webgraph.concurrentDocumentsByQuery(WebgraphSchema.target_id_s.getSolrFieldName() + ":\"" + ASCII.String(id) + "\"", 0, 10000000, 600000, 100, WebgraphSchema.source_id_s.getSolrFieldName());
+                SolrDocument doc;
                 try {
-                    ref.putUnique(b);
-                } catch (RowSpaceExceededException e) {
-                    Log.logException(e);
-                    break;
+                    while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+                        String refid = (String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName());
+                        if (refid == null) continue;
+                        byte[] refidh = ASCII.getBytes(refid);
+                        byte[] hh = new byte[6]; // host hash
+                        System.arraycopy(refidh, 6, hh, 0, 6);
+                        if (ByteBuffer.equals(hh, 0, id, 6, 6)) {
+                            if (acceptSelfReference || !ByteBuffer.equals(refidh, id)) {
+                                internalIDs.put(refidh);
+                                internal++;
+                            }
+                        } else {
+                            externalHosts.put(hh);
+                            externalIDs.put(refidh);
+                            external++;
+                        }
+                    }
+                } catch (final InterruptedException e) {
+                    ConcurrentLog.logException(e);
+                }
+            } else if (connectedCitation()) {
+                // read the references from the citation index
+                ReferenceContainer<CitationReference> references;
+                references = urlCitation().get(id, null);
+                if (references == null) return; // no references at all
+                Iterator<CitationReference> ri = references.entries();
+                while (ri.hasNext()) {
+                    CitationReference ref = ri.next();
+                    byte[] hh = ref.hosthash(); // host hash
+                    if (ByteBuffer.equals(hh, 0, id, 6, 6)) {
+                        internalIDs.put(ref.urlhash());
+                        internal++;
+                    } else {
+                        externalHosts.put(hh);
+                        externalIDs.put(ref.urlhash());
+                        external++;
+                    }
                 }
             }
         }
-        return ref.iterator();
+        public int getInternalCount() {
+            return this.internal;
+        }
+        public int getExternalCount() {
+            return this.external;
+        }
+        public HandleSet getExternalHostIDs() {
+            return this.externalHosts;
+        }
+        public HandleSet getExternalIDs() {
+            return this.externalIDs;
+        }
+        public HandleSet getInternallIDs() {
+            return this.internalIDs;
+        }
+    }
+    
+    public long RWICount() {
+        if (this.termIndex == null) return 0;
+        return this.termIndex.sizesMax();
+    }
+    
+    public long RWISegmentCount() {
+        if (this.termIndex == null) return 0;
+        return this.termIndex.getSegmentCount();
+    }
+
+    public int RWIBufferCount() {
+        if (this.termIndex == null) return 0;
+        return this.termIndex.getBufferSize();
+    }
+
+    /**
+     * get a guess about the word count. This is only a guess because it uses the term index if present and this index may be
+     * influenced by index transmission processes in its statistic word distribution. However, it can be a hint for heuristics
+     * which use the word count. Please do NOT use this if the termIndex is not present because it otherwise uses the solr index
+     * which makes it painfull slow.
+     * @param word
+     * @return the number of references for this word.
+     */
+    public int getWordCountGuess(String word) {
+        if (this.fulltext.getDefaultConnector() == null) return 0;
+        if (word == null || word.indexOf(':') >= 0 || word.indexOf(' ') >= 0 || word.indexOf('/') >= 0) return 0;
+        if (this.termIndex != null) {
+            int count = this.termIndex.count(Word.word2hash(word));
+            if (count > 0) return count;
+        }
+        try {
+            return (int) this.fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.text_t.getSolrFieldName() + ":\"" + word + "\"");
+        } catch (final Throwable e) {
+            ConcurrentLog.logException(e);
+            return 0;
+        }
+    }
+
+    @Deprecated
+    public boolean exists(final String urlhash) {
+        return this.fulltext.exists(urlhash);
+    }
+
+    /**
+     * Multiple-test for existing url hashes in the search index.
+     * All given ids are tested and a subset of the given ids are returned.
+     * @param ids
+     * @return a set of ids which exist in the database
+     */
+    public Set<String> exists(final Collection<String> ids) {
+        return this.fulltext.exists(ids);
     }
 
     /**
@@ -213,215 +428,97 @@ public class Segment {
      * @param stub
      * @return an iterator for all matching urls
      */
-    public Iterator<DigestURI> urlSelector(MultiProtocolURI stub) {
-        final String host = stub.getHost();
-        final Iterator<byte[]> bi = hostSelector(host);
-        final String urlstub = stub.toNormalform(false, false);
-
-        // get all urls from the specific domain
-        final Iterator<DigestURI> urls = new Iterator<DigestURI>() {
-            @Override
-            public boolean hasNext() {
-                return bi.hasNext();
-            }
-            @Override
-            public DigestURI next() {
-                URIMetadataRow umr = Segment.this.urlMetadata.load(bi.next());
-                return umr.url();
-            }
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
+    public Iterator<DigestURI> urlSelector(final MultiProtocolURI stub, final long maxtime, final int maxcount) {
+        final BlockingQueue<SolrDocument> docQueue;
+        final String urlstub;
+        if (stub == null) {
+            docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(AbstractSolrConnector.CATCHALL_TERM, 0, Integer.MAX_VALUE, maxtime, maxcount, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+            urlstub = null;
+        } else {
+            final String host = stub.getHost();
+            String hh = DigestURI.hosthash(host);
+            docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(CollectionSchema.host_id_s + ":\"" + hh + "\"", 0, Integer.MAX_VALUE, maxtime, maxcount, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
+            urlstub = stub.toNormalform(true);
+        }
 
         // now filter the stub from the iterated urls
         return new LookAheadIterator<DigestURI>() {
             @Override
             protected DigestURI next0() {
-                DigestURI u;
-                while (urls.hasNext()) {
-                    u = urls.next();
-                    if (u.toNormalform(false, false).startsWith(urlstub)) return u;
+                while (true) {
+                    SolrDocument doc;
+                    try {
+                        doc = docQueue.take();
+                    } catch (final InterruptedException e) {
+                        ConcurrentLog.logException(e);
+                        return null;
+                    }
+                    if (doc == null || doc == AbstractSolrConnector.POISON_DOCUMENT) return null;
+                    String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+                    String id =  (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
+                    DigestURI url;
+                    try {
+                        url = new DigestURI(u, ASCII.getBytes(id));
+                    } catch (final MalformedURLException e) {
+                        continue;
+                    }
+                    if (urlstub == null || u.startsWith(urlstub)) return url;
                 }
-                return null;
             }
         };
     }
 
     public void clear() {
         try {
-            this.termIndex.clear();
-            this.urlMetadata.clear();
-            this.urlCitationIndex.clear();
+            if (this.termIndex != null) this.termIndex.clear();
+            if (this.fulltext != null) this.fulltext.clearURLIndex();
+            if (this.fulltext != null) this.fulltext.clearLocalSolr();
+            if (this.fulltext != null) this.fulltext.clearRemoteSolr();
+            if (this.urlCitationIndex != null) this.urlCitationIndex.clear();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
-        if (Switchboard.getSwitchboard() != null &&
-            Switchboard.getSwitchboard().peers != null &&
-            Switchboard.getSwitchboard().peers.mySeed() != null) Switchboard.getSwitchboard().peers.mySeed().resetCounters();
+    }
+    
+    public void clearCache() {
+        if (this.urlCitationIndex != null) this.urlCitationIndex.clearCache();
+        if (this.termIndex != null) this.termIndex.clearCache();
+        this.fulltext.clearCache();
     }
 
     public File getLocation() {
         return this.segmentPath;
     }
 
-    /**
-     * this is called by the switchboard to put in a new page into the index
-     * use all the words in one condenser object to simultanous create index entries
-     *
-     * @param url
-     * @param urlModified
-     * @param document
-     * @param condenser
-     * @param language
-     * @param doctype
-     * @param outlinksSame
-     * @param outlinksOther
-     * @return
-     */
-    private int addPageIndex(
-            final DigestURI url,
-            final Date urlModified,
-            final Document document,
-            final Condenser condenser,
-            final String language,
-            final char doctype,
-            final int outlinksSame,
-            final int outlinksOther,
-            final SearchEvent searchEvent,
-            final String sourceName) {
-        final RWIProcess rankingProcess = (searchEvent == null) ? null : searchEvent.getRankingResult();
-        int wordCount = 0;
-        final int urlLength = url.toNormalform(true, true).length();
-        final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
-
-        // iterate over all words of content text
-        final Iterator<Map.Entry<String, Word>> i = condenser.words().entrySet().iterator();
-        Map.Entry<String, Word> wentry;
-        String word;
-        final int len = (document == null) ? urlLength : document.dc_title().length();
-        final WordReferenceRow ientry = new WordReferenceRow(url.hash(),
-                                urlLength, urlComps, len,
-                                condenser.RESULT_NUMB_WORDS,
-                                condenser.RESULT_NUMB_SENTENCES,
-                                urlModified.getTime(),
-                                System.currentTimeMillis(),
-                                UTF8.getBytes(language),
-                                doctype,
-                                outlinksSame, outlinksOther);
-        Word wprop = null;
-        byte[] wordhash;
-        while (i.hasNext()) {
-            wentry = i.next();
-            word = wentry.getKey();
-            wprop = wentry.getValue();
-            assert (wprop.flags != null);
-            ientry.setWord(wprop);
-            wordhash = Word.word2hash(word);
-            try {
-                this.termIndex.add(wordhash, ientry);
-            } catch (final Exception e) {
-                Log.logException(e);
-            }
-            wordCount++;
-
-            // during a search event it is possible that a heuristic is used which aquires index
-            // data during search-time. To transfer indexed data directly to the search process
-            // the following lines push the index data additionally to the search process
-            // this is done only for searched words
-            if (searchEvent != null && !searchEvent.getQuery().excludeHashes.has(wordhash) && searchEvent.getQuery().queryHashes.has(wordhash)) {
-                // if the page was added in the context of a heuristic this shall ensure that findings will fire directly into the search result
-                ReferenceContainer<WordReference> container;
-                try {
-                    container = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhash, 1);
-                    container.add(ientry);
-                    rankingProcess.add(container, true, sourceName, -1, !i.hasNext(), 5000);
-                } catch (final RowSpaceExceededException e) {
-                    continue;
-                }
-            }
-        }
-
-        // assign the catchall word
-        ientry.setWord(wprop == null ? catchallWord : wprop); // we use one of the word properties as template to get the document characteristics
-        try {
-            this.termIndex.add(catchallHash, ientry);
-        } catch (final Exception e) {
-            Log.logException(e);
-        }
-
-        return wordCount;
-    }
-
-    private int addCitationIndex(final DigestURI url, final Date urlModified, final Map<MultiProtocolURI, Properties> anchors) {
-    	if (anchors == null) return 0;
-    	int refCount = 0;
-
-        // iterate over all outgoing links, this will create a context for those links
-        final byte[] urlhash = url.hash();
-        final long urldate = urlModified.getTime();
-        for (Map.Entry<MultiProtocolURI, Properties> anchorEntry: anchors.entrySet()) {
-        	MultiProtocolURI anchor = anchorEntry.getKey();
-        	byte[] refhash = new DigestURI(anchor).hash();
-        	//System.out.println("*** addCitationIndex: urlhash = " + ASCII.String(urlhash) + ", refhash = " + ASCII.String(refhash) + ", urldate = " + urlModified.toString());
-            try {
-                this.urlCitationIndex.add(refhash, new CitationReference(urlhash, urldate));
-            } catch (final Exception e) {
-                Log.logException(e);
-            }
-            refCount++;
-        }
-        return refCount;
-    }
-
     public synchronized void close() {
-        this.termIndex.close();
-        this.urlMetadata.close();
-        this.urlCitationIndex.close();
+        this.indexingPutDocumentProcessor.shutdown();
+    	if (this.termIndex != null) this.termIndex.close();
+        if (this.fulltext != null) this.fulltext.close();
+        if (this.urlCitationIndex != null) this.urlCitationIndex.close();
     }
 
-    public URIMetadataRow storeDocument(
-            final DigestURI url,
-            final DigestURI referrerURL,
-            Date modDate,
-            final Date loadDate,
-            final long sourcesize,
-            final Document document,
-            final Condenser condenser,
-            final SearchEvent searchEvent,
-            final String sourceName
-            ) throws IOException {
-        final long startTime = System.currentTimeMillis();
-
-        // CREATE INDEX
-
-        // load some document metadata
-        final String dc_title = document.dc_title();
-
-        // do a identification of the language
+    private static String votedLanguage(
+                    final DigestURI url,
+                    final String urlNormalform,
+                    final Document document,
+                    final Condenser condenser) {
+     // do a identification of the language
         String language = condenser.language(); // this is a statistical analysation of the content: will be compared with other attributes
         final String bymetadata = document.dc_language(); // the languageByMetadata may return null if there was no declaration
         if (language == null) {
             // no statistics available, we take either the metadata (if given) or the TLD
             language = (bymetadata == null) ? url.language() : bymetadata;
-            if (this.log.isFine()) this.log.logFine("LANGUAGE-BY-STATISTICS: " + url + " FAILED, taking " + ((bymetadata == null) ? "TLD" : "metadata") + ": " + language);
         } else {
             if (bymetadata == null) {
                 // two possible results: compare and report conflicts
-                if (language.equals(url.language()))
-                    if (this.log.isFine()) this.log.logFine("LANGUAGE-BY-STATISTICS: " + url + " CONFIRMED - TLD IDENTICAL: " + language);
-                else {
-                    final String error = "LANGUAGE-BY-STATISTICS: " + url + " CONFLICTING: " + language + " (the language given by the TLD is " + url.language() + ")";
+                if (!language.equals(url.language())) {
                     // see if we have a hint in the url that the statistic was right
-                    final String u = url.toNormalform(true, false).toLowerCase();
+                    final String u = urlNormalform.toLowerCase();
                     if (!u.contains("/" + language + "/") && !u.contains("/" + ISO639.country(language).toLowerCase() + "/")) {
                         // no confirmation using the url, use the TLD
                         language = url.language();
-                        if (this.log.isFine()) this.log.logFine(error + ", corrected using the TLD");
                     } else {
                         // this is a strong hint that the statistics was in fact correct
-                        if (this.log.isFine()) this.log.logFine(error + ", but the url proves that the statistic is correct");
                     }
                 }
             } else {
@@ -439,85 +536,184 @@ public class Segment {
                 }
             }
         }
+        return language;
+    }
 
-        // create a new loaded URL db entry
-        if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
-        final URIMetadataRow newEntry = new URIMetadataRow(
-                url,                                       // URL
-                dc_title,                                  // document description
-                document.dc_creator(),                     // author
-                document.dc_subject(' '),                  // tags
-                document.dc_publisher(),                   // publisher (may be important to get location data)
-                document.lon(),                            // decimal degrees as in WGS84;
-                document.lat(),                            // if unknown both values may be 0.0d;
-                modDate,                                   // modification date
-                loadDate,                                  // loaded date
-                new Date(loadDate.getTime() + Math.max(0, loadDate.getTime() - modDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula
-                (referrerURL == null) ? null : ASCII.String(referrerURL.hash()),            // referer hash
-                new byte[0],                               // md5
-                (int) sourcesize,                          // size
-                condenser.RESULT_NUMB_WORDS,               // word count
-                Response.docType(document.dc_format()),    // doctype
-                condenser.RESULT_FLAGS,                    // flags
-                UTF8.getBytes(language),                   // language
-                document.inboundLinks().size(),            // inbound links
-                document.outboundLinks().size(),           // outbound links
-                document.getAudiolinks().size(),           // laudio
-                document.getImages().size(),               // limage
-                document.getVideolinks().size(),           // lvideo
-                document.getApplinks().size()              // lapp
-        );
+    public void storeRWI(final ReferenceContainer<WordReference> wordContainer) throws IOException, SpaceExceededException {
+        if (this.termIndex != null) this.termIndex.add(wordContainer);
+    }
+
+    public void storeRWI(final byte[] termHash, final WordReference entry) throws IOException, SpaceExceededException {
+        if (this.termIndex != null) this.termIndex.add(termHash, entry);
+    }
+
+    /**
+     * putDocument should not be called directly; instead, put queueEntries to
+     * indexingPutDocumentProcessor
+     * (this must be public, otherwise the WorkflowProcessor - calling by reflection - does not work)
+     * ATTENTION: do not remove! profiling tools will show that this is not called, which is not true (using reflection)
+     * @param queueEntry
+     * @throws IOException
+     */
+    public void putDocument(final StorageQueueEntry queueEntry) {
+        try {
+            this.fulltext().putDocument(queueEntry.queueEntry);
+        } catch (final IOException e) {
+            ConcurrentLog.logException(e);
+        }
+    }
+    
+    /**
+     * put a solr document into the index. This is the right point to call when enqueueing of solr document is wanted.
+     * This method exist to prevent that solr is filled concurrently with data which makes it fail or throw strange exceptions.
+     * @param queueEntry
+     */
+    public void putDocumentInQueue(final SolrInputDocument queueEntry) {
+        this.indexingPutDocumentProcessor.enQueue(new StorageQueueEntry(queueEntry));
+    }
+
+    public SolrInputDocument storeDocument(
+            final DigestURI url,
+            final DigestURI referrerURL,
+            final Map<String, Pattern> collections,
+            final ResponseHeader responseHeader,
+            final Document document,
+            final Condenser condenser,
+            final SearchEvent searchEvent,
+            final String sourceName,
+            final boolean storeToRWI
+            ) {
+        final long startTime = System.currentTimeMillis();
+        
+        // CREATE INDEX
+
+        // load some document metadata
+        final Date loadDate = new Date();
+        final String id = ASCII.String(url.hash());
+        final String dc_title = document.dc_title();
+        final String urlNormalform = url.toNormalform(true);
+        final String language = votedLanguage(url, urlNormalform, document, condenser); // identification of the language
 
         // STORE URL TO LOADED-URL-DB
-        this.urlMetadata.store(newEntry); // TODO: should be serialized; integrated in IODispatcher
-
+        Date modDate = responseHeader == null ? new Date() : responseHeader.lastModified();
+        if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
+        char docType = Response.docType(document.dc_format());
+        
+        // CREATE SOLR DOCUMENT
+        final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(id, collections, responseHeader, document, condenser, referrerURL, language, urlCitationIndex, this.fulltext.getWebgraphConfiguration());
+        
+        // ENRICH DOCUMENT WITH RANKING INFORMATION
+        if (this.connectedCitation()) {
+            this.fulltext.getDefaultConfiguration().postprocessing_references(this.getReferenceReportCache(), null, vector, url, null);
+        }
+        // STORE TO SOLR
+        String error = null;
+        this.putDocumentInQueue(vector);
+        if (this.fulltext.writeToWebgraph()) {
+            tryloop: for (int i = 0; i < 20; i++) {
+                try {
+                    error = null;
+                    this.fulltext.putEdges(vector.getWebgraphDocuments());
+                    break tryloop;
+                } catch (final IOException e ) {
+                    error = "failed to send " + urlNormalform + " to solr: " + e.getMessage();
+                    ConcurrentLog.warn("SOLR", error);
+                    if (i == 10) this.fulltext.commit(true);
+                    try {Thread.sleep(1000);} catch (final InterruptedException e1) {}
+                    continue tryloop;
+                }
+            }
+        }
+        if (error != null) {
+            ConcurrentLog.severe("SOLR", error + ", PLEASE REPORT TO bugs.yacy.net");
+            //Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, error);
+            //Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, error);
+        }
         final long storageEndTime = System.currentTimeMillis();
 
         // STORE PAGE INDEX INTO WORD INDEX DB
-        final int words = addPageIndex(
-                url,                                          // document url
-                modDate,                                      // document mod date
-                document,                                     // document content
-                condenser,                                    // document condenser
-                language,                                     // document language
-                Response.docType(document.dc_format()),       // document type
-                document.inboundLinks().size(),               // inbound links
-                document.outboundLinks().size(),              // outbound links
-                searchEvent,                                  // a search event that can have results directly
-                sourceName                                    // the name of the source where the index was created
-        );
+        int outlinksSame = document.inboundLinks().size();
+        int outlinksOther = document.outboundLinks().size();
+        final int urlLength = urlNormalform.length();
+        final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
 
-        // STORE PAGE REFERENCES INTO CITATION INDEX
-        final int refs = addCitationIndex(url, modDate, document.getAnchors());
+        // create a word prototype which is re-used for all entries
+        if ((this.termIndex != null && storeToRWI) || searchEvent != null) {
+            final int len = (document == null) ? urlLength : document.dc_title().length();
+            final WordReferenceRow ientry = new WordReferenceRow(
+                            url.hash(),
+                            urlLength, urlComps, len,
+                            condenser.RESULT_NUMB_WORDS,
+                            condenser.RESULT_NUMB_SENTENCES,
+                            modDate.getTime(),
+                            System.currentTimeMillis(),
+                            UTF8.getBytes(language),
+                            docType,
+                            outlinksSame, outlinksOther);
+    
+            // iterate over all words of content text
+            Word wprop = null;
+            byte[] wordhash;
+            String word;
+            for (Map.Entry<String, Word> wentry: condenser.words().entrySet()) {
+                word = wentry.getKey();
+                wprop = wentry.getValue();
+                assert (wprop.flags != null);
+                ientry.setWord(wprop);
+                wordhash = Word.word2hash(word);
+                if (this.termIndex != null && storeToRWI) try {
+                    this.termIndex.add(wordhash, ientry);
+                } catch (final Exception e) {
+                    ConcurrentLog.logException(e);
+                }
+    
+                // during a search event it is possible that a heuristic is used which aquires index
+                // data during search-time. To transfer indexed data directly to the search process
+                // the following lines push the index data additionally to the search process
+                // this is done only for searched words
+                if (searchEvent != null && !searchEvent.query.getQueryGoal().getExcludeHashes().has(wordhash) && searchEvent.query.getQueryGoal().getIncludeHashes().has(wordhash)) {
+                    // if the page was added in the context of a heuristic this shall ensure that findings will fire directly into the search result
+                    ReferenceContainer<WordReference> container;
+                    try {
+                        container = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhash, 1);
+                        container.add(ientry);
+                        searchEvent.addRWIs(container, true, sourceName, 1, 5000);
+                    } catch (final SpaceExceededException e) {
+                        continue;
+                    }
+                }
+            }
+            if (searchEvent != null) searchEvent.addFinalize();
+    
+            // assign the catchall word
+            ientry.setWord(wprop == null ? catchallWord : wprop); // we use one of the word properties as template to get the document characteristics
+            if (this.termIndex != null) try {
+                this.termIndex.add(catchallHash, ientry);
+            } catch (final Exception e) {
+                ConcurrentLog.logException(e);
+            }
+        }
 
         // finish index time
         final long indexingEndTime = System.currentTimeMillis();
 
         if (this.log.isInfo()) {
-            // TODO: UTF-8 docDescription seems not to be displayed correctly because
-            // of string concatenation
-            this.log.logInfo("*Indexed " + words + " words in URL " + url +
-                    " [" + ASCII.String(url.hash()) + "]" +
+            this.log.info("*Indexed " + condenser.words().size() + " words in URL " + url +
+                    " [" + id + "]" +
                     "\n\tDescription:  " + dc_title +
                     "\n\tMimeType: "  + document.dc_format() + " | Charset: " + document.getCharset() + " | " +
                     "Size: " + document.getTextLength() + " bytes | " +
-                    "Anchors: " + refs +
+                    //"Anchors: " + refs +
                     "\n\tLinkStorageTime: " + (storageEndTime - startTime) + " ms | " +
                     "indexStorageTime: " + (indexingEndTime - storageEndTime) + " ms");
         }
 
         // finished
-        return newEntry;
+        return vector;
     }
 
-
-    // method for index deletion
-    public int removeAllUrlReferences(final DigestURI url, final LoaderDispatcher loader, final CacheStrategy cacheStrategy) {
-        return removeAllUrlReferences(url.hash(), loader, cacheStrategy);
-    }
-
-    public void removeAllUrlReferences(final HandleSet urls, final LoaderDispatcher loader, final CacheStrategy cacheStrategy) {
-        for (final byte[] urlhash: urls) removeAllUrlReferences(urlhash, loader, cacheStrategy);
+    public void removeAllUrlReferences(final HandleSet urls, final LoaderDispatcher loader, final ClientIdentification.Agent agent, final CacheStrategy cacheStrategy) {
+        for (final byte[] urlhash: urls) removeAllUrlReferences(urlhash, loader, agent, cacheStrategy);
     }
 
     /**
@@ -528,164 +724,38 @@ public class Segment {
      * @param cacheStrategy
      * @return number of removed words
      */
-    public int removeAllUrlReferences(final byte[] urlhash, final LoaderDispatcher loader, final CacheStrategy cacheStrategy) {
+    public int removeAllUrlReferences(final byte[] urlhash, final LoaderDispatcher loader, final ClientIdentification.Agent agent, final CacheStrategy cacheStrategy) {
 
         if (urlhash == null) return 0;
         // determine the url string
-        final URIMetadataRow entry = urlMetadata().load(urlhash);
-        if (entry == null) return 0;
-        if (entry.url() == null) return 0;
+        final DigestURI url = fulltext().getURL(urlhash);
+        if (url == null) return 0;
 
         try {
             // parse the resource
-            final Document document = Document.mergeDocuments(entry.url(), null, loader.loadDocuments(loader.request(entry.url(), true, false), cacheStrategy, 10000, Integer.MAX_VALUE));
+            final Document document = Document.mergeDocuments(url, null, loader.loadDocuments(loader.request(url, true, false), cacheStrategy, Integer.MAX_VALUE, null, agent));
             if (document == null) {
                 // delete just the url entry
-                urlMetadata().remove(urlhash);
+                fulltext().remove(urlhash);
                 return 0;
             }
             // get the word set
             Set<String> words = null;
-            words = new Condenser(document, true, true, null, false).words().keySet();
+            words = new Condenser(document, true, true, null, null, false).words().keySet();
 
             // delete all word references
             int count = 0;
-            if (words != null) count = termIndex().remove(Word.words2hashesHandles(words), urlhash);
+            if (words != null && termIndex() != null) count = termIndex().remove(Word.words2hashesHandles(words), urlhash);
 
             // finally delete the url entry itself
-            urlMetadata().remove(urlhash);
+            fulltext().remove(urlhash);
             return count;
         } catch (final Parser.Failure e) {
             return 0;
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return 0;
         }
     }
 
-
-    //  The Cleaner class was provided as "UrldbCleaner" by Hydrox
-    public synchronized ReferenceCleaner getReferenceCleaner(final byte[] startHash) {
-        return new ReferenceCleaner(startHash);
-    }
-
-    public class ReferenceCleaner extends Thread {
-
-        private final byte[] startHash;
-        private boolean run = true;
-        private boolean pause = false;
-        public int rwiCountAtStart = 0;
-        public byte[] wordHashNow = null;
-        public byte[] lastWordHash = null;
-        public int lastDeletionCounter = 0;
-
-        public ReferenceCleaner(final byte[] startHash) {
-            this.startHash = startHash;
-            this.rwiCountAtStart = termIndex().sizesMax();
-        }
-
-        @Override
-        public void run() {
-            Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
-            ReferenceContainer<WordReference> container = null;
-            WordReferenceVars entry = null;
-            DigestURI url = null;
-            final HandleSet urlHashs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
-            try {
-                Iterator<ReferenceContainer<WordReference>> indexContainerIterator = Segment.this.termIndex.referenceContainer(this.startHash, false, false, 100, false).iterator();
-                while (indexContainerIterator.hasNext() && this.run) {
-                    waiter();
-                    container = indexContainerIterator.next();
-                    final Iterator<WordReference> containerIterator = container.entries();
-                    this.wordHashNow = container.getTermHash();
-                    while (containerIterator.hasNext() && this.run) {
-                        waiter();
-                        entry = new WordReferenceVars(containerIterator.next());
-                        // System.out.println("Wordhash: "+wordHash+" UrlHash:
-                        // "+entry.getUrlHash());
-                        final URIMetadataRow ue = Segment.this.urlMetadata.load(entry.urlhash());
-                        if (ue == null) {
-                            urlHashs.put(entry.urlhash());
-                        } else {
-                            url = ue.url();
-                            if (url == null || Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, url)) {
-                                urlHashs.put(entry.urlhash());
-                            }
-                        }
-                    }
-                    if (!urlHashs.isEmpty()) try {
-                        final int removed = Segment.this.termIndex.remove(container.getTermHash(), urlHashs);
-                        Log.logFine("INDEXCLEANER", ASCII.String(container.getTermHash()) + ": " + removed + " of " + container.size() + " URL-entries deleted");
-                        this.lastWordHash = container.getTermHash();
-                        this.lastDeletionCounter = urlHashs.size();
-                        urlHashs.clear();
-                    } catch (final IOException e) {
-                        Log.logException(e);
-                    }
-
-                    if (!containerIterator.hasNext()) {
-                        // We may not be finished yet, try to get the next chunk of wordHashes
-                        final TreeSet<ReferenceContainer<WordReference>> containers = Segment.this.termIndex.referenceContainer(container.getTermHash(), false, false, 100, false);
-                        indexContainerIterator = containers.iterator();
-                        // Make sure we don't get the same wordhash twice, but don't skip a word
-                        if ((indexContainerIterator.hasNext()) && (!container.getTermHash().equals(indexContainerIterator.next().getTermHash()))) {
-                            indexContainerIterator = containers.iterator();
-                        }
-                    }
-                }
-            } catch (final IOException e) {
-                Log.logException(e);
-            } catch (final Exception e) {
-                Log.logException(e);
-            }
-            Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread stopped");
-        }
-
-        public void abort() {
-            synchronized(this) {
-                this.run = false;
-                notifyAll();
-            }
-        }
-
-        public void pause() {
-            synchronized (this) {
-                if (!this.pause) {
-                    this.pause = true;
-                    Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread paused");
-                }
-            }
-        }
-
-        public void endPause() {
-            synchronized (this) {
-                if (this.pause) {
-                    this.pause = false;
-                    notifyAll();
-                    Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread resumed");
-                }
-            }
-        }
-
-        public void waiter() {
-            synchronized (this) {
-                if (this.pause) {
-                    try {
-                        this.wait();
-                    } catch (final InterruptedException e) {
-                        this.run = false;
-                        return;
-                    }
-                }
-            }
-        }
-
-        public int rwisize() {
-            return termIndex().sizesMax();
-        }
-
-        public int urlsize() {
-            return urlMetadata().size();
-        }
-    }
 }

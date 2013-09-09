@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 
 
@@ -83,7 +83,7 @@ public final class BufferedRecords {
         try {
             flushBuffer0();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         if (this.efs != null) this.efs.close();
     }
@@ -100,7 +100,6 @@ public final class BufferedRecords {
             assert b.length - start >= this.efs.recordsize;
             bb = this.buffer.get(idx);
             if (bb == null) {
-                if (index >= size()) throw new IndexOutOfBoundsException("kelondroBufferedEcoFS.get(" + index + ") outside bounds (" + size() + ")");
                 this.efs.get(index, b, start);
                 return;
             }
@@ -195,7 +194,7 @@ public final class BufferedRecords {
 
             t.close();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 }

@@ -37,13 +37,15 @@ import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.Order;
 import net.yacy.cora.sorting.Rating;
 import net.yacy.cora.storage.ComparableARC;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.MergeIterator;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.MergeIterator;
 import net.yacy.search.EventTracker;
+import net.yacy.search.Switchboard;
 
 
 /*
@@ -73,8 +75,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     private final long                                   targetFileSize, maxFileSize;
     private final int                                    writeBufferSize;
     private final Map<byte[], HandleSet>                 removeDelayedURLs; // mapping from word hashes to a list of url hashes
-    private       boolean                                cleanupShallRun;
-    private final Thread                                 cleanupThread;
+    private       boolean                                flushShallRun;
+    private final Thread                                 flushThread;
 
     public IndexCell(
             final File cellPath,
@@ -101,35 +103,35 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         this.maxFileSize = maxFileSize;
         this.writeBufferSize = writeBufferSize;
         this.removeDelayedURLs = new TreeMap<byte[], HandleSet>(URIMetadataRow.rowdef.objectOrder);
-        this.cleanupShallRun = true;
-        this.cleanupThread = new CleanupThread();
-        this.cleanupThread.start();
+        this.flushShallRun = true;
+        this.flushThread = new FlushThread();
+        this.flushThread.start();
     }
 
-    private class CleanupThread extends Thread {
+    private class FlushThread extends Thread {
         @Override
         public void run() {
-            while (IndexCell.this.cleanupShallRun) {
+            while (IndexCell.this.flushShallRun) {
                 try {
-                    cleanCache();
+                    flushBuffer();
                 } catch (final Throwable e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
                 try { Thread.sleep(3000); } catch (final InterruptedException e) {}
             }
         }
 
-        private void cleanCache() {
+        private void flushBuffer() {
 
             // dump the cache if necessary
             final long t = System.currentTimeMillis();
             if ((IndexCell.this.ram.size() >= IndexCell.this.maxRamEntries ||
                 (IndexCell.this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false)) ||
-                (IndexCell.this.ram.size() > 0 && IndexCell.this.lastDump + dumpCycle < t))) {
+                (!IndexCell.this.ram.isEmpty() && IndexCell.this.lastDump + dumpCycle < t))) {
                 synchronized (IndexCell.this.merger) {
                     if (IndexCell.this.ram.size() >= IndexCell.this.maxRamEntries ||
                         (IndexCell.this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false)) ||
-                        (IndexCell.this.ram.size() > 0 && IndexCell.this.lastDump + dumpCycle < t)) try {
+                        (!IndexCell.this.ram.isEmpty() && IndexCell.this.lastDump + dumpCycle < t)) try {
                             IndexCell.this.lastDump = System.currentTimeMillis();
                         // removed delayed
                         try {removeDelayed();} catch (final IOException e) {}
@@ -150,7 +152,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
                         IndexCell.this.lastDump = System.currentTimeMillis();
                     } catch (final Throwable e) {
                         // catch all exceptions
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 }
             }
@@ -165,7 +167,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
                         IndexCell.this.lastCleanup = System.currentTimeMillis(); // set again to mark end of procedure
                     } catch (final Throwable e) {
                         // catch all exceptions
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 }
             }
@@ -173,32 +175,36 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     }
 
-    public boolean shrink(final long targetFileSize, final long maxFileSize) {
+    private boolean shrink(final long targetFileSize, final long maxFileSize) {
         if (this.array.entries() < 2) return false;
         boolean donesomething = false;
 
         // first try to merge small files that match
         int term = 10;
         while (term-- > 0 && (this.merger.queueLength() < 3 || this.array.entries() >= 50)) {
-            if (!this.array.shrinkBestSmallFiles(this.merger, targetFileSize)) break; else donesomething = true;
+            if (!this.array.shrinkBestSmallFiles(this.merger, targetFileSize)) break;
+            donesomething = true;
         }
 
         // then try to merge simply any small file
         term = 10;
         while (term-- > 0 && (this.merger.queueLength() < 2)) {
-            if (!this.array.shrinkAnySmallFiles(this.merger, targetFileSize)) break; else donesomething = true;
+            if (!this.array.shrinkAnySmallFiles(this.merger, targetFileSize)) break;
+            donesomething = true;
         }
 
         // if there is no small file, then merge matching files up to limit
         term = 10;
         while (term-- > 0 && (this.merger.queueLength() < 1)) {
-            if (!this.array.shrinkUpToMaxSizeFiles(this.merger, maxFileSize)) break; else donesomething = true;
+            if (!this.array.shrinkUpToMaxSizeFiles(this.merger, maxFileSize)) break;
+            donesomething = true;
         }
 
         // rewrite old files (hack from sixcooler, see http://forum.yacy-websuche.de/viewtopic.php?p=15004#p15004)
         term = 10;
         while (term-- > 0 && (this.merger.queueLength() < 1)) {
-            if (!this.array.shrinkOldFiles(this.merger, targetFileSize)) break; else donesomething = true;
+            if (!this.array.shrinkOldFiles(this.merger)) break;
+            donesomething = true;
         }
 
         return donesomething;
@@ -220,17 +226,17 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     /**
      * add entries to the cell: this adds the new entries always to the RAM part, never to BLOBs
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
     @Override
-    public void add(final ReferenceContainer<ReferenceType> newEntries) throws IOException, RowSpaceExceededException {
+    public void add(final ReferenceContainer<ReferenceType> newEntries) throws IOException, SpaceExceededException {
         try {
             this.ram.add(newEntries);
             final long t = System.currentTimeMillis();
             if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < t || this.lastDump + dumpCycle < t) {
                 EventTracker.update(EventTracker.EClass.WORDCACHE, Long.valueOf(this.ram.size()), true);
             }
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             EventTracker.update(EventTracker.EClass.WORDCACHE, Long.valueOf(this.ram.size()), true);
             this.ram.add(newEntries);
         }
@@ -238,14 +244,14 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     }
 
     @Override
-    public void add(final byte[] termHash, final ReferenceType entry) throws IOException, RowSpaceExceededException {
+    public void add(final byte[] termHash, final ReferenceType entry) throws IOException, SpaceExceededException {
         try {
             this.ram.add(termHash, entry);
             final long t = System.currentTimeMillis();
             if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < t || this.lastDump + dumpCycle < t) {
                 EventTracker.update(EventTracker.EClass.WORDCACHE, Long.valueOf(this.ram.size()), true);
             }
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             EventTracker.update(EventTracker.EClass.WORDCACHE, Long.valueOf(this.ram.size()), true);
             this.ram.add(termHash, entry);
         }
@@ -274,7 +280,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         try {
             countFile = this.array.count(termHash);
         } catch (final Throwable e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         assert countFile >= 0;
 
@@ -307,18 +313,18 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         ReferenceContainer<ReferenceType> c1 = null;
         try {
             c1 = this.array.get(termHash);
-        } catch (final RowSpaceExceededException e2) {
-            Log.logException(e2);
+        } catch (final SpaceExceededException e2) {
+            ConcurrentLog.logException(e2);
         }
         ReferenceContainer<ReferenceType> result = null;
         if (c0 != null && c1 != null) {
             try {
                 result = c1.merge(c0);
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 // try to free some ram
                 try {
                     result = c1.merge(c0);
-                } catch (final RowSpaceExceededException e1) {
+                } catch (final SpaceExceededException e1) {
                     // go silently over the problem
                     result = (c1.size() > c0.size()) ? c1: c0;
                 }
@@ -348,8 +354,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         ReferenceContainer<ReferenceType> c1 = null;
         try {
             c1 = this.array.get(termHash);
-        } catch (final RowSpaceExceededException e2) {
-            Log.logException(e2);
+        } catch (final SpaceExceededException e2) {
+            ConcurrentLog.logException(e2);
         }
         if (c1 != null) {
             this.array.delete(termHash);
@@ -359,11 +365,11 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         if (c0 == null) return c1;
         try {
             return c1.merge(c0);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             // try to free some ram
             try {
                 return c1.merge(c0);
-            } catch (final RowSpaceExceededException e1) {
+            } catch (final SpaceExceededException e1) {
                 // go silently over the problem
                 return (c1.size() > c0.size()) ? c1: c0;
             }
@@ -376,8 +382,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         ReferenceContainer<ReferenceType> c1 = null;
         try {
             c1 = this.array.get(termHash);
-        } catch (final RowSpaceExceededException e2) {
-            Log.logException(e2);
+        } catch (final SpaceExceededException e2) {
+            ConcurrentLog.logException(e2);
         }
         if (c1 != null) {
             this.array.delete(termHash);
@@ -387,37 +393,17 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     }
 
     @Override
-    public void removeDelayed(final byte[] termHash, final HandleSet urlHashes) {
-        HandleSet r;
-        synchronized (this.removeDelayedURLs) {
-            r = this.removeDelayedURLs.get(termHash);
-        }
-        if (r == null) {
-            r = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
-        }
-        try {
-            r.putAll(urlHashes);
-        } catch (final RowSpaceExceededException e) {
-            try {remove(termHash, urlHashes);} catch (final IOException e1) {}
-            return;
-        }
-        synchronized (this.removeDelayedURLs) {
-            this.removeDelayedURLs.put(termHash, r);
-        }
-    }
-
-    @Override
     public void removeDelayed(final byte[] termHash, final byte[] urlHashBytes) {
         HandleSet r;
         synchronized (this.removeDelayedURLs) {
             r = this.removeDelayedURLs.get(termHash);
         }
         if (r == null) {
-            r = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            r = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
         }
         try {
             r.put(urlHashBytes);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             try {remove(termHash, urlHashBytes);} catch (final IOException e1) {}
             return;
         }
@@ -428,9 +414,9 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     @Override
     public void removeDelayed() throws IOException {
-        final HandleSet words = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0); // a set of url hashes where a worker thread tried to work on, but failed.
+        final HandleSet words = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0); // a set of url hashes where a worker thread tried to work on, but failed.
         synchronized (this.removeDelayedURLs) {
-            for (final byte[] b: this.removeDelayedURLs.keySet()) try {words.put(b);} catch (final RowSpaceExceededException e) {}
+            for (final byte[] b: this.removeDelayedURLs.keySet()) try {words.put(b);} catch (final SpaceExceededException e) {}
         }
 
         synchronized (this.removeDelayedURLs) {
@@ -457,9 +443,9 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         //final long am = this.array.mem();
         try {
             reduced = this.array.reduce(termHash, new RemoveReducer<ReferenceType>(urlHashes));
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             reduced = 0;
-            Log.logWarning("IndexCell", "not possible to remove urlHashes from a RWI because of too low memory. Remove was not applied. Please increase RAM assignment");
+            ConcurrentLog.warn("IndexCell", "not possible to remove urlHashes from a RWI because of too low memory. Remove was not applied. Please increase RAM assignment");
         }
         //assert this.array.mem() <= am : "am = " + am + ", array.mem() = " + this.array.mem();
         return removed + (reduced / this.array.rowdef().objectsize);
@@ -473,9 +459,9 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         //final long am = this.array.mem();
         try {
             reduced = this.array.reduce(termHash, new RemoveReducer<ReferenceType>(urlHashBytes));
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             reduced = 0;
-            Log.logWarning("IndexCell", "not possible to remove urlHashes from a RWI because of too low memory. Remove was not applied. Please increase RAM assignment");
+            ConcurrentLog.warn("IndexCell", "not possible to remove urlHashes from a RWI because of too low memory. Remove was not applied. Please increase RAM assignment");
         }
         //assert this.array.mem() <= am : "am = " + am + ", array.mem() = " + this.array.mem();
         return removed || (reduced > 0);
@@ -490,11 +476,11 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         }
 
         public RemoveReducer(final byte[] urlHashBytes) {
-            this.urlHashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            this.urlHashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
             try {
                 this.urlHashes.put(urlHashBytes);
-            } catch (final RowSpaceExceededException e) {
-                Log.logException(e);
+            } catch (final SpaceExceededException e) {
+                ConcurrentLog.logException(e);
             }
         }
 
@@ -552,6 +538,13 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         this.removeDelayedURLs.clear();
         this.ram.clear();
         this.array.clear();
+        if (Switchboard.getSwitchboard() != null &&
+                Switchboard.getSwitchboard().peers != null &&
+                Switchboard.getSwitchboard().peers.mySeed() != null) Switchboard.getSwitchboard().peers.mySeed().resetCounters();
+    }
+    
+    public synchronized void clearCache() {
+        this.countCache.clear();
     }
 
     /**
@@ -565,19 +558,28 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         try {removeDelayed();} catch (final IOException e) {}
         if (!this.ram.isEmpty()) this.ram.dump(this.array.newContainerBLOBFile(), (int) Math.min(MemoryControl.available() / 3, this.writeBufferSize), true);
         // close all
-        this.cleanupShallRun = false;
-        if (this.cleanupThread != null) try { this.cleanupThread.join(); } catch (final InterruptedException e) {}
+        this.flushShallRun = false;
+        if (this.flushThread != null) try { this.flushThread.join(); } catch (final InterruptedException e) {}
         this.merger.terminate();
         this.ram.close();
         this.array.close();
     }
 
+    public boolean isEmpty() {
+        if (this.ram.size() > 0) return false;
+        for (int s: this.array.sizes()) if (s > 0) return false;
+        return true;
+    }
+
     @Override
     public int size() {
         throw new UnsupportedOperationException("an accumulated size of index entries would not reflect the real number of words, which cannot be computed easily");
+        //int size = this.ram.size();
+        //for (int s: this.array.sizes()) size += s;
+        //return size;
     }
 
-    public int[] sizes() {
+    private int[] sizes() {
         final int[] as = this.array.sizes();
         final int[] asr = new int[as.length + 1];
         System.arraycopy(as, 0, asr, 0, as.length);
@@ -593,6 +595,10 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         return m;
     }
 
+    public int getSegmentCount() {
+        return this.array.entries();
+    }
+
     @Override
     public int minMem() {
         return 10 * 1024 * 1024;
@@ -601,16 +607,6 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     @Override
     public ByteOrder termKeyOrdering() {
         return this.array.ordering();
-    }
-
-    public File newContainerBLOBFile() {
-        // for migration of cache files
-        return this.array.newContainerBLOBFile();
-    }
-
-    public void mountBLOBFile(final File blobFile) throws IOException {
-        // for migration of cache files
-        this.array.mountBLOBFile(blobFile);
     }
 
     @Override

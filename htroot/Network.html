@@ -11,7 +11,7 @@
 
   <script type="text/javascript">
   <!--
-    imagestub = "NetworkPicture.png?width=1024&height=1024&bgcolor=FFFFFF&ct=9000&coronaangle=";
+    imagestub = "NetworkPicture.png?width=1024&height=720&bgcolor=FFFFFF&ct=15000&coronaangle=";
     imageanimindex = 0;
     imageloadindex = 0;
     imagecycles = 0;
@@ -23,7 +23,7 @@
       for (j = 0; j < 6; j++) initanimationphase(j, handle);
     }
     function initanimationphase(phase, handle) {
-      imagearray[phase] = new Image(1024, 1024);
+      imagearray[phase] = new Image(1024, 720);
       angle = phase * 60;
       imagearray[phase].src = imagestub + angle + "&handle=" + handle;
     }
@@ -120,9 +120,9 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <td><strong>Links</strong></td>
         <td><strong>RWIs</strong></td>
         <td><strong>URLs for<br/>Remote<br/>Crawl</strong></td>
-        <td><strong>Sent<br/>Words</strong></td>
+        <td><strong>Sent<br/>DHT Word Chunks</strong></td>
         <td><strong>Sent<br/>URLs</strong></td>
-        <td><strong>Received<br/>Words</strong></td>
+        <td><strong>Received<br/>DHT Word Chunks</strong></td>
         <td><strong>Received<br/>URLs</strong></td>
         #(complete)#::
         <td><strong>Address</strong></td>
@@ -136,7 +136,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       </tr>
       #{list}#
       <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-        <td>
+        <td><nobr>
           <a href="MessageSend_p.html?hash=#[hash]#" title="Send message to peer #[fullname]#">m</a>&nbsp;
           <a href="ViewProfile.html?hash=#[hash]#&amp;display=1" title="View profile of peer #[fullname]#">p</a>&nbsp;
           <a href="http://#[fullname]#.yacy/Wiki.html" title="Read and edit wiki on peer #[fullname]#">w</a>&nbsp;
@@ -145,9 +145,9 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           #(updatedWiki)#::<a href="http://#[address]#/Wiki.html?page=#[page]#" title="#[page]#"><img src="/env/grafics/wiki.gif" width="54" height="11" alt="Wiki updated" /></a>#(/updatedWiki)#
           #(updatedBlog)#::<a href="http://#[address]#/Blog.html?page=#[page]#" title="#[subject]#"><img src="/env/grafics/blog.gif" width="54" height="11" alt="Blog updated" /></a>#(/updatedBlog)#
           #(isCrawling)#::<a href="#[page]#"><img src="/env/grafics/crawl.gif" width="54" height="11" alt="Crawl" /></a>#(/isCrawling)#
-        </td>
-        <td #(special)#::class="TableCellActive"#(/special)#><a href="http://www.#[fullname]#.yacy">#[shortname]#</a></td>
-        <td width="44">
+        </nobr></td>
+        <td #(special)#::class="TableCellActive"#(/special)#><a href="http://www.#[fullname]#.yacy">#[shortname]#</a>#(ssl)#::<img src="/env/grafics/lock.gif" width="11" height="15" title="https supported" alt="https supported" />#(/ssl)#</td>
+        <td nowrap>
           #(type)##(direct)#<img src="/env/grafics/JuniorPassive.gif" width="11" height="11" title="Type: Junior | Contact: passive" alt="Junior passive" />::<img src="/env/grafics/JuniorDirect.gif" width="11" height="11" title="Type: Junior | Contact: direct" alt="Junior direct" />::<img src="/env/grafics/JuniorOffline.gif" width="11" height="11" title="Type: Junior | Contact: offline" alt="Junior offline" />#(/direct)#::#(direct)#<img src="/env/grafics/SeniorPassive.gif" width="11" height="11" title="Type: Senior | Contact: passive" alt="senior passive" />::<img src="/env/grafics/SeniorDirect.gif" width="11" height="11" title="Type: Senior | Contact: direct" alt="Senior direct" />::<img src="/env/grafics/SeniorOffline.gif" width="11" height="11" title="Type: Senior | Contact: offline" alt="Senior offline" />#(/direct)#::<a href="#[url]#">#(direct)#<img src="/env/grafics/PrincipalPassive.gif" width="11" height="11" title="Type: Principal | Contact: passive | Seed download: possible" alt="Principal passive" />::<img src="/env/grafics/PrincipalDirect.gif" width="11" height="11" title="Type: Principal | Contact: direct | Seed download: possible" alt="Principal active" />::<img src="/env/grafics/PrincipalOffline.gif" width="11" height="11" title="Type: Principal | Contact: offline | Seed download: ?" alt="Principal offline" />#(/direct)#</a>#(/type)##(acceptcrawl)#<img src="/env/grafics/CrawlNo.gif" width="11" height="11" title="Accept Crawl: no" alt="no crawl" />::<img src="/env/grafics/CrawlYes.gif" width="11" height="11" title="Accept Crawl: yes" alt="crawl possible" />::<img src="/env/grafics/CrawlYesOffline.gif" width="11" height="11" title="Accept Crawl: yes" alt="crawl possible" />#(/acceptcrawl)##(dhtreceive)#<img src="/env/grafics/DHTReceiveNo.gif" width="11" height="11" title="DHT Receive: no; #[peertags]#" alt="no DHT receive" />::<img src="/env/grafics/DHTReceiveYes.gif" width="11" height="11" title="DHT Receive: yes" alt="DHT receive enabled" />::<img src="/env/grafics/DHTReceiveYesOffline.gif" width="11" height="11" title="DHT Receive: yes" alt="DHT receive enabled" />#(/dhtreceive)##(nodestate)#<img src="/env/grafics/RootStateNo.gif" width="11" height="11" title="Not a Node Candidate" alt="no node candidate" />::<a href="http://#[ip]#:#[port]#/Network.html?page=1"><img src="/env/grafics/RootStateYes.gif" width="11" height="11" title="Node Candidate" alt="node candidate" /></a>#(/nodestate)#</td>
         <td align="right">#[version]#</td>
         <td align="right">#[ppm]#</td>
@@ -155,7 +155,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <td align="right">#[lastSeen]#</td>
         <td align="right">#[utc]#</td>
         <td align="right">#[location]#</td>
-        <td align="right">#[uptime]#</td>
+        <td align="right" nowrap>#[uptime]#</td>
         <td align="right">#[LCount]#</td>
         <td align="right">#[ICount]#</td>
         <td align="right">#[RCount]#</td>
@@ -184,24 +184,26 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     <table border="0" cellpadding="2" cellspacing="1" width="1024">
       <tr class="TableHeader">
         <td rowspan="5" class="TableHeader" width="10%">Network</td>
-        <td colspan="#(active-switch)#2::3::4::5#(/active-switch)#" width="22%">Online Peers</td>
+        <td colspan="#(active-switch)#2::3::4::5::6#(/active-switch)#" width="22%">Online Peers</td>
         <td rowspan="2" width="22%">Number of<br/>Documents</td>
         <td rowspan="2" width="22%">Indexing Speed:<br/>Pages Per Minute (PPM)</td>
         <td rowspan="2" width="22%">Query Frequency:<br/>Queries Per Hour (QPH)</td>
       </tr>
       <tr class="TableHeader">
         #(active-switch)#::
-        <td>Today</td>::
-        <td>Last&nbsp;Week</td><td>Today</td>::
-        <td>Last&nbsp;Month</td><td>Last&nbsp;Week</td><td>Today</td>
+        <td>Last Hour</td>::
+        <td>Today</td><td>Last Hour</td>::
+        <td>Last&nbsp;Week</td><td>Today</td><td>Last Hour</td>::
+        <td>Last&nbsp;Month</td><td>Last&nbsp;Week</td><td>Today</td><td>Last Hour</td>
         #(/active-switch)#
         <td colspan="2">Now</td>
       </tr>
       <tr class="TableCellDark">
         #(active-switch)#::
-        <td align="right" rowspan="3">#[last-day]#</td>::
-        <td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td>::
-        <td align="right" rowspan="3">#[last-month]#</td><td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td>
+        <td align="right" rowspan="3">#[last-hour]#</td>::
+        <td align="right" rowspan="3">#[last-day]#</td><td align="right" rowspan="3">#[last-hour]#</td>::
+        <td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td><td align="right" rowspan="3">#[last-hour]#</td>::
+        <td align="right" rowspan="3">#[last-month]#</td><td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td><td align="right" rowspan="3">#[last-hour]#</td>
         #(/active-switch)#
         <td align="left">Active</td>
         <td align="right">#[active-count]#</td>
@@ -220,7 +222,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <td align="right">#[potential-links]#</td>
       </tr>
       <tr class="TableCellSummary">
-        <td align="left" colspan="#(active-switch)#3::4::5::6#(/active-switch)#">This Peer</td>
+        <td align="left" colspan="#(active-switch)#3::4::5::6::7#(/active-switch)#">This Peer</td>
         <td align="right">#[my-LCount]#</td>
         <td align="right">#[my-ppm]#</td>
         <td align="right">#[my-qph]#</td>
@@ -230,7 +232,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 
     <div class="left">
       <p>
-        <a href="NetworkPicture.png?width=1024&amp;height=1024&amp;bgcolor=FFFFFF"><img id="NetworkPicture" src="NetworkPicture.png?width=1024&amp;height=1024&amp;bgcolor=FFFFFF&amp;coronaangle=0" alt="The YaCy Network" width="1024" height="1024" /></a>
+        <a href="NetworkPicture.png?width=1024&amp;height=720&amp;bgcolor=FFFFFF"><img id="NetworkPicture" src="NetworkPicture.png?width=1024&amp;height=720&amp;bgcolor=FFFFFF&amp;coronaangle=0" alt="The YaCy Network" width="1024" height="720" /></a>
       </p>
     </div>
     <div class="left">
@@ -245,9 +247,9 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <td>Links</td>
         <td>RWIs</td>
         <td>URLs for<br/>Remote Crawl</td>
-        <td>Sent<br/>Words</td>
+        <td>Sent<br/>DHT Word Chunks</td>
         <td>Sent<br/>URLs</td>
-        <td>Received<br/>Words</td>
+        <td>Received<br/>DHT Word Chunks</td>
         <td>Received<br/>URLs</td>
         <td>Known<br/>Seeds</td>
         <td>Connects<br/>per hour</td>
@@ -256,7 +258,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <td>QPH<br/>(remote)</td>
       </tr>
       <tr class="TableCellDark">
-        <td>#[my-name]#</td>
+        <td>#[my-name]##(my-ssl)#::<img src="/env/grafics/lock.gif" width="11" height="15" title="https supported" alt="https supported" />#(/my-ssl)#</td>
         <td>#(my-info)#<img src="/env/grafics/Virgin.gif" width="11" height="11" title="Type: Virgin" alt="Virgin" />::<img src="/env/grafics/JuniorDirect.gif" width="11" height="11" title="Type: Junior" alt="Junior" />::<img src="/env/grafics/SeniorDirect.gif" width="11" height="11" title="Type: Senior" alt="Senior" />::<img src="/env/grafics/PrincipalDirect.gif" width="11" height="11" title="Type: Principal" alt="Principal" />#(/my-info)##(my-acceptcrawl)#<img src="/env/grafics/CrawlNo.gif" width="11" height="11" title="Accept Crawl: no" alt="no crawl" />::<img src="/env/grafics/CrawlYes.gif" width="11" height="11" title="Accept Crawl: yes" alt="Crawl enabled" />#(/my-acceptcrawl)##(my-dhtreceive)#<img src="/env/grafics/DHTReceiveNo.gif" width="11" height="11" title="DHT Receive: no" alt="no DHT receive" />::<img src="/env/grafics/DHTReceiveYes.gif" width="11" height="11" title="DHT Receive: yes" alt="DHT Receive enabled" />#(/my-dhtreceive)##(my-nodestate)#<img src="/env/grafics/RootStateNo.gif" width="11" height="11" title="Not a Node Candidate" alt="no node candidate" />::<img src="/env/grafics/RootStateYes.gif" width="11" height="11" title="Node Candidate" alt="node candidate" />#(/my-nodestate)#</td>
         <td align="right">#[my-version]#</td>
         <td align="right">#[my-utc]#</td>

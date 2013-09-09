@@ -46,27 +46,25 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
-import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.Files;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Document;
 import net.yacy.document.parser.tarParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
 import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverCore;
-import de.anomic.tools.CryptoLib;
-import de.anomic.tools.SignatureOutputStream;
-import de.anomic.tools.tarTools;
+import net.yacy.server.serverCore;
+import net.yacy.utils.CryptoLib;
+import net.yacy.utils.SignatureOutputStream;
+import net.yacy.utils.tarTools;
 
 public final class yacyRelease extends yacyVersion {
 
@@ -109,14 +107,14 @@ public final class yacyRelease extends yacyVersion {
 
         // check if release was installed by packagemanager
         if (yacyBuildProperties.isPkgManager()) {
-            Network.log.logInfo("rulebasedUpdateInfo: package manager is used for update");
+            Network.log.info("rulebasedUpdateInfo: package manager is used for update");
             return null;
         }
 
         // check if update process allows update retrieve
         final String process = sb.getConfig("update.process", "manual");
         if ((!manual) && (!process.equals("auto"))) {
-            Network.log.logInfo("rulebasedUpdateInfo: not an automatic update selected");
+            Network.log.info("rulebasedUpdateInfo: not an automatic update selected");
             return null; // no, its a manual or guided process
         }
 
@@ -124,7 +122,7 @@ public final class yacyRelease extends yacyVersion {
         final long cycle = Math.max(1, sb.getConfigLong("update.cycle", 168)) * 60 * 60 * 1000; // update.cycle is hours
         final long timeLookup = sb.getConfigLong("update.time.lookup", System.currentTimeMillis());
         if ((!manual) && (timeLookup + cycle > System.currentTimeMillis())) {
-            Network.log.logInfo("rulebasedUpdateInfo: too early for a lookup for a new release (timeLookup = " + timeLookup + ", cycle = " + cycle + ", now = " + System.currentTimeMillis() + ")");
+            Network.log.info("rulebasedUpdateInfo: too early for a lookup for a new release (timeLookup = " + timeLookup + ", cycle = " + cycle + ", now = " + System.currentTimeMillis() + ")");
             return null; // no we have recently made a lookup
         }
 
@@ -147,7 +145,7 @@ public final class yacyRelease extends yacyVersion {
                 (!(Double.toString(latestdev.getReleaseNr()).matches(blacklist)))) {
                 // consider a dev-release
                 if (latestdev.compareTo(thisVersion()) <= 0) {
-                    Network.log.logInfo(
+                    Network.log.info(
                             "rulebasedUpdateInfo: latest dev " + latestdev.getName() +
                             " is not more recent than installed release " + thisVersion().getName());
                     return null;
@@ -157,13 +155,13 @@ public final class yacyRelease extends yacyVersion {
             if (latestmain != null) {
                 // consider a main release
                 if ((Double.toString(latestmain.getReleaseNr()).matches(blacklist))) {
-                    Network.log.logInfo(
+                    Network.log.info(
                             "rulebasedUpdateInfo: latest dev " + (latestdev == null ? "null" : latestdev.getName()) +
                             " matches with blacklist '" + blacklist + "'");
                     return null;
                 }
                 if (latestmain.compareTo(thisVersion()) <= 0) {
-                    Network.log.logInfo(
+                    Network.log.info(
                             "rulebasedUpdateInfo: latest main " + latestmain.getName() +
                             " is not more recent than installed release (1) " + thisVersion().getName());
                     return null;
@@ -174,20 +172,20 @@ public final class yacyRelease extends yacyVersion {
         if ((concept.equals("main")) && (latestmain != null)) {
             // return a main-release
             if ((Double.toString(latestmain.getReleaseNr()).matches(blacklist))) {
-                Network.log.logInfo(
+                Network.log.info(
                         "rulebasedUpdateInfo: latest main " + latestmain.getName() +
                         " matches with blacklist'" + blacklist + "'");
                 return null;
             }
             if (latestmain.compareTo(thisVersion()) <= 0) {
-                Network.log.logInfo(
+                Network.log.info(
                         "rulebasedUpdateInfo: latest main " + latestmain.getName() +
                         " is not more recent than installed release (2) " + thisVersion().getName());
                 return null;
             }
             return latestmain;
         }
-        Network.log.logInfo("rulebasedUpdateInfo: failed to find more recent release");
+        Network.log.info("rulebasedUpdateInfo: failed to find more recent release");
         return null;
     }
 
@@ -240,16 +238,16 @@ public final class yacyRelease extends yacyVersion {
         try {
             final DigestURI uri = location.getLocationURL();
             Thread.currentThread().setName("allReleaseFrom - host " + uri.getHost()); // makes it more easy to see which release blocks process in thread dump
-            scraper = Switchboard.getSwitchboard().loader.loadDocument(uri, CacheStrategy.NOCACHE);
+            scraper = Switchboard.getSwitchboard().loader.loadDocument(uri, CacheStrategy.NOCACHE, null, ClientIdentification.yacyInternetCrawlerAgent);
         } catch (final IOException e) {
             return null;
         }
 
         // analyze links in scraper resource, and find link to latest release in it
-        final Map<MultiProtocolURI, Properties> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
+        final Map<DigestURI, Properties> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
         final TreeSet<yacyRelease> mainReleases = new TreeSet<yacyRelease>();
         final TreeSet<yacyRelease> devReleases = new TreeSet<yacyRelease>();
-        for (final MultiProtocolURI url : anchors.keySet()) {
+        for (final DigestURI url : anchors.keySet()) {
             try {
                 final yacyRelease release = new yacyRelease(url, location.getPublicKey());
                 //System.out.println("r " + release.toAnchor());
@@ -287,23 +285,17 @@ public final class yacyRelease extends yacyVersion {
     public File downloadRelease() {
         final File storagePath = Switchboard.getSwitchboard().releasePath;
         File download = null;
-        // setup httpClient
-        final RequestHeader reqHeader = new RequestHeader();
-        reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
 
         final String name = getUrl().getFileName();
         byte[] signatureBytes = null;
-
-        final HTTPClient client = new HTTPClient();
-        client.setTimout(6000);
-        client.setHeader(reqHeader.entrySet());
+        final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
 
         // download signature first, if public key is available
         try {
             if (this.publicKey != null) {
             	final byte[] signatureData = client.GETbytes(getUrl().toString() + ".sig");
                 if (signatureData == null) {
-                    Log.logWarning("yacyVersion", "download of signature " + getUrl().toString() + " failed. ignoring signature file.");
+                    ConcurrentLog.warn("yacyVersion", "download of signature " + getUrl().toString() + " failed. ignoring signature file.");
                 }
                 else signatureBytes = Base64Order.standardCoder.decode(UTF8.String(signatureData).trim());
             }
@@ -352,17 +344,17 @@ public final class yacyRelease extends yacyVersion {
             }
         } catch (final IOException e) {
             // Saving file failed, abort download
-            Log.logSevere("yacyVersion", "download of " + getName() + " failed: " + e.getMessage());
+            ConcurrentLog.severe("yacyVersion", "download of " + getName() + " failed: " + e.getMessage());
             if (download != null && download.exists()) {
                 FileUtils.deletedelete(download);
-                if (download.exists()) Log.logWarning("yacyVersion", "could not delete file "+ download);
+                if (download.exists()) ConcurrentLog.warn("yacyVersion", "could not delete file "+ download);
             }
             download = null;
         } finally {
         	try {
 				client.finish();
 			} catch (final IOException e) {
-				Log.logSevere("yacyVersion", "finish of " + getName() + " failed: " + e.getMessage());
+				ConcurrentLog.severe("yacyVersion", "finish of " + getName() + " failed: " + e.getMessage());
 			}
         }
         this.releaseFile = download;
@@ -408,7 +400,7 @@ public final class yacyRelease extends yacyVersion {
             if (startType.exists()) starterFile = "startYACY.bat"; // startType noconsole
             if (startParameter.startsWith("-gui")) starterFile += " " + startParameter;
             try{
-                Log.logInfo("RESTART", "INITIATED");
+                ConcurrentLog.info("RESTART", "INITIATED");
                 final String script =
                     "@echo off" + serverCore.LF_STRING +
                     "title YaCy restarter" + serverCore.LF_STRING +
@@ -425,34 +417,34 @@ public final class yacyRelease extends yacyVersion {
                     "start /MIN CMD /C " + starterFile + serverCore.LF_STRING;
                 final File scriptFile = new File(sb.getDataPath(), "DATA/RELEASE/restart.bat".replace("/", File.separator));
                 OS.deployScript(scriptFile, script);
-                Log.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
+                ConcurrentLog.info("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
                 OS.execAsynchronous(scriptFile);
-                Log.logInfo("RESTART", "script is running");
+                ConcurrentLog.info("RESTART", "script is running");
                 sb.terminate(10, "windows restart");
             } catch (final IOException e) {
-                Log.logSevere("RESTART", "restart failed", e);
+                ConcurrentLog.severe("RESTART", "restart failed", e);
             }
         }
 
         if (yacyBuildProperties.isPkgManager()) {
             // start a re-start daemon
             try {
-                Log.logInfo("RESTART", "INITIATED");
+                ConcurrentLog.info("RESTART", "INITIATED");
                 final String script =
                     "#!/bin/sh" + serverCore.LF_STRING +
                     yacyBuildProperties.getRestartCmd() + " >/var/lib/yacy/RELEASE/log" + serverCore.LF_STRING;
                 final File scriptFile = new File(sb.getDataPath(), "DATA/RELEASE/restart.sh");
                 OS.deployScript(scriptFile, script);
-                Log.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
+                ConcurrentLog.info("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
                 OS.execAsynchronous(scriptFile);
-                Log.logInfo("RESTART", "script is running");
+                ConcurrentLog.info("RESTART", "script is running");
             } catch (final IOException e) {
-                Log.logSevere("RESTART", "restart failed", e);
+                ConcurrentLog.severe("RESTART", "restart failed", e);
             }
         } else if (OS.canExecUnix) {
             // start a re-start daemon
             try {
-                Log.logInfo("RESTART", "INITIATED");
+                ConcurrentLog.info("RESTART", "INITIATED");
                 final String script =
                     "#!/bin/sh" + serverCore.LF_STRING +
                     "cd " + sb.getDataPath() + "/DATA/RELEASE/" + serverCore.LF_STRING +
@@ -464,12 +456,12 @@ public final class yacyRelease extends yacyVersion {
                     "nohup ./startYACY.sh " + (startParameter.startsWith("-gui") ? startParameter : "") + " > /dev/null" + serverCore.LF_STRING;
                 final File scriptFile = new File(sb.getDataPath(), "DATA/RELEASE/restart.sh");
                 OS.deployScript(scriptFile, script);
-                Log.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
+                ConcurrentLog.info("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
                 OS.execAsynchronous(scriptFile);
-                Log.logInfo("RESTART", "script is running");
+                ConcurrentLog.info("RESTART", "script is running");
                 sb.terminate(10, "unix restart");
             } catch (final IOException e) {
-                Log.logSevere("RESTART", "restart failed", e);
+                ConcurrentLog.severe("RESTART", "restart failed", e);
             }
         }
     }
@@ -484,11 +476,11 @@ public final class yacyRelease extends yacyVersion {
         }
         try {
             final Switchboard sb = Switchboard.getSwitchboard();
-            Log.logInfo("UPDATE", "INITIATED");
+            ConcurrentLog.info("UPDATE", "INITIATED");
             try{
                 tarTools.unTar(tarTools.getInputStream(releaseFile), sb.getDataPath() + "/DATA/RELEASE/".replace("/", File.separator));
             } catch (final Exception e){
-                Log.logSevere("UNTAR", "failed", e);
+                ConcurrentLog.severe("UNTAR", "failed", e);
             }
             String script = null;
             String scriptFileName = null;
@@ -498,7 +490,7 @@ public final class yacyRelease extends yacyVersion {
                 final File InfoPlistDestination = new File(sb.getAppPath(), "addon/YaCy.app/Contents/Info.plist");
                 if (InfoPlistSource.exists() && InfoPlistDestination.exists()) {
                     Files.copy(InfoPlistSource, InfoPlistDestination);
-                    Log.logInfo("UPDATE", "replaced Info.plist");
+                    ConcurrentLog.info("UPDATE", "replaced Info.plist");
                 }
             }
             if (OS.isWindows) {
@@ -558,13 +550,13 @@ public final class yacyRelease extends yacyVersion {
             }
             final File scriptFile = new File(sb.getDataPath(), "DATA/RELEASE/".replace("/", File.separator) + scriptFileName);
             OS.deployScript(scriptFile, script);
-            Log.logInfo("UPDATE", "wrote update-script to " + scriptFile.getAbsolutePath());
+            ConcurrentLog.info("UPDATE", "wrote update-script to " + scriptFile.getAbsolutePath());
             OS.execAsynchronous(scriptFile);
-            Log.logInfo("UPDATE", "script is running");
+            ConcurrentLog.info("UPDATE", "script is running");
             sb.setConfig("update.time.deploy", System.currentTimeMillis());
             sb.terminate(10, "auto-deploy for " + releaseFile.getName());
         } catch (final IOException e) {
-            Log.logSevere("UPDATE", "update failed", e);
+            ConcurrentLog.severe("UPDATE", "update failed", e);
         }
     }
 
@@ -603,7 +595,7 @@ public final class yacyRelease extends yacyVersion {
 
         // if we have some files
         if (!downloadedreleases.isEmpty()) {
-            Log.logFine("STARTUP", "deleting downloaded releases older than "+ deleteAfterDays +" days");
+            ConcurrentLog.fine("STARTUP", "deleting downloaded releases older than "+ deleteAfterDays +" days");
 
             // keep latest version
             final yacyVersion latest = downloadedreleases.last();
@@ -634,7 +626,7 @@ public final class yacyRelease extends yacyVersion {
                     FileUtils.deletedelete(downloadedFile);
                     FileUtils.deletedelete(new File(downloadedFile.getAbsolutePath() + ".sig"));
                     if (downloadedFile.exists()) {
-                        Log.logWarning("STARTUP", "cannot delete old release " + downloadedFile.getAbsolutePath());
+                        ConcurrentLog.warn("STARTUP", "cannot delete old release " + downloadedFile.getAbsolutePath());
                     }
                 }
             }

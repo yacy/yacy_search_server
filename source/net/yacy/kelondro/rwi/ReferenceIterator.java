@@ -32,19 +32,19 @@ import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.LookAheadIterator;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.HeapReader;
 import net.yacy.kelondro.index.RowSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.LookAheadIterator;
 
 /**
  * iterator of BLOBHeap files: is used to import heap dumps into a write-enabled index heap
  */
 public class ReferenceIterator <ReferenceType extends Reference> extends LookAheadIterator<ReferenceContainer<ReferenceType>> implements CloneableIterator<ReferenceContainer<ReferenceType>>, Iterable<ReferenceContainer<ReferenceType>> {
-    HeapReader.entries blobs;
-    File blobFile;
-    ReferenceFactory<ReferenceType> factory;
+    private HeapReader.entries blobs;
+    private File blobFile;
+    private ReferenceFactory<ReferenceType> factory;
 
     public ReferenceIterator(final File blobFile, final ReferenceFactory<ReferenceType> factory) throws IOException {
         this.blobs = new HeapReader.entries(blobFile, factory.getRow().primaryKeyLength);
@@ -67,15 +67,15 @@ public class ReferenceIterator <ReferenceType extends Reference> extends LookAhe
             try {
                 row = RowSet.importRowSet(entry.getValue(), this.factory.getRow());
                 if (row == null) {
-                    Log.logSevere("ReferenceIterator", "lost entry '" + UTF8.String(entry.getKey()) + "' because importRowSet returned null");
+                    ConcurrentLog.severe("ReferenceIterator", "lost entry '" + UTF8.String(entry.getKey()) + "' because importRowSet returned null");
                     continue; // thats a fail but not as REALLY bad if the whole method would crash here
                 }
                 return new ReferenceContainer<ReferenceType>(this.factory, entry.getKey(), row);
-            } catch (final RowSpaceExceededException e) {
-                Log.logSevere("ReferenceIterator", "lost entry '" + UTF8.String(entry.getKey()) + "' because of too low memory: " + e.toString());
+            } catch (final SpaceExceededException e) {
+                ConcurrentLog.severe("ReferenceIterator", "lost entry '" + UTF8.String(entry.getKey()) + "' because of too low memory: " + e.toString());
                 continue;
             } catch (final Throwable e) {
-                Log.logSevere("ReferenceIterator", "lost entry '" + UTF8.String(entry.getKey()) + "' because of error: " + e.toString());
+                ConcurrentLog.severe("ReferenceIterator", "lost entry '" + UTF8.String(entry.getKey()) + "' because of error: " + e.toString());
                 continue;
             }
         }
@@ -95,7 +95,7 @@ public class ReferenceIterator <ReferenceType extends Reference> extends LookAhe
         try {
             return new ReferenceIterator<ReferenceType>(this.blobFile, this.factory);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
     }

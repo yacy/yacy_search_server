@@ -60,7 +60,7 @@ public class mmParser extends AbstractParser implements Parser {
     	if (parser == null) {
     		try {
 				parser = SAXParserFactory.newInstance().newSAXParser();
-			} catch (ParserConfigurationException e) {
+			} catch (final ParserConfigurationException e) {
 				throw new SAXException(e.getMessage(), e);
 			}
     		tlSax.set(parser);
@@ -68,6 +68,7 @@ public class mmParser extends AbstractParser implements Parser {
     	return parser;
     }
 
+    @Override
     public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException
@@ -83,7 +84,7 @@ public class mmParser extends AbstractParser implements Parser {
 
             final List<String> nodeTextList = freeMindHandler.getNodeText();
 
-            rootElementText = (nodeTextList.size() > 0) ? nodeTextList.get(0) : "";
+            rootElementText = nodeTextList.isEmpty() ? "" : nodeTextList.get(0);
 
             for (final String nodeText : nodeTextList) {
                 sb.append(nodeText);
@@ -92,10 +93,10 @@ public class mmParser extends AbstractParser implements Parser {
 
             content = UTF8.getBytes(sb.toString());
 
-        } catch (SAXException ex) {
-            this.log.logWarning(ex.getMessage());
-        } catch (IOException ex) {
-            this.log.logWarning(ex.getMessage());
+        } catch (final SAXException ex) {
+            AbstractParser.log.warn(ex.getMessage());
+        } catch (final IOException ex) {
+            AbstractParser.log.warn(ex.getMessage());
         }
 
         return new Document[]{new Document(
@@ -105,7 +106,7 @@ public class mmParser extends AbstractParser implements Parser {
             this,
             null,
             null,
-            rootElementText,
+            singleList(rootElementText),
             null,
             null,
             null,

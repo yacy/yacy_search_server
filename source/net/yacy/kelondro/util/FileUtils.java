@@ -24,8 +24,6 @@
 
 package net.yacy.kelondro.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -41,36 +39,25 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.Files;
-import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSet;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
-public final class FileUtils
-{
+public final class FileUtils {
 
     private static final int DEFAULT_BUFFER_SIZE = 1024; // this is also the maximum chunk size
 
@@ -119,22 +106,6 @@ public final class FileUtils
         return total;
     }
 
-    public static int copy(final File source, final Charset inputCharset, final Writer dest)
-        throws IOException {
-        InputStream fis = null;
-        try {
-            fis = new FileInputStream(source);
-            return copy(fis, dest, inputCharset);
-        } finally {
-            if ( fis != null ) {
-                try {
-                    fis.close();
-                } catch (Exception e ) {
-                }
-            }
-        }
-    }
-
     public static int copy(final InputStream source, final Writer dest) throws IOException {
         final InputStreamReader reader = new InputStreamReader(source);
         return copy(reader, dest);
@@ -170,7 +141,7 @@ public final class FileUtils
                 count += n;
             }
             dest.flush();
-        } catch ( final Exception e ) {
+        } catch (final Exception e ) {
             assert e != null;
             // an "sun.io.MalformedInputException: Missing byte-order mark" - exception may occur here
             //Log.logException(e);
@@ -210,8 +181,8 @@ public final class FileUtils
             if ( fos != null ) {
                 try {
                     fos.close();
-                } catch ( final Exception e ) {
-                    Log.logWarning(
+                } catch (final Exception e ) {
+                    ConcurrentLog.warn(
                         "FileUtils",
                         "cannot close FileOutputStream for " + dest + "! " + e.getMessage());
                 }
@@ -249,7 +220,7 @@ public final class FileUtils
             if ( fis != null ) {
                 try {
                     fis.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
         }
@@ -275,7 +246,7 @@ public final class FileUtils
             if ( fis != null ) {
                 try {
                     fis.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
         }
@@ -325,68 +296,12 @@ public final class FileUtils
             if ( fis != null ) {
                 try {
                     fis.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
             fis = null;
         }
         return buffer;
-    }
-
-    public static byte[] readAndZip(final File source) throws IOException {
-        ByteArrayOutputStream byteOut = null;
-        GZIPOutputStream zipOut = null;
-        try {
-            byteOut = new ByteArrayOutputStream((int) (source.length() / 2));
-            zipOut = new GZIPOutputStream(byteOut);
-            copy(source, zipOut);
-            zipOut.close();
-            return byteOut.toByteArray();
-        } finally {
-            if ( zipOut != null ) {
-                try {
-                    zipOut.close();
-                } catch ( final Exception e ) {
-                }
-            }
-            if ( byteOut != null ) {
-                try {
-                    byteOut.close();
-                } catch ( final Exception e ) {
-                }
-            }
-        }
-    }
-
-    public static void writeAndGZip(final byte[] source, final File dest) throws IOException {
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(dest);
-            writeAndGZip(source, fos);
-        } finally {
-            if ( fos != null ) {
-                try {
-                    fos.close();
-                } catch ( final Exception e ) {
-                }
-            }
-        }
-    }
-
-    public static void writeAndGZip(final byte[] source, final OutputStream dest) throws IOException {
-        GZIPOutputStream zipOut = null;
-        try {
-            zipOut = new GZIPOutputStream(dest);
-            copy(source, zipOut);
-            zipOut.close();
-        } finally {
-            if ( zipOut != null ) {
-                try {
-                    zipOut.close();
-                } catch ( final Exception e ) {
-                }
-            }
-        }
     }
 
     /**
@@ -427,7 +342,7 @@ public final class FileUtils
                 byteOutput.close();
 
                 source = byteOutput.toByteArray();
-            } catch ( final Exception e ) {
+            } catch (final Exception e ) {
                 if ( !e.getMessage().equals("Not in GZIP format") ) {
                     throw new IOException(e.getMessage());
                 }
@@ -450,12 +365,12 @@ public final class FileUtils
                 }
             }
             br.close();
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
         } finally {
             if ( br != null ) {
                 try {
                     br.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
         }
@@ -467,8 +382,8 @@ public final class FileUtils
         try {
             final byte[] b = read(f);
             return table(strings(b));
-        } catch ( final IOException e2 ) {
-            Log.logSevere("FileUtils", f.toString() + " not found", e2);
+        } catch (final IOException e2 ) {
+            ConcurrentLog.severe("FileUtils", f.toString() + " not found", e2);
             return null;
         }
     }
@@ -481,6 +396,12 @@ public final class FileUtils
         return mb;
     }
 
+    private final static Pattern backslashbackslash = Pattern.compile("\\\\");
+    private final static Pattern unescaped_equal = Pattern.compile("=");
+    private final static Pattern escaped_equal = Pattern.compile("\\=", Pattern.LITERAL);
+    private final static Pattern escaped_newline = Pattern.compile("\\n", Pattern.LITERAL);
+    private final static Pattern escaped_backslash = Pattern.compile(Pattern.quote("\\"), Pattern.LITERAL);
+
     public static void saveMap(final File file, final Map<String, String> props, final String comment) {
         PrintWriter pw = null;
         final File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
@@ -491,20 +412,24 @@ public final class FileUtils
             for ( final Map.Entry<String, String> entry : props.entrySet() ) {
                 key = entry.getKey();
                 if ( key != null ) {
-                    key = key.replace("\\", "\\\\").replace("\n", "\\n").replace("=", "\\=");
+                    key = backslashbackslash.matcher(key).replaceAll("\\\\");
+                    key = escaped_newline.matcher(key).replaceAll("\\n");
+                    key = unescaped_equal.matcher(key).replaceAll("\\=");
                 }
                 if ( entry.getValue() == null ) {
                     value = "";
                 } else {
-                    value = entry.getValue().replace("\\", "\\\\").replace("\n", "\\n");
+                    value = entry.getValue();
+                    value = backslashbackslash.matcher(value).replaceAll("\\\\");
+                    value = escaped_newline.matcher(value).replaceAll("\\n");
                 }
                 pw.println(key + "=" + value);
             }
             pw.println("# EOF");
-        } catch ( FileNotFoundException e ) {
-            Log.logWarning("FileUtils", e.getMessage(), e);
-        } catch ( UnsupportedEncodingException e ) {
-            Log.logWarning("FileUtils", e.getMessage(), e);
+        } catch (final  FileNotFoundException e ) {
+            ConcurrentLog.warn("FileUtils", e.getMessage(), e);
+        } catch (final  UnsupportedEncodingException e ) {
+            ConcurrentLog.warn("FileUtils", e.getMessage(), e);
         } finally {
             if ( pw != null ) {
                 pw.close();
@@ -513,100 +438,15 @@ public final class FileUtils
         }
         try {
             forceMove(tf, file);
-        } catch ( IOException e ) {
+        } catch (final  IOException e ) {
             // ignore
         }
     }
-
+    
     public static void saveMapB(final File file, final Map<String, byte[]> props, final String comment) {
         HashMap<String, String> m = new HashMap<String, String>();
         for (Map.Entry<String, byte[]> e: props.entrySet()) m.put(e.getKey(), UTF8.String(e.getValue()));
         saveMap(file, m, comment);
-    }
-
-    public static Set<String> loadSet(final File file, final int chunksize, final boolean tree)
-        throws IOException {
-        final Set<String> set =
-            (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
-        final byte[] b = read(file);
-        for ( int i = 0; (i + chunksize) <= b.length; i++ ) {
-            set.add(UTF8.String(b, i, chunksize));
-        }
-        return set;
-    }
-
-    public static Set<String> loadSet(final File file, final String sep, final boolean tree)
-        throws IOException {
-        final Set<String> set =
-            (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
-        final byte[] b = read(file);
-        final StringTokenizer st = new StringTokenizer(UTF8.String(b), sep);
-        while ( st.hasMoreTokens() ) {
-            set.add(st.nextToken());
-        }
-        return set;
-    }
-
-    public static void saveSet(final File file, final String format, final Set<byte[]> set, final String sep)
-        throws IOException {
-        final File tf = new File(file.toString() + ".prt" + (System.currentTimeMillis() % 1000));
-        OutputStream os = null;
-        if ( (format == null) || (format.equals("plain")) ) {
-            os = new BufferedOutputStream(new FileOutputStream(tf));
-        } else if ( format.equals("gzip") ) {
-            os = new GZIPOutputStream(new FileOutputStream(tf));
-        } else if ( format.equals("zip") ) {
-            final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file));
-            String name = file.getName();
-            if ( name.endsWith(".zip") ) {
-                name = name.substring(0, name.length() - 4);
-            }
-            zos.putNextEntry(new ZipEntry(name + ".txt"));
-            os = zos;
-        }
-        if ( os != null ) {
-            for ( final byte[] b : set ) {
-                os.write(b);
-                if ( sep != null ) {
-                    os.write(UTF8.getBytes(sep));
-                }
-            }
-            os.close();
-        }
-        forceMove(tf, file);
-    }
-
-    public static void saveSet(final File file, final String format, final RowSet set, final String sep)
-        throws IOException {
-        final File tf = new File(file.toString() + ".prt" + (System.currentTimeMillis() % 1000));
-        OutputStream os = null;
-        if ( (format == null) || (format.equals("plain")) ) {
-            os = new BufferedOutputStream(new FileOutputStream(tf));
-        } else if ( format.equals("gzip") ) {
-            os = new GZIPOutputStream(new FileOutputStream(tf));
-        } else if ( format.equals("zip") ) {
-            final ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file));
-            String name = file.getName();
-            if ( name.endsWith(".zip") ) {
-                name = name.substring(0, name.length() - 4);
-            }
-            zos.putNextEntry(new ZipEntry(name + ".txt"));
-            os = zos;
-        }
-        if ( os != null ) {
-            final Iterator<Row.Entry> i = set.iterator();
-            if ( i.hasNext() ) {
-                os.write(i.next().getPrimaryKeyBytes());
-            }
-            while ( i.hasNext() ) {
-                if ( sep != null ) {
-                    os.write(UTF8.getBytes(sep));
-                }
-                os.write(i.next().getPrimaryKeyBytes());
-            }
-            os.close();
-        }
-        forceMove(tf, file);
     }
 
     public static ConcurrentHashMap<String, String> table(final Reader r) {
@@ -614,26 +454,20 @@ public final class FileUtils
         return table(new StringsIterator(br));
     }
 
-    private final static Pattern escaped_equal = Pattern.compile("\\=", Pattern.LITERAL);
-    private final static Pattern escaped_newline = Pattern.compile("\\n", Pattern.LITERAL);
-    private final static Pattern escaped_backslash = Pattern.compile("\\", Pattern.LITERAL);
-
-    //private final static Pattern escaped_backslashbackslash = Pattern.compile("\\\\", Pattern.LITERAL);
-
     public static ConcurrentHashMap<String, String> table(final Iterator<String> li) {
         String line;
         final ConcurrentHashMap<String, String> props = new ConcurrentHashMap<String, String>();
         while ( li.hasNext() ) {
             int pos = 0;
             line = li.next().trim();
-            if ( line.length() > 0 && line.charAt(0) == '#' ) {
+            if ( !line.isEmpty() && line.charAt(0) == '#' ) {
                 continue; // exclude comments
             }
             do {
                 // search for unescaped =
                 pos = line.indexOf('=', pos + 1);
             } while ( pos > 0 && line.charAt(pos - 1) == '\\' );
-            if ( pos > 0 ) {
+            if ( pos > 0 ) try {
                 String key = escaped_equal.matcher(line.substring(0, pos).trim()).replaceAll("=");
                 key = escaped_newline.matcher(key).replaceAll("\n");
                 key = escaped_backslash.matcher(key).replaceAll("\\");
@@ -641,6 +475,8 @@ public final class FileUtils
                 value = value.replace("\\\\", "\\"); // does not work: escaped_backslashbackslash.matcher(value).replaceAll("\\");
                 //System.out.println("key = " + key + ", value = " + value);
                 props.put(key, value);
+            } catch (final IndexOutOfBoundsException e) {
+                ConcurrentLog.logException(e);
             }
         }
         return props;
@@ -658,7 +494,7 @@ public final class FileUtils
         }
         try {
             return new StringsIterator(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(a), "UTF-8")));
-        } catch ( final UnsupportedEncodingException e ) {
+        } catch (final UnsupportedEncodingException e ) {
             return null;
         }
     }
@@ -680,13 +516,13 @@ public final class FileUtils
                 list.add(line);
             }
             br.close();
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
             // list is empty
         } finally {
             if ( br != null ) {
                 try {
                     br.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
         }
@@ -700,27 +536,27 @@ public final class FileUtils
      * @param out the String to write
      * @return returns <code>true</code> if successful, <code>false</code> otherwise
      */
-    public static boolean writeList(final File listFile, final String out) {
+    private static boolean writeList(final File listFile, final String out) {
         BufferedWriter bw = null;
         try {
             bw = new BufferedWriter(new PrintWriter(new FileWriter(listFile)));
             bw.write(out);
             bw.close();
             return true;
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
             return false;
         } finally {
             if ( bw != null ) {
                 try {
                     bw.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
         }
     }
 
-    public static final char LF = (char) 10;
-    public static final char CR = (char) 13;
+    private static final char LF = (char) 10;
+    private static final char CR = (char) 13;
 
     /**
      * Read lines of a text file into a String, optionally ignoring comments.
@@ -740,7 +576,7 @@ public final class FileUtils
             // Read the List
             String line = "";
             while ( (line = br.readLine()) != null ) {
-                if ( line.length() == 0 ) {
+                if ( line.isEmpty() ) {
                     continue;
                 }
                 if ( line.charAt(0) != '#' || withcomments ) {
@@ -749,12 +585,12 @@ public final class FileUtils
                 }
             }
             br.close();
-        } catch ( final IOException e ) {
+        } catch (final IOException e ) {
         } finally {
             if ( br != null ) {
                 try {
                     br.close();
-                } catch ( final Exception e ) {
+                } catch (final Exception e ) {
                 }
             }
         }
@@ -828,7 +664,7 @@ public final class FileUtils
     /**
      * Returns a List of all dirs and subdirs as File Objects Warning: untested
      */
-    public static ArrayList<File> getDirsRecursive(
+    private static ArrayList<File> getDirsRecursive(
         final File dir,
         final String notdir,
         final boolean excludeDotfiles) {
@@ -866,12 +702,11 @@ public final class FileUtils
         return FileUtils.writeList(listFile, new String(out)); //(File, String)
     }
 
-    public static class StringsIterator implements Iterator<String>
-    {
+    private static class StringsIterator implements Iterator<String> {
         private BufferedReader reader;
         private String nextLine;
 
-        public StringsIterator(final BufferedReader reader) {
+        private StringsIterator(final BufferedReader reader) {
             this.reader = reader;
             this.nextLine = null;
             next();
@@ -888,20 +723,20 @@ public final class FileUtils
             if (this.reader != null) try {
                 while ( (this.nextLine = this.reader.readLine()) != null ) {
                     this.nextLine = this.nextLine.trim();
-                    if ( this.nextLine.length() > 0 ) {
+                    if ( !this.nextLine.isEmpty() ) {
                         break;
                     }
                 }
-            } catch ( final IOException e ) {
+            } catch (final IOException e ) {
                 this.nextLine = null;
-            } catch ( final OutOfMemoryError e ) {
-                Log.logException(e);
+            } catch (final OutOfMemoryError e ) {
+                ConcurrentLog.logException(e);
                 this.nextLine = null;
             }
             if (this.nextLine == null && this.reader != null) {
                 try {
                     this.reader.close();
-                } catch (IOException e) {} finally {
+                } catch (final IOException e) {} finally {
                     this.reader = null;
                 }
             }
@@ -928,52 +763,6 @@ public final class FileUtils
         }
     }
 
-    /**
-     * Moves all files from a directory to another.
-     *
-     * @param from_dir Directory which contents will be moved.
-     * @param to_dir Directory to move into. It must exist already.
-     */
-    public static void moveAll(final File from_dir, final File to_dir) {
-        if ( !(from_dir.isDirectory()) ) {
-            return;
-        }
-        if ( !(to_dir.isDirectory()) ) {
-            return;
-        }
-        final String[] list = from_dir.list();
-        for ( int i = 0; i < list.length; i++ ) {
-            if ( !new File(from_dir, list[i]).renameTo(new File(to_dir, list[i])) ) {
-                Log.logWarning("serverFileUtils", "moveAll(): could not move from "
-                    + from_dir
-                    + list[i]
-                    + " to "
-                    + to_dir
-                    + list[i]);
-            }
-        }
-    }
-
-    public static class dirlistComparator implements Comparator<File>, Serializable
-    {
-
-        /**
-         * generated serial
-         */
-        private static final long serialVersionUID = -5196490300039230135L;
-
-        @Override
-        public int compare(final File file1, final File file2) {
-            if ( file1.isDirectory() && !file2.isDirectory() ) {
-                return -1;
-            } else if ( !file1.isDirectory() && file2.isDirectory() ) {
-                return 1;
-            } else {
-                return file1.getName().compareToIgnoreCase(file2.getName());
-            }
-        }
-    }
-
     public static final File createTempFile(final Class<?> classObj, final String name) throws IOException {
         String parserClassName = classObj.getName();
         int idx = parserClassName.lastIndexOf('.');
@@ -992,110 +781,10 @@ public final class FileUtils
         final File tempFile =
             File.createTempFile(
                 parserClassName + "_" + ((idx > -1) ? fileName.substring(0, idx) : fileName),
-                (fileExt.length() > 0) ? "." + fileExt : fileExt);
+                (!fileExt.isEmpty()) ? "." + fileExt : fileExt);
         return tempFile;
     }
-
-    /**
-     * copies the input stream to one output stream (byte per byte)
-     *
-     * @param in
-     * @param out
-     * @return number of copies bytes
-     * @throws IOException
-     */
-    public static int copyToStream(final BufferedInputStream in, final BufferedOutputStream out)
-        throws IOException {
-        int count = 0;
-        // copy bytes
-        int b;
-        while ( (b = in.read()) != -1 ) {
-            count++;
-            out.write(b);
-        }
-        out.flush();
-        return count;
-    }
-
-    /**
-     * copies the input stream to both output streams (byte per byte)
-     *
-     * @param in
-     * @param out0
-     * @param out1
-     * @return number of copies bytes
-     * @throws IOException
-     */
-    public static int copyToStreams(
-        final BufferedInputStream in,
-        final BufferedOutputStream out0,
-        final BufferedOutputStream out1) throws IOException {
-        assert out0 != null;
-        assert out1 != null;
-
-        int count = 0;
-        // copy bytes
-        int b;
-        while ( (b = in.read()) != -1 ) {
-            count++;
-            out0.write(b);
-            out1.write(b);
-        }
-        out0.flush();
-        out1.flush();
-        return count;
-    }
-
-    /**
-     * copies the input stream to all writers (byte per byte)
-     *
-     * @param data
-     * @param writer
-     * @param charSet
-     * @return
-     * @throws IOException
-     */
-    public static int copyToWriter(
-        final BufferedInputStream data,
-        final BufferedWriter writer,
-        final Charset charSet) throws IOException {
-        // the docs say: "For top efficiency, consider wrapping an InputStreamReader within a BufferedReader."
-        final Reader sourceReader = new InputStreamReader(data, charSet);
-
-        int count = 0;
-        // copy bytes
-        int b;
-        while ( (b = sourceReader.read()) != -1 ) {
-            count++;
-            writer.write(b);
-        }
-        writer.flush();
-        return count;
-    }
-
-    public static int copyToWriters(
-        final BufferedInputStream data,
-        final BufferedWriter writer0,
-        final BufferedWriter writer1,
-        final Charset charSet) throws IOException {
-        // the docs say: "For top efficiency, consider wrapping an InputStreamReader within a BufferedReader."
-        assert writer0 != null;
-        assert writer1 != null;
-        final Reader sourceReader = new InputStreamReader(data, charSet);
-
-        int count = 0;
-        // copy bytes
-        int b;
-        while ( (b = sourceReader.read()) != -1 ) {
-            count++;
-            writer0.write(b);
-            writer1.write(b);
-        }
-        writer0.flush();
-        writer1.flush();
-        return count;
-    }
-
+    
     /**
      * delete files and directories if a directory is not empty, delete also everything inside because
      * deletion sometimes fails on windows, there is also a windows exec included
@@ -1130,7 +819,7 @@ public final class FileUtils
             //System.gc();
             try {
                 Thread.sleep(200);
-            } catch ( final InterruptedException e ) {
+            } catch (final InterruptedException e ) {
                 break;
             }
         }
@@ -1139,8 +828,8 @@ public final class FileUtils
             String p = "";
             try {
                 p = path.getCanonicalPath();
-            } catch ( final IOException e1 ) {
-                Log.logException(e1);
+            } catch (final IOException e1 ) {
+                ConcurrentLog.logException(e1);
             }
             if ( System.getProperties().getProperty("os.name", "").toLowerCase().startsWith("windows") ) {
                 // deleting files on windows sometimes does not work with java
@@ -1148,27 +837,44 @@ public final class FileUtils
                     final String command = "cmd /C del /F /Q \"" + p + "\"";
                     final Process r = Runtime.getRuntime().exec(command);
                     if ( r == null ) {
-                        Log.logSevere("FileUtils", "cannot execute command: " + command);
+                        ConcurrentLog.severe("FileUtils", "cannot execute command: " + command);
                     } else {
                         final byte[] response = read(r.getInputStream());
-                        Log.logInfo("FileUtils", "deletedelete: " + UTF8.String(response));
+                        ConcurrentLog.info("FileUtils", "deletedelete: " + UTF8.String(response));
                     }
-                } catch ( final IOException e ) {
-                    Log.logException(e);
+                } catch (final IOException e ) {
+                    ConcurrentLog.logException(e);
                 }
             }
             if ( path.exists() ) {
-                Log.logSevere("FileUtils", "cannot delete file " + p);
+                ConcurrentLog.severe("FileUtils", "cannot delete file " + p);
             }
         }
     }
-
-    public static void main(final String[] args) {
+    
+    /**
+     * Checks if a certain file is in a given directory.
+     * @param file the file to check
+     * @param directory the directory which must contain the file
+     * @return true if file is contained in directory
+     */
+    public static boolean isInDirectory(final File file, final File directory) {
+        
+        boolean inDirectory;
+        
         try {
-            writeAndGZip("ein zwei drei, Zauberei".getBytes(), new File("zauberei.txt.gz"));
-        } catch ( final IOException e ) {
-            Log.logException(e);
+            inDirectory = (
+                    directory != null
+                    && directory.isDirectory()
+                    && file != null
+                    && file.isFile()
+                    && directory.getCanonicalPath().equalsIgnoreCase(
+                            file.getParentFile().getCanonicalPath()));
+        } catch (final IOException e) {
+            inDirectory = false;
         }
+        
+        return inDirectory;
     }
 
 }

@@ -27,26 +27,26 @@
 package net.yacy.search.query;
 
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.WorkTables;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.SeedDB;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.data.WorkTables;
 
 public class SearchEventCache {
 
-    private volatile static Map<String, SearchEvent> lastEvents = new ConcurrentHashMap<String, SearchEvent>(); // a cache for objects from this class: re-use old search requests
-    public static final long eventLifetimeBigMem = 600000; // the time an event will stay in the cache when available memory is high, 10 Minutes
-    public static final long eventLifetimeMediumMem = 60000; // the time an event will stay in the cache when available memory is medium, 1 Minute
-    public static final long eventLifetimeShortMem = 10000; // the time an event will stay in the cache when memory is low, 10 seconds
-    public static final long memlimitHigh = 600 * 1024 * 1024; // 400 MB
-    public static final long memlimitMedium = 200 * 1024 * 1024; // 100 MB
+    private volatile static LinkedHashMap<String, SearchEvent> lastEvents = new LinkedHashMap<String, SearchEvent>(); // a cache for objects from this class: re-use old search requests
+    private static final long eventLifetimeBigMem = 600000; // the time an event will stay in the cache when available memory is high, 10 Minutes
+    private static final long eventLifetimeMediumMem = 60000; // the time an event will stay in the cache when available memory is medium, 1 Minute
+    private static final long eventLifetimeShortMem = 10000; // the time an event will stay in the cache when memory is low, 10 seconds
+    private static final long memlimitHigh = 600 * 1024 * 1024; // 400 MB
+    private static final long memlimitMedium = 200 * 1024 * 1024; // 100 MB
     public volatile static String lastEventID = "";
     public static long cacheInsert = 0, cacheHit = 0, cacheMiss = 0, cacheDelete = 0;
 
@@ -54,16 +54,20 @@ public class SearchEventCache {
         return lastEvents.size();
     }
 
-    public static void put(final String eventID, final SearchEvent event) {
+    protected static void put(final String eventID, final SearchEvent event) {
         if (MemoryControl.shortStatus()) cleanupEvents(false);
         lastEventID = eventID;
-        final SearchEvent oldEvent = lastEvents.put(eventID, event);
-        if (oldEvent == null) cacheInsert++;
+        synchronized (lastEvents) {
+            final SearchEvent oldEvent = lastEvents.put(eventID, event);
+            if (oldEvent == null) cacheInsert++;
+        }
     }
 
     public static boolean delete(final String urlhash) {
-        for (final SearchEvent event: lastEvents.values()) {
-            if (event.result().delete(urlhash)) return true;
+        synchronized (lastEvents) {
+            for (final SearchEvent event: lastEvents.values()) {
+                if (event.delete(urlhash)) return true;
+            }
         }
         return false;
     }
@@ -75,18 +79,40 @@ public class SearchEventCache {
         final long memx = MemoryControl.available();
         final long acceptTime = memx > memlimitHigh ? eventLifetimeBigMem : memx > memlimitMedium ? eventLifetimeMediumMem : eventLifetimeShortMem;
         Map.Entry<String, SearchEvent> eventEntry;
-        final Iterator<Map.Entry<String, SearchEvent>> i = lastEvents.entrySet().iterator();
-        SearchEvent event;
-        while (i.hasNext()) {
-            eventEntry = i.next();
-            event = eventEntry.getValue();
-            if (event == null) continue;
-            if (all || event.getEventTime() + acceptTime < System.currentTimeMillis()) {
-                if (event.workerAlive()) {
+        synchronized (lastEvents) {
+            final Iterator<Map.Entry<String, SearchEvent>> i = lastEvents.entrySet().iterator();
+            SearchEvent event;
+            while (i.hasNext()) {
+                eventEntry = i.next();
+                event = eventEntry.getValue();
+                if (event == null) continue;
+                if (all || event.getEventTime() + acceptTime < System.currentTimeMillis()) {
                     event.cleanup();
+                    i.remove();
+                    cacheDelete++;
                 }
+            }
+        }
+    }
+    
+    public static void cleanupEvents(int maxsize) {
+        // remove old events in the event cache
+        if (MemoryControl.shortStatus()) {cleanupEvents(true); return;}
+        Map.Entry<String, SearchEvent> eventEntry;
+        synchronized (lastEvents) {
+            final Iterator<Map.Entry<String, SearchEvent>> i = lastEvents.entrySet().iterator(); // iterates in order of entry
+            int dc = lastEvents.size() - maxsize;
+            if (dc <= 0) return;
+            SearchEvent event;
+            while (i.hasNext()) {
+                eventEntry = i.next();
+                event = eventEntry.getValue();
+                if (event == null) continue;
+                event.cleanup();
                 i.remove();
                 cacheDelete++;
+                dc--;
+                if (dc <= 0) break;            
             }
         }
     }
@@ -105,24 +131,6 @@ public class SearchEventCache {
         return event;
     }
 
-    public static int countAliveThreads() {
-        int alive = 0;
-        for (final SearchEvent e: lastEvents.values()) {
-            if (e.workerAlive()) alive++;
-        }
-        return alive;
-    }
-
-/*
-    private volatile static SearchEvent dummyEvent = null;
-    private static SearchEvent getDummyEvent(final WorkTables workTables, final LoaderDispatcher loader, final Segment indexSegment) {
-        Log.logWarning("SearchEventCache", "returning dummy event");
-        if (dummyEvent != null) return dummyEvent;
-        final QueryParams query = new QueryParams("", 0, null, indexSegment, new RankingProfile(Classification.ContentDomain.TEXT), "");
-        dummyEvent = new SearchEvent(query, null, workTables, null, false, loader, 0, 0, 0, 0, false);
-        return dummyEvent;
-    }
-*/
     public static SearchEvent getEvent(
             final QueryParams query,
             final SeedDB peers,
@@ -135,61 +143,36 @@ public class SearchEventCache {
             final int burstRobinsonPercent,
             final int burstMultiwordPercent) {
 
+        if (MemoryControl.shortStatus()) cleanupEvents(true);
         final String id = query.id(false);
         SearchEvent event = getEvent(id);
         if (Switchboard.getSwitchboard() != null && !Switchboard.getSwitchboard().crawlQueues.noticeURL.isEmpty() && event != null && System.currentTimeMillis() - event.getEventTime() > 60000) {
             // if a local crawl is ongoing, don't use the result from the cache to use possibly more results that come from the current crawl
             // to prevent that this happens during a person switches between the different result pages, a re-search happens no more than
             // once a minute
-            lastEvents.remove(id);
+            synchronized (lastEvents) {
+                lastEvents.remove(id);
+            }
             cacheDelete++;
             event = null;
         } else {
             if (event != null) {
                 //re-new the event time for this event, so it is not deleted next time too early
                 event.resetEventTime();
-                // replace the query, because this contains the current result offset
-                event.setQuery(query);
+                // replace the current result offset
+                event.query.offset = query.offset;
+                event.query.itemsPerPage = query.itemsPerPage;
             }
         }
         if (event == null) {
-
-            // throttling in case of too many search requests
-
-            int waitcount = 0;
-            /*
-            throttling : while (true) {
-                final int allowedThreads = (int) Math.max(10, MemoryControl.available() / (query.snippetCacheStrategy == null ? 3 : 30) / 1024 / 1024);
-                // make room if there are too many search events (they need a lot of RAM)
-                if (lastEvents.size() >= allowedThreads) {
-                    Log.logWarning("SearchEventCache", "throttling phase 1: " + lastEvents.size() + " in cache; " + countAliveThreads() + " alive; " + allowedThreads + " allowed");
-                    cleanupEvents(false);
-                } else break throttling;
-                // if there are still some then delete just all
-                if (lastEvents.size() >= allowedThreads) {
-                    Log.logWarning("SearchEventCache", "throttling phase 2: " + lastEvents.size() + " in cache; " + countAliveThreads() + " alive; " + allowedThreads + " allowed");
-                    cleanupEvents(true);
-                } else break throttling;
-                // now there might be still events left that are alive
-                if (countAliveThreads() < allowedThreads) break throttling;
-                // finally we just wait some time until we get access
-                Log.logWarning("SearchEventCache", "throttling phase 3: " + lastEvents.size() + " in cache; " + countAliveThreads() + " alive; " + allowedThreads + " allowed");
-                try { Thread.sleep(200); } catch (final InterruptedException e) { }
-                waitcount++;
-                if (waitcount >= 100) return getDummyEvent(workTables, loader, query.getSegment());
-            }
-             */
-
-            if (waitcount > 0) {
-                // do not fetch snippets because that is most time-expensive
-                query.snippetCacheStrategy = null;
-            }
-
             // check if there are too many other searches alive now
-            Log.logInfo("SearchEventCache", "getEvent: " + lastEvents.size() + " in cache; " + countAliveThreads() + " alive");
-
+            synchronized (lastEvents) {
+                ConcurrentLog.info("SearchEventCache", "getEvent: " + lastEvents.size() + " in cache");
+            }
+            
             // start a new event
-            final boolean delete = Switchboard.getSwitchboard() == null || Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, true);
+            Switchboard sb = Switchboard.getSwitchboard();
+            final boolean delete = sb == null || Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, true);
             event = new SearchEvent(query, peers, workTables, preselectedPeerHashes, generateAbstracts, loader, remote_maxcount, remote_maxtime, burstRobinsonPercent, burstMultiwordPercent, delete);
             MemoryControl.request(100 * 1024 * 1024, false); // this may trigger a short memory status which causes a reducing of cache space of other threads
         }

@@ -30,12 +30,12 @@
 import java.io.File;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.data.Cache;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.crawler.Cache;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class ProxyIndexingMonitor_p {
 
@@ -44,7 +44,7 @@ public class ProxyIndexingMonitor_p {
 //      if (date == null) return ""; else return dayFormatter.format(date);
 //  }
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -140,7 +140,7 @@ public class ProxyIndexingMonitor_p {
             } catch (final Exception e) {
                 prop.put("info", "2"); //Error: errmsg
                 prop.putHTML("info_error", e.getMessage());
-                Log.logSevere("SERVLET", "ProxyIndexingMonitor.case3", e);
+                ConcurrentLog.severe("SERVLET", "ProxyIndexingMonitor.case3", e);
             }
         }
 

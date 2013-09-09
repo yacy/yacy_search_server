@@ -34,12 +34,12 @@ import java.util.Map;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class CookieMonitorOutgoing_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch sb) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch sb) {
         final Switchboard switchboard = (Switchboard) sb;
 
         // return variable that accumulates replacements
@@ -53,7 +53,7 @@ public class CookieMonitorOutgoing_p {
                 switchboard.setConfig("proxy.monitorCookies", false);
 		switchboard.incomingCookies.clear();
 		switchboard.outgoingCookies.clear();
-            } 
+            }
         }
         prop.put("monitorCookies.on", switchboard.getConfigBool("proxy.monitorCookies", false) ? "1":"0");
         prop.put("monitorCookies.off", !switchboard.getConfigBool("proxy.monitorCookies", false) ? "1":"0");
@@ -78,7 +78,7 @@ public class CookieMonitorOutgoing_p {
             cookies = (Object[]) oa[2];
 
             // put values in template
-            prop.put("list_" + entCount + "_dark", dark ? "1" : "0" ); 
+            prop.put("list_" + entCount + "_dark", dark ? "1" : "0" );
             dark =! dark;
             prop.put("list_" + entCount + "_host", host);
             prop.put("list_" + entCount + "_date", HeaderFramework.formatRFC1123(date));

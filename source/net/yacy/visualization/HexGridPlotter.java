@@ -64,7 +64,7 @@ public class HexGridPlotter extends RasterPlotter {
     }
 
     public void drawGrid(final String colorNaming) {
-        setColor(colorNaming);
+        setColor(Long.parseLong(colorNaming, 16));
         int x0, y0, x1, y1;
         for (int i = 0; i < this.gwidth; i++) {
             x0 = projectionX(i, -1);
@@ -133,14 +133,16 @@ public class HexGridPlotter extends RasterPlotter {
         int y1 = projectionY(By);
         int horizontal;
         int dotc = 0;
+        Long colorLine_l = colorLine == null ? null : Long.parseLong(colorLine, 16);
+        Long colorDot_l = colorDot == null ? null : Long.parseLong(colorDot, 16);
         while (x1 != x0 || y1 != y0) {
             horizontal = 0;
             if (x1 > x0) {x1--; horizontal++;} else if (x1 < x0) {x1++; horizontal++;}
             if (y1 > y0) {y1--; horizontal++;} else if (y1 < y0) {y1++; horizontal++;}
-            if (colorLine != null) this.setColor(colorLine);
+            if (colorLine != null) this.setColor(colorLine_l);
             plot(x1, y1, (horizontal == 2) ? intensityLine : intensityLine * 8 / 10);
             if (dotc == dotPos) {
-                if (colorDot != null) this.setColor(colorDot);
+                if (colorDot != null) this.setColor(colorDot_l);
                 if (dotRadius == 0) this.plot(x1, y1, intensityDot);
                 else if (dotRadius > 0) this.dot(x1, y1, dotRadius, dotFilled, intensityDot);
             }
@@ -155,17 +157,17 @@ public class HexGridPlotter extends RasterPlotter {
         
         final HexGridPlotter picture = new HexGridPlotter(640, 480, DrawMode.MODE_SUB, "FFFFFF", 18);
         picture.drawGrid("555555");
-        picture.setColor("33ff33");
+        picture.setColor(Long.parseLong("33ff33", 16));
         picture.gridDot(0, 0, 5, true, 100); picture.gridPrint(0, 0, 5, "", "0,0", -1);
         for (int i = 1; i < picture.gridHeight() -1; i++) {
-            picture.setColor("33ff33");picture.gridDot(0, i, 3, true, 100);
-            picture.setColor("334433");picture.gridPrint(0, i, 3, "", "0," + i, -1);
+            picture.setColor(Long.parseLong("33ff33", 16));picture.gridDot(0, i, 3, true, 100);
+            picture.setColor(Long.parseLong("334433", 16));picture.gridPrint(0, i, 3, "", "0," + i, -1);
         }
         for (int i = 1; i < picture.gridWidth() -1; i++) {
-            picture.setColor("33ff33");picture.gridDot(i, 0, 3, true, 100);
-            picture.setColor("334433");picture.gridPrint315(i, 0, 3, i + ",0");
+            picture.setColor(Long.parseLong("33ff33", 16));picture.gridDot(i, 0, 3, true, 100);
+            picture.setColor(Long.parseLong("334433", 16));picture.gridPrint315(i, 0, 3, i + ",0");
         }
-        picture.setColor("33ff33");
+        picture.setColor(Long.parseLong("33ff33", 16));
         picture.gridDot(0, picture.gheight - 1, 5, true, 100); picture.gridPrint(0, picture.gheight - 1, 5, "0, grid.gheight - 1", "", -1);
         picture.gridDot(picture.gwidth - 1, 0, 5, true, 100); picture.gridPrint(picture.gwidth - 1, 0, 5, "", "grid.gwidth - 1, 0", -1);
         picture.gridDot(picture.gwidth - 1, picture.gheight - 1, 5, true, 100); picture.gridPrint(picture.gwidth - 1, picture.gheight - 1, 5, "grid.gwidth - 1, grid.gheight - 1", "", 1);

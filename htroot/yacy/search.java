@@ -35,26 +35,28 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Classification;
-import net.yacy.cora.document.Classification.ContentDomain;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.rwi.ReferenceContainer;
-import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.EventChannel;
@@ -67,15 +69,18 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryGoal;
+import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.query.SearchEventType;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.snippet.ResultEntry;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.tools.crypt;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.utils.crypt;
 
 public final class search {
 
@@ -93,10 +98,6 @@ public final class search {
         prop.put("links", "");
         prop.put("indexcount", "");
         prop.put("indexabstract", "");
-        prop.put("fwhop", ""); // hops (depth) of forwards that had been performed to construct this result
-        prop.put("fwsrc", ""); // peers that helped to construct this result
-        prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
-
 
         if (post == null || env == null) return prop;
         if (!Protocol.authentifyRequest(post, env)) return prop;
@@ -106,25 +107,25 @@ public final class search {
 
         final String  oseed  = post.get("myseed", ""); // complete seed of the requesting peer
 //      final String  youare = post.get("youare", ""); // seed hash of the target peer, used for testing network stability
-        final String  key    = post.get("key", "");    // transmission key for response
         final String  query  = post.get("query", "");  // a string of word hashes that shall be searched and combined
         final String  exclude= post.get("exclude", "");// a string of word hashes that shall not be within the search result
         final String  urls   = post.get("urls", "");         // a string of url hashes that are preselected for the search: no other may be returned
-        final String abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
-//      final String  fwdep  = post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
-//      final String  fwden  = post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
+        final String  abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
         final int     count  = Math.min((int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_DEFAULT, 100), post.getInt("count", 10)); // maximum number of wanted results
         final long    maxtime = Math.min((int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000), post.getLong("time", 3000)); // maximum waiting time
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
-        final String  modifier = post.get("modifier", "").trim();
         final String  contentdom = post.get("contentdom", "all");
         final String  filter = post.get("filter", ".*"); // a filter on the url
-        final Pattern snippetPattern = Pattern.compile(post.get("snippet", ".*")); // a filter on the snippet
-        String  sitehash = post.get("sitehash", ""); if (sitehash.length() == 0) sitehash = null;
-        String  authorhash = post.get("authorhash", ""); if (authorhash.length() == 0) authorhash = null;
+        QueryModifier modifier = new QueryModifier();
+        modifier.sitehost = post.get("sitehost", ""); if (modifier.sitehost.isEmpty()) modifier.sitehost = null;
+        modifier.sitehash = post.get("sitehash", ""); if (modifier.sitehash.isEmpty()) modifier.sitehash = null;
+        modifier.author = post.get("author", ""); if (modifier.author.isEmpty()) modifier.author = null;
+        modifier.filetype = post.get("filetype", ""); if (modifier.filetype.isEmpty()) modifier.filetype = null;
+        modifier.protocol = post.get("protocol", ""); if (modifier.protocol.isEmpty()) modifier.protocol = null;
+        modifier.parse(post.get("modifier", "").trim());
         String  language = post.get("language", "");
-        if (language == null || language.length() == 0 || !ISO639.exists(language)) {
+        if (language == null || language.isEmpty() || !ISO639.exists(language)) {
             // take language from the user agent
             String agent = header.get("User-Agent");
             if (agent == null) agent = System.getProperty("user.language");
@@ -133,7 +134,7 @@ public final class search {
         }
         final int partitions = post.getInt("partitions", 30);
         String profile = post.get("profile", ""); // remote profile hand-over
-        if (profile.length() > 0) profile = crypt.simpleDecode(profile, null);
+        if (profile.length() > 0) profile = crypt.simpleDecode(profile);
         //final boolean includesnippet = post.get("includesnippet", "false").equals("true");
         Bitfield constraint = ((post.containsKey("constraint")) && (post.get("constraint", "").length() > 0)) ? new Bitfield(4, post.get("constraint", "______")) : null;
         if (constraint != null) {
@@ -144,7 +145,6 @@ public final class search {
             }
             if (allon) constraint = null;
         }
-//      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
 
         // test:
@@ -189,80 +189,77 @@ public final class search {
         sb.intermissionAllThreads(100);
 
         EventTracker.delete(EventTracker.EClass.SEARCH);
-        final HandleSet abstractSet = (abstracts.length() == 0 || abstracts.equals("auto")) ? null : QueryParams.hashes2Set(abstracts);
+        final HandleSet abstractSet = (abstracts.isEmpty() || abstracts.equals("auto")) ? null : QueryParams.hashes2Set(abstracts);
 
         // store accessing peer
         Seed remoteSeed;
         try {
-            remoteSeed = Seed.genRemoteSeed(oseed, key, false, client);
+            remoteSeed = Seed.genRemoteSeed(oseed, false, client);
         } catch (final IOException e) {
-            Network.log.logInfo("yacy.search: access with bad seed: " + e.getMessage());
+            Network.log.info("yacy.search: access with bad seed: " + e.getMessage());
             remoteSeed = null;
         }
         if (sb.peers == null) {
-            Network.log.logSevere("yacy.search: seed cache not initialized");
+            Network.log.severe("yacy.search: seed cache not initialized");
         } else {
             sb.peers.peerActions.peerArrival(remoteSeed, true);
         }
 
         // prepare search
         final HandleSet queryhashes = QueryParams.hashes2Set(query);
-        final HandleSet excludehashes = (exclude.length() == 0) ? new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0) : QueryParams.hashes2Set(exclude);
+        final HandleSet excludehashes = (exclude.isEmpty()) ? new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0) : QueryParams.hashes2Set(exclude);
         final long timestamp = System.currentTimeMillis();
 
     	// prepare a search profile
-        final RankingProfile rankingProfile = (profile.length() == 0) ? new RankingProfile(Classification.ContentDomain.contentdomParser(contentdom)) : new RankingProfile("", profile);
+        final RankingProfile rankingProfile = (profile.isEmpty()) ? new RankingProfile(Classification.ContentDomain.contentdomParser(contentdom)) : new RankingProfile("", profile);
 
         // prepare an abstract result
         final StringBuilder indexabstract = new StringBuilder(6000);
         int indexabstractContainercount = 0;
-        int joincount = 0;
         QueryParams theQuery = null;
         SearchEvent theSearch = null;
         ArrayList<WeakPriorityBlockingQueue.Element<ResultEntry>> accu = null;
-        if (query.length() == 0 && abstractSet != null) {
+        if (query.isEmpty() && abstractSet != null) {
             // this is _not_ a normal search, only a request for index abstracts
             final Segment indexSegment = sb.index;
+            QueryGoal qg = new QueryGoal(abstractSet, new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0));
             theQuery = new QueryParams(
-                    null,
-                    abstractSet,
-                    new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0),
-                    null,
-                    snippetPattern,
-                    null,
+                    qg,
                     modifier,
                     maxdist,
                     prefer,
                     ContentDomain.contentdomParser(contentdom),
                     language,
                     new HashSet<Tagging.Metatag>(),
-                    "", // no navigation
                     null, // no snippet computation
                     count,
                     0,
                     filter,
+                    null,
+                    null,
                     QueryParams.Searchdom.LOCAL,
-                    -1,
                     null,
                     false,
-                    sitehash,
                     null,
-                    authorhash,
                     DigestURI.TLD_any_zone_filter,
                     client,
                     false,
                     indexSegment,
                     rankingProfile,
                     header.get(RequestHeader.USER_AGENT, ""),
-                    false, 0.0d, 0.0d, 0.0d
+                    false,
+                    false,
+                    0.0d,
+                    0.0d,
+                    0.0d
                     );
-            Network.log.logInfo("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.itemsPerPage() + " links");
+            Network.log.info("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
 
             final long timer = System.currentTimeMillis();
             //final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
-            final TreeMap<byte[], ReferenceContainer<WordReference>> incc = indexSegment.termIndex().searchConjunction(theQuery.queryHashes, QueryParams.hashes2Handles(urls));
+            final TreeMap<byte[], ReferenceContainer<WordReference>> incc = indexSegment.termIndex() == null ? new TreeMap<byte[], ReferenceContainer<WordReference>>() : indexSegment.termIndex().searchConjunction(theQuery.getQueryGoal().getIncludeHashes(), QueryParams.hashes2Set(urls));
 
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEvent.Type.COLLECTION, "", incc.size(), System.currentTimeMillis() - timer), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEventType.COLLECTION, "", incc.size(), System.currentTimeMillis() - timer), false);
             if (incc != null) {
                 final Iterator<Map.Entry<byte[], ReferenceContainer<WordReference>>> ci = incc.entrySet().iterator();
                 Map.Entry<byte[], ReferenceContainer<WordReference>> entry;
@@ -286,52 +283,53 @@ public final class search {
 
         } else {
             // retrieve index containers from search request
+            RowHandleSet allHashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+            try {allHashes.putAll(queryhashes);} catch (final SpaceExceededException e) {}
+            try {allHashes.putAll(excludehashes);} catch (final SpaceExceededException e) {}
+            QueryGoal qg = new QueryGoal(queryhashes, excludehashes);
             theQuery = new QueryParams(
-                    null,
-                    queryhashes,
-                    excludehashes,
-                    null,
-                    snippetPattern,
-                    null,
+                    qg,
                     modifier,
                     maxdist,
                     prefer,
                     ContentDomain.contentdomParser(contentdom),
                     language,
                     new HashSet<Tagging.Metatag>(),
-                    "", // no navigation
                     null, // no snippet computation
                     count,
                     0,
                     filter,
+                    null,
+                    null,
                     QueryParams.Searchdom.LOCAL,
-                    -1,
                     constraint,
                     false,
-                    sitehash,
                     null,
-                    authorhash,
                     DigestURI.TLD_any_zone_filter,
                     client,
                     false,
                     sb.index,
                     rankingProfile,
                     header.get(RequestHeader.USER_AGENT, ""),
-                    false, 0.0d, 0.0d, 0.0d
+                    false,
+                    false,
+                    0.0d,
+                    0.0d,
+                    0.0d
                     );
-            Network.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.itemsPerPage() + " links");
-            EventChannel.channels(EventChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.queryHashes), ""));
+            Network.log.info("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
+            EventChannel.channels(EventChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()), ""));
 
             // make event
             theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, null, abstracts.length() > 0, sb.loader, count, maxtime, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
+            if (theSearch.rwiProcess != null && theSearch.rwiProcess.isAlive()) try {theSearch.rwiProcess.join();} catch (final InterruptedException e) {}
 
             // set statistic details of search result and find best result index set
-            joincount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount();
-            prop.put("joincount", Integer.toString(joincount));
-            if (joincount != 0) {
-                accu = theSearch.result().completeResults(maxtime);
+            prop.put("joincount", Integer.toString(theSearch.getResultCount()));
+            if (theSearch.getResultCount() > 0) {
+                accu = theSearch.completeResults(maxtime);
             }
-            if (joincount <= 0 || abstracts.length() == 0) {
+            if (theSearch.getResultCount() <= 0 || abstracts.isEmpty()) {
                 prop.put("indexcount", "");
             } else {
                 // attach information about index abstracts
@@ -357,7 +355,7 @@ public final class search {
                 // generate compressed index for maxcounthash
                 // this is not needed if the search is restricted to specific
                 // urls, because it is a re-search
-                if ((theSearch.getAbstractsMaxCountHash() == null) || (urls.length() != 0) || (queryhashes.size() <= 1) || (abstracts.length() == 0)) {
+                if ((theSearch.getAbstractsMaxCountHash() == null) || (urls.length() != 0) || (queryhashes.size() <= 1) || (abstracts.isEmpty())) {
                     prop.put("indexabstract", "");
                 } else if (abstracts.equals("auto")) {
                     // automatically attach the index abstract for the index that has the most references. This should be our target dht position
@@ -377,7 +375,7 @@ public final class search {
 
             // prepare reference hints
             final long timer = System.currentTimeMillis();
-            final ScoreMap<String> topicNavigator = theSearch.getTopicNavigator(5);
+            final ScoreMap<String> topicNavigator = sb.index.connectedRWI() ? theSearch.getTopics(5, 100) : new ConcurrentScoreMap<String>();
             final StringBuilder refstr = new StringBuilder(6000);
             final Iterator<String> navigatorIterator = topicNavigator.keys(false);
             int i = 0;
@@ -388,12 +386,13 @@ public final class search {
                 i++;
             }
             prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEvent.Type.REFERENCECOLLECTION, "", i, System.currentTimeMillis() - timer), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEventType.REFERENCECOLLECTION, "", i, System.currentTimeMillis() - timer), false);
         }
         prop.put("indexabstract", indexabstract.toString());
 
         // prepare result
-        if (joincount == 0 || accu == null || accu.isEmpty()) {
+        int resultCount = theSearch == null ? 0 : theSearch.getResultCount(); // theSearch may be null if we searched only for abstracts
+        if (resultCount == 0 || accu == null || accu.isEmpty()) {
 
             // no results
             prop.put("links", "");
@@ -416,16 +415,15 @@ public final class search {
             theQuery.transmitcount = accu.size() + 1;
             prop.put("links", links.toString());
             prop.put("linkcount", accu.size());
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEvent.Type.RESULTLIST, "", accu.size(), System.currentTimeMillis() - timer), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEventType.RESULTLIST, "", accu.size(), System.currentTimeMillis() - timer), false);
         }
 
         // prepare search statistics
         theQuery.remotepeer = client == null ? null : sb.peers.lookupByIP(Domains.dnsResolve(client), -1, true, false, false);
-        theQuery.resultcount = (theSearch == null) ? 0 : joincount;
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
-        theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.result().getURLRetrievalTime();
-        theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.result().getSnippetComputationTime();
-        AccessTracker.add(AccessTracker.Location.remote, theQuery);
+        theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.getURLRetrievalTime();
+        theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.getSnippetComputationTime();
+        AccessTracker.add(AccessTracker.Location.remote, theQuery, resultCount);
 
         // update the search tracker
         synchronized (trackerHandles) {
@@ -437,8 +435,8 @@ public final class search {
         if (MemoryControl.shortStatus()) sb.remoteSearchTracker.clear();
 
         // log
-        Network.log.logInfo("EXIT HASH SEARCH: " +
-                QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + joincount + " links found, " +
+        Network.log.info("EXIT HASH SEARCH: " +
+                QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + resultCount + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstracts, " +
                 (System.currentTimeMillis() - timestamp) + " milliseconds");

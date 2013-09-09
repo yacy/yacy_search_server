@@ -72,13 +72,14 @@ function handleStatus(){
 	removeAllChildren(ppmNum);
 	ppmNum.appendChild(document.createTextNode(ppm));
 	
-	var ppmSpan = document.getElementById("ppmSpan");
-	removeAllChildren(ppmSpan);
-	for(i = 0; i < ppm / 10; i++){
-		img=document.createElement("img");
-		img.setAttribute("src", BAR_IMG1);
-		ppmSpan.appendChild(img);
-	}
+	// ppmBar start
+	var ppmBar = document.getElementById("ppmbar");
+	var ppmBarMaxRead = document.getElementById("customPPM");
+	
+    var ppmforppmbar = ppm.replace(/\.*/g,"");	
+	ppmBar.setAttribute("value", ppmforppmbar);
+    ppmBar.setAttribute("max", ppmBarMaxRead.value);
+	// ppmBar end
 	
 	// traffic output (no bar up to now)
     traffic = getFirstChild(statusTag, "traffic");
@@ -88,10 +89,24 @@ function handleStatus(){
 	trafCrawlerSpan.appendChild(document.createTextNode(Math.round((trafficCrawlerValue) / 1024 / 10.24) / 100));
 	
 	dbsize=getFirstChild(statusTag, "dbsize");
-	urlpublictextSize=getValue(getFirstChild(dbsize, "urlpublictext"));
-	rwipublictextSize=getValue(getFirstChild(dbsize, "rwipublictext"));
-	document.getElementById("urldbsize").firstChild.nodeValue=urlpublictextSize;
-	document.getElementById("rwidbsize").firstChild.nodeValue=rwipublictextSize;
+	urlpublictext=getValue(getFirstChild(dbsize, "urlpublictext"));
+	urlpublictextSegmentCount=getValue(getFirstChild(dbsize, "urlpublictextSegmentCount"));
+	webgraph=getValue(getFirstChild(dbsize, "webgraph"));
+	webgraphSegmentCount=getValue(getFirstChild(dbsize, "webgraphSegmentCount"));
+	rwipublictext=getValue(getFirstChild(dbsize, "rwipublictext"));
+	rwipublictextSegmentCount=getValue(getFirstChild(dbsize, "rwipublictextSegmentCount"));
+	document.getElementById("urlpublictextSize").firstChild.nodeValue=urlpublictext;
+	document.getElementById("urlpublictextSegmentCount").firstChild.nodeValue=urlpublictextSegmentCount;
+	document.getElementById("webgraphSize").firstChild.nodeValue=webgraph;
+	document.getElementById("webgraphSegmentCount").firstChild.nodeValue=webgraphSegmentCount;
+	document.getElementById("rwipublictextSize").firstChild.nodeValue=rwipublictext;
+	document.getElementById("rwipublictextSegmentCount").firstChild.nodeValue=rwipublictextSegmentCount;
+
+	postprocessing=getFirstChild(statusTag, "postprocessing");
+	document.getElementById("postprocessing").firstChild.nodeValue=getValue(getFirstChild(postprocessing, "status"));
+	
+	load=getFirstChild(statusTag, "load");
+	document.getElementById("load").firstChild.nodeValue=getValue(load);
 	
 	loaderqueue=getFirstChild(statusTag, "loaderqueue");	
 	loaderqueue_size=getValue(getFirstChild(loaderqueue, "size"));

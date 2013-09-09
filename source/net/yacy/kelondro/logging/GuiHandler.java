@@ -1,4 +1,4 @@
-//GuiHandler.java 
+//GuiHandler.java
 //-------------------------------------
 //part of YACY
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -40,39 +40,39 @@ import java.util.logging.SimpleFormatter;
 
 public class GuiHandler extends Handler {
 
-    private final static int DEFAULT_SIZE = 400;
-    private int size = DEFAULT_SIZE;    
+    private final static int DEFAULT_SIZE = 10000;
+    private int size = DEFAULT_SIZE;
     private LogRecord buffer[];
-    int start, count;
-    
-    
+    private int start, count;
+
+
     public GuiHandler() {
         super();
         configure();
         init();
-    }    
-    
+    }
+
     /**
      * Get any configuration properties set
      */
     private void configure() {
         final LogManager manager = LogManager.getLogManager();
         final String className = getClass().getName();
-        
+
         final String level = manager.getProperty(className + ".level");
         setLevel((level == null) ? Level.INFO : Level.parse(level));
-        
+
         final String filter = manager.getProperty(className + ".filter");
         setFilter(makeFilter(filter));
-        
+
         final String formatter = manager.getProperty(className + ".formatter");
         setFormatter(makeFormatter(formatter));
-        
+
         final String sizeString = manager.getProperty(className + ".size");
         this.size = parseSize(sizeString);
-    }    
-    
-    private int parseSize(final String sizeString) {
+    }
+
+    private static int parseSize(final String sizeString) {
         int newSize = DEFAULT_SIZE;
         try {
             newSize = Integer.parseInt(sizeString);
@@ -81,10 +81,10 @@ public class GuiHandler extends Handler {
         }
         return newSize;
     }
-    
-    private Filter makeFilter(final String name) {
+
+    private static Filter makeFilter(final String name) {
         if (name == null) return null;
-        
+
         Filter f = null;
         try {
             final Class<?> c = Class.forName(name);
@@ -93,11 +93,11 @@ public class GuiHandler extends Handler {
             System.err.println("Unable to load filter: " + name);
         }
         return f;
-    }    
-    
-    private Formatter makeFormatter(final String name) {
+    }
+
+    private static Formatter makeFormatter(final String name) {
         if (name == null) return null;
-        
+
         Formatter f = null;
         try {
             final Class<?> c = Class.forName(name);
@@ -107,21 +107,22 @@ public class GuiHandler extends Handler {
         }
         return f;
     }
-    
+
     // Initialize.  Size is a count of LogRecords.
     private void init() {
         this.buffer = new LogRecord[this.size];
         this.start = 0;
         this.count = 0;
     }
-    
+
     public final int getSize() {
     	return this.size;
     }
-    
+
+    @Override
     public final void publish(final LogRecord record) {
         if (!isLoggable(record)) return;
-        
+
         // write it to the buffer
         final int ix = (this.start+this.count)%this.buffer.length;
         this.buffer[ix] = record;
@@ -132,7 +133,7 @@ public class GuiHandler extends Handler {
         }
         flush();
     }
-    
+
     public final synchronized LogRecord[] getLogArray() {
     	return this.getLogArray(null);
     }
@@ -140,7 +141,7 @@ public class GuiHandler extends Handler {
 
     public final synchronized LogRecord[] getLogArray(final Long sequenceNumberStart) {
         final List<LogRecord> tempBuffer = new ArrayList<LogRecord>(this.count);
-        
+
         for (int i = 0; i < this.count; i++) {
             final int ix = (this.start+i)%this.buffer.length;
             final LogRecord record = this.buffer[ix];
@@ -148,17 +149,17 @@ public class GuiHandler extends Handler {
             	tempBuffer.add(record);
             }
         }
-        
+
         return tempBuffer.toArray(new LogRecord[tempBuffer.size()]);
-    }    
-    
-    public final synchronized String getLog(final boolean reversed, int lineCount) { 
-        
+    }
+
+    public final synchronized String getLog(final boolean reversed, int lineCount) {
+
         if ((lineCount > this.count)||(lineCount < 0)) lineCount = this.count;
-        
+
         final StringBuilder logMessages = new StringBuilder(this.count*40);
         final Formatter logFormatter = getFormatter();
-        
+
         try {
             final int theStart = (reversed)?this.start+this.count-1:this.start;
             LogRecord record=null;
@@ -177,14 +178,14 @@ public class GuiHandler extends Handler {
             return "Error while formatting the logging message";
         }
     }
-    
-    public final synchronized String[] getLogLines(final boolean reversed, int lineCount) { 
-        
+
+    public final synchronized String[] getLogLines(final boolean reversed, int lineCount) {
+
         if ((lineCount > this.count)||(lineCount < 0)) lineCount = this.count;
-        
+
         final List<String> logMessages = new ArrayList<String>(this.count);
         final Formatter logFormatter = getFormatter();
-        
+
         try {
             final int theStart = (reversed) ? this.start+this.count-1 : this.start+this.count-lineCount;
             LogRecord record=null;
@@ -202,12 +203,14 @@ public class GuiHandler extends Handler {
             reportError(null, ex, ErrorManager.FORMAT_FAILURE);
             return new String[]{"Error while formatting the logging message"};
         }
-    }    
-    
-    public void flush() {
-        
     }
 
+    @Override
+    public void flush() {
+
+    }
+
+    @Override
     public synchronized void close() throws SecurityException {
         // Nothing implement here
     }

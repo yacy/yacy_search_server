@@ -18,21 +18,6 @@
     text-align:right;
   }
 </style>
-  <script type="text/javascript">
-  <!--
-    imagestub = "WebStructurePicture_p.png?host=#[besthost]#&depth=#[depth]#&width=#[width]#&height=#[height]#&nodes=#[nodes]#&time=#[time]#&colortext=#[colortext]#&colorback=#[colorback]#&colordot=#[colordot]#&colorline=#[colorline]#&colorlineend=#[colorlineend]#";
-    idx = 0;
-    setTimeout("doanimation()", 3000);
-    function doanimation() {
-      var accessPicture = document.getElementById("WebPicture");
-      if (accessPicture != null) {
-        idx++;
-        accessPicture.src = imagestub + "&idx=" + idx;
-        setTimeout("doanimation()", 3000);
-      }
-    }
-  -->
-  </script>
 </head>
 <body id="WebStructure" style="margin:0px;">
 #%env/templates/header.template%# 
@@ -41,7 +26,7 @@
     <script type="text/javascript" src="/yacy/ui/js/jquery.colorpicker.js"></script>
 	<script type="text/javascript">
       $(document).ready(function(){
-        $('#colorback, #colortext, #colorline, #colordot, #colorlineend').ColorPicker({
+        $('#colorback, #colortext, #colorline, #colordot0, #colordota, #colorlineend').ColorPicker({
 			onSubmit: function(hsb, hex, rgb, el) {
 				$(el).val(hex);
 				$(el).ColorPickerHide();
@@ -65,9 +50,17 @@ Click the API icon to see the XML file.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
 </div>
 
-
 <h2>Web Structure</h2>
-
+    #(hosts)#::
+     <fieldset><legend>Host List</legend>
+      #{list}#
+      <div style="float:left; padding:1px 5px 1px 5px;">
+        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><a href="/WatchWebStructure_p.html?host=#[host]#&depth=3&time=1000">#[host]#</a></div>
+        <div style="width:80px; text-align:right; float: left; white-space:nowrap; overflow:hidden;">#[count]# outlinks</div>
+      </div>
+      #{/list}#
+    </fieldset>
+    #(/hosts)#
 <div id="left">
 <form action="/WatchWebStructure_p.html" accept-charset="UTF-8" onsubmit="return checkform(this);">
 <fieldset>
@@ -78,28 +71,29 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 	</dd>
 	<dt>depth</dt>
 	<dd>
-	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depthd]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot=#[colordot]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/minus.gif" width="11" height="11" alt="minus"/></a>
+	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depthd]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot0=#[colordot0]#&amp;colordota=#[colordota]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/minus.gif" width="11" height="11" alt="minus"/></a>
 	  <input type="text" name="depth" value="#[depth]#" size="1" maxlength="1" />
-      <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depthi]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot=#[colordot]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/plus.gif" width="11" height="11" alt="plus" /></a>
+      <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depthi]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot0=#[colordot0]#&amp;colordota=#[colordota]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/plus.gif" width="11" height="11" alt="plus" /></a>
 	</dd>
 	<dt>nodes</dt>
 	<dd>
-	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodesd]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot=#[colordot]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/minus.gif" width="11" height="11" alt="minus"/></a>
+	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodesd]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot0=#[colordot0]#&amp;colordota=#[colordota]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/minus.gif" width="11" height="11" alt="minus"/></a>
 	  <input type="text" name="nodes" value="#[nodes]#" size="4" maxlength="4" />
-	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodesi]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot=#[colordot]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/plus.gif" width="11" height="11" alt="plus"/></a>
+	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodesi]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot0=#[colordot0]#&amp;colordota=#[colordota]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/plus.gif" width="11" height="11" alt="plus"/></a>
 	</dd>
     <dt>time</dt>
 	<dd>
-	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[timed]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot=#[colordot]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/minus.gif" width="11" height="11" alt="minus"/></a>
+	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[timed]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot0=#[colordot0]#&amp;colordota=#[colordota]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/minus.gif" width="11" height="11" alt="minus"/></a>
 	  <input type="text" name="time" value="#[time]#" size="4" maxlength="4" />
-	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[timei]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot=#[colordot]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/plus.gif" width="11" height="11" alt="plus"/></a>
+	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[timei]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot0=#[colordot0]#&amp;colordota=#[colordota]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#"><img src="env/grafics/plus.gif" width="11" height="11" alt="plus"/></a>
 	</dd>
     <dt>size</dt>
 	<dd><input type="text" name="width" value="#[width]#" size="5" maxlength="5" />&nbsp;x&nbsp;<input type="text" name="height" value="#[height]#" size="5" maxlength="5" /></dd>
     <dt>Background</dt><dd>Color <input type="text" name="colorback" id="colorback" value="#[colorback]#" size="6" maxlength="6" /></dd>
     <dt>Text</dt><dd>Color <input type="text" name="colortext" id="colortext" value="#[colortext]#" size="6" maxlength="6" /></dd>
     <dt>Line</dt><dd>Color <input type="text" name="colorline" id="colorline" value="#[colorline]#" size="6" maxlength="6" /></dd>
-    <dt>Dot</dt><dd>Color <input type="text" name="colordot" id="colordot" value="#[colordot]#" size="6" maxlength="6" /></dd>
+    <dt>Pivot Dot</dt><dd>Color <input type="text" name="colordot0" id="colordot0" value="#[colordot0]#" size="6" maxlength="6" /></dd>
+    <dt>Other Dot</dt><dd>Color <input type="text" name="colordota" id="colordota" value="#[colordota]#" size="6" maxlength="6" /></dd>
     <dt>Dot-end</dt><dd>Color <input type="text" name="colorlineend" id="colorlineend" value="#[colorlineend]#" size="6" maxlength="6" /></dd>
     <dt>&nbsp;</dt>
     <dd><input type="submit" value="change" /></dd>
@@ -107,8 +101,8 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 </fieldset>
 </form>
 </div><br />
-<div style="text-align:right;">
-  <img id="WebPicture" src="WebStructurePicture_p.png?host=#[besthost]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot=#[colordot]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#" alt="WebStructurePicture"/>
+<div style="text-align:left;">
+  <img id="WebPicture" src="WebStructurePicture_p.png?host=#[besthost]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot0=#[colordot0]#&amp;colordota=#[colordota]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#" alt="WebStructurePicture"/>
 </div>
 #%env/templates/footer.template%# 
 </body>

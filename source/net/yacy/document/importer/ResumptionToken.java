@@ -37,8 +37,8 @@ import javax.xml.parsers.SAXParserFactory;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -106,7 +106,7 @@ public class ResumptionToken extends TreeMap<String, String> {
      * @return a string containing the url up to and including the '?'
      */
     public static String truncatedURL(final DigestURI url) {
-        String u = url.toNormalform(true, true);
+        String u = url.toNormalform(true);
         final int i = u.indexOf('?');
         if (i > 0) u = u.substring(0, i + 1);
         return u;
@@ -131,7 +131,7 @@ public class ResumptionToken extends TreeMap<String, String> {
 
         final String token = getToken();
         if (token == null) throw new IOException("end of resumption reached - token == null");
-        if (token.length() == 0) throw new IOException("end of resumption reached - token.length() == 0");
+        if (token.isEmpty()) throw new IOException("end of resumption reached - token.isEmpty()");
         final String url = truncatedURL(this.source);
 
         // encoded state
@@ -194,7 +194,7 @@ public class ResumptionToken extends TreeMap<String, String> {
         try {
             return ISO8601Formatter.FORMATTER.parse(d);
         } catch (final ParseException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return new Date();
         }
     }
@@ -252,7 +252,7 @@ public class ResumptionToken extends TreeMap<String, String> {
     	if (parser == null) {
     		try {
 				parser = SAXParserFactory.newInstance().newSAXParser();
-			} catch (ParserConfigurationException e) {
+			} catch (final ParserConfigurationException e) {
 				throw new SAXException(e.getMessage(), e);
 			}
     		tlSax.set(parser);
@@ -279,17 +279,17 @@ public class ResumptionToken extends TreeMap<String, String> {
                 this.saxParser = getParser();
                 this.saxParser.parse(this.stream, this);
             } catch (final SAXException e) {
-                Log.logException(e);
-                Log.logWarning("ResumptionToken", "token was not parsed (1):\n" + UTF8.String(b));
+                ConcurrentLog.logException(e);
+                ConcurrentLog.warn("ResumptionToken", "token was not parsed (1):\n" + UTF8.String(b));
             } catch (final IOException e) {
-                Log.logException(e);
-                Log.logWarning("ResumptionToken", "token was not parsed (2):\n" + UTF8.String(b));
+                ConcurrentLog.logException(e);
+                ConcurrentLog.warn("ResumptionToken", "token was not parsed (2):\n" + UTF8.String(b));
                 throw new IOException(e.getMessage());
             } finally {
                 try {
                     this.stream.close();
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }

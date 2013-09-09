@@ -2,46 +2,50 @@
 
 <style type="text/css" >
 
-.sci_panel {
+.sci_headerbar {
 	
 font: arial,helvetica,sans-serif;
 font-size: 10px;
 position: fixed;
-right: 0;
-background: #ffffff;
-border:1px solid #[color]#;
+left: 0;
+top: 0px;;
+width: 100%;
+height: 37px;
+border:0px;
 
-width: 210px;
-height: auto;
-padding: 30px 110px 30px 30px;
+background: #ffffff;
+
+padding: 0px 0px 0px 0px;
 
 z-index:99998;
 
-color: #[color]#;
+text-align: left;
+
 }
 
-.sci_right {
+.sci_bar {
 	
 font: arial,helvetica,sans-serif;
 font-size: 10px;
 position: fixed;
-right: 200px;
-top: 0;
+left: 0;
+top: 35px;;
+width: 100%;
+height: 2px;
 background: #ffffff;
 border:0px;
 
-width: 200px;
-height: 20px;
-padding: 5px 5px 5px 5px;
+background: #[color]#;
+
+padding: 0px 0px 0px 0px;
 
 z-index:99998;
 
-color: #[color]#;
+text-align: left;
 
 }
 
-
-.sci_left {
+.sci_icon {
 	
 font: arial,helvetica,sans-serif;
 font-size: 10px;
@@ -61,7 +65,79 @@ z-index:99998;
 
 color: #5a346e;
 
+text-align: left;
+
 }
+
+.sci_left {
+	
+font: arial,helvetica,sans-serif;
+font-size: 10px;
+position: fixed;
+left: 60px;
+top: 0;
+margin-top: 1px;
+padding-left: 50px;
+background: #ffffff;
+border:0px;
+
+width: 250px;
+height: 19px;
+padding: 9px 5px 5px 5px;
+
+z-index:99998;
+
+color: #5a346e;
+
+text-align: left;
+
+}
+
+
+.sci_right {
+	
+font: arial,helvetica,sans-serif;
+font-size: 10px;
+position: fixed;
+right: 200px;
+top: 0;
+background: #ffffff;
+border:0px;
+
+width: 200px;
+height: 20px;
+padding: 5px 5px 5px 5px;
+
+z-index:99998;
+
+color: #[color]#;
+
+text-align: left;
+
+}
+
+
+.sci_panel {
+	
+font: arial,helvetica,sans-serif;
+font-size: 10px;
+position: fixed;
+right: 0;
+background: #ffffff;
+border:1px solid #[color]#;
+
+width: 210px;
+height: auto;
+padding: 30px 110px 30px 30px;
+
+z-index:99998;
+
+color: #[color]#;
+
+text-align: left;
+
+}
+
 
 .sci_panel p{
 margin: 0 0 15px 0;
@@ -85,68 +161,6 @@ text-decoration: none;
 border-bottom: 1px solid #ffffff;
 }
 
-.sci_headerbar {
-	
-font: arial,helvetica,sans-serif;
-font-size: 10px;
-position: fixed;
-left: 0;
-top: 0px;;
-width: 100%;
-height: 40px;
-border:0px;
-
-background: #ffffff;
-
-padding: 0px 0px 0px 0px;
-
-z-index:99998;
-
-}
-
-.sci_bar {
-	
-font: arial,helvetica,sans-serif;
-font-size: 10px;
-position: fixed;
-left: 0;
-top: 35px;;
-width: 100%;
-height: 2px;
-background: #ffffff;
-border:0px;
-
-background: #[color]#;
-
-padding: 0px 0px 0px 0px;
-
-z-index:99998;
-
-}
-
-.sci_masterbutton {
-	
-font: arial,helvetica,sans-serif;
-font-size: 10px;
-position: fixed;
-left: 0px;
-top: -15px;
-
-width: 0px;
-height: 65px;
-background: #ffffff;
-border:0px;
-
-background: #5a346e;
-
-padding: 0px 0px 0px 0px;
-
-z-index:99999;
-
-}
-
-}
-
 </style>
 
 
@@ -156,17 +170,21 @@ z-index:99999;
 
 	</div>
 
-	<div id="sidebar-logo" class="sci_left" style="">
+	<div id="sidebar-logo" class="sci_icon" style="">
 
 		<img src="/currentyacypeer/env/grafics/yacy.png" height="20px" width="36px"/>		
-		<img src="/currentyacypeer/env/grafics/empty.gif" height="20px" width="20px"/>
+		
+	</div>
+	
+	<div id="sidebar-logo" class="sci_left" style="">
+
 		<!--#include virtual="/currentyacypeer/interaction_elements/Tag_part.html?action=#[action]#&hash=#[urlhash]#&url=#[url]#" -->	
 
 	</div>
+		
 
 	<div id="sidebar-document" class="sci_right" style="">
-	
-		<img src="/currentyacypeer/env/grafics/empty.gif" height="20px" width="20px"/>
+			
 		<!--#include virtual="/currentyacypeer/interaction_elements/Document_part.html?action=#[action]#&hash=#[urlhash]#&url=#[url]#" -->
 
 	</div>

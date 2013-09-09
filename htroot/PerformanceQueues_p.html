@@ -48,8 +48,8 @@
 	        <td align="right">#[sleeppercycle]#</td>
 	        <td align="right">#[execpercycle]#</td>
 	        <td align="right">#[memusepercycle]#</td>
-	        <td align="right"><input name="#[threadname]#_idlesleep" size="7" maxlength="7" value="#[idlesleep]#" /> milliseconds</td>
-	        <td align="right"><input name="#[threadname]#_busysleep" size="7" maxlength="7" value="#[busysleep]#" /> milliseconds</td>
+	        <td align="right"><input name="#[threadname]#_idlesleep" size="7" maxlength="7" value="#[idlesleep]#" #(disabled)#:: disabled="disabled"#(/disabled)# /> milliseconds</td>
+	        <td align="right"><input name="#[threadname]#_busysleep" size="7" maxlength="7" value="#[busysleep]#" #(disabled)#:: disabled="disabled"#(/disabled)# /> milliseconds</td>
 	        <td align="right"><input name="#[threadname]#_memprereq" size="7" maxlength="10" value="#[memprereq]#" #(disabled)#:: disabled="disabled"#(/disabled)# /> kbytes</td>
 	        <td align="left">#[longdescr]##(recommendation)#::<br/>recommended: #[value]# kbytes#(/recommendation)#</td>
 	      </tr>
@@ -71,14 +71,6 @@
 	        <td></td>
 	        <td>RAM Cache</td>
 	        <td>Description</td>
-	      </tr>
-	      <tr valign="top" class="TableCellDark">
-	        <td>URLs in RAM buffer:</td>
-	        <td align="center">#[urlCacheSize]#</td>
-	        <td>
-	          This is the size of the URL write buffer. Its purpose is to buffer incoming URLs
-	          in case of search result transmission and during DHT transfer.
-	        </td>
 	      </tr>
 	      <tr valign="top" class="TableCellDark">
 	        <td>Words in RAM cache:<br />(Size in KBytes)</td>
@@ -125,34 +117,6 @@
 	      <tr valign="top" class="TableCellLight">
 	        <td colspan="4">
 	        <input type="submit" name="cacheSizeSubmit" value="Enter New Cache Size" />
-	        Changes take effect immediately</td>
-	      </tr>
-	    </table>
-	  </fieldset>
-  </form>
-  
-  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-  	  <fieldset><legend>Balancer Settings:</legend>
-	  <p>
-	    This is the time delta between accessing of the same domain during a crawl. The crawl balancer tries to avoid that domains are
-	    accessed too often, but if the balancer fails (i.e. if there are only links left from the same domain), then these minimum
-	    delta times are ensured.
-	  </p>
-	    <table border="0" cellpadding="2" cellspacing="1">
-	      <tr class="TableHeader" valign="bottom">
-	        <td>Crawler Domain</td>
-	        <td>Minimum Access Time Delta</td>
-	      </tr>
-	      <tr class="TableCellDark">
-	        <td>local (intranet) crawls</td>
-	        <td align="right"><input id="minimumLocalDelta" name="minimumLocalDelta" type="text" size="20" maxlength="100" value="#[minimumLocalDelta]#" /></td>
-	      </tr>
-	      <tr class="TableCellDark">
-	        <td>global (internet) crawls</td>
-	        <td align="right"><input id="minimumGlobalDelta" name="minimumGlobalDelta" type="text" size="20" maxlength="100" value="#[minimumGlobalDelta]#" /></td>
-	      </tr>
-	      <tr class="TableCellLight">
-	        <td align="left" colspan="2"><input type="submit" name="minimumDeltaSubmit" value="Enter New Parameters" />
 	        Changes take effect immediately</td>
 	      </tr>
 	    </table>

@@ -33,7 +33,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.cora.util.ByteBuffer;
 
 
 public abstract class AbstractWriter extends AbstractReader implements Writer {
@@ -129,7 +129,7 @@ public abstract class AbstractWriter extends AbstractReader implements Writer {
         while ((line = br.readLine()) != null) { // very slow readLine????
             line = line.trim();
             if ("# EOF".equals(line)) return map;
-            if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
+            if ((line.isEmpty()) || (line.charAt(0) == '#')) continue;
             pos = line.indexOf('=');
             if (pos < 0) continue;
             map.put(line.substring(0, pos), line.substring(pos + 1));

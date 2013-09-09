@@ -99,7 +99,7 @@ public class EventTracker {
                 if (history.size() % 10 == 0) { // check again
                     Event e;
                     final long now = System.currentTimeMillis();
-                    while (history.size() > 0) {
+                    while (!history.isEmpty()) {
                         e = history.peek();
                         if (now - e.time < maxQueueAge) break;
                         history.poll();

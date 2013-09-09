@@ -1,14 +1,15 @@
 
 
+import java.io.IOException;
 import java.util.Iterator;
-
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.CommonPattern;
+import net.yacy.data.BookmarkHelper;
+import net.yacy.data.BookmarksDB;
+import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
-import de.anomic.data.BookmarkHelper;
-import de.anomic.data.BookmarksDB;
-import de.anomic.data.UserDB;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class get_folders {
 
@@ -51,12 +52,12 @@ public class get_folders {
 
     	// loop through folderList
     	it = BookmarkHelper.getFolderList(root, sb.bookmarksDB.getTagIterator(isAdmin));
-    	int n = root.split("/").length;
+    	int n = CommonPattern.SLASH.split(root, 0).length;
     	if (n == 0) n = 1;
     	int count = 0;
     	while (it.hasNext()) {
     		final String folder = it.next();
-    		foldername = folder.split("/");
+    		foldername = CommonPattern.SLASH.split(folder, 0);
     		if (foldername.length == n+1) {
 	    		prop.put("folders_"+count+"_foldername", foldername[n]);
 	    		prop.put("folders_"+count+"_expanded", "false");
@@ -73,24 +74,27 @@ public class get_folders {
     	it = sb.bookmarksDB.getBookmarksIterator(root, isAdmin);
     	BookmarksDB.Bookmark bm;
     	while (it.hasNext()) {
-    		bm = sb.bookmarksDB.getBookmark(it.next());
-    		// TODO: get rid of bmtype
-    		if (post.containsKey("bmtype")) {
-    			if (post.get("bmtype").equals("title")) {
-    				prop.put("folders_"+count+"_foldername", bm.getTitle());
-    			} else if (post.get("bmtype").equals("href")) {
-    				prop.put("folders_"+count+"_foldername", "<a href='"+bm.getUrl()+" 'target='_blank'>"+bm.getTitle()+"</a>");
-    			} else {
-    				prop.put("folders_"+count+"_foldername", bm.getUrl());
-    			}
-    		}
-    		prop.put("folders_"+count+"_expanded", "false");
-    		prop.put("folders_"+count+"_url", bm.getUrl());
-    		prop.put("folders_"+count+"_type", "file");
-    		prop.put("folders_"+count+"_hash", bm.getUrlHash());
-    		prop.put("folders_"+count+"_hasChildren", "false");
-    		prop.put("folders_"+count+"_comma", ",");
-    		count++;
+    		try {
+                bm = sb.bookmarksDB.getBookmark(it.next());
+                // TODO: get rid of bmtype
+                if (post.containsKey("bmtype")) {
+                    if (post.get("bmtype").equals("title")) {
+                        prop.put("folders_"+count+"_foldername", bm.getTitle());
+                    } else if (post.get("bmtype").equals("href")) {
+                        prop.put("folders_"+count+"_foldername", "<a href='"+bm.getUrl()+" 'target='_blank'>"+bm.getTitle()+"</a>");
+                    } else {
+                        prop.put("folders_"+count+"_foldername", bm.getUrl());
+                    }
+                }
+                prop.put("folders_"+count+"_expanded", "false");
+                prop.put("folders_"+count+"_url", bm.getUrl());
+                prop.put("folders_"+count+"_type", "file");
+                prop.put("folders_"+count+"_hash", bm.getUrlHash());
+                prop.put("folders_"+count+"_hasChildren", "false");
+                prop.put("folders_"+count+"_comma", ",");
+                count++;
+            } catch (final IOException e) {
+            }
     	}
 
     	count--;

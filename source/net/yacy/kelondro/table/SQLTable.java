@@ -34,7 +34,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -42,14 +41,12 @@ import java.util.TreeMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.index.RowCollection;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.NaturalOrder;
 
 
 /*
@@ -75,7 +72,6 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
     private static final String db_pwd_str    = "yacy";
 
     private Connection theDBConnection = null;
-    private static final ByteOrder order = new NaturalOrder(true);
     private final Row rowdef;
 
     public SQLTable(final String dbType, final Row rowdef) throws Exception {
@@ -133,7 +129,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
         if (this.theDBConnection != null) try {
             this.theDBConnection.close();
         } catch (final SQLException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         this.theDBConnection = null;
     }
@@ -156,7 +152,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
 
             return size;
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return -1;
         }
     }
@@ -271,14 +267,6 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
         throw new UnsupportedOperationException();
     }
 
-    public synchronized void addUnique(final Row.Entry row, final Date entryDate) {
-        throw new UnsupportedOperationException();
-    }
-
-    public synchronized void addUnique(final List<Row.Entry> rows) {
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public Row.Entry remove(final byte[] key) throws IOException {
         PreparedStatement sqlStatement = null;
@@ -302,7 +290,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
         		try {
 					sqlStatement.close();
 				} catch (final SQLException e) {
-				    Log.logException(e);
+				    ConcurrentLog.logException(e);
 				}
         	}
         }
@@ -320,6 +308,11 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
 
     @Override
     public List<Row.Entry> top(final int count) throws IOException {
+        return null;
+    }
+
+    @Override
+    public List<Row.Entry> random(final int count) throws IOException {
         return null;
     }
 
@@ -347,42 +340,6 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
     public CloneableIterator<byte[]> keys(final boolean up, final byte[] startKey) {
         // Objects are of type byte[]
         return null;
-    }
-
-    public int columns() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public int columnSize(final int column) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public ByteOrder order() {
-        return order;
-    }
-
-    public int primarykey() {
-        return 0;
-    }
-
-    public final int cacheObjectChunkSize() {
-        // dummy method
-        return -1;
-    }
-
-    public long[] cacheObjectStatus() {
-        // dummy method
-        return null;
-    }
-
-    public final int cacheNodeChunkSize() {
-        return -1;
-    }
-
-    public final int[] cacheNodeStatus() {
-        return new int[]{0,0,0,0,0,0,0,0,0,0};
     }
 
     @Override

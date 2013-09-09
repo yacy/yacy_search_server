@@ -4,27 +4,29 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.data.UserDB;
+import net.yacy.data.ymark.YMarkAutoTagger;
+import net.yacy.data.ymark.YMarkCrawlStart;
+import net.yacy.data.ymark.YMarkEntry;
+import net.yacy.data.ymark.YMarkMetadata;
+import net.yacy.data.ymark.YMarkTables;
+import net.yacy.data.ymark.YMarkTag;
+import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
-import de.anomic.data.ymark.YMarkAutoTagger;
-import de.anomic.data.ymark.YMarkCrawlStart;
-import de.anomic.data.ymark.YMarkEntry;
-import de.anomic.data.ymark.YMarkMetadata;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.data.ymark.YMarkTag;
-import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class get_treeview {
 
@@ -94,9 +96,9 @@ public class get_treeview {
 	        		// it = sb.tables.bookmarks.folders.getFolders(bmk_user, root);
 	        		it = sb.tables.bookmarks.getFolders(bmk_user, root).iterator();
 				} catch (final IOException e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				}
-	        	int n = root.split(YMarkUtil.FOLDERS_SEPARATOR).length;
+	        	int n = Pattern.compile(YMarkUtil.FOLDERS_SEPARATOR).split(root, 0).length;
 	        	if (n == 0) n = 1;
 	        	while (it.hasNext()) {
 	        		final String folder = it.next();
@@ -119,43 +121,38 @@ public class get_treeview {
 	    	    		count++;
 	        		}
 	        	}
-	        	// loop through bookmarkList
-	        	try {
-	        		if(displayBmk && !root.isEmpty()) {
-	        			bit = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, root);
-			        	while (bit.hasNext()) {
-			        		bmk_row = bit.next();
-			        		if(bmk_row != null) {
-			        			final String url = UTF8.String(bmk_row.get(YMarkEntry.BOOKMARK.URL.key()));
-			        			final String title = bmk_row.get(YMarkEntry.BOOKMARK.TITLE.key(), YMarkEntry.BOOKMARK.TITLE.deflt());
+	        	if(displayBmk && !root.isEmpty()) {
+					bit = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, root);
+					while (bit.hasNext()) {
+						bmk_row = bit.next();
+						if(bmk_row != null) {
+							final String url = UTF8.String(bmk_row.get(YMarkEntry.BOOKMARK.URL.key()));
+							final String title = bmk_row.get(YMarkEntry.BOOKMARK.TITLE.key(), YMarkEntry.BOOKMARK.TITLE.deflt());
 
-				        		// TODO: get_treeview - get rid of bmtype
-				        		if (post.containsKey("bmtype")) {
-				        			if (post.get("bmtype").equals("title")) {
-				        				prop.putJSON("folders_"+count+"_foldername", title);
-				        			} else if (post.get("bmtype").equals("href")) {
-				        				prop.putJSON("folders_"+count+"_foldername", "<a href='"+url+"' target='_blank'>"+title+"</a>");
-				        			}
-				        		} else {
-				        				prop.putJSON("folders_"+count+"_foldername", url);
-			        			}
-				        		prop.put("folders_"+count+"_expanded", "false");
-				        		prop.put("folders_"+count+"_url", url);
-				        		prop.put("folders_"+count+"_type", "file");
-				        		prop.put("folders_"+count+"_hash", "b:"+new String(bmk_row.getPK()));
-				        		prop.put("folders_"+count+"_hasChildren", "true");
-				        		prop.put("folders_"+count+"_comma", ",");
-				        		count++;
-				        	}
-			        	}
-	        		}
-		        	count--;
-		        	prop.put("folders_"+count+"_comma", "");
-		        	count++;
-		        	prop.put("folders", count);
-				} catch (final IOException e) {
-					Log.logException(e);
+				    		// TODO: get_treeview - get rid of bmtype
+				    		if (post.containsKey("bmtype")) {
+				    			if (post.get("bmtype").equals("title")) {
+				    				prop.putJSON("folders_"+count+"_foldername", title);
+				    			} else if (post.get("bmtype").equals("href")) {
+				    				prop.putJSON("folders_"+count+"_foldername", "<a href='"+url+"' target='_blank'>"+title+"</a>");
+				    			}
+				    		} else {
+				    				prop.putJSON("folders_"+count+"_foldername", url);
+							}
+				    		prop.put("folders_"+count+"_expanded", "false");
+				    		prop.put("folders_"+count+"_url", url);
+				    		prop.put("folders_"+count+"_type", "file");
+				    		prop.put("folders_"+count+"_hash", "b:"+new String(bmk_row.getPK()));
+				    		prop.put("folders_"+count+"_hasChildren", "true");
+				    		prop.put("folders_"+count+"_comma", ",");
+				    		count++;
+				    	}
+					}
 				}
+				count--;
+				prop.put("folders_"+count+"_comma", "");
+				count++;
+				prop.put("folders", count);
 	        } else if(displayBmk && isBookmark) {
 	        	try {
 					final String urlHash = post.get(ROOT).substring(2);
@@ -209,14 +206,15 @@ public class get_treeview {
 		        		prop.put("folders", count);
 					}
 				} catch (final IOException e) {
-					Log.logException(e);
-				} catch (final RowSpaceExceededException e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
+				} catch (final SpaceExceededException e) {
+					ConcurrentLog.logException(e);
 				}
 	        } else if (isAutoTagger || isMetadata || isURLdb || isCrawlStart) {
 	        	try {
 	                final YMarkMetadata meta = new YMarkMetadata(new DigestURI(post.get(ROOT).substring(2)), sb.index);
-        			final Document document = meta.loadDocument(sb.loader);
+	                ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+        			final Document document = meta.loadDocument(sb.loader, agent);
         			final TreeMap<String, YMarkTag> tags = sb.tables.bookmarks.getTags(bmk_user);
         			if(isAutoTagger)  {
         				prop.put("folders_"+count+"_foldername","<small><b>meta-"+YMarkMetadata.METADATA.KEYWORDS.name().toLowerCase()+":</b> " + meta.loadMetadata().get(YMarkMetadata.METADATA.KEYWORDS) + "</small>");
@@ -234,7 +232,7 @@ public class get_treeview {
 	        		} else if(isURLdb) {
 						count = putMeta(count, meta.getMetadata());
 	        		} else if(isCrawlStart) {
-	        			Log.logInfo("YMark", "I am looking for CrawlStart: "+post.get(ROOT).substring(2));
+	        			ConcurrentLog.info("YMark", "I am looking for CrawlStart: "+post.get(ROOT).substring(2));
 	        			final YMarkCrawlStart crawlStart = new YMarkCrawlStart(sb.tables, post.get(ROOT).substring(2));
 	        			final Iterator<String> iter = crawlStart.keySet().iterator();
 	        			String key;
@@ -248,11 +246,11 @@ public class get_treeview {
 	        		}
 
 				} catch (final MalformedURLException e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				} catch (final IOException e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				} catch (final Failure e) {
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				}
 	        }
         } else {

@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.ASCII;
-import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.cora.order.NaturalOrder;
 
 /**
  * a mapping from a column name to maps with the value of the columns to the primary keys where the entry exist in the table
@@ -93,7 +93,7 @@ public class MapColumnIndex implements Serializable {
         }
     }
 
-    private void indexupdate(final byte[] primarykey, final Map<String, Collection<byte[]>> valueIdxMap, final String value) {
+    private static void indexupdate(final byte[] primarykey, final Map<String, Collection<byte[]>> valueIdxMap, final String value) {
         Collection<byte[]> indexes = valueIdxMap.get(value);
         if (indexes == null) {
             // create a new index entry
@@ -103,7 +103,7 @@ public class MapColumnIndex implements Serializable {
         } else {
             // update the existing index entry
             // check if value already exist
-            if (!net.yacy.kelondro.util.ByteBuffer.contains(indexes, primarykey)) {
+            if (!net.yacy.cora.util.ByteBuffer.contains(indexes, primarykey)) {
                 indexes.add(primarykey);
             }
         }
@@ -120,12 +120,12 @@ public class MapColumnIndex implements Serializable {
         }
     }
 
-    private void indexdelete(final byte[] index, final Map<String, Collection<byte[]>> valueIdxMap) {
+    private static void indexdelete(final byte[] index, final Map<String, Collection<byte[]>> valueIdxMap) {
         Iterator<Map.Entry<String, Collection<byte[]>>> i = valueIdxMap.entrySet().iterator();
         Map.Entry<String, Collection<byte[]>> ref;
         while (i.hasNext()) {
             ref = i.next();
-            net.yacy.kelondro.util.ByteBuffer.remove(ref.getValue(), index);
+            net.yacy.cora.util.ByteBuffer.remove(ref.getValue(), index);
             if (ref.getValue().isEmpty()) {
                 i.remove();
             }
@@ -135,11 +135,11 @@ public class MapColumnIndex implements Serializable {
     private static Collection<byte[]> getIndexWithExceptionHandler(final MapColumnIndex idx, final String whereKey, final String isValue, Map<byte[], Map<String, String>> table) {
         try {
             return idx.getIndex(whereKey, isValue);
-        } catch (UnsupportedOperationException e) {
+        } catch (final UnsupportedOperationException e) {
             idx.init(whereKey, isValue, table.entrySet().iterator());
             try {
                 return idx.getIndex(whereKey, isValue);
-            } catch (UnsupportedOperationException ee) {
+            } catch (final UnsupportedOperationException ee) {
                 throw ee;
             }
         }

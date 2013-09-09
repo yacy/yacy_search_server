@@ -36,7 +36,8 @@ function search(search, count, offset) {
   } else if (window.ActiveXObject) { // IE
     self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
   }
-  self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&nav=all&contentdom=all&maximumRecords=" + maximumRecords + "&startRecord=" + startRecord + "&query=" + query, true);
+  //self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&nav=all&contentdom=all&maximumRecords=" + maximumRecords + "&startRecord=" + startRecord + "&query=" + query, true);
+  self.xmlHttpReq.open('GET', "/solr/select?hl=false&wt=yjson&facet=true&facet.mincount=1&facet.field=url_file_ext_s&start=" + startRecord + "&rows=" + maximumRecords + "&query=" + query, true);
   self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   self.xmlHttpReq.onreadystatechange = function() {
     if (self.xmlHttpReq.readyState == 4) {
@@ -60,10 +61,17 @@ function preparepage(str) {
   var firstChannel = rsp.channels[0];
   searchresult = firstChannel.items;
   totalResults = firstChannel.totalResults.replace(/[,.]/,"");
-//  var startIndex = firstChannel.startIndex;
-//  var itemsPerPage = firstChannel.itemsPerPage;
   topics = navget(firstChannel.navigation, "topics");
+  filetypefacet = navget(firstChannel.navigation, "filetypes");
+  
   filetypes = {};
+  if (filetypefacet) {
+    var elements = filetypefacet.elements;
+    for (var fc = 0; fc < elements.length; fc++) {
+	    filetypes[elements[fc].name] = elements[fc].count;
+    }
+  }
+
   script = "";
   if (query.length >= 13 && query.substring(query.length - 13, query.length - 3) == " filetype:") {
     modifier = query.substring(query.length - 12);
@@ -71,7 +79,7 @@ function preparepage(str) {
   if (modifier != "") modifiertype = modifier.substring(modifier.length - 3)
 
 
-  if (modifiertype == "png" || modifiertype == "gif" || modifiertype == "jpg") {
+  if (modifiertype == "png" || modifiertype == "gif" || modifiertype == "jpg" || modifiertype == "PNG" || modifiertype == "GIF" || modifiertype == "JPG") {
     var tt = resultImages();
     document.getElementById("searchresults").innerHTML = tt;
   } else {
@@ -136,21 +144,10 @@ function resultNavigation() {
   } else {
       // check if there is a filetype constraint and offer a removal
       if (modifier != "") {
-        html += "<span style=\"display:block\"><a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=" + query.substring(0, query.length - 12) + "&startRecord=" + startRecord + "&maximumRecords=" + maximumRecords + "\">remove the filter '" + modifier + "'</a></span>";
+        html += "<span style=\"display:block\"><a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=" + query.substring(0, query.length - 13) + "&startRecord=" + startRecord + "&maximumRecords=" + maximumRecords + "\">remove the filter '" + modifier + "'</a></span>";
       }
   }
 
-  // add topic navigation
-  /*
-  if (topics && topics.length > 0) {
-    var topwords = "";
-    for (var i = 0; i < topics.elements.length; i++) {
-        topwords += "<a href=\"/yacyinteractive.html?query=" + query + "+" + topics.elements[i].name + "&startRecord=" + startRecord + "&maximumRecords=" + maximumRecords + "\">" + topics.elements[i].name + "</a> ";
-        if (i > 10) break;
-    }
-    html += "&nbsp;&nbsp;&nbsp;topwords: " + topwords;
-  }
-  */
   return html;
 }
 
@@ -159,7 +156,7 @@ function resultList() {
   if (searchresult.length > 0) {
     document.getElementById("searchnavigation").innerHTML = "<div>found " + searchresult.length + " documents, preparing table...</div>";
     html += "<table class=\"sortable\" id=\"sortable\" border=\"0\" cellpadding=\"0\" cellspacing=\"1\" width=\"99%\">";
-    html += "<tr class=\"TableHeader\" valign=\"bottom\"><td width=\"10\">count</td><td width=\"40\">Protocol</td><td width=\"60\">Host</td><td width=\"260\">Path</td><td width=\"360\">Name</td><td width=\"60\">Size</td><td width=\"75\">Date</td></tr>";
+    html += "<tr class=\"TableHeader\" valign=\"bottom\"><td width=\"10\">Count</td><td width=\"40\">Protocol</td><td width=\"60\">Host</td><td width=\"140\">Path</td><td width=\"360\">URL</td><td width=\"60\">Size</td><td width=\"120\">Date</td></tr>";
     for (var i = 0; i < searchresult.length; i++) { html += resultLine("row", searchresult[i], i + 1); }
     html += "</table>";
   }
@@ -177,37 +174,42 @@ function resultLine(type, item, linenumber) {
   // evaluate item
   if (item == null) return "";
   if (item.link == null) return "";
-  p = item.link.indexOf("//");
   protocol = "";
   host = "";
   path = item.link;
+  file = "";
+  p = item.link.indexOf("//");
   if (p > 0) {
-  	q = item.link.indexOf("/", p + 2);
     protocol = item.link.substring(0, p - 1);
-    host = item.link.substring(p + 2, q);
-    path = item.link.substring(q + 1);
+  	q = item.link.indexOf("/", p + 2);
+    if (q > 0) {
+      host = item.link.substring(p + 2, q);
+      path = item.link.substring(q);
+    } else {
+      host = item.link.substring(p + 2);
+      path = "/";
+    }
   }
   title = item.title;
   q = path.lastIndexOf("/");
-  if (q > 0) path = path.substring(0, q);
+  if (q > 0) {
+    file = path.substring(q + 1);
+    path = path.substring(0, q + 1);
+  } else {
+    file = path;
+    path = "/";
+  }
   path = unescape(path);
   if (path.length >= 40) path = path.substring(0, 18) + "..." + path.substring(path.length - 19);
   if (title == "") title = path;
   if (title.length >= 60) title = title.substring(0, 28) + "..." + title.substring(title.length - 29);
   pd = item.pubDate;
+  if (pd == undefined) pd = "";
   if (pd.substring(pd.length - 6) == " +0000") pd = pd.substring(0, pd.length - 6);
   if (pd.substring(pd.length - 9) == " 00:00:00") pd = pd.substring(0, pd.length - 9);
   if (pd.substring(pd.length - 5) == " 2010") pd = pd.substring(0, pd.length - 5);
     
   // update navigation
-  if (item.link && item.link.length > 4) {
-    ext = item.link.substring(item.link.length - 4);
-    if (ext.charAt(0) == "." && ext.charAt(3) != "/") {
-      ext = ext.substring(1).toLowerCase();
-      var count = filetypes[ext];
-      if (count) filetypes[ext]++; else filetypes[ext] = 1;
-    }
-  }
   for (var key in filetypes) {
     if (query.indexOf("filetype:" + key) >= 0) delete filetypes[key];
   }
@@ -219,21 +221,20 @@ function resultLine(type, item, linenumber) {
   var html = "";
   if (type == "row") {
     html += "<tr class=\"TableCellDark\">";
-    html += "<td align=\"left\">" + linenumber + "</td>";
-    html += "<td align=\"left\">" + protocol + "</td>";
-    html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + "\">" + host + "</a></td>";
-    html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + path + "/\">" + path + "</a></td>";
-    html += "<td align=\"left\"><a href=\"" + item.link + "\">" + title + "</a></td>";
-    if (item.sizename == "-1 bytes") html += "<td></td>"; else html += "<td align=\"right\">" + item.sizename + "</td>";
-    //html += "<td>" + item.description + "</td>";
-    html += "<td align=\"right\">" + pd + "</td>";
+    html += "<td align=\"left\">" + linenumber + "</td>"; // Count
+    html += "<td align=\"left\">" + protocol + "</td>"; // Protocol
+    html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + "\">" + host + "</a></td>"; // Host
+    html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + path + "\">" + path + "</a></td>"; // Path 
+    html += "<td align=\"left\"><a href=\"" + item.link + "\">" + item.link + "</a></td>"; // URL
+    if (item.sizename == "-1 bytes") html += "<td></td>"; else html += "<td align=\"right\">" + item.sizename + "</td>"; // Size
+    html += "<td align=\"right\">" + pd + "</td>"; // Date
     html += "</tr>";
   }
   if (type == "image") {
     html += "<div style=\"float:left\">";
     html += "<a href=\"" + item.link + "\" class=\"thumblink\" onclick=\"return hs.expand(this)\">";
-    //html += "<img src=\"/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=" + item.code + "\" alt=\"" + title + "\" />";
-    html += "<img src=\"" + item.link + "\" width=\"96\" height=\"96\" alt=\"" + title + "\" />";
+    html += "<img src=\"/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=" + item.guid + "\" alt=\"" + title + "\" />";
+    //html += "<img src=\"" + item.link + "\" width=\"96\" height=\"96\" alt=\"" + title + "\" />";
     html += "</a>";
     var name = title;
     while ((p = name.indexOf("/")) >= 0) { name = name.substring(p + 1); }

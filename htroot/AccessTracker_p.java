@@ -24,32 +24,30 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
-import de.anomic.server.serverAccessTracker.Track;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.serverAccessTracker.Track;
 
 public class AccessTracker_p {
-
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
 
     private static Collection<Track> listclone (final Collection<Track> m) {
         final Collection<Track> accessClone = new LinkedBlockingQueue<Track>();
@@ -87,7 +85,10 @@ public class AccessTracker_p {
                     prop.putNum("page_list_" + entCount + "_countHour", sb.latestAccessCount(host, 1000 * 60 * 60));
                     entCount++;
                 }
-            } catch (final ConcurrentModificationException e) {} // we don't want to synchronize this
+            } catch (final ConcurrentModificationException e) {
+                // we don't want to synchronize this
+                ConcurrentLog.logException(e);
+            }
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
 
@@ -98,7 +99,10 @@ public class AccessTracker_p {
                     prop.putNum("page_bflist_" + entCount + "_countSecond", bfe.getValue());
                     entCount++;
                 }
-            } catch (final ConcurrentModificationException e) {} // we dont want to synchronize this
+            } catch (final ConcurrentModificationException e) {
+                // we don't want to synchronize this
+                ConcurrentLog.logException(e);
+            }
             prop.put("page_bflist", entCount);
         } else if (page == 1) {
             String host = (post == null) ? "" : post.get("host", "");
@@ -113,11 +117,14 @@ public class AccessTracker_p {
                         while (ii.hasNext()) {
                             entry = ii.next();
                             prop.putHTML("page_list_" + entCount + "_host", host);
-                            prop.put("page_list_" + entCount + "_date", SimpleFormatter.format(new Date(entry.getTime())));
+                            prop.put("page_list_" + entCount + "_date", GenericFormatter.SIMPLE_FORMATTER.format(new Date(entry.getTime())));
                             prop.putHTML("page_list_" + entCount + "_path", entry.getPath());
                             entCount++;
                         }
-                    } catch (final ConcurrentModificationException e) {} // we don't want to synchronize this
+                    } catch (final ConcurrentModificationException e) {
+                        // we don't want to synchronize this
+                        ConcurrentLog.logException(e);
+                    }
                 }
             } else {
                 try {
@@ -129,12 +136,15 @@ public class AccessTracker_p {
                         while (ii.hasNext()) {
                                 entry = ii.next();
                                 prop.putHTML("page_list_" + entCount + "_host", host);
-                                prop.put("page_list_" + entCount + "_date", SimpleFormatter.format(new Date(entry.getTime())));
+                                prop.put("page_list_" + entCount + "_date", GenericFormatter.SIMPLE_FORMATTER.format(new Date(entry.getTime())));
                                 prop.putHTML("page_list_" + entCount + "_path", entry.getPath());
                                 entCount++;
                         }
                     }
-                } catch (final ConcurrentModificationException e) {} // we dont want to synchronize this
+                } catch (final ConcurrentModificationException e) {
+                    // we don't want to synchronize this
+                    ConcurrentLog.logException(e);
+                }
             }
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
@@ -156,43 +166,46 @@ public class AccessTracker_p {
             while (ai.hasNext()) {
                 try {
                     query = ai.next();
-                } catch (ConcurrentModificationException e) {
+                } catch (final ConcurrentModificationException e) {
+                    // we don't want to synchronize this
+                    ConcurrentLog.logException(e);
                     break;
                 }
                 // put values in template
                 prop.put("page_list_" + m + "_dark", ((dark) ? 1 : 0) );
                 dark =! dark;
-                prop.putHTML("page_list_" + m + "_host", query.host);
-                prop.put("page_list_" + m + "_date", SimpleFormatter.format(new Date(query.starttime)));
+                prop.putHTML("page_list_" + m + "_host", query.clienthost);
+                prop.put("page_list_" + m + "_date", GenericFormatter.SIMPLE_FORMATTER.format(new Date(query.starttime)));
                 prop.put("page_list_" + m + "_timestamp", query.starttime);
                 if (page == 2) {
                     // local search
                     prop.putNum("page_list_" + m + "_offset", query.offset);
-                    prop.putHTML("page_list_" + m + "_querystring", query.queryString);
+                    prop.putHTML("page_list_" + m + "_querystring", query.getQueryGoal().getOriginalQueryString(false));
                 } else {
                     // remote search
                     prop.putHTML("page_list_" + m + "_peername", (query.remotepeer == null) ? "<unknown>" : query.remotepeer.getName());
-                    prop.put("page_list_" + m + "_queryhashes", QueryParams.anonymizedQueryHashes(query.queryHashes));
+                    prop.put("page_list_" + m + "_queryhashes", QueryParams.anonymizedQueryHashes(query.getQueryGoal().getIncludeHashes()));
                 }
                 prop.putNum("page_list_" + m + "_querycount", query.itemsPerPage);
                 prop.putNum("page_list_" + m + "_transmitcount", query.transmitcount);
-                prop.putNum("page_list_" + m + "_resultcount", query.resultcount);
+                prop.putNum("page_list_" + m + "_resultcount", 0 /*query.getResultCount()*/);
                 prop.putNum("page_list_" + m + "_urltime", query.urlretrievaltime);
                 prop.putNum("page_list_" + m + "_snippettime", query.snippetcomputationtime);
                 prop.putNum("page_list_" + m + "_resulttime", query.searchtime);
                 prop.putHTML("page_list_" + m + "_userAgent", query.userAgent);
                 qcountSum += query.itemsPerPage;
-                rcountSum += query.resultcount;
+                rcountSum += 0; //query.getResultCount();
                 tcountSum += query.transmitcount;
                 utimeSum += query.urlretrievaltime;
                 stimeSum += query.snippetcomputationtime;
                 rtimeSum += query.searchtime;
-                if (query.resultcount > 0){
-                	rcount++;
-                    utimeSum1 += query.urlretrievaltime;
-                    stimeSum1 += query.snippetcomputationtime;
+                
+                if (query.transmitcount > 0){
+                    rcount++;
+                /*  utimeSum1 += query.urlretrievaltime;
+                    stimeSum1 += query.snippetcomputationtime; */
                     rtimeSum1 += query.searchtime;
-                }
+                }                
                 m++;
             }
             prop.put("page_list", m);
@@ -254,7 +267,7 @@ public class AccessTracker_p {
                 final Iterator<Long> ii = handles.iterator();
                 while (ii.hasNext()) {
                     final Long timestamp = ii.next();
-                    prop.put("page_list_" + m + "_dates_" + dateCount + "_date", SimpleFormatter.format(new Date(timestamp.longValue())));
+                    prop.put("page_list_" + m + "_dates_" + dateCount + "_date", GenericFormatter.SIMPLE_FORMATTER.format(new Date(timestamp.longValue())));
                     prop.put("page_list_" + m + "_dates_" + dateCount + "_timestamp", timestamp.toString());
                     dateCount++;
                 }
@@ -274,7 +287,10 @@ public class AccessTracker_p {
                 // next
                 m++;
             }
-            } catch (final ConcurrentModificationException e) {} // we dont want to synchronize this
+            } catch (final ConcurrentModificationException e) {
+                // we don't want to synchronize this
+                ConcurrentLog.logException(e);
+            }
             // return empty values to not break the table view if no results can be listed
             if (m==0) {
                 prop.put("page_list", 1);

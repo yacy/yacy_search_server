@@ -31,14 +31,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
-
+import net.yacy.cora.util.StringBuilderComparator;
 
 public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<E> {
 
@@ -163,6 +163,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
             score = this.map.get(obj);
             if (score == null) {
                 this.map.put(obj, new AtomicInteger(incrementScore));
+                return;
             }
         }
         score.addAndGet(incrementScore);
@@ -217,11 +218,6 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         return minScore;
     }
 
-    @Override
-    public String toString() {
-        return this.map.toString();
-    }
-
     public Iterator<E> keys(final boolean up) {
         synchronized (this.map) {
             // re-organize entries
@@ -251,5 +247,17 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
             return r.iterator();
         }
     }
-
+    
+    public static void main(String[] args) {
+    	OrderedScoreMap<StringBuilder> w = new OrderedScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
+    	Random r = new Random();
+    	for (int i = 0; i < 10000; i++) {
+    		w.inc(new StringBuilder("a" + ((char) (('a') + r.nextInt(26)))));
+    	}
+    	for (StringBuilder s: w) System.out.println(s + ":" + w.get(s));
+    	System.out.println("--");
+    	w.shrinkToMaxSize(10);
+    	for (StringBuilder s: w) System.out.println(s + ":" + w.get(s));
+    }
+    
 }

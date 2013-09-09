@@ -30,19 +30,21 @@ import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.text.Collator;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
 
+import org.apache.solr.common.params.MultiMapSolrParams;
+
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 
-
-public class DCEntry extends TreeMap<String, String> {
+public class DCEntry extends MultiMapSolrParams {
 
     private static final long    serialVersionUID = -2050291583515701559L;
 
@@ -55,7 +57,7 @@ public class DCEntry extends TreeMap<String, String> {
     public  static final DCEntry poison = new DCEntry();
 
     public DCEntry() {
-        super((Collator) insensitiveCollator.clone());
+        super(new TreeMap<String, String[]>((Collator) insensitiveCollator.clone()));
     }
 
     public DCEntry(
@@ -67,14 +69,14 @@ public class DCEntry extends TreeMap<String, String> {
             double lat,
             double lon
             ) {
-        super((Collator) insensitiveCollator.clone());
-        this.put("dc:identifier", url.toNormalform(true, false));
-        this.put("dc:date", ISO8601Formatter.FORMATTER.format(date));
-        this.put("dc:title", title);
-        this.put("dc:creator", author);
-        this.put("dc:description", body);
-        this.put("geo:lat", Double.toString(lat));
-        this.put("geo:long", Double.toString(lon));
+        super(new TreeMap<String, String[]>((Collator) insensitiveCollator.clone()));
+        this.getMap().put("dc:identifier", new String[]{url.toNormalform(true)});
+        this.getMap().put("dc:date", new String[]{ISO8601Formatter.FORMATTER.format(date)});
+        this.getMap().put("dc:title", new String[]{title});
+        this.getMap().put("dc:creator", new String[]{author});
+        this.getMap().put("dc:description", new String[]{body});
+        this.getMap().put("geo:lat", new String[]{Double.toString(lat)});
+        this.getMap().put("geo:long", new String[]{Double.toString(lon)});
     }
 
     /*
@@ -100,11 +102,13 @@ public class DCEntry extends TreeMap<String, String> {
         String d = this.get("docdatetime");
         if (d == null) d = this.get("dc:date");
         if (d == null) return null;
-        if (d.length() == 0) return null;
+        if (d.isEmpty()) return null;
         try {
-            return ISO8601Formatter.FORMATTER.parse(d);
-        } catch (ParseException e) {
-            Log.logException(e);
+            Date x = ISO8601Formatter.FORMATTER.parse(d);
+            Date now = new Date();
+            return x.after(now) ? now : x;
+        } catch (final ParseException e) {
+            ConcurrentLog.logException(e);
             return new Date();
         }
     }
@@ -120,13 +124,13 @@ public class DCEntry extends TreeMap<String, String> {
         }
         try {
             return new DigestURI(u);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             if (useRelationAsAlternative) {
                 DigestURI relation = this.getRelation();
                 if (relation != null) return relation;
-                Log.logWarning("DCEntry", "getIdentifier: url is bad, relation also: " + e.getMessage());
+                ConcurrentLog.warn("DCEntry", "getIdentifier: url is bad, relation also: " + e.getMessage());
             }
-            Log.logWarning("DCEntry", "getIdentifier: url is bad: " + e.getMessage());
+            ConcurrentLog.warn("DCEntry", "getIdentifier: url is bad: " + e.getMessage());
             return null;
         }
     }
@@ -141,13 +145,13 @@ public class DCEntry extends TreeMap<String, String> {
         }
         try {
             return new DigestURI(u);
-        } catch (MalformedURLException e) {
-            Log.logWarning("DCEntry", "getRelation: url is bad: " + e.getMessage());
+        } catch (final MalformedURLException e) {
+            ConcurrentLog.warn("DCEntry", "getRelation: url is bad: " + e.getMessage());
             return null;
         }
     }
 
-    private String bestU(String[] urls) {
+    private static String bestU(String[] urls) {
         for (String uu: urls) {
             if (uu.startsWith("http://") && (uu.endsWith(".html") || uu.endsWith(".htm") || uu.endsWith(".pdf") || uu.endsWith(".doc") || uu.endsWith(".rss") || uu.endsWith(".xml"))) return uu;
         }
@@ -220,12 +224,12 @@ public class DCEntry extends TreeMap<String, String> {
         return t;
     }
 
-    public String getDescription() {
-        String t = this.get("body");
-        if (t == null) t = this.get("dc:description");
-        t = stripCDATA(t);
-        if (t == null) return "";
-        return t;
+    public List<String> getDescriptions() {
+        String[] t = this.getParams("dc:description");
+        List<String> descriptions = new ArrayList<String>();
+        if (t == null) return descriptions;
+        for (String s: t) descriptions.add(stripCDATA(s));
+        return descriptions;
     }
 
     public String[] getSubject() {
@@ -252,7 +256,7 @@ public class DCEntry extends TreeMap<String, String> {
         return Double.parseDouble(t);
     }
 
-    private String stripCDATA(String s) {
+    private static String stripCDATA(String s) {
         if (s == null) return null;
         s = s.trim();
         if (s.startsWith("<![CDATA[")) s = s.substring(9);
@@ -263,7 +267,8 @@ public class DCEntry extends TreeMap<String, String> {
     public Document document() {
         HashSet<String> languages = new HashSet<String>();
         languages.add(getLanguage());
-
+        List<String> t = new ArrayList<String>(1);
+        t.add(getTitle());
         return new Document(
             getIdentifier(true),
             "text/html",
@@ -271,13 +276,13 @@ public class DCEntry extends TreeMap<String, String> {
             this,
             languages,
             getSubject(),
-            getTitle(),
+            t,
             getCreator(),
             getPublisher(),
             null,
-            "",
+            getDescriptions(),
             getLon(), getLat(),
-            UTF8.getBytes(getDescription()),
+            "",
             null,
             null,
             null,

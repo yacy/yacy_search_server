@@ -11,18 +11,24 @@
 <script type="text/javascript" src="/js/Crawler.js"></script>
 </head>
 <body id="Crawler" onload="initCrawler();">
+
+<div id="api">
+<a href="/api/status_p.xml" id="apilink"><img src="/env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<span>Click on this API button to see an XML with information about the crawler status</span>
+</div>
+
 #%env/templates/header.template%#
 #%env/templates/submenuCrawlMonitor.template%#
 <h2>Crawler</h2>
 <noscript><p>(Please enable JavaScript to automatically update this page!)</p></noscript>
-<fieldset style="width:270px;height:140px;float:left;">
+<fieldset style="width:180px;height:160px;float:left;">
 <legend>Queues</legend>
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
           <tr class="TableHeader"> 
-            <th width="110">Queue</th>
-            <th>Size</th>
-            <th width="50">Pause/Resume</th>
+            <th width="110">Queue<br/>&nbsp;</th>
+            <th>Size<br/>&nbsp;</th>
+            <th width="50">Pause/<br/>Resume</th>
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">Local Crawler</td>
@@ -67,51 +73,69 @@
           </tr>
         </tbody>
       </table>
+      <div class="warning" id="message">&nbsp;#[queuemessage]#<div>
 </fieldset>
-<fieldset style="width:140px;height:140px;float:left;">
+<fieldset style="width:220px;height:160px;float:left;">
 <legend>Index Size</legend>
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
           <tr class="TableHeader"> 
-            <th>Database</th>
-            <th>Entries</th>
+            <th width="140">Database<br/>&nbsp;</th>
+            <th width="80">Entries<br/>&nbsp;</th>
+            <th width="40">Seg-<br/>ments</th>
           </tr>
           <tr class="TableCellLight"> 
-            <td align="left">Pages (URLs)</td>
-            <td align="right"><span id="urldbsize">#[urlpublictextSize]#</span></td>
+            <td align="left">Documents<br/><a href="/solr/select?core=collection1&q=*:*&start=0&rows=3">solr search api</a></td>
+            <td align="right"><span id="urlpublictextSize">#[urlpublictextSize]#</span></td>
+            <td align="right"><span id="urlpublictextSegmentCount">#[urlpublictextSegmentCount]#</span></td>
           </tr>
           <tr class="TableCellLight"> 
-            <td align="left">RWIs (Words)</td>
-            <td align="right"><span id="rwidbsize">#[rwipublictextSize]#</span></td>
+            <td align="left">Webgraph Edges<br/><a href="/solr/select?core=webgraph&q=*:*&start=0&rows=3">solr search api</a></td>
+            <td align="right"><span id="webgraphSize">#[webgraphSize]#</span></td>
+            <td align="right"><span id="webgraphSegmentCount">#[webgraphSegmentCount]#</span></td>
+          </tr>
+          <tr class="TableCellLight"> 
+            <td align="left">RWIs<br/>(P2P Chunks)</td>
+            <td align="right"><span id="rwipublictextSize">#[rwipublictextSize]#</span></td>
+            <td align="right"><span id="rwipublictextSegmentCount">#[rwipublictextSegmentCount]#</span></td>
           </tr>
         </tbody>
       </table>
 </fieldset>
-<fieldset style="width:520px;height:140px;;float:left;">
+<fieldset style="width:430px;height:160px;;float:left;">
 <legend>Progress</legend>
       <form action="Crawler_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
           <tr class="TableHeader"> 
-            <th width="90">Indicator</th>
-            <th colspan="2">Level</th>
+            <th width="100">Indicator<br/>&nbsp;</th>
+            <th width="300" colspan="4">Level<br/>&nbsp;</th>
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">Speed</td>
-            <td align="left" colspan="2">
+            <td align="left" colspan="4">
             <input #(crawlingSpeedMinChecked)#::class="TableCellDark"#(/crawlingSpeedMinChecked)# type="submit" name="crawlingPerformance" value="minimum" />
-            <input #(crawlingSpeedCustChecked)#::class="TableCellDark"#(/crawlingSpeedCustChecked)# name="customPPM" type="text" size="5" maxlength="5" value="#[customPPMdefault]#" />PPM <input type="submit" name="crawlingPerformance" value="custom" />
+            <input #(crawlingSpeedCustChecked)#::class="TableCellDark"#(/crawlingSpeedCustChecked)# id="customPPM" name="customPPM" type="text" size="5" maxlength="5" value="#[customPPMdefault]#" />PPM <input type="submit" name="crawlingPerformance" value="custom" />
             <input #(crawlingSpeedMaxChecked)#::class="TableCellDark"#(/crawlingSpeedMaxChecked)# type="submit" name="crawlingPerformance" value="maximum" />
             </td>
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">PPM (Pages Per Minute)</td>
-            <td align="left" width="20"><span id="ppmNum">&nbsp;&nbsp;&nbsp;</span></td>
-            <td align="left" width="400px"><span id="ppmSpan">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="left" width="40"><span id="ppmNum">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="left" width="260px" colspan="3">
+            	<progress id="ppmbar" max="30000" value="0" style="width:94%;"/>
+            </td>
           </tr>
           <tr class="TableCellLight">
             <td align="left">Traffic (Crawler)</td>
             <td align="left"><span id="trafficCrawler">&nbsp;&nbsp;&nbsp;</span> MB</td>
+            <td colspan="3">&nbsp;</td>
+          </tr>
+          <tr class="TableCellLight">
+            <td align="left">Load</td>
+            <td align="left"><span id="load">&nbsp;&nbsp;&nbsp;</span></td>
+            <td align="left" width="100">Postprocessing</td>
+            <td align="left"><span id="postprocessing">&nbsp;&nbsp;&nbsp;</span></td>
             <td>&nbsp;</td>
           </tr>
         </tbody>
@@ -145,28 +169,29 @@
         <!-- 8 -->
         Crawling of "#[crawlingURL]#" started. <strong>Please wait some seconds, 
         it may take some seconds until the first result appears there.</strong> 
-        If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.<br />
+        If you crawl any un-wanted pages, you can delete them <a href="IndexCreateQueues_p.html?stack=LOCAL">here</a>.<br />
 #(/info)#
 </p>
 <!-- crawl queues -->
 
-<p>See an <a href="/api/latency_p.xml">access timing</a></p>
 <!-- crawl profile list -->
 #(crawlProfilesShow)#::
 <fieldset>
-<legend>Running Crawls</legend>
+<legend>Running Crawls (#[count]#)</legend>
 <table border="0" cellpadding="2" cellspacing="1" summary="A list of crawl profiles and their current settings.">
   <colgroup>
   <col width="16" />
   <col width="140"/>
   </colgroup>
   <tr class="TableHeader">
-    <td><strong>Start URL</strong></td>
+    <td><strong>Name</strong></td>
+    #(debug)#::<td><strong>Count</strong></td>#(/debug)#
     <td><strong>Status</strong></td>
   </tr>
   #{list}# 
   <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
-    <td><a  href="#[startURL]#">#[startURL]#</a></td>
+    <td>#[name]#</td>
+    #(debug)#::<td>#[count]#</td>#(/debug)#
     <td>#(terminateButton)#::
         <div style="text-decoration:blink;float:left;">Running</div>
         <form style="float:left;" action="Crawler_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8"><div>
@@ -178,6 +203,26 @@
   </tr>
   #{/list}# 
 </table>
+#(linkstructure)#::
+<script type="text/javascript">
+  <!--
+    imagestub = "WebStructurePicture_p.png?host=#[hosts]#&depth=4&width=1024&height=512&nodes=600&time=1000&colortext=888888&colorback=FFFFFF&colordot0=1111BB&colordota=11BB11&colorline=222222&colorlineend=333333";
+    idx = 0;
+    setTimeout("doanimation(500)", 500);
+    function doanimation(nexttimeout) {
+      var accessPicture = document.getElementById("WebPicture");
+      if (accessPicture != null) {
+        idx++;
+        accessPicture.src = imagestub + "&idx=" + idx;
+        setTimeout("doanimation(" + (nexttimeout > 3000 ? 3000 : nexttimeout * 1.2) + ")", nexttimeout);
+      }
+    }
+  -->
+  </script>
+  <div style="clear:both; text-align:left;">
+  <img id="WebPicture" src="/env/grafics/invisible.png"/>
+  </div>
+#(/linkstructure)#
 <h3>Crawled Pages</h3>
 <p id="crawllist"></p>
 </fieldset>

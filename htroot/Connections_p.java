@@ -37,19 +37,19 @@ import java.util.Set;
 
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.workflow.WorkflowThread;
 import net.yacy.peers.PeerActions;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverCore.Session;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.serverCore.Session;
 
 public final class Connections_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -64,7 +64,7 @@ public final class Connections_p {
             doNameLookup = post.getBoolean("nameLookup");
             if (post.containsKey("closeServerSession")) {
                 final String sessionName = post.get("closeServerSession", null);
-                sb.closeSessions("10_httpd", sessionName);
+                sb.closeSessions(sessionName);
                 prop.put("LOCATION","");
                 return prop;
             }
@@ -75,7 +75,7 @@ public final class Connections_p {
         // waiting for all threads to finish
         int idx = 0, numActiveRunning = 0, numActivePending = 0;
         boolean dark = true;
-        for (final Session s: ((serverCore) httpd).getJobList()) {
+        for (final Session s: serverCore.getJobList()) {
             if (!s.isAlive()) continue;
 
             // get the session runtime
@@ -111,7 +111,7 @@ public final class Connections_p {
                 prop.put("list_" + idx + "_serverSessionID",URLEncoder.encode(s.getName(),"UTF8"));
             } catch (final UnsupportedEncodingException e) {
                 // TODO Auto-generated catch block
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             prop.putHTML("list_" + idx + "_sessionName", s.getName());
             prop.put("list_" + idx + "_proto", prot);

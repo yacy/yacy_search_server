@@ -32,6 +32,7 @@ import java.util.Date;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.Memory;
 import net.yacy.kelondro.io.ByteCount;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
@@ -42,9 +43,9 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class Status
 {
@@ -72,7 +73,7 @@ public class Status
             post.remove("noforward");
         }
 
-        if ( post != null && post.size() > 0 ) {
+        if ( post != null && !post.isEmpty() ) {
             if ( sb.adminAuthenticated(header) < 2 ) {
             	prop.authenticationRequired();
                 return prop;
@@ -84,9 +85,9 @@ public class Status
             } else if ( post.containsKey("pauseCrawlJob") ) {
                 final String jobType = post.get("jobType");
                 if ( "localCrawl".equals(jobType) ) {
-                    sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                    sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, "user demand on Status.html");
                 } else if ( "remoteTriggeredCrawl".equals(jobType) ) {
-                    sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                    sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "user demand on Status.html");
                 }
                 redirect = true;
             } else if ( post.containsKey("continueCrawlJob") ) {
@@ -117,7 +118,7 @@ public class Status
         }
 
         // update seed info
-        sb.updateMySeed();
+        //sb.updateMySeed(); // don't do this here. if Solr is stuck, this makes it worse. And it prevents that we can click on the Thread Dump menu.
 
         final boolean adminaccess = sb.adminAuthenticated(header) >= 2;
         if ( adminaccess ) {
@@ -129,7 +130,7 @@ public class Status
         }
 
         // password protection
-        if ( (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0)
+        if ( (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty())
             && (!sb.getConfigBool("adminAccountForLocalhost", false)) ) {
             prop.put("protection", "0"); // not protected
             prop.put("urgentSetPassword", "1");
@@ -194,7 +195,7 @@ public class Status
         prop.put("host", hostIP != null ? hostIP.getHostAddress() : "Unkown IP");
 
         // ssl support
-        prop.put("sslSupport", sb.getConfig("keyStore", "").length() == 0 ? "0" : "1");
+        prop.put("sslSupport", sb.getConfig("keyStore", "").isEmpty() || !sb.getConfigBool("server.https", false) ? 0 : 1);
 
         if ( sb.getConfigBool("remoteProxyUse", false) ) {
             prop.put("remoteProxy", "1");
@@ -317,6 +318,7 @@ public class Status
         prop.put("totalMemory", Formatter.bytesToString(MemoryControl.total()));
         prop.put("maxMemory", Formatter.bytesToString(MemoryControl.maxMemory()));
         prop.put("processors", WorkflowProcessor.availableCPU);
+        prop.put("load", Memory.load());
 
         // proxy traffic
         //prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));

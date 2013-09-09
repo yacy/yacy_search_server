@@ -26,34 +26,13 @@ package net.yacy.kelondro.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.util.BDecoder.BObject;
 
 public class BEncoder {
-
-    // lists
-    public static List<BObject> transcode(List<byte[]> list) {
-        ArrayList<BObject> l = new ArrayList<BObject>(list.size());
-        for (byte[] entry: list) l.add(new BDecoder.BStringObject(entry));
-        return l;
-    }
-    
-    public static byte[] encode(List<BObject> list) {
-        BDecoder.BListObject l = new BDecoder.BListObject(list);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            l.toStream(baos);
-            baos.close();
-            return baos.toByteArray();
-        } catch (IOException e) {
-        }
-        return null;
-    }
     
     // maps
     public static Map<String, BObject> transcode(Map<String, byte[]> map) {
@@ -69,7 +48,7 @@ public class BEncoder {
             dict.toStream(baos);
             baos.close();
             return baos.toByteArray();
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
         return null;
     }
     public static byte[] encodeMap(String key, byte[] value) {
@@ -78,7 +57,7 @@ public class BEncoder {
             BDecoder.BDictionaryObject.toStream(baos, key, value);
             baos.close();
             return baos.toByteArray();
-        } catch (IOException e) {}
+        } catch (final IOException e) {}
         return null;
     }
 

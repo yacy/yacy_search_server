@@ -26,23 +26,24 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
-import de.anomic.crawler.Latency;
-import de.anomic.crawler.NoticedURL;
-import de.anomic.crawler.Latency.Host;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.crawler.data.Latency;
+import net.yacy.crawler.data.Latency.Host;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class latency_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
+
         final serverObjects prop = new serverObjects();
         //final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final Iterator<Map.Entry<String, Host>> i = Latency.iterator();
         Map.Entry<String, Host> e;
         int c = 0;
         Latency.Host host;
+        ClientIdentification.Agent agent = post == null ? ClientIdentification.yacyInternetCrawlerAgent : ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
         while (i.hasNext()) {
             e = i.next();
             host = e.getValue();
@@ -52,13 +53,13 @@ public class latency_p {
             prop.put("domains_" + c + "_count", host.count());
             prop.put("domains_" + c + "_average", host.average());
             prop.put("domains_" + c + "_robots", host.robotsDelay());
-            prop.put("domains_" + c + "_flux", host.flux(NoticedURL.minimumGlobalDeltaInit));
+            prop.put("domains_" + c + "_flux", host.flux(agent.minimumDelta));
             c++;
         }
         prop.put("domains", c);
-        
+
         // return rewrite properties
         return prop;
     }
-    
+
 }

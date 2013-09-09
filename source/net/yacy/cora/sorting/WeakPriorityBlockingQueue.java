@@ -47,7 +47,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
 	private final TreeSet<Element<E>>   queue;    // object within the stack, ordered using a TreeSet
     private final Semaphore    enqueued; // semaphore for elements in the stack
     private final ArrayList<Element<E>> drained;  // objects that had been on the stack but had been removed
-    protected int maxsize;
+    private int maxsize;
 
     /**
      * create a new WeakPriorityBlockingQueue
@@ -158,28 +158,32 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         }
     }
 
-    /**
-     * Retrieves and removes the head of this queue, waiting if no elements are present on this queue.
-     * @return the head element from the queue
-     * @throws InterruptedException
-     */
-    public Element<E> take() throws InterruptedException {
-        this.enqueued.acquire();
-        synchronized (this) {
-            return takeUnsafe();
-        }
-    }
-
     private Element<E> takeUnsafe() {
-        final Element<E> element = this.queue.first();
+        final Element<E> element = this.queue.pollFirst();
         assert element != null;
-        this.queue.remove(element);
         if (this.drained != null && (this.maxsize == -1 || this.drained.size() < this.maxsize)) this.drained.add(element);
         assert this.queue.size() >= this.enqueued.availablePermits() : "(take) queue.size() = " + this.queue.size() + ", enqueued.availablePermits() = " + this.enqueued.availablePermits();
         return element;
     }
-
-
+    
+    /**
+     * remove a drained element
+     * @param element
+     */
+    /*
+    public void removeDrained(Element<E> element) {
+        if (element == null) return;
+        synchronized (this.drained) {
+            int p = this.drained.size() - 1;
+            if (this.drained.get(p) == element) {
+                this.drained.remove(p);
+                return;
+            }
+        }
+        this.drained.remove(element);
+    }
+    */
+    
     /**
      * return the element with the smallest weight, but do not remove it
      * @return null if no element is on the queue or the head of the queue
@@ -231,7 +235,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
      */
     public Element<E> element(final int position, long time) throws InterruptedException {
         if (this.drained == null) return null;
-        long timeout = System.currentTimeMillis() + time;
+        long timeout = time == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + time;
         if (position < this.drained.size()) {
             return this.drained.get(position);
         }
@@ -265,7 +269,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
      * return all entries as they would be retrievable with element()
      * @return a list of all elements in the stack
      */
-    public synchronized ArrayList<Element<E>> list() {
+    private synchronized ArrayList<Element<E>> list() {
         if (this.drained == null) return null;
         // shift all elements
         while (!this.queue.isEmpty()) this.poll();
@@ -293,7 +297,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
         public String toString();
     }
 
-    protected abstract static class AbstractElement<E> implements Element<E>, Serializable {
+    private abstract static class AbstractElement<E> implements Element<E>, Serializable {
 
 		private static final long serialVersionUID = -7026597258248026566L;
 
@@ -400,7 +404,7 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
                 Element<String> e;
                 try {
                     while ((e = a.poll(1000)) != null) System.out.println("> " + e.toString());
-                } catch (InterruptedException e1) {
+                } catch (final InterruptedException e1) {
                     e1.printStackTrace();
                 }
             }

@@ -30,19 +30,19 @@ import java.util.Date;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.crawler.data.NoticedURL;
+import net.yacy.crawler.data.ZURL.FailCategory;
+import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.peers.Protocol;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.NoticedURL;
-import de.anomic.crawler.ZURL.FailCategory;
-import de.anomic.crawler.retrieval.Request;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class urls {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
 
         // insert default values
@@ -82,6 +82,7 @@ public class urls {
                 // place url to notice-url db
                 sb.crawlQueues.delegatedURL.push(
                                 entry,
+                                null,
                                 sb.peers.mySeed().hash.getBytes(),
                                 new Date(),
                                 0,
@@ -91,8 +92,8 @@ public class urls {
 
                 // create RSS entry
                 prop.put("item_" + c + "_title", "");
-                prop.putXML("item_" + c + "_link", entry.url().toNormalform(true, false));
-                prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
+                prop.putXML("item_" + c + "_link", entry.url().toNormalform(true));
+                prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true));
                 prop.putXML("item_" + c + "_description", entry.name());
                 prop.put("item_" + c + "_author", "");
                 prop.put("item_" + c + "_pubDate", GenericFormatter.SHORT_SECOND_FORMATTER.format(entry.appdate()));
@@ -110,17 +111,17 @@ public class urls {
             if (urlhashes.length() % 12 != 0) return prop;
             final int count = urlhashes.length() / 12;
         	int c = 0;
-        	URIMetadataRow entry;
+        	URIMetadataNode entry;
             DigestURI referrer;
             for (int i = 0; i < count; i++) {
-                entry = sb.index.urlMetadata().load(ASCII.getBytes(urlhashes.substring(12 * i, 12 * (i + 1))));
+                entry = sb.index.fulltext().getMetadata(ASCII.getBytes(urlhashes.substring(12 * i, 12 * (i + 1))));
                 if (entry == null) continue;
                 // find referrer, if there is one
                 referrer = sb.getURL(entry.referrerHash());
                 // create RSS entry
                 prop.put("item_" + c + "_title", entry.dc_title());
-                prop.putXML("item_" + c + "_link", entry.url().toNormalform(true, false));
-                prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
+                prop.putXML("item_" + c + "_link", entry.url().toNormalform(true));
+                prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true));
                 prop.putXML("item_" + c + "_description", entry.dc_title());
                 prop.put("item_" + c + "_author", entry.dc_creator());
                 prop.put("item_" + c + "_pubDate", GenericFormatter.SHORT_SECOND_FORMATTER.format(entry.moddate()));

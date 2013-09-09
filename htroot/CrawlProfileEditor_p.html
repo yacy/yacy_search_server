@@ -33,7 +33,6 @@
   <tr class="TableHeader"> 
     <td><strong>Crawl Thread</strong></td>
     <td><strong>Status</strong></td>
-    <td><strong>Start URL</strong></td>
     <td><strong>Depth</strong></td>
     <td><strong>Must Match</strong></td>
     <td><strong>Must Not Match</strong></td>
@@ -53,18 +52,17 @@
         <div style="text-decoration:blink">Running</div>
         <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8"><div>
         <input type="hidden" name="handle" value="#[handle]#" />
-        <input type="submit" name="terminate" value="Terminate" />
+        <input type="submit" name="terminate" value="Terminate"/>
         </div></form>
         #(/terminateButton)#
 	    #(deleteButton)#::
 	    Finished
         <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8"><div>
         <input type="hidden" name="handle" value="#[handle]#" />
-        <input type="submit" name="delete" value="Delete" />
+        <input type="submit" name="delete" value="Delete"/>
         </div></form>
         #(/deleteButton)#
 	</td>
-    <td><a  href="#[startURL]#">#[startURL]#</a></td>
     <td>#[depth]#</td>
     <td>#[mustmatch]#</td>
     <td>#[mustnotmatch]#</td>
@@ -94,7 +92,7 @@
         <select name="handle">#{profiles}# 
           <option value="#[handle]#"#(selected)#:: selected="selected"#(/selected)#>#[name]#</option>#{/profiles}# 
         </select>
-        <input type="submit" name="edit" value="Edit profile" />
+        <input type="submit" name="edit" value="Edit profile" class="submitready"/>
       </fieldset>
     </form>
     
@@ -112,11 +110,11 @@
           <dd>#(readonly)# 
             <input id="#[name]#" name="#[name]#"
                    #(type)# type="checkbox"#(checked)#:: checked="checked"#(/checked)#::
-                    type="text" value="#[value]#"::
-                    type="text" value="#[value]#"#(/type)# />::
+                    type="text" value="#[value]#" size="120" maxlength="10000"::
+                    type="text" value="#[value]#" size="120" maxlength="10000"#(/type)# />::
             <strong>#(type)##(checked)#false::true#(/checked)#::#[value]#::#[value]##(/type)#</strong>#(/readonly)# 
           </dd>#{/entries}# 
-        <dt>&nbsp;</dt><dd><input type="submit" name="submit" value="Submit changes" /></dd>
+        <dt>&nbsp;</dt><dd><input type="submit" name="submit" value="Submit changes" class="submitready"/></dd>
         </dl>
       </fieldset>
     </form>

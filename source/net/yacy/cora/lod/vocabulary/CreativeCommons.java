@@ -84,7 +84,7 @@ public enum CreativeCommons implements Vocabulary {
             this.terminal = terminal;
             try {
                 this.subject = subject == null ? null : new MultiProtocolURI(subject);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 this.subject = null;
             }
             this.discoveryPattern = Pattern.compile(discoveryPattern == null ? ".*" : discoveryPattern);
@@ -120,7 +120,7 @@ public enum CreativeCommons implements Vocabulary {
             this.terminal = terminal;
             try {
                 this.subject = subject == null ? null : new MultiProtocolURI(subject);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 this.subject = null;
             }
             this.discoveryPattern = Pattern.compile(discoveryPattern == null ? ".*" : discoveryPattern);
@@ -152,7 +152,7 @@ public enum CreativeCommons implements Vocabulary {
             this.terminal = terminal;
             try {
                 this.subject = subject == null ? null : new MultiProtocolURI(subject);
-            } catch (MalformedURLException e) {
+            } catch (final MalformedURLException e) {
                 this.subject = null;
             }
             this.discoveryPattern = Pattern.compile(discoveryPattern == null ? ".*" : discoveryPattern);
@@ -203,5 +203,10 @@ public enum CreativeCommons implements Vocabulary {
     @Override
     public String getPredicate() {
         return this.predicate;
+    }
+
+    @Override
+    public String getURIref() {
+        return PREFIX + ':' + this.name();
     }
 }

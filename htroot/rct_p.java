@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -29,22 +29,21 @@ import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.Iterator;
 
-import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.Hit;
+import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
-import net.yacy.peers.dht.PeerSelection;
 import net.yacy.search.Switchboard;
-
-import de.anomic.crawler.retrieval.Request;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class rct_p {
-    
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -57,7 +56,7 @@ public class rct_p {
                 if (feed != null) {
                     for (final Hit item: feed) {
                         //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
-                        
+
                         // put url on remote crawl stack
                         DigestURI url;
                         try {
@@ -71,7 +70,7 @@ public class rct_p {
                         final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(url);
                         if (urlRejectReason == null) {
                             // stack url
-                            if (sb.getLog().isFinest()) sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
+                            if (sb.getLog().isFinest()) sb.getLog().finest("crawlOrder: stack: url='" + url + "'");
                             sb.crawlStacker.enqueueEntry(new Request(
                                     peerhash.getBytes(),
                                     url,
@@ -85,13 +84,13 @@ public class rct_p {
                                     item.getSize()
                                     ));
                         } else {
-                            env.getLog().logWarning("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
+                            env.getLog().warn("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);
                         }
                     }
                 }
             }
         }
-        
+
         listHosts(sb, prop);
 
         // return rewrite properties
@@ -103,15 +102,15 @@ public class rct_p {
      * @return
      */
     private static String urlToString(final DigestURI url) {
-        return (url == null ? "null" : url.toNormalform(true, false));
+        return (url == null ? "null" : url.toNormalform(true));
     }
-    
+
     private static void listHosts(final Switchboard sb, final serverObjects prop) {
         // list known hosts
         Seed seed;
         int hc = 0;
         if (sb.peers != null && sb.peers.sizeConnected() > 0) {
-            final Iterator<Seed> e = PeerSelection.getProvidesRemoteCrawlURLs(sb.peers);
+            final Iterator<Seed> e = DHTSelection.getProvidesRemoteCrawlURLs(sb.peers);
             while (e.hasNext()) {
                 seed = e.next();
                 if (seed != null) {

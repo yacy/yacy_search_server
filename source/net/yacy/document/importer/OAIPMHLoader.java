@@ -25,12 +25,13 @@ package net.yacy.document.importer;
 import java.io.File;
 import java.io.IOException;
 
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
-import de.anomic.crawler.retrieval.Response;
 
 
 // get one server with
@@ -44,20 +45,20 @@ public class OAIPMHLoader {
     private final DigestURI source;
     private final ResumptionToken resumptionToken;
 
-    public OAIPMHLoader(final LoaderDispatcher loader, final DigestURI source, final File targetDir, final String filePrefix) throws IOException {
+    public OAIPMHLoader(final LoaderDispatcher loader, final DigestURI source, final File targetDir, final ClientIdentification.Agent agent) throws IOException {
         this.source = source;
 
         // load the file from the net
-        Log.logInfo("OAIPMHLoader", "loading record from " + source.toNormalform(true, false));
+        ConcurrentLog.info("OAIPMHLoader", "loading record from " + source.toNormalform(true));
         Response response = null;
         IOException ee = null;
         for (int i = 0; i < 5; i++) {
             // make some retries if first attempt fails
             try {
-                response = loader.load(loader.request(source, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, true);
+                response = loader.load(loader.request(source, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
                 break;
-            } catch (IOException e) {
-                Log.logWarning("OAIPMHLoader", "loading failed at attempt " + (i + 1) + ": " + source.toNormalform(true, false));
+            } catch (final IOException e) {
+                ConcurrentLog.warn("OAIPMHLoader", "loading failed at attempt " + (i + 1) + ": " + source.toNormalform(true));
                 ee = e;
                 continue;
             }
@@ -79,7 +80,7 @@ public class OAIPMHLoader {
     }
 
     public String source() {
-        return this.source.toNormalform(true, false);
+        return this.source.toNormalform(true);
     }
 
     public static StringBuilder escape(final String s) {

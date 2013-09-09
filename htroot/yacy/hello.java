@@ -29,25 +29,23 @@
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.ConcurrentModificationException;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.peers.Network;
+import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
-import net.yacy.peers.dht.PeerSelection;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public final class hello {
 
@@ -80,26 +78,26 @@ public final class hello {
         final InetAddress ias = Domains.dnsResolve(clientip);
         final long time_dnsResolve = System.currentTimeMillis() - time;
         if (ias == null) {
-            Network.log.logInfo("hello/server: failed contacting seed; clientip not resolvable (clientip=" + clientip + ", time_dnsResolve=" + time_dnsResolve + ")");
+            Network.log.info("hello/server: failed contacting seed; clientip not resolvable (clientip=" + clientip + ", time_dnsResolve=" + time_dnsResolve + ")");
             prop.put("message", "cannot resolve your IP from your reported location " + clientip);
             return prop;
         }
         if (seed.length() > Seed.maxsize) {
-        	Network.log.logInfo("hello/server: rejected contacting seed; too large (" + seed.length() + " > " + Seed.maxsize + ", time_dnsResolve=" + time_dnsResolve + ")");
+        	Network.log.info("hello/server: rejected contacting seed; too large (" + seed.length() + " > " + Seed.maxsize + ", time_dnsResolve=" + time_dnsResolve + ")");
             prop.put("message", "your seed is too long (" + seed.length() + ")");
             return prop;
         }
         Seed remoteSeed;
         try {
-            remoteSeed = Seed.genRemoteSeed(seed, key, true, ias.getHostAddress());
+            remoteSeed = Seed.genRemoteSeed(seed, true, ias.getHostAddress());
         } catch (final IOException e) {
-            Network.log.logInfo("hello/server: bad seed: " + e.getMessage() + ", time_dnsResolve=" + time_dnsResolve);
+            Network.log.info("hello/server: bad seed: " + e.getMessage() + ", time_dnsResolve=" + time_dnsResolve);
             prop.put("message", "bad seed: " + e.getMessage());
             return prop;
         }
 
         if (remoteSeed == null || remoteSeed.hash == null) {
-            Network.log.logInfo("hello/server: bad seed: null, time_dnsResolve=" + time_dnsResolve);
+            Network.log.info("hello/server: bad seed: null, time_dnsResolve=" + time_dnsResolve);
             prop.put("message", "cannot parse your seed");
             return prop;
         }
@@ -110,12 +108,25 @@ public final class hello {
 
         // we easily know the caller's IP:
         final String userAgent = header.get(HeaderFramework.USER_AGENT, "<unknown>");
+        sb.peers.peerActions.setUserAgent(clientip, userAgent);
         final String reportedip = remoteSeed.getIP();
         final String reportedPeerType = remoteSeed.get(Seed.PEERTYPE, Seed.PEERTYPE_JUNIOR);
         final double clientversion = remoteSeed.getVersion();
 
+        if ((reportedip + ':' + remoteSeed.getPort()).equals(sb.peers.mySeed().getPublicAddress())) {
+            // reject a self-ping
+            prop.put("message", "I am I");
+            return prop;
+        }
+        
+        if (remoteSeed.getName().equals(sb.peers.mySeed().getName())) {
+        	// reject a ping with my name
+            prop.put("message", "You are using my name");
+            return prop;
+        }
+        
         if (sb.isRobinsonMode() && !sb.isPublicRobinson()) {
-        	// if we are a robinson cluster, answer only if this client is known by our network definition
+            // if we are a robinson cluster, answer only if this client is known by our network definition
             prop.put("message", "I am robinson, I do not answer");
             return prop;
         }
@@ -126,7 +137,6 @@ public final class hello {
         // if the remote client has reported its own IP address and the client supports
         // the port forwarding feature (if client version >= 0.383) then we try to
         // connect to the reported IP address first
-        time = System.currentTimeMillis();
         long time_backping = 0;
         String backping_method = "none";
         if (reportedip.length() > 0 &&
@@ -138,7 +148,8 @@ public final class hello {
             // try first the reportedip, since this may be a connect from a port-forwarding host
             prop.put("yourip", reportedip);
             remoteSeed.setIP(reportedip);
-            callback = Protocol.queryUrlCount(remoteSeed);
+            time = System.currentTimeMillis();
+            callback = Protocol.queryRWICount(remoteSeed, "Tq418bNZd6AO");
             time_backping = System.currentTimeMillis() - time;
             backping_method = "reportedip=" + reportedip;
         } else {
@@ -161,7 +172,8 @@ public final class hello {
 
                 prop.put("yourip", clientip);
                 remoteSeed.setIP(clientip);
-                callback = Protocol.queryUrlCount(remoteSeed);
+                time = System.currentTimeMillis();
+                callback = Protocol.queryRWICount(remoteSeed, "Tq418bNZd6AO"); // hash for "www"; the actual count is irrelevant, we just want to know if this works
                 time_backping = System.currentTimeMillis() - time;
                 backping_method = "clientip=" + clientip;
             }
@@ -184,12 +196,12 @@ public final class hello {
                 remoteSeed.put(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR);
             }
             // connect the seed
-            Network.log.logInfo("hello/server: responded remote senior peer '" + remoteSeed.getName() + "' from " + reportedip + ", time_dnsResolve=" + time_dnsResolve + ", time_backping=" + time_backping + ", method=" + backping_method + ", urls=" + callback[0]);
+            Network.log.info("hello/server: responded remote senior peer '" + remoteSeed.getName() + "' from " + reportedip + ", time_dnsResolve=" + time_dnsResolve + ", time_backping=" + time_backping + ", method=" + backping_method + ", urls=" + callback[0]);
             sb.peers.peerActions.peerArrival(remoteSeed, true);
         } else {
             prop.put(Seed.YOURTYPE, Seed.PEERTYPE_JUNIOR);
             remoteSeed.put(Seed.PEERTYPE, Seed.PEERTYPE_JUNIOR);
-            Network.log.logInfo("hello/server: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip + ", time_dnsResolve=" + time_dnsResolve + ", time_backping=" + time_backping + ", method=" + backping_method + ", urls=" + callback[0]);
+            Network.log.info("hello/server: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip + ", time_dnsResolve=" + time_dnsResolve + ", time_backping=" + time_backping + ", method=" + backping_method + ", urls=" + callback[0]);
             // no connection here, instead store junior in connection cache
             if ((remoteSeed.hash != null) && (remoteSeed.isProper(false) == null)) {
                 sb.peers.peerActions.peerPing(remoteSeed);
@@ -199,10 +211,8 @@ public final class hello {
 
         // update event tracker
         EventTracker.update(EventTracker.EClass.PEERPING, new ProfilingGraph.EventPing(remoteSeed.getName(), sb.peers.myName(), false, connectedAfter - connectedBefore), false);
-
-        sb.peers.peerActions.setUserAgent(clientip, userAgent);
         if (!(prop.get(Seed.YOURTYPE)).equals(reportedPeerType)) {
-            Network.log.logInfo("hello/server: changing remote peer '" + remoteSeed.getName() +
+            Network.log.info("hello/server: changing remote peer '" + remoteSeed.getName() +
                                                            "' [" + reportedip +
                                              "] peerType from '" + reportedPeerType +
                                                         "' to '" + prop.get(Seed.YOURTYPE) + "'.");
@@ -216,7 +226,7 @@ public final class hello {
             if (count > 100) { count = 100; }
 
             // latest seeds
-            final Map<String, Seed> ySeeds = PeerSelection.seedsByAge(sb.peers, true, count); // peerhash/yacySeed relation
+            final ConcurrentMap<String, Seed> ySeeds = DHTSelection.seedsByAge(sb.peers, true, count); // peerhash/yacySeed relation
 
             // attach also my own seed
             seeds.append("seed0=").append(sb.peers.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
@@ -230,14 +240,12 @@ public final class hello {
                 String seedString;
                 while (si.hasNext()) {
                 	s = si.next();
-                    if ((s != null) && (s.isProper(false) == null)) try {
+                    if ((s != null) && (s.isProper(false) == null)) {
                         seedString = s.genSeedStr(key);
                         if (seedString != null) {
                             seeds.append("seed").append(count).append('=').append(seedString).append(serverCore.CRLF_STRING);
                             count++;
                         }
-                    } catch (final ConcurrentModificationException e) {
-                        Log.logException(e);
                     }
                 }
             }
@@ -249,7 +257,7 @@ public final class hello {
         prop.put("seedlist", seeds.toString());
         // return rewrite properties
         prop.put("message", "ok " + seed.length());
-        Network.log.logInfo("hello/server: responded remote peer '" + remoteSeed.getName() + "' [" + reportedip + "] in " + (System.currentTimeMillis() - start) + " milliseconds");
+        Network.log.info("hello/server: responded remote peer '" + remoteSeed.getName() + "' [" + reportedip + "] in " + (System.currentTimeMillis() - start) + " milliseconds");
         return prop;
     }
 

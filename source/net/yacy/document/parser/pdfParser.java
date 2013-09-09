@@ -33,16 +33,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.document.AbstractParser;
-import net.yacy.document.Document;
-import net.yacy.document.Parser;
-import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.io.CharBuffer;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.MemoryControl;
-
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.exceptions.CryptographyException;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -50,8 +40,29 @@ import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.BadSecurityHandlerException;
 import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
+import org.apache.pdfbox.pdmodel.font.PDCIDFont;
+import org.apache.pdfbox.pdmodel.font.PDCIDFontType0Font;
+import org.apache.pdfbox.pdmodel.font.PDCIDFontType2Font;
 import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDMMType1Font;
+import org.apache.pdfbox.pdmodel.font.PDSimpleFont;
+import org.apache.pdfbox.pdmodel.font.PDTrueTypeFont;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
+import org.apache.pdfbox.pdmodel.font.PDType1AfmPfbFont;
+import org.apache.pdfbox.pdmodel.font.PDType1CFont;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.PDType3Font;
 import org.apache.pdfbox.util.PDFTextStripper;
+
+import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.document.AbstractParser;
+import net.yacy.document.Document;
+import net.yacy.document.Parser;
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.io.CharBuffer;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
 
 
 public class pdfParser extends AbstractParser implements Parser {
@@ -67,20 +78,24 @@ public class pdfParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("text/x-pdf");
     }
 
+    static {
+        clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes(); // must be called here to get that into the class loader; it will block other threads otherwise;
+    }
+    
     @Override
     public Document[] parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
 
         // check memory for parser
-        if (!MemoryControl.request(200 * 1024 * 1024, true))
+        if (!MemoryControl.request(200 * 1024 * 1024, false))
             throw new Parser.Failure("Not enough Memory available for pdf parser: " + MemoryControl.available(), location);
 
         // create a pdf parser
-        final PDDocument pdfDoc;
+        PDDocument pdfDoc;
         //final PDFParser pdfParser;
         try {
-            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+            Thread.currentThread().setPriority(Thread.MIN_PRIORITY); // the pdfparser is a big pain
             pdfDoc = PDDocument.load(source);
-            //pdfParser = new PDFParser(source);
+            //PDFParser pdfParser = new PDFParser(source);
             //pdfParser.parse();
             //pdfDoc = pdfParser.getPDDocument();
         } catch (final IOException e) {
@@ -108,22 +123,23 @@ public class pdfParser extends AbstractParser implements Parser {
         }
 
         // extracting some metadata
-        final PDDocumentInformation info = pdfDoc.getDocumentInformation();
+        PDDocumentInformation info = pdfDoc.getDocumentInformation();
         String docTitle = null, docSubject = null, docAuthor = null, docPublisher = null, docKeywordStr = null;
         if (info != null) {
             docTitle = info.getTitle();
             docSubject = info.getSubject();
             docAuthor = info.getAuthor();
             docPublisher = info.getProducer();
-            if (docPublisher == null || docPublisher.length() == 0) docPublisher = info.getCreator();
+            if (docPublisher == null || docPublisher.isEmpty()) docPublisher = info.getCreator();
             docKeywordStr = info.getKeywords();
             // unused:
             // info.getTrapped());
             // info.getCreationDate());
             // info.getModificationDate();
         }
+        info = null;
 
-        if (docTitle == null || docTitle.length() == 0) {
+        if (docTitle == null || docTitle.isEmpty()) {
             docTitle = MultiProtocolURI.unescape(location.getFileName());
         }
         final CharBuffer writer = new CharBuffer(odtParser.MAX_DOCSIZE);
@@ -139,11 +155,13 @@ public class pdfParser extends AbstractParser implements Parser {
             stripper.setStartPage(4); // continue with page 4 (terminated, resulting in no text)
             stripper.setEndPage(Integer.MAX_VALUE); // set to default
             // we start the pdf parsing in a separate thread to ensure that it can be terminated
+            final PDDocument pdfDocC = pdfDoc;
             final Thread t = new Thread() {
                 @Override
                 public void run() {
+                    Thread.currentThread().setName("pdfParser.getText:" + location);
                     try {
-                        writer.append(stripper.getText(pdfDoc));
+                        writer.append(stripper.getText(pdfDocC));
                     } catch (final Throwable e) {}
                 }
             };
@@ -152,20 +170,13 @@ public class pdfParser extends AbstractParser implements Parser {
             if (t.isAlive()) t.interrupt();
             pdfDoc.close();
             contentBytes = writer.getBytes(); // get final text before closing writer
-        } catch (final IOException e) {
+        } catch (final Throwable e) {
             // close the writer
             if (writer != null) try { writer.close(); } catch (final Exception ex) {}
-            try {pdfDoc.close();} catch (final IOException ee) {}
-            //throw new Parser.Failure(e.getMessage(), location);
-        } catch (final NullPointerException e) {
-            // this exception appeared after the insertion of the jempbox-1.5.0.jar library
-            Log.logException(e);
-            // close the writer
-            if (writer != null) try { writer.close(); } catch (final Exception ex) {}
-            try {pdfDoc.close();} catch (final IOException ee) {}
+            try {pdfDoc.close();} catch (final Throwable ee) {}
             //throw new Parser.Failure(e.getMessage(), location);
         } finally {
-            try {pdfDoc.close();} catch (final IOException e) {}
+            try {pdfDoc.close();} catch (final Throwable e) {}
             writer.close();
         }
 
@@ -187,8 +198,9 @@ public class pdfParser extends AbstractParser implements Parser {
         // COSStream, COSString, COSName, COSDocument, COSInteger[], COSNull
         // the great number of these objects can easily be seen in Java Visual VM
         // we try to get this shit out of the memory here by forced clear calls, hope the best the rubbish gets out.
-        COSName.clearResources();
-        PDFont.clearResources();
+        pdfDoc = null;
+        clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes();
+        
         return new Document[]{new Document(
                 location,
                 mimeType,
@@ -196,7 +208,7 @@ public class pdfParser extends AbstractParser implements Parser {
                 this,
                 null,
                 docKeywords,
-                docTitle,
+                singleList(docTitle),
                 docAuthor,
                 docPublisher,
                 null,
@@ -209,6 +221,26 @@ public class pdfParser extends AbstractParser implements Parser {
                 false)};
     }
 
+    @SuppressWarnings("static-access")
+    public static void clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes() {
+        // thank you very much, PDFParser hackers, this font cache will occupy >80MB RAM for a single pdf and then stays forever
+        // AND I DO NOT EVEN NEED A FONT HERE TO PARSE THE TEXT!
+        // Don't be so ignorant, just google once "PDFParser OutOfMemoryError" to feel the pain.
+        PDFont.clearResources();
+        COSName.clearResources();
+        PDType1Font.clearResources();
+        PDTrueTypeFont.clearResources();
+        PDType0Font.clearResources();
+        PDType1AfmPfbFont.clearResources();
+        PDType3Font.clearResources();
+        PDType1CFont.clearResources();
+        PDCIDFont.clearResources();
+        PDCIDFontType0Font.clearResources();
+        PDCIDFontType2Font.clearResources();
+        PDMMType1Font.clearResources();
+        PDSimpleFont.clearResources();
+    }
+    
     /**
      * test
      * @param args
@@ -229,14 +261,14 @@ public class pdfParser extends AbstractParser implements Parser {
                     document = Document.mergeDocuments(null, "application/pdf", parser.parse(null, "application/pdf", null, new FileInputStream(pdfFile)));
                 } catch (final Parser.Failure e) {
                     System.err.println("Cannot parse file " + pdfFile.getAbsolutePath());
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 } catch (final InterruptedException e) {
                     System.err.println("Interrupted while parsing!");
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 } catch (final NoClassDefFoundError e) {
                     System.err.println("class not found: " + e.getMessage());
                 } catch (final FileNotFoundException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
 
                 // statistics
@@ -249,10 +281,10 @@ public class pdfParser extends AbstractParser implements Parser {
                     System.out.println("\tParsed text with " + document.getTextLength() + " chars of text and " + document.getAnchors().size() + " anchors");
                     try {
                         // write file
-                        FileUtils.copy(document.getText(), new File("parsedPdf.txt"));
+                        FileUtils.copy(document.getTextStream(), new File("parsedPdf.txt"));
                     } catch (final IOException e) {
                         System.err.println("error saving parsed document");
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     }
                 }
             } else {

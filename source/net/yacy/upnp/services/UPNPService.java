@@ -196,7 +196,7 @@ public class UPNPService {
         Pointer argumentListPtr = null;
         try {
           argumentListPtr = actionsListCtx.getPointer( "scpdns:action["+i+"]/scpdns:argumentList" );
-        } catch ( JXPathException ex ) {
+        } catch (final  JXPathException ex ) {
           // there is no arguments list.
         }
         if ( argumentListPtr != null ) {
@@ -227,7 +227,7 @@ public class UPNPService {
         UPNPServiceActions.put( action.getName(), action );
       }
       parsedSCPD = true;
-    } catch ( Throwable t ) {
+    } catch (final  Throwable t ) {
       throw new RuntimeException( "Error during lazy SCDP file parsing at " + SCPDURL, t );
     }
   }
@@ -243,7 +243,7 @@ public class UPNPService {
       String sendEventsLcl = null;
       try {
         sendEventsLcl = (String)serviceStateTableCtx.getValue( "scpdns:stateVariable["+i+"]/scpdns:@sendEvents" );
-      } catch ( JXPathException defEx ) {
+      } catch (final  JXPathException defEx ) {
         // sendEvents not provided defaulting according to specs to "yes"
         sendEventsLcl = "yes";
       }
@@ -253,13 +253,13 @@ public class UPNPService {
       srvStateVar.dataType = (String)serviceStateTableCtx.getValue( "scpdns:stateVariable["+i+"]/scpdns:dataType" );
       try {
         srvStateVar.defaultValue = (String)serviceStateTableCtx.getValue( "scpdns:stateVariable["+i+"]/scpdns:defaultValue" );
-      } catch ( JXPathException defEx ) {
+      } catch (final  JXPathException defEx ) {
         // can happend since default value is not
       }
       Pointer allowedValuesPtr = null;
       try {
         allowedValuesPtr = serviceStateTableCtx.getPointer( "scpdns:stateVariable["+i+"]/scpdns:allowedValueList" );
-      } catch ( JXPathException ex ) {
+      } catch (final  JXPathException ex ) {
         // there is no allowed values list.
       }
       if ( allowedValuesPtr != null ) {
@@ -276,7 +276,7 @@ public class UPNPService {
       Pointer allowedValueRangePtr = null;
       try {
         allowedValueRangePtr = serviceStateTableCtx.getPointer( "scpdns:stateVariable["+i+"]/scpdns:allowedValueRange" );
-      } catch ( JXPathException ex ) {
+      } catch (final  JXPathException ex ) {
         // there is no allowed values list, can happen
       }
       if ( allowedValueRangePtr != null ) {
@@ -285,7 +285,7 @@ public class UPNPService {
         srvStateVar.maximumRangeValue = (String)serviceStateTableCtx.getValue( "scpdns:stateVariable["+i+"]/scpdns:allowedValueRange/scpdns:maximum" );
         try {
           srvStateVar.stepRangeValue = (String)serviceStateTableCtx.getValue( "scpdns:stateVariable["+i+"]/scpdns:allowedValueRange/scpdns:step" );
-        } catch ( JXPathException stepEx ) {
+        } catch (final  JXPathException stepEx ) {
           // can happend since step is not mandatory
         }
       }
@@ -323,7 +323,7 @@ public class UPNPService {
 	  		}
 	  		in.close();
 				SCPDURLData = strBuff.toString();
-  		} catch ( IOException ioEx ) {
+  		} catch (final  IOException ioEx ) {
   			return null;	
   		}
   	}

@@ -27,7 +27,7 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public class Captcha extends RasterPlotter {
@@ -86,7 +86,7 @@ public class Captcha extends RasterPlotter {
         try {
             ImageIO.write(m.getImage(), "png", new java.io.File(args[0]));
         } catch (final java.io.IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
     }

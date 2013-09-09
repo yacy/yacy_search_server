@@ -23,14 +23,16 @@
 
 package net.yacy.document;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 public abstract class AbstractParser implements Parser {
 
-    protected final Log log = new Log("PARSER");
+    public final static ConcurrentLog log = new ConcurrentLog("PARSER");
     protected final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
     protected final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     private   final String name;
@@ -46,6 +48,7 @@ public abstract class AbstractParser implements Parser {
     /**
      * return the name of the parser
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -54,6 +57,7 @@ public abstract class AbstractParser implements Parser {
      * each parser must define a set of supported mime types
      * @return a set of mime type strings that are supported
      */
+    @Override
     public Set<String> supportedMimeTypes() {
         return this.SUPPORTED_MIME_TYPES;
     }
@@ -62,6 +66,7 @@ public abstract class AbstractParser implements Parser {
      * each parser must define a set of supported file extensions
      * @return a set of file name extensions that are supported
      */
+    @Override
     public Set<String> supportedExtensions() {
         return this.SUPPORTED_EXTENSIONS;
     }
@@ -71,6 +76,7 @@ public abstract class AbstractParser implements Parser {
      * @param o
      * @return
      */
+    @Override
     public boolean equals(final Object o) {
         return getName().equals(((Parser) o).getName());
     }
@@ -79,8 +85,15 @@ public abstract class AbstractParser implements Parser {
      * the hash code of a parser
      * @return the hash code of the parser name string
      */
+    @Override
     public int hashCode() {
         return getName().hashCode();
+    }
+
+    public static List<String> singleList(String t) {
+        List<String> c = new ArrayList<String>(1);
+        c.add(t);
+        return c;
     }
 
 }

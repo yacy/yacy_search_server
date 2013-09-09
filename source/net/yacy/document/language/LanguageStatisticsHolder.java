@@ -28,7 +28,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Vector;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 /**
@@ -68,7 +68,7 @@ public final class LanguageStatisticsHolder extends Vector<LanguageStatistics> {
         
         final File folder = new File(directory);
         if (!folder.exists()) {
-            Log.logWarning("LanguageStatistics", "the language statistics folder " + directory + " cannot be found");
+            ConcurrentLog.warn("LanguageStatistics", "the language statistics folder " + directory + " cannot be found");
             return;
         }
         final FilenameFilter filter = new LanguageFilenameFilter();

@@ -38,7 +38,7 @@ public class WorkflowJob {
         this.status = STATUS_INITIATED;
     }
     
-    public WorkflowJob(final int status) {
+    private WorkflowJob(final int status) {
         this.status = status;
     }
     

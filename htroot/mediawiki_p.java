@@ -31,13 +31,13 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.importer.MediawikiImporter;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class mediawiki_p {
 
     //http://localhost:8090/mediawiki_p.html?dump=wikipedia.de.xml&title=Kartoffel
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         prop.put("title", "");

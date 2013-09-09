@@ -60,10 +60,15 @@ bindPort =
 #    If the property keyStore is not specified, then a new keystore file 
 #    DATA/SETTINGS/myPeerKeystore will be created.
 
-keyStore =
-keyStorePassword =
+keyStore=defaults/freeworldKeystore
+keyStorePassword=freeworld
 pkcs12ImportFile = 
 pkcs12ImportPwd = 
+
+# the keyStore is only used, if server.https is set to true
+# if server.https=true, then the YaCy web interface is available at
+# https://localhost:<port>/ and not at http://localhost:<port>/
+server.https=false
 
 # property that collects the names of all servlets that had been used so far
 # that is used to track if the user has already done some configuration steps
@@ -261,25 +266,17 @@ dictionaries = DATA/DICTIONARIES
 # storage place for new releases
 releases = DATA/RELEASE
 
-# time limits for the crawler:
-# these times (milliseconds) are the shortest times for an access of the crawler to the same domain
-# the crawler may read files faster than that, but never from the same domain faster than these time intervals
-# a delta of 500 milliseconds means that no more than two files are taken from the same server
-# there is a hard-coded limit which prevents that the used time is shorter that these default times
-# the time-limits are distinguished for local and global crawls: there is no limit for an intranet-crawl.
-minimumLocalDelta = 0
-minimumGlobalDelta = 500
-
 # the following mime-types are a blacklist for indexing:
 # parser.mime.deny: specifies mime-types that shall not be indexed
 parser.mime.deny=
 parser.extensions.deny=
+parser.enableAudioTags=false
 
 # Promotion Strings
 # These strings appear in the Web Mask of the YACY search client
 # Set these Strings to cusomize your peer and give any message to
 # other peer users
-promoteSearchPageGreeting = P2P Web Search
+promoteSearchPageGreeting = Web Search by the People, for the People
 # if the following property is set to true, the network name is used as greeting
 promoteSearchPageGreeting.useNetworkName = false
 # the following attributes can be used to define a custom image and home page on the search page
@@ -444,9 +441,13 @@ seedScpPath=
 # of the period here (minutes)
 peerCycle=2
 
-# Debug mode for YACY network: this will trigger that also local ip's are
-# accepted as peer addresses
-yacyDebugMode=false
+# debug flags
+debug.search.local.dht.off=false
+debug.search.local.solr.off=false
+debug.search.remote.dht.off=false
+debug.search.remote.dht.testlocal=false
+debug.search.remote.solr.off=false
+debug.search.remote.solr.testlocal=false
 
 #staticIP if you have a static IP, you can use this setting
 staticIP=
@@ -508,6 +509,7 @@ proxyURL=false
 proxyURL.access=127.0.0.1,0:0:0:0:0:0:0:1
 # which urls to rewrite to /proxy.html?url=x (values: all, domainlist)
 proxyURL.rewriteURLs=domainlist
+proxyURL.useforresults=false
 
 # From the 'IndexCreate' menu point you can also define a crawling start point.
 # The crawling works the same way as the prefetch, but it is possible to
@@ -525,7 +527,9 @@ indexMedia=true
 # Filter for crawling; may be used to restrict a crawl to a specific domain
 # URLs are only indexed and further crawled if they match this filter
 crawlingFilter=.*
-crawlingQ=false
+crawlingQ=true
+followFrames=true
+obeyHtmlRobotsNoindex=true
 storeHTCache=true
 storeTXCache=true
 
@@ -563,6 +567,13 @@ crawlingIPMustNotMatch=
 # the default country codes are all codes for countries in Europe
 crawlingCountryMustMatch=AD,AL,AT,BA,BE,BG,BY,CH,CY,CZ,DE,DK,EE,ES,FI,FO,FR,GG,GI,GR,HR,HU,IE,IM,IS,IT,JE,LI,LT,LU,LV,MC,MD,MK,MT,NL,NO,PL,PT,RO,RU,SE,SI,SJ,SK,SM,TR,UA,UK,VA,YU
 
+# collections for index data separation
+# these collections can either be used to produce search tenants.
+# The collection is used in the site-parameter in the GSA interface.
+# Collections are assigned during crawl-time and defined in the crawl start.
+# The YaCyScheme field collection_sxt must be switched on to use this field.
+collection=user
+
 # performance-settings
 # delay-times for permanent loops (milliseconds)
 # the idlesleep is the pause that an proces sleeps if the last call to the
@@ -581,7 +592,7 @@ crawlingCountryMustMatch=AD,AL,AT,BA,BE,BG,BY,CH,CY,CZ,DE,DK,EE,ES,FI,FO,FR,GG,G
 40_peerseedcycle_busysleep=1200000
 40_peerseedcycle_memprereq=4194304
 50_localcrawl_idlesleep=2000
-50_localcrawl_busysleep=20
+50_localcrawl_busysleep=10
 50_localcrawl_memprereq=12582912
 50_localcrawl_isPaused=false
 60_remotecrawlloader_idlesleep=4000
@@ -595,6 +606,9 @@ crawlingCountryMustMatch=AD,AL,AT,BA,BE,BG,BY,CH,CY,CZ,DE,DK,EE,ES,FI,FO,FR,GG,G
 70_surrogates_idlesleep=10000
 70_surrogates_busysleep=0
 70_surrogates_memprereq=12582912
+80_searchresult_idlesleep=10000
+80_searchresult_busysleep=200
+80_searchresult_memprereq=0
 90_cleanup_idlesleep=300000
 90_cleanup_busysleep=300000
 90_cleanup_memprereq=0
@@ -668,7 +682,7 @@ isTransparentProxy=false
 connectionKeepAliveSupport=true
 
 # Specifies the timeout the proxy sould use
-proxy.clientTimeout = 30000
+proxy.clientTimeout = 60000
 
 # Specifies if the proxy should send the via header according to RFC
 proxy.sendViaHeader=true
@@ -748,9 +762,11 @@ search.result.show.date = true
 search.result.show.size = false
 search.result.show.metadata = false
 search.result.show.parser = false
+search.result.show.citation = true
 search.result.show.pictures = false
 search.result.show.cache = true
 search.result.show.proxy = false
+search.result.show.hostbrowser = true
 search.result.show.tags = false
 
 # search navigators: comma-separated list of default values for search navigation.
@@ -780,9 +796,14 @@ search.excludehosth=
 # the cases of nocache, iffresh and ifexist causes an index deletion
 search.verify.delete = true
 
+# images may be treated either as documents that are shown in search results or as objects
+# that are only visible in special search environments, like image search
+search.excludeintext.image = true
+crawler.load.image = true;
+
 # remote search details
-remotesearch.maxcount = 20
-remotesearch.maxtime = 1000
+remotesearch.maxcount = 10
+remotesearch.maxtime = 3000
 
 # specifies if yacy should set it's own referer if no referer URL
 # was set by the client.
@@ -812,6 +833,7 @@ indexControl.gzipBody = true
 indexControl.timeout = 60000
 indexDistribution.timeout = 60000
 indexTransfer.timeout = 120000
+indexTransfer.maxload = 2.2
 
 # defining max. allowed amount of open files during index- transfer/distribution
 indexDistribution.maxOpenFiles = 800
@@ -932,9 +954,33 @@ WikiAccess = admin
 
 # Search Profiles
 # we will support different search profiles
-# this is currently only a single default profile
-# If this profile setting is empty, a hard-coded profile from plasmaSearchRanking is used
-rankingProfile =
+# If this profile setting is empty, a hard-coded profile is used to initialise the values
+search.ranking.rwi.profile =
+# The boost fields contains all fields which shall be searched together with a boost. non-mentioned fields are not searched.
+
+# Boost queries are added to all queries; functions evaluate a value which is either added or multiplied with the ranking.
+# The field boostfunctionmode can be either 'add' or 'multiply' to describe the mode.
+# All boost methods > 0 must have names to be able to select this name with a query, with the syntax /name
+search.ranking.solr.collection.boostname.tmpa.0=Default Profile
+search.ranking.solr.collection.boostfields.tmpa.0=url_paths_sxt^1000.0,synonyms_sxt^1.0,title^10000.0,text_t^2.0,h1_txt^1000.0,h2_txt^100.0,host_organization_s^100000.0
+search.ranking.solr.collection.boostquery.tmpa.0=fuzzy_signature_unique_b:true^100000.0
+search.ranking.solr.collection.boostfunction.tmpb.0=scale(cr_host_norm_i,1,20)
+search.ranking.solr.collection.boostname.tmpa.1=Date Profile: sort by date in descending order for a '/data' usage
+search.ranking.solr.collection.boostfields.tmpa.1=text_t^1.0
+search.ranking.solr.collection.boostquery.tmpa.1=fuzzy_signature_unique_b:true^100000.0
+search.ranking.solr.collection.boostfunction.tmpb.1=recip(rord(last_modified),1,1000,1000)
+search.ranking.solr.collection.boostname.tmpa.2=Intranet Profile: when a search is done on a singe domain only, i.e. if a site:-operator is used
+search.ranking.solr.collection.boostfields.tmpa.2=url_paths_sxt^1000.0,synonyms_sxt^1.0,title^10000.0,text_t^2.0,h1_txt^1000.0,h2_txt^100.0
+search.ranking.solr.collection.boostquery.tmpa.2=fuzzy_signature_unique_b:true^100000.0
+search.ranking.solr.collection.boostfunction.tmpb.2=scale(cr_host_norm_i,1,20)
+search.ranking.solr.collection.boostname.tmpa.3=_unused3
+search.ranking.solr.collection.boostfields.tmpa.3=text_t^1.0
+search.ranking.solr.collection.boostquery.tmpa.3=fuzzy_signature_unique_b:true^100000.0
+search.ranking.solr.collection.boostfunction.tmpb.3=
+
+# the following values are used to identify duplicate content
+search.ranking.solr.doubledetection.minlength=3
+search.ranking.solr.doubledetection.quantrate=0.5f
 
 #optional extern thumbnail program.
 #the program must accept the invocation PROGRAM http://url /path/to/filename
@@ -996,25 +1042,18 @@ content.phpbb3.dbpw = joshua
 content.phpbb3.ppf = 1000
 content.phpbb3.dumpfile =
 
-# segment assignment for index storage processes in YaCy:
-# each process can store its index result in it's own index segment
-segment.process.receipts_tmp = default
-segment.process.queries_tmp = default
-segment.process.dhtin_tmp = default
-segment.process.dhtout_tmp = default
-segment.process.proxy_tmp = default
-segment.process.localcrawling_tmp = default
-segment.process.remotecrawling_tmp = default
-segment.process.default_tmp = default
-
 # search engine teaser: an about box in search results
 # this is only shown, if the about.body is filled
-about.headline =
-about.body = 
+about.headline=Please support YaCy!
+about.body=<iframe src="http://yacy.net/include/donate.html" width="100%" height="90" border="0" frameborder="0" scrolling="no" hspace="0" vspace="0" name="donate"></iframe><br/><div style="padding:8px;">If you run a YaCy server, feel free to replace our donation plea with your own support message, use the <a href="/ConfigPortal.html">Portal Configuration</a> servlet.</div>
 
 # search heuristics
 heuristic.site = false
 heuristic.blekko = false
+heuristic.twitter = false
+heuristic.searchresults = false
+heuristic.searchresults.crawlglobal = false
+heuristic.opensearch = false
 
 # colours for generic design
 color_background = #FFFFFF
@@ -1050,17 +1089,22 @@ color_searchurlhover = #008000
 # - to check whats in solr after indexing, open http://localhost:8983/solr/admin/
 federated.service.solr.indexing.enabled = false
 federated.service.solr.indexing.url = http://127.0.0.1:8983/solr
-federated.service.solr.indexing.commitWithinMs = 1000
 federated.service.solr.indexing.sharding = MODULO_HOST_MD5
-federated.service.solr.indexing.schemefile = solr.keys.default.list
 # the lazy attribute causes that fields containing "" or 0 are not added and not written
 federated.service.solr.indexing.lazy = true
+federated.service.solr.indexing.timeout = 10000
 
-# the indexing engine in YaCy can be switched off or on
-# (off may make sense if federated.service.solr.indexing.enabled = true)
-# for experiments the value federated.service.yacy.indexing.engine = solr may be used
-# allowed values are: classic, solr, off
-federated.service.yacy.indexing.engine = classic
+# temporary definition of backend services to use.
+# After the migration a rwi+solr combination is used, the solr contains the content of the previously used metadata-db.
+# To get a handle for a migration, these values are defined as temporary, if the migration starts the values are renamed
+# and defined with different default values.
+# The citation service is used for ranking; this is a reverse linking index. It should be on before and after the migration.
+# It can be switched off if only a remote solr index is used.
+core.service.fulltext = true
+core.service.rwi.tmp = true
+core.service.citation.tmp = true
+core.service.webgraph.tmp = false
+core.service.jena.tmp = false
 
 # RDF triplestore settings
 triplestore.persistent = true
@@ -1073,7 +1117,20 @@ augmentation.reflect = false
 augmentation.addDoctype = false
 augmentation.reparse = false
 
+# Content control settings
+contentcontrol.enabled = false
+contentcontrol.bookmarklist = contentcontrol
+contentcontrol.mandatoryfilterlist = yacy
+contentcontrol.smwimport.enabled = false
+contentcontrol.smwimport.baseurl = 
+contentcontrol.smwimport.purgelistoninit = true
+contentcontrol.smwimport.targetlist = contentcontrol
+contentcontrol.smwimport.defaultcategory = yacy
+
 # Interaction settings
+interaction.enabled = false
+interaction.target = yacy
+
 interaction.feedback.enabled = true
 interaction.feedback.url = 
 interaction.feedback.accept = false
@@ -1096,3 +1153,18 @@ interaction.dontimportbookmarks =
 interaction.autocrawler.enabled = false
 interaction.autocrawler.domainfilter = .*
 interaction.autocrawler.categoryfilter = .*
+
+# host browser settings
+browser.autoload = false
+browser.load4everyone = false
+
+
+# greedy learning: fast information acquisition heuristic for new peers 
+# to make greedy learning work, it must be enabled in the network definition
+# the user may switch it off at any time, but if the automatic learning limit is reached
+# then the active flag is set to false automatically and this will switch to that state
+# automatically by the cleanup process each time if the user switches it on again.
+# While the switch in on, it will cause that the user-submitted search will be done along
+# with some heuristics like: loading linked documents and adding a twitter search.
+# When the learning mode is finished, the user may switch on individual heuristics by himself.
+greedylearning.active = true

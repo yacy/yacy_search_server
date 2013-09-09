@@ -29,7 +29,7 @@ package net.yacy.document.parser.xml;
 import java.io.IOException;
 import java.io.Writer;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -49,8 +49,8 @@ public class ODContentHandler extends DefaultHandler {
 	public void characters(final char ch[], final int start, final int length) {
 	    try {
 		out.write(ch, start, length);
-	    } catch (IOException e) {
-	        Log.logException(e);
+	    } catch (final IOException e) {
+	        ConcurrentLog.logException(e);
 	    }
 	}
 	@Override
@@ -59,8 +59,8 @@ public class ODContentHandler extends DefaultHandler {
 		// add newlines after paragraphs 
 		try {
 		    out.append("\n");
-		} catch (IOException e) {
-		    Log.logException(e);
+		} catch (final IOException e) {
+		    ConcurrentLog.logException(e);
 		}
 	    }
 	}

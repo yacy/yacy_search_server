@@ -26,12 +26,12 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class table_p {
 
@@ -83,7 +83,7 @@ public class table_p {
         final String counts = post.get("count", null);
         int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : post.getInt("count", 10);
         final String pattern = post.get("search", "");
-        final Pattern matcher = (pattern.length() == 0 || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
+        final Pattern matcher = (pattern.isEmpty() || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
 
 
         if (post.containsKey("deleterows")) {
@@ -91,7 +91,7 @@ public class table_p {
                 if (entry.getValue().startsWith("pk_")) try {
                     sb.tables.delete(table, entry.getValue().substring(3).getBytes());
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }
@@ -105,15 +105,15 @@ public class table_p {
                 }
             }
             try {
-                if (pk == null || pk.length() == 0) {
+                if (pk == null || pk.isEmpty()) {
                     sb.tables.insert(table, map);
                 } else {
                     sb.tables.update(table, pk.getBytes(), map);
                 }
             } catch (final IOException e) {
-                Log.logException(e);
-            } catch (final RowSpaceExceededException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
+            } catch (final SpaceExceededException e) {
+                ConcurrentLog.logException(e);
             }
         }
 
@@ -126,7 +126,7 @@ public class table_p {
         try {
             columns = sb.tables.columns(table);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             columns = new ArrayList<String>();
         }
 
@@ -149,7 +149,7 @@ public class table_p {
         try {
             maxcount = Math.min(maxcount, sb.tables.size(table));
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             maxcount = 0;
         }
         int count = 0;
@@ -188,7 +188,7 @@ public class table_p {
                 count++;
             }
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         prop.put("showtable_list", count);
         prop.put("showtable_num", count);

@@ -3,21 +3,20 @@ import java.io.File;
 import java.util.List;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.ListManager;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
-
-import de.anomic.data.ListManager;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class blacklists_p {
-    
-    
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final serverObjects prop = new serverObjects();
-        
-        ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
-        final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath);
+
+        final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);
         int blacklistCount=0;
 
         final String blackListName = (post == null) ? "" : post.get("listname", "");
@@ -49,7 +48,7 @@ public class blacklists_p {
 
                 	count=0;
                 	for (final String entry : list){
-                	    if (entry.length() == 0) continue;
+                	    if (entry.isEmpty()) continue;
                 	    if (entry.charAt(0) == '#') continue;
 
                 	    prop.putXML("lists_" + blacklistCount + "_items_" + count + "_item", entry);
@@ -62,10 +61,10 @@ public class blacklists_p {
             }
         }
         prop.put("lists", blacklistCount);
-        
-        
+
+
         // return rewrite properties
         return prop;
     }
-    
+
 }

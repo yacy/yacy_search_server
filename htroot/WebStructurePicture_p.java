@@ -25,6 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.net.MalformedURLException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,173 +34,164 @@ import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 import net.yacy.visualization.GraphPlotter;
+import net.yacy.visualization.GraphPlotter.Point;
 import net.yacy.visualization.PrintTool;
 import net.yacy.visualization.RasterPlotter;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class WebStructurePicture_p {
 
     private static final double maxlongd = Long.MAX_VALUE;
 
-    public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static RasterPlotter respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
 
         String color_text    = "888888";
         String color_back    = "FFFFFF";
-        String color_dot     = "11BB11";
+        String color_dot0    = "1111BB";
+        String color_dota    = "11BB11";
         String color_line    = "222222";
         String color_lineend = "333333";
 
         int width = 1024;
         int height = 576;
         int depth = 3;
-        int nodes = 100; // maximum number of host nodes that are painted
+        int nodes = 300; // maximum number of host nodes that are painted
+        int bf = 12;    // maximum number of branches around nodes; less nodes makes the graphic look more structured
         int time = -1;
-        String host = null;
+        String hosts = null;
         int cyc = 0;
 
         if (post != null) {
             width         = post.getInt("width", 1024);
+            if (width < 32 ) width = 32;
+            if (width > 10000) width = 10000;
             height        = post.getInt("height", 576);
+            if (height < 24) height = 24;
+            if (height > 10000) height = 10000;
             depth         = post.getInt("depth", 3);
+            if (depth > 8) depth = 8;
+            if (depth < 0) depth = 0;
             nodes         = post.getInt("nodes", width * height * 100 / 1024 / 576);
+            bf            = post.getInt("bf", depth <= 0 ? -1 : (int) Math.round(2.0d * Math.pow(nodes, 1.0d / depth)));
             time          = post.getInt("time", -1);
-            host          = post.get("host", null);
+            hosts         = post.get("host", null);
             color_text    = post.get("colortext",    color_text);
             color_back    = post.get("colorback",    color_back);
-            color_dot     = post.get("colordot",     color_dot);
+            color_dot0    = post.get("colordot0",    color_dot0);
+            color_dota    = post.get("colordota",    color_dota);
             color_line    = post.get("colorline",    color_line);
             color_lineend = post.get("colorlineend", color_lineend);
-            cyc   = post.getInt("cyc", 0);
+            cyc           = post.getInt("cyc", 0);
         }
-
-        // too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
-        if (width < 32 ) width = 32;
-        if (width > 10000) width = 10000;
-        if (height < 24) height = 24;
-        if (height > 10000) height = 10000;
-        if (depth > 8) depth = 8;
-        if (depth < 0) depth = 0;
-
+        
         // calculate target time
         final long timeout = (time < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + (time * 8 / 10);
 
         // find start point
-        if ((host == null) || (host.length() == 0) || (host.equals("auto"))) {
+        if (hosts == null || hosts.isEmpty() || hosts.equals("auto")) {
             // find domain with most references
-            host = sb.webStructure.hostWithMaxReferences();
+            hosts = sb.webStructure.hostWithMaxReferences();
         }
         final RasterPlotter graphPicture;
-        if (host == null) {
+        if (hosts == null) {
             // probably no information available
             final RasterPlotter.DrawMode drawMode = (RasterPlotter.darkColor(color_back)) ? RasterPlotter.DrawMode.MODE_ADD : RasterPlotter.DrawMode.MODE_SUB;
             graphPicture = new RasterPlotter(width, height, drawMode, color_back);
             PrintTool.print(graphPicture, width / 2, height / 2, 0, "NO WEB STRUCTURE DATA AVAILABLE.", 0);
             PrintTool.print(graphPicture, width / 2, height / 2 + 16, 0, "START A WEB CRAWL TO OBTAIN STRUCTURE DATA.", 0);
         } else {
-            // find start hash
-            String hash = null;
-            if (host != null && host.length() > 0) try {
-                hash = ASCII.String((new DigestURI("http://" + host)).hash(), 6, 6);
-            } catch (final MalformedURLException e) {Log.logException(e);}
-            //assert (sb.webStructure.outgoingReferences(hash) != null);
-
             // recursively find domains, up to a specific depth
             GraphPlotter graph = new GraphPlotter();
-            if (host != null && hash != null) place(graph, sb.webStructure, hash, host, nodes, timeout, 0.0, 0.0, 0, depth, cyc);
-            //graph.print();
+            String[] hostlist = hosts.split(",");
+            for (int i = 0; i < hostlist.length; i++) {
+                String host = hostlist[i];
+                String hash = null;
+                try {hash = ASCII.String((new DigestURI("http://" + host)).hash(), 6, 6);} catch (final MalformedURLException e) {ConcurrentLog.logException(e);}
+                Map.Entry<String, String> centernode = new AbstractMap.SimpleEntry<String, String>(hash, host);
+                double angle = 2.0d * i * Math.PI / hostlist.length;
+                if (hostlist.length == 3) angle -= Math.PI / 2;
+                if (hostlist.length == 4) angle += Math.PI / 4;
+                graph.addNode(centernode.getValue(), Math.cos(angle) / 8, Math.sin(angle) / 8, 0);
+                place(graph, sb.webStructure, centernode, bf, nodes, timeout, hostlist.length == 1 ? 0 : 1, hostlist.length == 1 ? depth : depth + 1, cyc);
+            }
 
             // apply physics to it to get a better shape
             if (post != null && post.containsKey("pa")) {
                 // test with: http://localhost:8090/WebStructurePicture_p.png?pa=1&ral=0.7&raa=0.5&rar=2&rel=0.5&rea=1&rer=2
                 GraphPlotter.Ribbon rAll = new GraphPlotter.Ribbon(post.getFloat("ral", 0.1f), post.getFloat("raa", 0.1f), post.getFloat("rar", 0.1f));
                 GraphPlotter.Ribbon rEdge = new GraphPlotter.Ribbon(post.getFloat("rel", 0.05f), post.getFloat("rea", 0.1f), post.getFloat("rer", 0.1f));
-                for (int i = 0; i < post.getInt("pa", 1); i++) graph = graph.physics(rAll, rEdge);
+                int pa = post.getInt("pa", 0);
+                for (int i = 0; i < pa; i++) graph = graph.physics(rAll, rEdge);
             }
 
             // draw the graph
-            graphPicture = graph.draw(width, height, 40, 40, 16, 16, color_back, color_dot, color_line, color_lineend, color_text);
+            graph.normalize();
+            graphPicture = graph.draw(width, height, 40, 40, 16, 16, 12, 6, color_back, color_dot0, color_dota, color_line, color_lineend, color_text);
         }
         // print headline
-        graphPicture.setColor(color_text);
+        graphPicture.setColor(Long.parseLong(color_text, 16));
         PrintTool.print(graphPicture, 2, 8, 0, "YACY WEB-STRUCTURE ANALYSIS", -1);
-        if (host != null) PrintTool.print(graphPicture, 2, 16, 0, "LINK ENVIRONMENT OF DOMAIN " + host.toUpperCase(), -1);
+        if (hosts != null) PrintTool.print(graphPicture, 2, 16, 0, "LINK ENVIRONMENT OF DOMAIN " + hosts.toUpperCase(), -1);
         PrintTool.print(graphPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
 
         return graphPicture;
-
     }
 
     private static final int place(
-                    final GraphPlotter graph, final WebStructureGraph structure, final String centerhash, final String centerhost,
-                    int maxnodes, final long timeout, final double x, final double y, int nextlayer, final int maxlayer,
-                    final int cyc) {
-        // returns the number of nodes that had been placed
-        assert centerhost != null;
-        final GraphPlotter.Point center = graph.getNode(centerhost);
-        int mynodes = 0;
-        if (center == null) {
-            graph.addNode(centerhost, x, y, nextlayer);
-            maxnodes--;
-            mynodes++;
-        }
-        if (nextlayer == maxlayer) return mynodes;
+                    final GraphPlotter graph, final WebStructureGraph structure, Map.Entry<String, String> pivotnode,
+                    int bf, int maxnodes, final long timeout, int nextlayer, final int maxlayer, final int cyc) {
+        Point pivotpoint = graph.getNode(pivotnode.getValue());
+        int branches = 0;
+        if (nextlayer == maxlayer) return branches;
         nextlayer++;
         final double radius = 1.0 / (1 << nextlayer);
-        final WebStructureGraph.StructureEntry sr = structure.outgoingReferences(centerhash);
+        final WebStructureGraph.StructureEntry sr = structure.outgoingReferences(pivotnode.getKey());
         final Map<String, Integer> next = (sr == null) ? new HashMap<String, Integer>() : sr.references;
-        Map.Entry<String, Integer> entry;
-        String targethash, targethost;
+        ClusteredScoreMap<String> next0 = new ClusteredScoreMap<String>();
+        for (Map.Entry<String, Integer> entry: next.entrySet()) next0.set(entry.getKey(), entry.getValue());
         // first set points to next hosts
-        final Iterator<Map.Entry<String, Integer>> i = next.entrySet().iterator();
-        final List<String[]> targets = new ArrayList<String[]>();
+        final List<Map.Entry<String, String>> targets = new ArrayList<Map.Entry<String, String>>();
         int maxtargetrefs = 8, maxthisrefs = 8;
         int targetrefs, thisrefs;
         double rr, re;
-        while (i.hasNext() && maxnodes > 0 && System.currentTimeMillis() < timeout) {
-            entry = i.next();
-            targethash = entry.getKey();
-            targethost = structure.hostHash2hostName(targethash);
+        Iterator<String> i = next0.keys(false);
+        while (i.hasNext()) {
+            String targethash = i.next();
+            String targethost = structure.hostHash2hostName(targethash);
             if (targethost == null) continue;
-            thisrefs = entry.getValue().intValue();
+            thisrefs = next.get(targethash).intValue();
             targetrefs = structure.referencesCount(targethash); // can be cpu/time-critical
             maxtargetrefs = Math.max(targetrefs, maxtargetrefs);
             maxthisrefs = Math.max(thisrefs, maxthisrefs);
-            targets.add(new String[] {targethash, targethost});
+            targets.add(new AbstractMap.SimpleEntry<String, String>(targethash, targethost));
             if (graph.getNode(targethost) != null) continue;
             // set a new point. It is placed on a circle around the host point
             final double angle = ((Base64Order.enhancedCoder.cardinal((targethash + "____").getBytes()) / maxlongd) + (cyc / 360.0d)) * 2.0d * Math.PI;
             //System.out.println("ANGLE = " + angle);
             rr = radius * 0.25 * (1 - targetrefs / (double) maxtargetrefs);
             re = radius * 0.5 * (thisrefs / (double) maxthisrefs);
-            graph.addNode(targethost, x + (radius - rr - re) * Math.cos(angle), y + (radius - rr - re) * Math.sin(angle), nextlayer);
-            maxnodes--;
-            mynodes++;
+            graph.addNode(targethost, pivotpoint.x + (radius - rr - re) * Math.cos(angle), pivotpoint.y + (radius - rr - re) * Math.sin(angle), nextlayer);
+            branches++;
+            if (maxnodes-- <= 0 || (bf > 0 && branches >= bf) || System.currentTimeMillis() >= timeout) break;
         }
         // recursively set next hosts
-        final Iterator<String[]> j = targets.iterator();
-        String[] target;
         int nextnodes;
-        while (j.hasNext()) {
-            target = j.next();
-            targethash = target[0];
-            targethost = target[1];
-            final GraphPlotter.Point c = graph.getNode(targethost);
-            assert c != null;
-            nextnodes = ((maxnodes <= 0) || (System.currentTimeMillis() >= timeout)) ? 0 : place(graph, structure, targethash, targethost, maxnodes, timeout, c.x, c.y, nextlayer, maxlayer, cyc);
-            mynodes += nextnodes;
+        for (Map.Entry<String, String> target: targets) {
+            nextnodes = ((maxnodes <= 0) || (System.currentTimeMillis() >= timeout)) ? 0 : place(graph, structure, target, bf, maxnodes, timeout, nextlayer, maxlayer, cyc);
+            branches += nextnodes;
             maxnodes -= nextnodes;
-            graph.setEdge(centerhost, targethost);
+            graph.setEdge(pivotnode.getValue(), target.getValue());
         }
-        return mynodes;
+        return branches;
     }
-
 }

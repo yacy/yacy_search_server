@@ -1,3 +1,22 @@
+/**
+ *  Triple_p
+ *  Copyright 2012 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
+ *  First released 14.09.2011 at http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -5,8 +24,11 @@ import java.net.MalformedURLException;
 
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.http.HTTPDemon;
 
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -15,15 +37,11 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 
-import de.anomic.http.server.HTTPDemon;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-
 
 public class Triple_p {
 
-	public static serverObjects respond(final RequestHeader header,
-			final serverObjects post, final serverSwitch env) {
+	public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header,
+			final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
 		final serverObjects prop = new serverObjects();
 
 		prop.put("display", 1); // Fixed to 1
@@ -59,10 +77,10 @@ public class Triple_p {
 								System.out.println (newurl);
 							}
 							JenaTripleStore.load(newurl);
-						} catch (MalformedURLException e) {
-							Log.logException(e);
-						} catch (IOException e) {
-							Log.logException(e);
+						} catch (final MalformedURLException e) {
+							ConcurrentLog.logException(e);
+						} catch (final IOException e) {
+							ConcurrentLog.logException(e);
 						}
 					}
 
@@ -114,7 +132,7 @@ public class Triple_p {
 					}
 
 
-					 } catch (Exception e) {
+					 } catch (final Exception e) {
 						 prop.putHTML("mode_rdfdump", "error");
 					 }
 

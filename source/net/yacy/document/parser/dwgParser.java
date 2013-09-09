@@ -103,11 +103,11 @@ public class dwgParser extends AbstractParser implements Parser {
             docSubject = info.getSubject();
             docAuthor = info.getAuthor();
             docPublisher = info.getProducer();
-            if (docPublisher == null || docPublisher.length() == 0) docPublisher = info.getCreator();
+            if (docPublisher == null || docPublisher.isEmpty()) docPublisher = info.getCreator();
             docKeywordStr = info.getKeywords();
         }
 
-        if (docTitle == null || docTitle.length() == 0) {
+        if (docTitle == null || docTitle.isEmpty()) {
             docTitle = MultiProtocolURI.unescape(location.getFileName());
         }
 
@@ -259,7 +259,7 @@ public class dwgParser extends AbstractParser implements Parser {
     private void handleHeader(
             int headerNumber, String value, Metadata metadata,
             XHTMLContentHandler xhtml) throws SAXException {
-        if(value == null || value.length() == 0) {
+        if(value == null || value.isEmpty()) {
             return;
         }
 

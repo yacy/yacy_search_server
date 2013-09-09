@@ -53,7 +53,7 @@ public void setup() {
   URL url = null;
   try {
     url = getDocumentBase();
-  } catch (NullPointerException e) {}
+  } catch (final NullPointerException e) {}
   if (url == null) {
     host="localhost";
     port=8090;
@@ -163,7 +163,7 @@ public void processCitation(String host, HashMap props) {
   String id = (String) props.get("id"); if (id == null) id = "";
   try {
   String counts = (String) props.get("count"); if (counts != null) count = Integer.parseInt(counts);
-  } catch (NumberFormatException e) {}
+  } catch (final NumberFormatException e) {}
   // find the two nodes that have a relation
   host h = (host) nodes.get(id);
   if (h == null) {

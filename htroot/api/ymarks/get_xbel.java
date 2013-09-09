@@ -4,18 +4,18 @@ import java.util.Iterator;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.UserDB;
+import net.yacy.data.ymark.YMarkDate;
+import net.yacy.data.ymark.YMarkEntry;
+import net.yacy.data.ymark.YMarkTables;
+import net.yacy.data.ymark.YMarkUtil;
+import net.yacy.data.ymark.YMarkXBELImporter;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
-import de.anomic.data.ymark.YMarkDate;
-import de.anomic.data.ymark.YMarkEntry;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.data.ymark.YMarkXBELImporter;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class get_xbel {
 	public static final String ROOT = "root";
@@ -62,7 +62,7 @@ public class get_xbel {
         	try {
         		fit = sb.tables.bookmarks.getFolders(bmk_user, root).iterator();
 			} catch (final IOException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 			}
 
 			while (fit.hasNext()) {
@@ -85,12 +85,7 @@ public class get_xbel {
                 		prop.put("xbel_"+count+"_elements", "<title>" + CharacterCoding.unicode2xml(foldername[n], true) + "</title>");
                 		count++;
         			}
-					try {
-						bit = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, folder);
-					} catch (final IOException e) {
-						// TODO: better error handling (avoid NPE)
-						bit = null;
-					}
+					bit = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, folder);
 					Tables.Row bmk_row = null;
 					String urlHash;
 					final YMarkDate date = new YMarkDate();

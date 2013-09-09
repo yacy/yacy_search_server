@@ -42,12 +42,12 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.BlogBoard;
+import net.yacy.data.UserDB;
 import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
-import de.anomic.data.BlogBoard;
-import de.anomic.data.UserDB;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class Blog {
 
@@ -108,7 +108,7 @@ public class Blog {
         if ("anonymous".equals(strAuthor)) {
             strAuthor = sb.blogDB.guessAuthor(ip);
 
-            if (strAuthor == null || strAuthor.length() == 0) {
+            if (strAuthor == null || strAuthor.isEmpty()) {
                 if (sb.peers.mySeed() == null) {
                     strAuthor = "anonymous";
                 } else {

@@ -31,7 +31,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Properties;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 public class Browser {
 
@@ -95,7 +95,7 @@ public class Browser {
             } else if (systemOS == systemUnix) {
                 //try {
                 //    openBrowserUnixGeneric(url);
-                //} catch (Exception e) {
+                //} catch (final Exception e) {
                     openBrowserUnixFirefox(url);
                 //}
             } else if (systemOS == systemWindows) {
@@ -103,15 +103,15 @@ public class Browser {
             } else {
                 throw new RuntimeException("System unknown");
             }
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             if (head) {
                 try {
                     openBrowserJava(url);
-                } catch (Exception ee) {
-                    logBrowserFail(url, ee);
+                } catch (final Exception ee) {
+                    logBrowserFail(url);
                 }
             } else {
-                logBrowserFail(url, e);
+                logBrowserFail(url);
             }
         }
     }
@@ -160,9 +160,9 @@ public class Browser {
         }
     }
 
-    private static void logBrowserFail(final String url, Throwable e) {
+    private static void logBrowserFail(final String url) {
         //if (e != null) Log.logException(e);
-        Log.logInfo("Browser", "please start your browser and open the following location: " + url);
+        ConcurrentLog.info("Browser", "please start your browser and open the following location: " + url);
     }
 
     private static String errorResponse(final Process p) {
@@ -178,8 +178,8 @@ public class Browser {
         } finally {
             try {
                 err.close();
-            } catch (IOException e) {
-                Log.logException(e);
+            } catch (final IOException e) {
+                ConcurrentLog.logException(e);
             }
         }
     }

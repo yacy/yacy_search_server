@@ -30,6 +30,7 @@
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -38,8 +39,10 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.peers.NewsDB;
 import net.yacy.peers.NewsPool;
@@ -49,8 +52,9 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.servletProperties;
 
 public class Network {
 
@@ -60,7 +64,8 @@ public class Network {
         final Switchboard sb = (Switchboard) switchboard;
         final long start = System.currentTimeMillis();
 
-        final serverObjects prop = new serverObjects();
+        final servletProperties prop = new servletProperties();
+        
         prop.put("menu", post == null ? 2 : (post.get("menu", "").equals("embed")) ? 0 : (post.get("menu","").equals("simple")) ? 1 : 2);
         if (sb.peers.mySeed() != null) prop.put("menu_newpeer_peerhash", sb.peers.mySeed().hash);
 
@@ -84,7 +89,7 @@ public class Network {
             final int disconCount = sb.peers.sizeDisconnected();
             int potCount = sb.peers.sizePotential();
 
-//          final boolean complete = ((post == null) ? false : post.get("links", "false").equals("true"));
+            // final boolean complete = ((post == null) ? false : post.get("links", "false").equals("true"));
             final long otherppm = sb.peers.countActivePPM();
             final double otherqpm = sb.peers.countActiveQPM();
             long myppm = 0;
@@ -103,6 +108,7 @@ public class Network {
                 // my-info
                 prop.putHTML("table_my-name", seed.get(Seed.NAME, "-") );
                 prop.put("table_my-hash", seed.hash );
+                prop.put("table_my-ssl", sb.peers.mySeed().getFlagSSLAvailable() ? 1 : 0);
                 if (sb.peers.mySeed().isVirgin()) {
                     prop.put("table_my-info", 0);
                 } else if(sb.peers.mySeed().isJunior()) {
@@ -122,7 +128,7 @@ public class Network {
                 prop.put("table_my-dhtreceive", seed.getFlagAcceptRemoteIndex() ? 1 : 0);
                 prop.put("table_my-nodestate", seed.getFlagRootNode() ? 1 : 0);
 
-                myppm = sb.currentPPM();
+                myppm = Switchboard.currentPPM();
                 myqph = 60d * sb.averageQPM();
                 prop.put("table_my-version", seed.get(Seed.VERSION, "-"));
                 prop.put("table_my-utc", seed.get(Seed.UTC, "-"));
@@ -151,14 +157,17 @@ public class Network {
             final int activeLastMonth = sb.peers.sizeActiveSince(30 * 1440);
             final int activeLastWeek = sb.peers.sizeActiveSince(7 * 1440);
             final int activeLastDay = sb.peers.sizeActiveSince(1440);
+            final int activeLastHour = sb.peers.sizeActiveSince(60);
             final int activeSwitch =
-                (activeLastDay <= conCount) ? 0 :
-                (activeLastWeek <= activeLastDay) ? 1 :
-                (activeLastMonth <= activeLastWeek) ? 2 : 3;
+                (activeLastHour <= conCount) ? 0 :
+                (activeLastDay <= activeLastHour) ? 1 :
+                (activeLastWeek <= activeLastDay) ? 2 :
+                (activeLastMonth <= activeLastWeek) ? 3 : 4;
             prop.putNum("table_active-switch", activeSwitch);
             prop.putNum("table_active-switch_last-month", activeLastMonth);
             prop.putNum("table_active-switch_last-week", activeLastWeek);
             prop.putNum("table_active-switch_last-day", activeLastDay);
+            prop.putNum("table_active-switch_last-hour", activeLastHour);
             prop.putNum("table_active-count", conCount);
             prop.putNum("table_active-links", accActLinks);
             prop.putNum("table_active-words", accActWords);
@@ -257,7 +266,7 @@ public class Network {
                     final HashMap<String, Map<String, String>> updatedBlog = new HashMap<String, Map<String, String>>();
                     final HashMap<String, String> isCrawling = new HashMap<String, String>();
                     NewsDB.Record record;
-                    final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(NewsPool.INCOMING_DB, true);
+                    final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(NewsPool.INCOMING_DB);
                     while (recordIterator.hasNext()) {
                         record = recordIterator.next();
                         if (record == null) {
@@ -276,6 +285,10 @@ public class Network {
                     boolean dark = true;
                     Seed seed;
                     final boolean complete = (post != null && post.containsKey("ip"));
+                    final boolean onlyIncomingDHT = (post != null && post.containsKey("onlydhtin"));
+                    final boolean onlyNode = (post != null && post.containsKey("onlynode"));
+                    final long onlyAgeOverDays = post == null ? 0 : post.getLong("onlyageoverdays", 0);
+                    final long onlySizeLessDocs = post == null ? Long.MAX_VALUE : post.getLong("onlysizelessdocs", Long.MAX_VALUE);
                     Iterator<Seed> e = null;
                     final boolean order = (post != null && post.get("order", "down").equals("up"));
                     final String sort = (post == null ? null : post.get("sort", null));
@@ -307,6 +320,10 @@ public class Network {
                         seed = e.next();
                         assert seed != null;
                         if (seed != null) {
+                            if (onlyIncomingDHT && !seed.getFlagAcceptRemoteIndex()) continue;
+                            if (onlyNode && !seed.getFlagRootNode()) continue;
+                            if (seed.getAge() < onlyAgeOverDays) continue;
+                            if (seed.getLinkCount() > onlySizeLessDocs) continue;
                             if((post != null && post.containsKey("search"))  && peerSearchPattern != null /*(wrongregex == null)*/) {
                                 boolean abort = true;
                                 Matcher m = peerSearchPattern.matcher (seed.getName());
@@ -362,15 +379,21 @@ public class Network {
                             prop.putHTML(STR_TABLE_LIST + conCount + "_shortname", shortname);
                             prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(Seed.NAME, "deadlink"));
                             prop.put(STR_TABLE_LIST + conCount + "_special", (seed.getFlagRootNode() && !seed.getFlagAcceptRemoteIndex()) ? 1 : 0);
+                            prop.put(STR_TABLE_LIST + conCount + "_ssl", (seed.getFlagSSLAvailable()) ? 1 : 0);
                             userAgent = null;
                             if (seed.hash != null && seed.hash.equals(sb.peers.mySeed().hash)) {
-                                userAgent = ClientIdentification.getUserAgent();
+                                userAgent = ClientIdentification.yacyInternetCrawlerAgent.userAgent;
                                 location = ClientIdentification.generateLocation();
                             } else {
-                               userAgent = sb.peers.peerActions.getUserAgent(seed.getIP());
-                               location = ClientIdentification.parseLocationInUserAgent(userAgent);
+                                userAgent = sb.peers.peerActions.getUserAgent(seed.getIP());
+                                location = ClientIdentification.parseLocationInUserAgent(userAgent);
                             }
-                            prop.put(STR_TABLE_LIST + conCount + "_location", location);
+                            if (location.length() > 10) location = location.substring(0, 10);
+                            if (location.length() == 0) {
+                                Locale l = Domains.getLocale(seed.getIP());
+                                if (l != null) location = l.toString();
+                            }
+                            prop.putHTML(STR_TABLE_LIST + conCount + "_location", location);
                             if (complete) {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete", 1);
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_ip", seed.getIP() );
@@ -429,7 +452,7 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", "");
                             } else {
                                 final String peertags = MapTools.set2string(seed.getPeerTags(), ",", false);
-                                prop.putHTML(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", ((peertags == null) || (peertags.length() == 0)) ? "no tags given" : ("tags = " + peertags));
+                                prop.putHTML(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", ((peertags == null) || (peertags.isEmpty())) ? "no tags given" : ("tags = " + peertags));
                             }
                             String[] yv = yacyVersion.combined2prettyVersion(seed.get(Seed.VERSION, "0.1"), shortname);
                             prop.putHTML(STR_TABLE_LIST + conCount + "_version", yv[0] + "/" + yv[1]);
@@ -470,6 +493,14 @@ public class Network {
 
         prop.putNum("table_rt", System.currentTimeMillis() - start);
 
+        // Adding CORS Access header for Network.xml
+        final String path = requestHeader.get(HeaderFramework.CONNECTION_PROP_PATH);
+        if(path != null && path.endsWith(".xml")) {
+            final ResponseHeader outgoingHeader = new ResponseHeader(200);
+    		outgoingHeader.put(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
+    		prop.setOutgoingHeader(outgoingHeader);        	
+        }
+        
         // return rewrite properties
         return prop;
     }

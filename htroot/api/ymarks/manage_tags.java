@@ -3,16 +3,15 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.UserDB;
+import net.yacy.data.ymark.YMarkTables;
+import net.yacy.data.ymark.YMarkUtil;
+import net.yacy.data.ymark.YMarkTables.TABLES;
 import net.yacy.kelondro.blob.Tables.Row;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.data.ymark.YMarkTables.TABLES;
-import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 
 public class manage_tags {
@@ -57,8 +56,8 @@ public class manage_tags {
                         if(qtype.equals("_tags")) {
                         	if(query.isEmpty())
                         		query = tags;
-                        	final String[] tagArray = YMarkUtil.cleanTagsString(query).split(YMarkUtil.TAGS_SEPARATOR);
-                        	row_iter = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray);
+                        	final String tagsString = YMarkUtil.cleanTagsString(query);
+                        	row_iter = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagsString);
                         } else if(qtype.equals("_folder")) {
                         	row_iter = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, query);
                         } else {
@@ -68,17 +67,15 @@ public class manage_tags {
                     	row_iter = sb.tables.iterator(bmk_table, Pattern.compile(query));
                     }
                 } else {
-                	final String[] tagArray = YMarkUtil.cleanTagsString(tags).split(YMarkUtil.TAGS_SEPARATOR);
-                	row_iter = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray);
+                	final String tagsString = YMarkUtil.cleanTagsString(tags);
+                	row_iter = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagsString);
                 	// row_iter = sb.tables.iterator(bmk_table);
                 }
                 sb.tables.bookmarks.replaceTags(row_iter, bmk_user, tags, replace);
                 prop.put("status", 1);
             } catch (final IOException e) {
-                Log.logException(e);
-            } catch (final RowSpaceExceededException e) {
-            	 Log.logException(e);
-			}
+                ConcurrentLog.logException(e);
+            }
         } else {
         	prop.put(serverObjects.ACTION_AUTHENTICATE, YMarkTables.USER_AUTHENTICATE_MSG);
         }

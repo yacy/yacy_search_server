@@ -28,8 +28,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlockingThread<J> implements BlockingThread<J> {
@@ -38,11 +39,11 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
     private final Method jobExecMethod;
     private final Object environment;
     private final Long   handle;
-    private static int handleCounter = 0;
-    public static int instantThreadCounter = 0;
-    public static final ConcurrentMap<Long, String> jobs = new ConcurrentHashMap<Long, String>();
+    private static AtomicInteger handleCounter = new AtomicInteger(0);
+    private static AtomicInteger instantThreadCounter = new AtomicInteger(0);
+    private static final ConcurrentMap<Long, String> jobs = new ConcurrentHashMap<Long, String>();
 
-    public InstantBlockingThread(final Object env, final String jobExec, final WorkflowProcessor<J> manager) {
+    public InstantBlockingThread(final WorkflowProcessor<J> manager) {
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
         // jobCount is the name of a method that returns the size of the job
 
@@ -50,23 +51,11 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
         setManager(manager);
 
         // define execution class
+        final Object env = manager.getEnvironment();
+        final String jobExec = manager.getMethodName();
         this.jobExecMethod = execMethod(env, jobExec);
         this.environment = (env instanceof Class<?>) ? null : env;
-        setName(this.jobExecMethod.getClass().getName() + "." + this.jobExecMethod.getName() + "." + handleCounter++);
-        this.handle = Long.valueOf(System.currentTimeMillis() + getName().hashCode());
-    }
-
-    public InstantBlockingThread(final Object env, final Method jobExecMethod, final WorkflowProcessor<J> manager) {
-        // jobExec is the name of a method of the object 'env' that executes the one-step-run
-        // jobCount is the name of a method that returns the size of the job
-
-        // set the manager of blocking queues for input and output
-        setManager(manager);
-
-        // define execution class
-        this.jobExecMethod = jobExecMethod;
-        this.environment = (env instanceof Class<?>) ? null : env;
-        setName(jobExecMethod.getClass().getName() + "." + jobExecMethod.getName() + "." + handleCounter++);
+        setName(this.jobExecMethod.getClass().getName() + "." + this.jobExecMethod.getName() + "." + handleCounter.getAndIncrement());
         this.handle = Long.valueOf(System.currentTimeMillis() + getName().hashCode());
     }
 
@@ -86,7 +75,7 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
 
     @Override
     public int getJobCount() {
-        return getManager().queueSize();
+        return getManager().getQueueSize();
     }
 
     @Override
@@ -102,36 +91,22 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
         } else {
             final long t = System.currentTimeMillis();
 
-            instantThreadCounter++;
+            instantThreadCounter.incrementAndGet();
             //System.out.println("started job " + this.handle + ": " + this.getName());
             jobs.put(this.handle, getName());
 
             try {
                 out = (J) this.jobExecMethod.invoke(this.environment, new Object[]{next});
-            } catch (final IllegalAccessException e) {
-                Log.logSevere(BLOCKINGTHREAD, "Internal Error in serverInstantThread.job: " + e.getMessage());
-                Log.logSevere(BLOCKINGTHREAD, "shutting down thread '" + getName() + "'");
-                terminate(false);
-            } catch (final IllegalArgumentException e) {
-                Log.logSevere(BLOCKINGTHREAD, "Internal Error in serverInstantThread.job: " + e.getMessage());
-                Log.logSevere(BLOCKINGTHREAD, "shutting down thread '" + getName() + "'");
-                terminate(false);
-            } catch (final InvocationTargetException e) {
-                final String targetException = e.getTargetException().getMessage();
-                Log.logException(e);
-                Log.logException(e.getCause());
-                Log.logException(e.getTargetException());
-                if ((targetException != null) &&
-                        ((targetException.indexOf("heap space",0) > 0) ||
-                        (targetException.indexOf("NullPointerException",0) > 0))) {
-                    Log.logException(e.getTargetException());
-                }
-                Log.logSevere(BLOCKINGTHREAD, "Runtime Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
-            } catch (final OutOfMemoryError e) {
-                Log.logSevere(BLOCKINGTHREAD, "OutOfMemory Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage());
-                Log.logException(e);
+            } catch (final Throwable e) {
+                ConcurrentLog.severe(BLOCKINGTHREAD, "Internal Error in serverInstantThread.job: " + e.getMessage());
+                ConcurrentLog.severe(BLOCKINGTHREAD, "shutting down thread '" + getName() + "'");
+                final Throwable targetException = (e instanceof InvocationTargetException) ? ((InvocationTargetException) e).getTargetException() : null;
+                ConcurrentLog.logException(e);
+                ConcurrentLog.logException(e.getCause());
+                if (targetException != null) ConcurrentLog.logException(targetException);
+                ConcurrentLog.severe(BLOCKINGTHREAD, "Runtime Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage());
             }
-            instantThreadCounter--;
+            instantThreadCounter.decrementAndGet();
             jobs.remove(this.handle);
             getManager().increaseJobTime(System.currentTimeMillis() - t);
         }

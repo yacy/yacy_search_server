@@ -31,7 +31,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 
 
@@ -61,7 +61,7 @@ public class ImportDump {
         	String s = UTF8.String(baos.toByteArray());
         	int p, q;
         	String t;
-        	loop: while (s.length() > 0) {
+        	loop: while (!s.isEmpty()) {
         		p = s.indexOf("INSERT INTO", 1);
         		q = s.indexOf("CREATE TABLE", 1);
         		if (q >= 0 && q < p) p = q;
@@ -82,14 +82,14 @@ public class ImportDump {
         		statement.addBatch(t);
         	}
         	statement.executeBatch();
-        } catch (SQLException e) {
-            Log.logException(e);
+        } catch (final SQLException e) {
+            ConcurrentLog.logException(e);
             throw e;
-        } catch (IOException e) {
-            Log.logException(e);
+        } catch (final IOException e) {
+            ConcurrentLog.logException(e);
             throw new SQLException(e.getMessage());
 		} finally {
-            if (statement != null) try {statement.close();} catch (SQLException e) {}
+            if (statement != null) try {statement.close();} catch (final SQLException e) {}
         }
     }
 

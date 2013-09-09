@@ -30,16 +30,16 @@ import java.io.File;
 import java.io.IOException;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.crawler.data.Cache;
+import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.crawler.Cache;
-import de.anomic.data.WorkTables;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class ConfigHTCache_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -59,7 +59,7 @@ public class ConfigHTCache_p {
             }
 
             // proxyCacheSize
-            final int newProxyCacheSize = Math.max(post.getInt("maxCacheSize", 64), 4);
+            final int newProxyCacheSize = Math.max(post.getInt("maxCacheSize", 64), 0);
             env.setConfig(SwitchboardConstants.PROXY_CACHE_SIZE, newProxyCacheSize);
             Cache.setMaxCacheSize(newProxyCacheSize * 1024L * 1024L);
         }

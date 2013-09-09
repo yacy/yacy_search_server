@@ -3,12 +3,6 @@
 // first published 18.12.2006 on http://www.anomic.de
 // this file was created using the an implementation from IndexCreate_p.java, published 02.12.2004
 //
-// This is a part of YaCy, a peer-to-peer based web search engine
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
 // LICENSE
 //
 // This program is free software; you can redistribute it and/or modify
@@ -27,43 +21,45 @@
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.ASCII;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.CrawlSwitchboard;
+import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.data.ZURL.FailCategory;
+import net.yacy.crawler.retrieval.Request;
+import net.yacy.crawler.retrieval.SitemapImporter;
+import net.yacy.data.WorkTables;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.NewsPool;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.index.Segment;
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.SitemapImporter;
-import de.anomic.crawler.ZURL.FailCategory;
-import de.anomic.crawler.retrieval.Request;
-import de.anomic.data.BookmarkHelper;
-import de.anomic.data.BookmarksDB;
-import de.anomic.data.ListManager;
-import de.anomic.data.WorkTables;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class Crawler_p {
 
@@ -77,7 +73,11 @@ public class Crawler_p {
         final serverObjects prop = new serverObjects();
         prop.put("rejected", 0);
         prop.put("urlpublictextSize", 0);
+        prop.put("urlpublictextSegmentCount", 0);
+        prop.put("webgraphSize", 0);
+        prop.put("webgraphSegmentCount", 0);
         prop.put("rwipublictextSize", 0);
+        prop.put("rwipublictextSegmentCount", 0);
         prop.put("list", "0");
         prop.put("loaderSize", 0);
         prop.put("loaderMax", 0);
@@ -93,18 +93,23 @@ public class Crawler_p {
         prop.put("list-remote", 0);
         prop.put("forwardToCrawlStart", "0");
 
-        // get segment
-        Segment indexSegment = sb.index;
-
         prop.put("info", "0");
+        boolean debug = (post != null && post.containsKey("debug"));
+        
+        if (post != null) {
+            String c = post.toString();
+            if (c.length() < 1000) ConcurrentLog.info("Crawl Start", c);
+        }
 
         if (post != null && post.containsKey("continue")) {
             // continue queue
             final String queue = post.get("continue", "");
             if ("localcrawler".equals(queue)) {
                 sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                sb.setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused_cause", "");
             } else if ("remotecrawler".equals(queue)) {
                 sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL + "_isPaused_cause", "");
             }
         }
 
@@ -112,12 +117,14 @@ public class Crawler_p {
             // pause queue
             final String queue = post.get("pause", "");
             if ("localcrawler".equals(queue)) {
-                sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, "user request in Crawler_p from " + header.refererHost());
             } else if ("remotecrawler".equals(queue)) {
-                sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "user request in Crawler_p from " + header.refererHost());
             }
         }
-
+        String queuemessage = sb.getConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused_cause", "");
+        prop.putHTML("queuemessage", queuemessage.length() == 0 ? "" : "pause reason: " + queuemessage);
+        
     	if (post != null && post.containsKey("terminate")) try {
             final String handle = post.get("handle", "");
             // termination of a crawl: shift the crawl from active to passive
@@ -126,8 +133,8 @@ public class Crawler_p {
             // delete all entries from the crawl queue that are deleted here
             sb.crawler.removeActive(handle.getBytes());
             sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000);
-        } catch (final RowSpaceExceededException e) {
-            Log.logException(e);
+        } catch (final SpaceExceededException e) {
+            ConcurrentLog.logException(e);
         }
 
         if (post != null && post.containsKey("crawlingstart")) {
@@ -135,18 +142,11 @@ public class Crawler_p {
             if (sb.peers == null) {
                 prop.put("info", "3");
             } else {
-                String crawlingStart = post.get("crawlingURL","").trim(); // the crawljob start url
-                // add the prefix http:// if necessary
-                int pos = crawlingStart.indexOf("://",0);
-                if (pos == -1) {
-                    if (crawlingStart.startsWith("www")) crawlingStart = "http://" + crawlingStart;
-                    if (crawlingStart.startsWith("ftp")) crawlingStart = "ftp://" + crawlingStart;
-                }
-
+                
                 // remove crawlingFileContent before we record the call
                 String crawlingFileName = post.get("crawlingFile");
                 final File crawlingFile;
-                if (crawlingFileName == null || crawlingFileName.length() == 0) {
+                if (crawlingFileName == null || crawlingFileName.isEmpty()) {
                     crawlingFile = null;
                 } else {
                     if (crawlingFileName.startsWith("file://")) crawlingFileName = crawlingFileName.substring(7);
@@ -155,20 +155,55 @@ public class Crawler_p {
                 if (crawlingFile != null && crawlingFile.exists()) {
                     post.remove("crawlingFile$file");
                 }
-
-                // normalize URL
-                DigestURI crawlingStartURL = null;
-                if (crawlingFile == null) try {crawlingStartURL = new DigestURI(crawlingStart);} catch (final MalformedURLException e1) {Log.logException(e1);}
-                crawlingStart = (crawlingStartURL == null) ? null : crawlingStartURL.toNormalform(true, true);
-
-                // set new properties
+                
+                // prepare some filter that are adjusted in case that this is wanted
+                boolean storeHTCache = "on".equals(post.get("storeHTCache", "off"));
+                String newcrawlingMustMatch = post.get("mustmatch", CrawlProfile.MATCH_ALL_STRING);
+                String newcrawlingMustNotMatch = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
+                if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = CrawlProfile.MATCH_ALL_STRING; // avoid that all urls are filtered out if bad value was submitted
                 final boolean fullDomain = "domain".equals(post.get("range", "wide")); // special property in simple crawl start
                 final boolean subPath    = "subpath".equals(post.get("range", "wide")); // special property in simple crawl start
 
+                final boolean restrictedcrawl = fullDomain || subPath || !CrawlProfile.MATCH_ALL_STRING.equals(newcrawlingMustMatch);
+                final boolean deleteage = restrictedcrawl && "age".equals(post.get("deleteold","off"));
+                Date deleteageDate = null;
+                if (deleteage) {
+                    long t = timeParser(true, post.getInt("deleteIfOlderNumber", -1), post.get("deleteIfOlderUnit","year")); // year, month, day, hour
+                    if (t > 0) deleteageDate = new Date(t);
+                }
+                final boolean deleteold = (deleteage && deleteageDate != null) || (restrictedcrawl && post.getBoolean("deleteold"));
+                
+                String crawlingStart0 = post.get("crawlingURL","").trim(); // the crawljob start url
+                String[] rootURLs0 = crawlingStart0.indexOf('\n') > 0 || crawlingStart0.indexOf('\r') > 0 ? crawlingStart0.split("[\\r\\n]+") : crawlingStart0.split(Pattern.quote("|"));
+                Set<DigestURI> rootURLs = new HashSet<DigestURI>();
+                String crawlName = "";
+                if (crawlingFile == null) for (String crawlingStart: rootURLs0) {
+                    if (crawlingStart == null || crawlingStart.length() == 0) continue;
+                    // add the prefix http:// if necessary
+                    int pos = crawlingStart.indexOf("://",0);
+                    if (pos == -1) {
+                        if (crawlingStart.startsWith("ftp")) crawlingStart = "ftp://" + crawlingStart; else crawlingStart = "http://" + crawlingStart;
+                    }
+                    try {
+                        DigestURI crawlingStartURL = new DigestURI(crawlingStart);
+                        rootURLs.add(crawlingStartURL);
+                        crawlName += ((crawlingStartURL.getHost() == null) ? crawlingStartURL.toNormalform(true) : crawlingStartURL.getHost()) + ',';
+                        if (crawlingStartURL != null && (crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
+                        
+                    } catch (final MalformedURLException e) {
+                        ConcurrentLog.logException(e);
+                    }
+                } else {
+                	crawlName = crawlingFile.getName();
+                }
+                if (crawlName.length() > 256) {
+                    int p = crawlName.lastIndexOf(',');
+                    if (p >= 8) crawlName = crawlName.substring(0, p);
+                }
+                if (crawlName.endsWith(",")) crawlName = crawlName.substring(0, crawlName.length() - 1);
+
+                
                 // set the crawl filter
-                String newcrawlingMustMatch = post.get("mustmatch", CrawlProfile.MATCH_ALL_STRING);
-                final String newcrawlingMustNotMatch = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
-                if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = CrawlProfile.MATCH_ALL_STRING; // avoid that all urls are filtered out if bad value was submitted
                 String ipMustMatch = post.get("ipMustmatch", CrawlProfile.MATCH_ALL_STRING);
                 final String ipMustNotMatch = post.get("ipMustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
                 if (ipMustMatch.length() < 2) ipMustMatch = CrawlProfile.MATCH_ALL_STRING;
@@ -177,63 +212,50 @@ public class Crawler_p {
                 sb.setConfig("crawlingIPMustNotMatch", ipMustNotMatch);
                 if (countryMustMatch.length() > 0) sb.setConfig("crawlingCountryMustMatch", countryMustMatch);
 
-                // special cases:
-                if (crawlingStartURL!= null && fullDomain) {
-                    newcrawlingMustMatch = CrawlProfile.mustMatchFilterFullDomain(crawlingStartURL);
-                    if (subPath) newcrawlingMustMatch = newcrawlingMustMatch.substring(0, newcrawlingMustMatch.length() - 2) + crawlingStartURL.getPath() + ".*";
-                }
-                if (crawlingStart!= null && subPath && (pos = crawlingStart.lastIndexOf('/')) > 0) {
-                    newcrawlingMustMatch = crawlingStart.substring(0, pos + 1) + ".*";
-                }
+                String crawlerNoDepthLimitMatch = post.get("crawlingDepthExtension", CrawlProfile.MATCH_NEVER_STRING);
+                final String indexUrlMustMatch = post.get("indexmustmatch", CrawlProfile.MATCH_ALL_STRING);
+                final String indexUrlMustNotMatch = post.get("indexmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
+                final String indexContentMustMatch = post.get("indexcontentmustmatch", CrawlProfile.MATCH_ALL_STRING);
+                final String indexContentMustNotMatch = post.get("indexcontentmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
 
                 final boolean crawlOrder = post.get("crawlOrder", "off").equals("on");
                 env.setConfig("crawlOrder", crawlOrder);
 
+                if (crawlOrder) crawlerNoDepthLimitMatch = CrawlProfile.MATCH_NEVER_STRING; // without limitation the crawl order does not work
+                
                 int newcrawlingdepth = post.getInt("crawlingDepth", 8);
                 env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                 if ((crawlOrder) && (newcrawlingdepth > 8)) newcrawlingdepth = 8;
 
-                final boolean directDocByURL = "on".equals(post.get("directDocByURL", "on")); // catch also all linked media documents without loading them
+                boolean directDocByURL = "on".equals(post.get("directDocByURL", "off")); // catch also all linked media documents without loading them
                 env.setConfig("crawlingDirectDocByURL", directDocByURL);
+
+                final String collection = post.get("collection", "user");
+                env.setConfig("collection", collection);
 
                 // recrawl
                 final String recrawl = post.get("recrawl", "nodoubles"); // nodoubles, reload, scheduler
-                boolean crawlingIfOlderCheck = "on".equals(post.get("crawlingIfOlderCheck", "off"));
-                int crawlingIfOlderNumber = post.getInt("crawlingIfOlderNumber", -1);
-                String crawlingIfOlderUnit = post.get("crawlingIfOlderUnit","year"); // year, month, day, hour
-                int repeat_time = post.getInt("repeat_time", -1);
-                final String repeat_unit = post.get("repeat_unit", "seldays"); // selminutes, selhours, seldays
-
-                if ("scheduler".equals(recrawl) && repeat_time > 0) {
-                    // set crawlingIfOlder attributes that are appropriate for scheduled crawling
-                    crawlingIfOlderCheck = true;
-                    crawlingIfOlderNumber = "selminutes".equals(repeat_unit) ? 1 : "selhours".equals(repeat_unit) ? repeat_time / 2 : repeat_time * 12;
-                    crawlingIfOlderUnit = "hour";
-                } else if ("reload".equals(recrawl)) {
-                    repeat_time = -1;
-                    crawlingIfOlderCheck = true;
-                } else if ("nodoubles".equals(recrawl)) {
-                    repeat_time = -1;
-                    crawlingIfOlderCheck = false;
+                long crawlingIfOlder = 0;
+                if ("reload".equals(recrawl)) {
+                    crawlingIfOlder = timeParser(true, post.getInt("reloadIfOlderNumber", -1), post.get("reloadIfOlderUnit","year")); // year, month, day, hour
                 }
-                final long crawlingIfOlder = recrawlIfOlderC(crawlingIfOlderCheck, crawlingIfOlderNumber, crawlingIfOlderUnit);
                 env.setConfig("crawlingIfOlder", crawlingIfOlder);
 
                 // store this call as api call
-                if (repeat_time > 0) {
-                    // store as scheduled api call
-                    sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + ((crawlingStart == null) ? post.get("crawlingFile", "") : crawlingStart), repeat_time, repeat_unit.substring(3));
-                } else {
-                    // store just a protocol
-                    sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + ((crawlingStart == null) ? post.get("crawlingFile", "") : crawlingStart));
-                }
+                sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + ((rootURLs.size() == 0) ? post.get("crawlingFile", "") : rootURLs.iterator().next().toNormalform(true)));
 
                 final boolean crawlingDomMaxCheck = "on".equals(post.get("crawlingDomMaxCheck", "off"));
                 final int crawlingDomMaxPages = (crawlingDomMaxCheck) ? post.getInt("crawlingDomMaxPages", -1) : -1;
                 env.setConfig("crawlingDomMaxPages", Integer.toString(crawlingDomMaxPages));
 
-                final boolean crawlingQ = "on".equals(post.get("crawlingQ", "off"));
+                boolean crawlingQ = "on".equals(post.get("crawlingQ", "on"));
                 env.setConfig("crawlingQ", crawlingQ);
+                
+                boolean followFrames = "on".equals(post.get("followFrames", "on"));
+                env.setConfig("followFrames", followFrames);
+                
+                boolean obeyHtmlRobotsNoindex = "on".equals(post.get("obeyHtmlRobotsNoindex", "on"));
+                env.setConfig("obeyHtmlRobotsNoindex", obeyHtmlRobotsNoindex);
 
                 final boolean indexText = "on".equals(post.get("indexText", "on"));
                 env.setConfig("indexText", indexText);
@@ -241,164 +263,166 @@ public class Crawler_p {
                 final boolean indexMedia = "on".equals(post.get("indexMedia", "on"));
                 env.setConfig("indexMedia", indexMedia);
 
-                boolean storeHTCache = "on".equals(post.get("storeHTCache", "on"));
-                if (crawlingStartURL!= null &&(crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
                 env.setConfig("storeHTCache", storeHTCache);
+                
+                String agentName = post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName);
+                ClientIdentification.Agent agent = ClientIdentification.getAgent(agentName);
 
                 CacheStrategy cachePolicy = CacheStrategy.parse(post.get("cachePolicy", "iffresh"));
                 if (cachePolicy == null) cachePolicy = CacheStrategy.IFFRESH;
 
-                final boolean xsstopw = "on".equals(post.get("xsstopw", "off"));
-                env.setConfig("xsstopw", xsstopw);
-
-                final boolean xdstopw = "on".equals(post.get("xdstopw", "off"));
-                env.setConfig("xdstopw", xdstopw);
-
-                final boolean xpstopw = "on".equals(post.get("xpstopw", "off"));
-                env.setConfig("xpstopw", xpstopw);
-
-                final String crawlingMode = post.get("crawlingMode","url");
-                if (crawlingStart != null && crawlingStart.startsWith("ftp")) {
-                    try {
-                        // check if the crawl filter works correctly
-                        Pattern.compile(newcrawlingMustMatch);
-                        final CrawlProfile profile = new CrawlProfile(
-                                crawlingStart,
-                                crawlingStartURL,
-                                newcrawlingMustMatch,
-                                newcrawlingMustNotMatch,
-                                ipMustMatch,
-                                ipMustNotMatch,
-                                countryMustMatch,
-                                newcrawlingdepth,
-                                directDocByURL,
-                                crawlingIfOlder,
-                                crawlingDomMaxPages,
-                                crawlingQ,
-                                indexText,
-                                indexMedia,
-                                storeHTCache,
-                                crawlOrder,
-                                xsstopw,
-                                xdstopw,
-                                xpstopw,
-                                cachePolicy);
-                        sb.crawler.putActive(profile.handle().getBytes(), profile);
-                        sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                        final DigestURI url = crawlingStartURL;
-                        sb.crawlStacker.enqueueEntriesFTP(sb.peers.mySeed().hash.getBytes(), profile.handle(), url.getHost(), url.getPort(), false);
-                    } catch (final PatternSyntaxException e) {
-                        prop.put("info", "4"); // crawlfilter does not match url
-                        prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
-                        prop.putHTML("info_error", e.getMessage());
-                    } catch (final Exception e) {
-                        // mist
-                        prop.put("info", "7"); // Error with file
-                        prop.putHTML("info_crawlingStart", crawlingStart);
-                        prop.putHTML("info_error", e.getMessage());
-                        Log.logException(e);
+                String crawlingMode = post.get("crawlingMode","url");
+                
+                if ("file".equals(crawlingMode) && post.containsKey("crawlingFile")) {
+                    newcrawlingMustNotMatch = CrawlProfile.MATCH_NEVER_STRING;
+                    directDocByURL = false;
+                }
+                
+                if ("sitemap".equals(crawlingMode)) {
+                    newcrawlingMustMatch = CrawlProfile.MATCH_ALL_STRING;
+                    newcrawlingMustNotMatch = CrawlProfile.MATCH_NEVER_STRING;
+                    newcrawlingdepth = 0;
+                    directDocByURL = false;
+                    crawlingQ = true;
+                }
+                
+                if ("sitelist".equals(crawlingMode)) {
+                    newcrawlingMustNotMatch = CrawlProfile.MATCH_NEVER_STRING;
+                    Set<DigestURI> newRootURLs = new HashSet<DigestURI>();
+                    for (DigestURI sitelistURL: rootURLs) {
+                        // download document
+                        Document scraper;
+                        try {
+                            scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, agent);
+                            // get links and generate filter
+                            for (DigestURI u: scraper.getAnchors().keySet()) {
+                                newRootURLs.add(u);
+                            }
+                        } catch (final IOException e) {
+                            ConcurrentLog.logException(e);
+                        }
                     }
-                    sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                } else if ("url".equals(crawlingMode)) {
-
-                    // check if pattern matches
-                    if ((crawlingStart == null || crawlingStartURL == null) /* || (!(crawlingStart.matches(newcrawlingfilter))) */) {
-                        // print error message
-                        prop.put("info", "4"); //crawlfilter does not match url
-                        prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
-                        prop.putHTML("info_crawlingStart", crawlingStart);
-                    } else try {
-
-
-                        // check if the crawl filter works correctly
-                        Pattern.compile(newcrawlingMustMatch);
-
-                        // stack request
-                        // first delete old entry, if exists
-                        final DigestURI url = new DigestURI(crawlingStart);
-                        final byte[] urlhash = url.hash();
-                        indexSegment.urlMetadata().remove(urlhash);
-                        sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
-                        sb.crawlQueues.errorURL.remove(urlhash);
-
-                        // get a scraper to get the title
-                        final Document scraper = sb.loader.loadDocument(url, CacheStrategy.IFFRESH);
-                        final String title = scraper == null ? url.toNormalform(true, true) : scraper.dc_title();
-                        final String description = scraper.dc_description();
-
-                        // stack url
-                        sb.crawler.removePassive(crawlingStartURL.hash()); // if there is an old entry, delete it
-                        final CrawlProfile pe = new CrawlProfile(
-                                (crawlingStartURL.getHost() == null) ? crawlingStartURL.toNormalform(true, false) : crawlingStartURL.getHost(),
-                                crawlingStartURL,
-                                newcrawlingMustMatch,
-                                newcrawlingMustNotMatch,
-                                ipMustMatch,
-                                ipMustNotMatch,
-                                countryMustMatch,
-                                newcrawlingdepth,
-                                directDocByURL,
-                                crawlingIfOlder,
-                                crawlingDomMaxPages,
-                                crawlingQ,
-                                indexText, indexMedia,
-                                storeHTCache,
-                                crawlOrder,
-                                xsstopw,
-                                xdstopw,
-                                xpstopw,
-                                cachePolicy);
-                        sb.crawler.putActive(pe.handle().getBytes(), pe);
-                        final String reasonString = sb.crawlStacker.stackCrawl(new Request(
-                                sb.peers.mySeed().hash.getBytes(),
-                                url,
-                                null,
-                                "CRAWLING-ROOT",
-                                new Date(),
-                                pe.handle(),
-                                0,
-                                0,
-                                0,
-                                0
-                                ));
-
-                        if (reasonString == null) {
-                            // create a bookmark from crawl start url
-                            //final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));
-                            final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString("/crawlStart"));
-                            tags.add("crawlStart");
-                            final String[] keywords = scraper.dc_subject();
-                            if (keywords != null) {
-                                for (final String k: keywords) {
-                                    final String kk = BookmarkHelper.cleanTagsString(k);
-                                    if (kk.length() > 0) tags.add(kk);
-                                }
+                    rootURLs = newRootURLs;
+                    crawlingMode = "url";
+                    if ((fullDomain || subPath) && newcrawlingdepth > 0) newcrawlingMustMatch = CrawlProfile.MATCH_ALL_STRING; // to prevent that there is a restriction on the original urls
+                }
+                
+                // compute mustmatch filter according to rootURLs
+                if ((fullDomain || subPath) && newcrawlingdepth > 0) {
+                    String siteFilter = ".*";
+                    if (fullDomain) {
+                        siteFilter = CrawlProfile.siteFilter(rootURLs);
+                        if (deleteold) {
+                            for (DigestURI u: rootURLs) {
+                                sb.index.fulltext().deleteDomainHashpart(u.hosthash(), deleteageDate);
                             }
-                            String tagStr = tags.toString();
-                            if (tagStr.length() > 2 && tagStr.startsWith("[") && tagStr.endsWith("]")) tagStr = tagStr.substring(1, tagStr.length() - 2);
-
-                            // we will create always a bookmark to use this to track crawled hosts
-                            final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");
-                            if (bookmark != null) {
-                                bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title);
-                                bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
-                                bookmark.setOwner("admin");
-                                bookmark.setPublic(false);
-                                bookmark.setTags(tags, true);
-                                sb.bookmarksDB.saveBookmark(bookmark);
+                        }
+                    } else if (subPath) {
+                        siteFilter = CrawlProfile.subpathFilter(rootURLs);
+                        if (deleteold) {
+                            for (DigestURI u: rootURLs) {
+                                String basepath = u.toNormalform(true);
+                                if (!basepath.endsWith("/")) {int p = basepath.lastIndexOf("/"); if (p > 0) basepath = basepath.substring(0, p + 1);}
+                                int count = sb.index.fulltext().remove(basepath, deleteageDate);
+                                if (count > 0) ConcurrentLog.info("Crawler_p", "deleted " + count + " documents for host " + u.getHost());
                             }
+                        }
+                    }
+                    if (CrawlProfile.MATCH_ALL_STRING.equals(newcrawlingMustMatch)) {
+                        newcrawlingMustMatch = siteFilter;
+                    } else if (!CrawlProfile.MATCH_ALL_STRING.equals(siteFilter)) {
+                        // combine both
+                        newcrawlingMustMatch = "(" + newcrawlingMustMatch + ")|(" + siteFilter + ")";
+                    }
+                }
+                
+                // check if the crawl filter works correctly
+                try {
+                    Pattern mmp = Pattern.compile(newcrawlingMustMatch);
+                    for (DigestURI u: rootURLs) {
+                        assert mmp.matcher(u.toNormalform(true)).matches() : "pattern " + mmp.toString() + " does not match url " + u.toNormalform(true);
+                    }
+                } catch (final PatternSyntaxException e) {
+                    prop.put("info", "4"); // crawlfilter does not match url
+                    prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
+                    prop.putHTML("info_error", e.getMessage());
+                } 
+                try {
+                    Pattern.compile(newcrawlingMustNotMatch);
+                } catch (final PatternSyntaxException e) {
+                    prop.put("info", "4"); // crawlfilter does not match url
+                    prop.putHTML("info_newcrawlingfilter", newcrawlingMustNotMatch);
+                    prop.putHTML("info_error", e.getMessage());
+                } 
+                
+                // prepare a new crawling profile
+                final CrawlProfile profile = new CrawlProfile(
+                        crawlName,
+                        newcrawlingMustMatch,
+                        newcrawlingMustNotMatch,
+                        ipMustMatch,
+                        ipMustNotMatch,
+                        countryMustMatch,
+                        crawlerNoDepthLimitMatch,
+                        indexUrlMustMatch,
+                        indexUrlMustNotMatch,
+                        indexContentMustMatch,
+                        indexContentMustNotMatch,
+                        newcrawlingdepth,
+                        directDocByURL,
+                        crawlingIfOlder,
+                        crawlingDomMaxPages,
+                        crawlingQ, followFrames, obeyHtmlRobotsNoindex,
+                        indexText,
+                        indexMedia,
+                        storeHTCache,
+                        crawlOrder,
+                        cachePolicy,
+                        collection,
+                        agentName);
+                byte[] handle = ASCII.getBytes(profile.handle());
+                
+                // before we fire up a new crawl, we make sure that another crawl with the same name is not running
+                sb.crawler.removeActive(handle);
+                sb.crawler.removePassive(handle);
+                try {sb.crawlQueues.noticeURL.removeByProfileHandle(profile.handle(), 10000);} catch (final SpaceExceededException e1) {}
+                
+                // delete all error urls for that domain
+                List<byte[]> hosthashes = new ArrayList<byte[]>();
+                for (DigestURI u: rootURLs) {
+                    hosthashes.add(ASCII.getBytes(u.hosthash()));
+                }
+                sb.crawlQueues.errorURL.removeHosts(hosthashes, false);
+                for (byte[] hosthash: hosthashes) {
+                    try {
+                        String deletequery = CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]";
+                        sb.index.fulltext().getDefaultConnector().deleteByQuery(deletequery);
+                    } catch (final IOException e) {ConcurrentLog.logException(e);}
+                }
+                sb.index.fulltext().commit(true);
+                
+                // start the crawl
+                if ("url".equals(crawlingMode)) {
+                    if (rootURLs.size() == 0) {
+                        prop.put("info", "5"); //Crawling failed
+                        prop.putHTML("info_crawlingURL", "(no url given)");
+                        prop.putHTML("info_reasonString", "you must submit at least one crawl url");
+                    } else {
+                        
+                        // stack requests
+                        sb.crawler.putActive(handle, profile);
+                        final Set<DigestURI> successurls = new HashSet<DigestURI>();
+                        final Map<DigestURI,String> failurls = new HashMap<DigestURI, String>();
+                        sb.stackURLs(rootURLs, profile, successurls, failurls);
 
-                            // do the same for ymarks
-                            // TODO: could a non admin user add crawls?
-                            sb.tables.bookmarks.createBookmark(sb.loader, url, YMarkTables.USER_ADMIN, true, "crawlStart", "/Crawl Start");
-
+                        if (failurls.size() == 0) {
                             // liftoff!
-                            prop.put("info", "8");//start msg
+                            prop.put("info", "8");
                             prop.putHTML("info_crawlingURL", post.get("crawlingURL"));
-
+    
                             // generate a YaCyNews if the global flag was set
                             if (!sb.isRobinsonMode() && crawlOrder) {
-                                final Map<String, String> m = new HashMap<String, String>(pe); // must be cloned
+                                final Map<String, String> m = new HashMap<String, String>(profile); // must be cloned
                                 m.remove("specificDepth");
                                 m.remove("indexText");
                                 m.remove("indexMedia");
@@ -414,47 +438,57 @@ public class Crawler_p {
                                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_CRAWL_START, m);
                             }
                         } else {
+                            StringBuilder fr = new StringBuilder();
+                            for (Map.Entry<DigestURI, String> failure: failurls.entrySet()) {
+                                sb.crawlQueues.errorURL.push(
+                                    new Request(
+                                            sb.peers.mySeed().hash.getBytes(),
+                                            failure.getKey(),
+                                            null,
+                                            "",
+                                            new Date(),
+                                            profile.handle(),
+                                            0,
+                                            0,
+                                            0,
+                                            0),
+                                    null,
+                                    sb.peers.mySeed().hash.getBytes(),
+                                    new Date(),
+                                    1,
+                                    FailCategory.FINAL_LOAD_CONTEXT,
+                                    failure.getValue(), -1);
+                                fr.append(failure.getValue()).append('/');
+                            }
+    
                             prop.put("info", "5"); //Crawling failed
                             prop.putHTML("info_crawlingURL", (post.get("crawlingURL")));
-                            prop.putHTML("info_reasonString", reasonString);
-
-                            sb.crawlQueues.errorURL.push(
-                                new Request(
-                                        sb.peers.mySeed().hash.getBytes(),
-                                        crawlingStartURL,
-                                        null,
-                                        "",
-                                        new Date(),
-                                        pe.handle(),
-                                        0,
-                                        0,
-                                        0,
-                                        0),
-                                sb.peers.mySeed().hash.getBytes(),
-                                new Date(),
-                                1,
-                                FailCategory.FINAL_LOAD_CONTEXT,
-                                reasonString, -1);
+                            prop.putHTML("info_reasonString", fr.toString());
                         }
-                    } catch (final PatternSyntaxException e) {
-                        prop.put("info", "4"); // crawlfilter does not match url
-                        prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
-                        prop.putHTML("info_error", e.getMessage());
+                        if (successurls.size() > 0) sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                    }
+                } else if ("sitemap".equals(crawlingMode)) {
+                    final String sitemapURLStr = post.get("sitemapURL","");
+                    try {
+                        final DigestURI sitemapURL = new DigestURI(sitemapURLStr);
+                        sb.crawler.putActive(handle, profile);
+                        final SitemapImporter importer = new SitemapImporter(sb, sitemapURL, profile);
+                        importer.start();
+                        sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                     } catch (final Exception e) {
                         // mist
-                        prop.put("info", "6"); // Error with url
-                        prop.putHTML("info_crawlingStart", crawlingStart);
+                        prop.put("info", "6");//Error with url
+                        prop.putHTML("info_crawlingStart", sitemapURLStr);
                         prop.putHTML("info_error", e.getMessage());
-                        Log.logInfo("Crawler_p", "start url rejected: " + e.getMessage());
+                        ConcurrentLog.logException(e);
                     }
-
                 } else if ("file".equals(crawlingMode)) {
                     if (post.containsKey("crawlingFile")) {
                         final String crawlingFileContent = post.get("crawlingFile$file", "");
                         try {
                             // check if the crawl filter works correctly
                             Pattern.compile(newcrawlingMustMatch);
-                            final ContentScraper scraper = new ContentScraper(new DigestURI(crawlingFile));
+                            final ContentScraper scraper = new ContentScraper(new DigestURI(crawlingFile), 10000000);
                             final Writer writer = new TransformerWriter(null, null, scraper, null, false);
                             if (crawlingFile != null && crawlingFile.exists()) {
                                 FileUtils.copy(new FileInputStream(crawlingFile), writer);
@@ -464,34 +498,17 @@ public class Crawler_p {
                             writer.close();
 
                             // get links and generate filter
-                            final Map<MultiProtocolURI, Properties> hyperlinks = scraper.getAnchors();
-                            if (fullDomain && newcrawlingdepth > 0) newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
+                            final Map<DigestURI, Properties> hyperlinks = scraper.getAnchors();
+                            if (newcrawlingdepth > 0) {
+                                if (fullDomain) {
+                                    newcrawlingMustMatch = CrawlProfile.siteFilter(hyperlinks.keySet());
+                                } else if (subPath) {
+                                    newcrawlingMustMatch = CrawlProfile.subpathFilter(hyperlinks.keySet());
+                                }
+                            }
 
-                            final DigestURI crawlURL = new DigestURI("file://" + crawlingFile.toString());
-                            final CrawlProfile profile = new CrawlProfile(
-                                    crawlingFileName,
-                                    crawlURL,
-                                    newcrawlingMustMatch,
-                                    CrawlProfile.MATCH_NEVER_STRING,
-                                    ipMustMatch,
-                                    ipMustNotMatch,
-                                    countryMustMatch,
-                                    newcrawlingdepth,
-                                    false,
-                                    crawlingIfOlder,
-                                    crawlingDomMaxPages,
-                                    crawlingQ,
-                                    indexText,
-                                    indexMedia,
-                                    storeHTCache,
-                                    crawlOrder,
-                                    xsstopw,
-                                    xdstopw,
-                                    xpstopw,
-                                    cachePolicy);
-                            sb.crawler.putActive(profile.handle().getBytes(), profile);
-                            sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                            sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks, true);
+                            sb.crawler.putActive(handle, profile);
+                            sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks);
                         } catch (final PatternSyntaxException e) {
                             prop.put("info", "4"); // crawlfilter does not match url
                             prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
@@ -501,111 +518,9 @@ public class Crawler_p {
                             prop.put("info", "7"); // Error with file
                             prop.putHTML("info_crawlingStart", crawlingFileName);
                             prop.putHTML("info_error", e.getMessage());
-                            Log.logException(e);
+                            ConcurrentLog.logException(e);
                         }
                         sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                    }
-                } else if ("sitemap".equals(crawlingMode)) {
-                    final String sitemapURLStr = post.get("sitemapURL","");
-                	try {
-                		final DigestURI sitemapURL = new DigestURI(sitemapURLStr);
-                		final CrawlProfile pe = new CrawlProfile(
-                				sitemapURLStr,
-                				sitemapURL,
-                				CrawlProfile.MATCH_ALL_STRING,
-                				CrawlProfile.MATCH_NEVER_STRING,
-                                ipMustMatch,
-                                ipMustNotMatch,
-                                countryMustMatch,
-                				0,
-                				false,
-                				crawlingIfOlder,
-                				crawlingDomMaxPages,
-                				true,
-                				indexText,
-                				indexMedia,
-                				storeHTCache,
-                				crawlOrder,
-                				xsstopw,
-                				xdstopw,
-                				xpstopw,
-                				cachePolicy);
-                		sb.crawler.putActive(pe.handle().getBytes(), pe);
-                		final SitemapImporter importer = new SitemapImporter(sb, sitemapURL, pe);
-                		importer.start();
-                	} catch (final Exception e) {
-                		// mist
-                		prop.put("info", "6");//Error with url
-                		prop.putHTML("info_crawlingStart", sitemapURLStr);
-                		prop.putHTML("info_error", e.getMessage());
-                		Log.logException(e);
-                	}
-                } else if ("sitelist".equals(crawlingMode)) {
-                    try {
-                        final DigestURI sitelistURL = new DigestURI(crawlingStart);
-                        // download document
-                        Document scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH);
-                        // String title = scraper.getTitle();
-                        // String description = scraper.getDescription();
-
-                        // get links and generate filter
-                        final Map<MultiProtocolURI, Properties> hyperlinks = scraper.getAnchors();
-                        if (fullDomain && newcrawlingdepth > 0) newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
-
-                        // put links onto crawl queue
-                        final CrawlProfile profile = new CrawlProfile(
-                                sitelistURL.getHost(),
-                                sitelistURL,
-                                newcrawlingMustMatch,
-                                CrawlProfile.MATCH_NEVER_STRING,
-                                ipMustMatch,
-                                ipMustNotMatch,
-                                countryMustMatch,
-                                newcrawlingdepth,
-                                directDocByURL,
-                                crawlingIfOlder,
-                                crawlingDomMaxPages,
-                                crawlingQ,
-                                indexText,
-                                indexMedia,
-                                storeHTCache,
-                                crawlOrder,
-                                xsstopw,
-                                xdstopw,
-                                xpstopw,
-                                cachePolicy);
-                        sb.crawler.putActive(profile.handle().getBytes(), profile);
-                        sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                        final Iterator<Map.Entry<MultiProtocolURI, Properties>> linkiterator = hyperlinks.entrySet().iterator();
-                        DigestURI nexturl;
-                        while (linkiterator.hasNext()) {
-                            final Map.Entry<MultiProtocolURI, Properties> e = linkiterator.next();
-                            if (e.getKey() == null) continue;
-                            nexturl = new DigestURI(e.getKey());
-                            // remove the url from the database to be prepared to crawl them again
-                            final byte[] urlhash = nexturl.hash();
-                            indexSegment.urlMetadata().remove(urlhash);
-                            sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
-                            sb.crawlQueues.errorURL.remove(urlhash);
-                            sb.crawlStacker.enqueueEntry(new Request(
-                                    sb.peers.mySeed().hash.getBytes(),
-                                    nexturl,
-                                    null,
-                                    e.getValue().getProperty("name", ""),
-                                    new Date(),
-                                    profile.handle(),
-                                    0,
-                                    0,
-                                    0,
-                                    0
-                                    ));
-                        }
-                    } catch (final Exception e) {
-                        // mist
-                        prop.put("info", "6");//Error with url
-                        prop.putHTML("info_crawlingStart", crawlingStart);
-                        prop.putHTML("info_error", e.getMessage());
-                        Log.logException(e);
                     }
                 }
             }
@@ -623,35 +538,67 @@ public class Crawler_p {
         prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? "1" : "0");
         prop.put("customPPMdefault", Integer.toString(LCppm));
 
-
         // generate crawl profile table
         int count = 0;
         boolean dark = true;
         final int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
         CrawlProfile profile;
         // put active crawls into list
+        String hosts = "";
         for (final byte[] h: sb.crawler.getActive()) {
             profile = sb.crawler.getActive(h);
-        	if (CrawlProfile.ignoreNames.contains(profile.name())) continue;
-            profile.putProfileEntry("crawlProfilesShow_list_", prop, sb.crawlStacker, true, dark, count, domlistlength);
+        	if (CrawlSwitchboard.DEFAULT_PROFILES.contains(profile.name())) continue;
+            profile.putProfileEntry("crawlProfilesShow_list_", prop, true, dark, count, domlistlength);
+            prop.put("crawlProfilesShow_list_" + count + "_debug", debug ? 1 : 0);
+            if (debug) {
+                RowHandleSet urlhashes = sb.crawler.getURLHashes(h);
+                prop.put("crawlProfilesShow_list_" + count + "_debug_count", urlhashes == null ? "unknown" : Integer.toString(urlhashes.size()));
+            }
+            if (profile.urlMustMatchPattern() == CrawlProfile.MATCH_ALL_PATTERN) {
+                hosts = hosts + "," + profile.name();
+            }
             dark = !dark;
             count++;
         }
+        prop.put("crawlProfilesShow_debug", debug ? 1 : 0);
         prop.put("crawlProfilesShow_list", count);
+        prop.put("crawlProfilesShow_count", count);
         prop.put("crawlProfilesShow", count == 0 ? 0 : 1);
 
+        if (count > 0) {
+            // collect the host names for 'wide' crawls which can be visualized
+            boolean showLinkstructure = hosts.length() > 0;
+            /*
+            // check if there is actually something to see
+            if (showLinkstructure) {
+                showLinkstructure = false;
+                for (String host: hosts.substring(1).split(",")) {
+                    String hash = null;
+                    try {hash = ASCII.String((new DigestURI("http://" + host)).hash(), 6, 6);} catch (final MalformedURLException e) {Log.logException(e);}
+                    if (hash != null && sb.webStructure.referencesCount(hash) > 0) {showLinkstructure = true; break;}
+                }
+            }
+            */
+            if (showLinkstructure) {
+                prop.put("crawlProfilesShow_linkstructure", 1);
+                prop.put("crawlProfilesShow_linkstructure_hosts", hosts.substring(1));
+            } else {
+                prop.put("crawlProfilesShow_linkstructure", 0);
+            }
+        }
 
         // return rewrite properties
         return prop;
     }
 
-    private static long recrawlIfOlderC(final boolean recrawlIfOlderCheck, final int recrawlIfOlderNumber, final String crawlingIfOlderUnit) {
+    private static long timeParser(final boolean recrawlIfOlderCheck, final int number, final String unit) {
         if (!recrawlIfOlderCheck) return 0L;
-        if ("year".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 365L;
-        if ("month".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 30L;
-        if ("day".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L;
-        if ("hour".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L;
-        return System.currentTimeMillis() - (long) recrawlIfOlderNumber;
+        if ("year".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L * 365L;
+        if ("month".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L * 30L;
+        if ("day".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L * 24L;
+        if ("hour".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L * 60L;
+        if ("minute".equals(unit)) return System.currentTimeMillis() - number * 1000L * 60L;
+        return 0L;
     }
 
     private static void setPerformance(final Switchboard sb, final serverObjects post) {
@@ -666,18 +613,4 @@ public class Crawler_p {
         sb.setPerformance(wantedPPM);
     }
 
-    private static String siteFilter(final Set<MultiProtocolURI> uris) {
-        final StringBuilder filter = new StringBuilder();
-        final Set<String> filterSet = new HashSet<String>();
-        for (final MultiProtocolURI uri: uris) {
-            filterSet.add(new StringBuilder().append(uri.getProtocol()).append("://").append(uri.getHost()).append(".*").toString());
-            if (!uri.getHost().startsWith("www.")) {
-                filterSet.add(new StringBuilder().append(uri.getProtocol()).append("://www.").append(uri.getHost()).append(".*").toString());
-            }
-        }
-        for (final String element : filterSet) {
-            filter.append('|').append(element);
-        }
-        return filter.length() > 0 ? filter.substring(1) : "";
-    }
 }

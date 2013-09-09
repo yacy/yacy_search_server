@@ -21,22 +21,23 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.geo.GeonamesLocation;
+import net.yacy.cora.geo.OpenGeoDBLocation;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.LibraryProvider;
-import net.yacy.document.geolocation.GeonamesLocation;
-import net.yacy.document.geolocation.OpenGeoDBLocation;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.retrieval.Response;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class DictionaryLoader_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects(); // return variable that accumulates replacements
 
@@ -65,7 +66,7 @@ public class DictionaryLoader_p {
         if (post.containsKey("geon0Load")) {
             // load from the net
             try {
-                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, ClientIdentification.yacyInternetCrawlerAgent);
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEON0.file());
                 LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON0.file(), null, -1));
@@ -73,11 +74,11 @@ public class DictionaryLoader_p {
                 prop.put("geon0Status", LibraryProvider.Dictionary.GEON0.file().exists() ? 1 : 0);
                 prop.put("geon0ActionLoaded", 1);
             } catch (final MalformedURLException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geon0ActionLoaded", 2);
                 prop.put("geon0ActionLoaded_error", e.getMessage());
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geon0ActionLoaded", 2);
                 prop.put("geon0ActionLoaded_error", e.getMessage());
             }
@@ -107,7 +108,7 @@ public class DictionaryLoader_p {
         if (post.containsKey("geon1Load")) {
             // load from the net
             try {
-                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON1.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON1.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, ClientIdentification.yacyInternetCrawlerAgent);
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEON1.file());
                 LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON1.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON1.file(), null, -1));
@@ -115,11 +116,11 @@ public class DictionaryLoader_p {
                 prop.put("geon1Status", LibraryProvider.Dictionary.GEON1.file().exists() ? 1 : 0);
                 prop.put("geon1ActionLoaded", 1);
             } catch (final MalformedURLException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geon1ActionLoaded", 2);
                 prop.put("geon1ActionLoaded_error", e.getMessage());
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geon1ActionLoaded", 2);
                 prop.put("geon1ActionLoaded_error", e.getMessage());
             }
@@ -149,7 +150,7 @@ public class DictionaryLoader_p {
         if (post.containsKey("geon2Load")) {
             // load from the net
             try {
-                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON2.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON2.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, ClientIdentification.yacyInternetCrawlerAgent);
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEON2.file());
                 LibraryProvider.geoLoc.activateLocation(LibraryProvider.Dictionary.GEON2.nickname, new GeonamesLocation(LibraryProvider.Dictionary.GEON2.file(), null, 100000));
@@ -157,11 +158,11 @@ public class DictionaryLoader_p {
                 prop.put("geon2Status", LibraryProvider.Dictionary.GEON2.file().exists() ? 1 : 0);
                 prop.put("geon2ActionLoaded", 1);
             } catch (final MalformedURLException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geon2ActionLoaded", 2);
                 prop.put("geon2ActionLoaded_error", e.getMessage());
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geon2ActionLoaded", 2);
                 prop.put("geon2ActionLoaded_error", e.getMessage());
             }
@@ -191,7 +192,7 @@ public class DictionaryLoader_p {
         if (post.containsKey("geo1Load")) {
             // load from the net
             try {
-                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEODB1.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEODB1.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, ClientIdentification.yacyInternetCrawlerAgent);
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEODB1.file());
                 LibraryProvider.geoLoc.deactivateLocalization(LibraryProvider.Dictionary.GEODB1.nickname);
@@ -200,11 +201,11 @@ public class DictionaryLoader_p {
                 prop.put("geo1Status", LibraryProvider.Dictionary.GEODB1.file().exists() ? 1 : 0);
                 prop.put("geo1ActionLoaded", 1);
             } catch (final MalformedURLException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geo1ActionLoaded", 2);
                 prop.put("geo1ActionLoaded_error", e.getMessage());
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("geo1ActionLoaded", 2);
                 prop.put("geo1ActionLoaded_error", e.getMessage());
             }
@@ -234,7 +235,7 @@ public class DictionaryLoader_p {
         if (post.containsKey("drw0Load")) {
             // load from the net
             try {
-                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.DRW0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.DRW0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, ClientIdentification.yacyInternetCrawlerAgent);
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.DRW0.file());
                 LibraryProvider.activateDeReWo();
@@ -242,11 +243,11 @@ public class DictionaryLoader_p {
                 prop.put("drw0Status", LibraryProvider.Dictionary.DRW0.file().exists() ? 1 : 0);
                 prop.put("drw0ActionLoaded", 1);
             } catch (final MalformedURLException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("drw0ActionLoaded", 2);
                 prop.put("drw0ActionLoaded_error", e.getMessage());
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("drw0ActionLoaded", 2);
                 prop.put("drw0ActionLoaded_error", e.getMessage());
             }
@@ -278,18 +279,18 @@ public class DictionaryLoader_p {
         if (post.containsKey("pnd0Load")) {
             // load from the net
             try {
-                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.PND0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, false);
+                final Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.PND0.url), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, ClientIdentification.yacyInternetCrawlerAgent);
                 final byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.PND0.file());
                 LibraryProvider.activatePND();
                 prop.put("pnd0Status", LibraryProvider.Dictionary.PND0.file().exists() ? 1 : 0);
                 prop.put("pnd0ActionLoaded", 1);
             } catch (final MalformedURLException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("pnd0ActionLoaded", 2);
                 prop.put("pnd0ActionLoaded_error", e.getMessage());
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 prop.put("pnd0ActionLoaded", 2);
                 prop.put("pnd0ActionLoaded_error", e.getMessage());
             }

@@ -1,5 +1,5 @@
 package www;
-// welcome.java 
+// welcome.java
 // -----------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -29,21 +29,21 @@ package www;
 // if the shell's current path is HTROOT
 
 import java.io.File;
+
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class welcome {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
-        
+
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
 
@@ -54,7 +54,7 @@ public class welcome {
         prop.putHTML("peerdomain", sb.peers.mySeed().getName().toLowerCase());
         prop.putHTML("peeraddress", sb.peers.mySeed().getPublicAddress());
         prop.put("hostname", env.myPublicIP());
-        prop.put("hostip", Domains.dnsResolve(env.myPublicIP()).getHostAddress());       
+        prop.put("hostip", Domains.dnsResolve(env.myPublicIP()).getHostAddress());
         prop.put("port", serverCore.getPortNr(env.getConfig("port","8090")));
         prop.put("clientip", header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, ""));
 

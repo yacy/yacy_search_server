@@ -34,32 +34,44 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.ByteArray;
-import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.cora.util.ByteArray;
+import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.LookAheadIterator;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.LookAheadIterator;
 
 
 public class Tables implements Iterable<String> {
 
-    private static final String suffix = ".bheap";
+    private final static String p1 = "(?:^|.*,)";
+    private final static String p2 = "((?:";
+    private final static String p3 = ")(?:,.*|$)){";
+    private final static String CIDX = "_cidx";
+    private final static int NOINDEX = 50000;
+    private final static int RAMINDEX = 100000;
+
+	private static final String suffix = ".bheap";
     private static final String system_table_pkcounter = "pkcounter";
     private static final String system_table_pkcounter_counterName = "pk";
 
     private final File location;
     private final ConcurrentHashMap<String, BEncodedHeap> tables;
-    int keymaxlen;
+    private final ConcurrentHashMap<String, TablesColumnIndex> cidx;
+    private int keymaxlen;
 
     // use our own formatter to prevent concurrency locks with other processes
     private final static GenericFormatter my_SHORT_MILSEC_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_MILSEC, 1);
@@ -81,6 +93,146 @@ public class Tables implements Iterable<String> {
                 }
             }
         }
+        this.cidx = new ConcurrentHashMap<String, TablesColumnIndex>();
+    }
+
+    public TablesColumnIndex getIndex(final String tableName, TablesColumnIndex.INDEXTYPE indexType) throws TableColumnIndexException, IOException {
+    	final TablesColumnIndex index;
+    	switch(indexType) {
+	    	case RAM:
+	    		index = new TablesColumnRAMIndex();
+	    		break;
+	    	case BLOB:
+	    		final String idx_table = tableName+CIDX;
+	    		BEncodedHeap bheap;
+	   			bheap = this.getHeap(idx_table);
+	   			index =  new TablesColumnBLOBIndex(bheap);
+	   			break;
+	   		default:
+	   			throw new TableColumnIndexException("Unsupported TableColumnIndex: "+indexType.name());
+    	}
+    	return index;
+    }
+
+    public TablesColumnIndex getIndex(final String tableName) throws TableColumnIndexException {
+    	// return an existing index
+        final TablesColumnIndex tci = this.cidx.get(tableName);
+    	if (tci != null) {
+    		return tci;
+    	}
+
+    	// create a new index
+    	int size;
+    	try {
+			size = this.size(tableName);
+		} catch (final IOException e) {
+			size = 0;
+		}
+
+    	final TablesColumnIndex index;
+
+    	if(size < NOINDEX) {
+    		throw new TableColumnIndexException("TableColumnIndex not available for tables with less than "+NOINDEX+" rows: "+tableName);
+    	}
+    	if(size < RAMINDEX) {
+    		index = new TablesColumnRAMIndex();
+    	} else {
+        	final String idx_table = tableName+CIDX;
+    		BEncodedHeap bheap;
+    		try {
+    			bheap = this.getHeap(idx_table);
+    		} catch (final IOException e) {
+    			bheap = null;
+    			ConcurrentLog.logException(e);
+    		}
+    		if(bheap != null) {
+    			index =  new TablesColumnBLOBIndex(bheap);
+    		} else {
+    			index = new TablesColumnRAMIndex();
+    		}
+    	}
+    	this.cidx.put(tableName, index);
+    	return index;
+    }
+
+    public boolean hasIndex (final String tableName) {
+    	return this.cidx.contains(tableName);
+    }
+
+    public boolean hasIndex(final String tableName, final String columnName) {
+        final TablesColumnIndex tci = this.cidx.get(tableName);
+    	if (tci != null) {
+    		return tci.hasIndex(columnName);
+    	}
+    	try {
+			if(this.has(tableName+CIDX, YMarkUtil.getKeyId(columnName))) {
+				return true;
+			}
+		} catch (final IOException e) {
+			ConcurrentLog.logException(e);
+		}
+    	return false;
+    }
+
+    public Iterator<Row> getByIndex(final String table, final String whereColumn, final String separator, final String whereValue) {
+    	final HashSet<Tables.Row> rows = new HashSet<Tables.Row>();
+    	final TreeSet<byte[]> set1 = new TreeSet<byte[]>(TablesColumnIndex.NATURALORDER);
+    	final TreeSet<byte[]> set2 = new TreeSet<byte[]>(TablesColumnIndex.NATURALORDER);
+    	final String[] values = whereValue.split(separator);
+    	if(this.hasIndex(table, whereColumn)) {
+    		try {
+    			final TablesColumnIndex index = this.getIndex(table);
+    			for(int i=0; i<values.length; i++) {
+    			    final Collection<byte[]> b = index.get(whereColumn, values[i]);
+        			if (b != null) {
+    	        		final Iterator<byte[]> biter = b.iterator();
+    	        		while(biter.hasNext()) {
+    	        			set1.add(biter.next());
+    	        		}
+    	        		if(i==0) {
+    	        			set2.addAll(set1);
+    	        		} else {
+    	        			set2.retainAll(set1);
+    	        		}
+    	        		set1.clear();
+    	    		}
+    			}
+    			for(byte[] pk : set2) {
+    				rows.add(this.select(table, pk));
+    			}
+
+			} catch (final Exception e) {
+				ConcurrentLog.logException(e);
+				return new HashSet<Row>().iterator();
+			}
+    	} else if (!separator.isEmpty()) {
+        	final StringBuilder patternBuilder = new StringBuilder(256);
+        	patternBuilder.append(p1);
+        	patternBuilder.append(p2);
+        	for (final String value : values) {
+        		patternBuilder.append(Pattern.quote(value));
+            	patternBuilder.append('|');
+    		}
+        	patternBuilder.deleteCharAt(patternBuilder.length()-1);
+        	patternBuilder.append(p3);
+        	patternBuilder.append(values.length);
+        	patternBuilder.append('}');
+        	final Pattern p = Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE);
+    		try {
+				return this.iterator(table, whereColumn, p);
+			} catch (final IOException e) {
+				ConcurrentLog.logException(e);
+				return new HashSet<Row>().iterator();
+			}
+    	} else {
+    		try {
+				return this.iterator(table, whereColumn, UTF8.getBytes(whereValue));
+			} catch (final IOException e) {
+				ConcurrentLog.logException(e);
+				return new HashSet<Row>().iterator();
+			}
+    	}
+    	return rows.iterator();
     }
 
     @Override
@@ -99,6 +251,7 @@ public class Tables implements Iterable<String> {
                 try {
                     getHeap(tablename);
                 } catch (final IOException e) {
+                    ConcurrentLog.logException(e);
                 }
             }
         }
@@ -128,7 +281,7 @@ public class Tables implements Iterable<String> {
                 heap = null;
             }
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } finally {
             this.tables.remove(tablename);
         }
@@ -167,7 +320,7 @@ public class Tables implements Iterable<String> {
         return heap.size();
     }
 
-    private byte[] ukey(final String tablename) throws IOException, RowSpaceExceededException {
+    private byte[] ukey(final String tablename) throws IOException, SpaceExceededException {
         Row row = select(system_table_pkcounter, UTF8.getBytes(tablename));
         if (row == null) {
             // table counter entry in pkcounter table does not exist: make a new table entry
@@ -201,11 +354,11 @@ public class Tables implements Iterable<String> {
      * insert a map into a table using a new unique key
      * @param tablename
      * @param map
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
-    public byte[] insert(final String tablename, final Map<String, byte[]> map) throws IOException, RowSpaceExceededException {
+    public byte[] insert(final String tablename, final Map<String, byte[]> map) throws IOException, SpaceExceededException {
         final byte[] uk = ukey(tablename);
         update(tablename, uk, map);
         final BEncodedHeap heap = getHeap(system_table_pkcounter);
@@ -217,7 +370,7 @@ public class Tables implements Iterable<String> {
         final BEncodedHeap heap = getHeap(table);
         try {
             heap.insert(pk, map);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             throw new IOException(e.getMessage());
         }
     }
@@ -226,7 +379,7 @@ public class Tables implements Iterable<String> {
         final BEncodedHeap heap = getHeap(table);
         try {
             heap.insert(row.pk, row);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             throw new IOException(e.getMessage());
         }
     }
@@ -235,7 +388,7 @@ public class Tables implements Iterable<String> {
         final BEncodedHeap heap = getHeap(table);
         try {
             heap.update(pk, map);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             throw new IOException(e.getMessage());
         }
     }
@@ -244,18 +397,19 @@ public class Tables implements Iterable<String> {
         final BEncodedHeap heap = getHeap(table);
         try {
             heap.update(row.pk, row);
-        } catch (final RowSpaceExceededException e) {
+        } catch (final SpaceExceededException e) {
             throw new IOException(e.getMessage());
         }
     }
 
-    public byte[] createRow(final String table) throws IOException, RowSpaceExceededException {
+    public byte[] createRow(final String table) throws IOException, SpaceExceededException {
         return this.insert(table, new ConcurrentHashMap<String, byte[]>());
     }
 
-    public Row select(final String table, final byte[] pk) throws IOException, RowSpaceExceededException {
+    public Row select(final String table, final byte[] pk) throws IOException, SpaceExceededException {
         final BEncodedHeap heap = getHeap(table);
-        if (heap.containsKey(pk)) return new Row(pk, heap.get(pk));
+        final Map<String,byte[]> b = heap.get(pk);
+        if (b != null) return new Row(pk, b);
         return null;
     }
 
@@ -369,7 +523,7 @@ public class Tables implements Iterable<String> {
         public RowIterator(final String table, final String whereColumn, final Pattern wherePattern) throws IOException {
             this.whereColumn = whereColumn;
             this.whereValue = null;
-            this.wherePattern = wherePattern == null || wherePattern.toString().length() == 0 ? null : wherePattern;
+            this.wherePattern = wherePattern == null || wherePattern.toString().isEmpty() ? null : wherePattern;
             final BEncodedHeap heap = getHeap(table);
             this.i = heap.iterator();
         }
@@ -384,7 +538,7 @@ public class Tables implements Iterable<String> {
         public RowIterator(final String table, final Pattern pattern) throws IOException {
             this.whereColumn = null;
             this.whereValue = null;
-            this.wherePattern = pattern == null || pattern.toString().length() == 0 ? null : pattern;
+            this.wherePattern = pattern == null || pattern.toString().isEmpty() ? null : pattern;
             final BEncodedHeap heap = getHeap(table);
             this.i = heap.iterator();
         }
@@ -434,11 +588,11 @@ public class Tables implements Iterable<String> {
         }
 
         public void put(final String colname, final int value) {
-            super.put(colname, UTF8.getBytes(Integer.toString(value)));
+            super.put(colname, ASCII.getBytes(Integer.toString(value)));
         }
 
         public void put(final String colname, final long value) {
-            super.put(colname, UTF8.getBytes(Long.toString(value)));
+            super.put(colname, ASCII.getBytes(Long.toString(value)));
         }
 
         public void put(final String colname, final Date value) {
@@ -564,7 +718,7 @@ public class Tables implements Iterable<String> {
             // clean up
             map.close();
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 

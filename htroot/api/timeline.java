@@ -24,26 +24,25 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.data.word.Word;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.WordReference;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.peers.Network;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
+import net.yacy.search.query.QueryGoal;
 import net.yacy.search.query.QueryParams;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public final class timeline {
 
@@ -68,8 +67,8 @@ public final class timeline {
             language = (agent == null) ? "en" : ISO639.userAgentLanguageDetection(agent);
             if (language == null) language = "en";
         }
-        final Collection<String>[] query = QueryParams.cleanQuery(querystring); // converts also umlaute
-        HandleSet q = Word.words2hashesHandles(query[0]);
+        final QueryGoal qg = new QueryGoal(querystring, querystring);
+        HandleSet q = qg.getIncludeHashes();
 
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(3000);
@@ -87,9 +86,9 @@ public final class timeline {
         // get the index container with the result vector
         TermSearch<WordReference> search = null;
         try {
-            search = segment.termIndex().query(q, Word.words2hashesHandles(query[1]), null, Segment.wordReferenceFactory, maxdist);
-        } catch (RowSpaceExceededException e) {
-            Log.logException(e);
+            search = segment.termIndex().query(q, qg.getExcludeHashes(), null, Segment.wordReferenceFactory, maxdist);
+        } catch (final SpaceExceededException e) {
+            ConcurrentLog.logException(e);
         }
         ReferenceContainer<WordReference> index = search.joined();
 
@@ -112,7 +111,7 @@ public final class timeline {
         prop.put("event", c);
 
         // log
-        Network.log.logInfo("EXIT TIMELINE SEARCH: " +
+        Network.log.info("EXIT TIMELINE SEARCH: " +
                 QueryParams.anonymizedQueryHashes(q) + " - " + joincount + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstracts, " +

@@ -922,7 +922,7 @@ public class DoubleMetaphone implements StringEncoder {
             return null;
         }
         input = input.trim();
-        if (input.length() == 0) {
+        if (input.isEmpty()) {
             return null;
         }
         return input.toUpperCase(java.util.Locale.ENGLISH);
@@ -1031,8 +1031,8 @@ public class DoubleMetaphone implements StringEncoder {
      */
     public class DoubleMetaphoneResult {
 
-        private final StringBuffer primary = new StringBuffer(getMaxCodeLen());
-        private final StringBuffer alternate = new StringBuffer(getMaxCodeLen());
+        private final StringBuilder primary = new StringBuilder(getMaxCodeLen());
+        private final StringBuilder alternate = new StringBuilder(getMaxCodeLen());
         private final int maxLength;
 
         public DoubleMetaphoneResult(int maxLength) {

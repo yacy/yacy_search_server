@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -26,30 +26,30 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import net.yacy.cora.protocol.RequestHeader;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class ssitestservlet {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
+
         //plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         int delay = 0;
         final long start = System.currentTimeMillis();
-        
+
         if (post != null) {
             delay = post.getInt("delay", 1000);
         }
-        
+
         // make a delay to see how the ssi loads and displays this page
         try {Thread.sleep(delay);} catch (final InterruptedException e) {}
-        
+
         prop.put("delay", delay);
         prop.put("start", start);
         prop.put("stop", System.currentTimeMillis());
-        
+
         return prop;
     }
-    
+
 }

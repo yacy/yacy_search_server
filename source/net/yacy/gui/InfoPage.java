@@ -111,7 +111,7 @@ public class InfoPage implements Layout {
         JComponent mainText = new JEditorPane();
         mainText.setPreferredSize(new java.awt.Dimension(480, 590));
         String infotext =
-            "This is a very early test for a YaCy GUI.\n\n" +
+            "This is a YaCy GUI wrappper.\n\n" +
             "The YaCy administration interface is in your browser\n" +
             "just open http://localhost:8090\n\n" +
             "You may also enter a search term and press enter,\n" +

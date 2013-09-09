@@ -35,7 +35,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Properties;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 
 public class ScraperInputStream extends InputStream implements ScraperListener {
@@ -58,23 +58,24 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
     public ScraperInputStream(
             final InputStream inStream,
             final String inputStreamCharset,
-            final MultiProtocolURI rooturl,
+            final DigestURI rooturl,
             final Transformer transformer,
-            final boolean passbyIfBinarySuspect
+            final boolean passbyIfBinarySuspect,
+            final int maxLinks
     ) {
         // create a input stream for buffereing
         this.bufferedIn = new BufferedInputStream(inStream, (int) preBufferSize);
         this.bufferedIn.mark((int) preBufferSize);
 
-        final ContentScraper scraper = new ContentScraper(rooturl);
+        final ContentScraper scraper = new ContentScraper(rooturl, maxLinks);
         scraper.registerHtmlFilterEventListener(this);
 
         try {
 	    this.reader = (inputStreamCharset == null) ? new InputStreamReader(this) : new InputStreamReader(this,inputStreamCharset);
-	} catch (UnsupportedEncodingException e) {
+	} catch (final UnsupportedEncodingException e) {
 	    try {
 		this.reader = new InputStreamReader(this, "UTF-8");
-	    } catch (UnsupportedEncodingException e1) {
+	    } catch (final UnsupportedEncodingException e1) {
 		// how is that possible?
 		this.reader = new InputStreamReader(this);
 	    }
@@ -103,7 +104,7 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
 
     @Override
     public void scrapeTag0(final String tagname, final Properties tagopts) {
-        if (tagname == null || tagname.length() == 0) return;
+        if (tagname == null || tagname.isEmpty()) return;
 
         if (tagname.equalsIgnoreCase("meta")) {
             if (tagopts.containsKey("http-equiv")) {
@@ -126,7 +127,7 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
 
     @Override
     public void scrapeTag1(final String tagname, final Properties tagopts, final char[] text) {
-        if (tagname == null || tagname.length() == 0) return;
+        if (tagname == null || tagname.isEmpty()) return;
 
         if (tagname.equalsIgnoreCase("head")) {
             this.endOfHead = true;

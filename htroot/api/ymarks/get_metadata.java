@@ -2,22 +2,24 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.EnumMap;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.UserDB;
+import net.yacy.data.ymark.YMarkAutoTagger;
+import net.yacy.data.ymark.YMarkCrawlStart;
+import net.yacy.data.ymark.YMarkEntry;
+import net.yacy.data.ymark.YMarkMetadata;
+import net.yacy.data.ymark.YMarkTables;
+import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
-import de.anomic.data.ymark.YMarkAutoTagger;
-import de.anomic.data.ymark.YMarkCrawlStart;
-import de.anomic.data.ymark.YMarkEntry;
-import de.anomic.data.ymark.YMarkMetadata;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class get_metadata {
 
@@ -48,7 +50,8 @@ public class get_metadata {
 
         	try {
 				final YMarkMetadata meta = new YMarkMetadata(new DigestURI(url), sb.index);
-				final Document document = meta.loadDocument(sb.loader);
+                ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+				final Document document = meta.loadDocument(sb.loader, agent);
 				final EnumMap<YMarkMetadata.METADATA, String> metadata = meta.loadMetadata();
 
 				prop.putXML("title", metadata.get(YMarkMetadata.METADATA.TITLE));
@@ -72,15 +75,15 @@ public class get_metadata {
 
 			} catch (final MalformedURLException e) {
 				// TODO Auto-generated catch block
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 				prop.put("status", "error");
 			} catch (final IOException e) {
 				// TODO Auto-generated catch block
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 				prop.put("status", "error");
 			} catch (final Failure e) {
 				// TODO Auto-generated catch block
-				Log.logException(e);
+				ConcurrentLog.logException(e);
 				prop.put("status", "error");
 			}
         } else {
@@ -91,7 +94,7 @@ public class get_metadata {
 	}
 
 	public static int putTags(final String tagString, final String var) {
-        final String list[] = tagString.split(YMarkUtil.TAGS_SEPARATOR);
+        final String list[] = Pattern.compile(YMarkUtil.TAGS_SEPARATOR).split(tagString, 0);
         int count = 0;
         for (final String element : list) {
             final String tag = element;

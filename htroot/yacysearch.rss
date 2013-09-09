@@ -10,7 +10,7 @@
 >
 	<!-- YaCy Search Engine; http://yacy.net -->
 	<channel>
-		<title>#[promoteSearchPageGreeting]#</title>
+		<title>#[promoteSearchPageGreeting]#: #[rss_query]#</title>
 		<description>Search for #[rss_query]#</description>
 		<link>#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;verify=#[verify]#</link>
 		<image>

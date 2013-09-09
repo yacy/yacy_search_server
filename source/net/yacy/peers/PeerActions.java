@@ -25,11 +25,10 @@
 package net.yacy.peers;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSMessage;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.peers.operation.yacyVersion;
 
@@ -44,7 +43,7 @@ public class PeerActions {
     public PeerActions(final SeedDB seedDB, final NewsPool newsPool) {
         this.seedDB = seedDB;
         this.newsPool = newsPool;
-        this.userAgents = new ConcurrentHashMap<String, String>();
+        this.userAgents = new ConcurrentARC<String, String>(10000, Runtime.getRuntime().availableProcessors() + 1);
         this.disconnects = 0;
     }
 
@@ -58,42 +57,42 @@ public class PeerActions {
         // store a remote peer's seed
         // returns true if the peer is new and previously unknown
         if (seed == null) {
-            Network.log.logSevere("connect: WRONG seed (NULL)");
+            Network.log.severe("connect: WRONG seed (NULL)");
             return false;
         }
         final String error = seed.isProper(false);
         if (error != null) {
-            Network.log.logSevere("connect: WRONG seed (" + seed.getName() + "/" + seed.hash + "): " + error);
+            Network.log.severe("connect: WRONG seed (" + seed.getName() + "/" + seed.hash + "): " + error);
             return false;
         }
         if ((this.seedDB.mySeedIsDefined()) && (seed.hash.equals(this.seedDB.mySeed().hash))) {
-            Network.log.logInfo("connect: SELF reference " + seed.getPublicAddress());
+            Network.log.info("connect: SELF reference " + seed.getPublicAddress());
             return false;
         }
         final String peerType = seed.get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN);
 
         if ((peerType.equals(Seed.PEERTYPE_VIRGIN)) || (peerType.equals(Seed.PEERTYPE_JUNIOR))) {
             // reject unqualified seeds
-            if (Network.log.isFine()) Network.log.logFine("connect: rejecting NOT QUALIFIED " + peerType + " seed " + seed.getName());
+            if (Network.log.isFine()) Network.log.fine("connect: rejecting NOT QUALIFIED " + peerType + " seed " + seed.getName());
             return false;
         }
         if (!(peerType.equals(Seed.PEERTYPE_SENIOR) || peerType.equals(Seed.PEERTYPE_PRINCIPAL))) {
             // reject unqualified seeds
-            if (Network.log.isFine()) Network.log.logFine("connect: rejecting NOT QUALIFIED " + peerType + " seed " + seed.getName());
+            if (Network.log.isFine()) Network.log.fine("connect: rejecting NOT QUALIFIED " + peerType + " seed " + seed.getName());
             return false;
         }
 
         final Seed doubleSeed = this.seedDB.lookupByIP(seed.getInetAddress(), seed.getPort(), true, false, false);
         if ((doubleSeed != null) && (doubleSeed.getPort() == seed.getPort()) && (!(doubleSeed.hash.equals(seed.hash)))) {
             // a user frauds with his peer different peer hashes
-            if (Network.log.isFine()) Network.log.logFine("connect: rejecting FRAUD (double hashes " + doubleSeed.hash + "/" + seed.hash + " on same port " + seed.getPort() + ") peer " + seed.getName());
+            if (Network.log.isFine()) Network.log.fine("connect: rejecting FRAUD (double hashes " + doubleSeed.hash + "/" + seed.hash + " on same port " + seed.getPort() + ") peer " + seed.getName());
             return false;
         }
 
         if (seed.get(Seed.LASTSEEN, "").length() != 14) {
             // hack for peers that do not have a LastSeen date
             seed.setLastSeenUTC();
-            if (Network.log.isFine()) Network.log.logFine("connect: reset wrong date (" + seed.getName() + "/" + seed.hash + ")");
+            if (Network.log.isFine()) Network.log.fine("connect: reset wrong date (" + seed.getName() + "/" + seed.hash + ")");
         }
 
         // connection time
@@ -108,7 +107,7 @@ public class PeerActions {
         }
         if (Math.abs(nowUTC0Time - ctimeUTC0) / 1000 / 60 > 60 * 6 ) {
             // the new connection is out-of-age, we reject the connection
-            if (Network.log.isFine()) Network.log.logFine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getPublicAddress() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + formatInterval(Math.abs(nowUTC0Time - ctimeUTC0)));
+            if (Network.log.isFine()) Network.log.fine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getPublicAddress() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + formatInterval(Math.abs(nowUTC0Time - ctimeUTC0)));
             return false;
         }
 
@@ -145,13 +144,13 @@ public class PeerActions {
             if (!direct) {
                 if (ctimeUTC0 < dtimeUTC0) {
                     // the disconnection was later, we reject the connection
-                    if (Network.log.isFine()) Network.log.logFine("connect: rejecting disconnected peer '" + seed.getName() + "' from " + seed.getPublicAddress());
+                    if (Network.log.isFine()) Network.log.fine("connect: rejecting disconnected peer '" + seed.getName() + "' from " + seed.getPublicAddress());
                     return false;
                 }
             }
 
             // this is a return of a lost peer
-            if (Network.log.isFine()) Network.log.logFine("connect: returned KNOWN " + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
+            if (Network.log.isFine()) Network.log.fine("connect: returned KNOWN " + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
             this.seedDB.addConnected(seed);
             return true;
         }
@@ -162,7 +161,7 @@ public class PeerActions {
                 // if the old LastSeen date is later then the other
                 // info, then we reject the info
                 if ((ctimeUTC0 < (connectedSeed.getLastSeenUTC())) && (!direct)) {
-                    if (Network.log.isFine()) Network.log.logFine("connect: rejecting old info about peer '" + seed.getName() + "'");
+                    if (Network.log.isFine()) Network.log.fine("connect: rejecting old info about peer '" + seed.getName() + "'");
                     return false;
                 }
 
@@ -170,10 +169,10 @@ public class PeerActions {
                     // TODO: update seed name lookup cache
                 }*/
             } catch (final NumberFormatException e) {
-                if (Network.log.isFine()) Network.log.logFine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getPublicAddress() + ". Cause: " + e.getMessage());
+                if (Network.log.isFine()) Network.log.fine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getPublicAddress() + ". Cause: " + e.getMessage());
                 return false;
             }
-            if (Network.log.isFine()) Network.log.logFine("connect: updated KNOWN " + ((direct) ? "direct " : "") + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
+            if (Network.log.isFine()) Network.log.fine("connect: updated KNOWN " + ((direct) ? "direct " : "") + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
             this.seedDB.addConnected(seed);
             return true;
         }
@@ -182,10 +181,10 @@ public class PeerActions {
         if ((this.seedDB.mySeedIsDefined()) && (seed.getIP().equals(this.seedDB.mySeed().getIP()))) {
             // seed from the same IP as the calling client: can be
             // the case if there runs another one over a NAT
-            if (Network.log.isFine()) Network.log.logFine("connect: saved NEW seed (myself IP) " + seed.getPublicAddress());
+            if (Network.log.isFine()) Network.log.fine("connect: saved NEW seed (myself IP) " + seed.getPublicAddress());
         } else {
             // completely new seed
-            if (Network.log.isFine()) Network.log.logFine("connect: saved NEW " + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
+            if (Network.log.isFine()) Network.log.fine("connect: saved NEW " + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
         }
         this.seedDB.addConnected(seed);
         return true;
@@ -205,7 +204,7 @@ public class PeerActions {
     public void peerDeparture(final Seed peer, final String cause) {
         if (peer == null) return;
         // we do this if we did not get contact with the other peer
-        if (Network.log.isFine()) Network.log.logFine("connect: no contact to a " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress() + ". Cause: " + cause);
+        if (Network.log.isFine()) Network.log.fine("connect: no contact to a " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress() + ". Cause: " + cause);
         synchronized (this.seedDB) {
             if (!this.seedDB.hasDisconnected(ASCII.getBytes(peer.hash))) { this.disconnects++; }
             peer.put("dct", Long.toString(System.currentTimeMillis()));
@@ -226,8 +225,8 @@ public class PeerActions {
     private void processPeerArrival(final Seed peer) {
         final String recordString = peer.get("news", null);
         //System.out.println("### triggered news arrival from peer " + peer.getName() + ", news " + ((recordString == null) ? "empty" : "attached"));
-        if ((recordString == null) || (recordString.length() == 0)) return;
-        final String decodedString = de.anomic.tools.crypt.simpleDecode(recordString, "");
+        if ((recordString == null) || (recordString.isEmpty())) return;
+        final String decodedString = net.yacy.utils.crypt.simpleDecode(recordString);
         final NewsDB.Record record = this.newsPool.parseExternal(decodedString);
         if (record != null) {
             //System.out.println("### news arrival from peer " + peer.getName() + ", decoded=" + decodedString + ", record=" + recordString + ", news=" + record.toString());
@@ -240,7 +239,7 @@ public class PeerActions {
             try {
                 synchronized (this.newsPool) {this.newsPool.enqueueIncomingNews(record);}
             } catch (final Exception e) {
-                Log.logSevere("YACY", "processPeerArrival", e);
+                Network.log.severe("processPeerArrival", e);
             }
         }
     }

@@ -41,7 +41,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -79,7 +79,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     	if (parser == null) {
     		try {
 				parser = SAXParserFactory.newInstance().newSAXParser();
-			} catch (ParserConfigurationException e) {
+			} catch (final ParserConfigurationException e) {
 				throw new SAXException(e.getMessage(), e);
 			}
     		tlSax.set(parser);
@@ -101,8 +101,8 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         
         try {
             this.saxParser = getParser();
-        } catch (SAXException e) {
-            Log.logException(e);
+        } catch (final SAXException e) {
+            ConcurrentLog.logException(e);
             throw new IOException(e.getMessage());
         }
     }
@@ -110,22 +110,22 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     public void run() {
         try {
             this.saxParser.parse(this.inputSource, this);
-        } catch (SAXParseException e) {
-            Log.logException(e);
-        } catch (SAXException e) {
-            Log.logException(e);
-        } catch (IOException e) {
-            Log.logException(e);
+        } catch (final SAXParseException e) {
+            ConcurrentLog.logException(e);
+        } catch (final SAXException e) {
+            ConcurrentLog.logException(e);
+        } catch (final IOException e) {
+            ConcurrentLog.logException(e);
         } finally {
         	try {
 				this.surrogates.put(DCEntry.poison);
-			} catch (InterruptedException e1) {
-			    Log.logException(e1);
+			} catch (final InterruptedException e1) {
+			    ConcurrentLog.logException(e1);
 			}
 			try {
         		this.inputStream.close();
-			} catch (IOException e) {
-			    Log.logException(e);
+			} catch (final IOException e) {
+			    ConcurrentLog.logException(e);
 			}
         }
     }
@@ -154,8 +154,8 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             //System.out.println("A Title: " + this.surrogate.title());
             try {
                 this.surrogates.put(this.surrogate);
-            } catch (InterruptedException e) {
-                Log.logException(e);
+            } catch (final InterruptedException e) {
+                ConcurrentLog.logException(e);
             } finally {
                 //System.out.println("B Title: " + this.surrogate.title());
                 this.surrogate = null;
@@ -169,7 +169,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             //System.out.println("BUFFER-SIZE=" + buffer.length());
             final String value = buffer.toString().trim();
             if (this.elementName != null) {
-                this.surrogate.put(this.elementName, value);
+                this.surrogate.getMap().put(this.elementName, new String[]{value});
             }
             this.buffer.setLength(0);
             this.parsingValue = false;
@@ -179,9 +179,9 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
                 value.replaceAll(";", ",");
                 String oldcontent = this.surrogate.get(this.elementName);
                 if (oldcontent == null) {
-                    this.surrogate.put(this.elementName, value);
+                    this.surrogate.getMap().put(this.elementName, new String[]{value});
                 } else {
-                    this.surrogate.put(this.elementName, oldcontent + ";" + value);
+                    this.surrogate.getMap().put(this.elementName, new String[]{oldcontent + ";" + value});
                 }
             }
             this.buffer.setLength(0);
@@ -198,8 +198,8 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     public DCEntry take() {
         try {
             return this.surrogates.take();
-        } catch (InterruptedException e) {
-            Log.logException(e);
+        } catch (final InterruptedException e) {
+            ConcurrentLog.logException(e);
             return null;
         }
     }
@@ -222,10 +222,10 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
                 System.out.println("Publisher: " + s.getPublisher());
                 System.out.println("URL: " + s.getIdentifier(true));
                 System.out.println("Language: " + s.getLanguage());
-                System.out.println("Body: " + s.getDescription());
+                System.out.println("Body: " + s.getDescriptions().toString());
             }
-        } catch (IOException e) {
-            Log.logException(e);
+        } catch (final IOException e) {
+            ConcurrentLog.logException(e);
         }
     }
 }

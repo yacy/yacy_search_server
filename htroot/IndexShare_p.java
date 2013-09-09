@@ -32,12 +32,12 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class IndexShare_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
     	// return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -50,8 +50,8 @@ public class IndexShare_p {
             prop.put("wordfreq", sb.getConfigLong("defaultWordReceiveFrequency",10));
             prop.put("dtable", "");
             prop.put("rtable", "");
-            prop.putNum("wcount", indexSegment.termIndex().sizesMax());
-            prop.putNum("ucount", indexSegment.urlMetadata().size());
+            prop.putNum("wcount", indexSegment.RWICount());
+            prop.putNum("ucount", indexSegment.fulltext().collectionSize());
             return prop; // be save
         }
 
@@ -63,8 +63,8 @@ public class IndexShare_p {
         }
 
         // insert constants
-        prop.putNum("wcount", indexSegment.termIndex().sizesMax());
-        prop.putNum("ucount", indexSegment.urlMetadata().size());
+        prop.putNum("wcount", indexSegment.RWICount());
+        prop.putNum("ucount", indexSegment.fulltext().collectionSize());
 
         // return rewrite properties
         return prop;

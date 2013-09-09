@@ -27,7 +27,7 @@
 package net.yacy.search;
 
 import net.yacy.kelondro.util.MapTools;
-import de.anomic.http.server.RobotsTxtConfig;
+import net.yacy.server.http.RobotsTxtConfig;
 
 /**
  * @author danielr
@@ -119,10 +119,10 @@ public final class SwitchboardConstants {
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM   = null;
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP        = "62_remotetriggeredcrawl_idlesleep";
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP        = "62_remotetriggeredcrawl_busysleep";
-    // 80_indexing
+ // 70_surrogates
     /**
      * <p><code>public static final String <strong>SURROGATES</strong> = "70_surrogates"</code></p>
-     * <p>A thread that polls the SURROGATES path and puts all Documents in one surroagte file into the indexing queue.</p>
+     * <p>A thread that polls the SURROGATES path and puts all Documents in one surrogate file into the indexing queue.</p>
      */
     public static final String SURROGATES                      = "70_surrogates";
     public static final String SURROGATES_MEMPREREQ            = "70_surrogates_memprereq";
@@ -131,6 +131,18 @@ public final class SwitchboardConstants {
     public static final String SURROGATES_METHOD_START         = "surrogateProcess";
     public static final String SURROGATES_METHOD_JOBCOUNT      = "surrogateQueueSize";
     public static final String SURROGATES_METHOD_FREEMEM       = "surrogateFreeMem";
+    // 80_search_result_processing
+    /**
+     * <p><code>public static final String <strong>SEARCHRESULT</strong> = "80_searchresult"</code></p>
+     * <p>A thread that stores search results from other peers into the own index.</p>
+     */
+    public static final String SEARCHRESULT                      = "80_searchresult";
+    public static final String SEARCHRESULT_MEMPREREQ            = "80_searchresult_memprereq";
+    public static final String SEARCHRESULT_IDLESLEEP            = "80_searchresult_idlesleep";
+    public static final String SEARCHRESULT_BUSYSLEEP            = "80_searchresult_busysleep";
+    public static final String SEARCHRESULT_METHOD_START         = "searchresultProcess";
+    public static final String SEARCHRESULT_METHOD_JOBCOUNT      = "searchresultQueueSize";
+    public static final String SEARCHRESULT_METHOD_FREEMEM       = "searchresultFreeMem";
     // 90_cleanup
     /**
      * <p><code>public static final String <strong>CLEANUP</strong> = "90_cleanup"</code></p>
@@ -242,6 +254,7 @@ public final class SwitchboardConstants {
     public static final String INDEX_DIST_ALLOW_WHILE_CRAWLING  = "allowDistributeIndexWhileCrawling";
     public static final String INDEX_DIST_ALLOW_WHILE_INDEXING  = "allowDistributeIndexWhileIndexing";
     public static final String INDEX_TRANSFER_TIMEOUT           = "indexTransfer.timeout";
+    public static final String INDEX_TRANSFER_MAXLOAD           = "indexTransfer.maxload";
     public static final String INDEX_TRANSFER_GZIP_BODY         = "indexTransfer.gzipBody";
     public static final String PARSER_MIME_DENY                 = "parser.mime.deny";
     public static final String PARSER_EXTENSIONS_DENY           = "parser.extensions.deny";
@@ -282,14 +295,29 @@ public final class SwitchboardConstants {
     public static final String CLUSTER_MODE_PRIVATE_PEER        = "privatepeer";
     public static final String CLUSTER_PEERS_IPPORT             = "cluster.peers.ipport";
 
+    
+    public static final String DHT_ENABLED                      = "network.unit.dht";
     public static final String DHT_BURST_ROBINSON               = "network.unit.dht.burst.robinson";
     public static final String DHT_BURST_MULTIWORD              = "network.unit.dht.burst.multiword";
 
     public static final String REMOTESEARCH_MAXCOUNT_DEFAULT    = "network.unit.remotesearch.maxcount";
     public static final String REMOTESEARCH_MAXTIME_DEFAULT     = "network.unit.remotesearch.maxtime";
-
     public static final String REMOTESEARCH_MAXCOUNT_USER       = "remotesearch.maxcount";
     public static final String REMOTESEARCH_MAXTIME_USER        = "remotesearch.maxtime";
+
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_ENABLED = "federated.service.solr.indexing.enabled";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_URL = "federated.service.solr.indexing.url";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_SHARDING = "federated.service.solr.indexing.sharding";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_LAZY = "federated.service.solr.indexing.lazy";
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT = "federated.service.solr.indexing.timeout";
+
+    //public static final String CORE_SERVICE_URLDB = "core.service.urldb.tmp";
+    //public static final String CORE_SERVICE_SOLR = "core.service.solr.tmp";
+    public static final String CORE_SERVICE_FULLTEXT = "core.service.fulltext";
+    public static final String CORE_SERVICE_RWI = "core.service.rwi.tmp";
+    public static final String CORE_SERVICE_CITATION = "core.service.citation.tmp";
+    public static final String CORE_SERVICE_WEBGRAPH = "core.service.webgraph.tmp";
+    public static final String CORE_SERVICE_JENA = "core.service.jena.tmp";
 
     /**
      * <p><code>public static final String <strong>CRAWLER_THREADS_ACTIVE_MAX</strong> = "crawler.MaxActiveThreads"</code></p>
@@ -298,8 +326,17 @@ public final class SwitchboardConstants {
     public static final String CRAWLER_THREADS_ACTIVE_MAX       = "crawler.MaxActiveThreads";
     public static final String CRAWLER_FOLLOW_REDIRECTS         = "crawler.http.FollowRedirects"; // ignore the target url and follow to the redirect
     public static final String CRAWLER_RECORD_REDIRECTS         = "crawler.http.RecordRedirects"; // record the ignored redirected page to the index store
-    public static final String YACY_MODE_DEBUG                  = "yacyDebugMode";
-
+    
+    /**
+     * debug flags
+     */
+    public static final String DEBUG_SEARCH_LOCAL_DHT_OFF        = "debug.search.local.dht.off"; // =true: do not use the local dht/rwi index (which is not done if we do remote searches)
+    public static final String DEBUG_SEARCH_LOCAL_SOLR_OFF      = "debug.search.local.solr.off"; // =true: do not use solr
+    public static final String DEBUG_SEARCH_REMOTE_DHT_OFF      = "debug.search.remote.dht.off"; // =true: do not use dht/rwi
+    public static final String DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL= "debug.search.remote.dht.testlocal"; // =true: do not use dht, search local peer in a shortcut to the own server
+    public static final String DEBUG_SEARCH_REMOTE_SOLR_OFF     = "debug.search.remote.solr.off"; // =true: do not use solr
+    public static final String DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL= "debug.search.remote.solr.testlocal"; // =true: do not use dht, search local peer in a shortcut to the own server
+    
     /**
      * <p><code>public static final String <strong>WORDCACHE_MAX_COUNT</strong> = "wordCacheMaxCount"</code></p>
      * <p>Name of the setting how many words the word-cache (or DHT-Out cache) shall contain maximal. Indexing pages if the
@@ -407,10 +444,11 @@ public final class SwitchboardConstants {
      *
      */
     public static final String NETWORK_NAME = "network.unit.name";
-    public static final String NETWORK_DOMAIN = "network.unit.domain";
+    public static final String NETWORK_DOMAIN = "network.unit.domain"; // can be filled with: global, local, any
     public static final String NETWORK_DOMAIN_NOCHECK = "network.unit.domain.nocheck";
     public static final String NETWORK_WHITELIST = "network.unit.access.whitelist";
     public static final String NETWORK_BLACKLIST = "network.unit.access.blacklist";
+    public static final String NETWORK_BOOTSTRAP_SEEDLIST_STUB = "network.unit.bootstrap.seedlist";
 
     public static final String NETWORK_SEARCHVERIFY = "network.unit.inspection.searchverify";
 
@@ -446,22 +484,47 @@ public final class SwitchboardConstants {
     public static final String SEARCH_VERIFY_DELETE = "search.verify.delete";
 
     /**
+     * ranking+evaluation
+     */
+    public static final String SEARCH_RANKING_RWI_PROFILE = "search.ranking.rwi.profile"; // old rwi rankingProfile ranking
+    public static final String SEARCH_RANKING_SOLR_DOUBLEDETECTION_MINLENGTH = "search.ranking.solr.doubledetection.minlength";
+    public static final String SEARCH_RANKING_SOLR_DOUBLEDETECTION_QUANTRATE = "search.ranking.solr.doubledetection.quantrate";
+
+    /**
+     * boosts for different cores (add an number to the end of the property name)
+     */
+    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTNAME_         = "search.ranking.solr.collection.boostname.tmpa."; // temporary until we know best default values; add the index number (0..3) to that string
+    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_       = "search.ranking.solr.collection.boostfields.tmpa.";
+    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_        = "search.ranking.solr.collection.boostquery.tmpa.";
+    public static final String SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_     = "search.ranking.solr.collection.boostfunction.tmpb.";
+    
+    /**
      * system tray
      */
-	public static final String TRAY_ICON_ENABLED	 = "tray.icon.enabled";
-	public static final String TRAY_ICON_FORCED		 = "tray.icon.force";
-	public static final String TRAY_ICON_LABEL		 = "tray.icon.label";
-	public static final String TRAY_MENU_ENABLED	 = "tray.menu.enabled";
-
-	/**
-	 * Segments
+	public static final String TRAY_ICON_ENABLED                   = "tray.icon.enabled";
+	public static final String TRAY_ICON_FORCED                    = "tray.icon.force";
+	public static final String TRAY_ICON_LABEL                     = "tray.icon.label";
+	public static final String TRAY_MENU_ENABLED                   = "tray.menu.enabled";
+	
+	/*
+	 * search heuristics
 	 */
-	public static final String SEGMENT_RECEIPTS      = "segment.process.receipts_tmp";
-	public static final String SEGMENT_QUERIES       = "segment.process.queries_tmp";
-	public static final String SEGMENT_DHTIN         = "segment.process.dhtin_tmp";
-	public static final String SEGMENT_DHTOUT        = "segment.process.dhtout_tmp";
-	public static final String SEGMENT_PROXY         = "segment.process.proxy_tmp";
-	public static final String SEGMENT_LOCALCRAWLING = "segment.process.localcrawling_tmp";
-	public static final String SEGMENT_REMOTECRAWLING= "segment.process.remotecrawling_tmp";
-	public static final String SEGMENT_PUBLIC        = "segment.process.public_tmp";
+    public static final String HEURISTIC_SITE                      = "heuristic.site";
+    public static final String HEURISTIC_SEARCHRESULTS             = "heuristic.searchresults";
+    public static final String HEURISTIC_SEARCHRESULTS_CRAWLGLOBAL = "heuristic.searchresults.crawlglobal";
+    public static final String HEURISTIC_BLEKKO                    = "heuristic.blekko";
+    public static final String HEURISTIC_TWITTER                   = "heuristic.twitter";
+    public static final String HEURISTIC_OPENSEARCH                = "heuristic.opensearch";
+	
+	/*
+	 * automatic learning heuristic
+	 */
+    public static final String GREEDYLEARNING_ENABLED              = "greedylearning.enabled";
+    public static final String GREEDYLEARNING_LIMIT_DOCCOUNT       = "greedylearning.limit.doccount";
+    public static final String GREEDYLEARNING_ACTIVE               = "greedylearning.active";
+
+    /*
+     * Skins
+     */
+    public static final String SKINS_PATH_DEFAULT                  = "DATA/SKINS";
 }

@@ -2903,7 +2903,7 @@ Max:Макс.:
 Indexing Queue==Черга індексування
 Loader Queue==Черга завантажувача
 paused==вимк.
-Queues==Черги
+>Queues<==>Черги<
 Local Crawl==Місцеве сканування
 Remote triggered Crawl==Вхідні віддалені сканування
 Pre-Queueing==Передчерга
@@ -3473,6 +3473,7 @@ YaCy - Distributed Search Engine==YaCy - Розподілений пошук
 ### SEARCH & BROWSE ###
 Web Search==Веб-Пошук
 File Search==Пошук файлів
+Host Browser==Host Перегляд
 Search&nbsp;&amp;&nbsp;Browse==Пошук&nbsp;&amp;&nbsp;перегляд
 Search Page==Сторінка пошуку
 Rich Client Search==Пошук Rich Client
@@ -3536,7 +3537,6 @@ YaCy Bugtracker==Помилкозбирач
 Peer Statistics::YaCy Statistics==Статистика::Статистика YaCy
 
 >Search==>Пошук
-Browse==Перегляд
 Computation==Обчислення
 Tutorial==Підручник
 Network Access==Мережа

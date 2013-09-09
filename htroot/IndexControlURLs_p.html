@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 #(reload)#::<meta http-equiv="REFRESH" content="5; url=/IndexControlURLs_p.html">#(/reload)#
   <head>
-    <title>YaCy '#[clientname]#': URL References Administration</title>
+    <title>YaCy '#[clientname]#': URL Database Administration</title>
     #%env/templates/metas.template%#
   <script type="text/javascript">
 //<![CDATA[
@@ -21,7 +21,7 @@ function search(query) {
     else if (window.ActiveXObject) { // IE
         self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
     }
-    self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&maximumRecords=100&nav=none&query=" + query + "+inurl:" + query, true);
+    self.xmlHttpReq.open('GET', "/solr/select?q=sku:\"" + query + "\" OR host_s:\"" + query + "\" OR host_dnc_s:\"" + query + "\" OR host_organization_s:\"" + query + "\" OR host_organizationdnc_s:\"" + query + "\" OR host_subdomain_s:\"" + query + "\" OR url_paths_sxt:\"" + query + "\" OR url_file_name_s:\"" + query + "\"&start=0&rows=100&wt=yjson", true);
     self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     self.xmlHttpReq.onreadystatechange = function() {
         if (self.xmlHttpReq.readyState == 4) {
@@ -62,7 +62,7 @@ function updatepage(str) {
   <body id="IndexControl">
     #%env/templates/header.template%#
     #%env/templates/submenuIndexControl.template%#
-    <h2>URL References Administration</h2>
+    <h2>URL Database Administration</h2>
     <p>The local index currently contains #[ucount]# URL references</p>
     <form action="IndexControlURLs_p.html" id="searchform" method="post" enctype="multipart/form-data" accept-charset="UTF-8" onkeyup="xmlhttpPost(); return false;">
     <fieldset><legend>URL Retrieval</legend>
@@ -70,20 +70,40 @@ function updatepage(str) {
         
         <dt class="TableCellDark">Retrieve by URL:</dt>
         <dd><input type="text" name="urlstring" value="#[urlstring]#" size="40" maxlength="250" />
-            <input type="submit" name="urlstringsearch" value="Show Details for URL" /><br />
+            <input type="submit" name="urlstringsearch" value="Show Details for URL" class="submitready" style="width:240px;"/><br />
             <div id="searchresults"></div>
         </dd>
         
         <dt class="TableCellDark">Retrieve by URL-Hash:</dt>
         <dd><input type="text" name="urlhash" value="#[urlhash]#" size="40" maxlength="12" />
-            <input type="submit" name="urlhashsearch" value="Show Details for URL-Hash" />
-            <input type="submit" name="urlhashsimilar" value="Generate List" />
+            <input type="submit" name="urlhashsearch" value="Show Details for URL-Hash" class="submitready" style="width:240px;"/>
         </dd>
       </dl>
     </fieldset>
     </form>
     
-    
+    #(cleanup)#::
+    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset><legend>Cleanup</legend>
+      <dl>
+        <dt class="TableCellDark">Index Deletion</dt>
+        <dd><input type="checkbox" name="deleteIndex" id="deleteIndex"
+             onclick="x=document.getElementById('deleteIndex').checked;#(rwi)#::document.getElementById('deleteRWI').checked=x;#(/rwi)#document.getElementById('deleteTriplestore').checked=x;document.getElementById('deleteRobots').checked=x;document.getElementById('deleteRobots').checked=x;document.getElementById('deleteCrawlQueues').checked=x;c='disabled';document.getElementById('deleteSearchFl').checked=x;if(x){c='';};document.getElementById('deleteTriplestore').disabled=c;document.getElementById('deletecomplete').disabled=c;document.getElementById('deleteCache').disabled=c;document.getElementById('deleteRobots').disabled=c;document.getElementById('deleteCrawlQueues').disabled=c;document.getElementById('deleteSearchFl').disabled=c;"
+            /><label for="deleteIndex">Delete local search index (embedded Solr and old Metadata)</label><br/>
+            #(solr)#::<input type="checkbox" name="deleteRemoteSolr" id="deleteRemoteSolr" onclick="x=document.getElementById('deleteRemoteSolr').checked;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;" /><label for="deleteRemoteSolr">Delete remote solr index</label><br/>#(/solr)#
+            #(rwi)#::<input type="checkbox" name="deleteRWI" id="deleteRWI" onclick="x=document.getElementById('deleteRWI').checked;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;" /><label for="deleteRWI">Delete RWI Index (DHT transmission words)</label><br/>#(/rwi)#
+            #(citation)#::<input type="checkbox" name="deleteCitation" id="deleteCitation" onclick="x=document.getElementById('deleteCitation').checked;c='disabled';if(x){c='';};document.getElementById('deletecomplete').disabled=c;" /><label for="deleteCitation">Delete Citation Index (linking between URLs)</label><br/>#(/citation)#
+            <input type="checkbox" name="deleteCache" id="deleteCache" disabled="disabled" /><label for="deleteCache">Delete HTTP &amp; FTP Cache</label><br/>
+            <input type="checkbox" name="deleteTriplestore" id="deleteTriplestore" disabled="disabled" /><label for="deleteTriplestore">Delete RDF Triplestore</label><br/>
+            <input type="checkbox" name="deleteCrawlQueues" id="deleteCrawlQueues" disabled="disabled" /><label for="deleteCrawlQueues">Stop Crawler and delete Crawl Queues</label><br/>
+            <input type="checkbox" name="deleteRobots" id="deleteRobots" disabled="disabled" /><label for="deleteRobots">Delete robots.txt Cache</label><br/>
+            <input type="checkbox" name="deleteSearchFl" id="deleteSearchFl" disabled="disabled" /><label for="deleteSearchFl">Delete cached snippet-fetching failures during search</label><br/><br/>
+            <input type="submit" name="deletecomplete" id="deletecomplete" value="Delete" disabled="disabled" class="submitready" style="width:240px;"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    #(/cleanup)#
     
     #(statistics)#::
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
@@ -91,7 +111,7 @@ function updatepage(str) {
       <dl>
         <dt class="TableCellLight">&nbsp;</dt>
         <dd>Show top <input type="text" name="lines" value="#[lines]#" size="6" maxlength="6" /> domains from all URLs.
-            <input type="submit" name="statistics" value="Generate Statistics" />
+            <input type="submit" name="statistics" value="Generate Statistics" class="submitready" style="width:240px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -111,9 +131,9 @@ function updatepage(str) {
         <td>
           <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
             <div>
-              <input type="hidden" name="hashpart" value="#[hashpart]#" />
+              <input type="hidden" name="domain" value="#[domain]#" />
               <input type="hidden" name="lines" value="#[lines]#" />
-              <input type="submit" name="deletedomain" value="delete all" />
+              <input type="submit" name="deletedomain" value="delete all" class="submitready" style="width:240px;"/>
             </div>
           </form>
         </td>
@@ -123,6 +143,45 @@ function updatepage(str) {
       #{/domains}#
     </table>
     #(/statisticslines)#
+    
+    #(dumprestore)#::
+    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset><legend>Dump and Restore of Solr Index</legend>
+      <dl>
+        <dt class="TableCellLight">&nbsp;</dt>
+        <dd><input type="submit" name="indexdump" value="Create Dump" class="submitready" style="width:240px;"/>
+        </dd>
+      </dl>
+      <dl>
+        <dt class="TableCellDark">Dump File</dt>
+        <dd><input type="text" name="dumpfile" value="#[dumpfile]#" size="80" maxlength="250" />
+        </dd>
+        <dt class="TableCellLight">&nbsp;</dt>
+        <dd><input type="submit" name="indexrestore" value="Restore Dump" class="submitready" style="width:240px;"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset><legend>Optimize Solr</legend>
+      <dl>
+        <dt class="TableCellLight">&nbsp;</dt>
+        <dd>merge to max. <input type="text" name="optimizemax" value="#[optimizemax]#" size="6" maxlength="6" /> segments
+        <input type="submit" name="optimizesolr" value="Optimize Solr" class="submitready" style="width:240px;"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset><legend>Reboot Solr Core</legend>
+      <dl>
+        <dt class="TableCellLight">&nbsp;</dt>
+        <dd><input type="submit" name="rebootsolr" value="Shut Down and Re-Start Solr" class="submitready" style="width:240px;"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>::
+    #(/dumprestore)#
     
     #(lurlexport)#::
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
@@ -145,7 +204,7 @@ function updatepage(str) {
             <br />
         </dd>
         <dt class="TableCellLight">&nbsp;</dt>
-        <dd><input type="submit" name="lurlexport" value="Export URLs" />
+        <dd><input type="submit" name="lurlexport" value="Export URLs" class="submitready" style="width:240px;"/>
         </dd>
       </dl>
     </fieldset>
@@ -161,18 +220,15 @@ function updatepage(str) {
     <div class="error">Export to file #[exportfile]# failed: #[exportfailmsg]#</div>::
     #(/lurlexporterror)#
     
-    #(urlhashsimilar)#::<p>Sequential List of URL-Hashes:<br />
-    #{rows}# 
-    #{cols}#<a href="/IndexControlURLs_p.html?urlhash=#[urlHash]#&amp;urlhashsearch=1" class="tt">#[urlHash]#</a> #{/cols}#<br />
-    #{/rows}#
-    </p>
-    #(/urlhashsimilar)#
+    #(indexdump)#::
+    <div class="commit">Stored a solr dump to file #[dumpfile]#</div>::
+    #(/indexdump)#
     
     #(genUrlProfile)#
     ::No entry found for URL-hash #[urlhash]#
-    ::<iframe src="/api/yacydoc.html?urlhash=#[urlhash]#" width="100%" height="420" frameborder="0" scrolling="no"></iframe><br />
+    ::<iframe src="/solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[urlhash]#%22" width="100%" height="420" frameborder="0" scrolling="no"></iframe><br />
     <div id="api">
-    <a href="/api/yacydoc.html?urlhash=#[urlhash]#">
+    <a href="/solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[urlhash]#%22">
     <img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
     <span>These document details can be retrieved as <a href="http://www.w3.org/TR/xhtml-rdfa-primer/">XHTML+RDFa</a>
     document containg <a href="http://www.w3.org/RDF/">RDF</a> annotations in <a href="http://dublincore.org/">Dublin Core</a> vocabulary.
@@ -185,16 +241,16 @@ function updatepage(str) {
 		<input type="hidden" name="viewMode" value="parsed" />
 		<input type="hidden" name="show" value="Show" />
 		<input type="hidden" name="urlHash" value="#[urlhash]#" />
-		<input type="submit" value="Show Content" name="showcontent" /><br />
+		<input type="submit" value="Show Content" name="showcontent" class="submitready" style="width:240px;"/><br />
 	</form>
 	<form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
 		<input type="hidden" name="keystring" value="" />
 		<input type="hidden" name="keyhash" value="" />
 		<input type="hidden" name="urlstring" value="" />
 		<input type="hidden" name="urlhash" value="#[urlhash]#" />
-		<input type="submit" value="Delete URL" name="urlhashdelete" /><br />
+		<input type="submit" value="Delete URL" name="urlhashdelete" class="submitready" style="width:240px;"/><br />
 		<span class="small">&nbsp;this may produce unresolved references at other word indexes but they do not harm</span><br /><br />
-		<input type="submit" value="Delete URL and remove all references from words" name="urlhashdeleteall" /><br />
+		<input type="submit" value="Delete URL and remove all references from words" name="urlhashdeleteall" class="submitready" style="width:240px;"/><br />
 		<span class="small">&nbsp;delete the reference to this url at every other word where the reference exists (very extensive, but prevents unresolved references)</span><br />
 	</form>
     #(/genUrlProfile)#

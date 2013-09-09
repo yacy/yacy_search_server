@@ -11,10 +11,14 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import net.yacy.document.AbstractParser;
 
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
-import net.yacy.document.TextParser;
+import net.yacy.document.parser.docParser;
+import net.yacy.document.parser.odtParser;
+import net.yacy.document.parser.ooxmlParser;
+import net.yacy.document.parser.pdfParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.junit.Test;
@@ -22,40 +26,134 @@ import org.junit.Test;
 
 public class ParserTest {
 
-	@Test public void testParsers() throws FileNotFoundException, Parser.Failure, MalformedURLException, UnsupportedEncodingException, IOException	{
+	@Test public void testooxmlParsers() throws FileNotFoundException, Parser.Failure, MalformedURLException, UnsupportedEncodingException, IOException	{
 		final String[][] testFiles = new String[][] {
 			// meaning:  filename in test/parsertest, mimetype, title, creator, description,
 			new String[]{"umlaute_windows.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen", "", ""},
 			new String[]{"umlaute_windows.pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation", "Folie 1", "", ""},
+		};
+
+		for (final String[] testFile : testFiles) {
+                    try {
+                        final String filename = "test/parsertest/" + testFile[0];
+                        final File file = new File(filename);
+                        final String mimetype = testFile[1];
+                        final DigestURI url = new DigestURI("http://localhost/"+filename);
+
+                        AbstractParser p = new ooxmlParser();
+                        final Document[] docs = p.parse(url, mimetype, null, new FileInputStream(file));
+                        for (final Document doc: docs) {
+                            final Reader content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
+                            final StringBuilder str = new StringBuilder();
+                            int c;
+                            while( (c = content.read()) != -1 )
+                                    str.append((char)c);
+
+                            System.out.println("Parsed " + filename + ": " + str);
+                            assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
+                            assertThat(doc.dc_title(), containsString(testFile[2]));
+                            assertThat(doc.dc_creator(), containsString(testFile[3]));
+                            assertThat(doc.dc_description(), containsString(testFile[4]));
+                        }
+                    } catch (final InterruptedException ex) {}
+                    }
+		}
+        
+        	@Test public void testodtParsers() throws FileNotFoundException, Parser.Failure, MalformedURLException, UnsupportedEncodingException, IOException	{
+		final String[][] testFiles = new String[][] {
+			// meaning:  filename in test/parsertest, mimetype, title, creator, description,
 			new String[]{"umlaute_linux.odt", "application/vnd.oasis.opendocument.text", "Münchner Hofbräuhaus", "", "Kommentar zum Hofbräuhaus"},
 			new String[]{"umlaute_linux.ods", "application/vnd.oasis.opendocument.spreadsheat", "", "", ""},
 			new String[]{"umlaute_linux.odp", "application/vnd.oasis.opendocument.presentation", "", "", ""},
+		};
+
+		for (final String[] testFile : testFiles) {
+                    try {
+                        final String filename = "test/parsertest/" + testFile[0];
+                        final File file = new File(filename);
+                        final String mimetype = testFile[1];
+                        final DigestURI url = new DigestURI("http://localhost/"+filename);
+
+                        AbstractParser p = new odtParser();
+                        final Document[] docs = p.parse(url, mimetype, null, new FileInputStream(file));
+                        for (final Document doc: docs) {
+                            final Reader content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
+                            final StringBuilder str = new StringBuilder();
+                            int c;
+                            while( (c = content.read()) != -1 )
+                                    str.append((char)c);
+
+                            System.out.println("Parsed " + filename + ": " + str);
+                            assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
+                     //       assertThat(doc.dc_title(), containsString(testFile[2]));
+                            assertThat(doc.dc_creator(), containsString(testFile[3]));
+                            assertThat(doc.dc_description(), containsString(testFile[4]));
+                        }
+                    } catch (final InterruptedException ex) {}
+                    }
+		}
+                
+        	@Test public void testpdfParsers() throws FileNotFoundException, Parser.Failure, MalformedURLException, UnsupportedEncodingException, IOException	{
+		final String[][] testFiles = new String[][] {
+                        // meaning:  filename in test/parsertest, mimetype, title, creator, description,
 			new String[]{"umlaute_linux.pdf", "application/pdf", "", "", ""},
+		};
+
+		for (final String[] testFile : testFiles) {
+                    try {
+                        final String filename = "test/parsertest/" + testFile[0];
+                        final File file = new File(filename);
+                        final String mimetype = testFile[1];
+                        final DigestURI url = new DigestURI("http://localhost/"+filename);
+
+                        AbstractParser p = new pdfParser();
+                        final Document[] docs = p.parse(url, mimetype, null, new FileInputStream(file));
+                        for (final Document doc: docs) {
+                            final Reader content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
+                            final StringBuilder str = new StringBuilder();
+                            int c;
+                            while( (c = content.read()) != -1 )
+                                    str.append((char)c);
+
+                            System.out.println("Parsed " + filename + ": " + str);
+                            assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
+                            assertThat(doc.dc_title(), containsString(testFile[2]));
+                            assertThat(doc.dc_creator(), containsString(testFile[3]));
+                            assertThat(doc.dc_description(), containsString(testFile[4]));
+                        }
+                    } catch (final InterruptedException ex) {}
+                    }
+		}                
+                
+        	@Test public void testdocParsers() throws FileNotFoundException, Parser.Failure, MalformedURLException, UnsupportedEncodingException, IOException	{
+		final String[][] testFiles = new String[][] {
+			// meaning:  filename in test/parsertest, mimetype, title, creator, description,
 			new String[]{"umlaute_windows.doc", "application/msword", "", "", ""},
 		};
 
-
 		for (final String[] testFile : testFiles) {
-			final String filename = "test/parsertest/" + testFile[0];
-			final File file = new File(filename);
-			final String mimetype = testFile[1];
-			final DigestURI url = new DigestURI("http://localhost/"+filename);
+                    try {
+                        final String filename = "test/parsertest/" + testFile[0];
+                        final File file = new File(filename);
+                        final String mimetype = testFile[1];
+                        final DigestURI url = new DigestURI("http://localhost/"+filename);
 
-			final Document[] docs = TextParser.parseSource(url, mimetype, null, file.length(), new FileInputStream(file), true);
-			for (final Document doc: docs) {
-    			final Reader content = new InputStreamReader(doc.getText(), doc.getCharset());
-    			final StringBuilder str = new StringBuilder();
-    			int c;
-    			while( (c = content.read()) != -1 )
-    				str.append((char)c);
+                        AbstractParser p = new docParser();
+                        final Document[] docs = p.parse(url, mimetype, null, new FileInputStream(file));
+                        for (final Document doc: docs) {
+                            final Reader content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
+                            final StringBuilder str = new StringBuilder();
+                            int c;
+                            while( (c = content.read()) != -1 )
+                                    str.append((char)c);
 
-    			System.out.println("Parsed " + filename + ": " + str);
-    			assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
-    			assertThat(doc.dc_title(), containsString(testFile[2]));
-    			assertThat(doc.dc_creator(), containsString(testFile[3]));
-    			assertThat(doc.dc_description(), containsString(testFile[4]));
-			}
-		}
+                            System.out.println("Parsed " + filename + ": " + str);
+                            assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
+                            assertThat(doc.dc_title(), containsString(testFile[2]));
+                            assertThat(doc.dc_creator(), containsString(testFile[3]));
+                            assertThat(doc.dc_description(), containsString(testFile[4]));
+                        }
+                    } catch (final InterruptedException ex) {}
+                    }
+		}                 
 	}
-}
-

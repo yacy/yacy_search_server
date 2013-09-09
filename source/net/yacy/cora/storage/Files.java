@@ -55,10 +55,10 @@ public class Files {
         InputStream is = new BufferedInputStream(new FileInputStream(f));
         if (f.toString().endsWith(".bz2")) is = new BZip2CompressorInputStream(is);
         if (f.toString().endsWith(".gz")) is = new GZIPInputStream(is);
-        
+
         return is;
 	}
-	
+
 	/**
 	 * reading a file line by line should be done with two concurrent processes
 	 * - one reading the file and doing IO operations
@@ -80,29 +80,31 @@ public class Files {
 		final InputStream is = read(f);
 		final BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 		Thread t = new Thread() {
-			public void run() {
+			@Override
+            public void run() {
+                Thread.currentThread().setName("Files.concurrentLineReader:" + f);
 				String line;
 				try {
 					while ((line = br.readLine()) != null) {
 						q.put(line);
 					}
-				} catch (IOException e) {
-				} catch (InterruptedException e) {
+				} catch (final IOException e) {
+				} catch (final InterruptedException e) {
 				} finally {
 					try {
 						q.put(POISON_LINE);
 						try {
 							br.close();
 							is.close();
-						} catch (IOException ee) {
+						} catch (final IOException ee) {
 						}
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						// last try
 						q.add(POISON_LINE);
 						try {
 							br.close();
 							is.close();
-						} catch (IOException ee) {
+						} catch (final IOException ee) {
 						}
 					}
 				}
@@ -111,7 +113,7 @@ public class Files {
 		t.start();
 		return q;
 	}
-	
+
     /**
      * copy a file or a complete directory
      * @param from the source file or directory

@@ -30,10 +30,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import net.yacy.cora.document.Classification;
-import net.yacy.cora.document.Classification.ContentDomain;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
-import net.yacy.kelondro.logging.Log;
 
 public class RankingProfile {
 
@@ -66,7 +66,6 @@ public class RankingProfile {
     public static final String WORDDISTANCE       = "worddistance";
     public static final String WORDSINTEXT        = "wordsintext";
     public static final String WORDSINTITLE       = "wordsintitle";
-    public static final String YBR                = "ybr";
 
     // post-sort predicates
     public static final String URLCOMPINTOPLIST   = "urlcompintoplist";
@@ -79,7 +78,7 @@ public class RankingProfile {
     public static final int COEFF_MAX = 15;
 
     public int
-        coeff_domlength, coeff_ybr, coeff_date, coeff_wordsintitle, coeff_wordsintext, coeff_phrasesintext,
+        coeff_domlength, coeff_date, coeff_wordsintitle, coeff_wordsintext, coeff_phrasesintext,
         coeff_llocal, coeff_lother, coeff_urllength, coeff_urlcomps, coeff_hitcount,
         coeff_posintext, coeff_posofphrase, coeff_posinphrase, coeff_authority, coeff_worddistance,
         coeff_appurl, coeff_app_dc_title, coeff_app_dc_creator, coeff_app_dc_subject, coeff_app_dc_description, coeff_appemph,
@@ -90,18 +89,18 @@ public class RankingProfile {
     public RankingProfile(final Classification.ContentDomain mediatype) {
         // set default-values
         this.coeff_appemph            = 5;
-        this.coeff_appurl             = 11;
+        this.coeff_appurl             = 12;
         this.coeff_app_dc_creator     = 1;
-        this.coeff_app_dc_description = 8;
+        this.coeff_app_dc_description = 10;
         this.coeff_app_dc_subject     = 2;
-        this.coeff_app_dc_title       = 12;
+        this.coeff_app_dc_title       = 14;
         this.coeff_authority          = 5;
         this.coeff_cathasapp          = (mediatype == ContentDomain.APP) ? 15 : 0;
         this.coeff_cathasaudio        = (mediatype == ContentDomain.AUDIO) ? 15 : 0;
         this.coeff_cathasimage        = (mediatype == ContentDomain.IMAGE) ? 15 : 0;
         this.coeff_cathasvideo        = (mediatype == ContentDomain.VIDEO) ? 15 : 0;
         this.coeff_catindexof         = (mediatype == ContentDomain.TEXT) ? 0 : 15;
-        this.coeff_date               = 7;
+        this.coeff_date               = 9;
         this.coeff_domlength          = 10;
         this.coeff_hitcount           = 1;
         this.coeff_language           = 2;
@@ -111,18 +110,17 @@ public class RankingProfile {
         this.coeff_posinphrase        = 0;
         this.coeff_posintext          = 4;
         this.coeff_posofphrase        = 0;
-        this.coeff_termfrequency      = 14;
+        this.coeff_termfrequency      = 8;
         this.coeff_urlcomps           = 7;
         this.coeff_urllength          = 6;
         this.coeff_worddistance       = 10;
         this.coeff_wordsintext        = 3;
         this.coeff_wordsintitle       = 2;
-        this.coeff_ybr                = 8;
 
         this.coeff_urlcompintoplist   = 2;
         this.coeff_descrcompintoplist = 2;
         this.coeff_prefer             = 0;
-        this.coeff_citation           = 15;
+        this.coeff_citation           = 10;
     }
 
     public RankingProfile(final String prefix, String profile) {
@@ -149,12 +147,11 @@ public class RankingProfile {
                         coeff.put(e.substring(s, p), Integer.valueOf(NumberTools.parseIntDecSubstring(e, p + 1)));
                     } catch (final NumberFormatException e1) {
                         System.out.println("wrong parameter: " + e.substring(s, p) + "=" + e.substring(p + 1));
-                        Log.logException(e1);
+                        ConcurrentLog.logException(e1);
                     }
                 }
             }
             this.coeff_domlength          = parseMap(coeff, DOMLENGTH, this.coeff_domlength);
-            this.coeff_ybr                = parseMap(coeff, YBR, this.coeff_ybr);
             this.coeff_date               = parseMap(coeff, DATE, this.coeff_date);
             this.coeff_wordsintitle       = parseMap(coeff, WORDSINTITLE, this.coeff_wordsintitle);
             this.coeff_wordsintext        = parseMap(coeff, WORDSINTEXT, this.coeff_wordsintext);
@@ -195,6 +192,45 @@ public class RankingProfile {
         return (coeff.get(attr)).intValue();
     }
 
+    /**
+     * set all ranking attributes to zero
+     * This is usually used when a specific value is set to maximum
+     */
+    public void allZero() {
+        this.coeff_domlength          = 0;
+        this.coeff_date               = 0;
+        this.coeff_wordsintitle       = 0;
+        this.coeff_wordsintext        = 0;
+        this.coeff_phrasesintext      = 0;
+        this.coeff_llocal             = 0;
+        this.coeff_lother             = 0;
+        this.coeff_urllength          = 0;
+        this.coeff_urlcomps           = 0;
+        this.coeff_hitcount           = 0;
+        this.coeff_posintext          = 0;
+        this.coeff_posofphrase        = 0;
+        this.coeff_posinphrase        = 0;
+        this.coeff_authority          = 0;
+        this.coeff_worddistance       = 0;
+        this.coeff_appurl             = 0;
+        this.coeff_app_dc_title       = 0;
+        this.coeff_app_dc_creator     = 0;
+        this.coeff_app_dc_subject     = 0;
+        this.coeff_app_dc_description = 0;
+        this.coeff_appemph            = 0;
+        this.coeff_catindexof         = 0;
+        this.coeff_cathasimage        = 0;
+        this.coeff_cathasaudio        = 0;
+        this.coeff_cathasvideo        = 0;
+        this.coeff_cathasapp          = 0;
+        this.coeff_termfrequency      = 0;
+        this.coeff_urlcompintoplist   = 0;
+        this.coeff_descrcompintoplist = 0;
+        this.coeff_prefer             = 0;
+        this.coeff_language           = 0;
+        this.coeff_citation           = 0;
+    }
+    
     private String externalStringCache = null;
     public String toExternalString() {
         if (this.externalStringCache != null) return this.externalStringCache;
@@ -210,7 +246,7 @@ public class RankingProfile {
 
     public Map<String, String> preToExternalMap(final String prefix) {
         final Map<String, String> ext = new LinkedHashMap<String, String>(40);
-        if (prefix.length() == 0) {
+        if (prefix.isEmpty()) {
             ext.put(APPEMPH, Integer.toString(this.coeff_appemph));
             ext.put(APPURL, Integer.toString(this.coeff_appurl));
             ext.put(APP_DC_CREATOR, Integer.toString(this.coeff_app_dc_creator));
@@ -239,7 +275,6 @@ public class RankingProfile {
             ext.put(WORDDISTANCE, Integer.toString(this.coeff_worddistance));
             ext.put(WORDSINTEXT, Integer.toString(this.coeff_wordsintext));
             ext.put(WORDSINTITLE, Integer.toString(this.coeff_wordsintitle));
-            ext.put(YBR, Integer.toString(this.coeff_ybr));
         } else {
             ext.put(prefix + APPEMPH, Integer.toString(this.coeff_appemph));
             ext.put(prefix + APPURL, Integer.toString(this.coeff_appurl));
@@ -269,14 +304,13 @@ public class RankingProfile {
             ext.put(prefix + WORDDISTANCE, Integer.toString(this.coeff_worddistance));
             ext.put(prefix + WORDSINTEXT, Integer.toString(this.coeff_wordsintext));
             ext.put(prefix + WORDSINTITLE, Integer.toString(this.coeff_wordsintitle));
-            ext.put(prefix + YBR, Integer.toString(this.coeff_ybr));
         }
         return ext;
     }
 
     public Map<String, String> postToExternalMap(final String prefix) {
     	final Map<String, String> ext = new LinkedHashMap<String, String>();
-        if (prefix.length() == 0) {
+        if (prefix.isEmpty()) {
             ext.put(URLCOMPINTOPLIST, Integer.toString(this.coeff_urlcompintoplist));
             ext.put(DESCRCOMPINTOPLIST, Integer.toString(this.coeff_descrcompintoplist));
             ext.put(PREFER, Integer.toString(this.coeff_prefer));

@@ -35,14 +35,14 @@ import java.util.TreeMap;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.MessageBoard;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 import com.google.common.io.Files;
 
-import de.anomic.data.MessageBoard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class Messages_p {
 

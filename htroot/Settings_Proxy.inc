@@ -53,7 +53,7 @@
   <!-- no remote proxy pattern -->
   <tr valign="top">
     <td><label for="no_prxy">No-proxy adresses</label>:</td>
-    <td colspan="2"><input name="remoteProxyNoProxy" type="text" id="no_prxy" size="32" maxlength="128" value="#[remoteProxyNoProxy]#" /></td>
+    <td colspan="2"><input name="remoteProxyNoProxy" type="text" id="no_prxy" size="32" maxlength="5000" value="#[remoteProxyNoProxy]#" /></td>
     <td>IP addresses for which the remote proxy should not be used</td>
   </tr>
   

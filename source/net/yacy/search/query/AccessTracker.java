@@ -36,32 +36,41 @@ import java.util.LinkedList;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
-import net.yacy.document.WordCache;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.document.WordCache;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 
 public class AccessTracker {
 
-    public static final int minSize = 100;
-    public static final int maxSize = 1000;
-    public static final int maxAge = 24 * 60 * 60 * 1000;
+    private final static long DUMP_PERIOD = 60000L;
+
+    private static final int minSize = 100;
+    private static final int maxSize = 1000;
+    private static final int maxAge = 24 * 60 * 60 * 1000;
 
     public enum Location {local, remote}
 
-    private static LinkedList<QueryParams> localSearches = new LinkedList<QueryParams>();
-    private static LinkedList<QueryParams> remoteSearches = new LinkedList<QueryParams>();
-    private static ArrayList<String> log = new ArrayList<String>();
+    private static final LinkedList<QueryParams> localSearches = new LinkedList<QueryParams>();
+    private static final LinkedList<QueryParams> remoteSearches = new LinkedList<QueryParams>();
+    private static final ArrayList<String> log = new ArrayList<String>();
+    private static long lastLogDump = System.currentTimeMillis();
+    private static File dumpFile = null;
 
-    public static void add(final Location location, final QueryParams query) {
-        if (location == Location.local) synchronized (localSearches) {add(localSearches, query);}
-        if (location == Location.remote) synchronized (remoteSearches) {add(remoteSearches, query);}
+    public static void setDumpFile(File f) {
+        dumpFile = f;
     }
 
-    private static void add(final LinkedList<QueryParams> list, final QueryParams query) {
+    public static void add(final Location location, final QueryParams query, int resultCount) {
+        if (location == Location.local) synchronized (localSearches) {add(localSearches, query, resultCount);}
+        if (location == Location.remote) synchronized (remoteSearches) {add(remoteSearches, query, resultCount);}
+    }
+
+    private static void add(final LinkedList<QueryParams> list, final QueryParams query, int resultCount) {
         // learn that this word can be a word completion for the DidYouMeanLibrary
-        if (query.resultcount > 10 && query.queryString != null && query.queryString.length() > 0) {
-            final StringBuilder sb = new StringBuilder(query.queryString);
-            sb.append(query.queryString);
+        String queryString = query.getQueryGoal().getOriginalQueryString(false);
+        if (resultCount > 10 && queryString != null && queryString.length() > 0) {
+            final StringBuilder sb = new StringBuilder(queryString);
+            sb.append(queryString);
             WordCache.learn(sb);
         }
 
@@ -69,9 +78,9 @@ public class AccessTracker {
         list.add(query);
 
         // shrink dump list but keep essentials in dump
-        while (list.size() > maxSize || (list.size() > 0 && MemoryControl.shortStatus())) {
+        while (list.size() > maxSize || (!list.isEmpty() && MemoryControl.shortStatus())) {
             synchronized (list) {
-                if (list.size() > 0) addToDump(list.removeFirst()); else break;
+                if (!list.isEmpty()) addToDump(list.removeFirst(), resultCount); else break;
             }
         }
 
@@ -80,10 +89,10 @@ public class AccessTracker {
 
         // if the list is large we look for too old entries
         final long timeout = System.currentTimeMillis() - maxAge;
-        while (list.size() > 0) {
+        while (!list.isEmpty()) {
             final QueryParams q = list.getFirst();
             if (q.starttime > timeout) break;
-            addToDump(list.removeFirst());
+            addToDump(list.removeFirst(), resultCount);
         }
     }
 
@@ -99,35 +108,64 @@ public class AccessTracker {
         return 0;
     }
 
-    private static void addToDump(final QueryParams query) {
-        //if (query.resultcount == 0) return;
-        if (query.queryString == null || query.queryString.length() == 0) return;
-        final StringBuilder sb = new StringBuilder(40);
-        sb.append(GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(query.starttime)));
-        sb.append(' ');
-        sb.append(Integer.toString(query.resultcount));
-        sb.append(' ');
-        sb.append(query.queryString);
-        log.add(sb.toString());
+    private static void addToDump(final QueryParams query, int resultCount) {
+        String queryString = query.getQueryGoal().getOriginalQueryString(false);
+        if (queryString == null || queryString.isEmpty()) return;
+        addToDump(queryString, Integer.toString(resultCount), new Date(query.starttime));
     }
 
-    public static void dumpLog(final File file) {
-        while (localSearches.size() > 0) {
-            addToDump(localSearches.removeFirst());
+    public static void addToDump(String querystring, String resultcount) {
+        addToDump(querystring, resultcount, new Date());
+        if (lastLogDump + DUMP_PERIOD < System.currentTimeMillis()) {
+            lastLogDump = System.currentTimeMillis();
+            dumpLog();
         }
-        try {
-            final RandomAccessFile raf = new RandomAccessFile(file, "rw");
-            raf.seek(raf.length());
-            for (final String s: log) {
-                raf.write(UTF8.getBytes(s));
-                raf.writeByte(10);
+    }
+
+    private static void addToDump(String querystring, String resultcount, Date d) {
+        //if (query.resultcount == 0) return;
+        if (querystring == null || querystring.isEmpty()) return;
+        final StringBuilder sb = new StringBuilder(40);
+        sb.append(GenericFormatter.SHORT_SECOND_FORMATTER.format(d));
+        sb.append(' ');
+        sb.append(resultcount);
+        sb.append(' ');
+        sb.append(querystring);
+        synchronized (log) {
+            log.add(sb.toString());
+        }
+    }
+
+    public static void dumpLog() {
+        while (!localSearches.isEmpty()) {
+            addToDump(localSearches.removeFirst(), 0);
+        }
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                ArrayList<String> logCopy = new ArrayList<String>();
+                synchronized (log) {
+                    logCopy.addAll(log);
+                    log.clear();
+                }
+                RandomAccessFile raf = null;
+                try {
+                    raf = new RandomAccessFile(dumpFile, "rw");
+                    raf.seek(raf.length());
+                    for (final String s: logCopy) {
+                        raf.write(UTF8.getBytes(s));
+                        raf.writeByte(10);
+                    }
+                    logCopy.clear();
+                } catch (final FileNotFoundException e) {
+                    ConcurrentLog.logException(e);
+                } catch (final IOException e) {
+                    ConcurrentLog.logException(e);
+                } finally {
+                    if (raf != null) try {raf.close();} catch (final IOException e) {}
+                }
             }
-            log.clear();
-        } catch (final FileNotFoundException e) {
-            Log.logException(e);
-        } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        };
+        t.start();
     }
 }

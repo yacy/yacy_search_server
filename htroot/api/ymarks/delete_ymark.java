@@ -1,15 +1,15 @@
 import java.io.IOException;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.data.UserDB;
+import net.yacy.data.ymark.YMarkEntry;
+import net.yacy.data.ymark.YMarkTables;
+import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
-import de.anomic.data.ymark.YMarkEntry;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 
 public class delete_ymark {
@@ -39,9 +39,9 @@ public class delete_ymark {
 	        	sb.tables.bookmarks.deleteBookmark(bmk_user, urlHash);
 	        	prop.put("result", "1");
 			} catch (final IOException e) {
-				Log.logException(e);
-			} catch (final RowSpaceExceededException e) {
-				Log.logException(e);
+				ConcurrentLog.logException(e);
+			} catch (final SpaceExceededException e) {
+				ConcurrentLog.logException(e);
 			}
         } else {
         	prop.put(serverObjects.ACTION_AUTHENTICATE, YMarkTables.USER_AUTHENTICATE_MSG);

@@ -20,6 +20,7 @@ you can validate it with http://www.stg.brown.edu/service/xmlvalid/
   <dc:identifier SCHEME="URL">#[dc_identifier]#</dc:identifier>
   <dc:format.extent>#[yacy_size]#</dc:format.extent>
   <dc:language SCHEME="ISO639-2">#[dc_language]#</dc:language>
+  <collections>#[collection]#</collections>
   <geo:Point>
     <geo:long>#[geo_long]#</geo:long>
     <geo:lat>#[geo_lat]#</geo:lat>

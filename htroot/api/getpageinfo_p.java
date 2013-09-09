@@ -33,24 +33,26 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.robots.RobotsTxtEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.anomic.crawler.RobotsTxtEntry;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class getpageinfo_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
@@ -90,13 +92,14 @@ public class getpageinfo_p {
                 try {
                     u = new DigestURI(url);
                 } catch (final MalformedURLException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
                 net.yacy.document.Document scraper = null;
                 if (u != null) try {
-                    scraper = sb.loader.loadDocument(u, CacheStrategy.IFEXIST);
+                    ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+                    scraper = sb.loader.loadDocument(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER, agent);
                 } catch (final IOException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                     // bad things are possible, i.e. that the Server responds with "403 Bad Behavior"
                     // that should not affect the robots.txt validity
                 }
@@ -119,21 +122,21 @@ public class getpageinfo_p {
                     }
                     prop.put("tags", count);
                     // put description
-                    prop.putXML("desc", scraper.dc_description());
+                    prop.putXML("desc", scraper.dc_description().length > 0 ? scraper.dc_description()[0] : "");
                     // put language
                     final Set<String> languages = scraper.getContentLanguages();
-                    prop.putXML("lang", (languages == null) ? "unknown" : languages.iterator().next());
+                    prop.putXML("lang", (languages == null || languages.size() == 0) ? "unknown" : languages.iterator().next());
 
                     // get links and put them into a semicolon-separated list
-                    final Set<MultiProtocolURI> uris = scraper.getAnchors().keySet();
+                    final Set<DigestURI> uris = scraper.getAnchors().keySet();
                     final StringBuilder links = new StringBuilder(uris.size() * 80);
                     final StringBuilder filter = new StringBuilder(uris.size() * 40);
                     count = 0;
-                    for (final MultiProtocolURI uri: uris) {
+                    for (final DigestURI uri: uris) {
                         if (uri == null) continue;
-                        links.append(';').append(uri.toNormalform(true, false));
+                        links.append(';').append(uri.toNormalform(true));
                         filter.append('|').append(uri.getProtocol()).append("://").append(uri.getHost()).append(".*");
-                        prop.putXML("links_" + count + "_link", uri.toNormalform(true, false));
+                        prop.putXML("links_" + count + "_link", uri.toNormalform(true));
                         count++;
                     }
                     prop.put("links", count);
@@ -146,13 +149,9 @@ public class getpageinfo_p {
                     final DigestURI theURL = new DigestURI(url);
 
                 	// determine if crawling of the current URL is allowed
-                    RobotsTxtEntry robotsEntry;
-                    try {
-                        robotsEntry = sb.robots.getEntry(theURL, sb.peers.myBotIDs());
-                    } catch (final IOException e) {
-                        robotsEntry = null;
-                        Log.logException(e);
-                    }
+                    ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+                    sb.robots.ensureExist(theURL, agent, true);
+                    RobotsTxtEntry robotsEntry = sb.robots.getEntry(theURL, agent);
                 	prop.put("robots-allowed", robotsEntry == null ? 1 : robotsEntry.isDisallowed(theURL) ? 0 : 1);
                     prop.putHTML("robotsInfo", robotsEntry == null ? "" : robotsEntry.getInfo());
 
@@ -160,7 +159,7 @@ public class getpageinfo_p {
                     final MultiProtocolURI sitemapURL = robotsEntry == null ? null : robotsEntry.getSitemap();
                     prop.putXML("sitemap", sitemapURL == null ? "" : sitemapURL.toString());
                 } catch (final MalformedURLException e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
             if (actions.indexOf("oai",0) >= 0) {
@@ -192,11 +191,11 @@ public class getpageinfo_p {
 			final DocumentBuilder builder = factory.newDocumentBuilder();
 			return parseXML(builder.parse(url));
 		} catch (final ParserConfigurationException ex) {
-			Log.logException(ex);
+			ConcurrentLog.logException(ex);
 		} catch (final SAXException ex) {
-			Log.logException(ex);
+			ConcurrentLog.logException(ex);
 		} catch (final IOException ex) {
-			Log.logException(ex);
+			ConcurrentLog.logException(ex);
 		}
 
 		return "";

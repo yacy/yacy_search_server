@@ -55,10 +55,10 @@ public class sidAudioParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("audio/x-sidtune");
     }
 
+    @Override
     public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source)
-            throws Parser.Failure, InterruptedException
-    {
+            throws Parser.Failure, InterruptedException {
         try {
             final int available = source.available();
             final byte[] b = new byte[available];
@@ -85,7 +85,7 @@ public class sidAudioParser extends AbstractParser implements Parser {
                         this,
                         null,
                         null,
-                        header.get("name"),
+                        singleList(header.get("name")),
                         header.get("author"),
                         header.get("publisher"),
                         null,
@@ -96,10 +96,9 @@ public class sidAudioParser extends AbstractParser implements Parser {
                         null,
                         null,
                         false)};
-            } else {
-                throw new Parser.Failure("Unable to parse SID file, file does seems to be incomplete (len = " + available + ").", location);
             }
-        } catch (IOException ex) {
+            throw new Parser.Failure("Unable to parse SID file, file does seems to be incomplete (len = " + available + ").", location);
+        } catch (final IOException ex) {
             throw new Parser.Failure("Unable to read SID file header.", location, ex);
         }
     }

@@ -36,15 +36,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 
 public class BDecoder {
 
-    final static byte[] _e = "e".getBytes();
-    final static byte[] _i = "i".getBytes();
-    final static byte[] _d = "d".getBytes();
-    final static byte[] _l = "l".getBytes();
-    final static byte[] _p = ":".getBytes();
+    private final static byte[] _e = "e".getBytes();
+    private final static byte[] _i = "i".getBytes();
+    private final static byte[] _d = "d".getBytes();
+    private final static byte[] _l = "l".getBytes();
+    private final static byte[] _p = ":".getBytes();
     
     private final byte[] b;
     private int pos;
@@ -69,7 +70,7 @@ public class BDecoder {
         public void toStream(OutputStream os) throws IOException;
     }
     
-    public static abstract class BDfltObject implements BObject {
+    private static abstract class BDfltObject implements BObject {
 
         public long getInteger() {
             throw new UnsupportedOperationException();
@@ -116,19 +117,20 @@ public class BDecoder {
             return UTF8.String(this.b);
         }
         public void toStream(OutputStream os) throws IOException {
-            os.write(UTF8.getBytes(Integer.toString(this.b.length)));
+            os.write(ASCII.getBytes(Integer.toString(this.b.length)));
             os.write(_p);
             os.write(this.b);
         }
-        public static void toStream(OutputStream os, byte[] b) throws IOException {
-            os.write(UTF8.getBytes(Integer.toString(b.length)));
+        private static void toStream(OutputStream os, byte[] b) throws IOException {
+            os.write(ASCII.getBytes(Integer.toString(b.length)));
             os.write(_p);
             os.write(b);
         }
-        public static void toStream(OutputStream os, String s) throws IOException {
-            os.write(UTF8.getBytes(Integer.toString(s.length())));
+        private static void toStream(OutputStream os, String s) throws IOException {
+            final byte[] b = UTF8.getBytes(s);
+            os.write(ASCII.getBytes(Integer.toString(b.length)));
             os.write(_p);
-            os.write(UTF8.getBytes(s));
+            os.write(b);   
         }
     }
     
@@ -201,7 +203,7 @@ public class BDecoder {
     
     public static class BIntegerObject extends BDfltObject implements BObject {
         private long i;
-        public BIntegerObject(long i) {
+        private BIntegerObject(long i) {
             this.i = i;
         }
         @Override
@@ -218,7 +220,7 @@ public class BDecoder {
         }
         public void toStream(OutputStream os) throws IOException {
             os.write(_i);
-            os.write(UTF8.getBytes(Long.toString(this.i)));
+            os.write(ASCII.getBytes(Long.toString(this.i)));
             os.write(_e);
         }
     }
@@ -260,7 +262,7 @@ public class BDecoder {
             int end = pos;
             end++;
             while (b[end] != ':') ++end;
-            final int len = Integer.parseInt(UTF8.String(b, pos, end - pos));
+            final int len = Integer.parseInt(ASCII.String(b, pos, end - pos));
             final byte[] s = new byte[len];
             System.arraycopy(b, end + 1, s, 0, len);
             pos = end + len + 1;
@@ -283,7 +285,7 @@ public class BDecoder {
         }
     }
     
-    public static void print(BObject bo, int t) {
+    private static void print(BObject bo, int t) {
         for (int i = 0; i < t; i++) System.out.print(" ");
         if (bo.getType() == BType.integer) System.out.println(bo.getInteger());
         if (bo.getType() == BType.string) System.out.println(bo.getString());
@@ -314,7 +316,7 @@ public class BDecoder {
             BObject o = bdecoder.parse();
             print(o, 0);
             System.out.println("Object: " + o.toString());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

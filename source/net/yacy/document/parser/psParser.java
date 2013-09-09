@@ -77,13 +77,13 @@ public class psParser extends AbstractParser implements Parser {
             final int returnCode = ps2asciiProc.waitFor();
             return (returnCode == 0);
         } catch (final Exception e) {
-            if (this.log != null) this.log.logInfo("ps2ascii not found. Switching to java parser mode.");
+            if (AbstractParser.log != null) AbstractParser.log.info("ps2ascii not found. Switching to java parser mode.");
             return false;
         }
     }
 
 
-    private Document[] parse(final DigestURI location, final String mimeType, final String charset, final File sourceFile) throws Parser.Failure, InterruptedException {
+    private Document[] parse(final DigestURI location, final String mimeType, @SuppressWarnings("unused") final String charset, final File sourceFile) throws Parser.Failure, InterruptedException {
 
     	File outputFile = null;
         try {
@@ -130,7 +130,7 @@ public class psParser extends AbstractParser implements Parser {
         }
     }
 
-    private void parseUsingJava(final File inputFile, final File outputFile) throws Exception {
+    private static void parseUsingJava(final File inputFile, final File outputFile) throws Exception {
 
         BufferedReader reader = null;
         BufferedWriter writer = null;
@@ -246,7 +246,7 @@ public class psParser extends AbstractParser implements Parser {
             execCode = ps2asciiProc.waitFor();
     	} catch (final Exception e) {
             final String errorMsg = "Unable to convert ps to ascii. " + e.getMessage();
-            this.log.logSevere(errorMsg);
+            AbstractParser.log.severe(errorMsg);
             throw new Exception(errorMsg);
     	}
 

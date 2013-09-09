@@ -23,38 +23,35 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
+ 
 package net.yacy.document.parser.xml;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-
-import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.ConcurrentLog;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-
+/*
+ * reads opensearchdescription xml document and provides the parsed search url
+ * templates via get methodes as well as all other tags by getItem(tagname)
+ */
 public class opensearchdescriptionReader extends DefaultHandler {
 
-    // statics for item generation and automatic categorization
-    static int guidcount = 0;
     //private static final String recordTag = "OpenSearchDescription";
     private static final String[] tagsDef = new String[]{
         "ShortName",
         "LongName",
-        "Image",
+        // "Image",
         "Language",
         "OutputEncoding",
         "InputEncoding",
@@ -97,35 +94,34 @@ public class opensearchdescriptionReader extends DefaultHandler {
     }
 
     // class variables
-    private Item channel;
     private final StringBuilder buffer;
-    private boolean parsingChannel;
-    private final String imageURL;
-    private final ArrayList<String> itemsGUID; // a list of GUIDs, so the items can be retrieved by a specific order
-    private final HashMap<String, Item> items; // a guid:Item map
-
+    private boolean parsingDescription, parsingTextValue;
+    private final HashMap<String, String> items; // Opensearchdescription Item map
+    private String rssurl, atomurl; // search url templates
+    private ClientIdentification.Agent agent;
 
     public opensearchdescriptionReader() {
-        this.itemsGUID = new ArrayList<String>();
-        this.items = new HashMap<String, Item>();
+        this.items = new HashMap<String, String>();
         this.buffer = new StringBuilder();
-        this.channel = null;
-        this.parsingChannel = false;
-        this.imageURL = null;
+        this.parsingDescription = false;
+        this.parsingTextValue = false;
+        this.rssurl = null;
+        this.atomurl = null;
+        this.agent = ClientIdentification.yacyInternetCrawlerAgent;
     }
 
     private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
     private static SAXParser getParser() throws SAXException {
-    	SAXParser parser = tlSax.get();
-    	if (parser == null) {
-    		try {
-				parser = SAXParserFactory.newInstance().newSAXParser();
-			} catch (ParserConfigurationException e) {
-				throw new SAXException(e.getMessage(), e);
-			}
-    		tlSax.set(parser);
-    	}
-    	return parser;
+        SAXParser parser = tlSax.get();
+        if (parser == null) {
+            try {
+                parser = SAXParserFactory.newInstance().newSAXParser();
+            } catch (final ParserConfigurationException e) {
+                throw new SAXException(e.getMessage(), e);
+            }
+            tlSax.set(parser);
+        }
+        return parser;
     }
     
     public opensearchdescriptionReader(final String path) {
@@ -134,7 +130,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
             final SAXParser saxParser = getParser();
             saxParser.parse(path, this);
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
@@ -144,106 +140,110 @@ public class opensearchdescriptionReader extends DefaultHandler {
             final SAXParser saxParser = getParser();
             saxParser.parse(stream, this);
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
-    public static opensearchdescriptionReader parse(final byte[] a) {
-
-        // check integrity of array
-        if ((a == null) || (a.length == 0)) {
-            Log.logWarning("opensearchdescriptionReader", "response=null");
-            return null;
-        }
-        if (a.length < 100) {
-            Log.logWarning("opensearchdescriptionReader", "response=" + UTF8.String(a));
-            return null;
-        }
-        if (!ByteBuffer.equals(a, UTF8.getBytes("<?xml"))) {
-            Log.logWarning("opensearchdescriptionReader", "response does not contain valid xml");
-            return null;
-        }
-        final String end = UTF8.String(a, a.length - 10, 10);
-        if (end.indexOf("rss",0) < 0) {
-            Log.logWarning("opensearchdescriptionReader", "response incomplete");
-            return null;
-        }
-
-        // make input stream
-        final ByteArrayInputStream bais = new ByteArrayInputStream(a);
-
-        // parse stream
-        opensearchdescriptionReader reader = null;
+    public opensearchdescriptionReader(final String path, final ClientIdentification.Agent agent) {
+        this();
+        this.agent = agent;
         try {
-            reader = new opensearchdescriptionReader(bais);
+            HTTPClient www = new HTTPClient(agent);
+            www.GET(path);
+            final SAXParser saxParser = getParser();
+            saxParser.parse(www.getContentstream(), this);
+            www.finish();
         } catch (final Exception e) {
-            Log.logWarning("opensearchdescriptionReader", "parse exception: " + e);
-            return null;
+            ConcurrentLog.logException(e);
         }
-        try { bais.close(); } catch (final IOException e) {}
-        return reader;
+    }
+
+    public boolean read(String path) {
+        this.items.clear();
+        this.buffer.setLength(0);
+        this.parsingDescription = false;
+        this.parsingTextValue = false;
+        this.rssurl = null;
+        this.atomurl = null;
+        try {
+            HTTPClient www = new HTTPClient(this.agent);
+            www.GET(path);
+            final SAXParser saxParser = getParser();
+            try {
+                saxParser.parse(www.getContentstream(), this);
+            } catch (final SAXException se) {
+                www.finish();
+                return false;
+            } catch (final IOException ioe) {
+                www.finish();
+                return false;
+            }
+            www.finish();
+            return true;
+        } catch (final Exception e) {
+            ConcurrentLog.warn("opensearchdescriptionReader", "parse exception: " + e);
+            return false;
+        }
     }
 
     @Override
     public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
-        if ("channel".equals(tag)) {
-            this.channel = new Item();
-            this.parsingChannel = true;
+        if ("OpenSearchDescription".equals(tag)) {
+            this.parsingDescription = true;
+        } else if (this.parsingDescription) {
+            if ("Url".equals(tag)) {
+                this.parsingTextValue = false;
+                String type = atts.getValue("type");
+                if ("application/rss+xml".equals(type)) {
+                    rssurl = atts.getValue("template");
+                } else if ("application/atom+xml".equals(type)) {
+                    atomurl = atts.getValue("template");
+                }
+            } else {
+                this.parsingTextValue = tags.contains(tag);
+            }
         }
     }
 
     @Override
     public void endElement(final String uri, final String name, final String tag) {
-        if (tag == null) return;
-        if ("channel".equals(tag)) {
-            this.parsingChannel = false;
-        } else if (this.parsingChannel) {
+        if (tag == null) return;        
+        if (parsingDescription && "OpenSearchDescription".equals(tag)) {
+            this.parsingDescription = false;
+        } else if (this.parsingTextValue) {
             final String value = this.buffer.toString().trim();
             this.buffer.setLength(0);
-            if (tags.contains(tag)) this.channel.setValue(tag, value);
+            if (tags.contains(tag)) {
+                this.items.put(tag, value);
+            }
         }
     }
 
     @Override
     public void characters(final char ch[], final int start, final int length) {
-        if (this.parsingChannel) {
+        if (this.parsingTextValue) {
             this.buffer.append(ch, start, length);
         }
     }
 
-    public Item getChannel() {
-        return this.channel;
+    public String getRSSTemplate() {
+        return this.rssurl;
     }
 
-    public Item getItem(final int i) {
-        // retrieve item by order number
-        return getItem(this.itemsGUID.get(i));
+    public String getRSSorAtomUrl() {
+        return this.rssurl == null ? this.atomurl : this.rssurl;
     }
 
-    public Item getItem(final String guid) {
-        // retrieve item by guid
-        return this.items.get(guid);
+    public String getShortName() {
+        return items.get("ShortName");
+    }
+
+    public String getItem(final String name) {
+        // retrieve item by name
+        return this.items.get(name);
     }
 
     public int items() {
         return this.items.size();
-    }
-
-    public String getImage() {
-        return this.imageURL;
-    }
-
-    public static class Item {
-
-        private final HashMap<String, String> map;
-
-        public Item() {
-            this.map = new HashMap<String, String>();
-            this.map.put("guid", Long.toHexString(System.currentTimeMillis()) + ":" + guidcount++);
-        }
-
-        public void setValue(final String name, final String value) {
-            this.map.put(name, value);
-        }
     }
 }

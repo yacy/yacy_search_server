@@ -199,9 +199,9 @@ public void run() {
     while ( this.inService ) {
       try {
         listenBroadCast();
-      } catch ( SocketTimeoutException ex ) {
+      } catch (final  SocketTimeoutException ex ) {
         // ignoring
-      } catch ( IOException ioEx ) {
+      } catch (final  IOException ioEx ) {
         log.error( "IO Exception during UPNP DiscoveryListener messages listening thread" );
       } catch( Exception ex ) {
         log.error( "Fatal Error during UPNP DiscoveryListener messages listening thread, thread will exit" );
@@ -212,7 +212,7 @@ public void run() {
     try {
       this.skt.leaveGroup( InetAddress.getByName( Discovery.SSDP_IP ) );
       this.skt.close();
-    } catch ( Exception ex ) {
+    } catch (final  Exception ex ) {
       // ignoring
     }
   }
@@ -225,7 +225,7 @@ public void run() {
     HttpResponse msg = null;
     try {
       msg = new HttpResponse( received );
-    } catch (IllegalArgumentException ex ) {
+    } catch (final IllegalArgumentException ex ) {
       // crappy http sent
       if ( log.isDebugEnabled() ) log.debug( "Skipping uncompliant HTTP message " + received );
       return;
@@ -234,7 +234,7 @@ public void run() {
     if ( header != null && header.startsWith( "HTTP/1.1 200 OK" ) && msg.getHTTPHeaderField( "st" ) != null ) {
       // probably a search repsonse !
       String deviceDescrLoc = msg.getHTTPHeaderField( "location" );
-      if( deviceDescrLoc == null || deviceDescrLoc.trim().length() == 0 ) {
+      if( deviceDescrLoc == null || deviceDescrLoc.trim().isEmpty() ) {
         if ( log.isDebugEnabled() ) log.debug( "Skipping SSDP message, missing HTTP header 'location' field" );
         return;
       }
@@ -251,22 +251,22 @@ public void run() {
       }
       if ( log.isDebugEnabled() ) log.debug( "Processing " + deviceDescrLoc + " device description location" );
       String st = msg.getHTTPHeaderField( "st" );
-      if( st == null || st.trim().length() == 0 ) {
+      if( st == null || st.trim().isEmpty() ) {
         if ( log.isDebugEnabled() ) log.debug( "Skipping SSDP message, missing HTTP header 'st' field" );
         return;
       }
       String usn = msg.getHTTPHeaderField( "usn" );
-      if( usn == null || usn.trim().length() == 0 ) {
+      if( usn == null || usn.trim().isEmpty() ) {
         if ( log.isDebugEnabled() ) log.debug( "Skipping SSDP message, missing HTTP header 'usn' field" );
         return;
       }
       String maxAge = msg.getHTTPFieldElement( "Cache-Control", "max-age" );
-      if( maxAge == null || maxAge.trim().length() == 0 ) {
+      if( maxAge == null || maxAge.trim().isEmpty() ) {
         if ( log.isDebugEnabled() ) log.debug( "Skipping SSDP message, missing HTTP header 'max-age' field" );
         return;
       }
       String server = msg.getHTTPHeaderField( "server" );
-      if( server == null || server.trim().length() == 0 ) {
+      if( server == null || server.trim().isEmpty() ) {
         if ( log.isDebugEnabled() ) log.debug( "Skipping SSDP message, missing HTTP header 'server' field" );
         return;
       }

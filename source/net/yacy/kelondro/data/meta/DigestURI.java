@@ -32,14 +32,17 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
-import net.yacy.kelondro.util.ByteArray;
+import net.yacy.cora.util.ByteArray;
+import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.kelondro.index.RowHandleSet;
 
 /**
  * URI-object providing YaCy-hash computation
@@ -68,7 +71,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         try {
             url = new DigestURI(h);
         } catch (final MalformedURLException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         }
         return (url == null) ? null : ASCII.String(url.hash(), 6, 6);
@@ -81,12 +84,12 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
      * @return list of host hashes without separation
      */
     public static String hosthashes(final String hostlist) {
-        String[] hs = hostlist.split(",");
+        String[] hs = CommonPattern.COMMA.split(hostlist);
         StringBuilder sb = new StringBuilder(hostlist.length());
         for (String h: hs) {
             if (h == null) continue;
             h = h.trim();
-            if (h.length() == 0) continue;
+            if (h.isEmpty()) continue;
             h = hosthash(h);
             if (h == null || h.length() != 6) continue;
             sb.append(h);
@@ -95,7 +98,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     }
 
     public static Set<String> hosthashess(String hosthashes) {
-        if (hosthashes == null || hosthashes.length() == 0) return null;
+        if (hosthashes == null || hosthashes.isEmpty()) return null;
         HashSet<String> h = new HashSet<String>();
         assert hosthashes.length() % 6 == 0;
         for (int i = 0; i < hosthashes.length(); i = i + 6) {
@@ -133,13 +136,15 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
 
     /**
      * DigestURI from general URI
-     * @param baseURL
+     * @param u
      */
-    public DigestURI(final MultiProtocolURI baseURL) {
-        super(baseURL);
-        this.hash = (baseURL instanceof DigestURI) ? ((DigestURI) baseURL).hash : null;
+    /*
+    private DigestURI(final MultiProtocolURI u) {
+        super(u);
+        this.hash = (u instanceof DigestURI) ? ((DigestURI) u).hash : null;
     }
-
+    */
+    
     /**
      * DigestURI from general URI, hash already calculated
      * @param baseURL
@@ -160,6 +165,23 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         this.hash = null;
     }
 
+    public static DigestURI newURL(final DigestURI baseURL, String relPath) throws MalformedURLException {
+        if (relPath.startsWith("//")) {
+            // patch for urls starting with "//" which can be found in the wild
+            relPath = (baseURL == null) ? "http:" + relPath : baseURL.getProtocol() + ":" + relPath;
+        }
+        if ((baseURL == null) ||
+            isHTTP(relPath) ||
+            isHTTPS(relPath) ||
+            isFTP(relPath) ||
+            isFile(relPath) ||
+            isSMB(relPath)/*||
+            relPath.contains(":") && patternMail.matcher(relPath.toLowerCase()).find()*/) {
+            return new DigestURI(relPath);
+        }
+        return new DigestURI(baseURL, relPath);
+    }
+    
     private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
 
     @Override
@@ -188,10 +210,18 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
      */
     public final byte[] hash() {
         // in case that the object was initialized without a known url hash, compute it now
-        if (this.hash == null) this.hash = urlHashComputation();
+        if (this.hash == null) {
+            synchronized (this) {
+                if (this.hash == null) this.hash = urlHashComputation();
+            }
+        }
         return this.hash;
     }
 
+    public String hosthash() {
+        return ASCII.String(this.hash(), 6, 6);
+    }
+    
     /**
      * calculated YaCy-Hash of this URI
      *
@@ -222,7 +252,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         // find rootpath
         int rootpathStart = 0;
         int rootpathEnd = this.path.length() - 1;
-        if (this.path.length() > 0 && this.path.charAt(0) == '/')
+        if (!this.path.isEmpty() && this.path.charAt(0) == '/')
             rootpathStart = 1;
         if (this.path.endsWith("/"))
             rootpathEnd = this.path.length() - 2;
@@ -242,7 +272,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         final StringBuilder hashs = new StringBuilder(12);
         assert hashs.length() == 0;
         // form the 'local' part of the hash
-        final String normalform = toNormalform(true, true, true);
+        final String normalform = toNormalform(true, true);
         final String b64l = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(normalform));
         if (b64l.length() < 5) return null;
         hashs.append(b64l.substring(0, 5)); // 5 chars
@@ -261,45 +291,44 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         return b;
     }
 
-    /**
-     * return true if the protocol of the URL was 'http'
-     * this is not true if the protocol was 'https'
-     * @param hash
-     * @return true for url hashes that point to http services; false otherwise
-     */
-    public static final boolean flag4HTTPset(final byte[] hash) {
-        assert hash.length == 12;
-        final byte flagbyte = hash[11];
-        return (flagbyte & 32) == 1;
-    }
-
     private static char subdomPortPath(final String subdom, final int port, final String rootpath) {
         final StringBuilder sb = new StringBuilder(subdom.length() + rootpath.length() + 8);
         sb.append(subdom).append(':').append(Integer.toString(port)).append(':').append(rootpath);
         return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(sb.toString())).charAt(0);
     }
 
-    private static final char rootURLFlag0 = subdomPortPath("", 80, "");
-    private static final char rootURLFlag1 = subdomPortPath("www", 80, "");
-
-    public static final boolean probablyRootURL(final String urlHash) {
-    	final char c = urlHash.charAt(5);
-        return c == rootURLFlag0 || c == rootURLFlag1;
+    public final Pattern rootPattern = Pattern.compile("/|/index.htm(l?)|/index.php|/home.htm(l?)|/home.php|/default.htm(l?)|/default.php");
+    
+    public final boolean probablyRootURL() {
+        return this.path.length() <= 1 || rootPattern.matcher(this.path).matches();
     }
-
-    public static final boolean probablyRootURL(final byte[] urlHash) {
-    	final char c = (char) urlHash[5];
-        return c == rootURLFlag0 || c == rootURLFlag1;
+    
+    public RowHandleSet getPossibleRootHashes() {
+        RowHandleSet rootCandidates = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 10);
+        String rootStub = this.getProtocol() + "://" + this.getHost();
+        try {
+            rootCandidates.put(new DigestURI(rootStub).hash());
+            rootCandidates.put(new DigestURI(rootStub + "/").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/index.htm").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/index.html").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/index.php").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/home.htm").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/home.html").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/home.php").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/default.htm").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/default.html").hash());
+            rootCandidates.put(new DigestURI(rootStub + "/default.php").hash());
+        } catch (final Throwable e) {}
+        return rootCandidates;
     }
 
     private static final String hosthash5(final String protocol, final String host, final int port) {
         if (host == null) {
             return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(protocol)).substring(0, 5);
-        } else {
-            final StringBuilder sb = new StringBuilder(host.length() + 15);
-            sb.append(protocol).append(':').append(host).append(':').append(Integer.toString(port));
-            return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(sb.toString())).substring(0, 5);
         }
+        final StringBuilder sb = new StringBuilder(host.length() + 15);
+        sb.append(protocol).append(':').append(host).append(':').append(Integer.toString(port));
+        return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(sb.toString())).substring(0, 5);
     }
 
     /**
@@ -309,7 +338,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
      * @param port
      * @return 6 bytes base64 encoded String representing the domain of the url
      */
-    public static final String hosthash6(final String protocol, final String host, final int port) {
+    private static final String hosthash6(final String protocol, final String host, final int port) {
         final StringBuilder hash = new StringBuilder(12);
         final int id = Domains.getDomainID(host, null); // id=7: tld is local
         int p = host.lastIndexOf('.');
@@ -347,24 +376,20 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
             return 14;
         case 3:
             return 20;
+        default:
+            return 20;
         }
-        return 20;
     }
 
     public static int domLengthNormalized(final byte[] urlHashBytes) {
         return domLengthEstimation(urlHashBytes) << 8 / 20;
     }
 
-    public static final int domDomain(final byte[] urlHash) {
+    private static final int domDomain(final byte[] urlHash) {
         // returns the ID of the domain of the domain
         assert (urlHash != null);
         assert (urlHash.length == 12 || urlHash.length == 6) : "urlhash = " + ASCII.String(urlHash);
         return (Base64Order.enhancedCoder.decodeByte(urlHash[(urlHash.length == 12) ? 11 : 5]) & 28) >> 2;
-    }
-
-
-    public static boolean isDomDomain(final byte[] urlHash, final int id) {
-        return domDomain(urlHash) == id;
     }
 
     /**
@@ -373,8 +398,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     @Override
     public final boolean isLocal() {
         if (this.isFile()) return true;
-        if (this.hash == null) this.hash = urlHashComputation();
-        return domDomain(this.hash) == 7;
+        return domDomain(hash()) == 7;
     }
 
     /**

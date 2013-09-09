@@ -28,8 +28,8 @@ package net.yacy.peers.operation;
 import java.io.File;
 
 import net.yacy.cora.protocol.ftp.FTPClient;
+import net.yacy.server.serverSwitch;
 
-import de.anomic.server.serverSwitch;
 
 public class yacySeedUploadFtp implements yacySeedUploader {
 

@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+    <head>
+        <title>YaCy '#[clientname]#': Field Re-Indexing</title>
+        #%env/templates/metas.template%#
+    </head>
+    <body id="IndexReindexMonitor">
+
+        #%env/templates/header.template%#
+        #%env/templates/submenuIndexControl.template%#
+        <h2>Field Re-Indexing</h2>
+        <p>In case that an index schema has changed, all documents with missing field entries can be indexed again with a reindex job.</p>
+        <form action="IndexReIndexMonitor_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+          <table><tr valign="top"><td>
+            <fieldset>                 
+                <table>
+                    <tr>
+                        <td>Documents in current queue</td>
+                        <td>#[querysize]#</td>
+                        <td>#(reindexjobrunning)#::<input type="submit" value="refresh page"/>#(/reindexjobrunning)#</td>
+                    </tr>
+                    <tr>
+                        <td>Documents processed</td>
+                        <td>#[docsprocessed]#</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>current select query </td>
+                        <td>#[currentselectquery]#</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td></td>
+                        <td></td>
+                    </tr>                    
+                </table>
+                #(reindexjobrunning)#                
+                <input type="submit" name="reindexnow" value="start reindex job now"/>
+                ::<input type="submit" name="stopreindex" value="stop reindexing"/>
+                #(/reindexjobrunning)# 
+                <p class="info">#[infomessage]#</p>                            
+            </fieldset>
+          </td><td>
+            #(reindexjobrunning)#::
+            <fieldset><legend>Remaining field list</legend>
+              <p>reindex documents containing these fields: </p>
+              <p>#[fieldlist]#</p>
+            </fieldset>
+            #(/reindexjobrunning)#
+          </td></tr></table>
+        </form>    
+        #%env/templates/footer.template%#
+    </body>
+</html>

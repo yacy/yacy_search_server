@@ -32,6 +32,7 @@ import java.util.Map;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.RAMIndex;
 import net.yacy.kelondro.table.Table;
@@ -40,8 +41,8 @@ import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class PerformanceMemory_p {
 
@@ -49,7 +50,7 @@ public class PerformanceMemory_p {
     private static final long MB = 1024 * KB;
     private static Map<String, String> defaultSettings = null;
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         if (defaultSettings == null) {
@@ -138,6 +139,8 @@ public class PerformanceMemory_p {
             try {
                 oie = oi.next();
             } catch (final ConcurrentModificationException e) {
+                // we don't want to synchronize this
+                ConcurrentLog.logException(e);
                 break;
             }
             filename = oie.getKey();
@@ -202,6 +205,22 @@ public class PerformanceMemory_p {
         prop.putNum("objectMissCacheTotalMem", totalmissmem / (1024d * 1024d));
 
         // other caching structures
+//        final CachedSolrConnector solr = (CachedSolrConnector) Switchboard.getSwitchboard().index.fulltext().getDefaultConnector();
+//        prop.putNum("solrcacheHit.size", solr.nameCacheHitSize());
+//        prop.putNum("solrcacheHit.Hit", solr.hitCache_Hit);
+//        prop.putNum("solrcacheHit.Miss", solr.hitCache_Miss);
+//        prop.putNum("solrcacheHit.Insert", solr.hitCache_Insert);
+//        
+//        prop.putNum("solrcacheMiss.size", solr.nameCacheMissSize());
+//        prop.putNum("solrcacheMiss.Hit", solr.missCache_Hit);
+//        prop.putNum("solrcacheMiss.Miss", solr.missCache_Miss);
+//        prop.putNum("solrcacheMiss.Insert", solr.missCache_Insert);
+//        
+//        prop.putNum("solrcacheDocument.size", solr.nameCacheDocumentSize());
+//        prop.putNum("solrcacheDocument.Hit", solr.documentCache_Hit);
+//        prop.putNum("solrcacheDocument.Miss", solr.documentCache_Miss);
+//        prop.putNum("solrcacheDocument.Insert", solr.documentCache_Insert);
+        
         prop.putNum("namecacheHit.size", Domains.nameCacheHitSize());
         prop.putNum("namecacheHit.Hit", Domains.cacheHit_Hit);
         prop.putNum("namecacheHit.Miss", Domains.cacheHit_Miss);

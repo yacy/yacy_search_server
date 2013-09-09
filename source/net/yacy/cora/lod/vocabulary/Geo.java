@@ -37,10 +37,11 @@ public enum Geo implements Vocabulary {
     public final static String NAMESPACE = "http://www.w3.org/2003/01/geo/wgs84_pos#";
     public final static String PREFIX = "geo";
 
-    private final String predicate;
+    private final String predicate, uriref;
 
     private Geo() {
         this.predicate = NAMESPACE + this.name().toLowerCase();
+        this.uriref = PREFIX + ':' + this.name().toLowerCase();
     }
 
     @Override
@@ -61,5 +62,10 @@ public enum Geo implements Vocabulary {
     @Override
     public String getPredicate() {
         return this.predicate;
+    }
+
+    @Override
+    public String getURIref() {
+        return this.uriref;
     }
 }

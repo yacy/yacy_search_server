@@ -233,11 +233,11 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
             int h = 0;
             for (final byte c: (byte[])x) h = 31 * h + (c & 0xFF);
             final int p = h & this.mask;
-            //String o = UTF8.String((byte[]) x); try { if (o.equals(latestObject)) throw new RuntimeException("ConcurrentARC: p = " + p + ", objectb = " + o); } catch (Exception e) { Log.logException(e); } latestObject = o;
+            //String o = UTF8.String((byte[]) x); try { if (o.equals(latestObject)) throw new RuntimeException("ConcurrentARC: p = " + p + ", objectb = " + o); } catch (final Exception e) { Log.logException(e); } latestObject = o;
             return p;
         }
         final int p = x.hashCode() & this.mask;
-        //String o = x.toString(); try { if (o.equals(latestObject)) throw new RuntimeException("ConcurrentARC: p = " + p + ", objecto = " + o); } catch (Exception e) { Log.logException(e); } latestObject = o;
+        //String o = x.toString(); try { if (o.equals(latestObject)) throw new RuntimeException("ConcurrentARC: p = " + p + ", objecto = " + o); } catch (final Exception e) { Log.logException(e); } latestObject = o;
         return p;
     }
 

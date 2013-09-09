@@ -45,7 +45,7 @@ public class JSONTokener {
     private int 	index;
     private int 	line;
     private char 	previous;
-    private Reader 	reader;
+    private final Reader 	reader;
     private boolean usePrevious;
 
 
@@ -55,7 +55,7 @@ public class JSONTokener {
      * @param reader     A reader.
      */
     public JSONTokener(Reader reader) {
-        this.reader = reader.markSupported() ? 
+        this.reader = reader.markSupported() ?
         		reader : new BufferedReader(reader);
         this.eof = false;
         this.usePrevious = false;
@@ -82,7 +82,7 @@ public class JSONTokener {
      * the next number or identifier.
      */
     public void back() throws JSONException {
-        if (usePrevious || index <= 0) {
+        if (this.usePrevious || this.index <= 0) {
             throw new JSONException("Stepping back two steps is not supported");
         }
         this.index -= 1;
@@ -110,9 +110,9 @@ public class JSONTokener {
         }
         return -1;
     }
-    
+
     public boolean end() {
-    	return eof && !usePrevious;    	
+    	return this.eof && !this.usePrevious;
     }
 
 
@@ -125,7 +125,7 @@ public class JSONTokener {
         next();
         if (end()) {
             return false;
-        } 
+        }
         back();
         return true;
     }
@@ -144,14 +144,14 @@ public class JSONTokener {
         } else {
 	        try {
 	            c = this.reader.read();
-	        } catch (IOException exception) {
+	        } catch (final IOException exception) {
 	            throw new JSONException(exception);
 	        }
-	
+
 	        if (c <= 0) { // End of stream
 	        	this.eof = true;
 	        	c = 0;
-	        } 
+	        }
         }
     	this.index += 1;
     	if (this.previous == '\r') {
@@ -205,7 +205,7 @@ public class JSONTokener {
          while (pos < n) {
              buffer[pos] = next();
              if (end()) {
-                 throw syntaxError("Substring bounds error");                 
+                 throw syntaxError("Substring bounds error");
              }
              pos += 1;
          }
@@ -356,6 +356,8 @@ public class JSONTokener {
             case '(':
                 back();
                 return new JSONArray(this);
+        default:
+            break;
         }
 
         /*
@@ -395,25 +397,25 @@ public class JSONTokener {
             int startIndex = this.index;
             int startCharacter = this.character;
             int startLine = this.line;
-            reader.mark(Integer.MAX_VALUE);
+            this.reader.mark(Integer.MAX_VALUE);
             do {
                 c = next();
                 if (c == 0) {
-                    reader.reset();
+                    this.reader.reset();
                     this.index = startIndex;
                     this.character = startCharacter;
                     this.line = startLine;
                     return c;
                 }
             } while (c != to);
-        } catch (IOException exc) {
+        } catch (final IOException exc) {
             throw new JSONException(exc);
         }
 
         back();
         return c;
     }
-    
+
 
     /**
      * Make a JSONException to signal a syntax error.
@@ -433,6 +435,6 @@ public class JSONTokener {
      */
     @Override
     public String toString() {
-        return " at " + index + " [character " + this.character + " line " + this.line + "]";
+        return " at " + this.index + " [character " + this.character + " line " + this.line + "]";
     }
 }

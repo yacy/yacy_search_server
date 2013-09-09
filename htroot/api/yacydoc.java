@@ -26,6 +26,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.net.MalformedURLException;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import net.yacy.cora.date.ISO8601Formatter;
@@ -34,18 +35,17 @@ import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFNode;
-
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class yacydoc {
 
@@ -68,6 +68,7 @@ public class yacydoc {
         prop.put("dc_type", "");
         prop.put("dc_identifier", "");
         prop.put("dc_language", "");
+        prop.put("collection", "");
         prop.put("geo_lat", "");
         prop.put("geo_long", "");
 
@@ -85,25 +86,25 @@ public class yacydoc {
 
         final String urlstring = post.get("url", "").trim();
         String urlhash = post.get("urlhash", "").trim();
-        if (urlstring.length() == 0 && urlhash.length() == 0) return prop;
+        if (urlstring.isEmpty() && urlhash.isEmpty()) return prop;
 
-        if (urlstring.length() > 0 && urlhash.length() == 0) {
+        if (urlstring.length() > 0 && urlhash.isEmpty()) {
             try {
                 final DigestURI url = new DigestURI(urlstring);
                 urlhash = ASCII.String(url.hash());
             } catch (final MalformedURLException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
-        if (urlhash == null || urlhash.length() == 0) return prop;
+        if (urlhash == null || urlhash.isEmpty()) return prop;
 
-        final URIMetadataRow entry = segment.urlMetadata().load(urlhash.getBytes());
+        final URIMetadataNode entry = segment.fulltext().getMetadata(urlhash.getBytes());
         if (entry == null) return prop;
 
         if (entry.url() == null) {
             return prop;
         }
-        final URIMetadataRow le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash());
+        final URIMetadataNode le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.fulltext().getMetadata(entry.referrerHash());
 
         prop.putXML("dc_title", entry.dc_title());
         prop.putXML("dc_creator", entry.dc_creator());
@@ -113,18 +114,19 @@ public class yacydoc {
         prop.putXML("dc_contributor", "");
         prop.putXML("dc_date", ISO8601Formatter.FORMATTER.format(entry.moddate()));
         prop.putXML("dc_type", String.valueOf(entry.doctype()));
-        prop.putXML("dc_identifier", entry.url().toNormalform(false, true));
+        prop.putXML("dc_identifier", entry.url().toNormalform(true));
         prop.putXML("dc_language", ASCII.String(entry.language()));
+        prop.putXML("collection", Arrays.toString(entry.collections()));
         prop.put("geo_lat", entry.lat());
         prop.put("geo_long", entry.lon());
 
         prop.put("yacy_urlhash", entry.url().hash());
         prop.putXML("yacy_loaddate", entry.loaddate().toString());
         prop.putXML("yacy_referrer_hash", (le == null) ? "" : ASCII.String(le.hash()));
-        prop.putXML("yacy_referrer_url", (le == null) ? "" : le.url().toNormalform(false, true));
+        prop.putXML("yacy_referrer_url", (le == null) ? "" : le.url().toNormalform(true));
         prop.put("yacy_size", entry.size());
         prop.put("yacy_words", entry.wordCount());
-        prop.put("yacy_citations", sb.index.urlCitation().count(entry.hash()));
+        prop.put("yacy_citations", sb.index.urlCitation()!= null ? sb.index.urlCitation().count(entry.hash()) : 0);
         prop.put("yacy_inbound", entry.llocal());
         prop.put("yacy_outbound", entry.lother());
 
@@ -143,7 +145,7 @@ public class yacydoc {
             references += r.toString()+",";
         }
 
-        Log.logInfo ("TRIPLESTORE", references);
+        ConcurrentLog.info("yacydoc", references);
 
         prop.put("taglinks", references);
 

@@ -29,12 +29,11 @@ package net.yacy.document.parser;
 
 import java.io.InputStream;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
 import org.apache.poi.hssf.eventusermodel.HSSFListener;
@@ -87,7 +86,7 @@ public class xlsParser extends AbstractParser implements Parser {
          * all extracted information about the parsed document
          */
         public Document[] parse(final DigestURI location, final String mimeType,
-                final String charset, final InputStream source) throws Parser.Failure,
+                @SuppressWarnings("unused") final String charset, final InputStream source) throws Parser.Failure,
                 InterruptedException {
             try {
 
@@ -120,13 +119,13 @@ public class xlsParser extends AbstractParser implements Parser {
                         this,
                         null,
                         null,
-                        location.getFile(),
+                        singleList(location.getFile()),
                         "", // TODO: AUTHOR
                         "", // TODO: publisher
                         null,
                         null,
                         0.0f, 0.0f,
-                        UTF8.getBytes(contents),
+                        contents,
                         null,
                         null,
                         null,
@@ -137,7 +136,7 @@ public class xlsParser extends AbstractParser implements Parser {
                 /*
                  * an unexpected error occurred, log it and throw a Parser.Failure
                  */
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 final String errorMsg = "Unable to parse the xls document '" + location + "':" + e.getMessage();
                 throw new Parser.Failure(errorMsg, location);
             }

@@ -6,7 +6,7 @@
   </head>
   <body id="ConfigHTCache">
     #%env/templates/header.template%#
-    #%env/templates/submenuConfig.template%#
+    #%env/templates/submenuIndexControl.template%#
     <h2>Hypertext Cache Configuration</h2>
     <p>
       The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.
@@ -23,7 +23,7 @@
           <dt><label for="maxCacheSize">The maximum size of the cache</label></dt>
           <dd><input name="maxCacheSize" id="maxCacheSize" type="text" size="8" maxlength="24" value="#[maxCacheSize]#" /> MB</dd>
           <dt>&nbsp;</dt>
-          <dd><input type="submit" name="set" value="Set" /></dd>
+          <dd><input type="submit" name="set" value="Set" class="submitready"/></dd>
         </dl>
       </fieldset>
     </form>
@@ -37,7 +37,7 @@
             />Delete HTTP &amp; FTP Cache<br/>
             <input type="checkbox" name="deleteRobots" id="deleteRobots" disabled="disabled" />Delete robots.txt Cache<br/>
             <input type="checkbox" name="deleteSearchFl" id="deleteSearchFl" disabled="disabled" />Delete cached snippet-fetching failures during search<br/><br/><br/>
-            <input type="submit" name="deletecomplete" value="Delete"/>
+            <input type="submit" name="deletecomplete" value="Delete" class="submitready"/>
         </dd>
       </dl>
     </fieldset>

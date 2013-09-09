@@ -36,22 +36,21 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.Network;
-import net.yacy.peers.PeerActions;
 import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacySeedUploader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.http.server.HTTPDProxyHandler;
-import de.anomic.http.server.HTTPDemon;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.http.HTTPDProxyHandler;
+import net.yacy.server.http.HTTPDemon;
 
 public class SettingsAck_p {
 
@@ -64,7 +63,7 @@ public class SettingsAck_p {
 
         // get referer for backlink
         final MultiProtocolURI referer = header.referer();
-        prop.put("referer", (referer == null) ? "Settings_p.html" : referer.toNormalform(true, true));
+        prop.put("referer", (referer == null) ? "Settings_p.html" : referer.toNormalform(true));
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
 
         if (post == null) {
@@ -83,7 +82,7 @@ public class SettingsAck_p {
                 prop.put("info", "1");//error with submitted information
                 return prop;
             }
-            if (user.length() == 0) {
+            if (user.isEmpty()) {
                 prop.put("info", "2");//username must be given
                 return prop;
             }
@@ -137,7 +136,7 @@ public class SettingsAck_p {
                 return prop;
             }
 
-            if (filter.length() == 0) filter = "*";
+            if (filter.isEmpty()) filter = "*";
             else if (!filter.equals("*")){
                 // testing proxy filter
                 int patternCount = 0;
@@ -212,7 +211,7 @@ public class SettingsAck_p {
             if (staticIP.indexOf(':',0) > 0) {
                 staticIP = staticIP.substring(0, staticIP.indexOf(':',0));
             }
-            if (staticIP.length() == 0) {
+            if (staticIP.isEmpty()) {
                 serverCore.useStaticIP = false;
             } else {
                 serverCore.useStaticIP = true;
@@ -231,7 +230,7 @@ public class SettingsAck_p {
                 prop.put("info", "1");//error with submitted information
                 return prop;
             }
-           /* if (user.length() == 0) {
+           /* if (user.isEmpty()) {
                 prop.put("info", 2);//username must be given
                 return prop;
             }
@@ -239,7 +238,7 @@ public class SettingsAck_p {
                 prop.put("info", 3);//pw check failed
                 return prop;
             }*/
-            if (filter.length() == 0) filter = "*";
+            if (filter.isEmpty()) filter = "*";
             else if (!filter.equals("*")){
                 // testing proxy filter
                 int patternCount = 0;
@@ -504,7 +503,7 @@ public class SettingsAck_p {
             }
 
             // everything is ok
-            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :PeerActions.formatInterval(crawlerTimeout));
+            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :Formatter.number(crawlerTimeout/1000.0,false)+" sec");
             prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)? "-1":Formatter.bytesToString(maxHttpSize));
             prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ? "-1":Formatter.bytesToString(maxFtpSize));
             prop.put("info_crawler.smb.maxFileSize", (maxSmbSize==-1) ? "-1":Formatter.bytesToString(maxSmbSize));

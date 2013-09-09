@@ -54,16 +54,17 @@ import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.MergeIterator;
-import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.cora.order.NaturalOrder;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.LookAheadIterator;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.rwi.ReferenceIterator;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.LookAheadIterator;
+import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.MergeIterator;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 
@@ -82,17 +83,17 @@ public class ArrayStack implements BLOB {
      * time-out. Deletions are not made automatically, they must be triggered using this method.
      */
 
-    public static final long maxFileSize = Integer.MAX_VALUE;
-    public static final long oneMonth    = 1000L * 60L * 60L * 24L * 365L / 12L;
+    private static final long maxFileSize = Integer.MAX_VALUE;
+    public  static final long oneMonth    = 1000L * 60L * 60L * 24L * 365L / 12L;
 
-    protected     int            keylength;
-    protected     ByteOrder      ordering;
+    private       int            keylength;
+    private       ByteOrder      ordering;
     private final File           heapLocation;
     private       long           fileAgeLimit;
     private       long           fileSizeLimit;
     private       long           repositoryAgeMax;
     private       long           repositorySizeMax;
-    protected     List<blobItem> blobs;
+    private       List<blobItem> blobs;
     private final String         prefix;
     private final int            buffersize;
     private final boolean        trimall;
@@ -110,7 +111,8 @@ public class ArrayStack implements BLOB {
             final ByteOrder ordering,
             final int keylength,
             final int buffersize,
-            final boolean trimall) throws IOException {
+            final boolean trimall,
+            final boolean deleteonfail) throws IOException {
         this.keylength = keylength;
         this.prefix = prefix;
         this.ordering = ordering;
@@ -199,13 +201,22 @@ public class ArrayStack implements BLOB {
                    d = my_SHORT_MILSEC_FORMATTER.parse(file.substring(this.prefix.length() + 1, this.prefix.length() + 18));
                    f = new File(heapLocation, file);
                    time = d.getTime();
-                   if (time == maxtime && !trimall) {
-                       oneBlob = new Heap(f, keylength, ordering, buffersize);
-                   } else {
-                       oneBlob = new HeapModifier(f, keylength, ordering);
-                       oneBlob.trim(); // no writings here, can be used with minimum memory
+                   try {
+                       if (time == maxtime && !trimall) {
+                           oneBlob = new Heap(f, keylength, ordering, buffersize);
+                       } else {
+                           oneBlob = new HeapModifier(f, keylength, ordering);
+                           oneBlob.trim(); // no writings here, can be used with minimum memory
+                       }
+                       sortedItems.put(Long.valueOf(time), new blobItem(d, f, oneBlob));
+                   } catch (final IOException e) {
+                       if (deleteonfail) {
+                           ConcurrentLog.warn("ArrayStack", "cannot read file " + f.getName() + ", deleting it (smart fail; alternative would be: crash; required user action would be same as deletion)");
+                           f.delete();
+                       } else {
+                           throw new IOException(e.getMessage(), e);
+                       }
                    }
-                   sortedItems.put(Long.valueOf(time), new blobItem(d, f, oneBlob));
                } catch (final ParseException e) {continue;}
             }
         }
@@ -255,7 +266,7 @@ public class ArrayStack implements BLOB {
         this.blobs.add(new blobItem(d, location, oneBlob));
     }
 
-    public synchronized void unmountBLOB(final File location, final boolean writeIDX) {
+    private synchronized void unmountBLOB(final File location, final boolean writeIDX) {
         blobItem b;
         for (int i = 0; i < this.blobs.size(); i++) {
             b = this.blobs.get(i);
@@ -267,7 +278,7 @@ public class ArrayStack implements BLOB {
                 return;
             }
         }
-        Log.logSevere("BLOBArray", "file " + location + " cannot be unmounted. The file " + ((location.exists()) ? "exists." : "does not exist."));
+        ConcurrentLog.severe("BLOBArray", "file " + location + " cannot be unmounted. The file " + ((location.exists()) ? "exists." : "does not exist."));
     }
 
     private File unmount(final int idx) {
@@ -281,7 +292,7 @@ public class ArrayStack implements BLOB {
 
     public synchronized File[] unmountBestMatch(final float maxq, long maxResultSize) {
     	if (this.blobs.size() < 2) return null;
-        long l, r;
+        long l, r, m;
         File lf, rf;
         float min = Float.MAX_VALUE;
         final File[] bestMatch = new File[2];
@@ -292,9 +303,12 @@ public class ArrayStack implements BLOB {
                 loopcount++;
             	lf = this.blobs.get(i).location;
             	rf = this.blobs.get(j).location;
+            	m = this.blobs.get(i).blob.mem();
+            	m += this.blobs.get(j).blob.mem();
                 l = 1 + (lf.length() >> 1);
                 r = 1 + (rf.length() >> 1);
                 if (l + r > maxResultSize) continue;
+                if (!MemoryControl.request(m, true)) continue;
                 final float q = Math.max((float) l, (float) r) / Math.min((float) l, (float) r);
                 if (q < min) {
                     min = q;
@@ -311,7 +325,7 @@ public class ArrayStack implements BLOB {
     }
 
     public synchronized File unmountOldest() {
-        if (this.blobs.size() == 0) return null;
+        if (this.blobs.isEmpty()) return null;
         if (System.currentTimeMillis() - this.blobs.get(0).creation.getTime() < this.fileAgeLimit) return null;
         final File f = this.blobs.get(0).location;
         unmountBLOB(f, false);
@@ -330,11 +344,7 @@ public class ArrayStack implements BLOB {
         return new File[]{f0, f1};
     }
 
-    public synchronized File unmountSmallestBLOB(final long maxResultSize) {
-        return smallestBLOB(null, maxResultSize);
-    }
-
-    public synchronized File smallestBLOB(final File excluding, final long maxsize) {
+    private synchronized File smallestBLOB(final File excluding, final long maxsize) {
         if (this.blobs.isEmpty()) return null;
         File bestFile = null;
         long smallest = Long.MAX_VALUE;
@@ -557,7 +567,7 @@ public class ArrayStack implements BLOB {
      * @return the blobItem that holds the key or null if no blobItem is found
      */
     private blobItem keeperOf(final byte[] key) {
-        if (this.blobs.size() == 0) return null;
+        if (this.blobs.isEmpty()) return null;
         if (this.blobs.size() == 1) {
             final blobItem bi = this.blobs.get(0);
             if (bi.blob.containsKey(key)) return bi;
@@ -613,7 +623,7 @@ public class ArrayStack implements BLOB {
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (final ExecutionException e) {
-            Log.logSevere("ArrayStack", "", e);
+            ConcurrentLog.severe("ArrayStack", "", e);
             throw new RuntimeException(e.getCause());
         }
         //System.out.println("*DEBUG SplitTable fail.time = " + (System.currentTimeMillis() - start) + " ms");
@@ -627,8 +637,8 @@ public class ArrayStack implements BLOB {
      * @throws IOException
      */
     @Override
-    public byte[] get(final byte[] key) throws IOException, RowSpaceExceededException {
-        if (this.blobs == null || this.blobs.size() == 0) return null;
+    public byte[] get(final byte[] key) throws IOException, SpaceExceededException {
+        if (this.blobs == null || this.blobs.isEmpty()) return null;
         if (this.blobs.size() == 1) {
             final blobItem bi = this.blobs.get(0);
             return bi.blob.get(key);
@@ -653,9 +663,9 @@ public class ArrayStack implements BLOB {
         try {
             return get((byte[]) key);
         } catch (final IOException e) {
-            Log.logException(e);
-        } catch (final RowSpaceExceededException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
+        } catch (final SpaceExceededException e) {
+            ConcurrentLog.logException(e);
         }
         return null;
     }
@@ -671,7 +681,7 @@ public class ArrayStack implements BLOB {
         return new BlobValues(key);
     }
 
-    public class BlobValues extends LookAheadIterator<byte[]> {
+    private class BlobValues extends LookAheadIterator<byte[]> {
 
         private final Iterator<blobItem> bii;
         private final byte[] key;
@@ -690,10 +700,10 @@ public class ArrayStack implements BLOB {
                     final byte[] n = b.get(this.key);
                     if (n != null) return n;
                 } catch (final IOException e) {
-                    Log.logSevere("ArrayStack", "BlobValues - IOException: " + e.getMessage(), e);
+                    ConcurrentLog.severe("ArrayStack", "BlobValues - IOException: " + e.getMessage(), e);
                     return null;
-                } catch (final RowSpaceExceededException e) {
-                    Log.logSevere("ArrayStack", "BlobValues - RowSpaceExceededException: " + e.getMessage(), e);
+                } catch (final SpaceExceededException e) {
+                    ConcurrentLog.severe("ArrayStack", "BlobValues - RowSpaceExceededException: " + e.getMessage(), e);
                     break;
                 }
             }
@@ -728,7 +738,7 @@ public class ArrayStack implements BLOB {
         return new BlobLengths(key);
     }
 
-    public class BlobLengths extends LookAheadIterator<Long> {
+    private class BlobLengths extends LookAheadIterator<Long> {
 
         private final Iterator<blobItem> bii;
         private final byte[] key;
@@ -747,7 +757,7 @@ public class ArrayStack implements BLOB {
                     final long l = b.length(this.key);
                     if (l >= 0) return Long.valueOf(l);
                 } catch (final IOException e) {
-                    Log.logSevere("ArrayStack", "", e);
+                    ConcurrentLog.severe("ArrayStack", "", e);
                     return null;
                 }
             }
@@ -774,7 +784,7 @@ public class ArrayStack implements BLOB {
      * @param key  the primary key
      * @param b
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
     @Override
     public synchronized void insert(final byte[] key, final byte[] b) throws IOException {
@@ -787,7 +797,7 @@ public class ArrayStack implements BLOB {
         else if (bi.location.length() > this.fileSizeLimit)
             System.out.println("bi.location.length() > this.maxsize");
         */
-        if ((bi == null) || (System.currentTimeMillis() - bi.creation.getTime() > this.fileAgeLimit) || (bi.location.length() > this.fileSizeLimit)) {
+        if ((bi == null) || (System.currentTimeMillis() - bi.creation.getTime() > this.fileAgeLimit) || (bi.location.length() > this.fileSizeLimit && this.fileSizeLimit >= 0)) {
             // add a new blob to the array
             bi = new blobItem(this.buffersize);
             this.blobs.add(bi);
@@ -801,10 +811,10 @@ public class ArrayStack implements BLOB {
      * replace a BLOB entry with another
      * @param key  the primary key
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
     @Override
-    public synchronized int replace(final byte[] key, final Rewriter rewriter) throws IOException, RowSpaceExceededException {
+    public synchronized int replace(final byte[] key, final Rewriter rewriter) throws IOException, SpaceExceededException {
         int d = 0;
         for (final blobItem bi: this.blobs) {
             d += bi.blob.replace(key, rewriter);
@@ -816,10 +826,10 @@ public class ArrayStack implements BLOB {
      * replace a BLOB entry with another which must be smaller or same size
      * @param key  the primary key
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
     @Override
-    public synchronized int reduce(final byte[] key, final Reducer reduce) throws IOException, RowSpaceExceededException {
+    public synchronized int reduce(final byte[] key, final Reducer reduce) throws IOException, SpaceExceededException {
         int d = 0;
         for (final blobItem bi: this.blobs) {
             d += bi.blob.reduce(key, reduce);
@@ -835,7 +845,7 @@ public class ArrayStack implements BLOB {
     @Override
     public synchronized void delete(final byte[] key) throws IOException {
         final long m = mem();
-        if (this.blobs.size() == 0) {
+        if (this.blobs.isEmpty()) {
             // do nothing
         } else if (this.blobs.size() == 1) {
             final blobItem bi = this.blobs.get(0);
@@ -863,7 +873,7 @@ public class ArrayStack implements BLOB {
                 i++;
             }
             // wait for termination
-            for (final FutureTask<Boolean> s: t) try {s.get();} catch (final InterruptedException e) {} catch (ExecutionException e) {}
+            for (final FutureTask<Boolean> s: t) try {s.get();} catch (final InterruptedException e) {} catch (final ExecutionException e) {}
         }
         assert mem() <= m : "m = " + m + ", mem() = " + mem();
     }
@@ -896,36 +906,35 @@ public class ArrayStack implements BLOB {
             final File newFile, final int writeBuffer) {
         if (f2 == null) {
             // this is a rewrite
-            Log.logInfo("BLOBArray", "rewrite of " + f1.getName());
+            ConcurrentLog.info("BLOBArray", "rewrite of " + f1.getName());
             final File resultFile = rewriteWorker(factory, this.keylength, this.ordering, f1, newFile, writeBuffer);
             if (resultFile == null) {
-                Log.logWarning("BLOBArray", "rewrite of file " + f1 + " returned null. newFile = " + newFile);
+                ConcurrentLog.warn("BLOBArray", "rewrite of file " + f1 + " returned null. newFile = " + newFile);
                 return null;
             }
             try {
                 mountBLOB(resultFile, false);
             } catch (final IOException e) {
-                Log.logWarning("BLOBArray", "rewrite of file " + f1 + " successfull, but read failed. resultFile = " + resultFile);
+                ConcurrentLog.warn("BLOBArray", "rewrite of file " + f1 + " successfull, but read failed. resultFile = " + resultFile);
                 return null;
             }
-            Log.logInfo("BLOBArray", "rewrite of " + f1.getName() + " into " + resultFile);
-            return resultFile;
-        } else {
-            Log.logInfo("BLOBArray", "merging " + f1.getName() + " with " + f2.getName());
-            final File resultFile = mergeWorker(factory, this.keylength, this.ordering, f1, f2, newFile, writeBuffer);
-            if (resultFile == null) {
-                Log.logWarning("BLOBArray", "merge of files " + f1 + ", " + f2 + " returned null. newFile = " + newFile);
-                return null;
-            }
-            try {
-                mountBLOB(resultFile, false);
-            } catch (final IOException e) {
-                Log.logWarning("BLOBArray", "merge of files " + f1 + ", " + f2 + " successfull, but read failed. resultFile = " + resultFile);
-                return null;
-            }
-            Log.logInfo("BLOBArray", "merged " + f1.getName() + " with " + f2.getName() + " into " + resultFile);
+            ConcurrentLog.info("BLOBArray", "rewrite of " + f1.getName() + " into " + resultFile);
             return resultFile;
         }
+        ConcurrentLog.info("BLOBArray", "merging " + f1.getName() + " with " + f2.getName());
+        final File resultFile = mergeWorker(factory, this.keylength, this.ordering, f1, f2, newFile, writeBuffer);
+        if (resultFile == null) {
+            ConcurrentLog.warn("BLOBArray", "merge of files " + f1 + ", " + f2 + " returned null. newFile = " + newFile);
+            return null;
+        }
+        try {
+            mountBLOB(resultFile, false);
+        } catch (final IOException e) {
+            ConcurrentLog.warn("BLOBArray", "merge of files " + f1 + ", " + f2 + " successfull, but read failed. resultFile = " + resultFile);
+            return null;
+        }
+        ConcurrentLog.info("BLOBArray", "merged " + f1.getName() + " with " + f2.getName() + " into " + resultFile);
+        return resultFile;
     }
 
     private static <ReferenceType extends Reference> File mergeWorker(
@@ -960,12 +969,12 @@ public class ArrayStack implements BLOB {
                     merge(i1, i2, order, writer);
                     writer.close(true);
                 } catch (final IOException e) {
-                    Log.logSevere("ArrayStack", "cannot writing or close writing merge, newFile = " + newFile.toString() + ", tmpFile = " + tmpFile.toString() + ": " + e.getMessage(), e);
+                    ConcurrentLog.severe("ArrayStack", "cannot writing or close writing merge, newFile = " + newFile.toString() + ", tmpFile = " + tmpFile.toString() + ": " + e.getMessage(), e);
                     HeapWriter.delete(tmpFile);
                     HeapWriter.delete(newFile);
                     return null;
-                } catch (final RowSpaceExceededException e) {
-                    Log.logSevere("ArrayStack", "cannot merge because of memory failure: " + e.getMessage(), e);
+                } catch (final SpaceExceededException e) {
+                    ConcurrentLog.severe("ArrayStack", "cannot merge because of memory failure: " + e.getMessage(), e);
                     HeapWriter.delete(tmpFile);
                     HeapWriter.delete(newFile);
                     return null;
@@ -975,13 +984,13 @@ public class ArrayStack implements BLOB {
                 HeapWriter.delete(f2);
                 return newFile;
             } catch (final IOException e) {
-                Log.logSevere("ArrayStack", "cannot merge because input files cannot be read, f2 = " + f2.toString() + ": " + e.getMessage(), e);
+                ConcurrentLog.severe("ArrayStack", "cannot merge because input files cannot be read, f2 = " + f2.toString() + ": " + e.getMessage(), e);
                 return null;
             } finally {
                 if (i2 != null) i2.close();
             }
         } catch (final IOException e) {
-            Log.logSevere("ArrayStack", "cannot merge because input files cannot be read, f1 = " + f1.toString() + ": " + e.getMessage(), e);
+            ConcurrentLog.severe("ArrayStack", "cannot merge because input files cannot be read, f1 = " + f1.toString() + ": " + e.getMessage(), e);
             return null;
         } finally {
             if (i1 != null) i1.close();
@@ -997,7 +1006,7 @@ public class ArrayStack implements BLOB {
         try {
             i = new ReferenceIterator<ReferenceType>(f, factory);
         } catch (final IOException e) {
-            Log.logSevere("ArrayStack", "cannot rewrite because input file cannot be read, f = " + f.toString() + ": " + e.getMessage(), e);
+            ConcurrentLog.severe("ArrayStack", "cannot rewrite because input file cannot be read, f = " + f.toString() + ": " + e.getMessage(), e);
             return null;
         }
         if (!i.hasNext()) {
@@ -1010,13 +1019,14 @@ public class ArrayStack implements BLOB {
             final HeapWriter writer = new HeapWriter(tmpFile, newFile, keylength, order, writeBuffer);
             rewrite(i, order, writer);
             writer.close(true);
+            i.close();
         } catch (final IOException e) {
-            Log.logSevere("ArrayStack", "cannot writing or close writing rewrite, newFile = " + newFile.toString() + ", tmpFile = " + tmpFile.toString() + ": " + e.getMessage(), e);
+            ConcurrentLog.severe("ArrayStack", "cannot writing or close writing rewrite, newFile = " + newFile.toString() + ", tmpFile = " + tmpFile.toString() + ": " + e.getMessage(), e);
             FileUtils.deletedelete(tmpFile);
             FileUtils.deletedelete(newFile);
             return null;
-        } catch (final RowSpaceExceededException e) {
-            Log.logSevere("ArrayStack", "cannot rewrite because of memory failure: " + e.getMessage(), e);
+        } catch (final SpaceExceededException e) {
+            ConcurrentLog.severe("ArrayStack", "cannot rewrite because of memory failure: " + e.getMessage(), e);
             FileUtils.deletedelete(tmpFile);
             FileUtils.deletedelete(newFile);
             return null;
@@ -1029,7 +1039,7 @@ public class ArrayStack implements BLOB {
     private static <ReferenceType extends Reference> void merge(
             final CloneableIterator<ReferenceContainer<ReferenceType>> i1,
             final CloneableIterator<ReferenceContainer<ReferenceType>> i2,
-            final ByteOrder ordering, final HeapWriter writer) throws IOException, RowSpaceExceededException {
+            final ByteOrder ordering, final HeapWriter writer) throws IOException, SpaceExceededException {
         assert i1.hasNext();
         assert i2.hasNext();
         byte[] c1lh, c2lh;
@@ -1043,7 +1053,7 @@ public class ArrayStack implements BLOB {
             e = ordering.compare(c1.getTermHash(), c2.getTermHash());
             if (e < 0) {
             	s = c1.shrinkReferences();
-            	if (s > 0) Log.logInfo("ArrayStack", "shrinking index for " + ASCII.String(c1.getTermHash()) + " by " + s + " to " + c1.size() + " entries");
+            	if (s > 0) ConcurrentLog.info("ArrayStack", "shrinking index for " + ASCII.String(c1.getTermHash()) + " by " + s + " to " + c1.size() + " entries");
                 writer.add(c1.getTermHash(), c1.exportCollection());
                 if (i1.hasNext()) {
                     c1lh = c1.getTermHash();
@@ -1056,7 +1066,7 @@ public class ArrayStack implements BLOB {
             }
             if (e > 0) {
                 s = c2.shrinkReferences();
-                if (s > 0) Log.logInfo("ArrayStack", "shrinking index for " + ASCII.String(c2.getTermHash()) + " by " + s + " to " + c2.size() + " entries");
+                if (s > 0) ConcurrentLog.info("ArrayStack", "shrinking index for " + ASCII.String(c2.getTermHash()) + " by " + s + " to " + c2.size() + " entries");
                 writer.add(c2.getTermHash(), c2.exportCollection());
                 if (i2.hasNext()) {
                     c2lh = c2.getTermHash();
@@ -1071,7 +1081,7 @@ public class ArrayStack implements BLOB {
             // merge the entries
             c1 = c1.merge(c2);
             s = c1.shrinkReferences();
-            if (s > 0) Log.logInfo("ArrayStack", "shrinking index for " + ASCII.String(c1.getTermHash()) + " by " + s + " to " + c1.size() + " entries");
+            if (s > 0) ConcurrentLog.info("ArrayStack", "shrinking index for " + ASCII.String(c1.getTermHash()) + " by " + s + " to " + c1.size() + " entries");
             writer.add(c1.getTermHash(), c1.exportCollection());
             c1lh = c1.getTermHash();
             c2lh = c2.getTermHash();
@@ -1101,7 +1111,7 @@ public class ArrayStack implements BLOB {
         while (c1 != null) {
             //System.out.println("FLUSH REMAINING 1: " + c1.getWordHash());
             s = c1.shrinkReferences();
-            if (s > 0) Log.logInfo("ArrayStack", "shrinking index for " + ASCII.String(c1.getTermHash()) + " by " + s + " to " + c1.size() + " entries");
+            if (s > 0) ConcurrentLog.info("ArrayStack", "shrinking index for " + ASCII.String(c1.getTermHash()) + " by " + s + " to " + c1.size() + " entries");
             writer.add(c1.getTermHash(), c1.exportCollection());
             if (i1.hasNext()) {
                 c1lh = c1.getTermHash();
@@ -1114,7 +1124,7 @@ public class ArrayStack implements BLOB {
         while (c2 != null) {
             //System.out.println("FLUSH REMAINING 2: " + c2.getWordHash());
             s = c2.shrinkReferences();
-            if (s > 0) Log.logInfo("ArrayStack", "shrinking index for " + ASCII.String(c2.getTermHash()) + " by " + s + " to " + c2.size() + " entries");
+            if (s > 0) ConcurrentLog.info("ArrayStack", "shrinking index for " + ASCII.String(c2.getTermHash()) + " by " + s + " to " + c2.size() + " entries");
             writer.add(c2.getTermHash(), c2.exportCollection());
             if (i2.hasNext()) {
                 c2lh = c2.getTermHash();
@@ -1129,7 +1139,7 @@ public class ArrayStack implements BLOB {
 
     private static <ReferenceType extends Reference> void rewrite(
             final CloneableIterator<ReferenceContainer<ReferenceType>> i,
-            final ByteOrder ordering, final HeapWriter writer) throws IOException, RowSpaceExceededException {
+            final ByteOrder ordering, final HeapWriter writer) throws IOException, SpaceExceededException {
         assert i.hasNext();
         byte[] clh;
         ReferenceContainer<ReferenceType> c;
@@ -1138,7 +1148,7 @@ public class ArrayStack implements BLOB {
         while (true) {
             assert c != null;
             s = c.shrinkReferences();
-            if (s > 0) Log.logInfo("ArrayStack", "shrinking index for " + ASCII.String(c.getTermHash()) + " by " + s + " to " + c.size() + " entries");
+            if (s > 0) ConcurrentLog.info("ArrayStack", "shrinking index for " + ASCII.String(c.getTermHash()) + " by " + s + " to " + c.size() + " entries");
             writer.add(c.getTermHash(), c.exportCollection());
             if (i.hasNext()) {
                 clh = c.getTermHash();
@@ -1155,7 +1165,7 @@ public class ArrayStack implements BLOB {
         final File f = new File("/Users/admin/blobarraytest");
         try {
             //f.delete();
-            final ArrayStack heap = new ArrayStack(f, "test", NaturalOrder.naturalOrder, 12, 512 * 1024, false);
+            final ArrayStack heap = new ArrayStack(f, "test", NaturalOrder.naturalOrder, 12, 512 * 1024, false, true);
             heap.insert("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
             heap.insert("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
             heap.insert("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());
@@ -1170,7 +1180,7 @@ public class ArrayStack implements BLOB {
             heap.insert("aaaaaaaaaaaX".getBytes(), "WXYZ".getBytes());
             heap.close(true);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 

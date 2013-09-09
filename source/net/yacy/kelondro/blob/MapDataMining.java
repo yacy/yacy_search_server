@@ -29,22 +29,24 @@ package net.yacy.kelondro.blob;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
-import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 
 
 public class MapDataMining extends MapHeap {
@@ -66,8 +68,7 @@ public class MapDataMining extends MapHeap {
             final int cachesize,
             final String[] sortfields,
             final String[] longaccfields,
-            final String[] floataccfields,
-            final Object externalHandler) throws IOException {
+            final String[] floataccfields) throws IOException {
         super(heapFile, keylength, ordering, buffermax, cachesize, ' ');
 
         // create fast ordering clusters and acc fields
@@ -119,8 +120,8 @@ public class MapDataMining extends MapHeap {
                 mapnameb = it.next();
                 try {
                     map = super.get(mapnameb);
-                } catch (final RowSpaceExceededException e) {
-                    Log.logWarning("MapDataMining", e.getMessage());
+                } catch (final SpaceExceededException e) {
+                    ConcurrentLog.warn("MapDataMining", e.getMessage());
                     break;
                 }
                 if (map == null) break;
@@ -128,7 +129,7 @@ public class MapDataMining extends MapHeap {
                 if (sortfields != null && cluster != null) {
                     for (int i = 0; i < sortfields.length; i++) {
                         cell = map.get(sortfields[i]);
-                        if (cell != null) cluster[i].set(UTF8.String(mapnameb), ClusteredScoreMap.object2score(cell));
+                        if (cell != null) cluster[i].set(UTF8.String(mapnameb), object2score(cell));
                     }
                 }
 
@@ -201,7 +202,7 @@ public class MapDataMining extends MapHeap {
     }
 
     @Override
-    public synchronized void insert(final byte[] key, final Map<String, String> newMap) throws IOException, RowSpaceExceededException {
+    public synchronized void insert(final byte[] key, final Map<String, String> newMap) throws IOException, SpaceExceededException {
         assert (key != null);
         assert (key.length > 0);
         assert (newMap != null);
@@ -273,7 +274,7 @@ public class MapDataMining extends MapHeap {
             cell = map.get(sortfield);
             if (cell != null) {
                 cluster = this.sortClusterMap.get(sortfield);
-                cluster.set(key, ClusteredScoreMap.object2score(cell));
+                cluster.set(key, object2score(cell));
                 this.sortClusterMap.put(sortfield, cluster);
             }
         }
@@ -296,9 +297,9 @@ public class MapDataMining extends MapHeap {
                     // remove from sortCluster
                     if (this.sortfields != null) deleteSortCluster(UTF8.String(key));
                 }
-            } catch (final RowSpaceExceededException e) {
+            } catch (final SpaceExceededException e) {
                 map = null;
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
         super.delete(key);
@@ -360,11 +361,11 @@ public class MapDataMining extends MapHeap {
         Collection<byte[]> idx = null;
         try {
             idx = this.columnIndex.getIndex(whereKey, isValue);
-        } catch (UnsupportedOperationException e) {
+        } catch (final UnsupportedOperationException e) {
             this.columnIndex.init(whereKey, isValue, new FullMapIterator(keys()));
             try {
                 idx = this.columnIndex.getIndex(whereKey, isValue);
-            } catch (UnsupportedOperationException ee) {
+            } catch (final UnsupportedOperationException ee) {
                 throw ee;
             }
         }
@@ -408,6 +409,81 @@ public class MapDataMining extends MapHeap {
 
         super.close();
     }
+    
+    private static final String shortDateFormatString = "yyyyMMddHHmmss";
+    private static final SimpleDateFormat shortFormatter = new SimpleDateFormat(shortDateFormatString, Locale.US);
+    private static final long minutemillis = 60000;
+    private static long date2000 = 0;
+
+    static {
+        try {
+            date2000 = shortFormatter.parse("20000101000000").getTime();
+        } catch (final ParseException e) {}
+    }
+
+    private static final byte[] plainByteArray = new byte[256];
+    static {
+        for (int i = 0; i < 32; i++) plainByteArray[i] = (byte) i;
+        for (int i = 32; i < 96; i++) plainByteArray[i] = (byte) (i - 32);
+        for (int i = 96; i < 128; i++) plainByteArray[i] = (byte) (i - 64);
+        for (int i = 128; i < 256; i++) plainByteArray[i] = (byte) (i & 0X20);
+    }
+
+    private static int object2score(Object o) {
+        if (o instanceof Integer) return ((Integer) o).intValue();
+        if (o instanceof Long) {
+            final long l = ((Long) o).longValue();
+            if (l < Integer.MAX_VALUE) return (int) l;
+            return (int) (l & Integer.MAX_VALUE);
+        }
+        if (o instanceof Float) {
+            final double d = 1000f * ((Float) o).floatValue();
+            return (int) Math.round(d);
+        }
+        if (o instanceof Double) {
+            final double d = 1000d * ((Double) o).doubleValue();
+            return (int) Math.round(d);
+        }
+        String s = null;
+        if (o instanceof String) s = (String) o;
+        if (o instanceof byte[]) s = UTF8.String((byte[]) o);
+
+        // this can be used to calculate a score from a string
+        if (s == null || s.isEmpty() || s.charAt(0) == '-') return 0;
+        try {
+            long l = 0;
+            if (s.length() == shortDateFormatString.length()) {
+                // try a date
+                l = ((shortFormatter.parse(s).getTime() - date2000) / minutemillis);
+                if (l < 0) l = 0;
+            } else {
+                // try a number
+                l = Long.parseLong(s);
+            }
+            // fix out-of-ranges
+            if (l > Integer.MAX_VALUE) return (int) (l & Integer.MAX_VALUE);
+            if (l < 0) {
+                System.out.println("string2score: negative score for input " + s);
+                return 0;
+            }
+            return (int) l;
+        } catch (final Throwable e) {
+            // try it lex
+            int len = s.length();
+            if (len > 5) len = 5;
+            int c = 0;
+            for (int i = 0; i < len; i++) {
+                c <<= 6;
+                c += plainByteArray[(byte) s.charAt(i)];
+            }
+            for (int i = len; i < 5; i++) c <<= 6;
+            if (c < 0) {
+                System.out.println("string2score: negative score for input " + s);
+                return 0;
+            }
+            return c;
+        }
+    }
 
 /*
     public byte[] lookupBy(
@@ -423,7 +499,7 @@ public class MapDataMining extends MapHeap {
         try {
             File f = new File("/tmp/MapDataMinig.test.db");
             f.delete();
-            final MapDataMining db = new MapDataMining(f, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, new String[] {"X"}, new String[] {"X"}, new String[] {}, null);
+            final MapDataMining db = new MapDataMining(f, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, new String[] {"X"}, new String[] {"X"}, new String[] {});
             final Map<String, String> m1 = new HashMap<String, String>();
             long t = System.currentTimeMillis();
             m1.put("X", Long.toString(t));

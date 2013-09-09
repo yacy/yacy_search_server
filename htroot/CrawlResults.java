@@ -24,8 +24,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
@@ -34,17 +34,17 @@ import java.util.Map;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.data.ResultURLs;
+import net.yacy.crawler.data.ResultURLs.EventOrigin;
+import net.yacy.crawler.data.ResultURLs.InitExecEntry;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.ResultURLs;
-import de.anomic.crawler.ResultURLs.EventOrigin;
-import de.anomic.crawler.ResultURLs.InitExecEntry;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.tools.nxTools;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.utils.nxTools;
 
 public class CrawlResults {
 
@@ -54,6 +54,7 @@ public class CrawlResults {
         final serverObjects prop = new serverObjects();
 
         int lines = 500;
+        boolean showCollection = sb.index.fulltext().getDefaultConfiguration().isEmpty() || sb.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.collection_sxt);
         boolean showInit    = env.getConfigBool("IndexMonitorInit", false);
         boolean showExec    = env.getConfigBool("IndexMonitorExec", false);
         boolean showDate    = env.getConfigBool("IndexMonitorDate", true);
@@ -116,21 +117,15 @@ public class CrawlResults {
                 final String hash = post.get("hash", null);
                 if (hash != null) {
                     // delete from database
-                    sb.index.urlMetadata().remove(hash.getBytes());
+                    sb.index.fulltext().remove(hash.getBytes());
                 }
             }
 
             if (post.containsKey("deletedomain")) {
                 final String domain = post.get("domain", null);
-                final String hashpart = domain == null ? null : DigestURI.hosthash6(domain);
-                if (hashpart != null) {
-                    // delete all urls for this domain from database
-                    try {
-                        sb.index.urlMetadata().deleteDomain(hashpart);
-                        ResultURLs.deleteDomain(tabletype, domain, hashpart);
-                    } catch (final IOException e) {
-                        Log.logException(e);
-                    }
+                if (domain != null) {
+                    sb.index.fulltext().deleteDomainHostname(domain, null);
+                    ResultURLs.deleteDomain(tabletype, domain);
                 }
             }
 
@@ -166,6 +161,7 @@ public class CrawlResults {
 
             prop.putHTML("table_feedbackpage", "CrawlResults.html");
             prop.put("table_tabletype", tabletype.getCode());
+            prop.put("table_showCollection", (showCollection) ? "1" : "0");
             prop.put("table_showInit",    (showInit) ? "1" : "0");
             prop.put("table_showExec",    (showExec) ? "1" : "0");
             prop.put("table_showDate",    (showDate) ? "1" : "0");
@@ -178,7 +174,7 @@ public class CrawlResults {
             boolean dark = true;
             String urlstr, urltxt;
             Seed initiatorSeed, executorSeed;
-            URIMetadataRow urle;
+            URIMetadataNode urle;
 
             int cnt = 0;
             final Iterator<Map.Entry<String, InitExecEntry>> i = ResultURLs.results(tabletype);
@@ -186,14 +182,19 @@ public class CrawlResults {
             while (i.hasNext()) {
                 entry = i.next();
                 try {
-                    urle = sb.index.urlMetadata().load(UTF8.getBytes(entry.getKey()));
+                    byte[] urlhash = UTF8.getBytes(entry.getKey());
+                    urle = sb.index.fulltext().getMetadata(urlhash);
                     if (urle == null) {
-                        Log.logWarning("PLASMA", "CrawlResults: URL not in index with url hash " + entry.getKey());
+                        sb.index.fulltext().commit(true);
+                        urle = sb.index.fulltext().getMetadata(urlhash);
+                    }
+                    if (urle == null) {
+                        ConcurrentLog.warn("PLASMA", "CrawlResults: URL not in index with url hash " + entry.getKey());
                         urlstr = null;
                         urltxt = null;
                         continue;
                     }
-                    urlstr = urle.url().toNormalform(false, true);
+                    urlstr = urle.url().toNormalform(true);
                     urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
 
                     initiatorSeed = entry.getValue() == null || entry.getValue().initiatorHash == null ? null : sb.peers.getConnected(ASCII.String(entry.getValue().initiatorHash));
@@ -203,6 +204,12 @@ public class CrawlResults {
                     prop.put("table_indexed_" + cnt + "_feedbackpage", "CrawlResults.html");
                     prop.put("table_indexed_" + cnt + "_tabletype", tabletype.getCode());
                     prop.put("table_indexed_" + cnt + "_urlhash", entry.getKey());
+
+                    if (showCollection) {
+                        prop.put("table_indexed_" + cnt + "_showCollection", "1");
+                        prop.put("table_indexed_" + cnt + "_showCollection_collection", Arrays.toString(urle.collections()));
+                    } else
+                        prop.put("table_indexed_" + cnt + "_showCollection", "0");
 
                     if (showInit) {
                         prop.put("table_indexed_" + cnt + "_showInit", "1");
@@ -232,7 +239,7 @@ public class CrawlResults {
                         prop.put("table_indexed_" + cnt + "_showTitle", (showTitle) ? "1" : "0");
                         prop.put("table_indexed_" + cnt + "_showTitle_available", "1");
 
-                        if (urle.dc_title() == null || urle.dc_title().trim().length() == 0)
+                        if (urle.dc_title() == null || urle.dc_title().trim().isEmpty())
                             prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "0");
                         else {
                             prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "1");
@@ -269,7 +276,7 @@ public class CrawlResults {
                     dark = !dark;
                     cnt++;
                 } catch (final Exception e) {
-                    Log.logSevere("PLASMA", "genTableProps", e);
+                    ConcurrentLog.severe("PLASMA", "genTableProps", e);
                 }
             }
             prop.put("table_indexed", cnt);

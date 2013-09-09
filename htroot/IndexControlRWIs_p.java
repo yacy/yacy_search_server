@@ -25,62 +25,56 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.TreeMap;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
-import net.yacy.cora.lod.JenaTripleStore;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.data.ListManager;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
-import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
-import net.yacy.peers.dht.PeerSelection;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
+import net.yacy.search.query.QueryGoal;
+import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.QueryParams;
-import net.yacy.search.query.RWIProcess;
+import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
-import net.yacy.search.ranking.BlockRank;
-import net.yacy.search.ranking.ReferenceOrder;
-import de.anomic.crawler.Cache;
-import de.anomic.crawler.ResultURLs;
-import de.anomic.data.ListManager;
-import de.anomic.data.WorkTables;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
-public class IndexControlRWIs_p
-{
+public class IndexControlRWIs_p {
 
-    public static serverObjects respond(
-        final RequestHeader header,
-        final serverObjects post,
-        final serverSwitch env) throws IOException {
+    private final static String errmsg = "not possible to compute word from hash";
+
+    @SuppressWarnings("deprecation")
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -89,9 +83,7 @@ public class IndexControlRWIs_p
         prop.putHTML("keystring", "");
         prop.put("keyhash", "");
         prop.put("result", "");
-        prop.put("cleanup", post == null || post.containsKey("maxReferencesLimit") ? 1 : 0);
-        prop.put("cleanup_solr", sb.index.getRemoteSolr() == null
-            || !sb.getConfigBool("federated.service.solr.indexing.enabled", false) ? 0 : 1);
+        prop.put("limitations", post == null || post.containsKey("maxReferencesLimit") ? 1 : 0);
 
         // switch off all optional forms/lists
         prop.put("searchresult", 0);
@@ -104,9 +96,10 @@ public class IndexControlRWIs_p
         Segment segment = sb.index;
 
         if ( post != null ) {
+            ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
             final String keystring = post.get("keystring", "").trim();
             byte[] keyhash = post.get("keyhash", "").trim().getBytes();
-            if (keystring.length() > 0) {
+            if (keystring.length() > 0 && !keystring.contains(errmsg)) {
                 keyhash = Word.word2hash(keystring);
             }
             prop.putHTML("keystring", keystring);
@@ -115,7 +108,7 @@ public class IndexControlRWIs_p
             // read values from checkboxes
             final String[] urls = post.getAll("urlhx.*");
             HandleSet urlb =
-                new HandleSet(
+                new RowHandleSet(
                     URIMetadataRow.rowdef.primaryKeyLength,
                     URIMetadataRow.rowdef.objectOrder,
                     urls.length);
@@ -123,8 +116,8 @@ public class IndexControlRWIs_p
                 for ( final String s : urls ) {
                     try {
                         urlb.put(s.getBytes());
-                    } catch ( final RowSpaceExceededException e ) {
-                        Log.logException(e);
+                    } catch (final SpaceExceededException e ) {
+                        ConcurrentLog.logException(e);
                     }
                 }
             }
@@ -133,55 +126,22 @@ public class IndexControlRWIs_p
 
             if ( post.containsKey("keystringsearch") ) {
                 prop.put("keyhash", keyhash);
-                final RWIProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
-                if ( ranking.filteredCount() == 0 ) {
+                final SearchEvent theSearch = genSearchresult(prop, sb, keyhash, null);
+                if (theSearch.local_rwi_available.get() == 0) {
                     prop.put("searchresult", 1);
                     prop.putHTML("searchresult_word", keystring);
                 }
             }
 
             if ( post.containsKey("keyhashsearch") ) {
-                if ( keystring.length() == 0 || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
-                    prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
+                if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
+                    prop.put("keystring", "&lt;" + errmsg + "&gt;");
                 }
-                final RWIProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
-                if ( ranking.filteredCount() == 0 ) {
+                final SearchEvent theSearch = genSearchresult(prop, sb, keyhash, null);
+                if (theSearch.local_rwi_available.get() == 0) {
                     prop.put("searchresult", 2);
                     prop.putHTML("searchresult_wordhash", ASCII.String(keyhash));
                 }
-            }
-
-            // delete everything
-            if ( post.containsKey("deletecomplete") ) {
-                if ( post.get("deleteIndex", "").equals("on") ) {
-                    segment.clear();
-                }
-                if ( post.get("deleteSolr", "").equals("on")
-                    && sb.getConfigBool("federated.service.solr.indexing.enabled", false) ) {
-                    try {
-                        sb.index.getRemoteSolr().clear();
-                    } catch ( final Exception e ) {
-                        Log.logException(e);
-                    }
-                }
-                if ( post.get("deleteCrawlQueues", "").equals("on") ) {
-                    sb.crawlQueues.clear();
-                    sb.crawlStacker.clear();
-                    ResultURLs.clearStacks();
-                }
-                if ( post.get("deleteTriplestore", "").equals("on") ) {
-                    JenaTripleStore.clear();
-                }
-                if ( post.get("deleteCache", "").equals("on") ) {
-                    Cache.clear();
-                }
-                if ( post.get("deleteRobots", "").equals("on") ) {
-                    sb.robots.clear();
-                }
-                if ( post.get("deleteSearchFl", "").equals("on") ) {
-                    sb.tables.clear(WorkTables.TABLE_SEARCH_FAILURE_NAME);
-                }
-                post.remove("deletecomplete");
             }
 
             // set reference limitation
@@ -203,21 +163,21 @@ public class IndexControlRWIs_p
                         index = segment.termIndex().get(keyhash, null);
                         final Iterator<WordReference> en = index.entries();
                         urlb =
-                            new HandleSet(
+                            new RowHandleSet(
                                 URIMetadataRow.rowdef.primaryKeyLength,
                                 URIMetadataRow.rowdef.objectOrder,
                                 index.size());
                         while ( en.hasNext() ) {
                             try {
                                 urlb.put(en.next().urlhash());
-                            } catch ( final RowSpaceExceededException e ) {
-                                Log.logException(e);
+                            } catch (final SpaceExceededException e ) {
+                                ConcurrentLog.logException(e);
                             }
                         }
                         index = null;
                     }
                     if ( delurlref ) {
-                        segment.removeAllUrlReferences(urlb, sb.loader, CacheStrategy.IFEXIST);
+                        segment.removeAllUrlReferences(urlb, sb.loader, agent, CacheStrategy.IFEXIST);
                     }
                     // delete the word first because that is much faster than the deletion of the urls from the url database
                     segment.termIndex().delete(keyhash);
@@ -229,8 +189,8 @@ public class IndexControlRWIs_p
                     }
                     post.remove("keyhashdeleteall");
                     post.put("urllist", "generated");
-                } catch ( final IOException e ) {
-                    Log.logException(e);
+                } catch (final IOException e ) {
+                    ConcurrentLog.logException(e);
                 }
             }
 
@@ -238,7 +198,7 @@ public class IndexControlRWIs_p
             if ( post.containsKey("keyhashdelete") ) {
                 try {
                     if ( delurlref ) {
-                        segment.removeAllUrlReferences(urlb, sb.loader, CacheStrategy.IFEXIST);
+                        segment.removeAllUrlReferences(urlb, sb.loader, agent, CacheStrategy.IFEXIST);
                     }
                     if ( delurl || delurlref ) {
                         for ( final byte[] b : urlb ) {
@@ -246,15 +206,15 @@ public class IndexControlRWIs_p
                         }
                     }
                     final HandleSet urlHashes =
-                        new HandleSet(
+                        new RowHandleSet(
                             URIMetadataRow.rowdef.primaryKeyLength,
                             URIMetadataRow.rowdef.objectOrder,
                             0);
                     for ( final byte[] b : urlb ) {
                         try {
                             urlHashes.put(b);
-                        } catch ( final RowSpaceExceededException e ) {
-                            Log.logException(e);
+                        } catch (final SpaceExceededException e ) {
+                            ConcurrentLog.logException(e);
                         }
                     }
                     segment.termIndex().remove(keyhash, urlHashes);
@@ -262,26 +222,26 @@ public class IndexControlRWIs_p
                     // thinks that it was called for a list presentation
                     post.remove("keyhashdelete");
                     post.put("urllist", "generated");
-                } catch ( final IOException e ) {
-                    Log.logException(e);
+                } catch (final IOException e ) {
+                    ConcurrentLog.logException(e);
                 }
             }
 
             if ( post.containsKey("urllist") ) {
-                if ( keystring.length() == 0 || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
-                    prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
+                if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
+                    prop.put("keystring", "&lt;" + errmsg + "&gt;");
                 }
                 final Bitfield flags = compileFlags(post);
                 final int count = (post.get("lines", "all").equals("all")) ? -1 : post.getInt("lines", -1);
-                final RWIProcess ranking = genSearchresult(prop, sb, segment, keyhash, flags);
-                genURLList(prop, keyhash, keystring, ranking, flags, count);
+                final SearchEvent theSearch = genSearchresult(prop, sb, keyhash, flags);
+                genURLList(prop, keyhash, keystring, theSearch, flags, count);
             }
 
             // transfer to other peer
             if ( post.containsKey("keyhashtransfer") ) {
                 try {
-                    if ( keystring.length() == 0 || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
-                        prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
+                    if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
+                        prop.put("keystring", "&lt;" + errmsg + "&gt;");
                     }
 
                     // find host & peer
@@ -308,27 +268,32 @@ public class IndexControlRWIs_p
                         index = segment.termIndex().get(keyhash, null);
                         // built urlCache
                         final Iterator<WordReference> urlIter = index.entries();
-                        final TreeMap<byte[], URIMetadataRow> knownURLs =
-                                new TreeMap<byte[], URIMetadataRow>(Base64Order.enhancedCoder);
+                        final HandleSet knownURLs =
+                        		new RowHandleSet(
+                                        WordReferenceRow.urlEntryRow.primaryKeyLength,
+                                        WordReferenceRow.urlEntryRow.objectOrder,
+                                        index.size());
                         final HandleSet unknownURLEntries =
-                                new HandleSet(
+                                new RowHandleSet(
                                 WordReferenceRow.urlEntryRow.primaryKeyLength,
                                 WordReferenceRow.urlEntryRow.objectOrder,
                                 index.size());
                         Reference iEntry;
-                        URIMetadataRow lurl;
                         while (urlIter.hasNext()) {
                             iEntry = urlIter.next();
-                            lurl = segment.urlMetadata().load(iEntry.urlhash());
-                            if (lurl == null) {
+                            if (!segment.fulltext().exists(ASCII.String(iEntry.urlhash()))) {
                                 try {
                                     unknownURLEntries.put(iEntry.urlhash());
-                                } catch (final RowSpaceExceededException e) {
-                                    Log.logException(e);
+                                } catch (final SpaceExceededException e) {
+                                    ConcurrentLog.logException(e);
                                 }
                                 urlIter.remove();
                             } else {
-                                knownURLs.put(iEntry.urlhash(), lurl);
+                                try {
+									knownURLs.put(iEntry.urlhash());
+								} catch (final SpaceExceededException e) {
+									ConcurrentLog.logException(e);
+								}
                             }
                         }
 
@@ -340,14 +305,14 @@ public class IndexControlRWIs_p
                                 Word.commonHashLength);
                         try {
                             icc.add(index);
-                        } catch (final RowSpaceExceededException e) {
-                            Log.logException(e);
+                        } catch (final SpaceExceededException e) {
+                            ConcurrentLog.logException(e);
                         }
 
                         // transport to other peer
                         final boolean gzipBody = sb.getConfigBool("indexControl.gzipBody", false);
                         final int timeout = (int) sb.getConfigLong("indexControl.timeout", 60000);
-                        final String error = Protocol.transferIndex(seed, icc, knownURLs, gzipBody, timeout);
+                        final String error = Protocol.transferIndex(seed, icc, knownURLs, segment, gzipBody, timeout);
                         prop.put("result", (error == null) ? ("Successfully transferred "
                                 + knownURLs.size()
                                 + " words in "
@@ -358,8 +323,8 @@ public class IndexControlRWIs_p
                     } else {
                         prop.put("result", "Peer " + host + " not found");
                     }
-                } catch ( final IOException e ) {
-                    Log.logException(e);
+                } catch (final IOException e ) {
+                    ConcurrentLog.logException(e);
                 }
             }
 
@@ -388,92 +353,76 @@ public class IndexControlRWIs_p
                     prop.put("keyhashsimilar_rows_" + rows + "_cols", cols);
                     prop.put("keyhashsimilar_rows", rows + 1);
                     prop.put("result", "");
-                } catch ( final IOException e ) {
-                    Log.logException(e);
+                } catch (final IOException e ) {
+                    ConcurrentLog.logException(e);
                 }
             }
 
             if ( post.containsKey("blacklist") ) {
                 final String blacklist = post.get("blacklist", "");
                 final HandleSet urlHashes =
-                    new HandleSet(
+                    new RowHandleSet(
                         URIMetadataRow.rowdef.primaryKeyLength,
                         URIMetadataRow.rowdef.objectOrder,
                         urlb.size());
                 if ( post.containsKey("blacklisturls") ) {
-                    PrintWriter pw;
-                    try {
-                        final String[] supportedBlacklistTypes =
-                            env.getConfig("BlackLists.types", "").split(",");
-                        pw =
-                            new PrintWriter(new FileWriter(new File(ListManager.listsPath, blacklist), true));
-                        DigestURI url;
-                        for ( final byte[] b : urlb ) {
-                            try {
-                                urlHashes.put(b);
-                            } catch ( final RowSpaceExceededException e ) {
-                                Log.logException(e);
-                            }
-                            final URIMetadataRow e = segment.urlMetadata().load(b);
-                            segment.urlMetadata().remove(b);
-                            if ( e != null ) {
-                                url = e.url();
-                                pw.println(url.getHost() + "/" + url.getFile());
-                                for ( final String supportedBlacklistType : supportedBlacklistTypes ) {
-                                    if ( ListManager.listSetContains(
-                                        supportedBlacklistType + ".BlackLists",
-                                        blacklist) ) {
-                                        Switchboard.urlBlacklist.add(
-                                            BlacklistType.valueOf(supportedBlacklistType),
-                                            url.getHost(),
-                                            url.getFile());
-                                    }
-                                }
-                                SearchEventCache.cleanupEvents(true);
-                            }
-                        }
-                        pw.close();
-                    } catch ( final IOException e ) {
-                    }
+                    final String[] supportedBlacklistTypes =
+					    env.getConfig("BlackLists.types", "").split(",");
+					DigestURI url;
+					for ( final byte[] b : urlb ) {
+					    try {
+					        urlHashes.put(b);
+					    } catch (final SpaceExceededException e ) {
+					        ConcurrentLog.logException(e);
+					    }
+					    url = segment.fulltext().getURL(b);
+					    segment.fulltext().remove(b);
+					    if ( url != null ) {
+					        for ( final String supportedBlacklistType : supportedBlacklistTypes ) {
+					            if ( ListManager.listSetContains(
+					                supportedBlacklistType + ".BlackLists",
+					                blacklist) ) {
+					                Switchboard.urlBlacklist.add(
+					                    BlacklistType.valueOf(supportedBlacklistType),
+					                    blacklist,
+					                    url.getHost(),
+					                    url.getFile());
+					            }
+					        }
+					        SearchEventCache.cleanupEvents(true);
+					    }
+					}
                 }
 
                 if ( post.containsKey("blacklistdomains") ) {
-                    PrintWriter pw;
-                    try {
-                        pw =
-                            new PrintWriter(new FileWriter(new File(ListManager.listsPath, blacklist), true));
-                        DigestURI url;
-                        for ( final byte[] b : urlb ) {
-                            try {
-                                urlHashes.put(b);
-                            } catch ( final RowSpaceExceededException e ) {
-                                Log.logException(e);
-                            }
-                            final URIMetadataRow e = segment.urlMetadata().load(b);
-                            segment.urlMetadata().remove(b);
-                            if ( e != null ) {
-                                url = e.url();
-                                pw.println(url.getHost() + "/.*");
-                                for ( final BlacklistType supportedBlacklistType : BlacklistType.values() ) {
-                                    if ( ListManager.listSetContains(
-                                        supportedBlacklistType + ".BlackLists",
-                                        blacklist) ) {
-                                        Switchboard.urlBlacklist.add(
-                                            supportedBlacklistType,
-                                            url.getHost(),
-                                            ".*");
-                                    }
-                                }
-                            }
-                        }
-                        pw.close();
-                    } catch ( final IOException e ) {
-                    }
+                    DigestURI url;
+					for ( final byte[] b : urlb ) {
+					    try {
+					        urlHashes.put(b);
+					    } catch (final SpaceExceededException e ) {
+					        ConcurrentLog.logException(e);
+					    }
+					    url = segment.fulltext().getURL(b);
+					    segment.fulltext().remove(b);
+					    if ( url != null ) {
+					        for ( final BlacklistType supportedBlacklistType : BlacklistType.values() ) {
+					            if ( ListManager.listSetContains(
+					                supportedBlacklistType + ".BlackLists",
+					                blacklist) ) {
+					                Switchboard.urlBlacklist.add(
+					                    supportedBlacklistType,
+					                    blacklist,
+					                    url.getHost(),
+					                    ".*");
+					            }
+					        }
+					    }
+					}
                 }
                 try {
                     segment.termIndex().remove(keyhash, urlHashes);
-                } catch ( final IOException e ) {
-                    Log.logException(e);
+                } catch (final IOException e ) {
+                    ConcurrentLog.logException(e);
                 }
             }
 
@@ -483,11 +432,9 @@ public class IndexControlRWIs_p
         }
 
         // insert constants
-        prop.putNum("wcount", segment.termIndex().sizesMax());
-        prop.put("cleanup_maxReferencesRadioChecked", ReferenceContainer.maxReferences > 0 ? 1 : 0);
-        prop.put("cleanup_maxReferences", ReferenceContainer.maxReferences > 0
-            ? ReferenceContainer.maxReferences
-            : 100000);
+        prop.putNum("wcount", segment.RWICount());
+        prop.put("limitations_maxReferencesRadioChecked", ReferenceContainer.maxReferences > 0 ? 1 : 0);
+        prop.put("limitations_maxReferences", ReferenceContainer.maxReferences > 0 ? ReferenceContainer.maxReferences : 100000);
 
         // return rewrite properties
         return prop;
@@ -497,14 +444,14 @@ public class IndexControlRWIs_p
         final serverObjects prop,
         final byte[] keyhash,
         final String keystring,
-        final RWIProcess ranked,
+        final SearchEvent theSearch,
         final Bitfield flags,
         final int maxlines) {
         // search for a word hash and generate a list of url links
         final String keyhashs = ASCII.String(keyhash);
         prop.put("genUrlList_keyHash", keyhashs);
 
-        if ( ranked.filteredCount() == 0 ) {
+        if (theSearch.local_rwi_stored.get() == 0) {
             prop.put("genUrlList", 1);
             prop.put("genUrlList_count", 0);
             prop.put("searchresult", 2);
@@ -515,15 +462,15 @@ public class IndexControlRWIs_p
             prop.put("genUrlList_lines", maxlines);
             int i = 0;
             DigestURI url;
-            URIMetadataRow entry;
+            URIMetadataNode entry;
             String us;
             long rn = -1;
-            while ( !ranked.isEmpty() && (entry = ranked.takeURL(false, 1000)) != null ) {
+            while (!theSearch.rwiIsEmpty() && (entry = theSearch.pullOneFilteredFromRWI(false)) != null) {
                 url = entry.url();
                 if ( url == null ) {
                     continue;
                 }
-                us = url.toNormalform(false, false);
+                us = url.toNormalform(true);
                 if ( rn == -1 ) {
                     rn = entry.ranking();
                 }
@@ -533,78 +480,38 @@ public class IndexControlRWIs_p
                 prop.putHTML("genUrlList_urlList_" + i + "_urlExists_keyString", keystring);
                 prop.put("genUrlList_urlList_" + i + "_urlExists_keyHash", keyhashs);
                 prop.putHTML("genUrlList_urlList_" + i + "_urlExists_urlString", us);
-                prop.put(
-                    "genUrlList_urlList_" + i + "_urlExists_urlStringShort",
-                    (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20, 40) + "...") : ((us
-                        .length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
+                prop.put("genUrlList_urlList_" + i + "_urlExists_urlStringShort",
+                    (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20, 40) + "...") : ((us.length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_ranking", (entry.ranking() - rn));
-                prop.putNum(
-                    "genUrlList_urlList_" + i + "_urlExists_domlength",
-                    DigestURI.domLengthEstimation(entry.hash()));
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_ybr", BlockRank.ranking(entry.hash()));
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_tf", 1000.0 * entry
-                    .word()
-                    .termFrequency());
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_authority", (ranked.getOrder() == null)
-                    ? -1
-                    : ranked.getOrder().authority(ASCII.String(entry.hash(), 6, 6)));
-                prop.put(
-                    "genUrlList_urlList_" + i + "_urlExists_date",
-                    GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(entry.word().lastModified())));
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_wordsintitle", entry
-                    .word()
-                    .wordsintitle());
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_domlength", DigestURI.domLengthEstimation(entry.hash()));
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_tf", 1000.0 * entry.word().termFrequency());
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_authority", (theSearch.getOrder() == null) ? -1 : theSearch.getOrder().authority(ASCII.String(entry.hash(), 6, 6)));
+                prop.put("genUrlList_urlList_" + i + "_urlExists_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(entry.word().lastModified())));
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_wordsintitle", entry.word().wordsintitle());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_wordsintext", entry.word().wordsintext());
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_phrasesintext", entry
-                    .word()
-                    .phrasesintext());
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_phrasesintext", entry.word().phrasesintext());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_llocal", entry.word().llocal());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_lother", entry.word().lother());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_hitcount", entry.word().hitcount());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_worddistance", 0);
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_ybr", BlockRank.ranking(entry.hash()));
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_pos", entry.word().minposition());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_phrase", entry.word().posofphrase());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_posinphrase", entry.word().posinphrase());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_urlcomps", entry.word().urlcomps());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_urllength", entry.word().urllength());
-                prop
-                    .put(
+                prop.put(
                         "genUrlList_urlList_" + i + "_urlExists_props",
-                        ((entry.word().flags().get(Condenser.flag_cat_indexof))
-                            ? "appears on index page, "
-                            : "")
-                            + ((entry.word().flags().get(Condenser.flag_cat_hasimage))
-                                ? "contains images, "
-                                : "")
-                            + ((entry.word().flags().get(Condenser.flag_cat_hasaudio))
-                                ? "contains audio, "
-                                : "")
-                            + ((entry.word().flags().get(Condenser.flag_cat_hasvideo))
-                                ? "contains video, "
-                                : "")
-                            + ((entry.word().flags().get(Condenser.flag_cat_hasapp))
-                                ? "contains applications, "
-                                : "")
-                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_identifier))
-                                ? "appears in url, "
-                                : "")
-                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_title))
-                                ? "appears in title, "
-                                : "")
-                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_creator))
-                                ? "appears in author, "
-                                : "")
-                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_subject))
-                                ? "appears in subject, "
-                                : "")
-                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_description))
-                                ? "appears in description, "
-                                : "")
-                            + ((entry.word().flags().get(WordReferenceRow.flag_app_emphasized))
-                                ? "appears emphasized, "
-                                : "")
-                            + ((DigestURI.probablyRootURL(entry.word().urlhash())) ? "probably root url" : ""));
+                        ((entry.word().flags().get(Condenser.flag_cat_indexof)) ? "appears on index page, " : "")
+                            + ((entry.word().flags().get(Condenser.flag_cat_hasimage)) ? "contains images, " : "")
+                            + ((entry.word().flags().get(Condenser.flag_cat_hasaudio)) ? "contains audio, " : "")
+                            + ((entry.word().flags().get(Condenser.flag_cat_hasvideo)) ? "contains video, " : "")
+                            + ((entry.word().flags().get(Condenser.flag_cat_hasapp)) ? "contains applications, " : "")
+                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_identifier)) ? "appears in url, " : "")
+                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_title)) ? "appears in title, " : "")
+                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_creator)) ? "appears in author, " : "")
+                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_subject)) ? "appears in subject, " : "")
+                            + ((entry.word().flags().get(WordReferenceRow.flag_app_dc_description)) ? "appears in description, " : "")
+                            + ((entry.word().flags().get(WordReferenceRow.flag_app_emphasized)) ? "appears emphasized, " : ""));
                 if ( Switchboard.urlBlacklist.isListed(BlacklistType.DHT, url) ) {
                     prop.put("genUrlList_urlList_" + i + "_urlExists_urlhxChecked", "1");
                 }
@@ -612,15 +519,6 @@ public class IndexControlRWIs_p
                 if ( (maxlines >= 0) && (i >= maxlines) ) {
                     break;
                 }
-            }
-            final Iterator<byte[]> iter = ranked.miss(); // iterates url hash strings
-            byte[] b;
-            while ( iter.hasNext() ) {
-                b = iter.next();
-                prop.put("genUrlList_urlList_" + i + "_urlExists", "0");
-                prop.put("genUrlList_urlList_" + i + "_urlExists_urlhxCount", i);
-                prop.putHTML("genUrlList_urlList_" + i + "_urlExists_urlhxValue", b);
-                i++;
             }
             prop.put("genUrlList_urlList", i);
             prop.putHTML("genUrlList_keyString", keystring);
@@ -643,7 +541,7 @@ public class IndexControlRWIs_p
             return null;
         }
         if ( post.get("flags") != null ) {
-            if ( post.get("flags", "").length() == 0 ) {
+            if ( post.get("flags", "").isEmpty() ) {
                 return null;
             }
             return new Bitfield(4, post.get("flags"));
@@ -690,7 +588,7 @@ public class IndexControlRWIs_p
         int hc = 0;
         prop.put("searchresult_keyhash", startHash);
         final Iterator<Seed> e =
-            PeerSelection.getAcceptRemoteIndexSeeds(sb.peers, startHash, sb.peers.sizeConnected(), true);
+            DHTSelection.getAcceptRemoteIndexSeeds(sb.peers, startHash, sb.peers.sizeConnected(), true);
         while ( e.hasNext() ) {
             seed = e.next();
             if ( seed != null ) {
@@ -704,37 +602,61 @@ public class IndexControlRWIs_p
         prop.put("searchresult_hosts", hc);
     }
 
-    public static RWIProcess genSearchresult(
+    public static SearchEvent genSearchresult(
         final serverObjects prop,
         final Switchboard sb,
-        final Segment segment,
         final byte[] keyhash,
         final Bitfield filter) {
-        final QueryParams query =
-            new QueryParams(ASCII.String(keyhash), -1, filter, segment, sb.getRanking(), "IndexControlRWIs_p");
-        final ReferenceOrder order = new ReferenceOrder(query.ranking, UTF8.getBytes(query.targetlang));
-        final RWIProcess ranked = new RWIProcess(query, order, false);
-        ranked.run();
-
-        if ( ranked.filteredCount() == 0 ) {
+        
+        final HandleSet queryhashes = QueryParams.hashes2Set(ASCII.String(keyhash));        
+        final QueryGoal qg = new QueryGoal(queryhashes, null);
+        final QueryParams query = new QueryParams(
+                qg,
+                new QueryModifier(),
+                Integer.MAX_VALUE,
+                "",
+                ContentDomain.ALL,
+                "", //lang
+                null,
+                CacheStrategy.IFFRESH,
+                1000, 0, //count, offset             
+                ".*", //urlmask
+                null,
+                null,
+                QueryParams.Searchdom.LOCAL,
+                filter,
+                false,
+                null,
+                DigestURI.TLD_any_zone_filter,
+                "", 
+                false,
+                sb.index,
+                sb.getRanking(),
+                "",//userAgent
+                false,
+                false,
+                0.0d, 0.0d, 0.0d);       
+        final SearchEvent theSearch = SearchEventCache.getEvent(query, sb.peers, sb.tables, null, false, sb.loader, Integer.MAX_VALUE, Long.MAX_VALUE, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));       
+        if (theSearch.rwiProcess != null && theSearch.rwiProcess.isAlive()) try {theSearch.rwiProcess.join();} catch (final InterruptedException e) {}
+        if (theSearch.local_rwi_available.get() == 0) {
             prop.put("searchresult", 2);
             prop.put("searchresult_wordhash", keyhash);
         } else {
             prop.put("searchresult", 3);
-            prop.put("searchresult_allurl", ranked.filteredCount());
+            prop.put("searchresult_allurl", theSearch.local_rwi_available.get());
             prop
-                .put("searchresult_description", ranked.flagCount()[WordReferenceRow.flag_app_dc_description]);
-            prop.put("searchresult_title", ranked.flagCount()[WordReferenceRow.flag_app_dc_title]);
-            prop.put("searchresult_creator", ranked.flagCount()[WordReferenceRow.flag_app_dc_creator]);
-            prop.put("searchresult_subject", ranked.flagCount()[WordReferenceRow.flag_app_dc_subject]);
-            prop.put("searchresult_url", ranked.flagCount()[WordReferenceRow.flag_app_dc_identifier]);
-            prop.put("searchresult_emphasized", ranked.flagCount()[WordReferenceRow.flag_app_emphasized]);
-            prop.put("searchresult_image", ranked.flagCount()[Condenser.flag_cat_hasimage]);
-            prop.put("searchresult_audio", ranked.flagCount()[Condenser.flag_cat_hasaudio]);
-            prop.put("searchresult_video", ranked.flagCount()[Condenser.flag_cat_hasvideo]);
-            prop.put("searchresult_app", ranked.flagCount()[Condenser.flag_cat_hasapp]);
-            prop.put("searchresult_indexof", ranked.flagCount()[Condenser.flag_cat_indexof]);
+                .put("searchresult_description", theSearch.flagCount()[WordReferenceRow.flag_app_dc_description]);
+            prop.put("searchresult_title", theSearch.flagCount()[WordReferenceRow.flag_app_dc_title]);
+            prop.put("searchresult_creator", theSearch.flagCount()[WordReferenceRow.flag_app_dc_creator]);
+            prop.put("searchresult_subject", theSearch.flagCount()[WordReferenceRow.flag_app_dc_subject]);
+            prop.put("searchresult_url", theSearch.flagCount()[WordReferenceRow.flag_app_dc_identifier]);
+            prop.put("searchresult_emphasized", theSearch.flagCount()[WordReferenceRow.flag_app_emphasized]);
+            prop.put("searchresult_image", theSearch.flagCount()[Condenser.flag_cat_hasimage]);
+            prop.put("searchresult_audio", theSearch.flagCount()[Condenser.flag_cat_hasaudio]);
+            prop.put("searchresult_video", theSearch.flagCount()[Condenser.flag_cat_hasvideo]);
+            prop.put("searchresult_app", theSearch.flagCount()[Condenser.flag_cat_hasapp]);
+            prop.put("searchresult_indexof", theSearch.flagCount()[Condenser.flag_cat_indexof]);
         }
-        return ranked;
+        return theSearch;
     }
 }

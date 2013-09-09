@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<data>
+    #(statisticslines)#::
+    <domains>
+      #{domains}#
+      <domain>
+        <host>#[domain]#</host>
+        <count>#[count]#</count>
+      </domain>
+      #{/domains}#
+    </domains>
+    #(/statisticslines)#
+    #(indexdump)#::
+    <dumpfile>#[dumpfile]#</dumpfile>::
+    #(/indexdump)#
+</data>

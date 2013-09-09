@@ -36,6 +36,9 @@ import net.yacy.kelondro.util.MemoryControl;
 
 public abstract class AbstractScraper implements Scraper {
 
+    protected static final String EMPTY_STRING = new String();
+
+    public static final char sp = ' ';
     public static final char lb = '<';
     public static final char rb = '>';
     public static final char sl = '/';
@@ -53,30 +56,35 @@ public abstract class AbstractScraper implements Scraper {
         this.tags1  = tags1;
     }
 
+    @Override
     public boolean isTag0(final String tag) {
         return (this.tags0 != null) && (this.tags0.contains(tag.toLowerCase()));
     }
 
+    @Override
     public boolean isTag1(final String tag) {
         return (this.tags1 != null) && (this.tags1.contains(tag.toLowerCase()));
     }
 
     //the 'missing' method that shall be implemented:
+    @Override
     public abstract void scrapeText(char[] text, String insideTag);
 
     // the other methods must take into account to construct the return value correctly
+    @Override
     public abstract void scrapeTag0(String tagname, Properties tagopts);
 
+    @Override
     public abstract void scrapeTag1(String tagname, Properties tagopts, char[] text);
 
-    protected static String stripAllTags(final char[] s) {
-        if (!MemoryControl.request(s.length * 2, false)) return "";
+    public static String stripAllTags(final char[] s) {
+        if (s.length > 80 && !MemoryControl.request(s.length * 2, false)) return "";
         final StringBuilder r = new StringBuilder(s.length);
         int bc = 0;
         for (final char c : s) {
             if (c == lb) {
                 bc++;
-                r.append(' ');
+                if (r.length() > 0 && r.charAt(r.length() - 1) != sp) r.append(sp);
             } else if (c == rb) {
                 bc--;
             } else if (bc <= 0) {
@@ -86,14 +94,36 @@ public abstract class AbstractScraper implements Scraper {
         return r.toString().trim();
     }
 
-    public static String stripAll(final char[] s) {
-        return CharacterCoding.html2unicode(stripAllTags(s));
+    protected final static String cleanLine(final String s) {
+        if (!MemoryControl.request(s.length() * 2, false)) return EMPTY_STRING;
+        final StringBuilder sb = new StringBuilder(s.length());
+        char l = ' ';
+        char c;
+        for (int i = 0; i < s.length(); i++) {
+            c = s.charAt(i);
+            if (c < ' ') c = ' ';
+            if (c == ' ') {
+                if (l != ' ') sb.append(c);
+            } else {
+                sb.append(c);
+            }
+            l = c;
+        }
+
+        // return result
+        return sb.toString().trim();
     }
 
+    @Override
     public void close() {
         // free resources
         this.tags0 = null;
         this.tags1 = null;
+    }
+
+    public static void main(String[] args) {
+        String t = "<script src=\"navigation.js\" type=\"text/javascript\"></script>\\n <script src=\"../js/prototype.js\" type=\"text/javascript\"></script>";
+        System.out.println("'" + stripAllTags(t.toCharArray()) + "'");
     }
 
 }

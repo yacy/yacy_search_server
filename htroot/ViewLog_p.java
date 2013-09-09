@@ -37,29 +37,28 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.logging.GuiHandler;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.logging.LogalizerHandler;
-
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class ViewLog_p {
-    
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         String[] log = new String[0];
-        boolean reversed = false;
+        boolean reversed = true;
         boolean json = false;
-        int maxlines = 400, lines = 200;
+        int maxlines = 10000, lines = 1000;
         /* Usually a regex like this would make no sense, ".*" would be
          * sufficient, but ".*.*" makes it a little bit more convenient
          * for the user to input regexes like ".*FOO.*" in the HTML
          * interface.
          */
         String filter = ".*.*";
-        
-        if(post != null){
+
+        if (post != null){
             reversed = (post.containsKey("mode") && "reversed".equals(post.get("mode")));
             json = post.containsKey("json");
 
@@ -84,20 +83,20 @@ public class ViewLog_p {
                 displaySubmenu = true;
              }
         }
-        
+
         prop.put("submenu", displaySubmenu ? "1" : "0");
         prop.put("reverseChecked", reversed ? "1" : "0");
         prop.put("lines", lines);
         prop.put("maxlines",maxlines);
         prop.putHTML("filter", filter);
-        
+
         // trying to compile the regular expression filter expression
         Matcher filterMatcher = null;
         try {
             final Pattern filterPattern = Pattern.compile(filter,Pattern.MULTILINE);
             filterMatcher = filterPattern.matcher("");
         } catch (final PatternSyntaxException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         int level = 0;
@@ -133,7 +132,7 @@ public class ViewLog_p {
             lc++;
         }
         prop.put("log", lc);
-        
+
         // return rewrite properties
         return prop;
     }

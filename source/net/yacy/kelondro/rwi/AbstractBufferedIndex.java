@@ -49,7 +49,7 @@ public abstract class AbstractBufferedIndex<ReferenceType extends Reference> ext
         containerOrder.rotate(emptyContainer);
         final TreeSet<ReferenceContainer<ReferenceType>> containers = new TreeSet<ReferenceContainer<ReferenceType>>(containerOrder);
         final Iterator<ReferenceContainer<ReferenceType>> i = referenceContainerIterator(startHash, rot, excludePrivate, ram);
-        if (ram) count = Math.min(size(), count);
+        if (ram) count = (this instanceof IndexCell) ? count : Math.min(size(), count);
         ReferenceContainer<ReferenceType> container;
         // this loop does not terminate using the i.hasNex() predicate when rot == true
         // because then the underlying iterator is a rotating iterator without termination

@@ -3,13 +3,13 @@ import net.yacy.kelondro.util.Formatter;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 
 public class yacysearchlatestinfo {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         //Switchboard sb = (Switchboard) env;
 
@@ -30,21 +30,18 @@ public class yacysearchlatestinfo {
             prop.put("remotePeerCount", 0);
             return prop;
         }
-        final QueryParams theQuery = theSearch.getQuery();
 
         // dynamically update count values
-        final int totalcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();
-        final int offset = theQuery.neededResults() - theQuery.itemsPerPage() + 1;
+        final int offset = theSearch.query.neededResults() - theSearch.query.itemsPerPage() + 1;
         prop.put("offset", offset);
-        prop.put("itemscount",Formatter.number(offset + theSearch.getQuery().itemsPerPage >= totalcount ? offset + totalcount % theSearch.getQuery().itemsPerPage - 1 : offset + theSearch.getQuery().itemsPerPage - 1));
-        prop.put("itemsperpage", theSearch.getQuery().itemsPerPage);
-        prop.put("totalcount", Formatter.number(totalcount, true));
-        prop.put("localResourceSize", Formatter.number(theSearch.getRankingResult().getLocalIndexCount(), true));
-        prop.put("localMissCount", Formatter.number(theSearch.getRankingResult().getMissCount(), true));
-        prop.put("remoteResourceSize", Formatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
-        prop.put("remoteIndexCount", Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
-        prop.put("remotePeerCount", Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
-        prop.putJSON("navurlBase", QueryParams.navurlBase("html", theQuery, null, theQuery.urlMask.toString(), theQuery.navigators).toString());
+        prop.put("itemscount",Formatter.number(offset + theSearch.query.itemsPerPage >= theSearch.getResultCount() ? offset + theSearch.getResultCount() % theSearch.query.itemsPerPage - 1 : offset + theSearch.query.itemsPerPage - 1));
+        prop.put("itemsperpage", theSearch.query.itemsPerPage);
+        prop.put("totalcount", Formatter.number(theSearch.getResultCount(), true));
+        prop.put("localResourceSize", Formatter.number(theSearch.local_rwi_stored.get() + theSearch.local_solr_stored.get(), true));
+        prop.put("remoteResourceSize", Formatter.number(theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get(), true));
+        prop.put("remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
+        prop.put("remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
+        prop.putJSON("navurlBase", QueryParams.navurlBase("html", theSearch.query, null).toString());
 
         return prop;
     }

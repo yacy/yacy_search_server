@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Content Control</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Settings">
+    #%env/templates/header.template%#
+    #%env/templates/submenuBlacklist.template%#
+    
+    <h2>Content Control</h2>
+    
+    <form id="contentcontrolsettings" action="ContentControl_p.html" method="post" enctype="multipart/form-data">
+    
+<fieldset><legend id="augmentation">Peer Content Control URL Filter</legend>
+<p>
+  With this settings you can activate or deactivate content control on this peer.
+</p>
+
+
+<dl>
+            
+            <dt><label for="content">Use content control filtering:</label></dt>
+              <dd>
+                <input type="checkbox" name="contentcontrolenabled" id="contentcontrolenabled" #(contentcontrolenabled_checked)#:: checked="checked"#(/contentcontrolenabled_checked)# />Enabled<br/>
+                <p class="help">
+                  Enables or disables content control.
+                </p>
+              </dd>
+                             
+              
+              <dt><label for="content">Use this table to create filter:</label></dt>
+              <dd>
+                <input type="text" name="contentcontrolbml" value="#[contentcontrolbml]#" size="60" /><br/><br/>
+                <p class="help">
+                  Define a table. Default: contentcontrol
+                </p>
+              </dd>
+              <dt></dt>
+              <dd><input type="submit" name="contentcontrolSettings" value="Submit" class="submitready"/></dd>
+            </dl>
+</fieldset>
+</form>
+
+
+
+    <form id="contentcontrolExtraSettings" action="ContentControl_p.html" method="post" enctype="multipart/form-data">
+<fieldset><legend id="urlproxy">Content Control SMW Import Settings</legend>
+<p>
+  With this settings you can define the content control import settings. You can define a <a href="http://wiki.sciety.org/mediawiki/extensions/yacy-smwextension/">Semantic Media Wiki with the appropriate extensions.</a>
+</p>
+
+            <dl>
+            
+            <dt><label for="content">SMW import to content control list:</label></dt>
+              <dd>
+                <input type="checkbox" name="ccsmwimport" id="ccsmwimport" #(ccsmwimport_checked)#:: checked="checked"#(/ccsmwimport_checked)# />Enabled<br/>
+                <p class="help">
+                  Enable or disable constant background synchronization of content control list from SMW (Semantic Mediawiki). Requires restart!
+                </p>
+              </dd>
+              
+              <dt><label for="content">SMW import base URL:</label></dt>
+              <dd>
+                <input type="text" name="ccsmwimporturl" value="#[ccsmwimporturl]#" size="60" /><br/><br/>
+                <p class="help">
+                  Define base URL for SMW special page "Ask". Example: http://my.wiki.cc/wiki/Special:Ask
+                </p>
+              </dd>
+              
+              <dt><label for="content">SMW import target table:</label></dt>
+              <dd>
+                <input type="text" name="ccsmwimportlist" value="#[ccsmwimportlist]#" size="60" /><br/><br/>
+                <p class="help">
+                  Define import target table. Default: contentcontrol
+                </p>
+              </dd>
+              
+              <dt><label for="content">Purge content control list on initial sync:</label></dt>
+              <dd>
+                <input type="checkbox" name="ccsmwpurge" id="ccsmwpurge" #(ccsmwpurge_checked)#:: checked="checked"#(/ccsmwpurge_checked)# />Enabled<br/>
+                <p class="help">
+                  Purge content control list on initial synchronisation after startup.
+                </p>
+              </dd>
+              <dt></dt>
+              <dd><input type="submit" name="contentcontrolExtraSettings" value="Submit" class="submitready"/></dd>
+            </dl>
+</fieldset>
+</form>  
+    
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

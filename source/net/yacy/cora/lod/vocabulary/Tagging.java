@@ -34,10 +34,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.geo.GeoLocation;
+import net.yacy.cora.geo.Locations;
 import net.yacy.cora.storage.Files;
-import net.yacy.document.WordCache.Dictionary;
-import net.yacy.document.geolocation.GeoLocation;
-import net.yacy.document.geolocation.Locations;
+import net.yacy.cora.util.CommonPattern;
 
 public class Tagging {
 
@@ -65,7 +65,7 @@ public class Tagging {
             this.objectlink = objectlink;
         }
 
-        public SOTuple(String[] synonyms, String objectlink) {
+        private SOTuple(String[] synonyms, String objectlink) {
             StringBuilder sb = new StringBuilder(synonyms.length * 10);
             for (String s: synonyms) sb.append(',').append(s);
             this.synonyms = sb.substring(1);
@@ -86,7 +86,7 @@ public class Tagging {
 
     }
 
-    public Tagging(String name) {
+    private Tagging(String name) {
         this.navigatorName = name;
         this.synonym2term = new ConcurrentHashMap<String, String>();
         this.term2synonym = new ConcurrentHashMap<String, String>();
@@ -127,7 +127,7 @@ public class Tagging {
             String term, v;
             String[] tags;
         	vocloop: for (Map.Entry<String, SOTuple> e: table.entrySet()) {
-			    if (e.getValue().getSynonymsCSV() == null || e.getValue().getSynonymsCSV().length() == 0) {
+			    if (e.getValue().getSynonymsCSV() == null || e.getValue().getSynonymsCSV().isEmpty()) {
 			        term = normalizeKey(e.getKey());
 			        v = normalizeTerm(e.getKey());
 			        this.synonym2term.put(v, term);
@@ -140,10 +140,10 @@ public class Tagging {
 			    Set<String> synonyms = new HashSet<String>();
 			    synonyms.add(term);
 			    tagloop: for (String synonym: tags) {
-			        if (synonym.length() == 0) continue tagloop;
+			        if (synonym.isEmpty()) continue tagloop;
 				    synonyms.add(synonym);
 			    	synonym = normalizeTerm(synonym);
-			        if (synonym.length() == 0) continue tagloop;
+			        if (synonym.isEmpty()) continue tagloop;
 				    synonyms.add(synonym);
 			        this.synonym2term.put(synonym, term);
 			        this.term2synonym.put(term, synonym);
@@ -163,7 +163,7 @@ public class Tagging {
 	        for (Map.Entry<String, SOTuple> e: table.entrySet()) {
 	            String s = e.getValue() == null ? "" : e.getValue().getSynonymsCSV();
 	            String o = e.getValue() == null ? "" : e.getValue().getObjectlink();
-	            w.write(e.getKey() + (s == null || s.length() == 0 ? "" : ":" + e.getValue().getSynonymsCSV()) + (o == null || o.length() == 0 || o.equals(objectspace + e.getKey()) ? "" : "#" + o) + "\n");
+	            w.write(e.getKey() + (s == null || s.isEmpty() ? "" : ":" + e.getValue().getSynonymsCSV()) + (o == null || o.isEmpty() || o.equals(objectspace + e.getKey()) ? "" : "#" + o) + "\n");
 	        }
 	        w.close();
 	        init();
@@ -180,25 +180,14 @@ public class Tagging {
             this.synonym2term.put(syn, loc);
             this.term2synonym.put(loc, syn);
             geo = location.find(loc, true);
-            if (geo.size() > 0) {
+            if (!geo.isEmpty()) {
                 g = geo.iterator().next();
                 this.term2objectlink.put(loc, "http://www.openstreetmap.org/?lat=" + g.lat() + "&lon=" + g.lon() + "&zoom=16");
             }
         }
     }
 
-    public Tagging(String name, Dictionary dictionary) {
-        this(name);
-        Set<StringBuilder> words = dictionary.getWords();
-        String s;
-        for (StringBuilder word: words) {
-            s = word.toString();
-            this.synonym2term.put(s.toLowerCase(), s);
-            this.term2synonym.put(s, s.toLowerCase());
-        }
-    }
-
-    public void init() throws IOException {
+    private void init() throws IOException {
         if (this.propFile == null) return;
         this.synonym2term.clear();
         this.term2synonym.clear();
@@ -249,10 +238,10 @@ public class Tagging {
                 Set<String> synonyms = new HashSet<String>();
                 synonyms.add(term);
                 tagloop: for (String synonym: tags) {
-                    if (synonym.length() == 0) continue tagloop;
+                    if (synonym.isEmpty()) continue tagloop;
                     synonyms.add(synonym);
                     synonym = normalizeTerm(synonym);
-                    if (synonym.length() == 0) continue tagloop;
+                    if (synonym.isEmpty()) continue tagloop;
                     synonyms.add(synonym);
                     this.synonym2term.put(synonym, term);
                     this.term2synonym.put(term, synonym);
@@ -266,7 +255,7 @@ public class Tagging {
                     this.synonym2synonyms.put(s, synonyms);
                 }
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
     }
 
@@ -295,16 +284,16 @@ public class Tagging {
                     continue vocloop;
                 }
                 if (pl[0].equals(term)) {
-                    w.write(term + (synonyms == null || synonyms.length() == 0 ? "" : ":" + synonyms) + (objectlink == null || objectlink.length() == 0 || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
+                    w.write(term + (synonyms == null || synonyms.isEmpty() ? "" : ":" + synonyms) + (objectlink == null || objectlink.isEmpty() || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
                     written = true;
                 } else {
-                    w.write(pl[0] + (pl[1] == null || pl[1].length() == 0 ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].length() == 0 || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
+                    w.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
                 }
             }
             if (!written) {
-                w.write(term + (synonyms == null || synonyms.length() == 0 ? "" : ":" + synonyms) + (objectlink == null || objectlink.length() == 0 || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
+                w.write(term + (synonyms == null || synonyms.isEmpty() ? "" : ":" + synonyms) + (objectlink == null || objectlink.isEmpty() || objectlink.equals(this.objectspace + term) ? "" : "#" + objectlink) + "\n");
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
         w.close();
         this.propFile.delete();
@@ -328,11 +317,10 @@ public class Tagging {
                 }
                 if (pl[0].equals(term)) {
                     continue vocloop;
-                } else {
-                    w.write(pl[0] + (pl[1] == null || pl[1].length() == 0 ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].length() == 0 || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
                 }
+                w.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
         w.close();
         this.propFile.delete();
@@ -368,9 +356,9 @@ public class Tagging {
                 if (pl == null) {
                     continue vocloop;
                 }
-                w.write(pl[0] + (pl[1] == null || pl[1].length() == 0 ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].length() == 0 || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
+                w.write(pl[0] + (pl[1] == null || pl[1].isEmpty() ? "" : ":" + pl[1]) + (pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : "#" + pl[2]) + "\n");
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
         w.close();
         this.propFile.delete();
@@ -378,7 +366,7 @@ public class Tagging {
         init();
     }
 
-    public Map<String, Set<String>> reconstructionSets() {
+    private Map<String, Set<String>> reconstructionSets() {
         Map<String, Set<String>> r = new TreeMap<String, Set<String>>();
         for (Map.Entry<String, String> e: this.term2synonym.entrySet()) {
             Set<String> s = r.get(e.getKey());
@@ -399,7 +387,7 @@ public class Tagging {
         return r;
     }
 
-    public Map<String, SOTuple> reconstructionLists() {
+    private Map<String, SOTuple> reconstructionLists() {
         Map<String, Set<String>> r = reconstructionSets();
         Map<String, SOTuple> map = new TreeMap<String, SOTuple>();
         for (Map.Entry<String, Set<String>> e: r.entrySet()) {
@@ -422,7 +410,7 @@ public class Tagging {
         BlockingQueue<String> list;
         try {
             list=Files.concurentLineReader(this.propFile, 1000);
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             return map;
         }
         String line;
@@ -432,9 +420,9 @@ public class Tagging {
                 if (pl == null) {
                     continue vocloop;
                 }
-                map.put(pl[0], new SOTuple(pl[1] == null || pl[1].length() == 0 ? "" : pl[1], pl[2] == null || pl[2].length() == 0 || pl[2].equals(this.objectspace + pl[0]) ? "" : pl[2]));
+                map.put(pl[0], new SOTuple(pl[1] == null || pl[1].isEmpty() ? "" : pl[1], pl[2] == null || pl[2].isEmpty() || pl[2].equals(this.objectspace + pl[0]) ? "" : pl[2]));
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
         return map;
     }
@@ -447,7 +435,7 @@ public class Tagging {
             c = line.substring(p + 1);
             line = line.substring(0, p).trim();
         }
-        if (line.length() == 0) {
+        if (line.isEmpty()) {
             return null;
         }
         p = line.indexOf(':');
@@ -511,10 +499,6 @@ public class Tagging {
         return new Metatag(word);
     }
 
-    public Set<String> getSynonyms(String term) {
-    	return this.synonym2synonyms.get(term);
-    }
-
     public Set<String> tags() {
         return this.synonym2term.keySet();
     }
@@ -556,7 +540,7 @@ public class Tagging {
 
 	public class Metatag {
 	    private final String object;
-	    public Metatag(String object) {
+	    private Metatag(String object) {
 	        this.object = object;
 	    }
 
@@ -589,20 +573,17 @@ public class Tagging {
 	    }
 	}
 
-    private final static Pattern PATTERN_UL = Pattern.compile("_");
-    private final static Pattern PATTERN_SP = Pattern.compile(" ");
-
     public static final String encodePrintname(String printname) {
-        return PATTERN_SP.matcher(printname).replaceAll("_");
+        return CommonPattern.SPACE.matcher(printname).replaceAll("_");
     }
 
     public static final String decodeMaskname(String maskname) {
-        return PATTERN_UL.matcher(maskname).replaceAll(" ");
+        return CommonPattern.UNDERSCORE.matcher(maskname).replaceAll(" ");
     }
 
     public static String cleanTagFromAutotagging(final String tagString) {
-        if (tagString == null || tagString.length() == 0) return "";
-        String[] tags = PATTERN_SP.split(tagString);
+        if (tagString == null || tagString.isEmpty()) return "";
+        String[] tags = CommonPattern.SPACE.split(tagString);
         StringBuilder sb = new StringBuilder(tagString.length());
         for (String tag : tags) {
             if (tag.length() > 0) {

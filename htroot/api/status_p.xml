@@ -12,6 +12,7 @@
   </memory>
   
   <processors>#[processors]#</processors>
+  <load>#[load]#</load>
   
   <traffic>
 	<in>#[trafficIn]#</in>
@@ -21,7 +22,11 @@
   
   <dbsize>
     <urlpublictext>#[urlpublictextSize]#</urlpublictext>
-    <rwipublictext>#[rwipublictextSize]#</rwipublictext>
+    <urlpublictextSegmentCount>#[urlpublictextSegmentCount]#</urlpublictextSegmentCount>
+    <webgraph>#[webgraphSize]#</webgraph>
+    <webgraphSegmentCount>#[webgraphSegmentCount]#</webgraphSegmentCount>
+    <rwipublictext>#[rwipublictextSize]#</rwipublictext>    
+    <rwipublictextSegmentCount>#[rwipublictextSegmentCount]#</rwipublictextSegmentCount>    
   </dbsize>
   
   <loaderqueue>
@@ -48,5 +53,24 @@
     <size>#[noloadCrawlSize]#</size>
     <state>#[noloadCrawlState]#</state>
   </noloadcrawlerqueue>
+
+<!-- crawl profile list -->
+#(crawlProfiles)#::
+  <crawls count="#[count]#">
+  #{list}#
+    <crawl>
+      <name>#[name]#</name>
+      <count>#[count]#</count>
+      <handle>#[handle]#</handle>
+      <depth>#[depth]#</depth>
+      <status>#(terminateButton)#terminated::alive#(/terminateButton)#</status>
+    </crawl>
+  #{/list}# 
+  </crawls>
+#(/crawlProfiles)#
+  
+  <postprocessing>
+    <status>#(postprocessingRunning)#idle::busy#(/postprocessingRunning)#</status>
+  </postprocessing>
   
 </status>

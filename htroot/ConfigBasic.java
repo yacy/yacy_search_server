@@ -36,17 +36,17 @@ import java.util.regex.Pattern;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.Translator;
+import net.yacy.data.WorkTables;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.data.Translator;
-import de.anomic.data.WorkTables;
-import de.anomic.http.server.HTTPDFileHandler;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.tools.UPnP;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.http.HTTPDFileHandler;
+import net.yacy.utils.UPnP;
 
 public class ConfigBasic {
 
@@ -78,7 +78,7 @@ public class ConfigBasic {
 
         //boolean doPeerPing = false;
         if ((sb.peers.mySeed().isVirgin()) || (sb.peers.mySeed().isJunior())) {
-            InstantBusyThread.oneTimeJob(sb.yc, "peerPing", null, 0);
+            InstantBusyThread.oneTimeJob(sb.yc, "peerPing", 0);
             //doPeerPing = true;
         }
 
@@ -89,14 +89,18 @@ public class ConfigBasic {
         }
 
         // peer name settings
-        final String peerName = (post == null) ? sb.peers.mySeed().getName() : post.get("peername", "");
-
+        String peerName = (post == null) ? sb.peers.mySeed().getName() : post.get("peername", "");
+        if (peerName != null && peerName.length() > 0) peerName = peerName.replace(' ', '-');
+        
         // port settings
         final long port;
+        boolean ssl;
         if (post != null && post.getInt("port", 0) > 1023) {
             port = post.getLong("port", 8090);
+            ssl = post.getBoolean("withssl");
         } else {
             port = env.getConfigLong("port", 8090); //this allows a low port, but it will only get one, if the user edits the config himself.
+            ssl = env.getConfigBool("server.https", false);
         }
 
         // check if peer name already exists
@@ -123,12 +127,13 @@ public class ConfigBasic {
             upnp = false;
         }
 
-        // check port
+        // check port and ssl connection
         final boolean reconnect;
-        if (!(env.getConfigLong("port", port) == port)) {
+        if (!(env.getConfigLong("port", port) == port) || env.getConfigBool("server.https", false) != ssl) {
             // validate port
             final serverCore theServerCore = (serverCore) env.getThread("10_httpd");
             env.setConfig("port", port);
+            env.setConfig("server.https", ssl);
 
             // redirect the browser to the new port
             reconnect = true;
@@ -159,8 +164,8 @@ public class ConfigBasic {
             //yacyAccessible.setNewPortBat(Integer.parseInt(port));
             //yacyAccessible.setNewPortLink(Integer.parseInt(port));
 
-            // force reconnection in 7 seconds
-            theServerCore.reconnect(7000);
+            // force reconnection in 5 seconds
+            theServerCore.reconnect(5000);
         } else {
             reconnect = false;
             prop.put("reconnect", "0");
@@ -262,6 +267,7 @@ public class ConfigBasic {
         // set default values
         prop.putHTML("defaultName", sb.peers.mySeed().getName());
         prop.putHTML("defaultPort", env.getConfig("port", "8090"));
+        prop.put("withsslenabled", env.getConfigBool("server.https", false) ? 1 : 0);
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed
         prop.put("lang_de", "0");
         prop.put("lang_fr", "0");

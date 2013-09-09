@@ -61,4 +61,9 @@ public enum Owl implements Vocabulary {
     public String getPredicate() {
         return this.predicate;
     }
+
+    @Override
+    public String getURIref() {
+        return PREFIX + ':' + this.name();
+    }
 }

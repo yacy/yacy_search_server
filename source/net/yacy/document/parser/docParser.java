@@ -29,7 +29,6 @@ package net.yacy.document.parser;
 
 import java.io.InputStream;
 
-import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -53,6 +52,7 @@ public class docParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("application/x-msword");
     }
 
+    @Override
     public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
@@ -61,7 +61,7 @@ public class docParser extends AbstractParser implements Parser {
 
         try {
             extractor = new WordExtractor(source);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new Parser.Failure("error in docParser, WordTextExtractorFactory: " + e.getMessage(), location);
         }
 
@@ -72,7 +72,7 @@ public class docParser extends AbstractParser implements Parser {
             contents.append(extractor.getHeaderText());
             contents.append(' ');
             contents.append(extractor.getFooterText());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new Parser.Failure("error in docParser, getText: " + e.getMessage(), location);
         }
         String title = (contents.length() > 240) ? contents.substring(0,240) : contents.toString().trim();
@@ -93,13 +93,13 @@ public class docParser extends AbstractParser implements Parser {
                   this,
                   null,
                   null,
-                  title,
+                  singleList(title),
                   "", // TODO: AUTHOR
                   extractor.getDocSummaryInformation().getCompany(), // publisher
                   null,
                   null,
                   0.0f, 0.0f,
-                  UTF8.getBytes(contents.toString()),
+                  contents.toString(),
                   null,
                   null,
                   null,

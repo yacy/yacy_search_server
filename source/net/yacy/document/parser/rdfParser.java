@@ -43,6 +43,7 @@ public class rdfParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("application/rdf+xml");
     }
 
+    @Override
     public Document[] parse(final DigestURI url, final String mimeType,
             final String charset, final InputStream source)
             throws Failure, InterruptedException {
@@ -57,8 +58,8 @@ public class rdfParser extends AbstractParser implements Parser {
         Document doc;
 
         String all = "rdfdatasource";
-		doc = new Document(url, mimeType, charset, null, null, null, "", "",
-					"", null, "", 0, 0, all.getBytes(), null, null, null, false);
+		doc = new Document(url, mimeType, charset, null, null, null, singleList(""), "",
+					"", null, new ArrayList<String>(0), 0, 0, all, null, null, null, false);
 
         docs.add(doc);
 

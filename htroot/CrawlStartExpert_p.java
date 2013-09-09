@@ -24,37 +24,40 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.util.ArrayList;
+import java.util.List;
+
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class CrawlStartExpert_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
         // define visible variables
-        prop.put("starturl", /*(intranet) ? repository :*/ "http://");
+        prop.put("starturl", /*(intranet) ? repository :*/ "");
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
         prop.put("crawlingDepth", Math.min(3, env.getConfigLong("crawlingDepth", 0)));
+        prop.put("crawlingDepthExtension", CrawlProfile.MATCH_NEVER_STRING);
         prop.put("directDocByURLChecked", sb.getConfigBool("crawlingDirectDocByURL", true) ? "1" : "0");
         prop.put("mustmatch", /*(intranet) ? repository + ".*" :*/ CrawlProfile.MATCH_ALL_STRING);
         prop.put("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
+        prop.put("indexmustmatch", CrawlProfile.MATCH_ALL_STRING);
+        prop.put("indexmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
+        prop.put("indexcontentmustmatch", CrawlProfile.MATCH_ALL_STRING);
+        prop.put("indexcontentmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
         prop.put("ipMustmatch", sb.getConfig("crawlingIPMustMatch", CrawlProfile.MATCH_ALL_STRING));
         prop.put("ipMustnotmatch", sb.getConfig("crawlingIPMustNotMatch", CrawlProfile.MATCH_NEVER_STRING));
         prop.put("countryMustMatch", sb.getConfig("crawlingCountryMustMatch", ""));
-
-        prop.put("crawlingIfOlderCheck", "0");
-        prop.put("crawlingIfOlderUnitYearCheck", "0");
-        prop.put("crawlingIfOlderUnitMonthCheck", "0");
-        prop.put("crawlingIfOlderUnitDayCheck", "1");
-        prop.put("crawlingIfOlderUnitHourCheck", "0");
-        prop.put("crawlingIfOlderNumber", "7");
 
         final int crawlingDomFilterDepth = env.getConfigInt("crawlingDomFilterDepth", -1);
         prop.put("crawlingDomFilterCheck", (crawlingDomFilterDepth == -1) ? "0" : "1");
@@ -63,6 +66,8 @@ public class CrawlStartExpert_p {
         prop.put("crawlingDomMaxCheck", (crawlingDomMaxPages == -1) ? "0" : "1");
         prop.put("crawlingDomMaxPages", (crawlingDomMaxPages == -1) ? 10000 : crawlingDomMaxPages);
         prop.put("crawlingQChecked", env.getConfigBool("crawlingQ", true) ? "1" : "0");
+        prop.put("followFramesChecked", env.getConfigBool("followFrames", true) ? "1" : "0");
+        prop.put("obeyHtmlRobotsNoindexChecked", env.getConfigBool("obeyHtmlRobotsNoindex", true) ? "1" : "0");
         prop.put("storeHTCacheChecked", env.getConfigBool("storeHTCache", true) ? "1" : "0");
         prop.put("indexingTextChecked", env.getConfigBool("indexText", true) ? "1" : "0");
         prop.put("indexingMediaChecked", env.getConfigBool("indexMedia", true) ? "1" : "0");
@@ -79,6 +84,24 @@ public class CrawlStartExpert_p {
         prop.put("xdstopwChecked", env.getConfigBool("xdstopw", true) ? "1" : "0");
         prop.put("xpstopwChecked", env.getConfigBool("xpstopw", true) ? "1" : "0");
 
+        boolean collectionEnabled = sb.index.fulltext().getDefaultConfiguration().isEmpty() || sb.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.collection_sxt);
+        prop.put("collectionEnabled", collectionEnabled ? 1 : 0);
+        prop.put("collection", collectionEnabled ? "user" : "");   
+        if (sb.isP2PMode()) {
+            prop.put("agentSelect", 0);
+        } else {
+            prop.put("agentSelect", 1); 
+            List<String> agentNames = new ArrayList<String>();
+            if (sb.isIntranetMode()) agentNames.add(ClientIdentification.yacyIntranetCrawlerAgentName);
+            if (sb.isGlobalMode()) agentNames.add(ClientIdentification.yacyInternetCrawlerAgentName);
+            agentNames.add(ClientIdentification.googleAgentName);
+            if (sb.isAllIPMode()) agentNames.add(ClientIdentification.browserAgentName);
+            for (int i = 0; i < agentNames.size(); i++) {
+                prop.put("agentSelect_list_" + i + "_name", agentNames.get(i)); 
+            }
+            prop.put("agentSelect_list", agentNames.size()); 
+        }
+        prop.put("agentSelect_defaultAgentName", ClientIdentification.yacyInternetCrawlerAgentName);     
         // return rewrite properties
         return prop;
     }

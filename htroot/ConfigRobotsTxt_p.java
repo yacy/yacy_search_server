@@ -1,4 +1,4 @@
-// ConfigRobotsTxt_p.java 
+// ConfigRobotsTxt_p.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -32,20 +32,20 @@
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.http.server.RobotsTxtConfig;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.server.servletProperties;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.servletProperties;
+import net.yacy.server.http.RobotsTxtConfig;
 
 public class ConfigRobotsTxt_p {
-    
-    public static servletProperties respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+    public static servletProperties respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final servletProperties prop = new servletProperties();
-        
+
         final RobotsTxtConfig rbc = ((Switchboard)env).robotstxtConfig;
         prop.put("clientname", sb.peers.mySeed().getPublicAddress());
-        
+
         if (post != null) {
             if (post.containsKey("save")) {
                 rbc.setAllDisallowed(post.containsKey(RobotsTxtConfig.ALL));
@@ -64,7 +64,7 @@ public class ConfigRobotsTxt_p {
                 env.setConfig(SwitchboardConstants.ROBOTS_TXT, rbc.toString());
             }
         }
-        
+
         prop.put(RobotsTxtConfig.ALL + ".checked", (rbc.isAllDisallowed()) ? "1" : "0");
         prop.put(RobotsTxtConfig.BLOG + ".checked", (rbc.isBlogDisallowed()) ? "1" : "0");
         prop.put(RobotsTxtConfig.BOOKMARKS + ".checked", (rbc.isBookmarksDisallowed()) ? "1" : "0");

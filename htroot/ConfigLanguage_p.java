@@ -1,4 +1,4 @@
-//ConfigLanguage_p.java 
+//ConfigLanguage_p.java
 //-----------------------
 //part of YACY
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -41,18 +41,18 @@ import java.util.Map;
 
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.Translator;
+import net.yacy.data.WorkTables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
-import de.anomic.data.Translator;
-import de.anomic.data.WorkTables;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 
 public class ConfigLanguage_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
         Switchboard sb = (Switchboard) env;
@@ -72,7 +72,7 @@ public class ConfigLanguage_p {
 
             // store this call as api call
             ((Switchboard) env).tables.recordAPICall(post, "ConfigLanguage_p.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "language settings: " + selectedLanguage);
-            
+
             //change language
             if (post.containsKey("use_button") && selectedLanguage != null){
                 /* Only change language if filename is contained in list of filesnames
@@ -101,7 +101,7 @@ public class ConfigLanguage_p {
                 Iterator<String> it;
                 try {
                     final DigestURI u = new DigestURI(url);
-                    it = FileUtils.strings(u.get(ClientIdentification.getUserAgent(), 10000));
+                    it = FileUtils.strings(u.get(ClientIdentification.yacyInternetCrawlerAgent));
                 } catch(final IOException e) {
                     prop.put("status", "1");//unable to get url
                     prop.put("status_url", url);
@@ -142,7 +142,7 @@ public class ConfigLanguage_p {
             final String langName = langNames.get(langKey);
             prop.put("langlist_" + (count + 1) + "_file", langFile);
             prop.put("langlist_" + (count + 1) + "_name", ((langName == null) ? langKey : langName));
-            
+
             if(env.getConfig("locale.language", "default").equals(langKey)) {
                 prop.put("langlist_" + (count + 1) + "_selected", "selected=\"selected\"");
                 prop.put("langlist_0_selected", " "); // reset Default

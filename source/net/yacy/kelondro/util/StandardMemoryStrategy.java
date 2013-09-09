@@ -25,13 +25,13 @@
 
 package net.yacy.kelondro.util;
 
+import net.yacy.cora.util.Memory;
+
 /**
  * Standard implementation to get information about memory usage or try to free some memory
  */
 public class StandardMemoryStrategy extends MemoryStrategy {
 
-
-    private final Runtime runtime = Runtime.getRuntime();
     private final long[] gcs = new long[5];
     private int gcs_pos = 0;
     private long properMbyte = 0L;
@@ -49,7 +49,6 @@ public class StandardMemoryStrategy extends MemoryStrategy {
      * @param last time which must be passed since lased gc
      * @param info additional info for log
      */
-    @Override
     protected final synchronized boolean gc(final int last, final String info) { // thq
     	assert last >= 10000; // too many forced GCs will cause bad execution performance
         final long elapsed = System.currentTimeMillis() - lastGC;
@@ -62,14 +61,14 @@ public class StandardMemoryStrategy extends MemoryStrategy {
             this.gcs[this.gcs_pos++] = after - before;
             if (this.gcs_pos >= this.gcs.length) this.gcs_pos = 0;
 
-            if (log.isFine()) log.logInfo("[gc] before: " + Formatter.bytesToString(before) +
+            if (log.isFine()) log.info("[gc] before: " + Formatter.bytesToString(before) +
                                               ", after: " + Formatter.bytesToString(after) +
                                               ", freed: " + Formatter.bytesToString(after - before) +
                                               ", rt: " + (lastGC - start) + " ms, call: " + info);
             return true;
         }
 
-        if (log.isFinest()) log.logFinest("[gc] no execute, last run: " + (elapsed / 1000) + " seconds ago, call: " + info);
+        if (log.isFinest()) log.finest("[gc] no execute, last run: " + (elapsed / 1000) + " seconds ago, call: " + info);
         return false;
     }
 
@@ -95,7 +94,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
      */
     @Override
     protected final long free() {
-        return this.runtime.freeMemory();
+        return Memory.free();
     }
 
     /**
@@ -104,7 +103,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
      */
     @Override
     protected final long available() {
-        return maxMemory() - total() + free();
+        return Memory.available();
     }
 
     /**
@@ -114,7 +113,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
     @Override
     protected final long maxMemory()
     {
-    	return this.runtime.maxMemory();
+    	return Memory.maxMemory();
     }
 
 	/**
@@ -124,7 +123,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
     @Override
     protected final long total()
 	{
-		return this.runtime.totalMemory();
+		return Memory.total();
 	}
 
 	/**
@@ -160,7 +159,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
         if (avail >= size) return true;
         if (log.isFine()) {
             final String t = new Throwable("Stack trace").getStackTrace()[1].toString();
-            log.logFine(t + " requested " + (size >> 10) + " KB, got " + (avail >> 10) + " KB");
+            log.fine(t + " requested " + (size >> 10) + " KB, got " + (avail >> 10) + " KB");
         }
         if (force || avg == 0 || avg + avail >= size) {
             // this is only called if we expect that an allocation of <size> bytes would cause the jvm to call the GC anyway
@@ -170,17 +169,16 @@ public class StandardMemoryStrategy extends MemoryStrategy {
             avail = available();
             if (performedGC) {
                 final long freed = avail - memBefore;
-                log.logInfo("performed " + ((force) ? "explicit" : "necessary") + " GC, freed " + (freed >> 10)
+                log.info("performed " + ((force) ? "explicit" : "necessary") + " GC, freed " + (freed >> 10)
                     + " KB (requested/available/average: "
                     + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
             }
             checkProper(avail);
             return avail >= size;
-        } else {
-            if (log.isFine()) log.logFine("former GCs indicate to not be able to free enough memory (requested/available/average: "
-                    + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
-            return false;
         }
+        if (log.isFine()) log.fine("former GCs indicate to not be able to free enough memory (requested/available/average: "
+                + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
+        return false;
     }
 
     /**
@@ -189,7 +187,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
      */
     @Override
     protected final long used() {
-        return total() - free();
+        return Memory.used();
     }
 
     @Override
@@ -224,7 +222,7 @@ public class StandardMemoryStrategy extends MemoryStrategy {
 
     		this.prevTreshold = t;
 
-			log.logInfo("checkProper: below treshold; tresholdCount: " + this.tresholdCount + "; proper: " + this.proper);
+			log.info("checkProper: below treshold; tresholdCount: " + this.tresholdCount + "; proper: " + this.proper);
     	}
     	else if (!this.proper && (available >> 20) > (this.properMbyte * 2L)) // we were wrong!
     		resetProperState();

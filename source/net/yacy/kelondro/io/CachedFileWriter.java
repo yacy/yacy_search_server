@@ -30,7 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 public final class CachedFileWriter extends AbstractWriter implements Writer {
 
@@ -87,7 +87,7 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
         long available = this.RAFile.length() - seek;
         if (available == -seek) return; // we don't know how this happens but we just silently ignore it by now TODO:fixme
         //System.out.println("*** available = " + available);
-        if (available < len) throw new IOException("EOF, available = " + available + ", requested = " + len + ", this.RAFile.length() = " + this.RAFile.length() + ", seek = " + seek);
+        if (available < len) throw new IOException("EOF in " + this.file.getName() + ", available = " + available + ", requested = " + len + ", this.RAFile.length() = " + this.RAFile.length() + ", seek = " + seek);
         if (this.cachestart + this.cachelen == seek && this.cache.length - this.cachelen >= len) {
             this.RAFile.readFully(this.cache, this.cachelen, len);
             //System.out.println("*** DEBUG FileRA " + this.file.getName() + ": append fill " + len + " bytes");
@@ -146,12 +146,12 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
     @Override
     public final synchronized void close() {
         if (this.RAFile != null) try {
-            try{this.RAFile.getChannel().close();} catch (IOException e) {}
+            try{this.RAFile.getChannel().close();} catch (final IOException e) {}
             //System.out.println("***DEBUG*** closed file " + this.file + ", FD is " + ((RAFile.getFD().valid()) ? "VALID" : "VOID") + ", channel is " + ((RAFile.getChannel().isOpen()) ? "OPEN" : "CLOSE"));
             this.RAFile.close();
             //System.out.println("***DEBUG*** closed file " + this.file + ", FD is " + ((RAFile.getFD().valid()) ? "VALID" : "VOID") + ", channel is " + ((RAFile.getChannel().isOpen()) ? "OPEN" : "CLOSE"));
-        } catch (IOException e) {
-            Log.logException(e);
+        } catch (final IOException e) {
+            ConcurrentLog.logException(e);
         }
         this.cache = null;
         this.RAFile = null;
@@ -162,8 +162,8 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
         // re-open the file
         try {
             this.RAFile = new RandomAccessFile(this.file, "rw");
-        } catch (FileNotFoundException e) {
-            Log.logException(e);
+        } catch (final FileNotFoundException e) {
+            ConcurrentLog.logException(e);
         }
         this.cache = new byte[8192];
         this.cachestart = 0;

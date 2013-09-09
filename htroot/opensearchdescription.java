@@ -28,9 +28,9 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class opensearchdescription {
 
@@ -44,8 +44,7 @@ public class opensearchdescription {
         if (thisaddress.indexOf(':',0) == -1) thisaddress += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
 
         int compareyacy = 0;
-        if (post != null && post.getBoolean("compare_yacy"))
-		compareyacy = 1;
+        if (post != null && post.getBoolean("compare_yacy")) compareyacy = 1;
 
         final serverObjects prop = new serverObjects();
         prop.put("compareyacy", compareyacy);

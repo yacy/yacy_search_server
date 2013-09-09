@@ -33,18 +33,18 @@ import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class Vocabulary_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         Collection<Tagging> vocs = LibraryProvider.autotagging.getVocabularies();
@@ -60,53 +60,55 @@ public class Vocabulary_p {
                     if (discovername != null && discovername.length() > 0) {
                         String discoverobjectspace = post.get("discoverobjectspace", "");
                         MultiProtocolURI discoveruri = null;
-                        if (discoverobjectspace.length() > 0) try {discoveruri = new MultiProtocolURI(discoverobjectspace);} catch (MalformedURLException e) {}
+                        if (discoverobjectspace.length() > 0) try {discoveruri = new MultiProtocolURI(discoverobjectspace);} catch (final MalformedURLException e) {}
                         if (discoveruri == null) discoverobjectspace = "";
                         Map<String, Tagging.SOTuple> table = new TreeMap<String, Tagging.SOTuple>();
                         File propFile = LibraryProvider.autotagging.getVocabularyFile(discovername);
+                        boolean discoverNot = post.get("discovermethod", "").equals("none");
                         boolean discoverFromPath = post.get("discovermethod", "").equals("path");
                         boolean discoverFromTitle = post.get("discovermethod", "").equals("title");
                         boolean discoverFromTitleSplitted = post.get("discovermethod", "").equals("titlesplitted");
                         boolean discoverFromAuthor = post.get("discovermethod", "").equals("author");
-                        if (discoveruri != null) {
-                            Segment segment = sb.index;
-                            Iterator<DigestURI> ui = segment.urlSelector(discoveruri);
-                            String t;
+                        Segment segment = sb.index;
+                        String t;
+                        if (!discoverNot) {
+                            Iterator<DigestURI> ui = segment.urlSelector(discoveruri, 600000L, 100000);
                             while (ui.hasNext()) {
                                 DigestURI u = ui.next();
-                                String u0 = u.toNormalform(true, false);
+                                String u0 = u.toNormalform(true);
                                 t = "";
                                 if (discoverFromPath) {
-                                    t = u0.substring(discoverobjectspace.length());
-                                    if (t.indexOf('/') >= 0) continue;
-                                    int p = t.indexOf('.');
-                                    if (p >= 0) t = t.substring(0, p);
+                                    int exp = u0.lastIndexOf('.');
+                                    if (exp < 0) continue;
+                                    int slp = u0.lastIndexOf('/', exp);
+                                    if (slp < 0) continue;
+                                    t = u0.substring(slp, exp);
+                                    int p;
                                     while ((p = t.indexOf(':')) >= 0) t = t.substring(p + 1);
                                     while ((p = t.indexOf('=')) >= 0) t = t.substring(p + 1);
-                                    if (p >= 0) t = t.substring(p + 1);
                                 }
                                 if (discoverFromTitle || discoverFromTitleSplitted) {
-                                    URIMetadataRow m = segment.urlMetadata().load(u.hash());
+                                    URIMetadataNode m = segment.fulltext().getMetadata(u.hash());
                                     if (m != null) t = m.dc_title();
                                     if (t.endsWith(".jpg") || t.endsWith(".gif")) continue;
                                 }
                                 if (discoverFromAuthor) {
-                                    URIMetadataRow m = segment.urlMetadata().load(u.hash());
+                                    URIMetadataNode m = segment.fulltext().getMetadata(u.hash());
                                     if (m != null) t = m.dc_creator();
                                 }
                                 t = t.replaceAll("_", " ").replaceAll("\"", " ").replaceAll("'", " ").replaceAll(",", " ").replaceAll("  ", " ").trim();
-                                if (t.length() == 0) continue;
+                                if (t.isEmpty()) continue;
                                 if (discoverFromTitleSplitted) {
                                     String[] ts = t.split(" ");
                                     for (String s: ts) {
-                                        if (s.length() == 0) continue;
+                                        if (s.isEmpty()) continue;
                                         if (s.endsWith(".jpg") || s.endsWith(".gif")) continue;
                                         table.put(s, new Tagging.SOTuple(Tagging.normalizeTerm(s), u0));
                                     }
                                 } else if (discoverFromAuthor) {
                                     String[] ts = t.split(";"); // author names are often separated by ';'
                                     for (String s: ts) {
-                                        if (s.length() == 0) continue;
+                                        if (s.isEmpty()) continue;
                                         int p = s.indexOf(','); // check if there is a reversed method to mention the name
                                         if (p >= 0) s = s.substring(p + 1).trim() + " " + s.substring(0, p).trim();
                                         table.put(s, new Tagging.SOTuple(Tagging.normalizeTerm(s), u0));
@@ -129,8 +131,8 @@ public class Vocabulary_p {
                     if (post.get("add_new", "").equals("checked") && post.get("newterm", "").length() > 0) {
                     	String objectlink = post.get("newobjectlink", "");
                     	if (objectlink.length() > 0) try {
-                    		objectlink = new MultiProtocolURI(objectlink).toNormalform(true, false);
-                    	} catch (MalformedURLException e) {}
+                    		objectlink = new MultiProtocolURI(objectlink).toNormalform(true);
+                    	} catch (final MalformedURLException e) {}
                         vocabulary.put(post.get("newterm", ""), post.get("newsynonyms", ""), objectlink);
                     }
 
@@ -164,8 +166,8 @@ public class Vocabulary_p {
                         vocabularyName = null;
                     }
                 }
-            } catch (IOException e) {
-                Log.logException(e);
+            } catch (final IOException e) {
+                ConcurrentLog.logException(e);
             }
         }
 

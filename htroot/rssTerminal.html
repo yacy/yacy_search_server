@@ -10,7 +10,7 @@ div#feedbox {
   margin: 0;
   background: #fff;
   text-align:left;
-  font:9px 'Lucida Console', 'Courier New', monospace;
+  font:9px 'Droid Sans', 'Lucida Console', 'Courier New', monospace;
 }
 
 div#feedbox p {
@@ -37,6 +37,8 @@ var tab = "&nbsp;&nbsp;";
 var lastShow = new Date();
 var set = "";
 var requestCount = 0;
+var fntcolor = "000000";
+var setcolors = new Array("PEERNEWS:606060","REMOTESEARCH:ffab00","LOCALSEARCH:dd0000","REMOTEINDEXING:ccbb00","LOCALINDEXING:562b29","DHTRECEIVE:006600","DHTSEND:002a97","PROXY:8d85f3");
 
 function fillLines() {
 alert(maxlines);
@@ -48,11 +50,18 @@ alert(maxlines);
 }
 
 function addLine(line) {
+  //if (typeof query.cf!=='undefined') {
+    for (var i=0;i<setcolors.length;i++) {
+      if (line.match(setcolors[i].split(":")[0])) {
+          fntcolor = setcolors[i].split(":")[1];
+      }
+    }
+  //}
   while (line.length > maxwidth) {
-    lines.push(line.substring(0, maxwidth));
+    lines.push("<font style=\"color:#" + fntcolor + ";\">" + line.substring(0, maxwidth) + "</font>");
     line = tab + line.substring(maxwidth);
   }
-  lines.push(line);
+  lines.push("<font style=\"color:#" + fntcolor + ";\">" + line + "</font>");
   if (lines.length > maxlines) {
     if (scroller != null) {
       window.clearInterval(scroller);

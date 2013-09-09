@@ -26,16 +26,16 @@ package net.yacy.document.parser.html;
 
 import java.util.Comparator;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry> {
 
-    private final MultiProtocolURI url;
+    private final DigestURI url;
     private final String alt;
     private final int width, height;
     private final long fileSize;
 
-    public ImageEntry(final MultiProtocolURI url, final String alt, final int width, final int height, long fileSize) {
+    public ImageEntry(final DigestURI url, final String alt, final int width, final int height, long fileSize) {
         assert url != null;
         this.url = url;
         this.alt = alt;
@@ -44,7 +44,7 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
         this.fileSize = fileSize;
     }
 
-    public MultiProtocolURI url() {
+    public DigestURI url() {
         return this.url;
     }
 
@@ -66,7 +66,7 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
 
     @Override
     public String toString() {
-        return "<img url=\"" + this.url.toNormalform(false, false) + "\"" +
+        return "<img url=\"" + this.url.toNormalform(false) + "\"" +
                (this.alt != null && this.alt.length() > 0 ? " alt=\"" + this.alt + "\"" : "") +
                (this.width >= 0 ? " width=\"" + this.width + "\"" : "") +
                (this.height >= 0 ? " height=\"" + this.height + "\"" : "") +
@@ -91,7 +91,7 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
         // assuming that hashCode would return a 'perfect hash' this method would
         // create a total ordering on images with respect on the image size
         assert (this.url != null);
-        if (this.url.toNormalform(true, true).equals((h).url.toNormalform(true, true))) return 0;
+        if (this.url.toNormalform(true).equals((h).url.toNormalform(true))) return 0;
         final int thc = this.hashCode();
         final int ohc = (h).hashCode();
         if (thc < ohc) return -1;

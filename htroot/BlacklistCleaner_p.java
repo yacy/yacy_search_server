@@ -30,9 +30,6 @@
 // if the shell's current path is HTROOT
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,16 +42,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.ListManager;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistError;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
-import de.anomic.data.ListManager;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class BlacklistCleaner_p {
 
@@ -63,18 +60,13 @@ public class BlacklistCleaner_p {
     private static final String BLACKLISTS = "blacklists_";
     private static final String ENTRIES = "entries_";
 
-    private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
-
     public static final Class<?>[] supportedBLEngines = {
         Blacklist.class
     };
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final serverObjects prop = new serverObjects();
 
-        // initialize the list manager
-        ListManager.switchboard = (Switchboard) env;
-        ListManager.listsPath = new File(env.getDataPath(), env.getConfig("listManager.listsPath", "DATA/LISTS"));
         String blacklistToUse = null;
 
         prop.put(DISABLED+"checked", "1");
@@ -86,13 +78,13 @@ public class BlacklistCleaner_p {
 
             if (post.containsKey("listNames")) {
                 blacklistToUse = post.get("listNames");
-                if (blacklistToUse.length() == 0 || !ListManager.listSetContains("listManager.listsPath", blacklistToUse)) {
+                if (blacklistToUse.isEmpty() || !ListManager.listSetContains("listManager.listsPath", blacklistToUse)) {
                     prop.put("results", "2");
 
                 }
             }
 
-            putBlacklists(prop, FileUtils.getDirListing(ListManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
+            putBlacklists(prop, FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER), blacklistToUse);
 
             if (blacklistToUse != null) {
                 prop.put("results", "1");
@@ -109,7 +101,7 @@ public class BlacklistCleaner_p {
                 final Map<String, BlacklistError> illegalEntries = getIllegalEntries(blacklistToUse, Switchboard.urlBlacklist, allowRegex);
                 prop.put(RESULTS + "blList", blacklistToUse);
                 prop.put(RESULTS + "entries", illegalEntries.size());
-                prop.putHTML(RESULTS + "blEngine", Switchboard.urlBlacklist.getEngineInfo());
+                prop.putHTML(RESULTS + "blEngine", Blacklist.getEngineInfo());
                 prop.put(RESULTS + "disabled", (illegalEntries.isEmpty()) ? "1" : "0");
                 if (!illegalEntries.isEmpty()) {
                     prop.put(RESULTS + DISABLED + "entries", illegalEntries.size());
@@ -125,7 +117,7 @@ public class BlacklistCleaner_p {
             }
         } else {
             prop.put("results", "0");
-            putBlacklists(prop, FileUtils.getDirListing(ListManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
+            putBlacklists(prop, FileUtils.getDirListing(ListManager.listsPath, Blacklist.BLACKLIST_FILENAME_FILTER), blacklistToUse);
         }
 
         return prop;
@@ -255,7 +247,7 @@ public class BlacklistCleaner_p {
             }
             legalEntries.add(element);
 
-            err = blEngine.checkError(element, properties);
+            err = Blacklist.checkError(element, properties);
 
             if (err.getInt() > 0) {
                 illegalEntries.put(element, err);
@@ -273,26 +265,13 @@ public class BlacklistCleaner_p {
      * @return Length of the list of entries to be removed.
      */
     private static int removeEntries(final String blacklistToUse, final BlacklistType[] supportedBlacklistTypes, final String[] entries) {
-        // load blacklist data from file
-        final List<String> list = FileUtils.getListArray(new File(ListManager.listsPath, blacklistToUse));
-
-        boolean listChanged = false;
-
-        // delete the old entry from file
         for (final String entry : entries) {
             String s = entry;
 
-            if (list != null){
-
-                // get rid of escape characters which make it impossible to
-                // properly use contains()
-                if (s.contains("\\\\")) {
-                    s = s.replaceAll(Pattern.quote("\\\\"), Matcher.quoteReplacement("\\"));
-                }
-
-                if (list.contains(s)) {
-                    listChanged = list.remove(s);
-                }
+            // get rid of escape characters which make it impossible to
+            // properly use contains()
+            if (s.contains("\\\\")) {
+                s = s.replaceAll(Pattern.quote("\\\\"), Matcher.quoteReplacement("\\"));
             }
 
             // remove the entry from the running blacklist engine
@@ -301,16 +280,13 @@ public class BlacklistCleaner_p {
                     final String host = (s.indexOf('/',0) == -1) ? s : s.substring(0, s.indexOf('/',0));
                     final String path = (s.indexOf('/',0) == -1) ? ".*" : s.substring(s.indexOf('/',0) + 1);
                     try {
-                    Switchboard.urlBlacklist.remove(supportedBlacklistType, host, path);
+                    Switchboard.urlBlacklist.remove(supportedBlacklistType, blacklistToUse, host, path);
                     } catch (final RuntimeException e) {
-                        Log.logSevere("BLACKLIST-CLEANER", e.getMessage() + ": " + host + "/" + path);
+                        ConcurrentLog.severe("BLACKLIST-CLEANER", e.getMessage() + ": " + host + "/" + path);
                     }
                 }
             }
             SearchEventCache.cleanupEvents(true);
-        }
-        if (listChanged){
-            FileUtils.writeList(new File(ListManager.listsPath, blacklistToUse), list.toArray(new String[list.size()]));
         }
         return entries.length;
     }
@@ -329,34 +305,23 @@ public class BlacklistCleaner_p {
             final String[] oldEntry,
             final String[] newEntry) {
         removeEntries(blacklistToUse, supportedBlacklistTypes, oldEntry);
-        PrintWriter pw = null;
-        try {
-            pw = new PrintWriter(new FileWriter(new File(ListManager.listsPath, blacklistToUse), true));
-            String host, path;
-            for (final String n : newEntry) {
-                final int pos = n.indexOf('/',0);
-                if (pos < 0) {
-                    host = n;
-                    path = ".*";
-                } else {
-                    host = n.substring(0, pos);
-                    path = n.substring(pos + 1);
-                }
-                pw.println(host + "/" + path);
-                for (final BlacklistType s : supportedBlacklistTypes) {
-                    if (ListManager.listSetContains(s + ".BlackLists",blacklistToUse)) {
-                        Switchboard.urlBlacklist.add(
-                                s,
-                                host,
-                                path);
-                    }
-                }
-                SearchEventCache.cleanupEvents(true);
-            }
-            pw.close();
-        } catch (final IOException e) {
-            Log.logSevere("BLACKLIST-CLEANER", "error on writing altered entries to blacklist", e);
-        }
+        String host, path;
+		for (final String n : newEntry) {
+		    final int pos = n.indexOf('/',0);
+		    if (pos < 0) {
+		        host = n;
+		        path = ".*";
+		    } else {
+		        host = n.substring(0, pos);
+		        path = n.substring(pos + 1);
+		    }
+		    for (final BlacklistType s : supportedBlacklistTypes) {
+		        if (ListManager.listSetContains(s + ".BlackLists",blacklistToUse)) {
+		            Switchboard.urlBlacklist.add(s, blacklistToUse, host, path);
+		        }
+		    }
+		    SearchEventCache.cleanupEvents(true);
+		}
         return newEntry.length;
     }
 }

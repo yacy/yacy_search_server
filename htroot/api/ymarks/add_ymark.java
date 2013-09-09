@@ -1,17 +1,17 @@
 import java.io.IOException;
 
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.UserDB;
+import net.yacy.data.ymark.YMarkEntry;
+import net.yacy.data.ymark.YMarkTables;
+import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
-import de.anomic.data.ymark.YMarkEntry;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 
 public class add_ymark {
@@ -24,34 +24,32 @@ public class add_ymark {
         final boolean isAdmin = (sb.verifyAuthentication(header));
         final boolean isAuthUser = user!= null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT);
 
-        if(isAdmin || isAuthUser) {
+        if (isAdmin || isAuthUser) {
         	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);
 
-            if(post.containsKey("redirect") && post.get("redirect").length() > 0) {
+            if (post.containsKey("redirect") && post.get("redirect").length() > 0) {
                 prop.put("redirect_url", post.get("redirect"));
                 prop.put("redirect", "1");
             }
 
-            if(post.containsKey("urlHash")) {
+            if (post.containsKey("urlHash")) {
             	final String urlHash = post.get("urlHash",YMarkUtil.EMPTY_STRING);
-            	final DigestURI url = sb.index.urlMetadata().load(urlHash.getBytes()).url();
+            	final DigestURI url = sb.index.fulltext().getURL(urlHash.getBytes());
             	final String folders = post.get(YMarkEntry.BOOKMARK.FOLDERS.key(),YMarkEntry.BOOKMARK.FOLDERS.deflt());
             	final String tags = post.get(YMarkEntry.BOOKMARK.TAGS.key(),YMarkUtil.EMPTY_STRING);
             	try {
-					sb.tables.bookmarks.createBookmark(sb.loader, url, bmk_user, true, tags, folders);
+                    ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+					sb.tables.bookmarks.createBookmark(sb.loader, url, agent, bmk_user, true, tags, folders);
 					prop.put("status", "1");
 				} catch (final IOException e) {
 					// TODO Auto-generated catch block
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				} catch (final Failure e) {
 					// TODO Auto-generated catch block
-					Log.logException(e);
-				} catch (final RowSpaceExceededException e) {
-					// TODO Auto-generated catch block
-					Log.logException(e);
+					ConcurrentLog.logException(e);
 				}
 
-            } else if(post.containsKey(YMarkEntry.BOOKMARK.URL.key())) {
+            } else if (post.containsKey(YMarkEntry.BOOKMARK.URL.key())) {
 	        	String url = post.get(YMarkEntry.BOOKMARK.URL.key(),YMarkEntry.BOOKMARK.URL.deflt());
 				boolean hasProtocol = false;
 				for (final YMarkTables.PROTOCOLS p : YMarkTables.PROTOCOLS.values()) {
@@ -76,9 +74,8 @@ public class add_ymark {
 	            try {
 					sb.tables.bookmarks.addBookmark(bmk_user, bmk, false, false);
 					} catch (final IOException e) {
-					    Log.logException(e);
-					} catch (final RowSpaceExceededException e) {
-				}
+					    ConcurrentLog.logException(e);
+					}
 	            prop.put("status", "1");
             } else {
             	prop.put("status", "0");

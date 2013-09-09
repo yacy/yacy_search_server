@@ -20,13 +20,12 @@
 import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
-
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class style {
-    
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         Iterator<String> i = env.configKeys();
         String key;
@@ -34,9 +33,9 @@ public class style {
             key = i.next();
             if (key.startsWith("color_")) prop.put(key, env.getConfig(key, "#000000"));
         }
-        
+
         // return rewrite properties
         return prop;
     }
-    
+
 }

@@ -51,19 +51,19 @@ import java.util.concurrent.TimeoutException;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
+import net.yacy.data.wiki.WikiCode;
+import net.yacy.data.wiki.WikiParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.ByteBuffer;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
-import de.anomic.data.wiki.WikiCode;
-import de.anomic.data.wiki.WikiParser;
 
 /*
  * this class provides data structures to read a mediawiki dump file in xml format
@@ -151,9 +151,15 @@ public class MediawikiImporter extends Thread implements Importer {
             InputStream is = new BufferedInputStream(new FileInputStream(this.sourcefile), 1024 * 1024);
             if (this.sourcefile.getName().endsWith(".bz2")) {
                 int b = is.read();
-                if (b != 'B') throw new IOException("Invalid bz2 content.");
+                if (b != 'B') {
+                    try {is.close();} catch (final IOException e) {}
+                    throw new IOException("Invalid bz2 content.");
+                }
                 b = is.read();
-                if (b != 'Z') throw new IOException("Invalid bz2 content.");
+                if (b != 'Z') {
+                    try {is.close();} catch (final IOException e) {}
+                    throw new IOException("Invalid bz2 content.");
+                }
                 is = new BZip2CompressorInputStream(is);
             } else if (this.sourcefile.getName().endsWith(".gz")) {
                 is = new GZIPInputStream(is);
@@ -203,9 +209,9 @@ public class MediawikiImporter extends Thread implements Importer {
                         final int u = t.indexOf(textend, q + 1);
                         if (u > q) {
                             sb.append(t.substring(q + 1, u));
-                            Log.logInfo("WIKITRANSLATION", "[INJECT] Title: " + title);
+                            ConcurrentLog.info("WIKITRANSLATION", "[INJECT] Title: " + title);
                             if (sb.length() == 0) {
-                                Log.logInfo("WIKITRANSLATION", "ERROR: " + title + " has empty content");
+                                ConcurrentLog.info("WIKITRANSLATION", "ERROR: " + title + " has empty content");
                                 continue;
                             }
                             record = newRecord(this.hostport, this.urlStub, title, sb);
@@ -213,21 +219,20 @@ public class MediawikiImporter extends Thread implements Importer {
                                 in.put(record);
                                 this.count++;
                             } catch (final InterruptedException e1) {
-                                Log.logException(e1);
+                                ConcurrentLog.logException(e1);
                             }
                             sb = new StringBuilder(200);
                             continue;
-                        } else {
-                            sb.append(t.substring(q + 1));
                         }
+                        sb.append(t.substring(q + 1));
                     }
                     continue;
                 }
                 if (t.indexOf(textend) >= 0) {
                     text = false;
-                    Log.logInfo("WIKITRANSLATION", "[INJECT] Title: " + title);
+                    ConcurrentLog.info("WIKITRANSLATION", "[INJECT] Title: " + title);
                     if (sb.length() == 0) {
-                        Log.logInfo("WIKITRANSLATION", "ERROR: " + title + " has empty content");
+                        ConcurrentLog.info("WIKITRANSLATION", "ERROR: " + title + " has empty content");
                         continue;
                     }
                     record = newRecord(this.hostport, this.urlStub, title, sb);
@@ -235,7 +240,7 @@ public class MediawikiImporter extends Thread implements Importer {
                         in.put(record);
                         this.count++;
                     } catch (final InterruptedException e1) {
-                        Log.logException(e1);
+                        ConcurrentLog.logException(e1);
                     }
                     sb = new StringBuilder(200);
                     continue;
@@ -267,18 +272,18 @@ public class MediawikiImporter extends Thread implements Importer {
                 out.put(poison);
                 writerResult.get(10000, TimeUnit.MILLISECONDS);
             } catch (final InterruptedException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch (final ExecutionException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch (final TimeoutException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch (final Exception e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         } catch (final Exception e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
     }
 
@@ -301,7 +306,7 @@ public class MediawikiImporter extends Thread implements Importer {
                 createIndex(this.mediawikixml);
             } catch (final IOException e) {
             } catch (final Exception e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -342,10 +347,10 @@ public class MediawikiImporter extends Thread implements Importer {
             if (!consumerResult.isDone()) consumerResult.get();
             producerResult.get();
         } catch (final InterruptedException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return;
         } catch (final ExecutionException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return;
         }
         in.close();
@@ -370,7 +375,7 @@ public class MediawikiImporter extends Thread implements Importer {
             try {
                 this.entries.put(b);
             } catch (final InterruptedException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
 
@@ -381,17 +386,17 @@ public class MediawikiImporter extends Thread implements Importer {
                 while(true) {
                     r = this.entries.take();
                     if (r == poison) {
-                        Log.logInfo("WIKITRANSLATION", "producer / got poison");
+                        ConcurrentLog.info("WIKITRANSLATION", "producer / got poison");
                         break;
                     }
                     this.out.println("  <page start=\"" + r.start + "\" length=\"" + (r.end - r.start) + "\">");
                     this.out.println("    <title>" + r.title + "</title>");
                     this.out.println("  </page>");
-                    Log.logInfo("WIKITRANSLATION", "producer / record start: " + r.start + ", title : " + r.title);
+                    ConcurrentLog.info("WIKITRANSLATION", "producer / record start: " + r.start + ", title : " + r.title);
                     this.count++;
                 }
             } catch (final InterruptedException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             this.entries.clear();
             this.out.println("</index>");
@@ -418,7 +423,7 @@ public class MediawikiImporter extends Thread implements Importer {
             try {
                 this.entries.put(b);
             } catch (final InterruptedException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
 
@@ -430,18 +435,18 @@ public class MediawikiImporter extends Thread implements Importer {
                 while(true) {
                     c = this.entries.take();
                     if (c == poison) {
-                        Log.logInfo("WIKITRANSLATION", "consumer / got poison");
+                        ConcurrentLog.info("WIKITRANSLATION", "consumer / got poison");
                         break;
                     }
                     try {
                         r = new wikisourcerecord(c.b, c.start, c.end);
                         this.producer.consume(r);
-                        Log.logInfo("WIKITRANSLATION", "consumer / record start: " + r.start + ", title : " + r.title);
+                        ConcurrentLog.info("WIKITRANSLATION", "consumer / record start: " + r.start + ", title : " + r.title);
                         this.count++;
                     } catch (final RuntimeException e) {}
                 }
             } catch (final InterruptedException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
             this.entries.clear();
             return Integer.valueOf(this.count);
@@ -509,7 +514,7 @@ public class MediawikiImporter extends Thread implements Importer {
                 final WikiParser wparser = new WikiCode();
                 this.html = wparser.transform(this.hostport, this.source);
             } catch (final Exception e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 throw new IOException(e.getMessage());
             }
         }
@@ -521,7 +526,7 @@ public class MediawikiImporter extends Thread implements Importer {
 				// the wiki parser is not able to find the proper title in the source text, so it must be set here
 				this.document.setTitle(this.title);
 			} catch (final MalformedURLException e1) {
-			    Log.logException(e1);
+			    ConcurrentLog.logException(e1);
 			}
         }
         public void writeXML(final OutputStreamWriter os) throws IOException {
@@ -569,7 +574,7 @@ public class MediawikiImporter extends Thread implements Importer {
             try {
                 this.is.close();
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
     }
@@ -582,7 +587,7 @@ public class MediawikiImporter extends Thread implements Importer {
             raf.seek(start);
             raf.read(b);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
         } finally {
             if (raf != null) try {
@@ -644,7 +649,7 @@ public class MediawikiImporter extends Thread implements Importer {
                 while(true) {
                     record = this.in.take();
                     if (record == this.poison) {
-                        Log.logInfo("WIKITRANSLATION", "convertConsumer / got poison");
+                        ConcurrentLog.info("WIKITRANSLATION", "convertConsumer / got poison");
                         break;
                     }
                     try {
@@ -652,18 +657,18 @@ public class MediawikiImporter extends Thread implements Importer {
                         record.genDocument();
                         this.out.put(record);
                     } catch (final RuntimeException e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     } catch (final Parser.Failure e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                     } catch (final IOException e) {
 						// TODO Auto-generated catch block
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
 					}
                 }
             } catch (final InterruptedException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
-            Log.logInfo("WIKITRANSLATION", "*** convertConsumer has terminated");
+            ConcurrentLog.info("WIKITRANSLATION", "*** convertConsumer has terminated");
             return Integer.valueOf(0);
         }
 
@@ -701,7 +706,7 @@ public class MediawikiImporter extends Thread implements Importer {
                 while(true) {
                     record = this.in.take();
                     if (record == this.poison) {
-                        Log.logInfo("WIKITRANSLATION", "convertConsumer / got poison");
+                        ConcurrentLog.info("WIKITRANSLATION", "convertConsumer / got poison");
                         break;
                     }
 
@@ -711,7 +716,7 @@ public class MediawikiImporter extends Thread implements Importer {
                         this.osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(this.targetdir, this.outputfilename))), "UTF-8");
                         this.osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
                     }
-                    Log.logInfo("WIKITRANSLATION", "[CONSUME] Title: " + record.title);
+                    ConcurrentLog.info("WIKITRANSLATION", "[CONSUME] Title: " + record.title);
                     record.document.writeXML(this.osw, new Date());
                     this.rc++;
                     if (this.rc >= 10000) {
@@ -727,13 +732,13 @@ public class MediawikiImporter extends Thread implements Importer {
                     }
                 }
             } catch (final InterruptedException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch (final UnsupportedEncodingException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch (final FileNotFoundException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             } finally {
 	            try {
 					this.osw.write(SurrogateReader.SURROGATES_MAIN_ELEMENT_CLOSE + "\n");
@@ -741,10 +746,10 @@ public class MediawikiImporter extends Thread implements Importer {
 		            final String finalfilename = this.targetstub + "." + this.fc + ".xml";
 		            new File(this.targetdir, this.outputfilename).renameTo(new File(this.targetdir, finalfilename));
 				} catch (final IOException e) {
-				    Log.logException(e);
+				    ConcurrentLog.logException(e);
 				}
             }
-            Log.logInfo("WIKITRANSLATION", "*** convertWriter has terminated");
+            ConcurrentLog.info("WIKITRANSLATION", "*** convertWriter has terminated");
             return Integer.valueOf(0);
         }
 
@@ -752,11 +757,11 @@ public class MediawikiImporter extends Thread implements Importer {
 
     public static void main(final String[] s) {
         if (s.length == 0) {
-            Log.logInfo("WIKITRANSLATION", "usage:");
-            Log.logInfo("WIKITRANSLATION", " -index <wikipedia-dump>");
-            Log.logInfo("WIKITRANSLATION", " -read  <start> <len> <idx-file>");
-            Log.logInfo("WIKITRANSLATION", " -find  <title> <wikipedia-dump>");
-            Log.logInfo("WIKITRANSLATION", " -convert <wikipedia-dump-xml.bz2> <convert-target-dir> <url-stub>");
+            ConcurrentLog.info("WIKITRANSLATION", "usage:");
+            ConcurrentLog.info("WIKITRANSLATION", " -index <wikipedia-dump>");
+            ConcurrentLog.info("WIKITRANSLATION", " -read  <start> <len> <idx-file>");
+            ConcurrentLog.info("WIKITRANSLATION", " -find  <title> <wikipedia-dump>");
+            ConcurrentLog.info("WIKITRANSLATION", " -convert <wikipedia-dump-xml.bz2> <convert-target-dir> <url-stub>");
             System.exit(0);
         }
 
@@ -773,7 +778,7 @@ public class MediawikiImporter extends Thread implements Importer {
                 mi.start();
                 mi.join();
             } catch (final InterruptedException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
 
@@ -781,7 +786,7 @@ public class MediawikiImporter extends Thread implements Importer {
             try {
                 createIndex(new File(s[1]));
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
         }
 
@@ -795,12 +800,12 @@ public class MediawikiImporter extends Thread implements Importer {
             try {
                 final wikisourcerecord w = find(s[1], new File(s[2] + ".idx.xml"));
                 if (w == null) {
-                    Log.logInfo("WIKITRANSLATION", "not found");
+                    ConcurrentLog.info("WIKITRANSLATION", "not found");
                 } else {
                     System.out.println(UTF8.String(read(new File(s[2]), w.start, (int) (w.end - w.start))));
                 }
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             }
 
         }

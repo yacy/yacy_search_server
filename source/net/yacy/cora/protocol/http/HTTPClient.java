@@ -49,6 +49,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.http.ProxySettings.Protocol;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -83,7 +84,9 @@ import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -113,24 +116,24 @@ public class HTTPClient {
 	private HttpUriRequest currentRequest = null;
 	private long upbytes = 0L;
 	private int timeout = 10000;
-	private String userAgent = null;
+	private ClientIdentification.Agent agent = null;
 	private String host = null;
 	private boolean redirecting = true;
 	private String realm = null;
 
-	public HTTPClient() {
-        super();
-    }
 
-	public HTTPClient(final String userAgent) {
+    public HTTPClient(final ClientIdentification.Agent agent) {
         super();
-        this.userAgent = userAgent;
+        this.agent = agent;
+        this.timeout = agent.clientTimeout;
+        HttpProtocolParams.setUserAgent(httpClient.getParams(), agent.userAgent);
     }
-
-	public HTTPClient(final String userAgent, final int timeout) {
+    
+    public HTTPClient(final ClientIdentification.Agent agent, final int timeout) {
         super();
-        this.userAgent = userAgent;
+        this.agent = agent;
         this.timeout = timeout;
+        HttpProtocolParams.setUserAgent(httpClient.getParams(), agent.userAgent);
     }
 
     public static void setDefaultUserAgent(final String defaultAgent) {
@@ -164,7 +167,7 @@ public class HTTPClient {
 		 */
 		HttpProtocolParams.setVersion(httpParams, HttpVersion.HTTP_1_1);
 		// UserAgent
-		HttpProtocolParams.setUserAgent(httpParams, ClientIdentification.getUserAgent());
+		HttpProtocolParams.setUserAgent(httpParams, ClientIdentification.yacyInternetCrawlerAgent.userAgent);
 		HttpProtocolParams.setUseExpectContinue(httpParams, false); // IMPORTANT - if not set to 'false' then servers do not process the request until a time-out of 2 seconds
 		/**
 		 * HTTP connection settings
@@ -198,7 +201,8 @@ public class HTTPClient {
 		((DefaultHttpClient) httpClient).addRequestInterceptor(new GzipRequestInterceptor());
 		// uncompress gzip
 		((DefaultHttpClient) httpClient).addResponseInterceptor(new GzipResponseInterceptor());
-
+		// remove retries; we expect connections to fail; therefore we should not retry
+		((DefaultHttpClient) httpClient).setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
 		if (idledConnectionEvictor == null) {
 		    idledConnectionEvictor = new IdledConnectionEvictor(clientConnectionManager);
 		    idledConnectionEvictor.start();
@@ -265,8 +269,8 @@ public class HTTPClient {
      *
      * @param userAgent
      */
-    public void setUserAgent(final String userAgent) {
-    	this.userAgent = userAgent;
+    public void setUserAgent(final ClientIdentification.Agent agent) {
+    	this.agent = agent;
     }
 
     /**
@@ -341,10 +345,16 @@ public class HTTPClient {
      */
     public byte[] GETbytes(final MultiProtocolURI url, final int maxBytes) throws IOException {
         final boolean localhost = Domains.isLocalhost(url.getHost());
-        final String urix = url.toNormalform(true, false);
-        final HttpGet httpGet = new HttpGet(urix);
+        final String urix = url.toNormalform(true);
+        HttpGet httpGet = null;
+        try {
+            httpGet = new HttpGet(urix);
+        } catch (IllegalArgumentException e) {
+            throw new IOException(e.getMessage()); // can be caused  at java.net.URI.create()
+        }
+        httpGet.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-        return getContentBytes(httpGet, maxBytes);
+        return getContentBytes(httpGet, url.getHost(), maxBytes);
     }
 
     /**
@@ -358,10 +368,17 @@ public class HTTPClient {
     public void GET(final String uri) throws IOException {
         if (this.currentRequest != null) throw new IOException("Client is in use!");
         final MultiProtocolURI url = new MultiProtocolURI(uri);
-        final HttpGet httpGet = new HttpGet(url.toNormalform(true, false));
+        final String urix = url.toNormalform(true);
+        HttpGet httpGet = null;
+        try {
+            httpGet = new HttpGet(urix);
+        } catch (IllegalArgumentException e) {
+            throw new IOException(e.getMessage()); // can be caused  at java.net.URI.create()
+        }
+        httpGet.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         this.currentRequest = httpGet;
-        execute(httpGet);
+        execute(httpGet, url.getHost());
     }
 
     /**
@@ -373,9 +390,10 @@ public class HTTPClient {
      */
     public HttpResponse HEADResponse(final String uri) throws IOException {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
-        final HttpHead httpHead = new HttpHead(url.toNormalform(true, false));
+        final HttpHead httpHead = new HttpHead(url.toNormalform(true));
+        httpHead.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-    	execute(httpHead);
+    	execute(httpHead, url.getHost());
     	finish();
     	ConnectionInfo.removeConnection(httpHead.hashCode());
     	return this.httpResponse;
@@ -394,7 +412,8 @@ public class HTTPClient {
     public void POST(final String uri, final InputStream instream, final long length) throws IOException {
     	if (this.currentRequest != null) throw new IOException("Client is in use!");
         final MultiProtocolURI url = new MultiProtocolURI(uri);
-        final HttpPost httpPost = new HttpPost(url.toNormalform(true, false));
+        final HttpPost httpPost = new HttpPost(url.toNormalform(true));
+        httpPost.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         String host = url.getHost();
         if (host == null) host = Domains.LOCALHOST;
         setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
@@ -403,7 +422,7 @@ public class HTTPClient {
     	this.upbytes = length;
     	httpPost.setEntity(inputStreamEntity);
     	this.currentRequest = httpPost;
-    	execute(httpPost);
+    	execute(httpPost, host);
     }
 
     /**
@@ -430,7 +449,8 @@ public class HTTPClient {
      * @throws IOException
      */
     public byte[] POSTbytes(final MultiProtocolURI url, final String vhost, final Map<String, ContentBody> post, final boolean usegzip) throws IOException {
-    	final HttpPost httpPost = new HttpPost(url.toNormalform(true, false));
+    	final HttpPost httpPost = new HttpPost(url.toNormalform(true));
+        httpPost.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
 
         setHost(vhost); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	if (vhost == null) setHost(Domains.LOCALHOST);
@@ -447,7 +467,7 @@ public class HTTPClient {
             httpPost.setEntity(multipartEntity);
         }
 
-        return getContentBytes(httpPost, Integer.MAX_VALUE);
+        return getContentBytes(httpPost, url.getHost(), Integer.MAX_VALUE);
     }
 
     /**
@@ -461,7 +481,8 @@ public class HTTPClient {
      */
     public byte[] POSTbytes(final String uri, final InputStream instream, final long length) throws IOException {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
-        final HttpPost httpPost = new HttpPost(url.toNormalform(true, false));
+        final HttpPost httpPost = new HttpPost(url.toNormalform(true));
+        httpPost.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         String host = url.getHost();
         if (host == null) host = Domains.LOCALHOST;
         setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
@@ -470,7 +491,7 @@ public class HTTPClient {
         // statistics
         this.upbytes = length;
         httpPost.setEntity(inputStreamEntity);
-        return getContentBytes(httpPost, Integer.MAX_VALUE);
+        return getContentBytes(httpPost, host, Integer.MAX_VALUE);
     }
 
 	/**
@@ -559,14 +580,14 @@ public class HTTPClient {
         }
     }
 
-    private byte[] getContentBytes(final HttpUriRequest httpUriRequest, final int maxBytes) throws IOException {
+    private byte[] getContentBytes(final HttpUriRequest httpUriRequest, String host, final int maxBytes) throws IOException {
     	try {
-            execute(httpUriRequest);
+            execute(httpUriRequest, host);
             if (this.httpResponse == null) return null;
             // get the response body
             final HttpEntity httpEntity = this.httpResponse.getEntity();
             if (httpEntity != null) {
-                if (getStatusCode() == 200 && httpEntity.getContentLength() < maxBytes) {
+                if (getStatusCode() == 200 && (maxBytes < 0 || httpEntity.getContentLength() < maxBytes)) {
                     return getByteArray(httpEntity, maxBytes);
                 }
                 // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
@@ -581,11 +602,11 @@ public class HTTPClient {
         }
     }
 
-    private void execute(final HttpUriRequest httpUriRequest) throws IOException {
+    private void execute(final HttpUriRequest httpUriRequest, String host) throws IOException {
     	final HttpContext httpContext = new BasicHttpContext();
     	setHeaders(httpUriRequest);
     	setParams(httpUriRequest.getParams());
-    	setProxy(httpUriRequest.getParams());
+    	setProxy(httpUriRequest.getParams(), host);
     	// statistics
     	storeConnectionInfo(httpUriRequest);
     	// execute the method; some asserts confirm that that the request can be send with Content-Length and is therefore not terminated by EOF
@@ -598,6 +619,7 @@ public class HTTPClient {
 	        assert !hrequest.expectContinue();
 	    }
 
+	    Thread.currentThread().setName("HTTPClient-" + httpUriRequest.getURI().getHost());
 	    try {
 	        final long time = System.currentTimeMillis();
             this.httpResponse = httpClient.execute(httpUriRequest, httpContext);
@@ -605,17 +627,17 @@ public class HTTPClient {
         } catch (final IOException e) {
             ConnectionInfo.removeConnection(httpUriRequest.hashCode());
             httpUriRequest.abort();
-            throw new IOException("Client can't execute: " + e.getMessage());
+            throw new IOException("Client can't execute: " + (e.getCause() == null ? e.getMessage() : e.getCause().getMessage()));
         }
     }
 
-    private byte[] getByteArray(final HttpEntity entity, final int maxBytes) throws IOException {
+    private static byte[] getByteArray(final HttpEntity entity, final int maxBytes) throws IOException {
         final InputStream instream = entity.getContent();
         if (instream == null) {
             return null;
         }
         try {
-            int i = Math.min(maxBytes, (int)entity.getContentLength());
+            int i = maxBytes < 0 ?  (int)entity.getContentLength() : Math.min(maxBytes, (int)entity.getContentLength());
             if (i < 0) {
                 i = 4096;
             }
@@ -624,7 +646,7 @@ public class HTTPClient {
             int l, sum = 0;
             while((l = instream.read(tmp)) != -1) {
             	sum += l;
-            	if (sum > maxBytes) throw new IOException("Download exceeded maximum value of " + maxBytes + " bytes");
+            	if (maxBytes >= 0 && sum > maxBytes) throw new IOException("Download exceeded maximum value of " + maxBytes + " bytes");
                 buffer.append(tmp, 0, l);
             }
             return buffer.toByteArray();
@@ -651,14 +673,14 @@ public class HTTPClient {
     	HttpClientParams.setRedirecting(httpParams, this.redirecting);
     	HttpConnectionParams.setConnectionTimeout(httpParams, this.timeout);
     	HttpConnectionParams.setSoTimeout(httpParams, this.timeout);
-    	if (this.userAgent != null)
-    		HttpProtocolParams.setUserAgent(httpParams, this.userAgent);
+    	if (this.agent != null)
+    		HttpProtocolParams.setUserAgent(httpParams, this.agent.userAgent);
     	if (this.host != null)
     		httpParams.setParameter(HTTP.TARGET_HOST, this.host);
     }
 
-    private void setProxy(final HttpParams httpParams) {
-    	if (ProxySettings.use)
+    private static void setProxy(final HttpParams httpParams, String host) {
+    	if (ProxySettings.useForHost(host, Protocol.HTTP))
     		ConnRouteParams.setDefaultProxy(httpParams, ProxySettings.getProxyHost());
     	// TODO find a better way for this
     	ProxySettings.setProxyCreds((DefaultHttpClient) httpClient);
@@ -670,7 +692,7 @@ public class HTTPClient {
     	//assert thost != null : "uri = " + httpUriRequest.getURI().toString();
     	ConnectionInfo.addConnection(new ConnectionInfo(
     			httpUriRequest.getURI().getScheme(),
-    			port == 80 ? thost : thost + ":" + port,
+    			port == -1 ? thost : thost + ":" + port,
     			httpUriRequest.getMethod() + " " + httpUriRequest.getURI().getPath(),
     			httpUriRequest.hashCode(),
     			System.currentTimeMillis(),
@@ -758,8 +780,7 @@ public class HTTPClient {
         } catch (final UnsupportedEncodingException e) {
             System.out.println(e.getStackTrace());
         }
-        final HTTPClient client = new HTTPClient();
-        client.setUserAgent("foobar");
+        final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
         client.setRedirecting(false);
         // Get some
         for (final String arg : args) {
@@ -776,7 +797,7 @@ public class HTTPClient {
         // Head some
 //		try {
 //			client.HEADResponse(url);
-//		} catch (IOException e) {
+//		} catch (final IOException e) {
 //			e.printStackTrace();
 //		}
         for (final Header header: client.getHttpResponse().getAllHeaders()) {
@@ -790,7 +811,7 @@ public class HTTPClient {
         // Post some
 //		try {
 //			System.out.println(UTF8.String(client.POSTbytes(url, newparts)));
-//		} catch (IOException e1) {
+//		} catch (final IOException e1) {
 //			e1.printStackTrace();
 //		}
         // Close out connection manager

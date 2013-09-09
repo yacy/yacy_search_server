@@ -25,38 +25,40 @@
 
 import java.util.ArrayList;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.crawler.CrawlStacker;
+import net.yacy.crawler.data.ZURL;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-import de.anomic.crawler.ZURL;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class IndexCreateParserErrors_p {
-    
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         prop.put("rejected", "0");
         int showRejectedCount = 100;
-        
+
         if (post != null) {
-            
+
             if (post.containsKey("clearRejected")) {
                 sb.crawlQueues.errorURL.clearStack();
-            } 
+            }
             if (post.containsKey("moreRejected")) {
                 showRejectedCount = post.getInt("showRejected", 10);
             }
         }
         boolean dark;
-        
+
 
         prop.put("indexing-queue", "0"); //is empty
-        
+
         // failure cases
         if (sb.crawlQueues.errorURL.stackSize() != 0) {
             if (showRejectedCount > sb.crawlQueues.errorURL.stackSize()) showRejectedCount = sb.crawlQueues.errorURL.stackSize();
@@ -70,7 +72,7 @@ public class IndexCreateParserErrors_p {
                 prop.put("rejected_only-latest", "0");
             }
             dark = true;
-            DigestURI url; 
+            DigestURI url;
             byte[] initiatorHash, executorHash;
             Seed initiatorSeed, executorSeed;
             int j=0;
@@ -81,15 +83,26 @@ public class IndexCreateParserErrors_p {
                 if (entry == null) continue;
                 url = entry.url();
                 if (url == null) continue;
-                
+
                 initiatorHash = entry.initiator();
                 executorHash = entry.executor();
                 initiatorSeed = (initiatorHash == null) ? null : sb.peers.getConnected(ASCII.String(initiatorHash));
                 executorSeed = (executorHash == null) ? null : sb.peers.getConnected(ASCII.String(executorHash));
+                prop.putHTML("rejected_list_"+j+"_time", GenericFormatter.SIMPLE_FORMATTER.format(entry.workdate()));
                 prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
                 prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
-                prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false, true));
-                prop.putHTML("rejected_list_"+j+"_failreason", entry.anycause());
+                prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false));
+                
+                String cause = entry.anycause();
+                if (cause.startsWith(CrawlStacker.ERROR_NO_MATCH_MUST_MATCH_FILTER)) {
+                    prop.put("rejected_list_"+j+"_failreason", "(<a href=\"/RegexTest.html?text=" + url.toNormalform(false) +
+                            "&regex=" + cause.substring(CrawlStacker.ERROR_NO_MATCH_MUST_MATCH_FILTER.length()) + "\">test</a>) " + cause);
+                } else if (cause.startsWith(CrawlStacker.ERROR_MATCH_WITH_MUST_NOT_MATCH_FILTER)) {
+                    prop.put("rejected_list_"+j+"_failreason", "(<a href=\"/RegexTest.html?text=" + url.toNormalform(false) +
+                            "&regex=" + cause.substring(CrawlStacker.ERROR_MATCH_WITH_MUST_NOT_MATCH_FILTER.length()) + "\">test</a>) " + cause);
+                } else {
+                    prop.putHTML("rejected_list_"+j+"_failreason", cause);
+                }
                 prop.put("rejected_list_"+j+"_dark", dark ? "1" : "0");
                 dark = !dark;
                 j++;

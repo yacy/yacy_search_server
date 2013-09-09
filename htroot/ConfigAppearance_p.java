@@ -44,20 +44,21 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 import com.google.common.io.Files;
 
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 public class ConfigAppearance_p {
 
     private final static String SKIN_FILENAME_FILTER = "^.*\\.css$";
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
-        final String skinPath = new File(env.getDataPath(), env.getConfig("skinPath", "DATA/SKINS")).toString();
+        final String skinPath = new File(env.getDataPath(), env.getConfig("skinPath", SwitchboardConstants.SKINS_PATH_DEFAULT)).toString();
 
         // Fallback
         prop.put("currentskin", "");
@@ -101,7 +102,7 @@ public class ConfigAppearance_p {
                 final Iterator<String> it;
                 try {
                     final DigestURI u = new DigestURI(url);
-                    it = FileUtils.strings(u.get(ClientIdentification.getUserAgent(), 10000));
+                    it = FileUtils.strings(u.get(ClientIdentification.yacyInternetCrawlerAgent));
                 } catch (final IOException e) {
                     prop.put("status", "1");// unable to get URL
                     prop.put("status_url", url);

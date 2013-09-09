@@ -7,12 +7,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -29,16 +29,18 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import net.yacy.cora.util.ConcurrentLog;
+
 public class RSSFeed implements Iterable<RSSMessage> {
 
-    public static final int DEFAULT_MAXSIZE = 1000;
-    
+    public static final int DEFAULT_MAXSIZE = 10000;
+
     // class variables
     private RSSMessage channel;
     private String imageURL;
-    private Map<String, RSSMessage> messages; // a guid:Item map
-    private int maxsize;
-    
+    private final Map<String, RSSMessage> messages; // a guid:Item map
+    private final int maxsize;
+
     public RSSFeed(final int maxsize) {
         this.messages = Collections.synchronizedMap(new LinkedHashMap<String, RSSMessage>());
         this.channel = null;
@@ -56,19 +58,19 @@ public class RSSFeed implements Iterable<RSSMessage> {
         String u;
         RSSMessage message;
         for (MultiProtocolURI uri: links) {
-            u = uri.toNormalform(true, false);
+            u = uri.toNormalform(true);
             message = new RSSMessage(u, "", u);
             message.setAuthor(source);
             this.addMessage(message);
         }
     }
-    
+
     public void setChannel(final RSSMessage channelItem) {
         this.channel = channelItem;
     }
-    
+
     public RSSMessage getChannel() {
-        return channel;
+        return this.channel;
     }
 
     public void setImage(final String imageURL) {
@@ -78,82 +80,87 @@ public class RSSFeed implements Iterable<RSSMessage> {
     public String getImage() {
         return this.imageURL;
     }
-    
+
     public Set<MultiProtocolURI> getLinks() {
         Set<MultiProtocolURI> links = new HashSet<MultiProtocolURI>();
-        for (RSSMessage message: messages.values()) {
-            try {links.add(new MultiProtocolURI(message.getLink()));} catch (MalformedURLException e) {}
+        for (RSSMessage message: this.messages.values()) {
+            try {links.add(new MultiProtocolURI(message.getLink()));} catch (final MalformedURLException e) {}
         }
         return links;
     }
-    
+
     public void addMessage(final RSSMessage item) {
         final String guid = item.getGuid();
-        messages.put(guid, item);
+        this.messages.put(guid, item);
         // in case that the feed is full (size > maxsize) flush the oldest element
-        while (messages.size() > this.maxsize) pollMessage();
+        while (this.messages.size() > this.maxsize) pollMessage();
     }
-    
+
     public RSSMessage getMessage(final String guid) {
         // retrieve item by guid
-        return messages.get(guid);
+        return this.messages.get(guid);
     }
 
     public boolean isEmpty() {
-        return messages.isEmpty();
+        return this.messages.isEmpty();
     }
-    
+
     public int size() {
-        return messages.size();
+        return this.messages.size();
     }
-    
+
+    @Override
     public Iterator<RSSMessage> iterator() {
         return new messageIterator();
     }
-    
+
     public RSSMessage pollMessage() {
         // retrieve and delete item
-        synchronized (messages) {
-            if (messages.isEmpty()) return null;
-            final String nextGUID = messages.keySet().iterator().next();
+        synchronized (this.messages) {
+            if (this.messages.isEmpty()) return null;
+            final String nextGUID = this.messages.keySet().size() == 0 ? null : this.messages.keySet().iterator().next();
             if (nextGUID == null) return null;
-            return messages.remove(nextGUID);
+            return this.messages.remove(nextGUID);
         }
     }
 
     public class messageIterator implements Iterator<RSSMessage>{
-        
+
         Iterator<String> GUIDiterator;
         String lastGUID;
         int t;
-        
+
         public messageIterator() {
-            t = messages.size(); // termination counter
-            GUIDiterator = messages.keySet().iterator();
-            lastGUID = null;
+            this.t = RSSFeed.this.messages.size(); // termination counter
+            this.GUIDiterator = RSSFeed.this.messages.keySet().iterator();
+            this.lastGUID = null;
         }
 
+        @Override
         public boolean hasNext() {
-            if (t <= 0) return false; // ensure termination
-            return GUIDiterator.hasNext();
+            if (this.t <= 0) return false; // ensure termination
+            return this.GUIDiterator.hasNext();
         }
 
+        @Override
         public RSSMessage next() {
-            t--; // ensure termination
+            this.t--; // ensure termination
             try {
-                lastGUID = GUIDiterator.next();
-            } catch (ConcurrentModificationException e) {
+                this.lastGUID = this.GUIDiterator.next();
+            } catch (final ConcurrentModificationException e) {
+                ConcurrentLog.logException(e);
                 return null;
             }
-            if (lastGUID == null) return null;
-            return messages.get(lastGUID);
+            if (this.lastGUID == null) return null;
+            return RSSFeed.this.messages.get(this.lastGUID);
         }
 
+        @Override
         public void remove() {
-            if (lastGUID == null) return;
-            GUIDiterator.remove();
-            messages.remove(lastGUID);
+            if (this.lastGUID == null) return;
+            this.GUIDiterator.remove();
+            RSSFeed.this.messages.remove(this.lastGUID);
         }
     }
-    
+
 }

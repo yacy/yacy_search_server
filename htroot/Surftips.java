@@ -32,22 +32,22 @@ import java.util.Iterator;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
-import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.peers.NewsDB;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.tools.crypt;
-import de.anomic.tools.nxTools;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.utils.crypt;
+import net.yacy.utils.nxTools;
 
 public class Surftips {
 
@@ -99,9 +99,9 @@ public class Surftips {
                 // make new news message with voting
                 final HashMap<String, String> map = new HashMap<String, String>();
                 map.put("urlhash", hash);
-                map.put("url", crypt.simpleDecode(post.get("url", ""), null));
-                map.put("title", crypt.simpleDecode(post.get("title", ""), null));
-                map.put("description", crypt.simpleDecode(post.get("description", ""), null));
+                map.put("url", crypt.simpleDecode(post.get("url", "")));
+                map.put("title", crypt.simpleDecode(post.get("title", "")));
+                map.put("description", crypt.simpleDecode(post.get("description", "")));
                 map.put("vote", "positive");
                 map.put("refid", post.get("refid", ""));
                 map.put("comment", post.get("comment", ""));
@@ -138,7 +138,7 @@ public class Surftips {
                 try{
                 	if(Switchboard.urlBlacklist.isListed(BlacklistType.SURFTIPS ,new DigestURI(url)))
                 		continue;
-                }catch(final MalformedURLException e){continue;};
+                }catch(final MalformedURLException e){continue;}
                 title = row.getColUTF8(1);
                 description = row.getColUTF8(2);
                 if ((url == null) || (title == null) || (description == null)) continue;
@@ -182,7 +182,7 @@ public class Surftips {
     private static void accumulateVotes(final Switchboard sb, final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
         NewsDB.Record record;
-        final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
+        final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype);
         int j = 0;
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
             record = recordIterator.next();
@@ -212,7 +212,7 @@ public class Surftips {
             final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
         NewsDB.Record record;
-        final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
+        final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype);
         int j = 0;
         String url = "", urlhash;
         Row.Entry entry;
@@ -229,7 +229,7 @@ public class Surftips {
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
-                                (((intention.length() == 0) || intention.equals("simple web crawl") || intention.equals("Automatic ReCrawl!")) ? record.attribute("startURL", "") : intention).getBytes(),
+                                (((intention.isEmpty()) || intention.equals("simple web crawl") || intention.equals("Automatic ReCrawl!")) ? record.attribute("startURL", "") : intention).getBytes(),
                                 intention.equals("Automatic ReCrawl!") ? UTF8.getBytes("Automatic ReCrawl") : UTF8.getBytes("Crawl Start Point"),
                                 record.id().getBytes()
                         });

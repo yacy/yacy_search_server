@@ -34,7 +34,6 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -52,6 +51,7 @@ import com.ibm.icu.text.CharsetDetector;
 public class htmlParser extends AbstractParser implements Parser {
 
     private static final Pattern patternUnderline = Pattern.compile("_");
+    private static final int maxLinks = 10000;
 
     public htmlParser() {
         super("Streaming HTML Parser");
@@ -93,7 +93,7 @@ public class htmlParser extends AbstractParser implements Parser {
 
         try {
             // first get a document from the parsed html
-            final ContentScraper scraper = parseToScraper(location, documentCharset, sourceStream);
+            final ContentScraper scraper = parseToScraper(location, documentCharset, sourceStream, maxLinks);
             final Document document = transformScraper(location, mimeType, documentCharset, scraper);
 
             return new Document[]{document};
@@ -131,27 +131,27 @@ public class htmlParser extends AbstractParser implements Parser {
                 scraper,
                 scraper.getContentLanguages(),
                 scraper.getKeywords(),
-                scraper.getTitle(),
+                scraper.getTitles(),
                 scraper.getAuthor(),
                 scraper.getPublisher(),
                 sections,
-                scraper.getDescription(),
+                scraper.getDescriptions(),
                 scraper.getLon(), scraper.getLat(),
                 scraper.getText(),
                 scraper.getAnchors(),
                 scraper.getRSS(),
                 scraper.getImages(),
                 scraper.indexingDenied());
-        //scraper.close();
         ppd.setFavicon(scraper.getFavicon());
 
         return ppd;
     }
 
     public static ContentScraper parseToScraper(
-            final MultiProtocolURI location,
+            final DigestURI location,
             final String documentCharset,
-            InputStream sourceStream) throws Parser.Failure, IOException {
+            InputStream sourceStream,
+            final int maxLinks) throws Parser.Failure, IOException {
 
         // make a scraper
         String charset = null;
@@ -164,9 +164,10 @@ public class htmlParser extends AbstractParser implements Parser {
         // nothing found: try to find a meta-tag
         if (charset == null) {
             try {
-                final ScraperInputStream htmlFilter = new ScraperInputStream(sourceStream,documentCharset,location,null,false);
+                final ScraperInputStream htmlFilter = new ScraperInputStream(sourceStream, documentCharset, location, null, false, maxLinks);
                 sourceStream = htmlFilter;
                 charset = htmlFilter.detectCharset();
+                htmlFilter.close();
             } catch (final IOException e1) {
                 throw new Parser.Failure("Charset error:" + e1.getMessage(), location);
             }
@@ -197,16 +198,16 @@ public class htmlParser extends AbstractParser implements Parser {
         }
 
         // parsing the content
-        final ContentScraper scraper = new ContentScraper(location);
-        final TransformerWriter writer = new TransformerWriter(null,null,scraper,null,false, Math.max(4096, sourceStream.available()));
+        final ContentScraper scraper = new ContentScraper(location, maxLinks);
+        final TransformerWriter writer = new TransformerWriter(null,null,scraper,null,false, Math.max(64, Math.min(4096, sourceStream.available())));
         try {
             FileUtils.copy(sourceStream, writer, c);
         } catch (final IOException e) {
             throw new Parser.Failure("IO error:" + e.getMessage(), location);
         } finally {
             writer.flush();
-            sourceStream.close();
-            //writer.close();
+            //sourceStream.close(); keep open for multipe parsing (close done by caller)
+            writer.close();
         }
         //OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);
         //serverFileUtils.copy(sourceFile, hfos);
@@ -298,7 +299,7 @@ public class htmlParser extends AbstractParser implements Parser {
         DigestURI url;
         try {
             url = new DigestURI(args[0]);
-            final byte[] content = url.get(ClientIdentification.getUserAgent(), 3000);
+            final byte[] content = url.get(ClientIdentification.yacyInternetCrawlerAgent);
             final Document[] document = new htmlParser().parse(url, "text/html", null, new ByteArrayInputStream(content));
             final String title = document[0].dc_title();
             System.out.println(title);

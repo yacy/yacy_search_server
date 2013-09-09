@@ -32,37 +32,34 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.federate.yacy.Distribution;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
-import net.yacy.peers.dht.PartitionScheme;
-import net.yacy.peers.dht.VerticalWordPartitionScheme;
 import net.yacy.peers.operation.yacySeedUploader;
 import net.yacy.search.Switchboard;
-import de.anomic.http.server.AlternativeDomainNames;
-import de.anomic.http.server.HTTPDemon;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.http.AlternativeDomainNames;
+import net.yacy.server.http.HTTPDemon;
 
 public final class SeedDB implements AlternativeDomainNames {
 
@@ -93,10 +90,9 @@ public final class SeedDB implements AlternativeDomainNames {
     public  NewsPool newsPool;
 
     private int netRedundancy;
-    public  PartitionScheme scheme;
+    public  Distribution scheme;
 
     private Seed mySeed; // my own seed
-    private final Set<String> myBotIDs; // list of id's that this bot accepts as robots.txt identification
 
     public SeedDB(
             final File networkRoot,
@@ -113,12 +109,8 @@ public final class SeedDB implements AlternativeDomainNames {
         this.seedPotentialDBFile = new File(networkRoot, seedPotentialDBFileName);
         this.mySeed = null; // my own seed
         this.myOwnSeedFile = myOwnSeedFile;
-        this.myBotIDs = new HashSet<String>();
-        this.myBotIDs.add("yacy");
-        this.myBotIDs.add("yacybot");
-        this.myBotIDs.add("yacyproxy");
         this.netRedundancy = redundancy;
-        this.scheme = new VerticalWordPartitionScheme(partitionExponent);
+        this.scheme = new Distribution(partitionExponent);
 
         // set up seed database
         this.seedActiveDB = openSeedTable(this.seedActiveDBFile);
@@ -166,7 +158,7 @@ public final class SeedDB implements AlternativeDomainNames {
         this.myOwnSeedFile = new File(newNetworkRoot, SeedDB.DBFILE_OWN_SEED);
 
         this.netRedundancy = redundancy;
-        this.scheme = new VerticalWordPartitionScheme(partitionExponent);
+        this.scheme = new Distribution(partitionExponent);
 
         // set up seed database
         this.seedActiveDB = openSeedTable(this.seedActiveDBFile);
@@ -201,35 +193,29 @@ public final class SeedDB implements AlternativeDomainNames {
             if (this.mySeed == null) throw new IOException("current seed is null");
         } catch (final IOException e) {
             // create new identity
-            Log.logSevere("SEEDDB", "could not load stored mySeed.txt from " + this.myOwnSeedFile.toString() + ": " + e.getMessage() + ". creating new seed.", e);
+            ConcurrentLog.severe("SEEDDB", "could not load stored mySeed.txt from " + this.myOwnSeedFile.toString() + ": " + e.getMessage() + ". creating new seed.", e);
             this.mySeed = Seed.genLocalSeed(this);
             try {
                 this.mySeed.save(this.myOwnSeedFile);
             } catch (final IOException ee) {
-                Log.logSevere("SEEDDB", "error saving mySeed.txt (1) to " + this.myOwnSeedFile.toString() + ": " + ee.getMessage(), ee);
-                Log.logException(ee);
+                ConcurrentLog.severe("SEEDDB", "error saving mySeed.txt (1) to " + this.myOwnSeedFile.toString() + ": " + ee.getMessage(), ee);
+                ConcurrentLog.logException(ee);
                 System.exit(-1);
             }
         } else {
             // create new identity
-            Log.logInfo("SEEDDB", "could not find stored mySeed.txt at " + this.myOwnSeedFile.toString() + ": " + ". creating new seed.");
+            ConcurrentLog.info("SEEDDB", "could not find stored mySeed.txt at " + this.myOwnSeedFile.toString() + ": " + ". creating new seed.");
             this.mySeed = Seed.genLocalSeed(this);
             try {
                 this.mySeed.save(this.myOwnSeedFile);
             } catch (final IOException ee) {
-                Log.logSevere("SEEDDB", "error saving mySeed.txt (2) to " + this.myOwnSeedFile.toString() + ": " + ee.getMessage(), ee);
-                Log.logException(ee);
+                ConcurrentLog.severe("SEEDDB", "error saving mySeed.txt (2) to " + this.myOwnSeedFile.toString() + ": " + ee.getMessage(), ee);
+                ConcurrentLog.logException(ee);
                 System.exit(-1);
             }
         }
-        this.myBotIDs.add(this.mySeed.getName() + ".yacy");
-        this.myBotIDs.add(this.mySeed.hash + ".yacyh");
         this.mySeed.setIP("");       // we delete the old information to see what we have now
         this.mySeed.put(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN); // markup startup condition
-    }
-
-    public Set<String> myBotIDs() {
-        return this.myBotIDs;
     }
 
     public int redundancy() {
@@ -246,7 +232,7 @@ public final class SeedDB implements AlternativeDomainNames {
             if (sizeConnected() == 0) try {Thread.sleep(5000);} catch (final InterruptedException e) {} // wait for init
             initMySeed();
             // check if my seed has an IP assigned
-            if (myIP() == null || myIP().length() == 0) {
+            if (myIP() == null || myIP().isEmpty()) {
                 this.mySeed.setIP(Domains.myPublicLocalIP().getHostAddress());
             }
         }
@@ -254,9 +240,7 @@ public final class SeedDB implements AlternativeDomainNames {
     }
 
     public void setMyName(final String name) {
-        this.myBotIDs.remove(this.mySeed.getName() + ".yacy");
         this.mySeed.setName(name);
-        this.myBotIDs.add(name + ".yacy");
     }
 
     @Override
@@ -292,13 +276,13 @@ public final class SeedDB implements AlternativeDomainNames {
             this.seedActiveDB.delete(mySeedHash);
             this.seedPassiveDB.delete(mySeedHash);
             this.seedPotentialDB.delete(mySeedHash);
-        } catch (final IOException e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
+        } catch (final IOException e) { ConcurrentLog.warn("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     }
 
     public void saveMySeed() {
         try {
           mySeed().save(this.myOwnSeedFile);
-        } catch (final IOException e) { Log.logWarning("yacySeedDB", "could not save mySeed '"+ this.myOwnSeedFile +"': "+ e.getMessage()); }
+        } catch (final IOException e) { ConcurrentLog.warn("yacySeedDB", "could not save mySeed '"+ this.myOwnSeedFile +"': "+ e.getMessage()); }
     }
 
     public boolean noDHTActivity() {
@@ -306,21 +290,21 @@ public final class SeedDB implements AlternativeDomainNames {
         return sizeConnected() <= dhtActivityMagic;
     }
 
-    private synchronized MapDataMining openSeedTable(final File seedDBFile) {
+    private synchronized static MapDataMining openSeedTable(final File seedDBFile) {
         final File parentDir = new File(seedDBFile.getParent());
         if (!parentDir.exists()) {
 			if(!parentDir.mkdirs())
-				Log.logWarning("yacySeedDB", "could not create directories for "+ seedDBFile.getParent());
+				ConcurrentLog.warn("yacySeedDB", "could not create directories for "+ seedDBFile.getParent());
 		}
         try {
-            return new MapDataMining(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, sortFields, longaccFields, doubleaccFields, this);
+            return new MapDataMining(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, sortFields, longaccFields, doubleaccFields);
         } catch (final Exception e) {
             // try again
             FileUtils.deletedelete(seedDBFile);
             try {
-                return new MapDataMining(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, sortFields, longaccFields, doubleaccFields, this);
+                return new MapDataMining(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, sortFields, longaccFields, doubleaccFields);
             } catch (final IOException e1) {
-                Log.logException(e1);
+                ConcurrentLog.logException(e1);
                 System.exit(-1);
                 return null;
             }
@@ -330,11 +314,11 @@ public final class SeedDB implements AlternativeDomainNames {
     private synchronized MapDataMining resetSeedTable(MapDataMining seedDB, final File seedDBFile) {
         // this is an emergency function that should only be used if any problem with the
         // seed.db is detected
-        Network.log.logWarning("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
+        Network.log.warn("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
         seedDB.close();
         FileUtils.deletedelete(seedDBFile);
         if (seedDBFile.exists())
-        	Log.logWarning("yacySeedDB", "could not delete file "+ seedDBFile);
+        	ConcurrentLog.warn("yacySeedDB", "could not delete file "+ seedDBFile);
         // create new seed database
         seedDB = openSeedTable(seedDBFile);
         return seedDB;
@@ -376,7 +360,7 @@ public final class SeedDB implements AlternativeDomainNames {
     	// address has therefore the form
     	// address    ::= (<peername>'.yacy'|<peerhexhash>'.yacyh'){'='<ip>{':'<port}}
     	// clusterdef ::= {address}{','address}*
-    	final String[] addresses = (clusterdefinition.length() == 0) ? new String[0] : clusterdefinition.split(",");
+    	final String[] addresses = (clusterdefinition.isEmpty()) ? new String[0] : clusterdefinition.split(",");
     	final TreeMap<byte[], String> clustermap = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
     	Seed seed;
     	String hash, yacydom, ipport;
@@ -395,7 +379,7 @@ public final class SeedDB implements AlternativeDomainNames {
     			hash = Seed.hexHash2b64Hash(yacydom.substring(0, yacydom.length() - 6));
     			seed = get(hash);
     			if (seed == null) {
-    				Network.log.logWarning("cluster peer '" + yacydom + "' was not found.");
+    				Network.log.warn("cluster peer '" + yacydom + "' was not found.");
     			} else {
     				clustermap.put(ASCII.getBytes(hash), ipport);
     			}
@@ -403,12 +387,12 @@ public final class SeedDB implements AlternativeDomainNames {
     			// find a peer with its name
     			seed = lookupByName(yacydom.substring(0, yacydom.length() - 5));
     			if (seed == null) {
-    				Network.log.logWarning("cluster peer '" + yacydom + "' was not found.");
+    				Network.log.warn("cluster peer '" + yacydom + "' was not found.");
     			} else {
     				clustermap.put(ASCII.getBytes(seed.hash), ipport);
     			}
     		} else {
-    			Network.log.logWarning("cluster peer '" + addresse + "' has wrong syntax. the name must end with .yacy or .yacyh");
+    			Network.log.warn("cluster peer '" + addresse + "' has wrong syntax. the name must end with .yacy or .yacyh");
     		}
     	}
     	return clustermap;
@@ -488,7 +472,7 @@ public final class SeedDB implements AlternativeDomainNames {
                 this.seedPassiveDB.delete(ASCII.getBytes(seed.hash));
                 this.seedPotentialDB.delete(ASCII.getBytes(seed.hash));
             } catch (final Exception e) {
-                Network.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                Network.log.severe("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 resetActiveTable();
             }
         }
@@ -500,13 +484,13 @@ public final class SeedDB implements AlternativeDomainNames {
             try {
                 this.seedActiveDB.delete(ASCII.getBytes(seed.hash));
                 this.seedPotentialDB.delete(ASCII.getBytes(seed.hash));
-            } catch (final Exception e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
+            } catch (final Exception e) { ConcurrentLog.warn("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
             //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
             try {
                 final ConcurrentMap<String, String> seedPropMap = seed.getMap();
                 this.seedPassiveDB.insert(ASCII.getBytes(seed.hash), seedPropMap);
             } catch (final Exception e) {
-                Network.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                Network.log.severe("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 resetPassiveTable();
             }
         }
@@ -518,13 +502,13 @@ public final class SeedDB implements AlternativeDomainNames {
             try {
                 this.seedActiveDB.delete(ASCII.getBytes(seed.hash));
                 this.seedPassiveDB.delete(ASCII.getBytes(seed.hash));
-            } catch (final Exception e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
+            } catch (final Exception e) { ConcurrentLog.warn("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
             //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
             try {
                 final ConcurrentMap<String, String> seedPropMap = seed.getMap();
                 this.seedPotentialDB.insert(ASCII.getBytes(seed.hash), seedPropMap);
             } catch (final Exception e) {
-                Network.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                Network.log.severe("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 resetPotentialTable();
             }
         }
@@ -534,14 +518,14 @@ public final class SeedDB implements AlternativeDomainNames {
     	if (peerHash == null) return;
     	try {
 			this.seedPassiveDB.delete(ASCII.getBytes(peerHash));
-		} catch (final IOException e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
+		} catch (final IOException e) { ConcurrentLog.warn("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     }
 
     public synchronized void removePotential(final String peerHash) {
     	if (peerHash == null) return;
     	try {
 			this.seedPotentialDB.delete(ASCII.getBytes(peerHash));
-		} catch (final IOException e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
+		} catch (final IOException e) { ConcurrentLog.warn("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     }
 
     public boolean hasConnected(final byte[] hash) {
@@ -557,7 +541,7 @@ public final class SeedDB implements AlternativeDomainNames {
     }
 
     private Seed get(final String hash, final MapDataMining database) {
-        if (hash == null || hash.length() == 0) return null;
+        if (hash == null || hash.isEmpty()) return null;
         if ((this.mySeed != null) && (hash.equals(this.mySeed.hash))) return this.mySeed;
         final ConcurrentHashMap<String, String> entry = new ConcurrentHashMap<String, String>();
         try {
@@ -565,10 +549,10 @@ public final class SeedDB implements AlternativeDomainNames {
             if (map == null) return null;
             entry.putAll(map);
         } catch (final IOException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
             return null;
-        } catch (final RowSpaceExceededException e) {
-            Log.logException(e);
+        } catch (final SpaceExceededException e) {
+            ConcurrentLog.logException(e);
             return null;
         }
         return new Seed(hash, entry);
@@ -601,13 +585,13 @@ public final class SeedDB implements AlternativeDomainNames {
         }
         final byte[] hashb = ASCII.getBytes(hash);
         Seed s = get(hash, this.seedActiveDB);
-        if (s != null) try { this.seedActiveDB.insert(hashb, seed.getMap()); return;} catch (final Exception e) {Log.logException(e);}
+        if (s != null) try { this.seedActiveDB.insert(hashb, seed.getMap()); return;} catch (final Exception e) {ConcurrentLog.logException(e);}
 
         s = get(hash, this.seedPassiveDB);
-        if (s != null) try { this.seedPassiveDB.insert(hashb, seed.getMap()); return;} catch (final Exception e) {Log.logException(e);}
+        if (s != null) try { this.seedPassiveDB.insert(hashb, seed.getMap()); return;} catch (final Exception e) {ConcurrentLog.logException(e);}
 
         s = get(hash, this.seedPotentialDB);
-        if (s != null) try { this.seedPotentialDB.insert(hashb, seed.getMap()); return;} catch (final Exception e) {Log.logException(e);}
+        if (s != null) try { this.seedPotentialDB.insert(hashb, seed.getMap()); return;} catch (final Exception e) {ConcurrentLog.logException(e);}
     }
 
     public Seed lookupByName(String peerName) {
@@ -633,7 +617,7 @@ public final class SeedDB implements AlternativeDomainNames {
                 //System.out.println("*** found lookupByName in seedActiveDB: " + peerName);
                 return seed;
             }
-        } catch ( IOException e ) {
+        } catch (final  IOException e ) {
         }}
         synchronized (this) { try {
             Collection<byte[]> idx = this.seedPassiveDB.select(Seed.NAME, name);
@@ -643,7 +627,7 @@ public final class SeedDB implements AlternativeDomainNames {
                 //System.out.println("*** found lookupByName in seedPassiveDB: " + peerName);
                 return seed;
             }
-        } catch ( IOException e ) {
+        } catch (final  IOException e ) {
         }}
 
         // check local seed
@@ -684,7 +668,7 @@ public final class SeedDB implements AlternativeDomainNames {
                     //System.out.println("*** found lookupByIP in connected: " + peerIP.toString() + " -> " + seed.getName());
                     return seed;
                 }
-            } catch ( IOException e ) {
+            } catch (final  IOException e ) {
             }
         }
 
@@ -698,7 +682,7 @@ public final class SeedDB implements AlternativeDomainNames {
                     //System.out.println("*** found lookupByIP in disconnected: " + peerIP.toString() + " -> " + seed.getName());
                     return seed;
                 }
-            } catch ( IOException e ) {
+            } catch (final  IOException e ) {
             }
         }
 
@@ -712,7 +696,7 @@ public final class SeedDB implements AlternativeDomainNames {
                     //System.out.println("*** found lookupByIP in potential: " + peerIP.toString() + " -> " + seed.getName());
                     return seed;
                 }
-            } catch ( IOException e ) {
+            } catch (final  IOException e ) {
             }
         }
 
@@ -787,15 +771,15 @@ public final class SeedDB implements AlternativeDomainNames {
             // create a seed file which for uploading ...
             seedFile = File.createTempFile("seedFile",".txt", seedDB.myOwnSeedFile.getParentFile());
             seedFile.deleteOnExit();
-            if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
+            if (Network.log.isFine()) Network.log.fine("SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
             final ArrayList<String> uv = storeSeedList(seedFile, true);
 
             // uploading the seed file
-            if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Trying to upload seed-file, " + seedFile.length() + " bytes, " + uv.size() + " entries.");
+            if (Network.log.isFine()) Network.log.fine("SaveSeedList: Trying to upload seed-file, " + seedFile.length() + " bytes, " + uv.size() + " entries.");
             log = uploader.uploadSeedFile(sb, seedFile);
 
             // test download
-            if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Trying to download seed-file '" + seedURL + "'.");
+            if (Network.log.isFine()) Network.log.fine("SaveSeedList: Trying to download seed-file '" + seedURL + "'.");
             final Iterator<String> check = downloadSeedFile(seedURL);
 
             // Comparing if local copy and uploaded copy are equal
@@ -817,14 +801,14 @@ public final class SeedDB implements AlternativeDomainNames {
         return log;
     }
 
-    private Iterator<String> downloadSeedFile(final DigestURI seedURL) throws IOException {
+    private static Iterator<String> downloadSeedFile(final DigestURI seedURL) throws IOException {
         // Configure http headers
         final RequestHeader reqHeader = new RequestHeader();
         reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
         reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?
-        reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
+        reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.yacyInternetCrawlerAgent.userAgent);
 
-        final HTTPClient client = new HTTPClient();
+        final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
         client.setHeader(reqHeader.entrySet());
         byte[] content = null;
         try {
@@ -850,13 +834,13 @@ public final class SeedDB implements AlternativeDomainNames {
         }
     }
 
-    private String checkCache(final ArrayList<String> uv, final Iterator<String> check) {
+    private static String checkCache(final ArrayList<String> uv, final Iterator<String> check) {
         if ((check == null) || (uv == null)) {
-            if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Local and uploades seed-list are different");
+            if (Network.log.isFine()) Network.log.fine("SaveSeedList: Local and uploades seed-list are different");
             return "Entry count is different: uv.size() = " + ((uv == null) ? "null" : Integer.toString(uv.size()));
         }
 
-        if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Comparing local and uploades seed-list entries ...");
+        if (Network.log.isFine()) Network.log.fine("SaveSeedList: Comparing local and uploades seed-list entries ...");
         int i = 0;
         while (check.hasNext() && i < uv.size()) {
         	if (!((uv.get(i)).equals(check.next()))) return "Element at position " + i + " is different.";
@@ -870,6 +854,7 @@ public final class SeedDB implements AlternativeDomainNames {
     /**
      * resolve a yacy address
      */
+    @Override
     public String resolve(String host) {
         Seed seed;
         int p;
@@ -954,14 +939,14 @@ public final class SeedDB implements AlternativeDomainNames {
                     if (version >= this.minVersion || version == 0.0) break; // include 0.0 to access always developer peers
                 }
             } catch (final IOException e) {
-                Log.logException(e);
-                Network.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                ConcurrentLog.logException(e);
+                Network.log.severe("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == SeedDB.this.seedActiveDB) SeedDB.this.seedActiveDB = resetSeedTable(SeedDB.this.seedActiveDB, SeedDB.this.seedActiveDBFile);
                 if (database == SeedDB.this.seedPassiveDB) SeedDB.this.seedPassiveDB = resetSeedTable(SeedDB.this.seedPassiveDB, SeedDB.this.seedPassiveDBFile);
                 this.it = null;
             } catch (final kelondroException e) {
-                Log.logException(e);
-                Network.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                ConcurrentLog.logException(e);
+                Network.log.severe("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == SeedDB.this.seedActiveDB) SeedDB.this.seedActiveDB = resetSeedTable(SeedDB.this.seedActiveDB, SeedDB.this.seedActiveDBFile);
                 if (database == SeedDB.this.seedPassiveDB) SeedDB.this.seedPassiveDB = resetSeedTable(SeedDB.this.seedPassiveDB, SeedDB.this.seedPassiveDBFile);
                 this.it = null;
@@ -974,8 +959,8 @@ public final class SeedDB implements AlternativeDomainNames {
                 this.it = database.entries(up, field);
                 this.nextSeed = internalNext();
             } catch (final kelondroException e) {
-                Log.logException(e);
-                Network.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                ConcurrentLog.logException(e);
+                Network.log.severe("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == SeedDB.this.seedActiveDB) SeedDB.this.seedActiveDB = resetSeedTable(SeedDB.this.seedActiveDB, SeedDB.this.seedActiveDBFile);
                 if (database == SeedDB.this.seedPassiveDB) SeedDB.this.seedPassiveDB = resetSeedTable(SeedDB.this.seedPassiveDB, SeedDB.this.seedPassiveDBFile);
                 if (database == SeedDB.this.seedPotentialDB) SeedDB.this.seedPotentialDB = resetSeedTable(SeedDB.this.seedPotentialDB, SeedDB.this.seedPotentialDBFile);
@@ -983,6 +968,7 @@ public final class SeedDB implements AlternativeDomainNames {
             }
         }
 
+        @Override
         public boolean hasNext() {
             return (this.nextSeed != null);
         }
@@ -996,7 +982,7 @@ public final class SeedDB implements AlternativeDomainNames {
                     try {
                         dna0 = this.it.next();
                     } catch (final OutOfMemoryError e) {
-                        Log.logException(e);
+                        ConcurrentLog.logException(e);
                         dna0 = null;
                     }
                     assert dna0 != null;
@@ -1013,8 +999,8 @@ public final class SeedDB implements AlternativeDomainNames {
                 }
                 return null;
             } catch (final Exception e) {
-                Log.logException(e);
-                Network.log.logSevere("ERROR internalNext: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                ConcurrentLog.logException(e);
+                Network.log.severe("ERROR internalNext: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (this.database == SeedDB.this.seedActiveDB) SeedDB.this.seedActiveDB = resetSeedTable(SeedDB.this.seedActiveDB, SeedDB.this.seedActiveDBFile);
                 if (this.database == SeedDB.this.seedPassiveDB) SeedDB.this.seedPassiveDB = resetSeedTable(SeedDB.this.seedPassiveDB, SeedDB.this.seedPassiveDBFile);
                 if (this.database == SeedDB.this.seedPotentialDB) SeedDB.this.seedPotentialDB = resetSeedTable(SeedDB.this.seedPotentialDB, SeedDB.this.seedPotentialDBFile);
@@ -1022,6 +1008,7 @@ public final class SeedDB implements AlternativeDomainNames {
             }
         }
 
+        @Override
         public Seed next() {
             final Seed seed = this.nextSeed;
             double version;
@@ -1031,9 +1018,9 @@ public final class SeedDB implements AlternativeDomainNames {
                 version = this.nextSeed.getVersion();
                 if (version >= this.minVersion || version == 0.0) break; // include 0.0 to access always developer peers
             }} catch (final kelondroException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
             	// emergency reset
-            	Network.log.logSevere("seed-db emergency reset", e);
+            	Network.log.severe("seed-db emergency reset", e);
             	this.database.clear();
 				this.nextSeed = null;
 				return null;
@@ -1041,6 +1028,7 @@ public final class SeedDB implements AlternativeDomainNames {
             return seed;
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }

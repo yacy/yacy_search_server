@@ -28,7 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.TreeMap;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public final class InstantBusyThread extends AbstractBusyThread implements BusyThread {
@@ -37,8 +37,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
     private final Object environment;
     private final Long   handle;
 
-    public static int instantThreadCounter = 0;
-    public static final TreeMap<Long, String> jobs = new TreeMap<Long, String>();
+    private static final TreeMap<Long, String> jobs = new TreeMap<Long, String>();
 
     public InstantBusyThread(
               final Object env,
@@ -56,7 +55,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
         // freemem is the name of a method that tries to free memory and returns void
         final Class<?> theClass = (env instanceof Class<?>) ? (Class<?>) env : env.getClass();
         try {
-            this.jobExecMethod = theClass.getMethod(jobExec, new Class[0]);
+            this.jobExecMethod = theClass.getMethod(jobExec);
         } catch (final NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of jobExec: " + e.getMessage());
         }
@@ -64,7 +63,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
             if (jobCount == null)
                 this.jobCountMethod = null;
             else
-                this.jobCountMethod = theClass.getMethod(jobCount, new Class[0]);
+                this.jobCountMethod = theClass.getMethod(jobCount);
 
         } catch (final NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of jobCount: " + e.getMessage());
@@ -73,7 +72,7 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
             if (freemem == null)
                 this.freememExecMethod = null;
             else
-                this.freememExecMethod = theClass.getMethod(freemem, new Class[0]);
+                this.freememExecMethod = theClass.getMethod(freemem);
 
         } catch (final NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of freemem: " + e.getMessage());
@@ -87,54 +86,49 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
     public int getJobCount() {
         if (this.jobCountMethod == null) return Integer.MAX_VALUE;
         try {
-            final Object result = this.jobCountMethod.invoke(this.environment, new Object[0]);
-            if (result instanceof Integer)
-                return ((Integer) result).intValue();
-            else
-                return -1;
+            final Object result = this.jobCountMethod.invoke(this.environment);
+            return (result instanceof Integer) ? ((Integer) result).intValue() : -1;
         } catch (final IllegalAccessException e) {
             return -1;
         } catch (final IllegalArgumentException e) {
             return -1;
         } catch (final InvocationTargetException e) {
-            Log.logSevere("BUSYTHREAD", "invocation serverInstantThread of thread '" + getName() + "': " + e.getMessage(), e);
+            ConcurrentLog.severe("BUSYTHREAD", "invocation serverInstantThread of thread '" + getName() + "': " + e.getMessage(), e);
             return -1;
         }
     }
 
     @Override
     public boolean job() throws Exception {
-        instantThreadCounter++;
         //System.out.println("started job " + this.handle + ": " + this.getName());
         synchronized(jobs) {jobs.put(this.handle, getName());}
         boolean jobHasDoneSomething = false;
         try {
-            final Object result = this.jobExecMethod.invoke(this.environment, new Object[0]);
+            final Object result = this.jobExecMethod.invoke(this.environment);
             if (result == null) jobHasDoneSomething = true;
             else if (result instanceof Boolean) jobHasDoneSomething = ((Boolean) result).booleanValue();
         } catch (final IllegalAccessException e) {
-            Log.logSevere("BUSYTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
-            Log.logSevere("BUSYTHREAD", "shutting down thread '" + getName() + "'");
+            ConcurrentLog.severe("BUSYTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
+            ConcurrentLog.severe("BUSYTHREAD", "shutting down thread '" + getName() + "'");
             terminate(false);
         } catch (final IllegalArgumentException e) {
-            Log.logSevere("BUSYTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
-            Log.logSevere("BUSYTHREAD", "shutting down thread '" + getName() + "'");
+            ConcurrentLog.severe("BUSYTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
+            ConcurrentLog.severe("BUSYTHREAD", "shutting down thread '" + getName() + "'");
             terminate(false);
         } catch (final InvocationTargetException e) {
             final String targetException = e.getTargetException().getMessage();
-            Log.logException(e);
-            Log.logException(e.getCause());
-            Log.logException(e.getTargetException());
-            Log.logSevere("BUSYTHREAD", "Runtime Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
+            ConcurrentLog.logException(e);
+            ConcurrentLog.logException(e.getCause());
+            ConcurrentLog.logException(e.getTargetException());
+            ConcurrentLog.severe("BUSYTHREAD", "Runtime Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
         } catch (final OutOfMemoryError e) {
-            Log.logSevere("BUSYTHREAD", "OutOfMemory Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage());
-            Log.logException(e);
+            ConcurrentLog.severe("BUSYTHREAD", "OutOfMemory Error in serverInstantThread.job, thread '" + getName() + "': " + e.getMessage());
+            ConcurrentLog.logException(e);
             freemem();
         } catch (final Exception e) {
-            Log.logSevere("BUSYTHREAD", "Generic Exception, thread '" + getName() + "': " + e.getMessage());
-            Log.logException(e);
+            ConcurrentLog.severe("BUSYTHREAD", "Generic Exception, thread '" + getName() + "': " + e.getMessage());
+            ConcurrentLog.logException(e);
         }
-        instantThreadCounter--;
         synchronized(jobs) {jobs.remove(this.handle);}
         return jobHasDoneSomething;
     }
@@ -143,27 +137,27 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
     public void freemem() {
         if (this.freememExecMethod == null) return;
         try {
-            this.freememExecMethod.invoke(this.environment, new Object[0]);
+            this.freememExecMethod.invoke(this.environment);
         } catch (final IllegalAccessException e) {
-            Log.logSevere("BUSYTHREAD", "Internal Error in serverInstantThread.freemem: " + e.getMessage());
-            Log.logSevere("BUSYTHREAD", "shutting down thread '" + getName() + "'");
+            ConcurrentLog.severe("BUSYTHREAD", "Internal Error in serverInstantThread.freemem: " + e.getMessage());
+            ConcurrentLog.severe("BUSYTHREAD", "shutting down thread '" + getName() + "'");
             terminate(false);
         } catch (final IllegalArgumentException e) {
-            Log.logSevere("BUSYTHREAD", "Internal Error in serverInstantThread.freemem: " + e.getMessage());
-            Log.logSevere("BUSYTHREAD", "shutting down thread '" + getName() + "'");
+            ConcurrentLog.severe("BUSYTHREAD", "Internal Error in serverInstantThread.freemem: " + e.getMessage());
+            ConcurrentLog.severe("BUSYTHREAD", "shutting down thread '" + getName() + "'");
             terminate(false);
         } catch (final InvocationTargetException e) {
             final String targetException = e.getTargetException().getMessage();
-            if (targetException.indexOf("heap space",0) > 0) Log.logException(e.getTargetException());
-            Log.logSevere("BUSYTHREAD", "Runtime Error in serverInstantThread.freemem, thread '" + getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
-            Log.logException(e.getTargetException());
+            if (targetException.indexOf("heap space",0) > 0) ConcurrentLog.logException(e.getTargetException());
+            ConcurrentLog.severe("BUSYTHREAD", "Runtime Error in serverInstantThread.freemem, thread '" + getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
+            ConcurrentLog.logException(e.getTargetException());
         } catch (final OutOfMemoryError e) {
-            Log.logSevere("BUSYTHREAD", "OutOfMemory Error in serverInstantThread.freemem, thread '" + getName() + "': " + e.getMessage());
-            Log.logException(e);
+            ConcurrentLog.severe("BUSYTHREAD", "OutOfMemory Error in serverInstantThread.freemem, thread '" + getName() + "': " + e.getMessage());
+            ConcurrentLog.logException(e);
         }
     }
 
-    public static BusyThread oneTimeJob(final Object env, final String jobExec, final Log log, final long startupDelay) {
+    public static BusyThread oneTimeJob(final Object env, final String jobExec, final long startupDelay) {
         // start the job and execute it once as background process
         final BusyThread thread = new InstantBusyThread(
                 env, jobExec, null, null, Long.MIN_VALUE, Long.MAX_VALUE, Long.MIN_VALUE, Long.MAX_VALUE);
@@ -176,16 +170,9 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
     }
 
     public static WorkflowThread oneTimeJob(final Runnable thread, final long startupDelay) {
-        final Log log = new Log(thread.getClass().getName() + "/run");
-        log.setLevel(java.util.logging.Level.INFO);
-        return oneTimeJob(thread, "run", log, startupDelay);
+        return oneTimeJob(thread, "run", startupDelay);
     }
-
-    public static WorkflowThread oneTimeJob(final Runnable thread, final long startupDelay, final int maxJobs) {
-        while (instantThreadCounter >= maxJobs) try {Thread.sleep(100);} catch (final InterruptedException e) {break;}
-        return oneTimeJob( thread, startupDelay);
-    }
-
+    
     @Override
     public void open() {
         // Not implemented in this thread

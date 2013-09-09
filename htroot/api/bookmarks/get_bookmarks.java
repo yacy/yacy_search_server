@@ -1,18 +1,19 @@
 
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.BookmarkHelper;
+import net.yacy.data.BookmarksDB;
+import net.yacy.data.UserDB;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.search.Switchboard;
-import de.anomic.data.BookmarkHelper;
-import de.anomic.data.BookmarksDB;
-import de.anomic.data.UserDB;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class get_bookmarks {
 
@@ -155,35 +156,38 @@ public class get_bookmarks {
             count = 0;
             BookmarksDB.Bookmark bookmark = null;
             while (count < itemsPerPage && it.hasNext()) {
-                bookmark = sb.bookmarksDB.getBookmark(it.next());
-                if (bookmark != null) {
-                    prop.put("display_bookmarks_"+count+"_id",count);
-                    prop.put("display_bookmarks_"+count+"_link",bookmark.getUrl());
-                    prop.put("display_bookmarks_"+count+"_date", ISO8601Formatter.FORMATTER.format(new Date(bookmark.getTimeStamp())));
-                    prop.put("display_bookmarks_"+count+"_rfc822date", HeaderFramework.formatRFC1123(new Date(bookmark.getTimeStamp())));
-                    prop.put("display_bookmarks_"+count+"_public", (bookmark.getPublic() ? "0" : "1"));
-                    prop.put("display_bookmarks_"+count+"_hash", bookmark.getUrlHash());
-                    prop.put("display_bookmarks_"+count+"_comma", ",");
+                try {
+                    bookmark = sb.bookmarksDB.getBookmark(it.next());
+                    if (bookmark != null) {
+                        prop.put("display_bookmarks_"+count+"_id",count);
+                        prop.put("display_bookmarks_"+count+"_link",bookmark.getUrl());
+                        prop.put("display_bookmarks_"+count+"_date", ISO8601Formatter.FORMATTER.format(new Date(bookmark.getTimeStamp())));
+                        prop.put("display_bookmarks_"+count+"_rfc822date", HeaderFramework.formatRFC1123(new Date(bookmark.getTimeStamp())));
+                        prop.put("display_bookmarks_"+count+"_public", (bookmark.getPublic() ? "0" : "1"));
+                        prop.put("display_bookmarks_"+count+"_hash", bookmark.getUrlHash());
+                        prop.put("display_bookmarks_"+count+"_comma", ",");
 
-                    // offer HTML encoded
-                    prop.putHTML("display_bookmarks_"+count+"_title-html", bookmark.getTitle());
-                    prop.putHTML("display_bookmarks_"+count+"_desc-html", bookmark.getDescription());
-                    prop.putHTML("display_bookmarks_"+count+"_tags-html", bookmark.getTagsString().replaceAll(",", ", "));
-                    prop.putHTML("display_bookmarks_"+count+"_folders-html", (bookmark.getFoldersString()));
+                        // offer HTML encoded
+                        prop.putHTML("display_bookmarks_"+count+"_title-html", bookmark.getTitle());
+                        prop.putHTML("display_bookmarks_"+count+"_desc-html", bookmark.getDescription());
+                        prop.putHTML("display_bookmarks_"+count+"_tags-html", bookmark.getTagsString().replaceAll(",", ", "));
+                        prop.putHTML("display_bookmarks_"+count+"_folders-html", (bookmark.getFoldersString()));
 
-                    // XML encoded
-                    prop.putXML("display_bookmarks_"+count+"_title-xml", bookmark.getTitle());
-                    prop.putXML("display_bookmarks_"+count+"_desc-xml", bookmark.getDescription());
-                    prop.putXML("display_bookmarks_"+count+"_tags-xml", bookmark.getTagsString());
-                    prop.putXML("display_bookmarks_"+count+"_folders-xml", (bookmark.getFoldersString()));
+                        // XML encoded
+                        prop.putXML("display_bookmarks_"+count+"_title-xml", bookmark.getTitle());
+                        prop.putXML("display_bookmarks_"+count+"_desc-xml", bookmark.getDescription());
+                        prop.putXML("display_bookmarks_"+count+"_tags-xml", bookmark.getTagsString());
+                        prop.putXML("display_bookmarks_"+count+"_folders-xml", (bookmark.getFoldersString()));
 
-                    // and plain text (potentially unsecure)
-                    prop.put("display_bookmarks_"+count+"_title", bookmark.getTitle());
-                    prop.put("display_bookmarks_"+count+"_desc", bookmark.getDescription());
-                    prop.put("display_bookmarks_"+count+"_tags", bookmark.getTagsString());
-                    prop.put("display_bookmarks_"+count+"_folders", (bookmark.getFoldersString()));
+                        // and plain text (potentially unsecure)
+                        prop.put("display_bookmarks_"+count+"_title", bookmark.getTitle());
+                        prop.put("display_bookmarks_"+count+"_desc", bookmark.getDescription());
+                        prop.put("display_bookmarks_"+count+"_tags", bookmark.getTagsString());
+                        prop.put("display_bookmarks_"+count+"_folders", (bookmark.getFoldersString()));
 
-                    count++;
+                        count++;
+                    }
+                } catch (final IOException e) {
                 }
             }
             // eliminate the trailing comma for Json output
@@ -250,36 +254,39 @@ public class get_bookmarks {
     	BookmarksDB.Bookmark bookmark = null;
     	Date date;
     	while(bit.hasNext()){
-            bookmark = sb.bookmarksDB.getBookmark(bit.next());
-            date = new Date(bookmark.getTimeStamp());
-            prop.put("display_xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
-                + "\" href=\"" + CharacterCoding.unicode2xml(bookmark.getUrl(), true)
-                + "\" added=\"" + CharacterCoding.unicode2xml(ISO8601Formatter.FORMATTER.format(date), true)+"\">");
-            count++;
-            prop.put("display_xbel_"+count+"_elements", "<title>");
-            count++;
-            prop.putXML("display_xbel_"+count+"_elements", bookmark.getTitle());
-            count++;
-            prop.put("display_xbel_"+count+"_elements", "</title>");
-            count++;
-            prop.put("display_xbel_"+count+"_elements", "<info>");
-            count++;
-            prop.put("display_xbel_"+count+"_elements", "<metadata owner=\"Mozilla\" ShortcutURL=\""
-                + CharacterCoding.unicode2xml(bookmark.getTagsString().replaceAll("/.*,", "").toLowerCase(), true)
-                + "\"/>");
-            count++;
-            prop.put("display_xbel_"+count+"_elements", "<metadata owner=\"YaCy\" public=\""+Boolean.toString(bookmark.getPublic())+"\"/>");
-            count++;
-            prop.put("display_xbel_"+count+"_elements", "</info>");
-            count++;
-            prop.put("display_xbel_"+count+"_elements", "<desc>");
-            count++;
-            prop.putXML("display_xbel_"+count+"_elements", bookmark.getDescription());
-            count++;
-            prop.put("display_xbel_"+count+"_elements", "</desc>");
-            count++;
-            prop.put("display_xbel_"+count+"_elements", "</bookmark>");
-            count++;
+            try {
+                bookmark = sb.bookmarksDB.getBookmark(bit.next());
+                date = new Date(bookmark.getTimeStamp());
+                prop.put("display_xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
+                    + "\" href=\"" + CharacterCoding.unicode2xml(bookmark.getUrl(), true)
+                    + "\" added=\"" + CharacterCoding.unicode2xml(ISO8601Formatter.FORMATTER.format(date), true)+"\">");
+                count++;
+                prop.put("display_xbel_"+count+"_elements", "<title>");
+                count++;
+                prop.putXML("display_xbel_"+count+"_elements", bookmark.getTitle());
+                count++;
+                prop.put("display_xbel_"+count+"_elements", "</title>");
+                count++;
+                prop.put("display_xbel_"+count+"_elements", "<info>");
+                count++;
+                prop.put("display_xbel_"+count+"_elements", "<metadata owner=\"Mozilla\" ShortcutURL=\""
+                    + CharacterCoding.unicode2xml(bookmark.getTagsString().replaceAll("/.*,", "").toLowerCase(), true)
+                    + "\"/>");
+                count++;
+                prop.put("display_xbel_"+count+"_elements", "<metadata owner=\"YaCy\" public=\""+Boolean.toString(bookmark.getPublic())+"\"/>");
+                count++;
+                prop.put("display_xbel_"+count+"_elements", "</info>");
+                count++;
+                prop.put("display_xbel_"+count+"_elements", "<desc>");
+                count++;
+                prop.putXML("display_xbel_"+count+"_elements", bookmark.getDescription());
+                count++;
+                prop.put("display_xbel_"+count+"_elements", "</desc>");
+                count++;
+                prop.put("display_xbel_"+count+"_elements", "</bookmark>");
+                count++;
+            } catch (final IOException e) {
+            }
         }
     	return count;
     }

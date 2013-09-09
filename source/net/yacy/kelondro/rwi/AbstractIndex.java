@@ -30,14 +30,12 @@ package net.yacy.kelondro.rwi;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
-import net.yacy.cora.order.Order;
-import net.yacy.kelondro.index.HandleSet;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 
 public abstract class AbstractIndex <ReferenceType extends Reference> implements Index<ReferenceType> {
 
@@ -52,10 +50,10 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
      * merge this index with another index
      * @param otherIndex
      * @throws IOException
-     * @throws RowSpaceExceededException
+     * @throws SpaceExceededException
      */
     @Override
-    public void merge(final Index<ReferenceType> otherIndex) throws IOException, RowSpaceExceededException {
+    public void merge(final Index<ReferenceType> otherIndex) throws IOException, SpaceExceededException {
         byte[] term;
         for (final ReferenceContainer<ReferenceType> otherContainer: otherIndex) {
             term = otherContainer.getTermHash();
@@ -73,16 +71,6 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
     }
 
     @Override
-    public void removeDelayed(final HandleSet termHashes, final byte[] urlHashBytes) throws IOException {
-        // remove the same url hashes for multiple words
-        // this is mainly used when correcting a index after a search
-        final Iterator<byte[]> i = termHashes.iterator();
-        while (i.hasNext()) {
-            removeDelayed(i.next(), urlHashBytes);
-        }
-    }
-
-    @Override
     public int remove(final HandleSet termHashes, final byte[] urlHashBytes) throws IOException {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search
@@ -93,32 +81,6 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         }
         return c;
     }
-
-    @Override
-    public synchronized TreeSet<ReferenceContainer<ReferenceType>> referenceContainer(final byte[] startHash, final boolean rot, final boolean excludePrivate, int count) throws IOException {
-        // creates a set of indexContainers
-        // this does not use the cache
-        final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(this.factory, termKeyOrdering().clone());
-        final ReferenceContainer<ReferenceType> emptyContainer = ReferenceContainer.emptyContainer(this.factory, startHash);
-        containerOrder.rotate(emptyContainer);
-        final TreeSet<ReferenceContainer<ReferenceType>> containers = new TreeSet<ReferenceContainer<ReferenceType>>(containerOrder);
-        final Iterator<ReferenceContainer<ReferenceType>> i = referenceContainerIterator(startHash, rot, excludePrivate);
-        //if (ram) count = Math.min(size(), count);
-        ReferenceContainer<ReferenceType> container;
-        // this loop does not terminate using the i.hasNex() predicate when rot == true
-        // because then the underlying iterator is a rotating iterator without termination
-        // in this case a termination must be ensured with a counter
-        // It must also be ensured that the counter is in/decreased every loop
-        while ((count > 0) && (i.hasNext())) {
-            container = i.next();
-            if (container != null && !container.isEmpty()) {
-                containers.add(container);
-            }
-            count--; // decrease counter even if the container was null or empty to ensure termination
-        }
-        return containers; // this may return less containers as demanded
-    }
-
 
     // methods to search in the index
 
@@ -153,7 +115,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
             try {
                 singleContainer = get(singleHash, urlselection);
             } catch (final IOException e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 continue;
             }
 
@@ -165,54 +127,12 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         return containers;
     }
 
-    /**
-     * collect containers for given word hashes and join them as they are retrieved.
-     * This collection stops if a single container does not contain any references
-     * or the current result of the container join results in an empty container.
-     * In any fail case only a empty result container is returned.
-     * @param wordHashes
-     * @param urlselection
-     * @param maxDistance the maximum distance that the words in the result may have
-     * @return ReferenceContainer the join result
-     * @throws RowSpaceExceededException
-     */
-    public ReferenceContainer<ReferenceType> searchJoin(final HandleSet wordHashes, final HandleSet urlselection, final int maxDistance) throws RowSpaceExceededException {
-        // first check if there is any entry that has no match;
-        // this uses only operations in ram
-        for (final byte[] wordHash: wordHashes) {
-            if (!has(wordHash)) return ReferenceContainer.emptyContainer(this.factory, null, 0);
-        }
-
-        // retrieve entities that belong to the hashes
-        ReferenceContainer<ReferenceType> resultContainer = null;
-        ReferenceContainer<ReferenceType> singleContainer;
-        for (final byte[] wordHash: wordHashes) {
-            // retrieve index
-            try {
-                singleContainer = get(wordHash, urlselection);
-            } catch (final IOException e) {
-                Log.logException(e);
-                continue;
-            }
-
-            // check result
-            if ((singleContainer == null || singleContainer.isEmpty())) return ReferenceContainer.emptyContainer(this.factory, null, 0);
-            if (resultContainer == null) resultContainer = singleContainer; else {
-                resultContainer = ReferenceContainer.joinConstructive(this.factory, resultContainer, singleContainer, maxDistance);
-            }
-
-            // finish if the result is empty
-            if (resultContainer.isEmpty()) return resultContainer;
-        }
-        return resultContainer;
-    }
-
     public TermSearch<ReferenceType> query(
             final HandleSet queryHashes,
             final HandleSet excludeHashes,
             final HandleSet urlselection,
             final ReferenceFactory<ReferenceType> termFactory,
-            final int maxDistance) throws RowSpaceExceededException {
+            final int maxDistance) throws SpaceExceededException {
         return new TermSearch<ReferenceType>(this, queryHashes, excludeHashes, urlselection, termFactory, maxDistance);
     }
 

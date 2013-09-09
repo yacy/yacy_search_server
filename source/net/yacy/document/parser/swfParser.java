@@ -29,12 +29,12 @@ package net.yacy.document.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -78,9 +78,9 @@ public class swfParser extends AbstractParser implements Parser {
             String urlnr = null;
             final String linebreak = System.getProperty("line.separator");
             final String[] sections =  null;
-            final String abstrct = null;
+            final List<String> abstrct = new ArrayList<String>();
             //TreeSet images = null;
-            final Map<MultiProtocolURI, Properties> anchors = new HashMap<MultiProtocolURI, Properties>();
+            final Map<DigestURI, Properties> anchors = new HashMap<DigestURI, Properties>();
             int urls = 0;
             int urlStart = -1;
             int urlEnd = 0;
@@ -99,7 +99,7 @@ public class swfParser extends AbstractParser implements Parser {
                 urlnr = Integer.toString(++urls).toString();
                 final Properties p = new Properties();
                 p.put("name", urlnr);
-                anchors.put(new MultiProtocolURI(url), p);
+                anchors.put(new DigestURI(url), p);
                 contents = contents.substring(0,urlStart)+contents.substring(urlEnd);
             }
 
@@ -111,17 +111,17 @@ public class swfParser extends AbstractParser implements Parser {
                     this,
                     null,
                     null,          //keywords
-                      ((contents.length() > 80)? contents.substring(0, 80):contents.trim()).
+                    singleList(((contents.length() > 80)? contents.substring(0, 80):contents.trim()).
                           replaceAll("\r\n"," ").
                           replaceAll("\n"," ").
                           replaceAll("\r"," ").
-                          replaceAll("\t"," "), // title
+                          replaceAll("\t"," ")), // title
                     "", // TODO: AUTHOR
                     "",
                     sections,     // an array of section headlines
                     abstrct,     // an abstract
                     0.0f, 0.0f,
-                    UTF8.getBytes(contents),     // the parsed document text
+                    contents,     // the parsed document text
                     anchors,      // a map of extracted anchors
                     null,
                     null,
@@ -131,7 +131,7 @@ public class swfParser extends AbstractParser implements Parser {
 
             // if an unexpected error occures just log the error and raise a new Parser.Failure
             final String errorMsg = "Unable to parse the swf document '" + location + "':" + e.getMessage();
-            this.log.logSevere(errorMsg);
+            //AbstractParser.log.logSevere(errorMsg);
             throw new Parser.Failure(errorMsg, location);
         }
     }

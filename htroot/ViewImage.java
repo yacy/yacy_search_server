@@ -32,23 +32,27 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Map;
 
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.ConcurrentARC;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.URLLicense;
 import net.yacy.document.ImageParser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.workflow.WorkflowProcessor;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class ViewImage {
 
-    private static Map<String, Image> iconcache = new ConcurrentARC<String, Image>(1000, Math.max(10, Math.min(32, Runtime.getRuntime().availableProcessors() * 2)));
+    private static Map<String, Image> iconcache = new ConcurrentARC<String, Image>(1000, Math.max(10, Math.min(32, WorkflowProcessor.availableCPU * 2)));
     private static String defaulticon = "htroot/env/grafics/dfltfvcn.ico";
     private static byte[] defaulticonb;
     static {
@@ -78,8 +82,13 @@ public class ViewImage {
         }
 
         if ((url == null) && (urlLicense.length() > 0)) {
-            url = sb.licensedURLs.releaseLicense(urlLicense);
-            urlString = (url == null) ? null : url.toNormalform(true, true);
+            urlString = URLLicense.releaseLicense(urlLicense);
+            try {
+                url = new DigestURI(urlString);
+            } catch (final MalformedURLException e1) {
+                url = null;
+                urlString = null;
+            }
         }
 
         if (urlString == null) return null;
@@ -95,9 +104,10 @@ public class ViewImage {
         if (image == null) {
             byte[] resourceb = null;
             if (url != null) try {
-                resourceb = sb.loader.loadContent(sb.loader.request(url, false, true), CacheStrategy.IFEXIST);
+                ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+                resourceb = sb.loader.loadContent(sb.loader.request(url, false, true), CacheStrategy.IFEXIST, BlacklistType.SEARCH, agent);
             } catch (final IOException e) {
-                Log.logFine("ViewImage", "cannot load: " + e.getMessage());
+                ConcurrentLog.fine("ViewImage", "cannot load: " + e.getMessage());
             }
             byte[] imgb = null;
             if (resourceb == null) {

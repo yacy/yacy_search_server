@@ -65,7 +65,7 @@ public class tarParser extends AbstractParser implements Parser {
 
         final List<Document> docacc = new ArrayList<Document>();
         Document[] subDocs = null;
-        final String ext = url.getFileExtension().toLowerCase();
+        final String ext = MultiProtocolURI.getFileExtension(url.getFileName()).toLowerCase();
         if (ext.equals("gz") || ext.equals("tgz")) {
             try {
                 source = new GZIPInputStream(source);
@@ -90,16 +90,16 @@ public class tarParser extends AbstractParser implements Parser {
                 try {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
                     FileUtils.copy(tis, tmp, entry.getSize());
-                    subDocs = TextParser.parseSource(new DigestURI(MultiProtocolURI.newURL(url,"#" + name)), mime, null, tmp);
+                    subDocs = TextParser.parseSource(DigestURI.newURL(url, "#" + name), mime, null, tmp);
                     if (subDocs == null) continue;
                     for (final Document d: subDocs) docacc.add(d);
                 } catch (final Parser.Failure e) {
-                    this.log.logWarning("tar parser entry " + name + ": " + e.getMessage());
+                    AbstractParser.log.warn("tar parser entry " + name + ": " + e.getMessage());
                 } finally {
                     if (tmp != null) FileUtils.deletedelete(tmp);
                 }
             } catch (final IOException e) {
-                this.log.logWarning("tar parser:" + e.getMessage());
+                AbstractParser.log.warn("tar parser:" + e.getMessage());
                 break;
             }
         }
@@ -108,16 +108,19 @@ public class tarParser extends AbstractParser implements Parser {
 
     public final static boolean isTar(File f) {
         if (!f.exists() || f.length() < 0x105) return false;
+        RandomAccessFile raf = null;
         try {
-            RandomAccessFile raf = new RandomAccessFile(f, "r");
+            raf = new RandomAccessFile(f, "r");
             raf.seek(0x101);
             byte[] b = new byte[5];
             raf.read(b);
             return MAGIC.equals(UTF8.String(b));
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             return false;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return false;
+        } finally {
+            if (raf != null) try {raf.close();} catch (final IOException e) {}
         }
     }
 }

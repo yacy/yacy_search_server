@@ -75,11 +75,10 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
   if (offset >= 0) document.getElementById("resultsOffset").firstChild.nodeValue = offset;
   if (itemscount >= 0) document.getElementById("itemscount").firstChild.nodeValue = itemscount;
   document.getElementById("totalcount").firstChild.nodeValue = totalcount;
-  if (document.getElementById("localResourceSize") == null) return;
-  document.getElementById("localResourceSize").firstChild.nodeValue = localResourceSize;
-  document.getElementById("remoteResourceSize").firstChild.nodeValue = remoteResourceSize;
-  document.getElementById("remoteIndexCount").firstChild.nodeValue = remoteIndexCount;
-  document.getElementById("remotePeerCount").firstChild.nodeValue = remotePeerCount;
+  if (document.getElementById("localResourceSize") != null) document.getElementById("localResourceSize").firstChild.nodeValue = localResourceSize;
+  if (document.getElementById("remoteResourceSize") != null) document.getElementById("remoteResourceSize").firstChild.nodeValue = remoteResourceSize;
+  if (document.getElementById("remoteIndexCount") != null) document.getElementById("remoteIndexCount").firstChild.nodeValue = remoteIndexCount;
+  if (document.getElementById("remotePeerCount") != null) document.getElementById("remotePeerCount").firstChild.nodeValue = remotePeerCount;
   document.getElementById("resNav").firstChild.nodeValue = "X";
   // compose page navigation
 
@@ -93,7 +92,7 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
   	resnav += ("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
   }
   
-  numberofpages = Math.min(10, 1 + ((totalcount - 1) / itemsperpage));
+  numberofpages = Math.floor(Math.min(10, 1 + ((totalcount.replace(/\./g,'') - 1) / itemsperpage)));
   if (!numberofpages) numberofpages = 10;
   for (i = 0; i < numberofpages; i++) {
       if (i == thispage) {
@@ -109,16 +108,18 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
          resnav += (i + 1);
          resnav += (".gif\" alt=\"page");
          resnav += (i + 1);
-         resnav += ("\" width=\"16\" height=\"16\" /></a>&nbsp;");
+         resnav += ("\" title=\"use the TAB key to navigate to next page\" width=\"16\" height=\"16\" /></a>&nbsp;");
       }
   }
   if (thispage >= numberofpages) {
-  	resnav += ("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" />");
+  	resnav += ("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" title=\"use the TAB key to navigate to next page\" width=\"16\" height=\"16\" />");
   } else {
       resnav += ("<a id=\"nextpage\" href=\"");
       resnav += (navurlbase + "&amp;startRecord=" + ((thispage + 1) * itemsperpage));
-      resnav += ("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
+      resnav += ("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" title=\"use the TAB key to navigate to next page\" width=\"16\" height=\"16\" /></a>");
   }
  
   document.getElementById("resNav").innerHTML = resnav;
 }
+
+

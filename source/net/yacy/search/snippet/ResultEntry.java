@@ -32,25 +32,28 @@ import java.util.Date;
 import java.util.List;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.util.ByteArray;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.Reference;
-import net.yacy.kelondro.util.ByteArray;
+import net.yacy.kelondro.util.Bitfield;
 import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
 import net.yacy.search.index.Segment;
+import net.yacy.search.schema.CollectionSchema;
 
 
 public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEntry> {
 
     // payload objects
-    private final URIMetadataRow urlentry;
+    private final URIMetadataNode urlentry;
     private String alternative_urlstring;
     private String alternative_urlname;
     private final TextSnippet textSnippet;
@@ -58,21 +61,21 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     private final Segment indexSegment;
 
     // statistic objects
-    public long dbRetrievalTime, snippetComputationTime, ranking;
+    public long snippetComputationTime;
 
-    public ResultEntry(final URIMetadataRow urlentry,
+    public ResultEntry(final URIMetadataNode urlentry,
                        final Segment indexSegment,
                        SeedDB peers,
                        final TextSnippet textSnippet,
                        final List<MediaSnippet> mediaSnippets,
-                       final long dbRetrievalTime, final long snippetComputationTime) {
+                       final long snippetComputationTime) {
         this.urlentry = urlentry;
+        this.urlentry.getDocument().setField(CollectionSchema.text_t.getSolrFieldName(), ""); // clear the text field which eats up most of the space; it was used for snippet computation which is in a separate field here
         this.indexSegment = indexSegment;
         this.alternative_urlstring = null;
         this.alternative_urlname = null;
         this.textSnippet = textSnippet;
         this.mediaSnippets = mediaSnippets;
-        this.dbRetrievalTime = dbRetrievalTime;
         this.snippetComputationTime = snippetComputationTime;
         final String host = urlentry.url().getHost();
         if (host != null && host.endsWith(".yacyh")) {
@@ -80,26 +83,26 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
             int p = host.indexOf('.');
             final String hash = Seed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));
             final Seed seed = peers.getConnected(hash);
-            final String filename = urlentry.url().getFile();
+            final String path = urlentry.url().getFile();
             String address = null;
             if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
                 // seed is not known from here
                 try {
-                    indexSegment.termIndex().remove(
+                    if (indexSegment.termIndex() != null) indexSegment.termIndex().remove(
                         Word.words2hashesHandles(Condenser.getWords(
                             ("yacyshare " +
-                             filename.replace('?', ' ') +
+                             path.replace('?', ' ') +
                              " " +
                              urlentry.dc_title()), null).keySet()),
                              urlentry.hash());
-                } catch (IOException e) {
-                    Log.logException(e);
+                } catch (final IOException e) {
+                    ConcurrentLog.logException(e);
                 }
-                indexSegment.urlMetadata().remove(urlentry.hash()); // clean up
+                indexSegment.fulltext().remove(urlentry.hash()); // clean up
                 throw new RuntimeException("index void");
             }
-            this.alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + filename;
-            this.alternative_urlname = "http://share." + seed.getName() + ".yacy" + filename;
+            this.alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + path;
+            this.alternative_urlname = "http://share." + seed.getName() + ".yacy" + path;
             if ((p = this.alternative_urlname.indexOf('?')) > 0) this.alternative_urlname = this.alternative_urlname.substring(0, p);
         }
     }
@@ -119,6 +122,9 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         ResultEntry other = (ResultEntry) obj;
         return Base64Order.enhancedCoder.equal(this.urlentry.hash(), other.urlentry.hash());
     }
+    public URIMetadataNode getNode() {
+        return this.urlentry;
+    }
     public byte[] hash() {
         return this.urlentry.hash();
     }
@@ -129,10 +135,10 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         return this.urlentry.flags();
     }
     public String urlstring() {
-        return (this.alternative_urlstring == null) ? this.urlentry.url().toNormalform(false, true) : this.alternative_urlstring;
+        return (this.alternative_urlstring == null) ? this.urlentry.url().toNormalform(true) : this.alternative_urlstring;
     }
     public String urlname() {
-        return (this.alternative_urlname == null) ? MultiProtocolURI.unescape(this.urlentry.url().toNormalform(false, true)) : this.alternative_urlname;
+        return (this.alternative_urlname == null) ? MultiProtocolURI.unescape(this.urlentry.url().toNormalform(true)) : this.alternative_urlname;
     }
     public String title() {
         return this.urlentry.dc_title();
@@ -162,7 +168,8 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         return this.urlentry.size();
     }
     public int referencesCount() {
-    	return this.indexSegment.urlCitation().count(this.urlentry.hash());
+        // urlCitationIndex index might be null (= configuration option)
+    	return this.indexSegment.urlCitation() != null ? this.indexSegment.urlCitation().count(this.urlentry.hash()) : 0;
     }
     public int llocal() {
     	return this.urlentry.llocal();
@@ -188,10 +195,13 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     public double lon() {
         return this.urlentry.lon();
     }
-    public WordReferenceVars word() {
+    public WordReference word() {
         final Reference word = this.urlentry.word();
-        assert word instanceof WordReferenceVars;
-        return (WordReferenceVars) word;
+        if (word == null) return null;
+        if (word instanceof WordReferenceVars) return (WordReferenceVars) word;
+        if (word instanceof WordReferenceRow) return (WordReferenceRow) word;
+        assert word instanceof WordReferenceRow || word instanceof WordReferenceVars : word == null ? "word = null" : "type = " + word.getClass().getCanonicalName();
+        return null;
     }
     public boolean hasTextSnippet() {
         return (this.textSnippet != null) && (!this.textSnippet.getErrorCode().fail());
@@ -213,5 +223,8 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     @Override
     public int compare(ResultEntry o1, ResultEntry o2) {
         return Base64Order.enhancedCoder.compare(o1.urlentry.hash(), o2.urlentry.hash());
+    }
+    public long ranking() {
+        return this.urlentry.ranking();
     }
 }

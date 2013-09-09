@@ -22,7 +22,7 @@
     ::
     <p class="error">Passwords do not match.</p>
     ::
-    <p class="error">Username too short. Username must be >= 4 Characters.</p>
+    <p class="error">Username too short. Username must be &gt;= 4 Characters.</p>
     #(/error)#
     #(passwordNotSetWarning)#::<div class="error">No password is set for the administration account. Please define a password for the admin account.</div>#(/passwordNotSetWarning)#
 
@@ -49,8 +49,9 @@
               <dd><input type="password" name="adminpw1" id="adminpw1" value="" size="16" maxlength="1024" onFocus="document.getElementById('access_account').checked = true;"/></dd>
               <dt><label for="adminpw2">Repeat Peer Password:</label></dt>
               <dd><input type="password" name="adminpw2" id="adminpw2" value="" size="16" maxlength="1024" onFocus="document.getElementById('access_account').checked = true;"/></dd>
+              <dt></dt>
+              <dd><input type="submit" name="setAdmin" value="Define Administrator" class="submitready"/></dd>
             </dl>
-          <input type="submit" name="setAdmin" value="Define Administrator" />
           </fieldset>
       </form>
     </fieldset>
@@ -68,8 +69,8 @@
           </dd>
           <dt>&nbsp;</dt>
           <dd>
-            <input type="submit" name="change_user" value="Edit User" />
-            <input type="submit" name="delete_user" value="Delete User" />
+            <input type="submit" name="change_user" value="Edit User" class="submitready"/>
+            <input type="submit" name="delete_user" value="Delete User" class="submitready"/>
           </dd>
         </dl>
       </fieldset>
@@ -103,7 +104,7 @@
           <dt><label for="tused">Time used</label>:</dt>
           <dd><input type="text" id="tused" name="timeused" value="#[timeused]#" /></dd>
           <dt>&nbsp;</dt>
-          <dd><input type="submit" name="change" value="Save User" /></dd>
+          <dd><input type="submit" name="change" value="Save User" class="submitready"/></dd>
         </dl>
       </fieldset>
     </form>

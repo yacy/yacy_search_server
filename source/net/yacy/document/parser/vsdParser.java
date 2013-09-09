@@ -28,13 +28,14 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 
 import org.apache.poi.hdgf.extractor.VisioTextExtractor;
 import org.apache.poi.hpsf.SummaryInformation;
@@ -63,6 +64,7 @@ public class vsdParser extends AbstractParser implements Parser {
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */
+    @Override
     public Document[] parse(final DigestURI location, final String mimeType, final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
 
@@ -75,8 +77,8 @@ public class vsdParser extends AbstractParser implements Parser {
                 final VisioTextExtractor extractor = new VisioTextExtractor(source);
             	contents = extractor.getText();
                 summary = extractor.getSummaryInformation();
-            } catch (Exception e) {
-            	Log.logWarning("vsdParser", e.getMessage());
+            } catch (final Exception e) {
+            	ConcurrentLog.warn("vsdParser", e.getMessage());
             }
 
             String author = null;
@@ -90,16 +92,10 @@ public class vsdParser extends AbstractParser implements Parser {
                 title = summary.getTitle();
             }
 
-            String abstrct = null;
-            abstrct = ((contents.length() > 80)? contents.substring(0, 80) : contents.trim()).
-                          replaceAll("\r\n"," ").
-                          replaceAll("\n"," ").
-                          replaceAll("\r"," ").
-                          replaceAll("\t"," ");
+            List<String> abstrct = new ArrayList<String>();
+            if (contents.length() > 0) abstrct.add(((contents.length() > 80) ? contents.substring(0, 80) : contents.trim()).replaceAll("\r\n"," ").replaceAll("\n"," ").replaceAll("\r"," ").replaceAll("\t"," "));
 
-            if (title == null) {
-                title = abstrct;
-            }
+            if (title == null) title = location.toNormalform(true);
 
            // As the result of parsing this function must return a plasmaParserDocument object
             return new Document[]{new Document(
@@ -109,13 +105,13 @@ public class vsdParser extends AbstractParser implements Parser {
                     this,
                     null,         // language
                     keywords,
-                    title,
+                    singleList(title),
                     author,
                     "",
                     null,         // an array of section headlines
                     abstrct,      // an abstract
                     0.0f, 0.0f,
-                    UTF8.getBytes(contents),     // the parsed document text
+                    contents,     // the parsed document text
                     null,         // a map of extracted anchors
                     null,
                     null,         // a treeset of image URLs
@@ -125,13 +121,13 @@ public class vsdParser extends AbstractParser implements Parser {
 
             // if an unexpected error occures just log the error and raise a new ParserException
             final String errorMsg = "Unable to parse the vsd document '" + location + "':" + e.getMessage();
-            this.log.logSevere(errorMsg);
+            AbstractParser.log.severe(errorMsg);
             throw new Parser.Failure(errorMsg, location);
         } finally {
             if (theDoc == null) {
                 // if an unexpected error occures just log the error and raise a new Parser.Failure
                 final String errorMsg = "Unable to parse the vsd document '" + location + "': possibly out of memory";
-                this.log.logSevere(errorMsg);
+                AbstractParser.log.severe(errorMsg);
                 throw new Parser.Failure(errorMsg, location);
             }
         }

@@ -24,17 +24,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.federate.opensearch.SRURSSConnector;
+import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
 import net.yacy.document.LibraryProvider;
-import net.yacy.document.geolocation.GeoLocation;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class yacysearch_location {
 
@@ -104,7 +104,7 @@ public class yacysearch_location {
                     prop.put("kml_placemark_" + placemarkCounter + "_author", message.getAuthor());
                     prop.put("kml_placemark_" + placemarkCounter + "_copyright", message.getCopyright());
                     prop.put("kml_placemark_" + placemarkCounter + "_subject", message.getSubject());
-                    prop.put("kml_placemark_" + placemarkCounter + "_description", message.getDescription());
+                    prop.put("kml_placemark_" + placemarkCounter + "_description", message.getDescriptions().size() > 0 ? message.getDescriptions().get(0) : "");
                     prop.put("kml_placemark_" + placemarkCounter + "_date", message.getPubDate());
                     prop.putXML("kml_placemark_" + placemarkCounter + "_url", message.getLink());
                     prop.put("kml_placemark_" + placemarkCounter + "_pointname", message.getTitle());
@@ -127,7 +127,7 @@ public class yacysearch_location {
 
             prop.put("kml_date822", HeaderFramework.formatRFC1123(new Date()));
             prop.put("kml_promoteSearchPageGreeting", promoteSearchPageGreeting);
-            prop.put("kml_rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
+            prop.put("kml_rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.png");
             prop.put("kml_searchBaseURL", "http://" + hostName + "/yacysearch_location.rss");
             prop.putXML("kml_rss_query", originalquerystring);
             prop.put("kml_rss_queryenc", originalquerystring.replace(' ', '+'));

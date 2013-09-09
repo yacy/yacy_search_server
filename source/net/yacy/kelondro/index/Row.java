@@ -27,6 +27,7 @@
 
 package net.yacy.kelondro.index;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -39,14 +40,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.order.AbstractOrder;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
+import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.order.Order;
+import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Bitfield;
-import net.yacy.kelondro.order.NaturalOrder;
-import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.kelondroException;
 
 
@@ -172,7 +173,7 @@ public final class Row implements Serializable {
         try {
             assert (this.objectOrder.wellformed(rowinstance, start, this.primaryKeyLength)) : "rowinstance = " + UTF8.String(rowinstance);
         } catch (final Throwable e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
         // this method offers the option to clone the content
         // this is necessary if it is known that the underlying byte array may change and therefore
@@ -285,7 +286,7 @@ public final class Row implements Serializable {
 
         public Entry(String external, final boolean decimalCardinal) {
             // parse external form
-            if (external.length() > 0 && external.charAt(0) == '{') external = external.substring(1, external.length() - 1);
+            if (!external.isEmpty() && external.charAt(0) == '{') external = external.substring(1, external.length() - 1);
             //final String[] elts = commaPattern.split(external);
             final StringTokenizer st = new StringTokenizer(external, ",");
             if (Row.this.nickref == null) genNickRef();
@@ -311,7 +312,7 @@ public final class Row implements Serializable {
                             try {
                                 setCol(col.encoder, this.offset + clstrt, col.cellwidth, NumberTools.parseLongDecSubstring(token, p + 1));
                             } catch (final NumberFormatException e) {
-                                Log.logSevere("kelondroRow", "NumberFormatException for celltype_cardinal, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
+                                ConcurrentLog.severe("kelondroRow", "NumberFormatException for celltype_cardinal, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
                                 setCol(col.encoder, this.offset + clstrt, col.cellwidth, 0);
                             }
                         } else if ((decimalCardinal) && (col.celltype == Column.celltype_binary)) {
@@ -319,7 +320,7 @@ public final class Row implements Serializable {
                             try {
                                 setCol(clstrt, col.cellwidth, new byte[]{(byte) NumberTools.parseIntDecSubstring(token, p + 1)});
                             } catch (final NumberFormatException e) {
-                                Log.logSevere("kelondroRow", "NumberFormatException for celltype_binary, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
+                                ConcurrentLog.severe("kelondroRow", "NumberFormatException for celltype_binary, celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + token.substring(p + 1).trim() + "'");
                                 setCol(clstrt, col.cellwidth, new byte[]{0});
                             }
                         } else if ((decimalCardinal) && (col.celltype == Column.celltype_bitfield)) {
@@ -455,6 +456,8 @@ public final class Row implements Serializable {
                 break;
             case Column.encoder_bytes:
                 throw new kelondroException("ROW", "setColLong of celltype bytes not applicable");
+            default:
+                throw new kelondroException("ROW", "setColLong has celltype none, no encoder given");
             }
         }
 
@@ -472,8 +475,9 @@ public final class Row implements Serializable {
                 l = c + NaturalOrder.decodeLong(this.rowinstance, this.offset + colstrt, cellwidth);
                 NaturalOrder.encodeLong(l, this.rowinstance, this.offset + colstrt, cellwidth);
                 return l;
+            default:
+                throw new kelondroException("ROW", "addCol did not find appropriate encoding");
             }
-            throw new kelondroException("ROW", "addCol did not find appropriate encoding");
         }
 
         public final byte[] getPrimaryKeyBytes() {
@@ -559,8 +563,9 @@ public final class Row implements Serializable {
                 return NaturalOrder.decodeLong(this.rowinstance, this.offset + clstrt, length);
             case Column.encoder_bytes:
                 throw new kelondroException("ROW", "getColLong of celltype bytes not applicable");
+            default:
+                throw new kelondroException("ROW", "getColLong did not find appropriate encoding");
             }
-            throw new kelondroException("ROW", "getColLong did not find appropriate encoding");
         }
 
         public final byte getColByte(final int column) {
@@ -619,7 +624,9 @@ public final class Row implements Serializable {
             }
             if (includeBraces) bb.append('}');
             //System.out.println("DEBUG-ROW " + bb.toString());
-            return bb.toString();
+            String bbs = bb.toString();
+            try {bb.close();} catch (final IOException e) {}
+            return bbs;
         }
 
         @Override

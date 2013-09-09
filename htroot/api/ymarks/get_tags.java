@@ -7,14 +7,14 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.UserDB;
+import net.yacy.data.ymark.YMarkEntry;
+import net.yacy.data.ymark.YMarkTables;
+import net.yacy.data.ymark.YMarkTag;
+import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.search.Switchboard;
-import de.anomic.data.UserDB;
-import de.anomic.data.ymark.YMarkEntry;
-import de.anomic.data.ymark.YMarkTables;
-import de.anomic.data.ymark.YMarkTag;
-import de.anomic.data.ymark.YMarkUtil;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class get_tags {
 
@@ -46,12 +46,8 @@ public class get_tags {
             YMarkTag t;
 
         	if (post != null && post.containsKey(TAG) && !post.get(TAG).isEmpty()) {
-    	    	final String[] tagArray = YMarkUtil.cleanTagsString(post.get(TAG)).split(YMarkUtil.TAGS_SEPARATOR);
-    	    	try {
-					tags = new TreeSet<YMarkTag>(sb.tables.bookmarks.getTags(sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray)).values());
-				} catch (final IOException e) {
-					return prop;
-				}
+    	    	final String tagsString = YMarkUtil.cleanTagsString(post.get(TAG));
+    	    	tags = new TreeSet<YMarkTag>(sb.tables.bookmarks.getTags(sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagsString)).values());
         	} else {
         		try {
 					tags = new TreeSet<YMarkTag>(sb.tables.bookmarks.getTags(bmk_user).values());

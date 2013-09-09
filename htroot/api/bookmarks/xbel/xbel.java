@@ -1,16 +1,17 @@
 
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.BookmarkHelper;
+import net.yacy.data.BookmarksDB;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.search.Switchboard;
-import de.anomic.data.BookmarkHelper;
-import de.anomic.data.BookmarksDB;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class xbel {
 
@@ -21,7 +22,7 @@ public class xbel {
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
-    	int count = 0;;
+    	int count = 0;
     	String root = "/";
     	int style = 0;
 
@@ -106,36 +107,39 @@ public class xbel {
     	BookmarksDB.Bookmark bookmark;
     	Date date;
     	while(bit.hasNext()){
-			bookmark=switchboard.bookmarksDB.getBookmark(bit.next());
-			date=new Date(bookmark.getTimeStamp());
-			prop.put("xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
-					+ "\" href=\"" + CharacterCoding.unicode2xml(bookmark.getUrl(), true)
-					+ "\" added=\"" + CharacterCoding.unicode2xml(ISO8601Formatter.FORMATTER.format(date), true)+"\">");
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "<title>");
-    		count++;
-    		prop.putXML("xbel_"+count+"_elements", bookmark.getTitle());
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "</title>");
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "<info>");
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "<metadata owner=\"Mozilla\" ShortcutURL=\""
-				+ CharacterCoding.unicode2xml(bookmark.getTagsString().replaceAll("/.*,", "").toLowerCase(), true)
-				+ "\"/>");
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "<metadata owner=\"YaCy\" public=\""+Boolean.toString(bookmark.getPublic())+"\"/>");
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "</info>");
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "<desc>");
-    		count++;
-    		prop.putXML("xbel_"+count+"_elements", bookmark.getDescription());
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "</desc>");
-    		count++;
-    		prop.put("xbel_"+count+"_elements", "</bookmark>");
-    		count++;
+			try {
+                bookmark=switchboard.bookmarksDB.getBookmark(bit.next());
+                date=new Date(bookmark.getTimeStamp());
+                prop.put("xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
+                        + "\" href=\"" + CharacterCoding.unicode2xml(bookmark.getUrl(), true)
+                        + "\" added=\"" + CharacterCoding.unicode2xml(ISO8601Formatter.FORMATTER.format(date), true)+"\">");
+                count++;
+                prop.put("xbel_"+count+"_elements", "<title>");
+                count++;
+                prop.putXML("xbel_"+count+"_elements", bookmark.getTitle());
+                count++;
+                prop.put("xbel_"+count+"_elements", "</title>");
+                count++;
+                prop.put("xbel_"+count+"_elements", "<info>");
+                count++;
+                prop.put("xbel_"+count+"_elements", "<metadata owner=\"Mozilla\" ShortcutURL=\""
+                    + CharacterCoding.unicode2xml(bookmark.getTagsString().replaceAll("/.*,", "").toLowerCase(), true)
+                    + "\"/>");
+                count++;
+                prop.put("xbel_"+count+"_elements", "<metadata owner=\"YaCy\" public=\""+Boolean.toString(bookmark.getPublic())+"\"/>");
+                count++;
+                prop.put("xbel_"+count+"_elements", "</info>");
+                count++;
+                prop.put("xbel_"+count+"_elements", "<desc>");
+                count++;
+                prop.putXML("xbel_"+count+"_elements", bookmark.getDescription());
+                count++;
+                prop.put("xbel_"+count+"_elements", "</desc>");
+                count++;
+                prop.put("xbel_"+count+"_elements", "</bookmark>");
+                count++;
+            } catch (final IOException e) {
+            }
 		}
     	return count;
     }

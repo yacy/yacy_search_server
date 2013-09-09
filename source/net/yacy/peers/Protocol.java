@@ -45,24 +45,21 @@ package net.yacy.peers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
+import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 
 import net.yacy.migration;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Classification;
 import net.yacy.cora.document.JSONArray;
 import net.yacy.cora.document.JSONException;
 import net.yacy.cora.document.JSONObject;
@@ -72,24 +69,33 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.federate.opensearch.SRURSSConnector;
+import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
+import net.yacy.cora.federate.solr.connector.SolrConnector;
+import net.yacy.cora.federate.solr.instance.RemoteInstance;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.sorting.ClusteredScoreMap;
+import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.cora.storage.HandleSet;
+import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.data.ResultURLs;
+import net.yacy.crawler.data.ResultURLs.EventOrigin;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Bitfield;
-import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
-import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.peers.graphics.WebStructureGraph;
@@ -101,23 +107,26 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import net.yacy.search.query.QueryParams;
-import net.yacy.search.query.RWIProcess;
 import net.yacy.search.query.SearchEvent;
-import net.yacy.search.ranking.RankingProfile;
+import net.yacy.search.query.SecondarySearchSuperviser;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.snippet.TextSnippet;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.utils.crypt;
 
 import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.FacetField.Count;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrInputDocument;
 
-import de.anomic.crawler.ResultURLs;
-import de.anomic.crawler.ResultURLs.EventOrigin;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.tools.crypt;
 
-public final class Protocol
-{
+public final class Protocol {
 
     private static byte[] postToFile(
         final Seed target,
@@ -142,7 +151,8 @@ public final class Protocol
         final String filename,
         final Map<String, ContentBody> parts,
         final int timeout) throws IOException {
-        final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
+        final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
+        httpClient.setTimout(timeout);
         return httpClient.POSTbytes(
             new MultiProtocolURI("http://" + targetAddress + "/yacy/" + filename),
             Seed.b64Hash2hexHash(targetPeerHash) + ".yacyh",
@@ -173,6 +183,7 @@ public final class Protocol
         Map<String, String> result = null;
         final String salt = crypt.randomSalt();
         long responseTime = Long.MAX_VALUE;
+        byte[] content = null;
         try {
             // generate request
             final Map<String, ContentBody> parts =
@@ -183,32 +194,23 @@ public final class Protocol
             // send request
             final long start = System.currentTimeMillis();
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/hello.html"), 30000, yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", parts);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 30000);
-            final byte[] content =
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 30000);
+            content =
                 httpClient.POSTbytes(
                     new MultiProtocolURI("http://" + address + "/yacy/hello.html"),
                     Seed.b64Hash2hexHash(otherHash) + ".yacyh",
                     parts,
                     false);
             responseTime = System.currentTimeMillis() - start;
-            Network.log.logInfo("yacyClient.hello thread '"
-                + Thread.currentThread().getName()
-                + "' contacted peer at "
-                + address
-                + ", received "
-                + ((content == null) ? "null" : content.length)
-                + " bytes, time = "
-                + responseTime
-                + " milliseconds");
             result = FileUtils.table(content);
-        } catch ( final Exception e ) {
+        } catch (final Exception e ) {
             if ( Thread.currentThread().isInterrupted() ) {
-                Network.log.logInfo("yacyClient.hello thread '"
+                Network.log.info("yacyClient.hello thread '"
                     + Thread.currentThread().getName()
                     + "' interrupted.");
                 return -1;
             }
-            Network.log.logInfo("yacyClient.hello thread '"
+            Network.log.info("yacyClient.hello thread '"
                 + Thread.currentThread().getName()
                 + "', peer "
                 + address
@@ -218,18 +220,27 @@ public final class Protocol
             result = null;
         }
 
-        if ( result == null ) {
-            Network.log.logInfo("yacyClient.hello result error: "
+        if (result == null || result.size() == 0) {
+            Network.log.info("yacyClient.hello result error: "
                 + ((result == null) ? "result null" : ("result=" + result.toString())));
             return -1;
         }
+        Network.log.info("yacyClient.hello thread '"
+                        + Thread.currentThread().getName()
+                        + "' contacted peer at "
+                        + address
+                        + ", received "
+                        + ((content == null) ? "null" : content.length)
+                        + " bytes, time = "
+                        + responseTime
+                        + " milliseconds");
 
         // check consistency with expectation
         Seed otherPeer = null;
         String seed;
         if ( (otherHash != null) && (otherHash.length() > 0) && ((seed = result.get("seed0")) != null) ) {
             if ( seed.length() > Seed.maxsize ) {
-                Network.log.logInfo("hello/client 0: rejected contacting seed; too large ("
+                Network.log.info("hello/client 0: rejected contacting seed; too large ("
                     + seed.length()
                     + " > "
                     + Seed.maxsize
@@ -240,17 +251,19 @@ public final class Protocol
                     if ( p < 0 ) {
                         return -1;
                     }
-                    final String host = Domains.dnsResolve(address.substring(0, p)).getHostAddress();
-                    otherPeer = Seed.genRemoteSeed(seed, salt, false, host);
+                    String h = address.substring(0, p);
+                    InetAddress ie = Domains.dnsResolve(h);
+                    final String host = ie == null ? h : ie.getHostAddress(); // hack to prevent NPEs
+                    otherPeer = Seed.genRemoteSeed(seed, false, host);
                     if ( !otherPeer.hash.equals(otherHash) ) {
-                        Network.log.logInfo("yacyClient.hello: consistency error: otherPeer.hash = "
+                        Network.log.info("yacyClient.hello: consistency error: otherPeer.hash = "
                             + otherPeer.hash
                             + ", otherHash = "
                             + otherHash);
                         return -1; // no success
                     }
-                } catch ( final IOException e ) {
-                    Network.log.logInfo("yacyClient.hello: consistency error: other seed bad:"
+                } catch (final IOException e ) {
+                    Network.log.info("yacyClient.hello: consistency error: other seed bad:"
                         + e.getMessage()
                         + ", seed="
                         + seed);
@@ -272,7 +285,8 @@ public final class Protocol
         } else {
             final String myIP = result.get("yourip");
             final String properIP = Seed.isProperIP(myIP);
-            mySeed.setFlagRootNode(mytype.equals(Seed.PEERTYPE_SENIOR) && responseTime < 1000 && Domains.isThisHostIP(myIP));
+            mySeed.setFlagRootNode((mytype.equals(Seed.PEERTYPE_SENIOR) || mytype.equals(Seed.PEERTYPE_PRINCIPAL)) && responseTime < 1000 && Domains.isThisHostIP(myIP) &&
+                    Switchboard.getSwitchboard().index.fulltext().connectedLocalSolr()); // RootNode may receive direct Solr queries, set flag only if available
             if ( properIP == null ) {
                 mySeed.setIP(myIP);
             }
@@ -296,13 +310,13 @@ public final class Protocol
          * If this is true we try to reconnect the sch channel to the remote server now.
          */
         if ( mytype.equalsIgnoreCase(Seed.PEERTYPE_JUNIOR) ) {
-            Network.log.logInfo("yacyClient.hello: Peer '"
+            Network.log.info("yacyClient.hello: Peer '"
                 + ((otherPeer == null) ? "unknown" : otherPeer.getName())
                 + "' reported us as junior.");
         } else if ( (mytype.equalsIgnoreCase(Seed.PEERTYPE_SENIOR))
             || (mytype.equalsIgnoreCase(Seed.PEERTYPE_PRINCIPAL)) ) {
             if ( Network.log.isFine() ) {
-                Network.log.logFine("yacyClient.hello: Peer '"
+                Network.log.fine("yacyClient.hello: Peer '"
                     + ((otherPeer == null) ? "unknown" : otherPeer.getName())
                     + "' reported us as "
                     + mytype
@@ -311,7 +325,7 @@ public final class Protocol
         } else {
             // wrong type report
             if ( Network.log.isFine() ) {
-                Network.log.logFine("yacyClient.hello: Peer '"
+                Network.log.fine("yacyClient.hello: Peer '"
                     + ((otherPeer == null) ? "unknown" : otherPeer.getName())
                     + "' reported us as "
                     + mytype
@@ -325,7 +339,7 @@ public final class Protocol
 
         final String error = mySeed.isProper(true);
         if ( error != null ) {
-            Network.log.logWarning("yacyClient.hello mySeed error - not proper: " + error);
+            Network.log.warn("yacyClient.hello mySeed error - not proper: " + error);
             return -1;
         }
 
@@ -341,7 +355,7 @@ public final class Protocol
             // integrate new seed into own database
             // the first seed, "seed0" is the seed of the responding peer
             if ( seedStr.length() > Seed.maxsize ) {
-                Network.log.logInfo("hello/client: rejected contacting seed; too large ("
+                Network.log.info("hello/client: rejected contacting seed; too large ("
                     + seedStr.length()
                     + " > "
                     + Seed.maxsize
@@ -353,16 +367,18 @@ public final class Protocol
                         if ( p < 0 ) {
                             return -1;
                         }
-                        final String host = Domains.dnsResolve(address.substring(0, p)).getHostAddress();
-                        s = Seed.genRemoteSeed(seedStr, salt, false, host);
+                        InetAddress ia = Domains.dnsResolve(address.substring(0, p));
+                        if (ia == null) continue;
+                        final String host = ia.getHostAddress();
+                        s = Seed.genRemoteSeed(seedStr, false, host);
                     } else {
-                        s = Seed.genRemoteSeed(seedStr, salt, false, null);
+                        s = Seed.genRemoteSeed(seedStr, false, null);
                     }
                     if ( peerActions.peerArrival(s, (i == 1)) ) {
                         count++;
                     }
-                } catch ( final IOException e ) {
-                    Network.log.logInfo("hello/client: rejected contacting seed; bad ("
+                } catch (final IOException e ) {
+                    Network.log.info("hello/client: rejected contacting seed; bad ("
                         + e.getMessage()
                         + ")");
                 }
@@ -379,7 +395,44 @@ public final class Protocol
 
         return count;
     }
-
+    /*
+    private int readSeeds(String prefix) {
+        String seedStr;
+        while ( (seedStr = result.get("seed" + i++)) != null ) {
+            // integrate new seed into own database
+            // the first seed, "seed0" is the seed of the responding peer
+            if ( seedStr.length() > Seed.maxsize ) {
+                Network.log.logInfo("hello/client: rejected contacting seed; too large ("
+                    + seedStr.length()
+                    + " > "
+                    + Seed.maxsize
+                    + ")");
+            } else {
+                try {
+                    if ( i == 1 ) {
+                        final int p = address.indexOf(':');
+                        if ( p < 0 ) {
+                            return -1;
+                        }
+                        InetAddress ia = Domains.dnsResolve(address.substring(0, p));
+                        if (ia == null) continue;
+                        final String host = ia.getHostAddress();
+                        s = Seed.genRemoteSeed(seedStr, false, host);
+                    } else {
+                        s = Seed.genRemoteSeed(seedStr, false, null);
+                    }
+                    if ( peerActions.peerArrival(s, (i == 1)) ) {
+                        count++;
+                    }
+                } catch (final IOException e ) {
+                    Network.log.logInfo("hello/client: rejected contacting seed; bad ("
+                        + e.getMessage()
+                        + ")");
+                }
+            }
+        }
+    }
+*/
     public static Seed querySeed(final Seed target, final String seedHash) {
         // prepare request
         final String salt = crypt.randomSalt();
@@ -397,97 +450,40 @@ public final class Protocol
                 return null;
             }
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
-            return Seed.genRemoteSeed(result.get("response"), salt, false, target.getIP());
-        } catch ( final Exception e ) {
-            Network.log.logWarning("yacyClient.querySeed error:" + e.getMessage());
+            return Seed.genRemoteSeed(result.get("response"), false, target.getIP());
+        } catch (final Exception e ) {
+            Network.log.warn("yacyClient.querySeed error:" + e.getMessage());
             return null;
         }
     }
 
-    public static int queryRWICount(final Seed target, final String wordHash) {
+    public static long[] queryRWICount(final Seed target, final String wordHash) {
+        if (target == null) return new long[] {-1, -1};
+        
         // prepare request
         final String salt = crypt.randomSalt();
 
         // send request
         try {
-            final Map<String, ContentBody> parts =
-                basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
+            final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("object", UTF8.StringBody("rwicount"));
             parts.put("ttl", UTF8.StringBody("0"));
             parts.put("env", UTF8.StringBody(wordHash));
-            final byte[] content = postToFile(target, "query.html", parts, 5000);
+            final byte[] content = postToFile(target, "query.html", parts, 6000);
             final Map<String, String> result = FileUtils.table(content);
-
-            if ( result == null || result.isEmpty() ) {
-                return -1;
-            }
-            return Integer.parseInt(result.get("response"));
-        } catch ( final Exception e ) {
-            Network.log.logWarning("yacyClient.queryRWICount error:" + e.getMessage());
-            return -1;
-        }
-    }
-
-    /**
-     * check the status of a remote peer
-     *
-     * @param target
-     * @return an array of two long: [0] is the count of urls, [1] is a magic
-     */
-    public static long[] queryUrlCount(final Seed target) {
-        if ( target == null ) {
-            return new long[] {
-                -1, -1
-            };
-        }
-
-        // prepare request
-        final String salt = crypt.randomSalt();
-
-        // send request
-        try {
-            final Map<String, ContentBody> parts =
-                basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
-            parts.put("object", UTF8.StringBody("lurlcount"));
-            parts.put("ttl", UTF8.StringBody("0"));
-            parts.put("env", UTF8.StringBody(""));
-            final byte[] content = postToFile(target, "query.html", parts, 5000);
-            final Map<String, String> result = FileUtils.table(content);
-
-            if ( result == null || result.isEmpty() ) {
-                return new long[] {
-                    -1, -1
-                };
-            }
+            if (result == null || result.isEmpty()) return new long[] {-1, -1};
             final String resp = result.get("response");
-            if ( resp == null ) {
-                return new long[] {
-                    -1, -1
-                };
-            }
+            if (resp == null) return new long[] {-1, -1};
             String magic = result.get("magic");
-            if ( magic == null ) {
-                magic = "0";
-            }
+            if (magic == null) magic = "0";
             try {
-                return new long[] {
-                    Long.parseLong(resp), Long.parseLong(magic)
-                };
-            } catch ( final NumberFormatException e ) {
-                return new long[] {
-                    -1, -1
-                };
+                return new long[] {Long.parseLong(resp), Long.parseLong(magic)};
+            } catch (final NumberFormatException e ) {
+                return new long[] {-1, -1};
             }
-        } catch ( final IOException e ) {
-            if ( Network.log.isFine() ) {
-                Network.log.logFine("yacyClient.queryUrlCount error asking peer '"
-                    + target.getName()
-                    + "':"
-                    + e.toString());
-            }
-            return new long[] {
-                -1, -1
-            };
+        } catch (final Exception e ) {
+            if (Network.log.isFine()) Network.log.fine("yacyClient.queryRWICount error:" + e.getMessage());
+            return new long[] {-1, -1};
         }
     }
 
@@ -502,7 +498,7 @@ public final class Protocol
         }
         final int targetCount = Integer.parseInt(target.get(Seed.RCOUNT, "0"));
         if ( targetCount <= 0 ) {
-            Network.log.logWarning("yacyClient.queryRemoteCrawlURLs wrong peer '"
+            Network.log.warn("yacyClient.queryRemoteCrawlURLs wrong peer '"
                 + target.getName()
                 + "' selected: not enough links available");
             return null;
@@ -519,14 +515,14 @@ public final class Protocol
             parts.put("count", UTF8.StringBody(Integer.toString(maxCount)));
             parts.put("time", UTF8.StringBody(Long.toString(maxTime)));
             // final byte[] result = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/urls.xml"), (int) maxTime, target.getHexHash() + ".yacyh", parts);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), (int) maxTime);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, (int) maxTime);
             final byte[] result =
                 httpClient.POSTbytes(new MultiProtocolURI("http://"
                     + target.getClusterAddress()
                     + "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false);
             final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
             if ( reader == null ) {
-                Network.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '"
+                Network.log.warn("yacyClient.queryRemoteCrawlURLs failed asking peer '"
                     + target.getName()
                     + "': probably bad response from remote peer (1), reader == null");
                 target.put(Seed.RCOUNT, "0");
@@ -537,7 +533,7 @@ public final class Protocol
             final RSSFeed feed = reader.getFeed();
             if ( feed == null ) {
                 // case where the rss reader does not understand the content
-                Network.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '"
+                Network.log.warn("yacyClient.queryRemoteCrawlURLs failed asking peer '"
                     + target.getName()
                     + "': probably bad response from remote peer (2)");
                 //System.out.println("***DEBUG*** rss input = " + UTF8.String(result));
@@ -550,8 +546,8 @@ public final class Protocol
             target.put(Seed.RCOUNT, Integer.toString(Math.max(0, targetCount - feed.size())));
             seedDB.update(target.hash, target);
             return feed;
-        } catch ( final IOException e ) {
-            Network.log.logWarning("yacyClient.queryRemoteCrawlURLs error asking peer '"
+        } catch (final IOException e ) {
+            Network.log.warn("yacyClient.queryRemoteCrawlURLs error asking peer '"
                 + target.getName()
                 + "':"
                 + e.toString());
@@ -582,32 +578,19 @@ public final class Protocol
             null);
     }
 
-    @SuppressWarnings("unchecked")
-    public static int search(
-        final Seed mySeed,
+    protected static int primarySearch(
+        final SearchEvent event,
         final String wordhashes,
         final String excludehashes,
-        final String urlhashes,
-        final Pattern prefer,
-        final Pattern filter,
-        final Pattern snippet,
-        final String modifier,
         final String language,
-        final String sitehash,
-        final String authorhash,
         final String contentdom,
         final int count,
         final long time,
         final int maxDistance,
-        final boolean global,
         final int partitions,
         final Seed target,
-        final Segment indexSegment,
-        final RWIProcess containerCache,
-        final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
-        final Blacklist blacklist,
-        final RankingProfile rankingProfile,
-        final Bitfield constraint) {
+        final SecondarySearchSuperviser secondarySearchSuperviser,
+        final Blacklist blacklist) {
         // send a search request to peer with remote Hash
 
         // INPUT:
@@ -624,71 +607,146 @@ public final class Protocol
         // duetime    : maximum time that a peer should spent to create a result
 
         final long timestamp = System.currentTimeMillis();
-        containerCache.addExpectedRemoteReferences(count);
+        event.addExpectedRemoteReferences(count);
         SearchResult result;
+        String clusteraddress = target.getClusterAddress();
+        if (clusteraddress.equals(event.peers.mySeed().getClusterAddress())) clusteraddress = "localhost:" + event.peers.mySeed().getPort();
         try {
             result =
                 new SearchResult(
+                    event,
                     basicRequestParts(Switchboard.getSwitchboard(), target.hash, crypt.randomSalt()),
-                    mySeed,
                     wordhashes,
                     excludehashes,
-                    urlhashes,
-                    prefer,
-                    filter,
-                    snippet,
-                    modifier,
+                    "",
                     language,
-                    sitehash,
-                    authorhash,
                     contentdom,
                     count,
                     time,
                     maxDistance,
-                    global,
                     partitions,
                     target.getHexHash() + ".yacyh",
-                    target.getClusterAddress(),
-                    secondarySearchSuperviser,
-                    rankingProfile,
-                    constraint);
-        } catch ( final IOException e ) {
-            Network.log.logInfo("SEARCH failed, Peer: "
-                + target.hash
-                + ":"
-                + target.getName()
-                + " ("
-                + e.getMessage()
-                + ")");
-            //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
+                    clusteraddress,
+                    secondarySearchSuperviser
+                    );
+        } catch (final IOException e ) {
+            Network.log.info("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
+            event.peers.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
             return -1;
         }
         // computation time
         final long totalrequesttime = System.currentTimeMillis() - timestamp;
 
-        final boolean thisIsASecondarySearch = urlhashes.length() > 0;
-        assert !thisIsASecondarySearch || secondarySearchSuperviser == null;
+        try {
+            remoteSearchProcess(event, count, totalrequesttime, wordhashes, target, blacklist, result);
+        } catch (final SpaceExceededException e) {
+            ConcurrentLog.logException(e);
+            return -1;
+        }
+
+        // read index abstract
+        if ( secondarySearchSuperviser != null ) {
+            String wordhash;
+            String whacc = "";
+            ByteBuffer ci;
+            int ac = 0;
+            for ( final Map.Entry<byte[], String> abstractEntry : result.indexabstract.entrySet() ) {
+                try {
+                    ci = new ByteBuffer(abstractEntry.getValue());
+                    wordhash = ASCII.String(abstractEntry.getKey());
+                } catch (final OutOfMemoryError e ) {
+                    ConcurrentLog.logException(e);
+                    continue;
+                }
+                whacc += wordhash;
+                secondarySearchSuperviser.addAbstract(
+                    wordhash,
+                    WordReferenceFactory.decompressIndex(ci, target.hash));
+                ac++;
+
+            }
+            if ( ac > 0 ) {
+                secondarySearchSuperviser.commitAbstract();
+                Network.log.info("remote search: peer " + target.getName() + " sent " + ac + " index abstracts for words " + whacc);
+            }
+        }
+        return result.availableCount;
+    }
+
+    protected static int secondarySearch(
+        final SearchEvent event,
+        final String wordhashes,
+        final String urlhashes,
+        final String contentdom,
+        final int count,
+        final long time,
+        final int maxDistance,
+        final int partitions,
+        final Seed target,
+        final Blacklist blacklist) {
+
+        final long timestamp = System.currentTimeMillis();
+        event.addExpectedRemoteReferences(count);
+        SearchResult result;
+        try {
+            result =
+                new SearchResult(
+                    event,
+                    basicRequestParts(Switchboard.getSwitchboard(), target.hash, crypt.randomSalt()),
+                    wordhashes,
+                    "",
+                    urlhashes,
+                    "",
+                    contentdom,
+                    count,
+                    time,
+                    maxDistance,
+                    partitions,
+                    target.getHexHash() + ".yacyh",
+                    target.getClusterAddress(),
+                    null
+                    );
+        } catch (final IOException e ) {
+            Network.log.info("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
+            event.peers.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
+            return -1;
+        }
+        // computation time
+        final long totalrequesttime = System.currentTimeMillis() - timestamp;
+
+        try {
+            remoteSearchProcess(event, count, totalrequesttime, wordhashes, target, blacklist, result);
+        } catch (final SpaceExceededException e) {
+            ConcurrentLog.logException(e);
+            return -1;
+        }
+        return result.availableCount;
+    }
+
+    private static void remoteSearchProcess(
+        final SearchEvent event,
+        final int count,
+        final long time,
+        final String wordhashes,
+        final Seed target,
+        final Blacklist blacklist,
+        final SearchResult result
+        ) throws SpaceExceededException {
 
         // create containers
         final int words = wordhashes.length() / Word.commonHashLength;
         assert words > 0 : "wordhashes = " + wordhashes;
-        final ReferenceContainer<WordReference>[] container = new ReferenceContainer[words];
+        final List<ReferenceContainer<WordReference>> container = new ArrayList<ReferenceContainer<WordReference>>(words);
         for ( int i = 0; i < words; i++ ) {
-            try {
-                container[i] =
-                    ReferenceContainer.emptyContainer(
+            container.add(ReferenceContainer.emptyContainer(
                         Segment.wordReferenceFactory,
-                        ASCII.getBytes(wordhashes.substring(i * Word.commonHashLength, (i + 1)
-                            * Word.commonHashLength)),
-                        count);
-            } catch ( final RowSpaceExceededException e ) {
-                Log.logException(e);
-                return -1;
-            }
+                        ASCII.getBytes(wordhashes.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)),
+                        count)); // throws SpaceExceededException
         }
 
         // insert results to containers
         int term = count;
+        Collection<URIMetadataRow> storeDocs = new ArrayList<URIMetadataRow>(result.links.size());
         for ( final URIMetadataRow urlEntry : result.links ) {
             if ( term-- <= 0 ) {
                 break; // do not process more that requested (in case that evil peers fill us up with rubbish)
@@ -703,10 +761,7 @@ public final class Protocol
             }
             if ( blacklist.isListed(BlacklistType.SEARCH, urlEntry) ) {
                 if ( Network.log.isInfo() ) {
-                    Network.log.logInfo("remote search: filtered blacklisted url "
-                        + urlEntry.url()
-                        + " from peer "
-                        + target.getName());
+                    Network.log.info("remote search: filtered blacklisted url " + urlEntry.url() + " from peer " + target.getName());
                 }
                 continue; // block with backlist
             }
@@ -715,12 +770,7 @@ public final class Protocol
                 Switchboard.getSwitchboard().crawlStacker.urlInAcceptedDomain(urlEntry.url());
             if ( urlRejectReason != null ) {
                 if ( Network.log.isInfo() ) {
-                    Network.log.logInfo("remote search: rejected url '"
-                        + urlEntry.url()
-                        + "' ("
-                        + urlRejectReason
-                        + ") from peer "
-                        + target.getName());
+                    Network.log.info("remote search: rejected url '" + urlEntry.url() + "' (" + urlRejectReason + ") from peer " + target.getName());
                 }
                 continue; // reject url outside of our domain
             }
@@ -728,40 +778,26 @@ public final class Protocol
             // save the url entry
             final Reference entry = urlEntry.word();
             if ( entry == null ) {
-                if ( Network.log.isWarning() ) {
-                    Network.log.logWarning("remote search: no word attached from peer "
-                        + target.getName()
-                        + ", version "
-                        + target.getVersion());
+                if ( Network.log.isWarn() ) {
+                    Network.log.warn("remote search: no word attached from peer " + target.getName() + ", version " + target.getVersion());
                 }
                 continue; // no word attached
             }
 
             // the search-result-url transports all the attributes of word indexes
             if ( !Base64Order.enhancedCoder.equal(entry.urlhash(), urlEntry.hash()) ) {
-                Network.log.logInfo("remote search: url-hash "
-                    + ASCII.String(urlEntry.hash())
-                    + " does not belong to word-attached-hash "
-                    + ASCII.String(entry.urlhash())
-                    + "; url = "
-                    + urlEntry.url()
-                    + " from peer "
-                    + target.getName());
+                Network.log.info("remote search: url-hash " + ASCII.String(urlEntry.hash()) + " does not belong to word-attached-hash " + ASCII.String(entry.urlhash()) + "; url = " + urlEntry.url() + " from peer " + target.getName());
                 continue; // spammed
             }
 
             // passed all checks, store url
-            try {
-                indexSegment.urlMetadata().store(urlEntry);
-                ResultURLs.stack(
-                    urlEntry,
-                    mySeed.hash.getBytes(),
-                    UTF8.getBytes(target.hash),
-                    EventOrigin.QUERIES);
-            } catch ( final IOException e ) {
-                Network.log.logWarning("could not store search result", e);
-                continue; // db-error
-            }
+            storeDocs.add(urlEntry);
+            ResultURLs.stack(
+                ASCII.String(urlEntry.url().hash()),
+                urlEntry.url().getHost(),
+                event.peers.mySeed().hash.getBytes(),
+                UTF8.getBytes(target.hash),
+                EventOrigin.QUERIES);
 
             if ( urlEntry.snippet() != null
                 && urlEntry.snippet().length() > 0
@@ -774,144 +810,77 @@ public final class Protocol
             }
 
             // add the url entry to the word indexes
-            for ( int m = 0; m < words; m++ ) {
+            for ( final ReferenceContainer<WordReference> c : container ) {
                 try {
-                    container[m].add(entry);
-                } catch ( final RowSpaceExceededException e ) {
-                    Log.logException(e);
+                    c.add(entry);
+                } catch (final SpaceExceededException e ) {
+                    ConcurrentLog.logException(e);
                     break;
                 }
+            }
+        }
+        
+        for (URIMetadataRow entry: storeDocs) {
+            try {
+                event.query.getSegment().fulltext().putMetadata(entry);
+            } catch (final IOException e) {
+                ConcurrentLog.logException(e);
             }
         }
 
         // store remote result to local result container
         // insert one container into the search result buffer
         // one is enough, only the references are used, not the word
-        containerCache.add(container[0], false, target.getName() + "/" + target.hash, result.joincount, true, time);
-        containerCache.addExpectedRemoteReferences(-count);
+        event.addRWIs(container.get(0), false, target.getName() + "/" + target.hash, result.totalCount, time);
+        event.addFinalize();
+        event.addExpectedRemoteReferences(-count);
 
         // insert the containers to the index
         for ( final ReferenceContainer<WordReference> c : container ) {
             try {
-                indexSegment.termIndex().add(c);
-            } catch ( final Exception e ) {
-                Log.logException(e);
+                event.query.getSegment().storeRWI(c);
+            } catch (final Exception e ) {
+                ConcurrentLog.logException(e);
             }
         }
-
-        Network.log.logInfo("remote search: peer "
-            + target.getName()
-            + " sent "
-            + container[0].size()
-            + "/"
-            + result.joincount
-            + " references for "
-            + (thisIsASecondarySearch ? "a secondary search" : "joined word queries"));
 
         // integrate remote top-words/topics
         if ( result.references != null && result.references.length > 0 ) {
-            Network.log.logInfo("remote search: peer "
-                + target.getName()
-                + " sent "
-                + result.references.length
-                + " topics");
+            Network.log.info("remote search: peer " + target.getName() + " sent " + result.references.length + " topics");
             // add references twice, so they can be counted (must have at least 2 entries)
-            synchronized ( containerCache ) {
-                containerCache.addTopic(result.references);
-                containerCache.addTopic(result.references);
+            synchronized (event) {
+                event.addTopic(result.references);
+                event.addTopic(result.references);
             }
         }
-
-        // read index abstract
-        if ( secondarySearchSuperviser != null ) {
-            String wordhash;
-            String whacc = "";
-            ByteBuffer ci;
-            int ac = 0;
-            for ( final Map.Entry<byte[], String> abstractEntry : result.indexabstract.entrySet() ) {
-                try {
-                    ci = new ByteBuffer(abstractEntry.getValue());
-                    wordhash = ASCII.String(abstractEntry.getKey());
-                } catch ( final OutOfMemoryError e ) {
-                    Log.logException(e);
-                    continue;
-                }
-                whacc += wordhash;
-                secondarySearchSuperviser.addAbstract(
-                    wordhash,
-                    WordReferenceFactory.decompressIndex(ci, target.hash));
-                ac++;
-
-            }
-            if ( ac > 0 ) {
-                secondarySearchSuperviser.commitAbstract();
-                Network.log.logInfo("remote search: peer "
-                    + target.getName()
-                    + " sent "
-                    + ac
-                    + " index abstracts for words "
-                    + whacc);
-            }
-        }
-
-        // generate statistics
-        if ( Network.log.isFine() ) {
-            Network.log.logFine("SEARCH "
-                + result.urlcount
-                + " URLS FROM "
-                + target.hash
-                + ":"
-                + target.getName()
-                + ", searchtime="
-                + result.searchtime
-                + ", netdelay="
-                + (totalrequesttime - result.searchtime)
-                + ", references="
-                + result.references);
-        }
-        return result.urlcount;
+        Network.log.info("remote search: peer " + target.getName() + " sent " + container.get(0).size() + "/" + result.totalCount + " references");
     }
 
-    public static class SearchResult
-    {
-
-        public String version; // version : application version of responder
-        public String uptime; // uptime : uptime in seconds of responder
-        public String fwhop; // hops (depth) of forwards that had been performed to construct this result
-        public String fwsrc; // peers that helped to construct this result
-        public String fwrec; // peers that would have helped to construct this result (recommendations)
-        public int urlcount; // number of returned LURL's for this search
-        public int joincount; //
+    private static class SearchResult {
+        public int availableCount; // number of returned LURL's for this search
+        public int totalCount; //
         public Map<byte[], Integer> indexcount; //
-        public long searchtime; // time that the peer actually spent to create the result
+        //public long searchtime; // time that the peer actually spent to create the result
         public String[] references; // search hints, the top-words
         public List<URIMetadataRow> links; // LURLs of search
         public Map<byte[], String> indexabstract; // index abstracts, a collection of url-hashes per word
 
         public SearchResult(
+            final SearchEvent event,
             final Map<String, ContentBody> parts,
-            final Seed mySeed,
             final String wordhashes,
             final String excludehashes,
             final String urlhashes,
-            final Pattern prefer,
-            final Pattern filter,
-            final Pattern snippet,
-            final String modifier,
             final String language,
-            final String sitehash,
-            final String authorhash,
             final String contentdom,
             final int count,
             final long time,
             final int maxDistance,
-            final boolean global,
             final int partitions,
             final String hostname,
             final String hostaddress,
-            final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
-            final RankingProfile rankingProfile,
-            final Bitfield constraint) throws IOException {
+            final SecondarySearchSuperviser secondarySearchSuperviser
+            ) throws IOException {
             // send a search request to peer with remote Hash
 
             //if (hostaddress.equals(mySeed.getClusterAddress())) hostaddress = "127.0.0.1:" + mySeed.getPort(); // for debugging
@@ -938,34 +907,37 @@ public final class Protocol
                 keyBody.writeTo(baos);
                 key = baos.toString();
             }
-            parts.put("myseed", UTF8.StringBody((mySeed == null) ? "" : mySeed.genSeedStr(key)));
+            
+            String filter = event.query.urlMask.pattern().toString();
+            if (event.query.tld != null) filter = ".*" + event.query.tld + ".*" + filter;
+            if (event.query.modifier.protocol != null) filter = ".*" + event.query.modifier.protocol + ".*" + filter;
+            if (event.query.modifier.filetype != null) filter = filter + ".*" + event.query.modifier.filetype + ".*";
+            parts.put("myseed", UTF8.StringBody((event.peers.mySeed() == null) ? "" : event.peers.mySeed().genSeedStr(key)));
             parts.put("count", UTF8.StringBody(Integer.toString(Math.max(10, count))));
             parts.put("time", UTF8.StringBody(Long.toString(Math.max(3000, time))));
-            parts.put("resource", UTF8.StringBody(((global) ? "global" : "local")));
             parts.put("partitions", UTF8.StringBody(Integer.toString(partitions)));
             parts.put("query", UTF8.StringBody(wordhashes));
             parts.put("exclude", UTF8.StringBody(excludehashes));
             parts.put("duetime", UTF8.StringBody("1000"));
             parts.put("urls", UTF8.StringBody(urlhashes));
-            parts.put("prefer", UTF8.StringBody(prefer.pattern()));
-            parts.put("filter", UTF8.StringBody(filter.pattern()));
-            parts.put("snippet", UTF8.StringBody(snippet.pattern()));
-            parts.put("modifier", UTF8.StringBody(modifier));
+            parts.put("prefer", UTF8.StringBody(event.query.prefer.pattern()));
+            parts.put("filter", UTF8.StringBody(filter));
+            parts.put("modifier", UTF8.StringBody(event.query.modifier.toString()));
             parts.put("language", UTF8.StringBody(language));
-            parts.put("sitehash", UTF8.StringBody(sitehash));
-            parts.put("authorhash", UTF8.StringBody(authorhash));
+            parts.put("sitehash", UTF8.StringBody(event.query.modifier.sitehash));
+            parts.put("author", UTF8.StringBody(event.query.modifier.author));
             parts.put("contentdom", UTF8.StringBody(contentdom));
             parts.put("ttl", UTF8.StringBody("0"));
             parts.put("maxdist", UTF8.StringBody(Integer.toString(maxDistance)));
-            parts.put("profile", UTF8.StringBody(crypt.simpleEncode(rankingProfile.toExternalString())));
-            parts.put("constraint", UTF8.StringBody((constraint == null) ? "" : constraint.exportB64()));
+            parts.put("profile", UTF8.StringBody(crypt.simpleEncode(event.query.ranking.toExternalString())));
+            parts.put("constraint", UTF8.StringBody((event.query.constraint == null) ? "" : event.query.constraint.exportB64()));
             if ( secondarySearchSuperviser != null ) {
                 parts.put("abstracts", UTF8.StringBody("auto"));
                 // resultMap = FileUtils.table(HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), 60000, hostname, parts));
                 //resultMap = FileUtils.table(HTTPConnector.getConnector(MultiProtocolURI.crawlerUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/search.html"), 60000, target.getHexHash() + ".yacyh", parts));
             }
 
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 8000);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 8000);
             byte[] a = httpClient.POSTbytes(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), hostname, parts, false);
             if (a != null && a.length > 200000) {
                 // there is something wrong. This is too large, maybe a hack on the other side?
@@ -977,27 +949,26 @@ public final class Protocol
             if ( resultMap == null || resultMap.isEmpty() ) {
                 throw new IOException("resultMap is NULL");
             }
+            /*
             try {
                 this.searchtime = Integer.parseInt(resultMap.get("searchtime"));
-            } catch ( final NumberFormatException e ) {
+            } catch (final NumberFormatException e ) {
                 throw new IOException("wrong output format for searchtime: "
                     + e.getMessage()
                     + ", map = "
                     + resultMap.toString());
             }
+            */
             try {
-                this.joincount = Integer.parseInt(resultMap.get("joincount")); // the complete number of hits at remote site
-            } catch ( final NumberFormatException e ) {
+                this.totalCount = Integer.parseInt(resultMap.get("joincount")); // the complete number of hits at remote site; rwi+solr (via: theSearch.getResultCount())
+            } catch (final NumberFormatException e ) {
                 throw new IOException("wrong output format for joincount: " + e.getMessage());
             }
             try {
-                this.urlcount = Integer.parseInt(resultMap.get("count")); // the number of hits that are returned in the result list
-            } catch ( final NumberFormatException e ) {
+                this.availableCount = Integer.parseInt(resultMap.get("count")); // the number of hits that are returned in the result list
+            } catch (final NumberFormatException e ) {
                 throw new IOException("wrong output format for count: " + e.getMessage());
             }
-            this.fwhop = resultMap.get("fwhop");
-            this.fwsrc = resultMap.get("fwsrc");
-            this.fwrec = resultMap.get("fwrec");
             // scan the result map for entries with special prefix
             this.indexcount = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
             this.indexabstract = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
@@ -1012,8 +983,8 @@ public final class Protocol
                 }
             }
             this.references = resultMap.get("references").split(",");
-            this.links = new ArrayList<URIMetadataRow>(this.urlcount);
-            for ( int n = 0; n < this.urlcount; n++ ) {
+            this.links = new ArrayList<URIMetadataRow>(this.availableCount);
+            for ( int n = 0; n < this.availableCount; n++ ) {
                 // get one single search result
                 final String resultLine = resultMap.get("resource" + n);
                 if ( resultLine == null ) {
@@ -1028,6 +999,194 @@ public final class Protocol
         }
     }
 
+    private final static CollectionSchema[] snippetFields = new CollectionSchema[]{CollectionSchema.h1_txt, CollectionSchema.h2_txt, CollectionSchema.text_t};
+    
+    protected static int solrQuery(
+            final SearchEvent event,
+            final SolrQuery solrQuery,
+            final int offset,
+            final int count,
+            Seed target,
+            final Blacklist blacklist) {
+
+        if (event.query.getQueryGoal().getOriginalQueryString(false) == null || event.query.getQueryGoal().getOriginalQueryString(false).length() == 0) {
+            return -1; // we cannot query solr only with word hashes, there is no clear text string
+        }
+        event.addExpectedRemoteReferences(count);
+        
+        solrQuery.setStart(offset);
+        solrQuery.setRows(count);
+        
+        // set highlighting query attributes
+        if (event.query.contentdom == Classification.ContentDomain.TEXT || event.query.contentdom == Classification.ContentDomain.ALL) {
+            solrQuery.setHighlight(true);
+            solrQuery.setHighlightFragsize(SearchEvent.SNIPPET_MAX_LENGTH);
+            //solrQuery.setHighlightRequireFieldMatch();
+            solrQuery.setHighlightSimplePost("</b>");
+            solrQuery.setHighlightSimplePre("<b>");
+            solrQuery.setHighlightSnippets(1);
+            for (CollectionSchema field: snippetFields) solrQuery.addHighlightField(field.getSolrFieldName());
+        } else {
+            solrQuery.setHighlight(false);
+        }
+        boolean localsearch = target == null || target.equals(event.peers.mySeed());
+        if (localsearch &&  Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
+            target = event.peers.mySeed();
+            localsearch = false;
+        }
+        RemoteInstance instance = null;
+        SolrConnector solrConnector = null;        
+        SolrDocumentList docList = null;
+        QueryResponse rsp = null;
+        if (localsearch) {
+            // search the local index
+            try {
+                rsp = event.getQuery().getSegment().fulltext().getDefaultConnector().getResponseByParams(solrQuery);
+                docList = rsp.getResults();
+            } catch (final Throwable e) {
+                Network.log.info("SEARCH failed (solr), localpeer (" + e.getMessage() + ")", e);
+                return -1;
+            }
+        } else {
+            try {
+                String address = target == event.peers.mySeed() ? "localhost:" + target.getPort() : target.getPublicAddress();
+                final int solrtimeout = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 10000);
+                instance = new RemoteInstance("http://" + address, null, "solr", solrtimeout); // this is a 'patch configuration' which considers 'solr' as default collection
+                solrConnector = new RemoteSolrConnector(instance, "solr");
+                rsp = solrConnector.getResponseByParams(solrQuery);
+                docList = rsp.getResults();
+                solrConnector.close();
+                instance.close();
+                // no need to close this here because that sends a commit to remote solr which is not wanted here
+            } catch (final Throwable e) {
+                Network.log.info("SEARCH failed (solr), remote Peer: " +target.getName() + "/" + target.getPublicAddress() + " (" + e.getMessage() + ")");
+                return -1;
+            }
+        }
+        
+        // evaluate facets
+        Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>(event.query.facetfields.size());
+        for (String field: event.query.facetfields) {
+            FacetField facet = rsp.getFacetField(field);
+            ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+            List<Count> values = facet == null ? null : facet.getValues();
+            if (values == null) continue;
+            for (Count ff: values) {
+                int c = (int) ff.getCount();
+                if (c == 0) continue;
+                result.set(ff.getName(), c);
+            }
+            if (result.size() > 0) facets.put(field, result);
+        }
+        
+        // evaluate snippets
+        Map<String, Map<String, List<String>>> rawsnippets = rsp.getHighlighting(); // a map from the urlhash to a map with key=field and value = list of snippets
+        Map<String, String> snippets = new HashMap<String, String>(); // this will be a list of urlhash-snippet entries
+        if (rawsnippets != null) {
+            nextsnippet: for (Map.Entry<String, Map<String, List<String>>> re: rawsnippets.entrySet()) {
+                Map<String, List<String>> rs = re.getValue();
+                for (CollectionSchema field: snippetFields) {
+                    if (rs.containsKey(field.getSolrFieldName())) {
+                        List<String> s = rs.get(field.getSolrFieldName());
+                        if (s.size() > 0) {
+                            snippets.put(re.getKey(), s.get(0));
+                            continue nextsnippet;
+                        }
+                    }
+                }
+                // no snippet found :( --we don't assign a value here by default; that can be done as an evaluation outside this method
+            }
+        }
+
+        // evaluate result
+        List<URIMetadataNode> container = new ArrayList<URIMetadataNode>();
+		if (docList == null || docList.size() == 0) {
+		    Network.log.info("SEARCH (solr), returned 0 out of 0 documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())) + " query = " + solrQuery.toString()) ;
+		    return 0;
+		}
+		
+        Network.log.info("SEARCH (solr), returned " + docList.size() + " out of " + docList.getNumFound() + " documents and " + facets.size() + " facets " + facets.keySet().toString() + " from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
+        int term = count;
+        Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>(docList.size());
+        for (final SolrDocument doc: docList) {
+            if ( term-- <= 0 ) {
+                break; // do not process more that requested (in case that evil peers fill us up with rubbish)
+            }
+            // get one single search result
+            if ( doc == null ) {
+                continue;
+            }
+            URIMetadataNode urlEntry = new URIMetadataNode(doc);
+
+            if ( blacklist.isListed(BlacklistType.SEARCH, urlEntry) ) {
+                if ( Network.log.isInfo() ) {
+                    if (localsearch) {
+                        Network.log.info("local search (solr): filtered blacklisted url " + urlEntry.url());
+                    } else {
+                        Network.log.info("remote search (solr): filtered blacklisted url " + urlEntry.url() + " from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
+                    }
+                }
+                continue; // block with blacklist
+            }
+
+            final String urlRejectReason = Switchboard.getSwitchboard().crawlStacker.urlInAcceptedDomain(urlEntry.url());
+            if ( urlRejectReason != null ) {
+                if ( Network.log.isInfo() ) {
+                    if (localsearch) {
+                        Network.log.info("local search (solr): rejected url '" + urlEntry.url() + "' (" + urlRejectReason + ")");
+                    } else {
+                        Network.log.info("remote search (solr): rejected url '" + urlEntry.url() + "' (" + urlRejectReason + ") from peer " + target.getName());
+                    }
+                }
+                continue; // reject url outside of our domain
+            }
+
+            // passed all checks, store url
+            if (!localsearch) {
+                // put the remote documents to the local index. We must convert the solr document to a solr input document:
+                SolrInputDocument sid = event.query.getSegment().fulltext().getDefaultConfiguration().toSolrInputDocument(doc);
+
+                // after this conversion we can remove the largest and not used field text_t and synonyms_sxt from the document
+                // because that goes into a search cache and would take a lot of memory in the search cache
+                //doc.removeFields(CollectionSchema.text_t.getSolrFieldName());
+                doc.removeFields(CollectionSchema.synonyms_sxt.getSolrFieldName());
+                
+                // the input document stays untouched because it contains top-level cloned objects
+                docs.add(sid);
+                ResultURLs.stack(
+                    ASCII.String(urlEntry.url().hash()),
+                    urlEntry.url().getHost(),
+                    event.peers.mySeed().hash.getBytes(),
+                    UTF8.getBytes(target.hash),
+                    EventOrigin.QUERIES);
+            }
+
+            // add the url entry to the word indexes
+            container.add(urlEntry);
+        }
+        if (localsearch) {
+            event.addNodes(container, facets, snippets, true, "localpeer", (int) docList.getNumFound());
+            event.addFinalize();
+            event.addExpectedRemoteReferences(-count);
+            Network.log.info("local search (solr): localpeer sent " + container.size() + "/" + docList.getNumFound() + " references");
+        } else {
+            for (SolrInputDocument doc: docs) {
+                event.query.getSegment().putDocumentInQueue(doc);
+            }
+            docs.clear(); docs = null;
+            event.addNodes(container, facets, snippets, false, target.getName() + "/" + target.hash, (int) docList.getNumFound());
+            event.addFinalize();
+            event.addExpectedRemoteReferences(-count);
+            Network.log.info("remote search (solr): peer " + target.getName() + " sent " + (container.size() == 0 ? 0 : container.size()) + "/" + docList.getNumFound() + " references");
+        }
+        final int dls = docList.size();
+        docList.clear();
+        docList = null;
+        if (solrConnector != null) solrConnector.close();
+        if (instance != null) instance.close();
+        return dls;
+    }
+
     public static Map<String, String> permissionMessage(final SeedDB seedDB, final String targetHash) {
         // ask for allowed message size and attachement size
         // if this replies null, the peer does not answer
@@ -1040,12 +1199,12 @@ public final class Protocol
             final Map<String, ContentBody> parts =
                 basicRequestParts(Switchboard.getSwitchboard(), targetHash, salt);
             parts.put("process", UTF8.StringBody("permission"));
-            final byte[] content = postToFile(seedDB, targetHash, "message.html", parts, 5000);
+            final byte[] content = postToFile(seedDB, targetHash, "message.html", parts, 6000);
             final Map<String, String> result = FileUtils.table(content);
             return result;
-        } catch ( final Exception e ) {
+        } catch (final Exception e ) {
             // most probably a network time-out exception
-            Network.log.logWarning("yacyClient.permissionMessage error:" + e.getMessage());
+            Network.log.warn("yacyClient.permissionMessage error:" + e.getMessage());
             return null;
         }
     }
@@ -1071,8 +1230,8 @@ public final class Protocol
             final byte[] content = postToFile(seedDB, targetHash, "message.html", parts, 20000);
             final Map<String, String> result = FileUtils.table(content);
             return result;
-        } catch ( final Exception e ) {
-            Network.log.logWarning("yacyClient.postMessage error:" + e.getMessage());
+        } catch (final Exception e ) {
+            Network.log.warn("yacyClient.postMessage error:" + e.getMessage());
             return null;
         }
     }
@@ -1083,7 +1242,7 @@ public final class Protocol
         final String process,
         final String result,
         final String reason,
-        final URIMetadataRow entry,
+        final URIMetadataNode entry,
         final String wordhashes) {
         assert (target != null);
         assert (mySeed != null);
@@ -1121,8 +1280,7 @@ public final class Protocol
         // send request
         try {
             // prepare request
-            final Map<String, ContentBody> parts =
-                basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
+            final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("process", UTF8.StringBody(process));
             parts.put("urlhash", UTF8.StringBody(((entry == null) ? "" : ASCII.String(entry.hash()))));
             parts.put("result", UTF8.StringBody(result));
@@ -1133,7 +1291,7 @@ public final class Protocol
                 UTF8.StringBody(((entry == null) ? "" : crypt.simpleEncode(entry.toString(), salt))));
             // send request
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/crawlReceipt.html"), 10000, target.getHexHash() + ".yacyh", parts);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 10000);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 10000);
             final byte[] content =
                 httpClient.POSTbytes(
                     new MultiProtocolURI("http://" + address + "/yacy/crawlReceipt.html"),
@@ -1141,9 +1299,9 @@ public final class Protocol
                     parts,
                     false);
             return FileUtils.table(content);
-        } catch ( final Exception e ) {
+        } catch (final Exception e ) {
             // most probably a network time-out exception
-            Network.log.logWarning("yacyClient.crawlReceipt error:" + e.getMessage());
+            Network.log.warn("yacyClient.crawlReceipt error:" + e.getMessage());
             return null;
         }
     }
@@ -1162,7 +1320,8 @@ public final class Protocol
     public static String transferIndex(
         final Seed targetSeed,
         final ReferenceContainerCache<WordReference> indexes,
-        final SortedMap<byte[], URIMetadataRow> urlCache,
+        final HandleSet urlRefs,
+        final Segment segment,
         final boolean gzipBody,
         final int timeout) {
 
@@ -1173,9 +1332,9 @@ public final class Protocol
             eenum = ic.entries();
             while ( eenum.hasNext() ) {
                 entry = eenum.next();
-                if ( urlCache.get(entry.urlhash()) == null ) {
+                if ( !urlRefs.has(entry.urlhash()) ) {
                     if ( Network.log.isFine() ) {
-                        Network.log.logFine("DEBUG transferIndex: to-send url hash '"
+                        Network.log.fine("DEBUG transferIndex: to-send url hash '"
                             + ASCII.String(entry.urlhash())
                             + "' is not contained in urlCache");
                     }
@@ -1213,7 +1372,7 @@ public final class Protocol
                     targetSeed.hash));
 
         uhss = uhss.trim();
-        if ( uhss.length() == 0 || uhss.equals(",") ) {
+        if ( uhss.isEmpty() || uhss.equals(",") ) {
             return null;
         } // all url's known, we are ready here
 
@@ -1223,12 +1382,14 @@ public final class Protocol
         } // all url's known
 
         // extract the urlCache from the result
-        final URIMetadataRow[] urls = new URIMetadataRow[uhs.length];
+        final URIMetadataNode[] urls = new URIMetadataNode[uhs.length];
+        byte[] key;
         for ( int i = 0; i < uhs.length; i++ ) {
-            urls[i] = urlCache.get(ASCII.getBytes(uhs[i]));
+        	key = ASCII.getBytes(uhs[i]);
+        	if ( urlRefs.has(key) ) urls[i] = segment.fulltext().getMetadata(key);
             if ( urls[i] == null ) {
                 if ( Network.log.isFine() ) {
-                    Network.log.logFine("DEBUG transferIndex: requested url hash '"
+                    Network.log.fine("DEBUG transferIndex: requested url hash '"
                         + uhs[i]
                         + "', unknownURL='"
                         + uhss
@@ -1267,7 +1428,7 @@ public final class Protocol
         final int timeout) {
         final String address = targetSeed.getPublicAddress();
         if ( address == null ) {
-            Network.log.logWarning("no address for transferRWI");
+            Network.log.warn("no address for transferRWI");
             return null;
         }
 
@@ -1309,7 +1470,7 @@ public final class Protocol
             parts.put("entryc", UTF8.StringBody(Integer.toString(indexcount)));
             parts.put("indexes", UTF8.StringBody(entrypost.toString()));
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/transferRWI.html"), timeout, targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
             final byte[] content =
                 httpClient.POSTbytes(
                     new MultiProtocolURI("http://" + address + "/yacy/transferRWI.html"),
@@ -1323,15 +1484,15 @@ public final class Protocol
             // return the transfered index data in bytes (for debugging only)
             result.put("indexPayloadSize", Integer.toString(entrypost.length()));
             return result;
-        } catch ( final Exception e ) {
-            Network.log.logInfo("yacyClient.transferRWI to " + address + " error: " + e.getMessage());
+        } catch (final Exception e ) {
+            Network.log.info("yacyClient.transferRWI to " + address + " error: " + e.getMessage());
             return null;
         }
     }
 
     private static Map<String, String> transferURL(
         final Seed targetSeed,
-        final URIMetadataRow[] urls,
+        final URIMetadataNode[] urls,
         boolean gzipBody,
         final int timeout) {
         // this post a message to the remote message board
@@ -1353,7 +1514,7 @@ public final class Protocol
         String resource;
         int urlc = 0;
         int urlPayloadSize = 0;
-        for ( final URIMetadataRow url : urls ) {
+        for ( final URIMetadataNode url : urls ) {
             if ( url != null ) {
                 resource = url.toString();
                 //System.out.println("*** DEBUG resource = " + resource);
@@ -1367,7 +1528,7 @@ public final class Protocol
         try {
             parts.put("urlc", UTF8.StringBody(Integer.toString(urlc)));
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/transferURL.html"), timeout, targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
             final byte[] content =
                 httpClient.POSTbytes(
                     new MultiProtocolURI("http://" + address + "/yacy/transferURL.html"),
@@ -1380,8 +1541,8 @@ public final class Protocol
             // return the transfered url data in bytes (for debugging only)
             result.put("urlPayloadSize", Integer.toString(urlPayloadSize));
             return result;
-        } catch ( final Exception e ) {
-            Network.log.logWarning("yacyClient.transferURL to " + address + " error: " + e.getMessage());
+        } catch (final Exception e ) {
+            Network.log.warn("yacyClient.transferURL to " + address + " error: " + e.getMessage());
             return null;
         }
     }
@@ -1400,7 +1561,7 @@ public final class Protocol
             final Map<String, ContentBody> parts =
                 basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/profile.html"), 5000, targetSeed.getHexHash() + ".yacyh", parts);
-            final HTTPClient httpclient = new HTTPClient(ClientIdentification.getUserAgent(), 5000);
+            final HTTPClient httpclient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 15000);
             final byte[] content =
                 httpclient.POSTbytes(
                     new MultiProtocolURI("http://" + address + "/yacy/profile.html"),
@@ -1408,8 +1569,8 @@ public final class Protocol
                     parts,
                     false);
             return FileUtils.table(content);
-        } catch ( final Exception e ) {
-            Network.log.logWarning("yacyClient.getProfile error:" + e.getMessage());
+        } catch (final Exception e ) {
+            Network.log.warn("yacyClient.getProfile error:" + e.getMessage());
             return null;
         }
     }
@@ -1436,7 +1597,7 @@ public final class Protocol
             parts.put("object", UTF8.StringBody("host"));
             final byte[] content = postToFile(target, "idx.json", parts, 30000);
             if ( content == null || content.length == 0 ) {
-                Network.log.logWarning("yacyClient.loadIDXHosts error: empty result");
+                Network.log.warn("yacyClient.loadIDXHosts error: empty result");
                 return null;
             }
             final JSONObject json =
@@ -1472,116 +1633,14 @@ public final class Protocol
                         //System.out.println("REFERENCE: " + reference);
                         referenceContainer.add(new HostReference(reference));
                     }
-                } catch ( final JSONException e ) {
+                } catch (final JSONException e ) {
                 } // this finishes the iteration
                 index.add(referenceContainer);
             }
             return index;
-        } catch ( final Exception e ) {
-            Network.log.logWarning("yacyClient.loadIDXHosts error:" + e.getMessage());
+        } catch (final Exception e ) {
+            Network.log.warn("yacyClient.loadIDXHosts error:" + e.getMessage());
             return index;
-        }
-    }
-
-    public static void main(final String[] args) {
-        if ( args.length > 2 ) {
-            // search a remote peer. arguments:
-            // first  arg: path to application home
-            // second arg: address of target peer
-            // third  arg: search word or file name with list of search words
-            // i.e. /Data/workspace1/yacy/ localhost:8090 /Data/workspace1/yacy/test/words/searchtest.words
-            System.out.println("yacyClient Test");
-            final File searchwordfile = new File(args[2]);
-            final List<String> searchlines = new ArrayList<String>();
-            if ( searchwordfile.exists() ) {
-                Iterator<String> i;
-                try {
-                    i = FileUtils.strings(FileUtils.read(searchwordfile));
-                    while ( i.hasNext() ) {
-                        searchlines.add(i.next());
-                    }
-                } catch ( final IOException e ) {
-                    e.printStackTrace();
-                    System.exit(-1);
-                }
-            } else {
-                searchlines.add(args[2]);
-            }
-            for ( final String line : searchlines ) {
-                final byte[] wordhashe =
-                    ASCII.getBytes(QueryParams.hashSet2hashString(Word.words2hashesHandles(QueryParams
-                        .cleanQuery(line)[0])));
-                final long time = System.currentTimeMillis();
-                SearchResult result;
-                try {
-                    result =
-                        new SearchResult(basicRequestParts((String) null, (String) null, "freeworld"), null, // sb.peers.mySeed(),
-                            ASCII.String(wordhashe),
-                            "", // excludehashes,
-                            "", // urlhashes,
-                            QueryParams.matchnothing_pattern, // prefer,
-                            QueryParams.catchall_pattern, // filter,
-                            QueryParams.catchall_pattern, // snippet,
-                            "", // modifier
-                            "", // language,
-                            "", // sitehash,
-                            "", // authorhash,
-                            "all", // contentdom,
-                            10, // count,
-                            3000, // time,
-                            1000, // maxDistance,
-                            true, //global,
-                            16, // partitions,
-                            "",
-                            args[1],
-                            null, //secondarySearchSuperviser,
-                            new RankingProfile(Classification.ContentDomain.TEXT), // rankingProfile,
-                            null // constraint);
-                        );
-                    for ( final URIMetadataRow link : result.links ) {
-                        System.out.println(link.url().toNormalform(true, false));
-                        System.out.println(link.snippet());
-                    }
-                } catch ( final IOException e ) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                System.out.println("Search Time: " + (System.currentTimeMillis() - time));
-            }
-            System.exit(0);
-        } else if ( args.length == 1 ) {
-            System.out.println("wput Test");
-            // connection params
-            MultiProtocolURI url = null;
-            try {
-                url = new MultiProtocolURI(args[0]);
-            } catch ( final MalformedURLException e ) {
-                Log.logException(e);
-            }
-            if ( url == null ) {
-                System.exit(1);
-                return;
-            }
-            final String vhost = url.getHost();
-            final int timeout = 10000;
-            // new data
-            final Map<String, ContentBody> newpost = new LinkedHashMap<String, ContentBody>();
-            newpost.put("process", UTF8.StringBody("permission"));
-            newpost.put("purpose", UTF8.StringBody("crcon"));
-            byte[] res;
-            try {
-                // res = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(url, timeout, vhost, newpost, true);
-                final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
-                res = httpClient.POSTbytes(url, vhost, newpost, true);
-                System.out.println(UTF8.String(res));
-            } catch ( final IOException e1 ) {
-                Log.logException(e1);
-            }
-        }
-        try {
-            net.yacy.cora.protocol.http.HTTPClient.closeConnectionManager();
-        } catch ( final InterruptedException e ) {
-            Log.logException(e);
         }
     }
 
@@ -1603,7 +1662,7 @@ public final class Protocol
         }
         final String authenticationMethod =
             env.getConfig("network.unit.protocol.request.authentication.method", "");
-        if ( authenticationMethod.length() == 0 ) {
+        if ( authenticationMethod.isEmpty() ) {
             return false;
         }
         if ( authenticationMethod.equals("salted-magic-sim") ) {
@@ -1619,7 +1678,7 @@ public final class Protocol
         return false;
     }
 
-    public static final LinkedHashMap<String, ContentBody> basicRequestParts(
+    private static final LinkedHashMap<String, ContentBody> basicRequestParts(
         final Switchboard sb,
         final String targetHash,
         final String salt) {
@@ -1651,7 +1710,7 @@ public final class Protocol
         return parts;
     }
 
-    public static final LinkedHashMap<String, ContentBody> basicRequestParts(
+    private static final LinkedHashMap<String, ContentBody> basicRequestParts(
         final String myHash,
         final String targetHash,
         final String networkName) {

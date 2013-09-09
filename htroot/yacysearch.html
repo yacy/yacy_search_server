@@ -69,15 +69,25 @@
 <div id="api">
 <script type="text/javascript">
 //<![CDATA[
-document.write("\<a href=\"yacysearch.rss?" + window.location.search.substring(1) + "\"\>")
+document.write("\<a href=\"yacysearch.rss?" + window.location.search.substring(1) + "\"\><img src=\"env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>")
 //]]>
 </script>
-<img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
 <span>This search result can also be retrieved as RSS/<a href="http://www.opensearch.org">opensearch</a> output.
 The query format is similar to <a href="http://www.loc.gov/standards/sru/">SRU</a>.
 Click the API icon to see an example call to the search rss API.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
-</div>	
+</div>
+#(resource-select)#::
+<div id="searchmode">
+<img src="env/grafics/searchmode_p2p_activated_32.png" width="91" height="32"/><br/>
+<a href="yacysearch.html?resource=local"><img src="env/grafics/searchmode_stealth_deactivated_32.png" width="91" height="32"/></a>
+<span>Your search is done using peers in the YaCy P2P network. You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used.</span>
+</div>::
+<div id="searchmode">
+<a href="yacysearch.html?resource=global"><img src="env/grafics/searchmode_p2p_deactivated_32.png" width="91" height="32"/></a><br/>
+<img src="env/grafics/searchmode_stealth_activated_32.png" width="91" height="32"/>
+<span>Your search is done using only your own peer, locally. You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network.</span>
+</div>#(/resource-select)#
     #%env/templates/simpleheader.template%#
     #(/topmenu)#
 <script type="text/javascript">
@@ -120,16 +130,15 @@ $(function() {
 	    #(searchvideo)#::<input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# /><label for="video">Video</label>&nbsp;&nbsp;#(/searchvideo)#
 	    #(searchapp)#::<input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# /><label for="app">Applications</label>#(/searchapp)#
         &nbsp;
-        <a href="index.html?searchoptions=2&amp;count=#[count]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#&amp;meanCount=#[meanCount]#">more options</a>
+        <a href="index.html?searchoptions=2&amp;count=#[count]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#&amp;meanCount=#[meanCount]#">more options</a>
     </div>
     #(/searchdomswitches)#
     <input type="hidden" name="former" value="#[former]#" />
     <input type="hidden" name="maximumRecords" value="#[count]#" />
-    <input type="hidden" name="startRecord" value="#[offset]#" />
+    <input type="hidden" name="startRecord" value="0" />
     <input type="hidden" name="verify" value="#[search.verify]#" />
     <input type="hidden" name="resource" value="#[resource]#" />
     <input type="hidden" name="nav" value="#[search.navigation]#" />
-    <input type="hidden" name="urlmaskfilter" value="#[urlmaskfilter]#" />
     <input type="hidden" name="prefermaskfilter" value="#[prefermaskfilter]#" />
     <input type="hidden" name="depth" value="#[depth]#" />
     <input type="hidden" name="cat" value="#[cat]#" />

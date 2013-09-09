@@ -32,7 +32,6 @@ import java.io.InputStream;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
 
-import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -51,6 +50,7 @@ public class rtfParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("application/x-soffice");
     }
 
+    @Override
     public Document[] parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
@@ -70,17 +70,17 @@ public class rtfParser extends AbstractParser implements Parser {
                     this,
                     null,
                     null,
-                    ((bodyText.length() > 80)? bodyText.substring(0, 80):bodyText.trim()).
+                    singleList(((bodyText.length() > 80)? bodyText.substring(0, 80):bodyText.trim()).
                         replaceAll("\r\n"," ").
                         replaceAll("\n"," ").
                         replaceAll("\r"," ").
-                        replaceAll("\t"," "),
+                        replaceAll("\t"," ")),
                     "", // TODO: AUTHOR
                     "", // TODO: publisher
                     null,
                     null,
                     0.0f, 0.0f,
-                    UTF8.getBytes(bodyText),
+                    bodyText,
                     null,
                     null,
                     null,

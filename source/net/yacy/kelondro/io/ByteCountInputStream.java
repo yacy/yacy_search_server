@@ -30,7 +30,7 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 public final class ByteCountInputStream extends FilterInputStream {
 
@@ -123,8 +123,8 @@ public final class ByteCountInputStream extends FilterInputStream {
     public final synchronized void close() throws IOException {
         try {
             super.close();
-        } catch (OutOfMemoryError e) {
-            Log.logException(e);
+        } catch (final OutOfMemoryError e) {
+            ConcurrentLog.logException(e);
         }
         this.finish();
     }

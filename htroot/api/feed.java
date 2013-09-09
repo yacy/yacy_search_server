@@ -1,14 +1,15 @@
 
 
 import java.util.Date;
+import java.util.List;
 
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.EventChannel;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class feed {
 
@@ -60,9 +61,11 @@ public class feed {
             if (feed == null || feed.isEmpty()) continue channelIteration;
 
             RSSMessage message = feed.getChannel();
+            List<String> descriptions = message.getDescriptions();
+            String description = descriptions.size() > 0 ? descriptions.get(0) : "";
             if (message != null) {
                 prop.putXML("channel_title", message.getTitle());
-                prop.putXML("channel_description", message.getDescription());
+                prop.putXML("channel_description", description);
                 prop.put("channel_pubDate", message.getPubDate());
             }
             while (messageMaxCount > 0 && !feed.isEmpty()) {
@@ -71,7 +74,9 @@ public class feed {
 
                 // create RSS entry
                 prop.putXML("item_" + messageCount + "_title", channelName + ": " + message.getTitle());
-                prop.putXML("item_" + messageCount + "_description", message.getDescription());
+                descriptions = message.getDescriptions();
+                description = descriptions.size() > 0 ? descriptions.get(0) : "";
+                prop.putXML("item_" + messageCount + "_description", description);
                 prop.putXML("item_" + messageCount + "_link", message.getLink());
                 prop.put("item_" + messageCount + "_pubDate", message.getPubDate());
                 prop.putXML("item_" + messageCount + "_guid", message.getGuid());

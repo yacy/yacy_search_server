@@ -34,23 +34,19 @@ package net.yacy.kelondro.workflow;
 
 import java.nio.channels.ClosedByInterruptException;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public abstract class AbstractThread extends Thread implements WorkflowThread {
 
-    private static Log log = new Log("WorkflowThread");
-    protected boolean running = true, announcedShutdown = false;
+    private static ConcurrentLog log = new ConcurrentLog("AbstractThread");
+    protected boolean running = true;
+    private boolean announcedShutdown = false;
     protected long busytime = 0, memuse = 0;
     private   long blockPause = 0;
     private   String shortDescr = "", longDescr = "";
     private   String monitorURL = null;
     private   long threadBlockTimestamp = System.currentTimeMillis();
-
-
-    protected final boolean announceShutdown() {
-        return this.announcedShutdown;
-    }
 
     protected final void announceThreadBlockApply() {
         // shall only be used, if a thread blocks for an important reason
@@ -66,10 +62,6 @@ public abstract class AbstractThread extends Thread implements WorkflowThread {
         final long thisBlockTime = (System.currentTimeMillis() - this.threadBlockTimestamp);
         this.blockPause += thisBlockTime;
         this.busytime -= thisBlockTime;
-    }
-
-    protected final void announceMoreExecTime(final long millis) {
-        this.busytime += millis;
     }
 
     @Override
@@ -136,9 +128,9 @@ public abstract class AbstractThread extends Thread implements WorkflowThread {
 
     private final void logError(final String text,final Throwable thrown) {
         if (log == null) {
-            Log.logSevere("THREAD-CONTROL", text, thrown);
+            ConcurrentLog.severe("THREAD-CONTROL", text, thrown);
         } else {
-            log.logSevere(text,thrown);
+            log.severe(text,thrown);
         }
     }
 
@@ -151,8 +143,8 @@ public abstract class AbstractThread extends Thread implements WorkflowThread {
     }
 
     @Override
-    public void open() {}; // dummy definition; should be overriden
+    public void open() {} // dummy definition; should be overriden
     @Override
-    public void close() {}; // dummy definition; should be overriden
+    public void close() {} // dummy definition; should be overriden
 
 }

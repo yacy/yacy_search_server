@@ -37,6 +37,8 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
+import net.yacy.cora.util.ConcurrentLog;
+
 public final class ConsoleOutErrHandler extends Handler {
 
     private boolean ignoreCtrlChr = false;
@@ -78,7 +80,7 @@ public final class ConsoleOutErrHandler extends Handler {
             this.stdOutHandler.setEncoding(encoding);
             this.stdErrHandler.setEncoding(encoding);
         } catch (final UnsupportedEncodingException e) {
-            Log.logException(e);
+            ConcurrentLog.logException(e);
         }
 
         final String ignoreCtrlChrStr = manager.getProperty(className + ".ignoreCtrlChr");

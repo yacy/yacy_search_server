@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional because target is being used in a links -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Host Browser</title>
+    #%env/templates/metas.template%#
+  <script type="text/javascript">
+//<![CDATA[
+function xmlhttpPost() {
+    var searchform = document.getElementById('searchform');
+    search(searchform.path.value);
+}
+
+function search(query) {
+    var xmlHttpReq = false;
+    var self = this;
+    if (window.XMLHttpRequest) { // Mozilla/Safari
+        self.xmlHttpReq = new XMLHttpRequest(); 
+    }
+    else if (window.ActiveXObject) { // IE
+        self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    self.xmlHttpReq.open('GET', "/solr/select?q=sku:\"" + query + "\" OR host_s:\"" + query + "\" OR host_dnc_s:\"" + query + "\" OR host_organization_s:\"" + query + "\" OR host_organizationdnc_s:\"" + query + "\" OR host_subdomain_s:\"" + query + "\" OR url_paths_sxt:\"" + query + "\" OR url_file_name_s:\"" + query + "\"&start=0&rows=100&wt=yjson", true);
+    self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    self.xmlHttpReq.onreadystatechange = function() {
+        if (self.xmlHttpReq.readyState == 4) {
+            updatepage(self.xmlHttpReq.responseText);
+        }
+    }
+    self.xmlHttpReq.send(null);
+}
+
+function updatepage(str) {
+  var rsp = eval("("+str+")");
+  var firstChannel = rsp.channels[0];
+  var totalResults = firstChannel.totalResults.replace(/[,.]/,"");
+  var startIndex = firstChannel.startIndex;
+  var itemsPerPage = firstChannel.itemsPerPage;
+  var navigation = firstChannel.navigation;
+  
+  var html = "";
+  
+  if (totalResults > 0 && firstChannel.items.length > 0) {
+    var item;
+    html += "<table class=\"networkTable\" border=\"0\" cellpadding=\"2\" cellspacing=\"1\" width=\"99%\">";
+    html += "<tr class=\"TableHeader\" valign=\"bottom\">";
+    html += "<td>URL from index (total results = " + totalResults + ")<\/td>";
+    for (var i = 0; i < firstChannel.items.length; i++) {
+        item = firstChannel.items[i];
+        html += "<tr class=\"TableCellLight\"><td align=\"left\"><a href=\"HostBrowser.html?pathsearch=&amp;path=" + item.link + "\">" + item.link + "<\/a><\/td>";
+    }
+    html += "<\/table>";
+  }
+  document.getElementById("searchresults").innerHTML = html;
+}
+//]]>
+</script>
+<script type="text/javascript" src="/js/sorttable.js"></script>
+  </head>
+  <body id="IndexControl">
+    #(topmenu)#
+    #%env/templates/portalheader.template%#
+    <div class="SubMenu">
+      <ul class="SubMenu">
+      <li style="width:15%;"><a class="MenuItemLink" href="/index.html"><img src="env/grafics/navsl.gif" height="10px"  style="padding-right:10px" align="baseline"/>back to start page</a></li>
+      </ul>
+    </div>
+    #%env/templates/embeddedheader.template%#
+    ::
+    #%env/templates/simpleheader.template%#
+    #(/topmenu)#
+    <h2>Host Browser</h2>
+    <p>Browse the index of #[ucount]# documents. Enter a host or an URL for a file list or view a list of <a href="/HostBrowser.html?hosts=">all hosts</a>, <a href="/HostBrowser.html?hosts=crawling">only hosts with urls pending in the crawler</a> or <a href="/HostBrowser.html?hosts=error">only with load errors</a>.</p>
+    <form action="HostBrowser.html" id="searchform" method="get" onkeyup="xmlhttpPost(); return false;">
+    <fieldset class="yacys">
+      Host/URL: 
+      <input id="search" type="text" name="path" value="#[path]#" size="80" maxlength="250" />
+      <input type="submit" name="list" value="Browse Host" class="submitready" style="width:240px;"/>
+      #(delete)#::<input type="submit" name="delete" value="Delete Subpath" class="submitready" style="width:240px;" onclick="return confirm('Confirm Deletion')"/>#(/delete)#
+      <br />
+      <div id="searchresults"></div>
+    </fieldset>
+    </form>
+    #[result]#
+    
+    #(hosts)#::
+     <fieldset><legend>Host List</legend>
+      #{list}#
+      <div style="float:left; padding:1px 5px 1px 5px;">
+        <div style="width:180px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div id="info"><img src="/env/grafics/#(type)#invisible.png::burn-e.gif::construction.gif#(/type)#" align="left" width="12" height="8">&nbsp;<a href="/HostBrowser.html?path=#[host]#&facetcount=#[count]#">#[host]#</a></div></div>
+        <div style="width:120px; text-align:right; float: left; white-space:nowrap; overflow:hidden;"><span class="commit">#[count]#</span>#(crawler)#::/<span class="pending">#[pending]#</span>#(/crawler)##(errors)#::/<span class="error">#[exclcount]#/#[failcount]#</span>#(/errors)# URLs</div>
+      </div>
+      #{/list}#
+      <div style="clear:both; float:left; padding:10px 5px 1px 5px;">
+        <div style="float:left;clear:both;">Count Colors:</div>
+        <div class="commit" style="float:left;">&nbsp;&nbsp;&nbsp;Documents without Errors</div>
+        <div class="pending" style="float:left;">&nbsp;&nbsp;&nbsp;Pending in Crawler</div>
+        <div class="error" style="float:left;">&nbsp;&nbsp;&nbsp;Load Errors (exclusion/failure)</div>
+        </div>
+    </fieldset>
+    #(/hosts)#
+    
+    #(files)#::
+     <fieldset><legend>Browser for <a href="#[path]#" target="_blank">#[path]#</a></legend>
+     <p>documents stored for host: #[hostsize]#; documents stored for subpath: #[subpathloadsize]#; unloaded documents detected in subpath: #[subpathdetectedsize]# <!-- #(complete)#;<a href="/HostBrowser.html?complete=true&path=#[path]#">get complete list</a>::<a href="/HostBrowser.html?path=#[path]#">directory view</a>#(/complete)#-->
+     </p>
+      <table class="sortable" border="0" cellpadding="2" cellspacing="2" style="float:left">
+      <tr>
+        <th align="center" width="32"></th>
+        <th align="left" width="600" class="listing">Path</th>
+        <td align="right" class="listingem">stored</td>
+        <td align="right" class="listingem">linked</td>
+        <td align="right" class="listingem">pending</td>
+        <td align="right" class="listingem">excluded</td>
+        <td align="right" class="listingem">failed</td>
+      </tr>
+      #(root)#
+      <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+        <td align="center"></td>
+        <td align="left" nowrap ><a href="/HostBrowser.html?path=#[path]#" class="listing">..</a></td>
+        <td align="right" colspan="5" nowrap></td>
+      </tr>::
+      #(/root)#
+      #{list}#
+        #(type)#<!--file-->
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+          <td align="center"><div id="info"><a href="/ViewFile.html?url=#[url]#"><img src="/env/grafics/doc.gif"/></a><span>Show Metadata</span></div></td>
+          <td align="left" nowrap class=#(stored)#"listingem"::"listing"#(/stored)#><a href="#[url]#" target="_blank">#[url]#</a></td>
+          #(stored)#
+          #(load)#<td align="left" colspan="5" nowrap class="listingem">link, detected from context</td>::<td align="left" colspan="5" nowrap class="listingnok"><a href="/HostBrowser.html?load=#[url]#&path=#[path]#">load &amp; index</a>#(/load)#</td>::
+          <td align="left" colspan="1" nowrap class="listingok">indexed</td><td align="left" colspan="4" nowrap class="listingem">#[comment]#</td>::
+ 		  <td align="left" colspan="5" nowrap class="pending">loading</td>::
+ 		  <td align="left" colspan="5" nowrap class="listingnok">#[error]#</td>
+          #(/stored)#
+        </tr>::<!--folder-->
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+          <td align="center"><img src="/env/grafics/dir.gif"/></td>
+          <td align="left" nowrap class="listing"><a href="/HostBrowser.html?path=#[url]#" class="listing">#[url]#</a></td>
+          <td align="right" class="commit">#[stored]#</td>
+          <td align="right" class="listing">#[linked]#</td>
+          <td align="right" #(pendingVisible)#class="listingem"::class="pending"#(/pendingVisible)#>#[pending]#</td>
+          <td align="right" #(excludedVisible)#class="listingem"::class="error"#(/excludedVisible)#>#[excluded]#</td>
+          <td align="right" #(failedVisible)#class="listingem"::class="error"#(/failedVisible)#>#[failed]#</td>
+        </tr>
+        #(/type)#
+      #{/list}#
+      </table>
+    </fieldset>
+    #(/files)#
+    
+    #(outbound)#::
+     <fieldset><legend>Outbound Links, outgoing from #[host]# - Host List</legend>
+      #{list}#
+      <div style="float:left; padding:1px 5px 1px 5px;">
+        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div id="info"><a href="/HostBrowser.html?path=#[link]#">#[host]#</a></div></div>
+        <div style="width:80px; text-align:right; float: left; white-space:nowrap; overflow:hidden;">#[count]# URLs</div>
+      </div>
+      #{/list}#
+      #(admin)#::
+      <p style="clear:both"><br/>
+      <img src="/WebStructurePicture_p.png?host=#[host]#&depth=3&width=1024&height=576&nodes=200&time=1000&colortext=888888&colorback=FFFFFF&colordot0=1111BB&colordota=11BB11&colorline=222222&colorlineend=333333">
+      </p>
+      #(/admin)#
+    </fieldset>
+    #(/outbound)#
+
+    #(inbound)#::
+     <fieldset><legend>Inbound Links, incoming to #[host]# - Host List</legend>
+      #{list}#
+      <div style="float:left; padding:1px 5px 1px 5px;">
+        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div id="info"><a href="/HostBrowser.html?path=#[host]#">#[host]#</a></div></div>
+        <div style="width:80px; text-align:right; float: left; white-space:nowrap; overflow:hidden;">#[count]# URLs</div>
+      </div>
+      #{/list}#
+    </fieldset>
+    #(/inbound)#
+
+    #(admin)#:: 
+    #%HostBrowserAdmin_p.html%# 
+    #(/admin)#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

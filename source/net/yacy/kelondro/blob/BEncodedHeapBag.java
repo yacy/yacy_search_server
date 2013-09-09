@@ -36,15 +36,15 @@ import java.util.Map;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.AbstractMapStore;
 import net.yacy.cora.storage.MapStore;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MergeIterator;
 
 public class BEncodedHeapBag extends AbstractMapStore implements MapStore {
     
@@ -97,7 +97,7 @@ public class BEncodedHeapBag extends AbstractMapStore implements MapStore {
                 try {
                     d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(element.substring(this.prefix.length() + 1, this.prefix.length() + 18));
                 } catch (final ParseException e) {
-                    Log.logSevere("BEncodedHeapBag", "", e);
+                    ConcurrentLog.severe("BEncodedHeapBag", "", e);
                     continue;
                 }
                 time = d.getTime();
@@ -134,11 +134,11 @@ public class BEncodedHeapBag extends AbstractMapStore implements MapStore {
             t.remove(maxf);
             f = new File(this.baseDir, maxf);
             try {
-                Log.logInfo("BEncodedHeapBag", "opening partial heap " + f);
+                ConcurrentLog.info("BEncodedHeapBag", "opening partial heap " + f);
                 BEncodedHeap heap = new BEncodedHeap(f, this.keylength, this.entryOrder, this.buffermax);
                 this.bag.put(maxf, heap);
-            } catch (IOException e) {
-                Log.logSevere("BEncodedHeapBag", "error opening partial heap " + f);
+            } catch (final IOException e) {
+                ConcurrentLog.severe("BEncodedHeapBag", "error opening partial heap " + f);
             }
         }
     }
@@ -186,8 +186,8 @@ public class BEncodedHeapBag extends AbstractMapStore implements MapStore {
         BEncodedHeap heap;
         try {
             heap = new BEncodedHeap(f, this.keylength, this.entryOrder, this.buffermax);
-        } catch (IOException e) {
-            Log.logSevere("BEncodedHeapBag", "unable to open new heap file: " + e.getMessage(), e);
+        } catch (final IOException e) {
+            ConcurrentLog.severe("BEncodedHeapBag", "unable to open new heap file: " + e.getMessage(), e);
             return null;
         }
         this.bag.put(this.current, heap);
@@ -205,7 +205,7 @@ public class BEncodedHeapBag extends AbstractMapStore implements MapStore {
         try {
             d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(name.substring(this.prefix.length() + 1, this.prefix.length() + 18)).getTime();
         } catch (final ParseException e) {
-            Log.logSevere("BEncodedHeapBag", "", e);
+            ConcurrentLog.severe("BEncodedHeapBag", "", e);
             d = 0;
         }
         if (d + this.fileAgeLimit < t || new File(this.baseDir, name).length() >= this.fileSizeLimit) {
@@ -333,7 +333,7 @@ public class BEncodedHeapBag extends AbstractMapStore implements MapStore {
         }
         System.out.println("test size after remove = " + hb.size());
         hb.close();
-        Log.shutdown();
+        ConcurrentLog.shutdown();
     }
     
 }

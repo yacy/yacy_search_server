@@ -21,8 +21,8 @@
     <script type="text/javascript">
     function submitchange(from) {
     	document.getElementById("apilist").action = "Table_API_p.html#" + from;
-        document.getElementById ("scheduleevent").value = "true";
-        document.getElementById("current_schedule_pk").value = from;
+        document.getElementById ("scheduleeventaction").value = "true";
+        document.getElementById("current_pk").value = from;
     	document.getElementById("apilist").submit();
     }
     </script>
@@ -40,7 +40,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     <div id="fullcontent">
   	#(inline)##%env/templates/header.template%#
     
-    <h2>Steering of API Actions</h2>
+    <h2>Process Scheduler</h2>
     <p>This table shows actions that had been issued on the YaCy interface
     to change the configuration or to request crawl actions.
     These recorded actions can be used to repeat specific actions and to send them
@@ -78,6 +78,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           <th>Recording<br/>Date</th>
           <th>Last&nbsp;Exec<br/>Date</th>
           <th>Next&nbsp;Exec<br/>Date</th>
+          <th class="sorttable_nosort">Event Trigger</th>
           <th class="sorttable_nosort">Scheduler</th>
           #(inline)#<th class="sorttable_nosort">URL</th>::#(/inline)#
         </tr>
@@ -91,8 +92,54 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           <td>#[dateLastExec]#</td>
           <td>#[dateNextExec]#</td>
           <td>
+          #(event)#
+            <select name="event_select_#[pk]#" onchange='submitchange("#[pk]#")'>
+              <option value="off" selected="selected">no event</option>
+              <option value="on">activate event</option>
+            </select>
+          ::         
+            <table>
+                <tr><td>
+                    <select name="event_kind_#[pk]#" onchange='submitchange("#[pk]#")'>
+                      <option value="off" #(selectedoff)#::selected="selected"#(/selectedoff)#>off</option>
+                      <option value="once" #(selectedonce)#::selected="selected"#(/selectedonce)#>run once</option>
+                      <option value="regular" #(selectedregular)#::selected="selected"#(/selectedregular)#>run regular</option>
+                    </select>
+                </td><td>
+                    <select name="event_action_#[pk]#" onchange='submitchange("#[pk]#")'>
+                      <option value="startup" #(selectedstartup)#::selected="selected"#(/selectedstartup)#>after start-up</option>
+                      <option value="0000" #(selected0000)#::selected="selected"#(/selected0000)#>at 00:00h</option>
+                      <option value="0100" #(selected0100)#::selected="selected"#(/selected0100)#>at 01:00h</option>
+                      <option value="0200" #(selected0200)#::selected="selected"#(/selected0200)#>at 02:00h</option>
+                      <option value="0300" #(selected0300)#::selected="selected"#(/selected0300)#>at 03:00h</option>
+                      <option value="0400" #(selected0400)#::selected="selected"#(/selected0400)#>at 04:00h</option>
+                      <option value="0500" #(selected0500)#::selected="selected"#(/selected0500)#>at 05:00h</option>
+                      <option value="0600" #(selected0600)#::selected="selected"#(/selected0600)#>at 06:00h</option>
+                      <option value="0700" #(selected0700)#::selected="selected"#(/selected0700)#>at 07:00h</option>
+                      <option value="0800" #(selected0800)#::selected="selected"#(/selected0800)#>at 08:00h</option>
+                      <option value="0900" #(selected0900)#::selected="selected"#(/selected0900)#>at 09:00h</option>
+                      <option value="1000" #(selected1000)#::selected="selected"#(/selected1000)#>at 10:00h</option>
+                      <option value="1100" #(selected1100)#::selected="selected"#(/selected1100)#>at 11:00h</option>
+                      <option value="1200" #(selected1200)#::selected="selected"#(/selected1200)#>at 12:00h</option>
+                      <option value="1300" #(selected1300)#::selected="selected"#(/selected1300)#>at 13:00h</option>
+                      <option value="1400" #(selected1400)#::selected="selected"#(/selected1400)#>at 14:00h</option>
+                      <option value="1500" #(selected1500)#::selected="selected"#(/selected1500)#>at 15:00h</option>
+                      <option value="1600" #(selected1600)#::selected="selected"#(/selected1600)#>at 16:00h</option>
+                      <option value="1700" #(selected1700)#::selected="selected"#(/selected1700)#>at 17:00h</option>
+                      <option value="1800" #(selected1800)#::selected="selected"#(/selected1800)#>at 18:00h</option>
+                      <option value="1900" #(selected1900)#::selected="selected"#(/selected1900)#>at 19:00h</option>
+                      <option value="2000" #(selected2000)#::selected="selected"#(/selected2000)#>at 20:00h</option>
+                      <option value="2100" #(selected2100)#::selected="selected"#(/selected2100)#>at 21:00h</option>
+                      <option value="2200" #(selected2200)#::selected="selected"#(/selected2200)#>at 22:00h</option>
+                      <option value="2300" #(selected2300)#::selected="selected"#(/selected2300)#>at 23:00h</option>
+                    </select>
+                </td></tr>
+            </table>          
+          #(/event)#
+          </td>
+          <td>
           #(scheduler)#
-            <select name="repeat_select_#[pk]#" onchange='submitchange("#[pk]#")'>
+            <select name="repeat_select_#[pk]#" onchange='submitchange("#[pk]#")'#(disabled)#:: disabled="disabled"#(/disabled)#>
               <option value="off" selected="selected">no repetition</option>
               <option value="on">activate scheduler</option>
             </select>
@@ -121,11 +168,19 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       </div>
       </fieldset>
       <p>
-      <input type="hidden" name="scheduleevent" id="scheduleevent" value="false" />
-      <input type="hidden" name="current_schedule_pk" id="current_schedule_pk" value="" />
+      <input type="hidden" name="scheduleeventaction" id="scheduleeventaction" value="false" />
+      <input type="hidden" name="current_pk" id="current_pk" value="" />
       <input type="hidden" name="num" value="#[num]#" />
-      <input type="submit" name="execrows" value="Execute Selected Actions" />
-      <input type="submit" name="deleterows" value="Delete Selected Actions" />
+      &nbsp;<input type="submit" name="execrows" value="Execute Selected Actions" />&nbsp;&nbsp;&nbsp;
+      <input type="submit" name="deleterows" value="Delete Selected Actions" />&nbsp;&nbsp;&nbsp;
+      <table><tr><td><input type="submit" name="deleteold" value="Delete all Actions which had been created before " /></td><td><select name="deleteoldtime">
+        <option value="1">1 day</option><option value="2">2 days</option><option value="3">3 days</option>
+        <option value="4">4 days</option><option value="5">5 days</option><option value="6">6 days</option>
+        <option value="7">1 week</option><option value="14">2 weeks</option><option value="21">3 weeks</option>
+        <option value="30">1 month</option><option value="60" selected="selected">2 months</option><option value="90">3 months</option>
+        <option value="180">6 months</option><option value="270">9 months</option>
+        <option value="365">1 year</option><option value="730">2 years</option>
+      </select></td></tr></table>
       </p>
       
     </form>

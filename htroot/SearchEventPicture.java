@@ -28,15 +28,15 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.graphics.NetworkGraph;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 import net.yacy.visualization.RasterPlotter;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
 
 // draw a picture of the yacy network
 
 public class SearchEventPicture {
 
-    public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static RasterPlotter respond(final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final String eventID = header.get("event", SearchEventCache.lastEventID);
         if (eventID == null) return null;

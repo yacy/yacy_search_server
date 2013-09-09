@@ -25,7 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 
 
@@ -39,7 +39,7 @@ public final class CachedFileReader extends AbstractReader implements Reader {
         this.name = file.getName();
         this.file = file;
         this.RAFile = new RandomAccessFile(this.file, "r");
-        if (MemoryControl.available() / 10L > this.RAFile.length() && this.RAFile.length() < (long) Integer.MAX_VALUE) {
+        if (MemoryControl.available() / 10L > this.RAFile.length() && this.RAFile.length() < Integer.MAX_VALUE) {
         	this.cache = new byte[(int) this.RAFile.length()];
         	this.RAFile.seek(0);
         	this.RAFile.readFully(this.cache);
@@ -76,10 +76,10 @@ public final class CachedFileReader extends AbstractReader implements Reader {
     
     public final synchronized void close() {
         if (RAFile != null) try {
-            try{RAFile.getChannel().close();} catch (IOException e) {}
+            try{RAFile.getChannel().close();} catch (final IOException e) {}
             RAFile.close();
-        } catch (IOException e) {
-            Log.logException(e);
+        } catch (final IOException e) {
+            ConcurrentLog.logException(e);
         }
         this.cache = null;
     }

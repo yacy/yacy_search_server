@@ -29,41 +29,34 @@ package net.yacy.search.index;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import net.yacy.cora.document.Classification;
-import net.yacy.cora.document.UTF8;
+import org.apache.solr.common.SolrInputDocument;
+
+import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.search.query.QueryParams;
-import net.yacy.search.query.RWIProcess;
-import net.yacy.search.ranking.RankingProfile;
-import net.yacy.search.ranking.ReferenceOrder;
+import net.yacy.kelondro.workflow.WorkflowProcessor;
+import net.yacy.search.schema.CollectionConfiguration;
+import net.yacy.search.schema.WebgraphConfiguration;
 
 /**
  * convenience class to access the yacycore library from outside of yacy to put files into the index
  *
  * @author Michael Christen
  */
-public class DocumentIndex extends Segment
-{
-
-    private static final RankingProfile textRankingDefault = new RankingProfile(Classification.ContentDomain.TEXT);
-    //private Bitfield zeroConstraint = new Bitfield(4);
+public class DocumentIndex extends Segment {
 
     private static DigestURI poison;
     static {
         try {
             poison = new DigestURI("file://.");
-        } catch ( final MalformedURLException e ) {
+        } catch (final MalformedURLException e ) {
         }
     }
     BlockingQueue<DigestURI> queue; // a queue of document ID's
@@ -72,14 +65,24 @@ public class DocumentIndex extends Segment
 
     static final ThreadGroup workerThreadGroup = new ThreadGroup("workerThreadGroup");
 
-    public DocumentIndex(final File segmentPath, final CallbackListener callback, final int cachesize)
+    public DocumentIndex(final File segmentPath, final File collectionConfigurationPath, final File webgraphConfigurationPath, final CallbackListener callback, final int cachesize)
         throws IOException {
-        super(new Log("DocumentIndex"), segmentPath, cachesize, targetFileSize * 4 - 1, false, false);
-        final int cores = Runtime.getRuntime().availableProcessors() + 1;
+        super(new ConcurrentLog("DocumentIndex"), segmentPath,
+                collectionConfigurationPath == null ? null : new CollectionConfiguration(collectionConfigurationPath, true),
+                webgraphConfigurationPath == null ? null : new WebgraphConfiguration(webgraphConfigurationPath, true)
+        );
+        super.connectRWI(cachesize, targetFileSize * 4 - 1);
+        super.connectCitation(cachesize, targetFileSize * 4 - 1);
+        super.connectUrlDb(
+                false, // useTailCache
+                false  // exceed134217727
+                );
+        super.fulltext().connectLocalSolr();
+        super.fulltext().writeWebgraph(true);
         this.callback = callback;
-        this.queue = new LinkedBlockingQueue<DigestURI>(cores * 300);
-        this.worker = new Worker[cores];
-        for ( int i = 0; i < cores; i++ ) {
+        this.queue = new LinkedBlockingQueue<DigestURI>(WorkflowProcessor.availableCPU * 300);
+        this.worker = new Worker[WorkflowProcessor.availableCPU];
+        for ( int i = 0; i < WorkflowProcessor.availableCPU; i++ ) {
             this.worker[i] = new Worker(i);
             this.worker[i].start();
         }
@@ -94,12 +97,12 @@ public class DocumentIndex extends Segment
         @Override
         public void run() {
             DigestURI f;
-            URIMetadataRow[] resultRows;
+            SolrInputDocument[] resultRows;
             try {
                 while ( (f = DocumentIndex.this.queue.take()) != poison ) {
                     try {
                         resultRows = add(f);
-                        for ( final URIMetadataRow resultRow : resultRows ) {
+                        for ( final SolrInputDocument resultRow : resultRows ) {
                             if ( DocumentIndex.this.callback != null ) {
                                 if ( resultRow == null ) {
                                     DocumentIndex.this.callback.fail(f, "result is null");
@@ -108,14 +111,14 @@ public class DocumentIndex extends Segment
                                 }
                             }
                         }
-                    } catch ( final IOException e ) {
+                    } catch (final IOException e ) {
                         if ( e.getMessage().indexOf("cannot parse", 0) < 0 ) {
-                            Log.logException(e);
+                            ConcurrentLog.logException(e);
                         }
                         DocumentIndex.this.callback.fail(f, e.getMessage());
                     }
                 }
-            } catch ( final InterruptedException e ) {
+            } catch (final InterruptedException e ) {
             }
         }
     }
@@ -131,7 +134,7 @@ public class DocumentIndex extends Segment
         this.queue.clear();
     }
 
-    private URIMetadataRow[] add(final DigestURI url) throws IOException {
+    private SolrInputDocument[] add(final DigestURI url) throws IOException {
         if ( url == null ) {
             throw new IOException("file = null");
         }
@@ -145,31 +148,31 @@ public class DocumentIndex extends Segment
         long length;
         try {
             length = url.length();
-        } catch ( final Exception e ) {
+        } catch (final Exception e ) {
             length = -1;
         }
         try {
-            documents = TextParser.parseSource(url, null, null, length, url.getInputStream(null, -1));
-        } catch ( final Exception e ) {
+            documents = TextParser.parseSource(url, null, null, length, url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent));
+        } catch (final Exception e ) {
             throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
         }
         //Document document = Document.mergeDocuments(url, null, documents);
-        final URIMetadataRow[] rows = new URIMetadataRow[documents.length];
+        final SolrInputDocument[] rows = new SolrInputDocument[documents.length];
         int c = 0;
         for ( final Document document : documents ) {
         	if (document == null) continue;
-            final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib, true);
+            final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib, LibraryProvider.synonyms, true);
             rows[c++] =
                 super.storeDocument(
                     url,
                     null,
-                    new Date(url.lastModified()),
-                    new Date(),
-                    url.length(),
+                    null,
+                    null,
                     document,
                     condenser,
                     null,
-                    DocumentIndex.class.getName() + ".add");
+                    DocumentIndex.class.getName() + ".add",
+                    false);
         }
         return rows;
     }
@@ -186,7 +189,7 @@ public class DocumentIndex extends Segment
         if ( !start.isDirectory() ) {
             try {
                 this.queue.put(start);
-            } catch ( final InterruptedException e ) {
+            } catch (final InterruptedException e ) {
             }
             return;
         }
@@ -201,42 +204,14 @@ public class DocumentIndex extends Segment
                     } else {
                         try {
                             this.queue.put(w);
-                        } catch ( final InterruptedException e ) {
+                        } catch (final InterruptedException e ) {
                         }
                     }
                 }
-            } catch ( final MalformedURLException e1 ) {
-                Log.logException(e1);
+            } catch (final MalformedURLException e1 ) {
+                ConcurrentLog.logException(e1);
             }
         }
-    }
-
-    /**
-     * do a full-text search of a given string and return a specific number of results
-     *
-     * @param querystring
-     * @param count
-     * @return a list of files that contain the given string
-     */
-    public ArrayList<DigestURI> find(final String querystring, int count) {
-        // make a query and start a search
-        final QueryParams query =
-            new QueryParams(querystring, count, null, this, textRankingDefault, "DocumentIndex");
-        final ReferenceOrder order = new ReferenceOrder(query.ranking, UTF8.getBytes(query.targetlang));
-        final RWIProcess rankedCache = new RWIProcess(query, order, false);
-        rankedCache.start();
-
-        // search is running; retrieve results
-        URIMetadataRow row;
-        final ArrayList<DigestURI> files = new ArrayList<DigestURI>();
-        while ( (row = rankedCache.takeURL(false, 1000)) != null ) {
-            files.add(row.url());
-            count--;
-            if ( count == 0 ) {
-                break;
-            }
-        }
-        return files;
     }
 
     /**
@@ -249,14 +224,14 @@ public class DocumentIndex extends Segment
         final Worker element : this.worker ) {
             try {
                 this.queue.put(poison);
-            } catch ( final InterruptedException e ) {
+            } catch (final InterruptedException e ) {
             }
         }
         // wait for termination
         for ( final Worker element : this.worker ) {
             try {
                 element.join();
-            } catch ( final InterruptedException e ) {
+            } catch (final InterruptedException e ) {
             }
         }
         // close the segment
@@ -265,61 +240,9 @@ public class DocumentIndex extends Segment
 
     public interface CallbackListener
     {
-        public void commit(DigestURI f, URIMetadataRow resultRow);
+        public void commit(DigestURI f, SolrInputDocument resultRow);
 
         public void fail(DigestURI f, String failReason);
-    }
-
-    public static void main(final String[] args) {
-        // first argument: path to segment
-        // second argument: either 'add' or 'search'
-        // third and more arguments exists only in case that second argument is 'search': these are then the search words
-        //
-        // example:
-        // DocumentIndex yacyindex add test/parsertest
-        // DocumentIndex yacyindex search steht
-        System.setProperty("java.awt.headless", "true");
-        if ( args.length < 3 ) {
-            return;
-        }
-        final File segmentPath = new File(args[0]);
-        System.out.println("using index files at " + segmentPath.getAbsolutePath());
-        final CallbackListener callback = new CallbackListener() {
-            @Override
-            public void commit(final DigestURI f, final URIMetadataRow resultRow) {
-                System.out.println("indexed: " + f.toString());
-            }
-
-            @Override
-            public void fail(final DigestURI f, final String failReason) {
-                System.out.println("not indexed " + f.toString() + ": " + failReason);
-            }
-        };
-        try {
-            if ( args[1].equals("add") ) {
-                final DigestURI f = new DigestURI(args[2]);
-                final DocumentIndex di = new DocumentIndex(segmentPath, callback, 100000);
-                di.addConcurrent(f);
-                di.close();
-            } else {
-                String query = "";
-                for ( int i = 2; i < args.length; i++ ) {
-                    query += args[i];
-                }
-                query.trim();
-                final DocumentIndex di = new DocumentIndex(segmentPath, callback, 100000);
-                final ArrayList<DigestURI> results = di.find(query, 100);
-                for ( final DigestURI f : results ) {
-                    if ( f != null ) {
-                        System.out.println(f.toString());
-                    }
-                }
-                di.close();
-            }
-        } catch ( final IOException e ) {
-            Log.logException(e);
-        }
-        //System.exit(0);
     }
 
 }

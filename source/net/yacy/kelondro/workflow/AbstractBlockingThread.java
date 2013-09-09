@@ -24,13 +24,13 @@
 
 package net.yacy.kelondro.workflow;
 
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 
 public abstract class AbstractBlockingThread<J extends WorkflowJob> extends AbstractThread implements BlockingThread<J> {
 
     private WorkflowProcessor<J> manager = null;
-    private final static Log log = new Log("BlockingThread");
+    private final static ConcurrentLog log = new ConcurrentLog("AbstractBlockingThread");
 
     @Override
     public void setManager(final WorkflowProcessor<J> manager) {
@@ -96,7 +96,7 @@ public abstract class AbstractBlockingThread<J extends WorkflowJob> extends Abst
                 this.running = false;
                 break;
             } catch (final Exception e) {
-                Log.logException(e);
+                ConcurrentLog.logException(e);
                 // handle exceptions: thread must not die on any unexpected exceptions
                 // if the exception is too bad it should call terminate()
                 this.jobExceptionHandler(e);
@@ -104,15 +104,16 @@ public abstract class AbstractBlockingThread<J extends WorkflowJob> extends Abst
                 busyCycles++;
             }
         }
+        this.manager.decExecutors();
         this.close();
         logSystem("thread '" + this.getName() + "' terminated.");
     }
 
     private void logSystem(final String text) {
         if (log == null) {
-            Log.logConfig("THREAD-CONTROL", text);
+            ConcurrentLog.config("THREAD-CONTROL", text);
         } else {
-            log.logConfig(text);
+            log.config(text);
         }
     }
 }

@@ -31,16 +31,16 @@ import java.util.Map.Entry;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.NewsDB;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 public class News {
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -49,7 +49,7 @@ public class News {
 
         // execute commands
         if (post != null) {
-            
+
             if ((post.containsKey("deletespecific")) && (tableID >= 0)) {
                 if (sb.adminAuthenticated(header) < 2) {
                 	prop.authenticationRequired();
@@ -64,11 +64,11 @@ public class News {
                         id = check.substring(4);
                         try {
                             sb.peers.newsPool.moveOff(tableID, id);
-                        } catch (final Exception ee) {Log.logException(ee);}
+                        } catch (final Exception ee) {ConcurrentLog.logException(ee);}
                     }
                 }
             }
-            
+
             if ((post.containsKey("deleteall")) && (tableID >= 0)) {
                 if (sb.adminAuthenticated(header) < 2) {
                 	prop.authenticationRequired();
@@ -81,11 +81,11 @@ public class News {
                         sb.peers.newsPool.moveOffAll(tableID);
                     }
                 } catch (final Exception e) {
-                    Log.logException(e);
+                    ConcurrentLog.logException(e);
                 }
             }
         }
-        
+
         // generate properties for output
         if (overview) {
             // show overview
@@ -100,17 +100,17 @@ public class News {
             prop.put("table", "1");
             prop.put("page", tableID + 1);
             prop.put("table_page", tableID + 1);
-            
+
             if (sb.peers != null) {
                 final int maxCount = Math.min(1000, sb.peers.newsPool.size(tableID));
-                final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(tableID, false);
+                final Iterator<NewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(tableID);
                 NewsDB.Record record;
                 Seed seed;
                 int i = 0;
                 while ((recordIterator.hasNext()) && (i < maxCount)) {
                     record = recordIterator.next();
                     if (record == null) continue;
-                    
+
                     seed = sb.peers.getConnected(record.originator());
                     if (seed == null) seed = sb.peers.getDisconnected(record.originator());
                     final String category = record.category();
@@ -121,7 +121,7 @@ public class News {
                     prop.putHTML("table_list_" + i + "_cat", category);
                     prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : GenericFormatter.SHORT_SECOND_FORMATTER.format(record.received()));
                     prop.put("table_list_" + i + "_dis", record.distributed());
-                    
+
                     final Map<String, String> attributeMap = record.attributes();
                     prop.putHTML("table_list_" + i + "_att", attributeMap.toString());
                     int j = 0;
@@ -133,7 +133,7 @@ public class News {
                         }
                     }
                     prop.put("table_list_" + i + "_attributes", j);
-                                        
+
                     // generating link / title / description (taken over from Surftips.java)
                     String link, title, description;
                     if (category.equals(NewsPool.CATEGORY_CRAWL_START)) {
@@ -165,23 +165,23 @@ public class News {
                     	title = record.attribute("author", "Anonymous") + ": " + record.attribute("page", "");
                     	description = "Blog Entry: " + record.attribute("subject", "");
                     } else {
-                    	link = "";             
-                    	title = ""; 
+                    	link = "";
+                    	title = "";
                     	description = "";
                     }
                     prop.putHTML("table_list_" + i + "_link", link);
                     prop.putHTML("table_list_" + i + "_title", title);
                     prop.putHTML("table_list_" + i + "_description", description);
-                    
+
                     i++;
                 }
                 prop.put("table_list", i);
             }
         }
-        
+
         // adding the peer address
         prop.put("address", sb.peers.mySeed().getPublicAddress());
-        
+
         // return rewrite properties
         return prop;
     }

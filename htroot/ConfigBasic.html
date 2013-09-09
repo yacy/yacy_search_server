@@ -1,6 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta charset="UTF-8" />
     <title>YaCy '#[clientname]#': Access Configuration</title>
     #%env/templates/metas.template%#
     <script type="text/javascript">
@@ -37,6 +38,7 @@
             <input type="radio" name="language" value="cn" id="lang_cn" onchange="this.form.submit()" #(lang_cn)#::checked="checked"#(/lang_cn)# /><label for="lang_cn">&#27721;&#35821;/&#28450;&#35486</label>
             <input type="radio" name="language" value="ru" id="lang_ru" onchange="this.form.submit()" #(lang_ru)#::checked="checked"#(/lang_ru)# /><label for="lang_ru">&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</label>
             <input type="radio" name="language" value="uk" id="lang_uk" onchange="this.form.submit()" #(lang_uk)#::checked="checked"#(/lang_uk)# /><label for="lang_uk">&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;</label>
+            <input type="radio" name="language" value="hi" id="lang_hi" onchange="this.form.submit()" #(lang_hi)#::checked="checked"#(/lang_hi)# /><label for="lang_hi">&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;</label>
             <input type="radio" name="language" value="default" id="lang_en" onchange="this.form.submit()" #(lang_en)#::checked="checked"#(/lang_en)# /><label for="lang_en">English</label>
           </fieldset>
         </li>
@@ -90,7 +92,8 @@
             <dl>
               <dt><label for="port">Peer Port: </label></dt>
               <dd>
-                <input type="text" name="port" id="port" value="#[defaultPort]#" size="5" maxlength="5" />
+                <input type="text" name="port" id="port" value="#[defaultPort]#" size="5" maxlength="5" />&nbsp;&nbsp;&nbsp;
+                <input type="checkbox" name="withssl" id="withssl" #(withsslenabled)#::checked="checked"#(/withsslenabled)#>with SSL (https enabled)
               </dd>
               #(upnp)#::<dt>
                 <label for="enableUpnp">Configure your router for YaCy:&nbsp;</label>
@@ -102,7 +105,7 @@
              </dl>
            </fieldset>
          </li>
-    <fieldset>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="set" value="Set Configuration" /></fieldset>
+    <fieldset>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="set" value="Set Configuration" class="submitready"/></fieldset>
         
       </ol>
     </form>
@@ -122,7 +125,7 @@
     <!-- [3]: port not proper -->
     <p>You did not open a port in your firewall or your router does not forward the server port to your peer. This is needed if you want to fully participate in the YaCy network. You can also use your peer without opening it, but this is not recomended.</p>::
     <!-- [4]: reconnect to different port -->
-    <p>The peer port was changed successfully. Your browser will be redirected to the new <a href="#(sslSupport)#http::https#(/sslSupport)#://#[host]#:#[port]#/ConfigBasic.html">location</a> in 10 seconds.</p>
+    <p>The peer port was changed successfully. Your browser will be redirected to the new <a href="#(sslSupport)#http::https#(/sslSupport)#://#[host]#:#[port]#/ConfigBasic.html">location</a> in 5 seconds.</p>
     #(/nextStep)#
     #%env/templates/footer.template%#
   </body>

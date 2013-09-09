@@ -40,24 +40,25 @@ import java.util.Set;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.federated.yacy.CacheStrategy;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.BookmarkHelper;
+import net.yacy.data.BookmarksDB;
+import net.yacy.data.ListManager;
+import net.yacy.data.UserDB;
+import net.yacy.data.BookmarksDB.Bookmark;
+import net.yacy.data.BookmarksDB.Tag;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
-import de.anomic.data.BookmarkHelper;
-import de.anomic.data.BookmarksDB;
-import de.anomic.data.BookmarksDB.Bookmark;
-import de.anomic.data.BookmarksDB.Tag;
-import de.anomic.data.ListManager;
-import de.anomic.data.UserDB;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
 
 
 public class Bookmarks {
@@ -181,7 +182,8 @@ public class Bookmarks {
                 prop.put("mode", "2");
                 prop.put("display", "1");
                 display = 1;
-                if (urlHash.length() == 0) {
+                ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+                if (urlHash.isEmpty()) {
                     prop.put("mode_edit", "0"); // create mode
                     prop.putHTML("mode_title", post.get("title"));
                     prop.putHTML("mode_description", post.get("description"));
@@ -191,14 +193,18 @@ public class Bookmarks {
                     prop.put("mode_public", "0");
                     prop.put("mode_feed", "0");
                 } else {
-                    final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
+                    BookmarksDB.Bookmark bookmark = null;
+                    try {
+                        bookmark = sb.bookmarksDB.getBookmark(urlHash);
+                    } catch (final IOException e1) {
+                    }
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        final URIMetadataRow urlentry = sb.index.urlMetadata().load(ASCII.getBytes(urlHash));
+                        final URIMetadataNode urlentry = sb.index.fulltext().getMetadata(ASCII.getBytes(urlHash));
                         if (urlentry != null) try {
-                            final Document document = Document.mergeDocuments(urlentry.url(), null, sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, 5000, Integer.MAX_VALUE));
+                            final Document document = Document.mergeDocuments(urlentry.url(), null, sb.loader.loadDocuments(sb.loader.request(urlentry.url(), true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, agent));
                             prop.put("mode_edit", "0"); // create mode
-                            prop.put("mode_url", urlentry.url().toNormalform(false, true));
+                            prop.put("mode_url", urlentry.url().toNormalform(false));
                             prop.putHTML("mode_title", urlentry.dc_title());
                             prop.putHTML("mode_description", (document == null) ? urlentry.dc_title(): document.dc_title());
                             prop.putHTML("mode_author", urlentry.dc_creator());
@@ -206,7 +212,7 @@ public class Bookmarks {
                             prop.putHTML("mode_path","");
                             prop.put("mode_public", "0");
                             prop.put("mode_feed", "0"); //TODO: check if it IS a feed
-                        } catch (final IOException e) {Log.logException(e);} catch (final Parser.Failure e) {Log.logException(e);}
+                        } catch (final IOException e) {ConcurrentLog.logException(e);} catch (final Parser.Failure e) {ConcurrentLog.logException(e);}
                     } else {
                         // get from the bookmark database
                         prop.put("mode_edit", "1"); // edit mode
@@ -237,14 +243,14 @@ public class Bookmarks {
                     tags="unsorted";
                 }
 
-                Log.logInfo("BOOKMARKS", "Trying to import bookmarks from HTML-file");
+                ConcurrentLog.info("BOOKMARKS", "Trying to import bookmarks from HTML-file");
 
                 try {
                     final File file = new File(post.get("htmlfile"));
                     BookmarkHelper.importFromBookmarks(sb.bookmarksDB, new DigestURI(file), post.get("htmlfile$file"), tags, isPublic);
                 } catch (final MalformedURLException e) {}
 
-                Log.logInfo("BOOKMARKS", "success!!");
+                ConcurrentLog.info("BOOKMARKS", "success!!");
 
             } else if (post.containsKey("xmlfile")) {
 
@@ -304,7 +310,11 @@ public class Bookmarks {
 
 	       	count = 0;
 	       	while(count < max_count && it.hasNext()) {
-                    final Bookmark bookmark = sb.bookmarksDB.getBookmark(it.next());
+                    Bookmark bookmark = null;
+                    try {
+                        bookmark = sb.bookmarksDB.getBookmark(it.next());
+                    } catch (final IOException e) {
+                    }
 
                     if (bookmark != null){
                         if (bookmark.getFeed() && isAdmin) {
@@ -424,10 +434,12 @@ public class Bookmarks {
             final Iterator<String> bit = sb.bookmarksDB.getBookmarksIterator(fn, isAdmin);
 
             while (bit.hasNext()) {
-                final Bookmark bookmark=sb.bookmarksDB.getBookmark(bit.next());
-    		if(bookmark == null) {
-                    break;
+                Bookmark bookmark = null;
+                try {
+                    bookmark = sb.bookmarksDB.getBookmark(bit.next());
+                } catch (final IOException e) {
                 }
+        		if (bookmark == null) break;
                 prop.put("display_folderlist_" + count + "_folder", "<li><a href=\"" + bookmark.getUrl() + "\" title=\"" + bookmark.getDescription() + "\">" + bookmark.getTitle() + "</a></li>");
                 count++;
             }

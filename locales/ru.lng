@@ -33,7 +33,7 @@ Access Tracker==Zugriffe
 Server Access Overview==Обзор доступа к серверу
 This is a list of \#\[num\]\# requests to the local http server within the last hour.==Это список запросов #[num]# на локальный сервер http в течение последнего часа.
 This is a list of requests to the local http server within the last hour.==Это список запросов на локальный http сервер в течение часа.
-Showing \#\[num\]\# requests.==Показать #[num]# запросы.
+Showing \#\[num\]\# requests.==Показать #[num]# запросов.
 #>Host<==>Хост<
 >Path<==>Путь<
 Date<==Дата<
@@ -42,16 +42,16 @@ last Second==последняя секунда
 last Minute==последняя минута
 last 10 Minutes==последние 10 минут
 last Hour==последний час
-The following hosts are registered as source for brute-force requests to protected pages==Следующие хостов зарегистрированы в качестве источника для грубой силы запросы к защищенным страницам
+The following hosts are registered as source for brute-force requests to protected pages==Следующие хостов зарегистрированы как пытающиеся получить доступ к защищенным страницам перебором паролея
 #>Host==>Хост
 Access Times==Время доступа
 Server Access Details==Подробные сведения о сервере доступа
 Local Search Log==Лог локального поиска
-Local Search Host Tracker==Локальный поиск на трекере
+Local Search Host Tracker==Локальный поиск на узле
 Remote Search Log==Лог внешнего поиска
 #Total:==Итого:
 Success:==Успешно:
-Remote Search Host Tracker==Удаленный поиск на трекере
+Remote Search Host Tracker==Удаленный поиск на узле
 This is a list of searches that had been requested from this\' peer search interface==Это список запросов полученный от других поисковых пиров
 Showing \#\[num\]\# entries from a total of \#\[total\]\# requests.==Показаны \ # \ [num \] \ # из \ # \ [total \] \ # запросов .
 Requesting Host==Запрашиваемый Хост
@@ -67,16 +67,16 @@ Search Word Hashes==Поиск слова по хэшу
 Count</td>==Количество</td>
 Queries Per Last Hour==Запросов за последний час
 Access Dates==Время доступа
-This is a list of searches that had been requested from remote peer search interface==Это список запросов, которые были запрошены из отдаленных поисковых пиров
+This is a list of searches that had been requested from remote peer search interface==Это список запросов, которые были запрошены удаленными узлами
 #-----------------------------
 #File: Blacklist_p.html
 #---------------------------
-Blacklist Administration==Черный список администрации
+Blacklist Administration==Управление черными списками
 Used Blacklist engine:==Используемый черный список:
-This function provides an URL filter to the proxy; any blacklisted URL is blocked==Эта функция позволяет фильтровать URL перед прокси-сервером.
-from being loaded. You can define several blacklists and activate them separately.==загрузку. Вы можете задать несколько черных списков и активировать их по отдельности .
-You may also provide your blacklist to other peers by sharing them; in return you may==Вы также можете обменяться своим черным списком с другими узлами.
-collect blacklist entries from other peers.==собирать черный список с других источников.
+This function provides an URL filter to the proxy; any blacklisted URL is blocked==Эта функция представляет собой URL-фильтр для прокси-сервера; адреса в черном списке не
+from being loaded. You can define several blacklists and activate them separately.==загружаются. Вы можете задать несколько черных списков и активировать их по отдельности.
+You may also provide your blacklist to other peers by sharing them; in return you may==Вы также можете открыть доступ к вашему черному списку другим узлам; или
+collect blacklist entries from other peers.==загружать шаблоны из черных списков других узлов.
 Active list:==Активный список
 No blacklist selected==Не выбран черный список
 Select list:==Выбранный список:
@@ -104,10 +104,10 @@ domain.net\/fullpath<==domain.net/полный путь<
 \*.sub.domain.net\/\*<==*.sub.domain.net/*<
 #sub.domain.\*\/\*<==sub.domain.*/*<
 #domain.\*\/\*<==domain.*/*<
-a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a> \(slow\)==полный <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">регулярное выражение</a> \(медленный\)
+a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a> \(slow\)==полное <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">регулярное выражение</a> \(медленно\)
 #was removed from blacklist==был удален из черного списка
 #was added to the blacklist==был добавлен в черный список
-Activate this list for==Активировать этот лист для
+Activate this list for==Использовать этот список для
 Show entries:==Показать ввод:
 Entries per page:==Записи на страницу:
 "Go"=="Вперед"
@@ -117,8 +117,8 @@ proxy==прокси
 #-----------------------------
 #File: BlacklistCleaner_p.html
 #---------------------------
-Blacklist Cleaner==Черный список чист
-Here you can remove or edit illegal or double blacklist-entries.==Здесь вы можете удалить или редактировать ошибочные или двойные записи.
+Blacklist Cleaner==Чистка черного списка
+Here you can remove or edit illegal or double blacklist-entries.==Здесь вы можете удалить или отредактировать ошибочные или двойные записи.
 Check list==Лист проверки
 "Check"=="Проверка"
 Allow regular expressions in host part of blacklist entries.==Разрешить регулярные выражения в черном списке.
@@ -160,14 +160,14 @@ This file will not contain any additional information==Этот файл не б
 #---------------------------
 Blacklist Test==Проверка черного списка
 Used Blacklist engine:==Использовать черный список
-Test list:==Список тестов:
+Test list:==Тест списка:
 "Test"=="Тест"
 The tested URL was==Проверенный URL был
-It is blocked for the following cases:==Это блокируется в следующем случае:
-#Crawling==Crawling
-#DHT==DHT
-#News==Новости
-#Proxy==Прокси
+It is blocked for the following cases:==Он блокируется в следующих случаях:
+Crawling==Crawling
+DHT==DHT
+News==Новости
+Proxy==Прокси
 Search==Поиск
 Surftips==Советы
 #-----------------------------
@@ -189,7 +189,7 @@ Author:==Автор:
 Subject:==Тема:
 #Text:==Текст:
 You can use==Вы можете использовать
-Yacy-Wiki Code==YaCy-Wiki Befehle
+#Yacy-Wiki Code==YaCy-Wiki Befehle
 here.==здесь.
 Comments:==Комментарии:
 deactivated==отключить
@@ -204,7 +204,7 @@ Access denied==Доступ запрещен
 To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Чтобы изменить или создать блог, вы должны быть зарегистрированы в качестве администратора или пользователя, который имеет необходимые права .
 Are you sure==Вы уверены
 that you want to delete==что вы хотите удалить
-Confirm deletion==Bestätige Löschung
+Confirm deletion==Подтвердите удаление
 Yes, delete it.==Да, удалить это.
 No, leave it.==Нет, оставить это.
 Import was successful!==Импорт завершен!
@@ -216,14 +216,14 @@ Please select the XML-file you want to import:== Пожалуйста выбер
 by==von
 Comments</a>==Комментарий</a>
 Login==Логин
-Blog-Home==Blog-Startseite
+#Blog-Home==Blog-Startseite
 delete</a>==удалить</a>
 allow</a>==разрешить
 Author:==Автор:
 Subject:==Тема:
 #Text:==Текст:
 You can use==Вы можете использовать
-Yacy-Wiki Code==YaCy-Wiki Befehle
+#Yacy-Wiki Code==YaCy-Wiki Befehle
 here.==здесь.
 "Submit"=="Послать"
 "Preview"=="предварительный просмотр"
@@ -286,8 +286,8 @@ Public Queue==Публичная Очередь
 #File: compare_yacy.html
 #---------------------------
 Websearch Comparison==Сравнение веб-поиска
-Left Search Engine==Левый поисковый
-Right Search Engine==Правый поисковый
+Left Search Engine==Левый поиск
+Right Search Engine==Правый поиск
 Query==Запрос
 "Compare"=="Сравнить"
 Search Result==Результат поиска
@@ -305,12 +305,12 @@ No password is set for the administration account.==Пароль не устан
 Please define a password for the admin account.==Пожалуйста, определите пароль для учетной записи администратора .
 Admin Account==Admin, учетная запись
 Access from localhost without account==Для доступа с localhost не требуются права
-Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==Доступ к пиру со своего компьютера \ (localhost access\) разрешен. Нет необходимости настраивать управление учетной записи.
+Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==Доступ к узлу со своего компьютера \ (localhost access\) разрешен. Нет необходимости настраивать управление учетной записи.
 Access only with qualified account==Доступ только с квалифицированной учетной записи
-You need this only if you want a remote access to your peer.==Это нужно только если вам нужен доступ к пирам.
+You need this only if you want a remote access to your peer.==Это нужно только если вам нужен удаленный доступ к вашему узлу
 Peer User:==Пир(юзер)
-New Peer Password:==Новый пароль Пира:
-Repeat Peer Password:==Повторите пароль Пира
+New Peer Password:==Новый пароль Узла:
+Repeat Peer Password:==Повторите пароль Узла:
 "Define Administrator"=="Определить Администратором"
 Select user==Выбранный пользователь
 New user==Новый пользователь
@@ -373,7 +373,7 @@ Error saving the skin.==Ошибка сохранения файла скина.
 #---------------------------
 Access Configuration==Конфигурация доступа
 Basic Configuration==Основная конфигурация
-Your YaCy Peer needs some basic information to operate properly==Ваш YaCy пир нуждается в некоторой информации для правильной работы
+Your YaCy Peer needs some basic information to operate properly==Ваш узел YaCy нуждается в некоторой информации для правильной работы
 Select a language for the interface==Выберите язык интерфейса
 Use Case: what do you want to do with YaCy:==Вариант использования: что вы хотите сделать с YaCy:
 Community-based web search==Групповой веб-поиск
@@ -387,14 +387,14 @@ Intranet Indexing==Интранет индексирование
 Create a search portal for your intranet or web pages or your \(shared\) file system.==Портал для интрасети или общественные веб-сайты или их (распределенной) файловой системы.
 URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==URL-адреса могут быть использованы с HTTP / HTTPS / FTP и локальное имя домена или IP-адрес, или URL формы 
 or smb:==или smb:
-Your peer name has not been customized; please set your own peer name==Ваше имя пира не должно меняться, пожалуйста, установите ваше собственное имя пира
-You may change your peer name==Вы можете поменять имя пира
-Peer Name:==Имя пира:
-Your peer cannot be reached from outside==Ваш пир недоступен извне
+Your peer name has not been customized; please set your own peer name==Вы не указали имя узла. Пожалуйста назовите свой узел
+You may change your peer name==Вы можете поменять имя узла
+Peer Name:==Имя узла:
+Your peer cannot be reached from outside==Ваш узел недоступен извне
 which is not fatal, but would be good for the YaCy network==это не критично, но это не хорошо для сети YaCy
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==пожалуйста откройте настройки Вашего брендмауэра и/или настройки виртуального сервера на Вашем роуторе для открытия подключений на этот порт
-Your peer can be reached by other peers==Ваш пир не может быть доступен с других пиров
-Peer Port:==Порт пира:
+Your peer can be reached by other peers==Ваш узел доступен с других узлов
+Peer Port:==Порт узла:
 Configure your router for YaCy:==Настройте ваш роутер для YaCy:
 Configuration was not successful. This may take a moment.==Настройки не были применены. Попробуйте через некоторое время .
 Set Configuration==Установка настроек
@@ -404,44 +404,43 @@ just <==только <
 start an uncensored search==начать не централизованный поиск
 start your own crawl</a> and contribute to the global index, or create your own private web index==начать свой собственное сканирование(crawl) </> и внести вклад в глобальный индекс, или создать свой собственный веб-индекс
 set a personal peer profile</a> \(optional settings\)==установите персональный профиль пира</a> \(дополнительные настройки\)
-monitor at the network page</a> what the other peers are doing==страница мониторинга сети </> что другие пиры делают 
-Your Peer name is a default name; please set an individual peer name.==Ваше имя пира является по умолчанию, пожалуйста установите другое имя пира.
+monitor at the network page</a> what the other peers are doing==страница мониторинга сети </> что делают другие узлы 
+Your Peer name is a default name; please set an individual peer name.==Ваше имя узла является именем по умолчанию, пожалуйста установите другое имя узла.
 You did not set a user name and/or a password.==Вы не установили имя пользователя и / или пароль .
 Some pages are protected by passwords.==Некоторые страницы защищены паролем .
 You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Вы должны установить пароль в меню <a  href="ConfigAccounts_p.html"> Учетные записи </>, чтобы защитить YaCy пир. </p >::
-You did not open a port in your firewall or your router does not forward the server port to your peer.==Вы не открыли порт в фаерволе или ваш роутер не перенаправляет запросы на порт  сервера
-This is needed if you want to fully participate in the YaCy network.==Это необходимо, если вы хотите полноценно участвовать в YaCy сети.
+You did not open a port in your firewall or your router does not forward the server port to your peer.==Вы не открыли порт на фаерволе или ваш роутер не перенаправляет запросы на порт  сервера
+This is needed if you want to fully participate in the YaCy network.==Это необходимо, если вы хотите полноценно участвовать в сети YaCy.
 You can also use your peer without opening it, but this is not recomended.==Вы можете использовать без открытия порта, но это не рекомендуется.
 #-----------------------------
 #File: ConfigHeuristics_p.html
 #---------------------------
-Heuristics Configuration==Конфигурация Эвристики
-A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==Эвристика <a href=\"http://ru.wikipedia.org/wiki/Эвристика\"> </a> специальные методы, которые помогают в анализе и поиска лучшего результата.
-The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==Эвристический поиск использует методы, которые помогают улучшить результат поиска по основным ссылкам и другим запросам в поисковой системе. 
-Die Heuristik zur Suche die hier angeschalten werden können sind Techniken die helfen mögliche Suchergebnisse zu entdecken mit Hilfe von erratenen Links, Crawls während der Suche und Anfragen an andere Suchmaschinen.
-When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Когда используется эвристический поиск, непосредственно ссылки не используются в выдаче результата, но загруженные и индексированные страницы храняться как обычный контент.
-This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Damit wird sichergestellt dass die Sperrlisten verwendet werden können und dass die Suchbegriffe auch wirklich auf den Seiten auftauchen, die mithilfe der Heuristik gefunden wurden.
-The success of heuristics are marked with an image==Der Erfolg der Heuristik wird mit einem Bild markiert
-heuristic:&lt;name&gt;==Heuristik:&lt;Name&gt;
-#\(redundant\)==\(избыточный\)
+Heuristics Configuration==Конфигурация Эвристик
+A <a href=\"http://en.wikipedia.org/wiki/Heuristic\">heuristic</a> is an \'experience-based technique that help in problem solving, learning and discovery\' \(wikipedia\).==Эвристика <a href=\"http://ru.wikipedia.org/wiki/Эвристика\"> </a> это специальный метод, которые помогают в анализе и поиске лучшего результата.
+The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==Эвристический поиск использует методы, которые помогают улучшить результат поиска за счет предугадывания ссылок и/или запросов к другим поисковым системам. 
+When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Когда используется эвристический поиск, полученные ссылки не используются в поисковой выдаче напрямую а используются для индексации новых страниц.
+#This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Это дает возможность использовать черные списки и гарантирует что что искомое слово реально есть на странице найденной эвристикой.
+The success of heuristics are marked with an image==Успех эвристик отмечен изображением
+heuristic:&lt;name&gt;==эвристика:&lt;название&gt;
+#\(redundant\)==\(избыточно\)
 \(new link\)==\(новый линк\)
-below the favicon left from the search result entry:==ниже значок слева от результата поиска:
+below the favicon left from the search result entry:==под иконкой слева от результата поиска:
 The search result was discovered by a heuristic, but the link was already known by YaCy==Результат поиска был обнаружен при помощи эвристики, но линк был уже известен YaCy
-The search result was discovered by a heuristic, not previously known by YaCy==Das Suchergebnis wurde durch eine Heuristik gefunden, aber YaCy vorher noch nicht bekannt.
-\'site\'-operator: instant shallow crawl=='site'-Operator: Sofortiger oberflächlicher Crawl
-When a search is made using a \'site\'-operator \(like: \'download site:yacy.net\'\) then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==Wenn eine Suche mit dem 'site'-Operator gestartet wird (z.B.: 'download site:yacy.net') dann wird der Host des 'site'-Operator sofort gecrawlt mit einer auf den Host beschränkten Suchtiefe von 1.
-That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Das bedeutet: Gleich nach der Suchanfrage wird die Portalseite des Hosts geladen und jede verlinkte Seite die auf eine Seite auf demselben Host verweist.
-Because this \'instant crawl\' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search \(after a small pause of some seconds\).==Weil dieser 'Sofort Crawl' auch die robots.txt und eine minimale Zugriffszeit für folgende Seiten berücksichtigen muss, ist diese Heuristik sehr langsam - aber kann alle gewünschten Suchergebniss finden indem eine zweite Suche (nach einigen Sekunden Pause) gestartet wird. 
+The search result was discovered by a heuristic, not previously known by YaCy==Результат поиска был обнаружен при помоще эвристики, но ранее не был известен YaCy
+\'site\'-operator: instant shallow crawl== Оператор 'site': - мгновенная неглубокая индексация
+When a search is made using a \'site\'-operator \(like: \'download site:yacy.net\'\) then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==Если при поиске используется оператор 'site' (например: 'download site:yacy.net') то указанный сайт обходится с глубиной поиска 1.
+That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Это значит: сразу после поиска главная страница сайта и все страницы сайта на которые есть ссылки с главной - загружены.
+Because this \'instant crawl\' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search \(after a small pause of some seconds\).==Так как эта эвристика должна соблюдать указанные в robots.txt и в конфигурации YaCy ограничения то эта эвристика достаточно медленная. Но страницы могут быть доступны при следущем поиске (через несколько секунд). 
 scroogle: load external search result list==scroogle: загрузка внешних результатов поиска
 When using this heuristic, then every search request line is used for a call to scroogle.==При использовании эвристически,  каждая строка поискового запроса используется для вызова scroogle .
-20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==20 результаты взяты из scroogle и загружаются одновременно, анализируются и индексируются сразу.
+20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==20 результатов берутся из scroogle и загружаются одновременно, анализируются и индексируются сразу.
 #-----------------------------
 #File: ConfigHTCache_p.html
 #---------------------------
 Hypertext Cache Configuration==Настройка кэша гипертекста
 The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==Кэш храненит данные полученные по HTTP и FTP протоколу. Документы из smb:// and file:// не кэшируются.
-The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==Ротация кэша: если она заполнена, то старые записи будут удалены и заменены на новые.
-HTCache Configuration==HT Настройка кэша
+The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==Ротация кэша: если он заполнен, то старые записи будут удалены и заменены на новые.
+HTCache Configuration==Настройка кэша
 The path where the cache is stored==Путь, где сохраняется кэш
 The current size of the cache==Текущий размер кэша
 The maximum size of the cache==Максимальный размер кэша
@@ -474,94 +473,94 @@ might overwrite existing data if a file of the same name exists already.==мож
 #File: ConfigLiveSearch.html
 #---------------------------
 Integration of a Search Field for Live Search==Интеграция поискового модуля для живого поиска
-A \'Live-Search\' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page==Eine 'Live Suche' Eingabefeld zeigt live beim Eingeben in einem Pop-up Fenster Ergebnisse and und kann einfach in jede bestehende Webseite eingebaut werden
-This is the same function as can be seen on all pages of the YaCy online-interface \(look at the window in the upper right corner\)==Das ist dieselbe Funktion, die man auf allen Seiten des YaCy Webinterfaces sehen kann (z.B. das Fenster in der oberen rechten Ecke)
-Just use the code snippet below to integrate that in your own web pages==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld in Ihre Webseite einzubauen.
-Please check if the address, as given in the example \'\#\[ip\]\#\:\#\[port\]\#\' here is correct and replace it with more appropriate values if necessary==Bitte überprüfen Sie, ob die Adresse die im Beispiel '#[ip]#:#[port]#' richtig ist und ersetzen Sie die Adresse wenn nötig mit richtigen Werten
+#A \'Live-Search\' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page==Eine 'Live Suche' Eingabefeld zeigt live beim Eingeben in einem Pop-up Fenster Ergebnisse and und kann einfach in jede bestehende Webseite eingebaut werden
+#This is the same function as can be seen on all pages of the YaCy online-interface \(look at the window in the upper right corner\)==Das ist dieselbe Funktion, die man auf allen Seiten des YaCy Webinterfaces sehen kann (z.B. das Fenster in der oberen rechten Ecke)
+#Just use the code snippet below to integrate that in your own web pages==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld in Ihre Webseite einzubauen.
+#Please check if the address, as given in the example \'\#\[ip\]\#\:\#\[port\]\#\' here is correct and replace it with more appropriate values if necessary==Bitte überprüfen Sie, ob die Adresse die im Beispiel '#[ip]#:#[port]#' richtig ist und ersetzen Sie die Adresse wenn nötig mit richtigen Werten
 Code Snippet:==Фрагмент кода:
-YaCy Portal Search==YaCy Поисковый Портал
+YaCy Portal Search==Поисковый Портал YaCy
 "Search"=="Поиск"
-Configuration options and defaults for \'yconf\':==Konfigurations Optionen und Standardeinstellungen für 'yconf':
+#Configuration options and defaults for \'yconf\':==Konfigurations Optionen und Standardeinstellungen für 'yconf':
 Defaults<==По умолчанию<
 url<==URL<
-is a mandatory property - no default<==muss angegeben werden<
+#is a mandatory property - no default<==является обязательным свойством<
 YaCy P2P Web Search==YaCy P2P Веб поиск
-Size and position \(width \| height \| position\)==Größe und Position (Breite | Höhe | Position)
+Size and position \(width \| height \| position\)==Размер и положение (ширина | высота | положение )
 Specifies where the dialog should be displayed. Possible values for position: \'center\', \'left\', \'right\', \'top\', \'bottom\', or an array containing a coordinate pair \(in pixel offset from top left of viewport\) or the possible string values \(e.g. \[\'right\',\'top\'\] for top right corner\)==Gibt an wo der Dialog angezeigt werden soll. Mögliche Werte für position: 'center', 'left', 'right', 'top', 'bottom', oder ein Array das ein Koordinatenpaar enthält (in Pixel Werten als Offset von der linken oberen Ecke des Viewports) oder einer möglichen String Variabble (e.g. ['right','top'] für die rechte obere Ecke)
-Animation effects \(show | hide\)==Animationseffekte (show | hide)
-The effect to be used. Possible values: \'blind\', \'clip\', \'drop\', \'explode\', \'fold\', \'puff\', \'slide\', \'scale\', \'size\', \'pulsate\'.==
-Der Effekt der angewendet werden soll. Mögliche Werte sind: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
-Interaction \(modal \| resizable\)==Interaktion (modal | resizable)
-If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled \(i.e. cannot be interacted with\).==Wenn modal auf true gesetzt wird verhält sich der Dialog genau so; Andere Elemente auf der Seite werden deaktiviert. (können also solange das Fenster geöffnet ist nicht verwendet werden)
-Modal dialogs create an overlay below the dialog but above other page elements.==Modale Dialoge erzeugen einen Overlay unter dem Dialog aber überhalb anderer Seitenelemente
-If resizable is set to true, the dialog will be resizeable.==Wenn resizable auf true gesetzt wird, kann man die Größe des Dialogfensters verändern.
-Load JavaScript load_js==JavaScript laden load_js
-If load_js is set to false, you have to manually load the needed JavaScript on your portal page.==Wenn load_js auf false gesetzt wird, müssen Sie manuell das benötigte Javascript auf Ihrer Portalseite laden.
-This can help to avoid timing problems or double loading.==Das kann helfen Timing Probleme oder das doppelte Laden zu verhindern.
-Load Stylesheets load_css==Stylesheets laden load_css
-If load_css is set to false, you have to manually load the needed CSS on your portal page.==Wenn load_css auf false gesetzt wird, müssen Sie manuell das benötigte CSS auf Ihrer Portalseite laden. 
+Animation effects \(show | hide\)== Анимационные эффекты (показать | скрыть)
+#The effect to be used. Possible values: \'blind\', \'clip\', \'drop\', \'explode\', \'fold\', \'puff\', \'slide\', \'scale\', \'size\', \'pulsate\'.==
+#Der Effekt der angewendet werden soll. Mögliche Werte sind: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
+#Interaction \(modal \| resizable\)==Взаимодействие (модальное | изменяемый размер)
+#If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled \(i.e. cannot be interacted with\).==Wenn modal auf true gesetzt wird verhält sich der Dialog genau so; Andere Elemente auf der Seite werden deaktiviert. (können also solange das Fenster geöffnet ist nicht verwendet werden)
+#Modal dialogs create an overlay below the dialog but above other page elements.==Modale Dialoge erzeugen einen Overlay unter dem Dialog aber überhalb anderer Seitenelemente
+#If resizable is set to true, the dialog will be resizeable.==Wenn resizable auf true gesetzt wird, kann man die Größe des Dialogfensters verändern.
+#Load JavaScript load_js==Загружать JavaScript load_js
+#If load_js is set to false, you have to manually load the needed JavaScript on your portal page.==Wenn load_js auf false gesetzt wird, müssen Sie manuell das benötigte Javascript auf Ihrer Portalseite laden.
+#This can help to avoid timing problems or double loading.==Das kann helfen Timing Probleme oder das doppelte Laden zu verhindern.
+#Load Stylesheets load_css==Stylesheets laden load_css
+#If load_css is set to false, you have to manually load the needed CSS on your portal page.==Wenn load_css auf false gesetzt wird, müssen Sie manuell das benötigte CSS auf Ihrer Portalseite laden. 
 #Themes==Themes
-You can <==Sie können <
-download</a> ready made themes or <a href=\"http://jqueryui.com/themeroller/\" target=\"_blank\">create</a>==fertige Themes herunterladen</a> oder <a href="http://jqueryui.com/themeroller/" target="_blank">erstellen</a>
-your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/==Ihr ganz eigenes Theme. <br/>Themes werden im folgenden Verzeichnis installiert: DATA/HTDOCS/yacy/ui/css/themes/
+#You can <==Вы можете <
+#download</a> ready made themes or <a href=\"http://jqueryui.com/themeroller/\" target=\"_blank\">create</a>==fertige Themes herunterladen</a> oder <a href="http://jqueryui.com/themeroller/" target="_blank">erstellen</a>
+#your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/==Ihr ganz eigenes Theme. <br/>Themes werden im folgenden Verzeichnis installiert: DATA/HTDOCS/yacy/ui/css/themes/
 #-----------------------------
 #File: ConfigNetwork_p.html
 #---------------------------
-Network Configuration==Netzwerk Einstellungen
-No changes were made!==Es wurden keine Änderungen vorgenommen!
-Accepted Changes==Änderungen wurden gespeichert
-Inapplicable Setting Combination==unpassende Einstellungskombination
+Network Configuration==Конфигурация сети
+No changes were made!==Изменений не произведено!
+Accepted Changes==Приняты изменения!
+Inapplicable Setting Combination==Некорректное сочетанией настроек
 #P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on==P2P-Tätigkeit läuft ohne Remote-Indexierung, aber funktioniert besser, wenn diese eingeschaltet ist. Bitte aktivieren Sie 'Remote Crawling akzeptieren'
-For P2P operation, at least DHT distribution or DHT receive \(or both\) must be set. You have thus defined a Robinson configuration==Für P2P-Tätigkeit muss mindestens DHT-Verteilung oder DHT-Empfang (oder beides) aktiviert sein. Ansonsten haben Sie einen Robinson-Peer definiert
-Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.==Die globale Suche im P2P-Modus ist nur erlaubt, wenn der Index-Empfang aktiviert ist. Sie sind im P2P-Modus, aber Sie dürfen keine anderen Peers durchsuchen.
-For Robinson Mode, index distribution and receive is switched off==Im Robinson-Modus werden Indexverteilung und -empfang deaktiviert
+For P2P operation, at least DHT distribution or DHT receive \(or both\) must be set. You have thus defined a Robinson configuration==Для P2P-режима должно быть разрешено или отсылка через DHT или прием \(или и то и другое\). Вы указали автономную (Robinson) конфигурацию
+Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.==Глобальный P2P-поиск доступ только если у вас включен включен прием индекса через DHT. У вас P2P-конфигурация но вам не доступен глобальный поиск.
+For Robinson Mode, index distribution and receive is switched off==Для автономного(Robinson) режима, отсылка и прием индекса отключены
 #This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted==Dieser Robinson-Modus aktiviert Remote-Indexierung, aber beschränkt die Anfragen auf Peers des selben Clusters. Nur Remote-Indexierungsanfragen von Peers des selben Clusters werden akzeptiert
 #This Robinson Mode does not allow any remote indexing \(neither requests remote indexing, nor accepts it\)==Dieser Robinson-Modus erlaubt keinerlei Remote-Indexierung (es wird weder Remote-Indexierung angefragt, noch akzeptiert)
-Network and Domain Specification==Netzwerk und Domain Spezifikation
+Network and Domain Specification==Указание сети и доме́на
 # With this configuration it is not allowed to authentify automatically from localhost!==Diese Konfiguration erlaubt keine automatische Authentifikation von localhost!
 # Please open the <a href=\"ConfigAccounts_p.html\">Account Configuration</a> and set a new password.==Bitte in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> ein neues Passwort festlegen.
-YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==Sie können an einem verteiltem Netz aus YaCy Peers mitwirken oder einen eigenständigen Peer betreiben.
-To control that all participants within a web indexing domain have access to the same domain,==Um zu kontrollieren, dass alle Teilnehmer innerhalb einer Indexierungs Domain Zugriff zu der selben Domain haben, 
-this network definition must be equal to all members of the same YaCy network.==müssen diese Netzwerkdefinitionen bei allen Mitgliedern des YaCy Netzwerkes gleich sein.
-Network Definition==Netzwerk Definition
-Network Nick==Netzwerk Nick
-Long Description==Lange Beschreibung
-Indexing Domain==Indexierungs Domain
+YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==YaCy может работать в режиме кластера узлов или как одиночный узел.
+To control that all participants within a web indexing domain have access to the same domain,==Для контроля того что все участники домена индексации имеют доступ к одним и тем же данным, 
+this network definition must be equal to all members of the same YaCy network.==данное описание сети должно быть одинаково у всех членов этой сети.
+#Network Definition==Netzwerk Definition
+#Network Nick==Netzwerk Nick
+#Long Description==Lange Beschreibung
+#Indexing Domain==Indexierungs Domain
 #DHT==DHT
-"Change Network"=="Netzwerk wechseln"
-Distributed Computing Network for Domain==Verteiltes Rechnen Netzwerk für die Domain
-You can configure if you want to participate at the global YaCy network or if you want to have your==Sie können einstellen, ob Sie am globalen YaCy-Netzwerk teilnehmen wollen oder ob Sie einen eigenen
-own separate search cluster with or without connection to the global network. You may also define==separaten Such-Cluster, mit oder ohne Verbindung zum globalen Netz, haben möchten. Sie können auch
-a completely independent search engine instance, without any data exchange between your peer and other==eine vollkommen unabhängige Instanz einer Suchmaschine, ohne jeglichen Datenaustausch zwischen Ihrem und anderen Peers, definieren.
-peers, which we call a 'Robinson' peer.==Dies nennen wir einen 'Robinson'-Peer.
-Peer-to-Peer Mode==Peer-to-Peer Modus
->Index Distribution==>Index-Verteilung
-This enables automated, DHT-ruled Index Transmission to other peers==Dies aktiviert den automatischen, DHT-basierten Versand an andere Peers
->enabled==>aktiviert
-disabled during crawling==während des Crawlings deaktiviert
-disabled during indexing==während des Indexierens deaktiviert
->Index Receive==>Index-Empfang
-Accept remote Index Transmissions==Remote Index-Übertragungen akzeptieren
-This works only if you have a senior peer. The DHT-rules do not work without this function==Dies funktioniert nur, wenn Sie einen Senior-Peer haben. Die DHT-Regeln arbeiten nicht ohne diese Funktion
->reject==>verwerfe
-accept transmitted URLs that match your blacklist==akzeptiere übertragene URLs, die zu Ihrer Blacklist passen
+#"Change Network"=="Netzwerk wechseln"
+#Distributed Computing Network for Domain==Verteiltes Rechnen Netzwerk für die Domain
+#You can configure if you want to participate at the global YaCy network or if you want to have your==Sie können einstellen, ob Sie am globalen YaCy-Netzwerk teilnehmen wollen oder ob Sie einen eigenen
+#own separate search cluster with or without connection to the global network. You may also define==separaten Such-Cluster, mit oder ohne Verbindung zum globalen Netz, haben möchten. Sie können auch
+#a completely independent search engine instance, without any data exchange between your peer and other==eine vollkommen unabhängige Instanz einer Suchmaschine, ohne jeglichen Datenaustausch zwischen Ihrem und anderen Peers, definieren.
+#peers, which we call a 'Robinson' peer.==Dies nennen wir einen 'Robinson'-Peer.
+#Peer-to-Peer Mode==Peer-to-Peer Modus
+#>Index Distribution==>Index-Verteilung
+#This enables automated, DHT-ruled Index Transmission to other peers==Dies aktiviert den automatischen, DHT-basierten Versand an andere Peers
+#>enabled==>aktiviert
+#disabled during crawling==während des Crawlings deaktiviert
+#disabled during indexing==während des Indexierens deaktiviert
+#>Index Receive==>Index-Empfang
+#Accept remote Index Transmissions==Remote Index-Übertragungen akzeptieren
+#This works only if you have a senior peer. The DHT-rules do not work without this function==Dies funktioniert nur, wenn Sie einen Senior-Peer haben. Die DHT-Regeln arbeiten nicht ohne diese Funktion
+#>reject==>verwerfe
+#accept transmitted URLs that match your blacklist==akzeptiere übertragene URLs, die zu Ihrer Blacklist passen
 #>Accept Remote Crawl Requests==>Remotecrawl-Anfragen akzeptieren
 #Perform web indexing upon request of another peer==Führe Indexierung bei Anfrage eines anderen Peers aus
 #This works only if you are a senior peer==Dies funktioniert nur, wenn Sie ein Senior-Peer sind
 #Load with a maximum of==Lade mit maximal
 #pages per minute==Seiten pro Minute (PPM)
->Robinson Mode==>Robinson Modus
-If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==Falls Ihr Peer im 'Robinson Modus' läuft, so verwenden Sie YaCy als Suchmaschine für Ihr eigenes Suchportal, ohne Datenaustausch mit anderen Peers
-There is no index receive and no index distribution between your peer and any other peer==Es gibt keinen Index-Empfang von und keine Index-Verteilung zu anderen Peers
-In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster==Im Fall eines Robinson-Clusters können Remotecrawl-Anfragen von Peers des selben Clusters akzeptiert werden
->Private Peer==>Privater Peer
-Your search engine will not contact any other peer, and will reject every request==Ihre Suchmaschine wird keine fremden Peers kontaktieren und alle Anfragen anderer Peers ablehnen
+#>Robinson Mode==>Robinson Modus
+#If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==Falls Ihr Peer im 'Robinson Modus' läuft, so verwenden Sie YaCy als Suchmaschine für Ihr eigenes Suchportal, ohne Datenaustausch mit anderen Peers
+#There is no index receive and no index distribution between your peer and any other peer==Es gibt keinen Index-Empfang von und keine Index-Verteilung zu anderen Peers
+#In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster==Im Fall eines Robinson-Clusters können Remotecrawl-Anfragen von Peers des selben Clusters akzeptiert werden
+#>Private Peer==>Privater Peer
+#Your search engine will not contact any other peer, and will reject every request==Ihre Suchmaschine wird keine fremden Peers kontaktieren und alle Anfragen anderer Peers ablehnen
 #>Private Cluster==>Privater Cluster
 #Your peer is part of a private cluster without public visibility
 #Index data is not distributed, but remote crawl requests are distributed and accepted from your cluster
 #Search requests are spread over all peers of the cluster, and answered from all peers of the cluster
 #List of ip:port - addresses of the cluster: \(comma-separated\)
->Public Cluster==>Öffentlicher Cluster
+>Public Cluster==>Публичный кластер
 Your peer is part of a public cluster within the YaCy network==Ihr Peer ist Teil eines öffentlichen Clusters innerhalb des YaCy-Netzwerkes
 Index data is not distributed, but remote crawl requests are distributed and accepted==Indexdaten werden nicht verteilt, aber Remotecrawl-Anfragen werden verteilt und akzeptiert
 Search requests are spread over all peers of the cluster, and answered from all peers of the cluster==Suchanfragen werden über alle Peers des Clusters verteilt und von allen Peers des Clusters beantwortet
@@ -619,7 +618,7 @@ You can change the \'corporate identity\'-images, the greeting line==Вы мож
 and a link to a home page that is reached when the \'corporate identity\'-images are clicked.==и ссылку на домашную страницу, которая будет доступна при нажатии на картинку фирменного логотипа.
 To change also colours and styles use the <a href=\"ConfigAppearance_p.html\">Appearance Servlet</a> for different skins and languages.==
 Um auch die Farben und Stile zu verändern verwenden Sie das <a href="ConfigAppearance_p.html">Servlet Aussehen</a> für andere Skins und Sprachen.
-Greeting Line<==Строка приветсвия<
+Greeting Line<==Строка приветствия<
 URL of Home Page<==URL домашней страницы<
 URL of a Small Corporate Image<==URL адрес маленького логотипа<
 URL of a Large Corporate Image<==URL адрес крупного логотипа<
@@ -652,10 +651,10 @@ Show Information Links for each Search Result Entry==Отображать инф
 >Parser&==>Парсер&
 >Pictures==>Картинки
 Show Navigation on Side-Bar==Показывать элементы навигации
-Host Navigation==Навигации хоста
-Author Navigation==Навигации автора
-Wiki Name-Space Navigation==Wiki нивигация
-Topics (Tag-Cloud) Navigation==Топик навигация
+Host Navigation==по хостам
+Author Navigation==по авторам
+Wiki Name-Space Navigation==по пространствам имён wiki
+Topics (Tag-Cloud) Navigation==по темам (облако тегов)
 Default Pop-Up Page<==Первая страница по умолчанию<
 >Status Page==>Страница статуса
 >Search Front Page==>Главная страница поиска
@@ -697,40 +696,40 @@ You can use <==Вы можете использовать <
 #-----------------------------
 #File: ConfigProperties_p.html
 #---------------------------
-Advanced Config==Erweiterte Einstellungen
-Here are all configuration options from YaCy.==Hier sind alle Konfigurationseinstellungen von YaCy.
-You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie können alles ändern, bedenken Sie aber, dass einige Änderungen einen Neustart von YaCy erfordern und andere Änderungen YaCy ganz zum Absturz bringen können.
+Advanced Config==Расширенная конфигурация
+Here are all configuration options from YaCy.==Тут находятся все конфигурационные опции YaCy.
+You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Вы можете менять любые опции но некоторые из них требуют перезапуска YaCy, или даже могут, при использовании неправильных значений, вызвать падение.
 For explanation please look into defaults/yacy.init==Eine Erklärung finden Sie in der Datei defaults/yacy.init
-"Save"=="Speichern"
+"Save"=="Сохранить"
 #-----------------------------
 #File: ConfigRobotsTxt_p.html
 #---------------------------
-Exclude Web-Spiders==Web-Spider ausschließen
+Exclude Web-Spiders==Блокировать пауков
 Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==Hier können Sie eine robots.txt für alle Webcrawler die das Webinterface Ihres Peers indexieren wollen, erstellen.
 is a volunteer agreement most search-engines \(including YaCy\) follow.==ist ein freiwilliger Standard den die meisten Suchmaschinen (inkl. YaCy) befolgen.
 It disallows crawlers to access webpages or even entire domains.==Er kann Crawlern den Zugriff auf Webseiten oder sogar ganze Domains verbieten.
-Deny access to==Verbiete die Erfassung
-Entire Peer==des ganzen Peers
-Status page==der Statusseite
-Network pages==der Netzwerkseiten
-Surftips==der Surftipps
-News pages==der News-Seiten
-Blog==des Blogs
-Wiki=des Wikis
-Public bookmarks==der öffentlichen Lesezeichen
-Home Page==der Home-Page
-File Share==des File-Shares
-"Save restrictions"=="Beschränkungen speichern"
+Deny access to==Закрыть доступ к 
+Entire Peer=Узлу целиком
+Status page==Странице статуса
+Network pages==Network pages
+Surftips==Surftips
+News pages==Страницам новостей
+Blog==Блогу
+Wiki=Вики
+Public bookmarks==Публичным закладкам
+Home Page==Домашнией странице
+File Share==File Share
+"Save restrictions"=="Сохранить ограничения"
 #-----------------------------
 #File: ConfigSearchBox.html
 #---------------------------
-Integration of a Search Box==Integration einer Suchbox
+Integration of a Search Box==Интеграция Search Box
 We give information how to integrate a search box on any web page that==Hier finden Sie Informationen dazu wie man eine Suchbox auf jeder Webseite einsetzen kann das
 calls the normal YaCy search window.==ein normales YaCy Suchfenster aufruft.
-Simply use the following code:==Verwenden Sie einfach den folgenden Code:
-  MySearch==  Meine Suche
-"Search"=="Suchen"
-This would look like:==Das sieht dann so aus:
+Simply use the following code:==Просто используете следующий код:
+  MySearch==  МойПоиск
+"Search"=="Поиск"
+This would look like:==Это будет выглядеть как:
 This does not use a style sheet file to make the integration into another web page with a different style sheet easier.==Da hier keine Stylesheet Datei verwendet wird, gestaltet sich die Integration in andere Webseiten mit einem anderen Stylesheet einfacher.
 You would need to change the following items:==Sie müssen dazu die folgenden Einträge ändern:
 Replace the given colors \#eeeeee \(box background\) and \#cccccc \(box border\)==Ersetzen sie die vorgegebenen Farben #eeeeee (Hintergrund der Box) and #cccccc (Boxenrand)
@@ -751,18 +750,18 @@ no&nbsp;automated installation on development environments==без автома�
 "Install Release"=="Установить версию"
 "Delete Release"=="Удалить версию"
 Automatic Update==Автоматическое обновление
-check for new releases, download if available and restart with downloaded release==проверить наличие новых релизов, скачать если таковые имеются и перезапустить на новый релиз
-"Check \+ Download \+ Install Release Now"=="Проверить, загрузить и установить новый релиз сейчас"
-Download of release \#\[downloadedRelease\]\# finished. Restart Initiated.== Der Download von Version #[downloadedRelease]# ist beendet. Ein Neustart ist eingeleitet.
-No more recent release found.==Kein neuere Version gefunden.
-Release will be installed. Please wait.==Das Release wird installiert. Bitte warten.
-You installed YaCy with a package manager.==Sie haben YaCy mit einer Paketverwaltung oder Installer installiert.
-To update YaCy, use the package manager:==Um YaCy auf den neuesten Stand zu bringen, verwenden Sie den Paketmanager.
-Omitting update because this is a development environment.==Update ausgelassen weil dies ein Entwicklersystem ist.
-Omitting update because download of release \#\[downloadedRelease\]\# failed.==Update ausgelassen weil der Download von Version #[downloadedRelease]# fehlschlug.
+check for new releases, download if available and restart with downloaded release==проверить наличие новых версий, скачать если таковые имеются и перезапустить на новый релиз
+"Check \+ Download \+ Install Release Now"=="Проверить, загрузить и установить новую версию сейчас"
+Download of release \#\[downloadedRelease\]\# finished. Restart Initiated.== Загрузка версии #[downloadedRelease]# завершена. Ухожу на перезагрузку.
+No more recent release found.==Более новой версии не обнаружено.
+Release will be installed. Please wait.==Идет установка новой версии. Пожалуйста подождите.
+You installed YaCy with a package manager.==Вы установили YaCy через менеджер пакетов.
+To update YaCy, use the package manager:==Для обновления YaCy используете менеджер пакетов.
+Omitting update because this is a development environment.==Пропускаю обновление потому что это режим разработки.
+Omitting update because download of release \#\[downloadedRelease\]\# failed.==Пропускаю обновление потому что загрузка версии #[downloadedRelease]# не была успешной.
 Automated System Update==Система автоматического обновления
 manual update==Ручное обновление
-no automatic look-up, updates can be made manually using this interface \(see options above\)==нет автоматического обновления. Обновления можно сделать вручную на этой странице (см. настройки выше).
+no automatic look-up, updates can be made manually using this interface \(see options above\)==нет автоматического обновления. Обновление можно сделать вручную на этой странице (см. настройки выше).
 automatic update==Автоматическое обновление
 updates are made within fixed cycles:==обновления выполняются в установленные циклы:
 Time between lookup==Время между проверками
@@ -771,7 +770,7 @@ Release blacklist==Черный список релизов
 regex on release number strings==список регулярных выражений с номерами выпусков
 Release type==Тип релиза
 only main releases==только финальные релизы
-any release including developer releases==любые версии, включая релизы для разработчиков
+any release including developer releases==любые версии, включая версии для разработчиков
 Signed autoupdate:==Подписанные автообновления:
 only accept signed files==принимать только подписанные файлы
 "Submit"=="Применить"
@@ -784,8 +783,8 @@ Last Deploy==Последние обновления
 #-----------------------------
 #File: Connections_p.html
 #---------------------------
-Connection Tracking==Verbindungsstatus
-Incoming Connections==Eingehende Verbindungen
+Connection Tracking==Отслеживание соединенией
+Incoming Connections==Входящие соединения
 Showing \#\[numActiveRunning\]\# active, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==Es werden #[numActiveRunning]# aktive und #[numActivePending]# wartende Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt.
 Protocol</td>==Protokoll</td>
 Duration==Dauer
@@ -1158,76 +1157,76 @@ To learn how to do that, watch one of the demonstration videos below==Bitte sehe
 #-----------------------------
 #File: index.html
 #---------------------------
-YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
-#kiosk mode==Kiosk Modus
+YaCy \'\#\[clientname\]\#\': Search Page== Yacy: '#[clientname]#': Поиск
+#kiosk mode==режим киоска
 "Search"=="Поиск"
 Text==Текст
 Images==Картинки
 #Audio==Аудио
 Video==Видео
-Applications==Anwendungen
+Applications==Приложения
 more options...==Расширенный поиск...
-advanced parameters==erweiterte Parameter
-Max. number of results==Max. Anzahl der Ergebnisse
-Results per page==Ergebnisse pro Seite
-Resource==Quelle
+advanced parameters==расширенные параметры
+Max. number of results==максимальное количество результатов
+Results per page==Результатов на страницу
+Resource==Ресурс
 global==global
->local==>lokal
-Global search is disabled because==Die globale Suche ist deaktiviert, denn
-DHT Distribution</a> is==die DHT-Verteilung</a> ist
-Index Receive</a> is==der Index-Empfang</a> ist 
-DHT Distribution and Index Receive</a> are==DHT-Verteilung und Index-Empfang</a> sind
-disabled.\#\(==deaktiviert.#(
-URL mask==URL-Filter
-restrict on==beschränken auf
-show all==alle zeigen
+>local==>local
+Global search is disabled because==Глобальный поиск отключен так как
+DHT Distribution</a> is==Прием DHT-данных</a>
+Index Receive</a> is==Прием индекса</a> 
+DHT Distribution and Index Receive</a> are==Прим DHT-данны и индекса</a>
+disabled.\#\(==отключен.#(
+URL mask==маска URL
+restrict on==ограничение
+show all==показать все
 #überarbeiten!!!
-Prefer mask==Vorzugsmaske
-Constraints==Einschränkungen
-only index pages==Nur Index-Seiten
-"authentication required"=="Autorisierung erforderlich"
-Disable search function for users without authorization==Suchfunktion für Benutzer ohne Autorisierung sperren
-Enable web search to everyone==Suchfunktion für alle Nutzer erlauben
-the peer-to-peer network==Peer-to-Peer-Netzwerk
-only the local index==Nur lokaler Index
-Query Operators==Such-Operatoren
-restrictions==Restriktionen
-only urls with the &lt;phrase&gt; in the url==Nur URLs, welche &lt;phrase&gt; enthalten
-only urls with extension==Nur URLs mit der Dateinamenserweiterung
-only urls from host==Nur URLs vom Server
-only pages with as-author-anotated==Nur Seiten mit dem angegebenen Autor
-only pages from top-level-domains==Nur Seiten aus der Top-Level-Domain
-only resources from http or https servers==Nur Ressources auf HTTP- oder HTTPS-Servern
-only resources from ftp servers==Nur Ressourcen auf FTP-Servern
-they are rare==eher selten
-crawl them yourself==crawlen Sie sie selbst
-only resources from smb servers==Nur Ressourcen von SMB-Servern
-Intranet Indexing</a> must be selected==Intranet-Indexierung</a> muss ausgewählt sein
-only files from a local file system==Nur Dateien aus dem lokalen Dateisystem
-ranking modifier==Ranking-Modifizierung
+Prefer mask==Маска предпочтений
+Constraints==Ограничения
+only index pages==only index pages
+"authentication required"=="требуется авторизация"
+Disable search function for users without authorization==Отключить веб-поиск для пользователей без авторизации
+Enable web search to everyone==Разрешить веб-поиск всем
+the peer-to-peer network==P2P-сеть
+only the local index==Только локальный индекс
+Query Operators==Операторы запроса
+restrictions==ограничения
+only urls with the &lt;phrase&gt; in the url==только URL c &lt;phrase&gt; в URL
+only urls with extension==только URL с расширением
+only urls from host==только URL с хоста
+only pages with as-author-anotated==только страницы с аннотацией (as-author-annotated)
+only pages from top-level-domains==только страницы с TLD
+only resources from http or https servers==только ресурсы с HTTP или HTTPS-серверов
+only resources from ftp servers==только ресурсы с FTP серверов
+they are rare==они редки
+crawl them yourself==проиндексируйте их сами
+only resources from smb servers==только ресурсы с SMB-серверов
+Intranet Indexing</a> must be selected==Индексация интранет</a> должна быть активна
+only files from a local file system==только файлы с локальной файловой системы
+ranking modifier==модификация ранжирования
 sort by date==сортировка по дате
-latest first==Neuste zuerst
-multiple words shall appear near==Mehrere Wörter sollen nah zusammen stehen
-doublequotes==Anführungszeichen
-prefer given language==Angegebene Sprache bevorzugen
-an ISO639 2-letter code==2-Buchstaben-Ländercode nach ISO639
-heuristics==Heuristiken
-add search results from scroogle==Benutze zusätzliche Ergebnisse von Scroogle
-add search results from blekko==Benutze zusätzliche Ergebnisse von Blekko
-Search Navigation==Such-Navigation
-keyboard shotcuts==Tastatur-Kürzel
-tab or page-up==Tab oder Bild hoch
-next result page==Nächste Ergebnisseite
-page-down==Bild nach unten
-previous result page==Vorherige Ergebnisseite
-automatic result retrieval==Automatische Ergebnis-Abfrage
-browser integration==Browserintegration
-after searching, click-open on the default search engine in the upper right search field of your browser and select 'Add "YaCy Search.."'==Nach der Suche clicken Sie auf das Suchfeld Ihres Browsers und wählen Sie '"YaCy" hinzufügen'
-search as rss feed==Suche als RSS-Feed
-click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an==Klicken Sie nach der Suche auf das rote Icon in der rechten oberen Ecke. Dies funktioniert gut mit dem '/date' Ranking-Modifizierer. Hier ein
->example==>Beispiel
-json search results==JSON-Suchergebnisse
-for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==Für AJAX-Entwickler: Rufen Sie den RSS-Feed auf und ersetzen Sie '.rss' durch '.json'
+latest first==последние вперед
+multiple words shall appear near==слова должны быть рядом
+doublequotes==двойные кавычки
+prefer given language==предпочитать указанный язык
+an ISO639 2-letter code==2-буквенных языковый код ISO639
+heuristics==эвристики
+add search results from scroogle==добавить результаты из scroogle
+add search results from blekko==добавить результаты из Blekko
+Search Navigation==Поисковая навигация
+keyboard shotcuts==клавиатурные ярлыки
+tab or page-up==Tab или PgUp
+next result page==следущая страница результатов
+page-down==PgDn
+previous result page==предыдущая страница результатов
+automatic result retrieval==автоматический запрос результатов
+browser integration==интеграция в браузер
+after searching, click-open on the default search engine in the upper right search field of your browser and select 'Add "YaCy Search.."'==после поиска, кликлнет на поиске по умолчанию в правом верхнем углу браузера и выберите 'добавить Поиск YaCy'
+search as rss feed==представить как RSS-фид
+click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an==после поиска кликните на красной иконке в правом верхнему углу. Также хорошо работает с модификатором ранжирования /date. Сотри
+>example==>пример
+json search results==результаты в формате JSON
+for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==для AJAX-разрбаотчиков: получите rss-ленту и замените расширение .rss на .json
 #-----------------------------
 #File: IndexCleaner_p.html
 #---------------------------
@@ -1254,9 +1253,9 @@ RWI-DB-Cleaner - Clean up the database by deletion of words with reference to bl
 #-----------------------------
 #File: IndexControlRWIs_p.html
 #---------------------------
-Reverse Word Index Administration==Обратное управление индексом слов
+Reverse Word Index Administration==Администрирование индекса ссылок по слову
 The local index currently contains \#\[wcount\]\# reverse word indexes==Локальный индекс в настоящее время содержит #[wcount]# слов обратного индекса
-RWI Retrieval \(= search for a single word\)==RWI запрос (= поиск одного слова)
+RWI Retrieval \(= search for a single word\)==RWI‐запрос (= поиск одного слова)
 Select Segment:==Выбрать сегмент:
 Retrieve by Word:<==Запрос по слову:<
 "Show URL Entries for Word"=="Показать URL адреса для слова"
@@ -1269,10 +1268,10 @@ Cleanup==Очистка
 Stop Crawler and delete Crawl Queues==Остановить сканирование и удалить очередь запросов
 Delete HTTP &amp; FTP Cache==Удалить HTTP &amp; FTP кэш
 Delete robots.txt Cache==Удалить кеш robots.txt
-Delete cached snippet-fetching failures during search==Удалить кэшированные фрагменты полученные ошибки во время поиска
+#Delete cached snippet-fetching failures during search==Удалить кэшированные фрагменты полученные ошибки во время поиска
 "Delete"=="Удалить"
-No entry for word \'\#\[word\]\#\'==Не найдено для слова "#[word]#"
-No entry for word hash==Не найдено для хэш слова слова
+No entry for word \'\#\[word\]\#\'==Не найдено для слова «#[word]#»
+No entry for word hash==Не найдено для хэш‐суммы слова
 Search result==Результат поиска
 total URLs</td>==количество URL адресов</td>
 appearance in</td>==kommt vor in</td>
@@ -1356,8 +1355,8 @@ Retrieve by URL-Hash==Abfrage nach URL-Hash
 "Show Details for URL-Hash"=="Details für URL-Hash zeigen"
 "Generate List"=="Liste erstellen"
 Statistics about top-domains in URL Database==Statistik über die Top-Domains in der URL Datenbank
-Show top==Zeige die
-domains from all URLs.==Top-Domains aus allen URLs.
+Show top==Показать
+domains from all URLs.==наиболее часто встречающихся доменов среди всех URL.
 "Generate Statistics"=="Statistik erstellen"
 Statistics about the top-\#\[domains\]\# domains in the database:==Statistik über die Top-#[domains]# Domains in der Datenbank:
 "delete all"=="Alle Löschen"
@@ -1371,10 +1370,10 @@ Export File==Export-Datei
 #Only Domain <i>\(superfast\)==Nur Domains <i>(sehr schnell)
 Only Domain:==Только домен:
 Full URL List:==Liste mit vollständiger URL:
-Plain Text List \(domains only\)==Einfache Text Liste (nur Domains)
+Plain Text List \(domains only\)==Простой текстовый список (только домены)
 HTML \(domains as URLs, no title\)==HTML (Domains als URLs, kein Titel)
 #Full URL List <i>\(high IO\)==Vollständige URL Liste <i>(hoher IO)
-Plain Text List \(URLs only\)==Einfache Text Liste (nur URLs)
+Plain Text List \(URLs only\)==Простой текстовый список (только URL’ы)
 HTML \(URLs with title\)==HTML (URLs mit Titel)
 #XML (RSS)==XML (RSS)
 "Export URLs"=="Экспортировать URL адреса"
@@ -2488,91 +2487,91 @@ value="Submit"==value="speichern"
 YaCy \'\#\[clientname\]\#\': Settings Acknowledge==YaCy '#[clientname]#': Einstellung Verarbeitung
 Settings Receipt:==Einstellungen angenommen:
 No information has been submitted==Es wurden keine Informationen übertragen.
-Error with submitted information.==Es gab einen Fehler bei der Übertragung der Informationen.
-Nothing changed.</p>==Nichts wurde verändert.</p>
-The user name must be given.==Der User Name muss angegeben werden
-Your request cannot be processed.==Ihre Anfrage konnte nicht bearbeitet werden.
-The password redundancy check failed. You have probably misstyped your password.==Die Passwortüberprüfung schlug fehl. Sie haben sich wahrscheinlich vertippt.
-Shutting down.</strong><br />Application will terminate after working off all crawling tasks.==Runterfahren</strong><br />Die Anwendung wird geschlossen, nachdem alle Crawls abgearbeitet wurden.
-Your administration account setting has been made.==Ihre Administrator Account Einstellungen wurden gespeichert.
-Your new administration account name is \#\[user\]\#. The password has been accepted.<br />If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das Passwort wurde akzeptiert.<br />Wenn Sie zurück zu den Einstellungen gehen wollen, müssen Sie sich neu einloggen.
-Your proxy access setting has been changed.==Die Proxy Zugangs Einstellungen wurden geändert.
-Your proxy account check has been disabled, since you did not supply a password.==Ihr Proxy Account Test wurde deaktiviert, weil sie kein Passwort eingegeben haben.
-The new proxy IP filter is set to==Der neue Proxy IP-Filter ist
-The proxy port is:==Der Proxy Port ist:
-Port rebinding will be done in a few seconds.==Die Port Neubindung wird in wenigen Sekunden abgeschlossen sein.
-You can reach your YaCy server under the new location==Sie können Ihren YaCy Server unter folgender neuer Adresse erreichen:
-Your proxy access setting has been changed.==Ihre Proxy Zugangs Einstellung wurden geändert.
-Your server access filter is now set to==Ihr Proxy Zugangs Filter ist nun gesetzt auf
-Auto pop-up of the Status page is now <strong>disabled</strong>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>deaktiviert.</strong>
-Auto pop-up of the Status page is now <strong>enabled</strong>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>aktiviert.</strong>
-You are now permanently <strong>online</strong>.==Sie sind nun im <strong>permanenten Online Modus</strong>.
-After a short while you should see the effect on the====Nach kurzer Zeit können Sie die Änderungen auf der
-status</a> page.==Status-Seite</a> sehen.
-The Peer Name is:==Der Name dieses Peers ist:
-Your static Ip\(or DynDns\) is:==Ihre statische IP(oder DynDns) ist:
-Seed Settings changed.\#\(success\)\#::You are now a principal peer.==Seed Einstellungen wurden geändert.#(success)#::Sie sind nun ein Principal Peer.
-Seed Settings changed, but something is wrong.==Seed Einstellungen wurden geändert, aber etwas stimmt nicht.
-Seed Uploading was deactivated automatically.==Seed Upload wurde automatisch deaktiviert.
-Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zurück und modifizieren Sie die Daten.
-The remote-proxy setting has been changed==Die remote-proxy Einstellungen wurden geändert.
-The new setting is effective immediately, you don't need to re-start.==Die neuen Einstellungen wirken sofort. Sie brauchen den Peer nicht neu zu starten.
-The submitted peer name is already used by another peer. Please choose a different name.</strong> The Peer name has not been changed.==Der eingegebene Peername wird bereits von einem anderen Peer benutzt. Bitte wählen Sie einen anderen Namen.</strong> Der Peername wurde nicht geändert.
-Your Peer Language is:==Ihre Peer Sprache ist:
-The submitted peer name is not well-formed. Please choose a different name.</strong> The Peer name has not been changed.
-Peer names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and must not be longer than 80 characters.
+#Error with submitted information.==Es gab einen Fehler bei der Übertragung der Informationen.
+#Nothing changed.</p>==Nichts wurde verändert.</p>
+#The user name must be given.==Der User Name muss angegeben werden
+#Your request cannot be processed.==Ihre Anfrage konnte nicht bearbeitet werden.
+#The password redundancy check failed. You have probably misstyped your password.==Die Passwortüberprüfung schlug fehl. Sie haben sich wahrscheinlich vertippt.
+#Shutting down.</strong><br />Application will terminate after working off all crawling tasks.==Runterfahren</strong><br />Die Anwendung wird geschlossen, nachdem alle Crawls abgearbeitet wurden.
+#Your administration account setting has been made.==Ihre Administrator Account Einstellungen wurden gespeichert.
+#Your new administration account name is \#\[user\]\#. The password has been accepted.<br />If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das Passwort wurde akzeptiert.<br />Wenn Sie zurück zu den Einstellungen gehen wollen, müssen Sie sich neu einloggen.
+#Your proxy access setting has been changed.==Die Proxy Zugangs Einstellungen wurden geändert.
+#Your proxy account check has been disabled, since you did not supply a password.==Ihr Proxy Account Test wurde deaktiviert, weil sie kein Passwort eingegeben haben.
+#The new proxy IP filter is set to==Der neue Proxy IP-Filter ist
+#The proxy port is:==Der Proxy Port ist:
+#Port rebinding will be done in a few seconds.==Die Port Neubindung wird in wenigen Sekunden abgeschlossen sein.
+#You can reach your YaCy server under the new location==Sie können Ihren YaCy Server unter folgender neuer Adresse erreichen:
+#Your proxy access setting has been changed.==Ihre Proxy Zugangs Einstellung wurden geändert.
+#Your server access filter is now set to==Ihr Proxy Zugangs Filter ist nun gesetzt auf
+#Auto pop-up of the Status page is now <strong>disabled</strong>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>deaktiviert.</strong>
+#Auto pop-up of the Status page is now <strong>enabled</strong>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>aktiviert.</strong>
+#You are now permanently <strong>online</strong>.==Sie sind nun im <strong>permanenten Online Modus</strong>.
+#After a short while you should see the effect on the====Nach kurzer Zeit können Sie die Änderungen auf der
+#status</a> page.==Status-Seite</a> sehen.
+#The Peer Name is:==Der Name dieses Peers ist:
+#Your static Ip\(or DynDns\) is:==Ihre statische IP(oder DynDns) ist:
+#Seed Settings changed.\#\(success\)\#::You are now a principal peer.==Seed Einstellungen wurden geändert.#(success)#::Sie sind nun ein Principal Peer.
+#Seed Settings changed, but something is wrong.==Seed Einstellungen wurden geändert, aber etwas stimmt nicht.
+#Seed Uploading was deactivated automatically.==Seed Upload wurde automatisch deaktiviert.
+#Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zurück und modifizieren Sie die Daten.
+#The remote-proxy setting has been changed==Die remote-proxy Einstellungen wurden geändert.
+#The new setting is effective immediately, you don't need to re-start.==Die neuen Einstellungen wirken sofort. Sie brauchen den Peer nicht neu zu starten.
+#The submitted peer name is already used by another peer. Please choose a different name.</strong> The Peer name has not been changed.==Der eingegebene Peername wird bereits von einem anderen Peer benutzt. Bitte wählen Sie einen anderen Namen.</strong> Der Peername wurde nicht geändert.
+#Your Peer Language is:==Ihre Peer Sprache ist:
+#The submitted peer name is not well-formed. Please choose a different name.</strong> The Peer name has not been changed.
+#Peer names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and must not be longer than 80 characters.
 #The new parser settings where changed successfully.==Die neuen Parser Einstellungen wurden erfolgreich gespeichert.
-Parsing of the following mime-types was enabled:
-Seed Upload method was changed successfully.==Seed Upload Methode wurde erfolgreich geändert.
-You are now a principal peer.==Sie sind nun ein Principal Peer.
-Seed Upload Method:==Seed Upload Methode:
-Seed File URL:==Seed Datei URL:
-Your proxy networking settings have been changed.==Ihre Proxy Netzwerk Einstellungen wurden geändert.
-Transparent Proxy Support is:==Durchsichtige Proxy Unterstützung ist:
-Connection Keep-Alive Support is:==Verbindung aufrecht erhalten Unterstützung ist:
-Your message forwarding settings have been changed.==Ihre Nachrichten Weiterleitungseinstellungen haben sich geändert.
-Message Forwarding Support is:==Nachrichten Weiterleitungs Unterstützung:
-Message Forwarding Command:==Nachrichten Weiterleitungskommando:
-Recipient Address:==Empfänger Adresse:
-Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zurück und modifizieren Sie die Daten.
-You are now <strong>event-based online</strong>.==Sie sind nun im  <strong>aktivitätsbasierten Modus</strong>.
-After a short while you should see the effect on the==Nach kurzer Zeit können Sie die Änderungen auf der
-You are now in <strong>Cache Mode</strong>.==Sie sind nun im <strong>Cache Modus</strong>.
-Only Proxy-cache ist available in this mode.==Nur der Proxy Cache ist in diesem Modus verfügbar.
-After a short while you should see the effect on the==Nach kurzer Zeit können Sie die Änderungen auf der
-You can now go back to the==Sie können nun zurück zu den
-Settings</a> page if you want to make more changes.==Einstellungen</a> gehen, um weitere Änderungen vorzunehmen.
-You can reach your YaCy server under the new location==Dieser YaCy-Peer kann nun unter seiner neuen Adresse erreicht werden:
+#Parsing of the following mime-types was enabled:
+#Seed Upload method was changed successfully.==Seed Upload Methode wurde erfolgreich geändert.
+#You are now a principal peer.==Sie sind nun ein Principal Peer.
+#Seed Upload Method:==Seed Upload Methode:
+#Seed File URL:==Seed Datei URL:
+#Your proxy networking settings have been changed.==Ihre Proxy Netzwerk Einstellungen wurden geändert.
+#Transparent Proxy Support is:==Durchsichtige Proxy Unterstützung ist:
+#Connection Keep-Alive Support is:==Verbindung aufrecht erhalten Unterstützung ist:
+#Your message forwarding settings have been changed.==Ihre Nachrichten Weiterleitungseinstellungen haben sich geändert.
+#Message Forwarding Support is:==Nachrichten Weiterleitungs Unterstützung:
+#Message Forwarding Command:==Nachrichten Weiterleitungskommando:
+#Recipient Address:==Empfänger Adresse:
+#Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zurück und modifizieren Sie die Daten.
+#You are now <strong>event-based online</strong>.==Sie sind nun im  <strong>aktivitätsbasierten Modus</strong>.
+#After a short while you should see the effect on the==Nach kurzer Zeit können Sie die Änderungen auf der
+#You are now in <strong>Cache Mode</strong>.==Sie sind nun im <strong>Cache Modus</strong>.
+#Only Proxy-cache ist available in this mode.==Nur der Proxy Cache ist in diesem Modus verfügbar.
+#After a short while you should see the effect on the==Nach kurzer Zeit können Sie die Änderungen auf der
+#You can now go back to the==Sie können nun zurück zu den
+#Settings</a> page if you want to make more changes.==Einstellungen</a> gehen, um weitere Änderungen vorzunehmen.
+#You can reach your YaCy server under the new location==Dieser YaCy-Peer kann nun unter seiner neuen Adresse erreicht werden:
 #-----------------------------
 #File: Settings_MessageForwarding.inc
 #---------------------------
-Message Forwarding==Nachrichten Weiterleitung
-With this settings you can activate or deactivate forwarding of yacy-messages via email.==Mit diesen Einstellungen können Sie die Weiterleitung von YaCy-Nachrichten per E-Mail aktivieren oder deaktivieren.
-Enable message forwarding==Aktiviere Nachrichten Weiterleitung
-Enabling/Disabling message forwarding via email.==Aktivieren/Deaktivieren der Nachrichten Weiterleitung per E-Mail.
-Forwarding Command==Weiterleitungskommando
-The command-line program that should be used to forward the message.<br />==Das Kommandozeilenprogramm, das verwendet werden soll um die Nachricht weiterzuleiten.<br />
-Forwarding To==Weiterleiten An
-The recipient email-address.<br />==Die E-Mail Adresse des Empfängers.<br />
-e.g.:==z.B.:
-"Submit"=="Speichern"
-Changes will take effect immediately.==Änderungen sind sofort wirksam.
+#Message Forwarding==Nachrichten Weiterleitung
+#With this settings you can activate or deactivate forwarding of yacy-messages via email.==Mit diesen Einstellungen können Sie die Weiterleitung von YaCy-Nachrichten per E-Mail aktivieren oder deaktivieren.
+#Enable message forwarding==Aktiviere Nachrichten Weiterleitung
+#Enabling/Disabling message forwarding via email.==Aktivieren/Deaktivieren der Nachrichten Weiterleitung per E-Mail.
+#Forwarding Command==Weiterleitungskommando
+#The command-line program that should be used to forward the message.<br />==Das Kommandozeilenprogramm, das verwendet werden soll um die Nachricht weiterzuleiten.<br />
+#Forwarding To==Weiterleiten An
+#The recipient email-address.<br />==Die E-Mail Adresse des Empfängers.<br />
+#e.g.:==z.B.:
+#"Submit"=="Speichern"
+#Changes will take effect immediately.==Änderungen sind sofort wirksam.
 #-----------------------------
 #File: sharedBlacklist_p.html
 #---------------------------
-Shared Blacklist==Freigegebene Blacklist
-Add Items to Blacklist==Hinzufügen von Daten zur Blacklist
-Unable to store the items into the blacklist file:==Es war nicht möglich in folgender Blacklist Datei die Daten zu speichern:
+#Shared Blacklist==Freigegebene Blacklist
+#Add Items to Blacklist==Hinzufügen von Daten zur Blacklist
+#Unable to store the items into the blacklist file:==Es war nicht möglich in folgender Blacklist Datei die Daten zu speichern:
 #File Error! Wrong Path?==Datei Fehler! Falscher Pfad?
-YaCy-Peer &quot;<span class="settingsValue">\#\[name\]\#</span>&quot; not found.==YaCy Peer YaCy-Peer &quot;<span class="settingsValue">#[name]#</span>&quot; nicht gefunden.
-not found or empty list.==nicht gefunden oder leere Liste.
-Wrong Invocation! Please invoke with==Falscher Aufruf! Bitte nur so aufrufen
-Blacklist source:==Blacklist Quelle:
-Blacklist target:==Blacklist Ziel:
-Blacklist item==Blacklist Eintrag
-"select all"=="alle auswählen"
-"deselect all"=="alle abwählen"
-value="add"==value="hinzufügen"
+#YaCy-Peer &quot;<span class="settingsValue">\#\[name\]\#</span>&quot; not found.==YaCy Peer YaCy-Peer &quot;<span class="settingsValue">#[name]#</span>&quot; nicht gefunden.
+#not found or empty list.==nicht gefunden oder leere Liste.
+#Wrong Invocation! Please invoke with==Falscher Aufruf! Bitte nur so aufrufen
+#Blacklist source:==Blacklist Quelle:
+#Blacklist target:==Blacklist Ziel:
+#Blacklist item==Blacklist Eintrag
+#"select all"=="alle auswählen"
+#"deselect all"=="alle abwählen"
+#value="add"==value="hinzufügen"
 #-----------------------------
 #File: Status.html
 #---------------------------
@@ -2602,8 +2601,8 @@ Latest public version is==Die neueste stabile Version ist
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie können eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten:
 #"Update YaCy"=="Update YaCy"
 Install YaCy==Установка YaCy
-You are running a server in senior mode and you support the global internet index,==Сервер запущен в старшем режиме и Вы поддерживаете глобальный индекс Интернет,
-which you can also <a href="index.html">search yourself</a>.==которые вы также можете <a href="index.html">найти себя</a>.
+You are running a server in senior mode and you support the global internet index,==Ваш узел в senior-режиме и Вы поддерживаете глобальный индекс Интернет,
+which you can also <a href="index.html">search yourself</a>.==который вы также можете <a href="index.html">использовать для своего поиска</a>.
 You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch laden,
 where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
 Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite_p.html">here</a>==Ваш индексатор веб сайтов простаивает. Вы можете начать сканирование сайта <a href="CrawlStartSite_p.html">по ссылке</a>
@@ -2624,28 +2623,28 @@ password-protected==Пароль используется
 Unrestricted access from localhost==Неограниченный доступ с локального хоста
 Address</dt>==Адрес</dt>
 Host==Хост
-peer address not assigned==Peer Adresse nicht zugewiesen
+#peer address not assigned==Peer Adresse nicht zugewiesen
 Public Address:==Публичный адрес:
 YaCy Address:==YaCy адрес:
 #Peer Host==Peer Host
 #Port Forwarding Host==Port Forwarding Host
 broken==повреждено
 connected==подключено
-Remote Proxy==Прокси сервер
+Remote Proxy==Вышестоящий прокси
 not used==не используется
-Used for YaCy -> YaCy communication:==Использовано для YaCy -> YaCy коммуникаций:
+Used for YaCy -> YaCy communication:==Используется для YaCy -> YaCy коммуникаций:
 WARNING:==WARNUNG:
-You do this on your own risk.==Sie verwenden diese Einstellung auf Ihr eigenes Risiko.
-If you do this without YaCy running on a desktop-pc or without Java 6 installed, this will possibly break startup.==Wenn Sie diese Option verwenden, ohne dass YaCy auf einem Desktop PC läuft, oder ohne installiertes Java 6, wird YaCy vermutlich nicht mehr starten.
-In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf==In dem Fall müssen Sie die Konfiguration manuell in der folgenden Konfigurationsdatei ändern DATA/SETTINGS/yacy.conf
->Experimental<==>Experimentell<
+#You do this on your own risk.==Sie verwenden diese Einstellung auf Ihr eigenes Risiko.
+#If you do this without YaCy running on a desktop-pc or without Java 6 installed, this will possibly break startup.==Wenn Sie diese Option verwenden, ohne dass YaCy auf einem Desktop PC läuft, oder ohne installiertes Java 6, wird YaCy vermutlich nicht mehr starten.
+#In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf==In dem Fall müssen Sie die Konfiguration manuell in der folgenden Konfigurationsdatei ändern DATA/SETTINGS/yacy.conf
+#>Experimental<==>Experimental<
 Yes==Да
 No==Нет
-Auto-popup on start-up==Вслывающие сообщения при запуске
+Auto-popup on start-up==Открывать при старте
 Disabled==Отключено
-Enable\]==Включено]
-Enabled <a==Статус: <a
-Disable\]==Отключено]
+Enable\]==Включить]
+Enabled <a==Включено: <a
+Disable\]==Отключить]
 Tray-Icon==Иконка в трее
 Memory Usage==Использование памяти
 free:==Свободно:
@@ -2659,14 +2658,14 @@ Crawler:==Сканер сайтов:
 Incoming Connections==Входящих соединений:
 Active:==Активно:
 Max:==Максимально:
-#Indexing Queue==Indexier Puffer
+Indexing Queue==Очередь индексации
 Loader Queue==Загружено запросов
 paused==на паузе
-Queues==Запросы
-Local Crawl==Локальный сканер
-Remote triggered Crawl==Удаленный сканер
-Pre-Queueing==Vor-Pufferung
-Seed server==Скорость сервера
+>Queues<==>Запросы<
+Local Crawl==Локальный обход
+Remote triggered Crawl==Удаленный обход
+Pre-Queueing==Предварителньая очередь
+#Seed server==Seed server
 Configure==Настройка
 Enabled: Updating to server==Включено: Обновление на сервер:
 Last upload: #\[lastUpload\]# ago.==Последная передача: #\[lastUpload\]#
@@ -2674,24 +2673,24 @@ Enabled: Updating to file==Включено: Обновление до файл�
 #-----------------------------
 #File: Steering.html
 #---------------------------
-Steering</title>==Steuerung</title>
-Checking peer status...==Überprüfe Peer Status ...
-Peer is online again, forwarding to status page...==Peer ist wieder online. Weiterleitung auf Status Seite ...
-Peer is not online yet, will check again in a few seconds...==Peer ist noch nicht online. Nächste Prüfung in wenigen Sekunden ...
-No action submitted==Keine Aktion übermittelt
-Go back to the <a href="Settings_p.html">Settings</a> page==Zurück zur Seite mit den <a href="Settings_p.html">Erweiterten Einstellungen</a>
-Your system is not protected by a password==Ihr System wird nicht von einem Passwort geschützt
-Please go to the <a href="/ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Bitte legen Sie ein Administrator Passwort auf der Seite <a href="/ConfigAccounts_p.html">Benutzerverwaltung</a> fest.
+#Steering</title>==Steuerung</title>
+Checking peer status...==Проверка статуса узла...
+#Peer is online again, forwarding to status page...==Peer ist wieder online. Weiterleitung auf Status Seite ...
+Peer is not online yet, will check again in a few seconds...==Узел пока не онлайн, проверю через несколько секунд ...
+#No action submitted==Keine Aktion übermittelt
+#Go back to the <a href="Settings_p.html">Settings</a> page==Zurück zur Seite mit den <a href="Settings_p.html">Erweiterten Einstellungen</a>
+#Your system is not protected by a password==Ihr System wird nicht von einem Passwort geschützt
+#Please go to the <a href="/ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Bitte legen Sie ein Administrator Passwort auf der Seite <a href="/ConfigAccounts_p.html">Benutzerverwaltung</a> fest.
 You don't have the correct access right to perform this task.==Sie haben nicht die Erlaubnis diese Anwendung auszuführen.
-Please log in.==Bitte melden Sie sich an.
-You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie können nun zurück auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie weitere Änderungen vornehmen wollen.
-See you soon!==Bis bald!
+Please log in.== Пожалкйста авторизуйтесь.
+#You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie können nun zurück auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie weitere Änderungen vornehmen wollen.
+See you soon!==До встречи!
 Just a moment, please!==Einen Moment bitte!
-Application will terminate after working off all scheduled tasks.==YaCy Proxy wird beendet, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
-Then YaCy will restart.==Dann wird YaCy neu gestartet.
-If you can't reach YaCy's interface after 5 minutes restart failed.==Wenn Sie nach 5 Minuten nicht auf das YaCy Interface zugreifen können, dann ist der Neustart fehlgeschlagen.
-Installing release==Installiere Release
-YaCy will be restarted after installation==YaCy wird nach der Installation neugestartet
+#Application will terminate after working off all scheduled tasks.==YaCy Proxy wird beendet, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
+Then YaCy will restart.==А затем YaCy перезагрузится
+#If you can't reach YaCy's interface after 5 minutes restart failed.==Wenn Sie nach 5 Minuten nicht auf das YaCy Interface zugreifen können, dann ist der Neustart fehlgeschlagen.
+Installing release==Устанавливаю релиз
+#YaCy will be restarted after installation==YaCy wird nach der Installation neugestartet
 #-----------------------------
 #File: Supporter.html
 #---------------------------
@@ -2708,26 +2707,26 @@ provided by YaCy peers with an URL in their profile. This shows only URLs from p
 #-----------------------------
 #File: Surftips.html
 #---------------------------
-Surftips</title>==Surftipps</title>
-Surftips</h2>==Surftipps</h2>
-Surftips are switched off==Surftipps sind ausgeschaltet
-title="bookmark"==title="Lesezeichen"
-alt="Add to bookmarks"==alt="Zu den Lesezeichen hinzufügen"
-title="positive vote"==title="Positive Bewertung"
-alt="Give positive vote"==alt="Link positiv bewerten"
-title="negative vote"==title="Negative Bewertung"
-alt="Give negative vote"==alt="Link negativ bewerten"
-YaCy Supporters<==YaCy Unterstützer<
->a list of home pages of yacy users<==>Eine Liste von Homepages von YaCy Nutzern<
-provided by YaCy peers using public bookmarks, link votes and crawl start points==automatisch erzeugt durch öffentliche Lesezeichen, Link-Bewertungen und Crawl-Startpunkte anderer YaCy-Peers
-"Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="Bitte geben Sie zu Ihrer Linkempfehlung einen Kommentar ein. (Ihre Stimme wird auch ohne Kommentar angenommen.)"
-"authentication required"=="Autorisierung erforderlich"
-Hide surftips for users without autorization==Verberge Surftipps für Benutzer ohne Autorisierung
-Show surftips to everyone==Zeige Surftipps allen Benutzern
+#Surftips</title>==Surftipps</title>
+#Surftips</h2>==Surftipps</h2>
+#Surftips are switched off==Surftipps sind ausgeschaltet
+#title="bookmark"==title="закладка"
+#alt="Add to bookmarks"==alt="Zu den Lesezeichen hinzufügen"
+#title="positive vote"==title="Positive Bewertung"
+#alt="Give positive vote"==alt="Link positiv bewerten"
+#title="negative vote"==title="Negative Bewertung"
+#alt="Give negative vote"==alt="Link negativ bewerten"
+#YaCy Supporters<==YaCy Unterstützer<
+#>a list of home pages of yacy users<==>Eine Liste von Homepages von YaCy Nutzern<
+#provided by YaCy peers using public bookmarks, link votes and crawl start points==automatisch erzeugt durch öffentliche Lesezeichen, Link-Bewertungen und Crawl-Startpunkte anderer YaCy-Peers
+#"Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="Bitte geben Sie zu Ihrer Linkempfehlung einen Kommentar ein. (Ihre Stimme wird auch ohne Kommentar angenommen.)"
+#"authentication required"=="Autorisierung erforderlich"
+#Hide surftips for users without autorization==Verberge Surftipps für Benutzer ohne Autorisierung
+#Show surftips to everyone==Zeige Surftipps allen Benutzern
 #-----------------------------
 #File: Table_API_p.html
 #---------------------------
-: Peer Steering==: Управление пира
+: Peer Steering==: Управление узлом
 Steering of API Actions<==Руководство по действиям API<
 This table shows actions that had been issued on the YaCy interface==Эта таблица показывает какие действия были выполнены на YaCy интерфейсе,
 to change the configuration or to request crawl actions.==для изменения настроек или подачи запроса на выполнение сканирования.
@@ -3097,7 +3096,7 @@ This search result can also be retrieved as RSS/<a href="http://www.opensearch.o
 The query format is similar to <a href="http://www.loc.gov/standards/sru/">SRU</a>.==Das Abfrageformat ist so ähnlich wie <a href="http://www.loc.gov/standards/sru/">SRU</a>.
 Click the API icon to see an example call to the search rss API.==Klicken Sie auf den API Button, um ein Beispiel zu sehen, wie das Such-RSS-API aufgerufen werden kann.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
-Did you mean:==Meinten Sie vielleicht:
+Did you mean:==Возможно вы имели ввиду:
 "Search"=="Поиск"
 'Search'=='Поиск'
 "search again"=="Искать ещё"
@@ -3108,20 +3107,20 @@ Audio==Аудио
 Video==Видео
 Applications==Приложения
 The following words are stop-words and had been excluded from the search:==Следующие слова стоп-слов и были исключены из поиска:
-No Results.==Нет результата.
-length of search words must be at least 3 characters==Длина искуемого слова должно быть не менее 3 символов
+No Results.==Нет результатов.
+length of search words must be at least 3 characters==Длина искомого слова должно быть не менее 3 символов
 > of==> из
 g> local,==g> локально,
 #g> remote),==g> удаленно),
 > from==> из
-remote YaCy peers.==удаленных YaCy пиров.
+remote YaCy peers.==удаленных узлов YaCy.
 #-----------------------------
 #File: yacysearchitem.html
 #---------------------------
 "bookmark"=="закладка"
 "recommend"=="рекомендовать"
 "delete"=="удалить"
-Pictures==Картинка
+Pictures==Картинки
 #-----------------------------
 #File: yacysearchtrailer.html
 #---------------------------
@@ -3161,21 +3160,25 @@ YaCy - Distributed Search Engine==YaCy - Система распределённ
 ### SEARCH & BROWSE ###
 >Search==>Поиск
 Web Search==Веб поиск
-File Search==Поиск файла
+File Search==Поиск файлов
 Search&nbsp;&amp;&nbsp;Browse==Поиск&nbsp;&amp;&nbsp;Обзор
 Search Page==Страница поиска
-Rich Client Search==Богатый Поиск Клиента
+#Rich Client Search==Богатый Поиск Клиента
 Interactive local Search==Интерактивный локальный поиск
-Compare Search==Сравнить поиск
-Ranking Config==Ranking Einstellungen
-Browse==Обзор
+Compare Search==Сравнить поиски
+Ranking Config==Настройка ранжирования
+Host Browser==Просмотр хостов
 >Surftips==>Советы
-Local Peer Wiki==Локальный Wiki
+Local Peer Wiki==Локальная вики
 >Bookmarks==>Закладки
 >Help==>Помощь
+### SEARCH DESIGN ###
+#Search Design==Suchmaskendesign
+Search Integration into External Sites==Вставка поискового интерфейса в другие сайты
+Integrated Search Configuration==Настройка встраиваемого поиска
 ### INDEX CONTROL ###
 Index&nbsp;Production==Индексирование
-Index&nbsp;Control==Index&nbsp;Kontrolle
+Index&nbsp;Control==Контроль&nbsp;индексации
 Index Creation==Создание индекса
 Crawler Monitor==Монитор сканирования
 Crawl Results==Результат сканирования
@@ -3185,17 +3188,17 @@ Index Administration==Администрирование индекса
 Filter &amp; Blacklists==Фильтр &amp; Черный список
 ### SEARCH INTEGRATION ###
 Search Integration==Настройка поисковика
-Search Portals==Such Portale
-Customization==Anpassungen
+Search Portals==Поисковые порталы
+Customization==Кастомизация
 ### MONITORING ###
 Monitoring==Мониторинг
 Network Access==Доступ к сети
-YaCy Network==YaCy сеть
-Web Visualization==Веб визуализация
-Access Tracker==Zugriffe
-#Server Log==Server Log
+YaCy Network==Сеть YaCy
+Web Visualization==Визуализация паутины
+Access Tracker==Монитор Доступа
+Server Log==Server Log
 >Messages==>Сообщения
-#>Terminal==>Terminal
+>Terminal==>Терминал
 "New Messages"=="Новые сообщения"
 ### PEER CONTROL
 Peer Control==Управление пиром
@@ -3208,33 +3211,33 @@ Confirm Shutdown==Подтвердить выключение
 ### THE PROJECT ###
 The Project==Проект
 Project Home==Домашная страница
-Deutsches Forum==Форум на Немецком
-English Forum==Форум на Английском
-YaCy Project Wiki==Wiki сайт проекта YaCy
-# Development Change Log==Entwicklung Änderungshistorie
-amp;language=en==amp;язык=de
-Development Change Log==Entwicklung Changelog
-Peer Statistics::YaCy Statistics==Peer Statistiken::YaCy Statistiken
+Deutsches Forum==Форум на немецком
+English Forum==Форум на английском
+YaCy Project Wiki==Wiki‐сайт проекта YaCy
+# Development Change Log==Development Change Log
+amp;language=en==amp;язык=ru
+Development Change Log==Development Change Log 
+Peer Statistics::YaCy Statistics==Peer Statistics::YaCy Statistics
 #-----------------------------
 #File: env/templates/simpleheader.template
 #---------------------------
 Administration<==Администрирование<
->Web Search<==>Веб поиск<
+>Web Search<==>Веб‐поиск<
 >Search Network<==>Поиск сети<
 Peer Owner Profile==Профиль владельца пира
 Help / YaCy Wiki==Помощь / YaCy Wiki
 #-----------------------------
 #File: env/templates/submenuAccessTracker.template
 #---------------------------
-Access Tracker==Zugriffe
-Server Access==Server-Zugriff
-Overview==Überblick
-#Details==Details
-Connections</a>==Verbindungen</a>
-Local Search==Lokale Suche
-#Log==Log
-#Host Tracker==Host Tracker
-Remote&nbsp;Search==Remote Suche
+Access Tracker==Монитор Доступа
+Server Access=Доступ к серверу
+Overview==Обзор
+Details==Подробно
+Connections</a>==Соединения</a>
+Local Search==Локальный поиск
+Log==Log
+Host Tracker==Host Tracker
+Remote&nbsp;Search==Удаленный&nbsp;поиск
 #-----------------------------
 #File: env/templates/submenuBlacklist.template
 #---------------------------
@@ -3259,14 +3262,14 @@ System Update==Обновление системы
 Advanced Settings==Расширенные настройки
 Parser Configuration==Конфигурация обработки
 Local robots.txt==Локальный robots.txt
-Web Cache==Веб кэш
+Web Cache==Веб‐кэш
 Advanced Properties==Расширенные настройки
 #-----------------------------
 #File: env/templates/submenuContentIntegration.template
 #---------------------------
 External Content Integration==Интеграция внешнего контента
-Import phpBB3 forum==Импорт phpBB3 форум
-Import Mediawiki dumps==Импорт Mediawiki дамп
+Import phpBB3 forum==Импорт форума phpBB3
+Import Mediawiki dumps==Импорт дампа Mediawiki
 Import OAI-PMH Sources==Импорт OAI-PMH источника
 #-----------------------------
 #File: env/templates/submenuCookie.template
@@ -3339,11 +3342,11 @@ Crawler/Spider<==Сбор/Паук<
 Full Site Crawl==Полное сканирование сайта
 Sitemap Loader==Загрузка карты сайта
 Crawl Start<br/>\(Expert\)==Запуск сканирования<br/>(Эксперт)
-Network<br/>Scanner==Сетевой<br/>сканер
+Network<br/>Scanner==Сканер<br/>сети
 #>Intranet<br/>Scanner<==>Интранет<br/>сканер<
 Crawling of==Сканирование
 #MediaWikis==MediaWikis
->phpBB3 Forums<==>phpBB3 форумы<
+>phpBB3 Forums<==>phpBB3‐форумы<
 Content Import<==Импорт контента<
 Network Harvesting<==Сеть сбора<
 #Remote<br/>Crawling==Remote<br/>Crawling
@@ -3351,7 +3354,7 @@ Network Harvesting<==Сеть сбора<
 Database Reader<==Обозреватель БД<
 for phpBB3 Forums==для форумов phpBB3
 Dump Reader for==Dump Leser für
-#MediaWiki dumps==MediaWiki дамп
+#MediaWiki dumps==MediaWiki‐дампы
 #-----------------------------
 #File: env/templates/submenuPortalIntegration.template
 #---------------------------
@@ -3391,68 +3394,67 @@ Password</label>==Пароль</label>
 #-----------------------------
 #File: proxymsg/error.html
 #---------------------------
-YaCy: Error Message==YaCy: Fehlermeldung
-request:==Anfrage:
-unspecified error==unspezifizierter Fehler
-not-yet-assigned error==noch nicht vergebener Fehler
-You don't have an active internet connection. Please go online.==Sie haben keine aktive Internetverbindung. Bitte gehen Sie online.
-Could not load resource. The file is not available.==Datei konnte nicht geladen werden. Die Datei ist nicht vorhanden.
-Exception occurred==Dieser Fehler trat auf 
-Generated \#\[date\]\# by==Erstellt am #[date]# von
+YaCy: Error Message==YaCy: Сообщение об ошибкеequest:==запрос:
+unspecified error==неизвестная ошибка
+not-yet-assigned error==пока-не-назначенная-ошибка
+You don't have an active internet connection. Please go online.==У вас нет активного соединения с интернет. Пожалуйста выйдите онлайн.
+Could not load resource. The file is not available.==Не могу загрузить ресурс. Файл недоступен.
+Exception occurred==Произошло исключение
+Generated \#\[date\]\# by==Сгенерировано: #[date]# 
 #-----------------------------
 #File: proxymsg/proxylimits.inc
 #---------------------------
-Your Account is disabled for surfing.==Ihr Account ist deaktivert zum surfen.
-Your Timelimit \(\#\[timelimit\]\# Minutes per Day\) is reached.==Ihr Zeitlimit (#[timelimit]# Minuten am Tag) wurde erreicht. 
+Your Account is disabled for surfing.==Вашему аккаунту запрешен просмотр.
+Your Timelimit \(\#\[timelimit\]\# Minutes per Day\) is reached.==Ваш временной лимит (#[timelimit]# минут в день) исчерпан. 
 #-----------------------------
 #File: proxymsg/unknownHost.inc
 #---------------------------
 The server==Сервер
 could not be found.==не найден.
-Did you mean:==Meinten Sie vielleicht:
+Did you mean:==Вы имели ввиду:
 #-----------------------------
 #File: www/welcome.html
 #---------------------------
-YaCy: Default Page for Individual Peer Content==YACY: Standardseite für eigene Peer-Inhalte
-Individual&nbsp;Web&nbsp;Page==eigene Webseite
-Welcome to your own web page<br />in the <strong>YaCy Network==Willkommen auf Ihrer eigenen Webseite<br />im <strong>YaCy-Netzwerk
-THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==DIES IST EINE DEMONSTRATIONSSEITE FÜR IHREN EIGENEN WEB SERVER!
-PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
-&lt;YaCy-application-home&gt;<strong>\#\[wwwpath\]\#</strong>==&lt;YaCy-Programmpfad&gt;<strong>#[wwwpath]#</strong> ABLEGEN.
+YaCy: Default Page for Individual Peer Content==YaCy: Страница по умолчанию для контента узла
+#Individual&nbsp;Web&nbsp;Page==eigene Webseite
+#Welcome to your own web page<br />in the <strong>YaCy Network==Willkommen auf Ihrer eigenen Webseite<br />im <strong>YaCy-Netzwerk
+#THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==DIES IST EINE DEMONSTRATIONSSEITE FÜR IHREN EIGENEN WEB SERVER!
+#PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
+#&lt;YaCy-application-home&gt;<strong>\#\[wwwpath\]\#</strong>==&lt;YaCy-Programmpfad&gt;<strong>#[wwwpath]#</strong> ABLEGEN.
 #-----------------------------
 #File: js/Crawler.js
 #---------------------------
-"Continue this queue"=="Diese Queue weiter abarbeiten"
-"Pause this queue"=="Diese Queue anhalten"
+"Continue this queue"=="Запустить эту очередь"
+"Pause this queue"=="Приостановить эту очередь"
 #-----------------------------
 #File: js/yacyinteractive.js
 #---------------------------
 >total results==>всего в результате
-&nbsp;topwords:==&nbsp;Topwörter:
+#&nbsp;topwords:==&nbsp;Topwörter:
 >Name==>Имя
 >Size==>Размер
 >Date==>Дата
 #-----------------------------
 #File: yacy/ui/js/jquery-flexigrid.js
 #---------------------------
-'Displaying \{from\} to \{to\} of \{total}\ items'=='Zeige {from} bis {to} von {total} Elementen'
-'Processing, please wait ...'=='In Bearbeitung. Bitte warten ...'
-'No items'=='Keine Elemente'
+'Displaying \{from\} to \{to\} of \{total}\ items'=='Показываю {from} от {to} из {total} элементов'
+'Processing, please wait ...'=='Обработка, ждитее ...'
+'No items'=='Нет обьектов'
 #-----------------------------
 #File: yacy/ui/js/jquery-ui-1.7.2.min.js
 #---------------------------
-Loading&#8230;==Lade&#8230;
+#Loading&#8230;==Загрузка&#8230;
 #-----------------------------
 #File: yacy/ui/js/jquery.ui.all.min.js
 #---------------------------
-Loading&#8230;==Lade&#8230;
+#Loading&#8230;==Lade&#8230;
 #-----------------------------
 #File: yacy/ui/index.html
 #---------------------------
-About YaCy-UI==Über YaCy-UI
-Admin Console==Admin Konsole
-"Bookmarks"=="Lesezeichen"
->Bookmarks==>Lesezeichen
+About YaCy-UI==О YaCy
+Admin Console==Консоль администратора
+"Bookmarks"=="Закладки"
+>Bookmarks==>Закладки
 #Server Log==Server Log
 #-----------------------------
 #File: yacy/ui/yacyui-admin.html
@@ -3460,22 +3462,22 @@ Admin Console==Admin Konsole
 Peer Control==Peer
 "Login"=="Login"
 #Login==Anmelden
-Themes==Aussehen
-Messages==Nachrichten
-Re-Start==Neustart
-Shutdown==Beenden
+Themes==Темы
+Messages==Сообщения
+Re-Start==Рестарт
+Shutdown==Выключение
 Web Indexing==Web Indexierung
 Crawl Start==Crawl starten
 Monitoring==Überwachung
 YaCy Network==YaCy Netzwerk
->Settings==>Einstellungen
-"Basic Settings"=="Eingangskonfiguration"
-\tBasic==Basis
-Accounts==Konten
+>Settings==>Настройки
+"Basic Settings"=="Базовые настройки"
+\tBasic==Базовые
+Accounts==Аккаунты
 "Network"=="Netzwerk"
 \tNetwork==Netzwerk
-"Advanced Settings"=="Erweiterte Einstellungen"
-\tAdvanced==Erweitert
+"Advanced Settings"=="Расширенные настройки"
+\tAdvanced==Расширенные
 "Update Settings"=="System Aktualisierung"
 \tUpdate==Aktualisierung
 >YaCy Project==>YaCy Projekt
@@ -3483,7 +3485,7 @@ Accounts==Konten
 \tProject==Projekt
 "YaCy Statistics"=="YaCy Statistiken"
 \tStatistics==Statistiken
-"YaCy Forum"=="YaCy форум"
+"YaCy Forum"=="Форум YaCy"
 #Forum==Forum
 "Help"=="Hilfe"
 #"YaCy Wiki"=="YaCy Wiki"
