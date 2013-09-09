@@ -45,17 +45,23 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.Classification;
+import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.Seed;
 import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.search.Switchboard;
+import net.yacy.server.http.TemplateEngine;
+import net.yacy.server.serverClassLoader;
+import net.yacy.server.serverCore;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.servletProperties;
 import net.yacy.visualization.RasterPlotter;
 
 import org.eclipse.jetty.server.Handler;
@@ -63,12 +69,6 @@ import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import de.anomic.http.server.TemplateEngine;
-import de.anomic.server.serverClassLoader;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.server.servletProperties;
 
 /**
  * jetty http handler:
@@ -150,10 +150,10 @@ public class TemplateHandler extends AbstractHandler implements Handler {
             templateMethodCache.put(classFile, new SoftReference<Method>(m));
             
         } catch (final ClassNotFoundException e) {
-            Log.logSevere("TemplateHandler", "class " + classFile + " is missing:" + e.getMessage());
+            ConcurrentLog.severe("TemplateHandler", "class " + classFile + " is missing:" + e.getMessage());
             throw new InvocationTargetException(e, "class " + classFile + " is missing:" + e.getMessage());
         } catch (final NoSuchMethodException e) {
-            Log.logSevere("TemplateHandler", "method 'respond' not found in class " + classFile + ": " + e.getMessage());
+            ConcurrentLog.severe("TemplateHandler", "method 'respond' not found in class " + classFile + ": " + e.getMessage());
             throw new InvocationTargetException(e, "method 'respond' not found in class " + classFile + ": " + e.getMessage());
         }
         return m;
@@ -203,6 +203,15 @@ public class TemplateHandler extends AbstractHandler implements Handler {
         		String argName = argNames.nextElement();
         		args.put(argName, request.getParameter(argName));
         	}
+                //TODO: for SSI request, local parameters are added as attributes, put them back as parameter for the legacy request
+                //      likely this should be implemented via httpservletrequestwrapper to supply complete parameters  
+                @SuppressWarnings("unchecked")
+                Enumeration<String> attNames = request.getAttributeNames();
+                while (attNames.hasMoreElements()) {
+                    String argName = attNames.nextElement();
+                    args.put (argName,request.getAttribute(argName).toString());
+                }        
+                // eof modification to read attribute
         	RequestHeader legacyRequestHeader = generateLegacyRequestHeader(request, target, targetExt);
         	
             Object tmp;

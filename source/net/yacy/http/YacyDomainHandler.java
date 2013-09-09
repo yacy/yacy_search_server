@@ -39,7 +39,7 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import de.anomic.http.server.AlternativeDomainNames;
+import net.yacy.server.http.AlternativeDomainNames;
 
 public class YacyDomainHandler extends AbstractHandler implements Handler {
 	

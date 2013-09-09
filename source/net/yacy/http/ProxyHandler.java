@@ -34,6 +34,7 @@ import java.util.Enumeration;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.yacy.cora.protocol.ClientIdentification;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -47,9 +48,9 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.server.Request;
 
-import de.anomic.crawler.Cache;
-import de.anomic.crawler.retrieval.Response;
-import de.anomic.http.server.MultiOutputStream;
+import net.yacy.crawler.data.Cache;
+import net.yacy.crawler.retrieval.Response;
+import net.yacy.server.http.MultiOutputStream;
 
 /**
  * jetty http handler
@@ -93,7 +94,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 		proxyHeaders.remove(RequestHeader.KEEP_ALIVE);
 		proxyHeaders.remove(RequestHeader.CONTENT_LENGTH);
 
-		final HTTPClient client = new HTTPClient();
+		final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
 		int timeout = 60000;
 		client.setTimout(timeout);
 		client.setHeader(proxyHeaders.entrySet());
@@ -134,7 +135,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
             }
             
             // reserver cache entry
-            final de.anomic.crawler.retrieval.Request yacyRequest = new de.anomic.crawler.retrieval.Request(
+            final net.yacy.crawler.retrieval.Request yacyRequest = new net.yacy.crawler.retrieval.Request(
         			null, 
                     digestURI, 
                     null, //requestHeader.referer() == null ? null : new DigestURI(requestHeader.referer()).hash(), 

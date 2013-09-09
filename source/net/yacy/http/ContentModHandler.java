@@ -35,7 +35,6 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HandlerContainer;
-import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.server.Request;
 
 import org.eclipse.jetty.server.handler.HandlerWrapper;
@@ -86,7 +85,7 @@ public abstract class ContentModHandler extends HandlerWrapper implements Handle
 		private ByteArrayServletOutputStream wrappedOutputStream = new ByteArrayServletOutputStream();
 
 		public ContentModResponseWrapper(HttpServletResponse response) {
-			super(response);
+			super(response);                        
 		}
 		
 		@Override

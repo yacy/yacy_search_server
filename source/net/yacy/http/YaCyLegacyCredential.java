@@ -24,8 +24,8 @@
 
 package net.yacy.http;
 
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.order.Digest;
 import net.yacy.kelondro.util.MapTools;
 
 import org.eclipse.jetty.http.security.Credential;

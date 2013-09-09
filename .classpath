@@ -11,6 +11,14 @@
 	<classpathentry excluding="collection1/" kind="src" path="htroot/solr"/>
 	<classpathentry kind="src" path="htroot/gsa"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/jetty-continuation-7.3.0.v20110203.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-http-7.3.0.v20110203.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-io-7.3.0.v20110203.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-security-7.3.0.v20110203.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-server-7.3.0.v20110203.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlet-7.3.0.v20110203.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlets-7.3.0.v20110203.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-util-7.3.0.v20110203.jar"/>
 	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
 	<classpathentry kind="lib" path="lib/activation.jar"/>
 	<classpathentry kind="lib" path="lib/commons-jxpath-1.3.jar"/>

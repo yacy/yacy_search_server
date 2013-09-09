@@ -31,12 +31,13 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HandlerContainer;
 
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.ByteBuffer;
 
 /**
  * Jetty Http HandlerWrapper applying server-side includes,
@@ -71,21 +72,61 @@ public class SSIHandler extends ContentModHandler implements Handler, HandlerCon
         out.flush();
 	}
 	
-    private static void parseSSI(final ByteBuffer in, final int off, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void parseSSI(final ByteBuffer in, final int off, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (in.startsWith("<!--#include virtual=\"".getBytes(), off)) {
             final int q = in.indexOf("\"".getBytes(), off + 22);
             if (q > 0) {
                 final String path = in.toString(off + 22, q - off - 22);
                 try {
-                	RequestDispatcher dispatcher = request.getRequestDispatcher("/"+path);
-                	dispatcher.include(request, response);
+                	//RequestDispatcher dispatcher = request.getRequestDispatcher("/"+path);
+                    //
+                    //TODO: dispatcher.include did not work in testing, temporarely added old writeContent - 
+                    //  
+                	//dispatcher.include(request, response);
+                        writeContent(path,request,response);
+                        
                 	response.flushBuffer();
                 } catch (Exception e) {
-                	Log.logException(e);
+                	ConcurrentLog.logException(e);
                 	throw new ServletException();
                 }
             }
         }
     }
+    
+    /**
+     * temporarly added old writeContent for SSI to output include files
+     * as request.parameter is not modifyable used quickfix to add parameter via request.setAttribute
+     * and added temporarely the code in handler (TemplateHandler.handle) to read the request.attribute
+     *  TODO: should finally be implementend otherwise eg. via HttpServletRequestWrapper
+     */
+    public void writeContent(final String path, HttpServletRequest request, HttpServletResponse response) {
+        // check if there are arguments in path string
+        String args = "";
+        String fname = path;
+        final int argpos = path.indexOf('?');
+        if (argpos > 0) {
+            fname = path.substring(0, argpos);
+            args = path.substring(argpos + 1);
+            String[] arglist = CommonPattern.AMP.split(args);
+            for (String arg : arglist) {
+                String[] argnv = arg.split("=");
+                if (argnv.length > 1) {
+                    request.setAttribute(argnv[0], argnv[1]);
+                } else {
+                    request.setAttribute(arg, null);
+                }
+            }
+        }
+
+        try {
+            Handler h = this.getHandler();
+            h.handle(fname, null, request, response);
+        } catch (IOException ex) {
+            ConcurrentLog.logException(ex);
+        } catch (ServletException ex) {
+            ConcurrentLog.logException(ex);
+        }
+    }    
 
 }
