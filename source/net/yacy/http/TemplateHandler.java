@@ -38,6 +38,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletException;
@@ -63,6 +65,9 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
 import net.yacy.visualization.RasterPlotter;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConnection;
@@ -194,7 +199,7 @@ public class TemplateHandler extends AbstractHandler implements Handler {
         File targetFile = getLocalizedFile(target, localeSelection);
         File targetClass = rewriteClassFile(new File(htDefaultPath, target));
         String targetExt = target.substring(target.lastIndexOf('.') + 1, target.length());
-        
+              
         if ((targetClass != null)) {
 			serverObjects args = new serverObjects();
         	@SuppressWarnings("unchecked")
@@ -210,7 +215,12 @@ public class TemplateHandler extends AbstractHandler implements Handler {
                 while (attNames.hasMoreElements()) {
                     String argName = attNames.nextElement();
                     args.put (argName,request.getAttribute(argName).toString());
-                }        
+                } 
+                
+                // add multipart-form fields to parameter
+                if (request.getContentType() != null && request.getContentType().startsWith("multipart/form-data")) {
+                    parseMultipart(request, args);
+                }
                 // eof modification to read attribute
         	RequestHeader legacyRequestHeader = generateLegacyRequestHeader(request, target, targetExt);
         	
@@ -306,7 +316,7 @@ public class TemplateHandler extends AbstractHandler implements Handler {
             	// set response header
                 response.setContentType(mimeType);
                 response.setStatus(HttpServletResponse.SC_OK);
-                
+
                 // apply templates
                 TemplateEngine.writeTemplate(fis, response.getOutputStream(), templatePatterns, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                 fis.close();
@@ -322,5 +332,39 @@ public class TemplateHandler extends AbstractHandler implements Handler {
         Date lastModified;
         byte[] content;
     }
-
+    
+    /**
+     * TODO: add same functionality & checks as in HTTPDemon.parseMultipart
+     *
+     * parse multi-part form data for formfields (only), see also original
+     * implementation in HTTPDemon.parseMultipart
+     *
+     * @param request
+     * @param args found fields/values are added to the map
+     */
+    public void parseMultipart(HttpServletRequest request, serverObjects args) {
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        // maximum size that will be stored in memory
+        factory.setSizeThreshold(4096 * 16);
+        // Location to save data that is larger than maxMemSize.
+        // factory.setRepository(new File("."));
+        // Create a new file upload handler
+        ServletFileUpload upload = new ServletFileUpload(factory);
+        upload.setSizeMax(4096 * 8);
+        try {
+            // Parse the request to get form field items
+            @SuppressWarnings("unchecked")
+            List<FileItem> fileItems = upload.parseRequest(request);
+            // Process the uploaded file items
+            Iterator<FileItem> i = fileItems.iterator();
+            while (i.hasNext()) {
+                FileItem fi = (FileItem) i.next();
+                if (fi.isFormField()) {
+                    args.put(fi.getFieldName(), fi.getString());
+                }
+            }
+        } catch (Exception ex) {
+            ConcurrentLog.logException(ex);
+        }
+    }
 }
