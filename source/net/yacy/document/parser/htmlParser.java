@@ -141,7 +141,8 @@ public class htmlParser extends AbstractParser implements Parser {
                 scraper.getAnchors(),
                 scraper.getRSS(),
                 scraper.getImages(),
-                scraper.indexingDenied());
+                scraper.indexingDenied(),
+                scraper.getDate());
         ppd.setFavicon(scraper.getFavicon());
 
         return ppd;

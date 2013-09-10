@@ -28,6 +28,7 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
+import java.util.Date;
 
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
@@ -129,7 +130,8 @@ public class xlsParser extends AbstractParser implements Parser {
                         null,
                         null,
                         null,
-                        false)};
+                        false,
+                        new Date())};
             } catch (final Exception e) {
                 if (e instanceof InterruptedException) throw (InterruptedException) e;
 

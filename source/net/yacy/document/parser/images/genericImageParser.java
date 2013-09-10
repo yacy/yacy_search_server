@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -221,7 +222,8 @@ public class genericImageParser extends AbstractParser implements Parser {
              anchors, // anchors
              null,
              images,
-             false)}; // images
+             false,
+             new Date())}; // images
     }
 
     @Override

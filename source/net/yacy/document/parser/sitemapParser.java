@@ -96,7 +96,8 @@ public class sitemapParser extends AbstractParser implements Parser {
                     null,
                     null,
                     new HashMap<DigestURI, ImageEntry>(),
-                    false);
+                    false,
+                    new Date());
             docs.add(doc);
         } catch (final MalformedURLException e) {
             continue;

@@ -102,7 +102,8 @@ public class rssParser extends AbstractParser implements Parser {
                     anchors,
                     null,
                     new HashMap<DigestURI, ImageEntry>(),
-                    false);
+                    false,
+                    item.getPubDate());
             docs.add(doc);
         } catch (final MalformedURLException e) {
             continue;

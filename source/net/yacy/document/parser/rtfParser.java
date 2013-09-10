@@ -28,6 +28,7 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
+import java.util.Date;
 
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
@@ -84,7 +85,8 @@ public class rtfParser extends AbstractParser implements Parser {
                     null,
                     null,
                     null,
-                    false)};
+                    false,
+                    new Date())};
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;

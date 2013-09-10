@@ -28,6 +28,7 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
+import java.util.Date;
 
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -103,7 +104,8 @@ public class docParser extends AbstractParser implements Parser {
                   null,
                   null,
                   null,
-                  false)};
+                  false,
+                  new Date())};
 
         return docs;
     }

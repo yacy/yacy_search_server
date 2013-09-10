@@ -30,6 +30,7 @@ package net.yacy.document.parser;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -197,7 +198,9 @@ public class odtParser extends AbstractParser implements Parser {
                     null,
                     null,
                     null,
-                    false)};
+                    false,
+                    new Date()
+                    )};
             return docs;
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;

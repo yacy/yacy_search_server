@@ -32,6 +32,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
@@ -72,7 +73,8 @@ public class sevenzipParser extends AbstractParser implements Parser {
                 null,
                 null,
                 null,
-                false);
+                false,
+                new Date());
         Handler archive;
         AbstractParser.log.fine("opening 7zip archive...");
         try {

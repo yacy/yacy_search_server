@@ -34,6 +34,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Date;
 
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -115,7 +116,8 @@ public class psParser extends AbstractParser implements Parser {
                     null,     // anchors
                     null,     // rss
                     null,     // images
-                    false)};  // indexingdenied
+                    false,    // indexingdenied
+                    new Date())};  
 
             return docs;
         } catch (final Exception e) {
