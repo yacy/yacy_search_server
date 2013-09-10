@@ -37,6 +37,13 @@
 		<key>ClassPath</key>
 			<array>
 			<string>$JAVAROOT/htroot</string>
+                        <string>$JAVAROOT/lib/jetty-http-7.3.0.v20110203.jar</string>
+                        <string>$JAVAROOT/lib/jetty-io-7.3.0.v20110203.jar</string>
+                        <string>$JAVAROOT/lib/jetty-security-7.3.0.v20110203.jar</string>
+                        <string>$JAVAROOT/lib/jetty-server-7.3.0.v20110203.jar</string>
+                        <string>$JAVAROOT/lib/jetty-servlet-7.3.0.v20110203.jar</string>
+                        <string>$JAVAROOT/lib/jetty-servlets-7.3.0.v20110203.jar</string>
+                        <string>$JAVAROOT/lib/jetty-util-7.3.0.v20110203.jar</string>
 			<string>$JAVAROOT/lib/activation.jar</string>
 			<string>$JAVAROOT/lib/apache-mime4j-0.6.jar</string>
 			<string>$JAVAROOT/lib/arq-2.8.7.jar</string>
