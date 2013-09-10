@@ -30,6 +30,7 @@ package net.yacy.document.parser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,7 +126,8 @@ public class swfParser extends AbstractParser implements Parser {
                     anchors,      // a map of extracted anchors
                     null,
                     null,
-                    false)};      // a treeset of image URLs
+                    false,
+                    new Date())};      // a treeset of image URLs
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
 

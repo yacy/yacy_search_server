@@ -31,7 +31,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -45,6 +47,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.event.EventListenerList;
 
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.storage.SizeLimitedMap;
@@ -847,6 +850,28 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         s = s.substring(pos + 1).trim();
         if (s.toLowerCase().startsWith("url=")) return s.substring(4).trim();
         return EMPTY_STRING;
+    }
+    
+    public Date getDate() {
+        String content;
+        
+        // <meta name="date" content="YYYY-MM-DD..." />
+        content = this.metas.get("date");
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content);} catch (ParseException e) {}
+
+        // <meta name="DC.date" content="YYYY-MM-DD" />
+        content = this.metas.get("dc.date");
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content);} catch (ParseException e) {}
+        
+        // <meta name="DC:date" content="YYYY-MM-DD" />
+        content = this.metas.get("dc:date");
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content);} catch (ParseException e) {}
+        
+        // <meta http-equiv="last-modified" content="YYYY-MM-DD" />
+        content = this.metas.get("last-modified");
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content);} catch (ParseException e) {}
+        
+        return new Date();
     }
 
     // parse location

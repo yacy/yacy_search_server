@@ -32,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.exceptions.CryptographyException;
@@ -125,6 +126,7 @@ public class pdfParser extends AbstractParser implements Parser {
         // extracting some metadata
         PDDocumentInformation info = pdfDoc.getDocumentInformation();
         String docTitle = null, docSubject = null, docAuthor = null, docPublisher = null, docKeywordStr = null;
+        Date docDate = new Date();
         if (info != null) {
             docTitle = info.getTitle();
             docSubject = info.getSubject();
@@ -132,10 +134,9 @@ public class pdfParser extends AbstractParser implements Parser {
             docPublisher = info.getProducer();
             if (docPublisher == null || docPublisher.isEmpty()) docPublisher = info.getCreator();
             docKeywordStr = info.getKeywords();
+            try {if (info.getModificationDate() != null) docDate = info.getModificationDate().getTime();} catch (IOException e) {}
             // unused:
             // info.getTrapped());
-            // info.getCreationDate());
-            // info.getModificationDate();
         }
         info = null;
 
@@ -218,7 +219,8 @@ public class pdfParser extends AbstractParser implements Parser {
                 null,
                 null,
                 null,
-                false)};
+                false,
+                docDate)};
     }
 
     @SuppressWarnings("static-access")

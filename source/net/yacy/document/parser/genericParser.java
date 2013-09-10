@@ -25,6 +25,7 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
+import java.util.Date;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
@@ -65,7 +66,8 @@ public class genericParser extends AbstractParser implements Parser {
                 null,
                 null,
                 null,
-                false)};
+                false,
+                new Date())};
         return docs;
     }
 }

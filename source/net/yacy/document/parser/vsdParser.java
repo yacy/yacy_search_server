@@ -29,6 +29,7 @@ package net.yacy.document.parser;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import net.yacy.cora.util.ConcurrentLog;
@@ -115,7 +116,8 @@ public class vsdParser extends AbstractParser implements Parser {
                     null,         // a map of extracted anchors
                     null,
                     null,         // a treeset of image URLs
-                    false)};
+                    false,
+                    new Date())};
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
 

@@ -116,7 +116,7 @@ public class searchresult {
         post.put("defType", "edismax");
         post.put(CommonParams.Q, solrQ.toString());
         post.put(CommonParams.ROWS, post.remove("num"));
-        post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 5000 : 100));
+        post.put(CommonParams.ROWS, Math.min(post.getInt(CommonParams.ROWS, 10), (authenticated) ? 100000000 : 100));
         
         // set ranking
         if (post.containsKey("sort")) {

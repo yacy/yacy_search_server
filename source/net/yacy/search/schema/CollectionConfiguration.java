@@ -441,7 +441,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             add(doc, CollectionSchema.author, author);
         }
         if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, new String[]{document.dc_format()});
-        if (allAttr || contains(CollectionSchema.last_modified)) add(doc, CollectionSchema.last_modified, responseHeader == null ? new Date() : responseHeader.lastModified());
+        if (allAttr || contains(CollectionSchema.last_modified)) {
+            Date lastModified = responseHeader == null ? new Date() : responseHeader.lastModified();
+            if (document.getDate().before(lastModified)) lastModified = document.getDate();
+            add(doc, CollectionSchema.last_modified, lastModified);
+        }
         if (allAttr || contains(CollectionSchema.keywords)) add(doc, CollectionSchema.keywords, document.dc_subject(' '));
         if (allAttr || contains(CollectionSchema.synonyms_sxt)) {
             List<String> synonyms = condenser.synonyms();

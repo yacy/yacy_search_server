@@ -30,6 +30,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -171,7 +172,8 @@ public class audioTagParser extends AbstractParser implements Parser {
                     null,
                     null,
                     null,
-                    false)
+                    false,
+                    new Date())
             };            
             return docs;
         } catch (final Exception e) {
@@ -193,7 +195,8 @@ public class audioTagParser extends AbstractParser implements Parser {
 	                null,
 	                null,
 	                null,
-	                false
+	                false,
+                    new Date()
 	    	)};
 		} finally {
             try {

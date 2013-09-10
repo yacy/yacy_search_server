@@ -27,6 +27,7 @@ package net.yacy.document.parser;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import net.yacy.document.AbstractParser;
@@ -59,7 +60,7 @@ public class rdfParser extends AbstractParser implements Parser {
 
         String all = "rdfdatasource";
 		doc = new Document(url, mimeType, charset, null, null, null, singleList(""), "",
-					"", null, new ArrayList<String>(0), 0, 0, all, null, null, null, false);
+					"", null, new ArrayList<String>(0), 0, 0, all, null, null, null, false, new Date());
 
         docs.add(doc);
 

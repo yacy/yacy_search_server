@@ -100,7 +100,9 @@ public class DCEntry extends MultiMapSolrParams {
          */
     public Date getDate() {
         String d = this.get("docdatetime");
+        if (d == null) d = this.get("date");
         if (d == null) d = this.get("dc:date");
+        if (d == null) d = this.get("last-modified");
         if (d == null) return null;
         if (d.isEmpty()) return null;
         try {
@@ -286,7 +288,8 @@ public class DCEntry extends MultiMapSolrParams {
             null,
             null,
             null,
-            false);
+            false,
+            getDate());
     }
 
     public void writeXML(OutputStreamWriter os) throws IOException {

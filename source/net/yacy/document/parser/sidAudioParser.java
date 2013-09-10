@@ -27,6 +27,7 @@ package net.yacy.document.parser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -95,7 +96,8 @@ public class sidAudioParser extends AbstractParser implements Parser {
                         null,
                         null,
                         null,
-                        false)};
+                        false,
+                        new Date())};
             }
             throw new Parser.Failure("Unable to parse SID file, file does seems to be incomplete (len = " + available + ").", location);
         } catch (final IOException ex) {

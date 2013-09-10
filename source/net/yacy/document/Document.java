@@ -94,6 +94,7 @@ public class Document {
     private final double lon, lat;
     private final Object parserObject; // the source object that was used to create the Document
     private final Map<String, Set<String>> generic_facets; // a map from vocabulary names to the set of tags for that vocabulary which apply for this document
+    private final Date date;
 
     public Document(final DigestURI location, final String mimeType, final String charset,
                     final Object parserObject,
@@ -107,7 +108,8 @@ public class Document {
                     final Map<DigestURI, Properties> anchors,
                     final Map<DigestURI, String> rss,
                     final Map<DigestURI, ImageEntry> images,
-                    final boolean indexingDenied) {
+                    final boolean indexingDenied,
+                    final Date date) {
         this.source = location;
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
         this.charset = charset;
@@ -143,6 +145,7 @@ public class Document {
         this.indexingDenied = indexingDenied;
         this.text = text == null ? "" : text;
         this.generic_facets = new HashMap<String, Set<String>>();
+        this.date = date == null ? new Date() : date;
     }
 
     public Object getParserObject() {
@@ -449,6 +452,10 @@ dc_rights
         // this is part of the getAnchor-set: only links to email addresses
         if (!this.resorted) resortLinks();
         return this.emaillinks;
+    }
+
+    public Date getDate() {
+        return this.date;
     }
 
     public double lon() {
@@ -783,6 +790,7 @@ dc_rights
         final Map<DigestURI, String> rss = new HashMap<DigestURI, String>();
         final Map<DigestURI, ImageEntry> images = new HashMap<DigestURI, ImageEntry>();
         double lon = 0.0d, lat = 0.0d;
+        Date date = new Date();
 
         for (final Document doc: docs) {
 
@@ -821,6 +829,7 @@ dc_rights
             rss.putAll(doc.getRSS());
             ContentScraper.addAllImages(images, doc.getImages());
             if (doc.lon() != 0.0 && doc.lat() != 0.0) { lon = doc.lon(); lat = doc.lat(); }
+            if (doc.date.before(date)) date = doc.date;
         }
 
         // clean up parser data
@@ -852,7 +861,8 @@ dc_rights
                 anchors,
                 rss,
                 images,
-                false);
+                false,
+                date);
     }
 
     public static Map<DigestURI, String> getHyperlinks(final Document[] documents) {
