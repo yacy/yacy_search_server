@@ -141,10 +141,12 @@ public class searchresult {
             String origfq = post.get(CommonParams.FQ);
             String datefq = "";
             for (String dr: daterange) {
-                String from_to[] = dr.split("\\.\\.");
+                String from_to[] = dr.endsWith("..") ? new String[]{dr.substring(0, dr.length() - 2), ""} : dr.startsWith("..") ? new String[]{"", dr.substring(2)} : dr.split("\\.\\.");
                 if (from_to.length != 2) continue;
-                Date from = HeaderFramework.parseGSAFS(from_to[0]); if (from == null) continue;
-                Date to = HeaderFramework.parseGSAFS(from_to[1]); if (to == null) continue;
+                Date from = HeaderFramework.parseGSAFS(from_to[0]);
+                if (from == null) from = new Date(0);
+                Date to = HeaderFramework.parseGSAFS(from_to[1]);
+                if (to == null) to = new Date();
                 to.setTime(to.getTime() + 24L * 60L * 60L * 1000L); // we add a day because the day is inclusive
                 String z = CollectionSchema.last_modified.getSolrFieldName() + ":[" + ISO8601Formatter.FORMATTER.format(from) + " TO " + ISO8601Formatter.FORMATTER.format(to) + "]";
                 datefq = datefq.length() == 0 ? z : " OR " + z;
