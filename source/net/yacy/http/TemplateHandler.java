@@ -82,24 +82,25 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
  */
 public class TemplateHandler extends AbstractHandler implements Handler {
 
-	private String htLocalePath = "DATA/LOCALE/htroot";
-	private String htDefaultPath = "htroot";
-	private String htDocsPath = "DATA/HTDOCS";
-
-	private static final serverClassLoader provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
-
+    private String htLocalePath = "DATA/LOCALE/htroot";
+    private String htDefaultPath = "htroot";
+    private String htDocsPath = "DATA/HTDOCS";
+    
+    private static final serverClassLoader provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
+    
     private ConcurrentHashMap<File, SoftReference<Method>> templateMethodCache = null;
     
-	@Override
-	protected void doStart() throws Exception {
-		super.doStart();
-        templateMethodCache =  new ConcurrentHashMap<File, SoftReference<Method>>();
-	}
+    @Override
+    protected void doStart() throws Exception {
+        super.doStart();
+        templateMethodCache = new ConcurrentHashMap<File, SoftReference<Method>>();
+        htDocsPath = Switchboard.getSwitchboard().htDocsPath.getPath();
+    }
 
-	@Override
-	protected void doStop() throws Exception {
-		super.doStop();
-	}
+    @Override
+    protected void doStop() throws Exception {
+        super.doStop();
+    }
 
     /** Returns a path to the localized or default file according to the parameter localeSelection
      * @param path relative from htroot
@@ -228,16 +229,13 @@ public class TemplateHandler extends AbstractHandler implements Handler {
 			try {
 				tmp = invokeServlet(targetClass, legacyRequestHeader, args);
 			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ConcurrentLog.logException(e);
 				throw new ServletException();
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ConcurrentLog.logException(e);
 				throw new ServletException();
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ConcurrentLog.logException(e);
 				throw new ServletException();
 			}
 			
@@ -245,15 +243,15 @@ public class TemplateHandler extends AbstractHandler implements Handler {
 				
 				ByteBuffer result = null;
 			
-				if (tmp instanceof RasterPlotter) {
-	                final RasterPlotter yp = (RasterPlotter) tmp;
-	                // send an image to client
-	                result = RasterPlotter.exportImage(yp.getImage(), "png");
-	            }
-				if (tmp instanceof EncodedImage) {
-					final EncodedImage yp = (EncodedImage) tmp;
-	                result = yp.getImage();
-				}
+                            if (tmp instanceof RasterPlotter) {
+                                final RasterPlotter yp = (RasterPlotter) tmp;
+                                // send an image to client
+                                result = RasterPlotter.exportImage(yp.getImage(), "png");
+                            }
+                            if (tmp instanceof EncodedImage) {
+                                final EncodedImage yp = (EncodedImage) tmp;
+                                result = yp.getImage();
+                            }
 				
 	            if (tmp instanceof Image) {
 	                final Image i = (Image) tmp;

@@ -84,7 +84,7 @@ public class SSIHandler extends ContentModHandler implements Handler, HandlerCon
                     //  
                 	//dispatcher.include(request, response);
                         writeContent(path,request,response);
-                        
+
                 	response.flushBuffer();
                 } catch (Exception e) {
                 	ConcurrentLog.logException(e);
@@ -102,7 +102,7 @@ public class SSIHandler extends ContentModHandler implements Handler, HandlerCon
      */
     public void writeContent(final String path, HttpServletRequest request, HttpServletResponse response) {
         // check if there are arguments in path string
-        String args = "";
+        String args;
         String fname = path;
         final int argpos = path.indexOf('?');
         if (argpos > 0) {

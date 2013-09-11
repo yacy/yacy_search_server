@@ -56,7 +56,7 @@ public final class Connections_p {
 
         // server sessions
         // get the serverCore thread
-        final WorkflowThread httpd = sb.getThread("10_httpd");
+        //final WorkflowThread httpd = sb.getThread("10_httpd"); //not working with Jetty
 
         // determines if name lookup should be done or not
         final boolean doNameLookup;
@@ -138,7 +138,7 @@ public final class Connections_p {
         }
         prop.put("list", idx);
 
-        prop.putNum("numMax", ((serverCore)httpd).getMaxSessionCount());
+        prop.putNum("numMax", -1/* ((serverCore)httpd).getMaxSessionCount()*/); //TODO: get limit from Jetty
         prop.putNum("numActiveRunning", numActiveRunning);
         prop.putNum("numActivePending", numActivePending);
 

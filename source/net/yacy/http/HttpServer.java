@@ -40,46 +40,46 @@ import org.eclipse.jetty.server.nio.SelectChannelConnector;
  */
 public class HttpServer {
 	
-	private Server server = new Server();
-	
-	/**
-	 * @param port TCP Port to listen for http requests
-	 */
-	public HttpServer(int port) {
-		Switchboard sb = Switchboard.getSwitchboard();
-        server = new Server();
+    private Server server = new Server();
+
+    /**
+     * @param port TCP Port to listen for http requests
+     */
+    public HttpServer(int port) {
+        Switchboard sb = Switchboard.getSwitchboard();
+
         SelectChannelConnector connector = new SelectChannelConnector();
         connector.setPort(port);
         //connector.setThreadPool(new QueuedThreadPool(20));
         server.addConnector(connector);
-        
+
         YacyDomainHandler domainHandler = new YacyDomainHandler();
         domainHandler.setAlternativeResolver(sb.peers);
-        
+
         ResourceHandler resource_handler = new ResourceHandler();
         resource_handler.setDirectoriesListed(true);
-        resource_handler.setWelcomeFiles(new String[]{ "index.html" });
- 
+        resource_handler.setWelcomeFiles(new String[]{"index.html"});
+
         resource_handler.setResourceBase("htroot/");
 
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[]
-                {	domainHandler, new ProxyCacheHandler(), new ProxyHandler(), new RewriteHandler(),
-        			new SSIHandler(new TemplateHandler()),
-        			resource_handler, new DefaultHandler() });
-        
+           {domainHandler, new ProxyCacheHandler(), new ProxyHandler(),
+            new RewriteHandler(), new SSIHandler(new TemplateHandler()),
+            resource_handler, new DefaultHandler()});
+
         YaCySecurityHandler securityHandler = new YaCySecurityHandler();
         securityHandler.setLoginService(new YaCyLoginService());
         securityHandler.setRealmName("YaCy Admin Interface");
         securityHandler.setHandler(new CrashProtectionHandler(handlers));
-        
+
         // context handler for dispatcher and security
         ContextHandler context = new ContextHandler();
         context.setContextPath("/");
         context.setHandler(securityHandler);
-        
+
         server.setHandler(context);
-	}
+    }
 	
 	/**
 	 * start http server
