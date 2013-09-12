@@ -58,6 +58,7 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.http.TemplateEngine;
 import net.yacy.server.serverClassLoader;
 import net.yacy.server.serverCore;
@@ -70,7 +71,6 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
@@ -296,6 +296,7 @@ public class TemplateHandler extends AbstractHandler implements Handler {
             Seed myPeer = sb.peers.mySeed();
             templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1); 
             templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
+            templatePatterns.put("p2p", sb.getConfigBool(SwitchboardConstants.DHT_ENABLED, true) || !sb.isRobinsonMode() ? 1 : 0);
             
             if(targetFile.exists() && targetFile.isFile() && targetFile.canRead()) {
             	String mimeType = Classification.ext2mime(targetExt, "text/html");
@@ -355,7 +356,7 @@ public class TemplateHandler extends AbstractHandler implements Handler {
             // Process the uploaded file items
             Iterator<FileItem> i = fileItems.iterator();
             while (i.hasNext()) {
-                FileItem fi = (FileItem) i.next();
+                FileItem fi = i.next();
                 if (fi.isFormField()) {
                     args.put(fi.getFieldName(), fi.getString());
                 }
