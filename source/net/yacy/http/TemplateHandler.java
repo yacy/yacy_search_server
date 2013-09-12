@@ -271,12 +271,11 @@ public class TemplateHandler extends AbstractHandler implements Handler {
                 
                 result.writeTo(response.getOutputStream());
                 
-                // we handled this request, break out of handler chain
-        		Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
-        		base_request.setHandled(true);
-
-        		return;
-			}
+                // we handled this request, break out of handler chain 
+                // is null on SSI template
+                if (baseRequest != null)  baseRequest.setHandled(true);
+                return;
+            }
 
 			
             servletProperties templatePatterns = null;
@@ -320,11 +319,11 @@ public class TemplateHandler extends AbstractHandler implements Handler {
                 fis.close();
                 
                 // we handled this request, break out of handler chain
-        		Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
-        		base_request.setHandled(true);
+                // is null on SSI template
+         	if (baseRequest != null) baseRequest.setHandled(true);
             }
         }
-	}
+    }
 
     protected final class TemplateCacheEntry {
         Date lastModified;
