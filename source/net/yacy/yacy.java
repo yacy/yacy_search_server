@@ -327,7 +327,7 @@ public final class yacy {
             }
 
             // start main threads
-            final long port = sb.getConfigLong("port", 8090);
+            final int port = sb.getConfigInt("port", 8090);
             try {
 
             	// start jetty http server
@@ -346,6 +346,7 @@ public final class yacy {
                 
                 // start the server
                 //sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
+                sb.setHttpServer(httpServer);  
                 //server.start();
 
                 // open the browser window

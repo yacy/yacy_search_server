@@ -24,6 +24,11 @@
 
 package net.yacy.http;
 
+import java.net.InetSocketAddress;
+import java.net.SocketException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 
 import org.eclipse.jetty.server.Handler;
@@ -34,12 +39,11 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 
-
 /**
  * class to embedded jetty http server into YaCy
  */
 public class HttpServer {
-	
+
     private Server server = new Server();
 
     /**
@@ -80,29 +84,65 @@ public class HttpServer {
 
         server.setHandler(context);
     }
-	
-	/**
-	 * start http server
-	 */
-	public void start() throws Exception {
+
+    /**
+     * start http server
+     */
+    public void start() throws Exception {
         server.start();
-	}
-	
-	/**
-	 * stop http server and wait for it
-	 */
-	public void stop() throws Exception {
-		server.stop();
+    }
+
+    /**
+     * stop http server and wait for it
+     */
+    public void stop() throws Exception {
+        server.stop();
         server.join();
-	}
+    }
 
-	/**
-	 * just for testing and debugging
-	 */
-	public static void main(String[] args) throws Exception {
-		HttpServer server = new HttpServer(8090);
-		server.start();
-		server.stop();
-	}
+    public void setMaxSessionCount(int maxBusy) {
+        // TODO:
+    }
 
+    public boolean withSSL() {
+        return false; // TODO:
+    }
+
+    public void reconnect(int milsec) {
+        try {
+            Thread.sleep(milsec);
+        } catch (final InterruptedException e) {
+            ConcurrentLog.logException(e);
+        } catch (final Exception e) {
+            ConcurrentLog.logException(e);
+        }
+        try {
+            server.stop();
+            server.join();
+            server.start();
+        } catch (Exception ex) {
+            ConcurrentLog.logException(ex);
+        }
+    }
+
+    public InetSocketAddress generateSocketAddress(String port) throws SocketException {
+        return null; // TODO:
+    }
+
+    public int getMaxSessionCount() {
+        return server.getThreadPool().getThreads();
+    }
+
+    public int getJobCount() {
+        return getMaxSessionCount()-server.getThreadPool().getIdleThreads(); // TODO:
+    }
+
+    /**
+     * just for testing and debugging
+     */
+    public static void main(String[] args) throws Exception {
+        HttpServer server = new HttpServer(8090);
+        server.start();
+        server.stop();
+    }
 }

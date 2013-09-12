@@ -33,6 +33,7 @@ import java.util.Date;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.Memory;
+import net.yacy.http.HttpServer;
 import net.yacy.kelondro.io.ByteCount;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
@@ -326,10 +327,10 @@ public class Status
         prop.put("trafficCrawler", Formatter.bytesToString(ByteCount.getAccountCount(ByteCount.CRAWLER)));
 
         // connection information
-        final serverCore httpd = (serverCore) sb.getThread("10_httpd");
+        final HttpServer httpd =  sb.getHttpServer();
 
-        //prop.putNum("connectionsActive", httpd.getJobCount());
-        //prop.putNum("connectionsMax", httpd.getMaxSessionCount());
+        prop.putNum("connectionsActive", httpd.getJobCount());
+        prop.putNum("connectionsMax", httpd.getMaxSessionCount());
 
         // Queue information
         final int loaderJobCount = sb.crawlQueues.workerSize();

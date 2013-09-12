@@ -47,6 +47,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.http.HttpServer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowThread;
@@ -69,7 +70,8 @@ public class serverSwitch
     private final ConcurrentMap<InetAddress, String> authorization;
     private final NavigableMap<String, BusyThread> workerThreads;
     private final serverAccessTracker accessTracker;
-
+    private HttpServer httpserver;
+    
     public serverSwitch(
         final File dataPath,
         final File appPath,
@@ -638,6 +640,16 @@ public class serverSwitch
         byte[] bytes = new byte[length];
         pwGenerator.nextBytes(bytes);
         return Digest.encodeMD5Hex(bytes);
+    }
+    /**
+     * set/remember jetty server
+     * @param jettyserver 
+     */
+    public void setHttpServer(HttpServer jettyserver) {
+        this.httpserver = jettyserver;
+    }
+    public HttpServer getHttpServer() {
+        return httpserver;
     }
 
 }
