@@ -33,7 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -43,7 +44,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.data.WorkTables;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.search.Switchboard;
@@ -127,7 +127,7 @@ public class IndexControlURLs_p {
         String urlhash = post.get("urlhash", "").trim();
         if (urlhash.isEmpty() && urlstring.length() > 0) {
             try {
-                urlhash = ASCII.String(new DigestURI(urlstring).hash());
+                urlhash = ASCII.String(new DigestURL(urlstring).hash());
             } catch (final MalformedURLException e) {
             }
         }
@@ -184,7 +184,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            final DigestURI url = segment.fulltext().getURL(ASCII.getBytes(urlhash));
+            final DigestURL url = segment.fulltext().getURL(ASCII.getBytes(urlhash));
             if (url == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
@@ -197,7 +197,7 @@ public class IndexControlURLs_p {
 
         if (post.containsKey("urldelete")) {
             try {
-                urlhash = ASCII.String((new DigestURI(urlstring)).hash());
+                urlhash = ASCII.String((new DigestURL(urlstring)).hash());
             } catch (final MalformedURLException e) {
                 urlhash = null;
             }
@@ -211,7 +211,7 @@ public class IndexControlURLs_p {
 
         if (post.containsKey("urlstringsearch")) {
             try {
-                final DigestURI url = new DigestURI(urlstring);
+                final DigestURL url = new DigestURL(urlstring);
                 urlhash = ASCII.String(url.hash());
                 prop.put("urlhash", urlhash);
                 final URIMetadataNode entry = segment.fulltext().getMetadata(ASCII.getBytes(urlhash));

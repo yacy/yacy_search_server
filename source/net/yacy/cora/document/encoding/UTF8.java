@@ -22,7 +22,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.document;
+package net.yacy.cora.document.encoding;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;

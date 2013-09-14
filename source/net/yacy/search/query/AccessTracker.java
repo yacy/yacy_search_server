@@ -35,8 +35,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.WordCache;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 

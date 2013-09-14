@@ -31,12 +31,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Condenser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -128,7 +128,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     public byte[] hash() {
         return this.urlentry.hash();
     }
-    public DigestURI url() {
+    public DigestURL url() {
         return this.urlentry.url();
     }
     public Bitfield flags() {
@@ -138,7 +138,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         return (this.alternative_urlstring == null) ? this.urlentry.url().toNormalform(true) : this.alternative_urlstring;
     }
     public String urlname() {
-        return (this.alternative_urlname == null) ? MultiProtocolURI.unescape(this.urlentry.url().toNormalform(true)) : this.alternative_urlname;
+        return (this.alternative_urlname == null) ? MultiProtocolURL.unescape(this.urlentry.url().toNormalform(true)) : this.alternative_urlname;
     }
     public String title() {
         return this.urlentry.dc_title();

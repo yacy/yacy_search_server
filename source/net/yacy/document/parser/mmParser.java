@@ -34,11 +34,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -70,7 +70,7 @@ public class mmParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURI location, final String mimeType,
+    public Document[] parse(final DigestURL location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException
     {

@@ -32,7 +32,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.crawler.CrawlSwitchboard;
@@ -40,7 +41,6 @@ import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 
 public class YMarkCrawlStart extends HashMap<String,String>{
@@ -162,7 +162,7 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 
 	protected static String crawlStart(
         final Switchboard sb,
-        final DigestURI startURL,
+        final DigestURL startURL,
         final String urlMustMatch,
         final String urlMustNotMatch,
         final int depth,

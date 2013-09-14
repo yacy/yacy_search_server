@@ -41,9 +41,10 @@ import java.util.regex.Pattern;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -62,7 +63,6 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.citation.CitationReferenceFactory;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -216,10 +216,10 @@ public class Segment {
      * @return the clickdepth level or 999 if the root url cannot be found or a recursion limit is reached
      * @throws IOException
      */
-    public int getClickDepth(final DigestURI url) throws IOException {
+    public int getClickDepth(final DigestURL url) throws IOException {
 
         final byte[] searchhash = url.hash();
-        RowHandleSet rootCandidates = url.getPossibleRootHashes();
+        RowHandleSet rootCandidates = getPossibleRootHashes(url);
         
         RowHandleSet ignore = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100); // a set of urlhashes to be ignored. This is generated from all hashes that are seen during recursion to prevent enless loops
         RowHandleSet levelhashes = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 1); // all hashes of a clickdepth. The first call contains the target hash only and therefore just one entry
@@ -266,6 +266,25 @@ public class Segment {
         
         }
         return 999;
+    }
+    
+    private static RowHandleSet getPossibleRootHashes(DigestURL url) {
+        RowHandleSet rootCandidates = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 10);
+        String rootStub = url.getProtocol() + "://" + url.getHost();
+        try {
+            rootCandidates.put(new DigestURL(rootStub).hash());
+            rootCandidates.put(new DigestURL(rootStub + "/").hash());
+            rootCandidates.put(new DigestURL(rootStub + "/index.htm").hash());
+            rootCandidates.put(new DigestURL(rootStub + "/index.html").hash());
+            rootCandidates.put(new DigestURL(rootStub + "/index.php").hash());
+            rootCandidates.put(new DigestURL(rootStub + "/home.htm").hash());
+            rootCandidates.put(new DigestURL(rootStub + "/home.html").hash());
+            rootCandidates.put(new DigestURL(rootStub + "/home.php").hash());
+            rootCandidates.put(new DigestURL(rootStub + "/default.htm").hash());
+            rootCandidates.put(new DigestURL(rootStub + "/default.html").hash());
+            rootCandidates.put(new DigestURL(rootStub + "/default.php").hash());
+        } catch (final Throwable e) {}
+        return rootCandidates;
     }
 
     public ReferenceReportCache getReferenceReportCache()  {
@@ -428,7 +447,7 @@ public class Segment {
      * @param stub
      * @return an iterator for all matching urls
      */
-    public Iterator<DigestURI> urlSelector(final MultiProtocolURI stub, final long maxtime, final int maxcount) {
+    public Iterator<DigestURL> urlSelector(final MultiProtocolURL stub, final long maxtime, final int maxcount) {
         final BlockingQueue<SolrDocument> docQueue;
         final String urlstub;
         if (stub == null) {
@@ -436,15 +455,15 @@ public class Segment {
             urlstub = null;
         } else {
             final String host = stub.getHost();
-            String hh = DigestURI.hosthash(host);
+            String hh = DigestURL.hosthash(host);
             docQueue = this.fulltext.getDefaultConnector().concurrentDocumentsByQuery(CollectionSchema.host_id_s + ":\"" + hh + "\"", 0, Integer.MAX_VALUE, maxtime, maxcount, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
             urlstub = stub.toNormalform(true);
         }
 
         // now filter the stub from the iterated urls
-        return new LookAheadIterator<DigestURI>() {
+        return new LookAheadIterator<DigestURL>() {
             @Override
-            protected DigestURI next0() {
+            protected DigestURL next0() {
                 while (true) {
                     SolrDocument doc;
                     try {
@@ -456,9 +475,9 @@ public class Segment {
                     if (doc == null || doc == AbstractSolrConnector.POISON_DOCUMENT) return null;
                     String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
                     String id =  (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-                    DigestURI url;
+                    DigestURL url;
                     try {
-                        url = new DigestURI(u, ASCII.getBytes(id));
+                        url = new DigestURL(u, ASCII.getBytes(id));
                     } catch (final MalformedURLException e) {
                         continue;
                     }
@@ -498,7 +517,7 @@ public class Segment {
     }
 
     private static String votedLanguage(
-                    final DigestURI url,
+                    final DigestURL url,
                     final String urlNormalform,
                     final Document document,
                     final Condenser condenser) {
@@ -573,8 +592,8 @@ public class Segment {
     }
 
     public SolrInputDocument storeDocument(
-            final DigestURI url,
-            final DigestURI referrerURL,
+            final DigestURL url,
+            final DigestURL referrerURL,
             final Map<String, Pattern> collections,
             final ResponseHeader responseHeader,
             final Document document,
@@ -635,7 +654,7 @@ public class Segment {
         int outlinksSame = document.inboundLinks().size();
         int outlinksOther = document.outboundLinks().size();
         final int urlLength = urlNormalform.length();
-        final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
+        final int urlComps = MultiProtocolURL.urlComps(url.toString()).length;
 
         // create a word prototype which is re-used for all entries
         if ((this.termIndex != null && storeToRWI) || searchEvent != null) {
@@ -728,7 +747,7 @@ public class Segment {
 
         if (urlhash == null) return 0;
         // determine the url string
-        final DigestURI url = fulltext().getURL(urlhash);
+        final DigestURL url = fulltext().getURL(urlhash);
         if (url == null) return 0;
 
         try {

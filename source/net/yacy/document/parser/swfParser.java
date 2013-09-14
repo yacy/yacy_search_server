@@ -31,15 +31,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import pt.tumba.parser.swf.SWF2HTML;
 
 public class swfParser extends AbstractParser implements Parser {
@@ -58,7 +56,7 @@ public class swfParser extends AbstractParser implements Parser {
      * all extracted information about the parsed document
      */
     @Override
-    public Document[] parse(final DigestURI location, final String mimeType,
+    public Document[] parse(final DigestURL location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException
     {
@@ -81,7 +79,7 @@ public class swfParser extends AbstractParser implements Parser {
             final String[] sections =  null;
             final List<String> abstrct = new ArrayList<String>();
             //TreeSet images = null;
-            final Map<DigestURI, Properties> anchors = new HashMap<DigestURI, Properties>();
+            final List<AnchorURL> anchors = new ArrayList<AnchorURL>();
             int urls = 0;
             int urlStart = -1;
             int urlEnd = 0;
@@ -98,9 +96,9 @@ public class swfParser extends AbstractParser implements Parser {
                 urlEnd = contents.indexOf(linebreak,urlStart);
                 url = contents.substring(urlStart,urlEnd);
                 urlnr = Integer.toString(++urls).toString();
-                final Properties p = new Properties();
-                p.put("name", urlnr);
-                anchors.put(new DigestURI(url), p);
+                AnchorURL u = new AnchorURL(url);
+                u.getProperties().put("name", urlnr);
+                anchors.add(u);
                 contents = contents.substring(0,urlStart)+contents.substring(urlEnd);
             }
 

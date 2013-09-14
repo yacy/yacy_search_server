@@ -3,8 +3,8 @@
 import java.util.Date;
 import java.util.List;
 
-import net.yacy.cora.document.RSSFeed;
-import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.document.feed.RSSFeed;
+import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.EventChannel;
 import net.yacy.search.Switchboard;

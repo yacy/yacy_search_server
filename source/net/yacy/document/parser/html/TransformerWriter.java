@@ -44,9 +44,9 @@ import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
 
 
@@ -545,7 +545,7 @@ public final class TransformerWriter extends Writer {
         System.exit(0);
         final char[] buffer = new char[512];
         try {
-            final ContentScraper scraper = new ContentScraper(new DigestURI("http://localhost:8090"), 1000);
+            final ContentScraper scraper = new ContentScraper(new DigestURL("http://localhost:8090"), 1000);
             final Transformer transformer = new ContentTransformer();
             final Reader is = new FileReader(args[0]);
             final FileOutputStream fos = new FileOutputStream(new File(args[0] + ".out"));

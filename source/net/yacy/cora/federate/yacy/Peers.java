@@ -29,7 +29,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.federate.yacy.api.Network;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.http.HTTPClient;

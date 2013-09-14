@@ -33,9 +33,10 @@ import java.util.concurrent.BlockingQueue;
 
 import org.apache.solr.common.SolrDocument;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailType;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
@@ -46,7 +47,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.Request;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.peers.graphics.WebStructureGraph.StructureEntry;
 import net.yacy.search.Switchboard;
@@ -115,8 +115,8 @@ public class HostBrowser {
         prop.putHTML("path", path);
         prop.put("delete", admin && path.length() > 0 ? 1 : 0);
         
-        DigestURI pathURI = null;
-        try {pathURI = new DigestURI(path);} catch (final MalformedURLException e) {}
+        DigestURL pathURI = null;
+        try {pathURI = new DigestURL(path);} catch (final MalformedURLException e) {}
 
         String load = post.get("load", "");
         boolean wait = false;
@@ -127,10 +127,10 @@ public class HostBrowser {
         }
         if (load.length() > 0 && loadRight) {
             // stack URL
-            DigestURI url;
+            DigestURL url;
             if (sb.crawlStacker.size() > 2) wait = false;
             try {
-                url = new DigestURI(load);
+                url = new DigestURL(load);
                 String reasonString = sb.crawlStacker.stackCrawl(new Request(
                         sb.peers.mySeed().hash.getBytes(),
                         url, null, load, new Date(),
@@ -244,7 +244,7 @@ public class HostBrowser {
             }
             try {
                 // generate file list from path
-                DigestURI uri = new DigestURI(path);
+                DigestURL uri = new DigestURL(path);
                 String host = uri.getHost();
                 prop.putHTML("outbound_host", host);
                 if (admin) prop.putHTML("outbound_admin_host", host); //used for WebStructurePicture_p link
@@ -322,7 +322,7 @@ public class HostBrowser {
                         while (links.hasNext()) {
                             u = links.next();
                             try {
-                                MultiProtocolURI mu = new MultiProtocolURI(u);
+                                MultiProtocolURL mu = new MultiProtocolURL(u);
                                 if (mu.getHost() != null) {
                                     ReversibleScoreMap<String> lks = outboundHosts.get(mu.getHost());
                                     if (lks == null) {
@@ -422,7 +422,7 @@ public class HostBrowser {
                         prop.put("files_list_" + c + "_type", 0);
                         prop.put("files_list_" + c + "_type_url", entry.getKey());
                         StoreType type = (StoreType) entry.getValue();
-                        try {uri = new DigestURI(entry.getKey());} catch (final MalformedURLException e) {uri = null;}
+                        try {uri = new DigestURL(entry.getKey());} catch (final MalformedURLException e) {uri = null;}
                         HarvestProcess process = uri == null ? null : sb.crawlQueues.exists(uri.hash());
                         boolean loading = load.equals(entry.getKey()) || (process != null && process != HarvestProcess.ERRORS);
                         boolean error =  process == HarvestProcess.ERRORS || type == StoreType.EXCLUDED || type == StoreType.FAILED;
@@ -541,12 +541,12 @@ public class HostBrowser {
                     // get all urls from the index and store them here
                     for (String id: internalIDs) {
                         if (id.equals(urlhash)) continue; // no self-references
-                        DigestURI u = fulltext.getURL(ASCII.getBytes(id));
+                        DigestURL u = fulltext.getURL(ASCII.getBytes(id));
                         if (u != null) references_internal_urls.add(u.toNormalform(true));
                     }
                     for (String id: externalIDs) {
                         if (id.equals(urlhash)) continue; // no self-references
-                        DigestURI u = fulltext.getURL(ASCII.getBytes(id));
+                        DigestURL u = fulltext.getURL(ASCII.getBytes(id));
                         if (u != null) references_external_urls.add(u.toNormalform(true));
                     }
                 } catch (final IOException e) {

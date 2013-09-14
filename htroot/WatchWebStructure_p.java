@@ -6,11 +6,11 @@
 
 import java.util.Iterator;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.CrawlProfile;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -64,7 +64,7 @@ public class WatchWebStructure_p {
 
         // fix start point if a "www."-prefix would be better
         if (host != null && !host.startsWith("www")) {
-            if (sb.webStructure.referencesCount(DigestURI.hosthash6("www." + host)) > sb.webStructure.referencesCount(DigestURI.hosthash6(host))) {
+            if (sb.webStructure.referencesCount(DigestURL.hosthash6("www." + host)) > sb.webStructure.referencesCount(DigestURL.hosthash6(host))) {
                 host = "www." + host;
             }
         }

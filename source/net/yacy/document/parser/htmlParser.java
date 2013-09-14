@@ -32,17 +32,19 @@ import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.html.ScraperInputStream;
 import net.yacy.document.parser.html.TransformerWriter;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import com.ibm.icu.text.CharsetDetector;
@@ -86,7 +88,7 @@ public class htmlParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final DigestURI location,
+            final DigestURL location,
             final String mimeType,
             final String documentCharset,
             final InputStream sourceStream) throws Parser.Failure, InterruptedException {
@@ -110,7 +112,7 @@ public class htmlParser extends AbstractParser implements Parser {
      * @param scraper
      * @return
      */
-    private static Document transformScraper(final DigestURI location, final String mimeType, final String charSet, final ContentScraper scraper) {
+    private static Document transformScraper(final DigestURL location, final String mimeType, final String charSet, final ContentScraper scraper) {
         final String[] sections = new String[
                  scraper.getHeadlines(1).length +
                  scraper.getHeadlines(2).length +
@@ -124,6 +126,8 @@ public class htmlParser extends AbstractParser implements Parser {
                 sections[p++] = headline;
             }
         }
+        LinkedHashMap<DigestURL, ImageEntry> noDoubleImages = new LinkedHashMap<DigestURL, ImageEntry>();
+        for (ImageEntry ie: scraper.getImages()) noDoubleImages.put(ie.url(), ie);
         final Document ppd = new Document(
                 location,
                 mimeType,
@@ -140,7 +144,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 scraper.getText(),
                 scraper.getAnchors(),
                 scraper.getRSS(),
-                scraper.getImages(),
+                noDoubleImages,
                 scraper.indexingDenied(),
                 scraper.getDate());
         ppd.setFavicon(scraper.getFavicon());
@@ -149,7 +153,7 @@ public class htmlParser extends AbstractParser implements Parser {
     }
 
     public static ContentScraper parseToScraper(
-            final DigestURI location,
+            final DigestURL location,
             final String documentCharset,
             InputStream sourceStream,
             final int maxLinks) throws Parser.Failure, IOException {
@@ -297,9 +301,9 @@ public class htmlParser extends AbstractParser implements Parser {
 
     public static void main(final String[] args) {
         // test parsing of a url
-        DigestURI url;
+        DigestURL url;
         try {
-            url = new DigestURI(args[0]);
+            url = new DigestURL(args[0]);
             final byte[] content = url.get(ClientIdentification.yacyInternetCrawlerAgent);
             final Document[] document = new htmlParser().parse(url, "text/html", null, new ByteArrayInputStream(content));
             final String title = document[0].dc_title();

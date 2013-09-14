@@ -31,11 +31,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
@@ -56,7 +56,7 @@ public class bzipParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURI location, final String mimeType,
+    public Document[] parse(final DigestURL location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
 

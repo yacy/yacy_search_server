@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.server.serverCore;

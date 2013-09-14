@@ -32,11 +32,11 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -60,7 +60,7 @@ public class zipParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURI url, final String mimeType,
+    public Document[] parse(final DigestURL url, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
         // check memory for parser
@@ -86,7 +86,7 @@ public class zipParser extends AbstractParser implements Parser {
                 try {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
                     FileUtils.copy(zis, tmp, entry.getSize());
-                    final DigestURI virtualURL = DigestURI.newURL(url, "#" + name);
+                    final DigestURL virtualURL = DigestURL.newURL(url, "#" + name);
                     //this.log.logInfo("ZIP file parser: " + virtualURL.toNormalform(false, false));
                     docs = TextParser.parseSource(virtualURL, mime, null, tmp);
                     if (docs == null) continue;

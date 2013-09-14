@@ -37,15 +37,17 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -55,7 +57,6 @@ import net.yacy.cora.storage.Files;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Document;
 import net.yacy.document.parser.tarParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
@@ -75,17 +76,17 @@ public final class yacyRelease extends yacyVersion {
     public final static List<yacyUpdateLocation> latestReleaseLocations = new ArrayList<yacyUpdateLocation>(); // will be initialized with value in defaults/yacy.network.freeworld.unit
     public static String startParameter = "";
 
-    private MultiProtocolURI url;
+    private MultiProtocolURL url;
     private File releaseFile;
 
     private PublicKey publicKey;
 
-    public yacyRelease(final MultiProtocolURI url) {
+    public yacyRelease(final MultiProtocolURL url) {
         super(url.getFileName(), url.getHost());
         this.url = url;
     }
 
-    private yacyRelease(final MultiProtocolURI url, final PublicKey publicKey) {
+    private yacyRelease(final MultiProtocolURL url, final PublicKey publicKey) {
         this(url);
         this.publicKey = publicKey;
     }
@@ -95,7 +96,7 @@ public final class yacyRelease extends yacyVersion {
         this.releaseFile = releaseFile;
     }
 
-    public MultiProtocolURI getUrl() {
+    public MultiProtocolURL getUrl() {
         return this.url;
     }
 
@@ -236,7 +237,7 @@ public final class yacyRelease extends yacyVersion {
         // returns the version info if successful, null otherwise
         Document scraper;
         try {
-            final DigestURI uri = location.getLocationURL();
+            final DigestURL uri = location.getLocationURL();
             Thread.currentThread().setName("allReleaseFrom - host " + uri.getHost()); // makes it more easy to see which release blocks process in thread dump
             scraper = Switchboard.getSwitchboard().loader.loadDocument(uri, CacheStrategy.NOCACHE, null, ClientIdentification.yacyInternetCrawlerAgent);
         } catch (final IOException e) {
@@ -244,10 +245,10 @@ public final class yacyRelease extends yacyVersion {
         }
 
         // analyze links in scraper resource, and find link to latest release in it
-        final Map<DigestURI, Properties> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
+        final Collection<AnchorURL> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
         final TreeSet<yacyRelease> mainReleases = new TreeSet<yacyRelease>();
         final TreeSet<yacyRelease> devReleases = new TreeSet<yacyRelease>();
-        for (final DigestURI url : anchors.keySet()) {
+        for (final DigestURL url : anchors) {
             try {
                 final yacyRelease release = new yacyRelease(url, location.getPublicKey());
                 //System.out.println("r " + release.toAnchor());

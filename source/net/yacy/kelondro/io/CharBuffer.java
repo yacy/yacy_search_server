@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Properties;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 
 public final class CharBuffer extends Writer {
 

@@ -22,7 +22,7 @@ package net.yacy.cora.util;
 
 import java.util.HashMap;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 
 
 /**

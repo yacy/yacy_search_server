@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;

@@ -37,8 +37,8 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.AbstractOrder;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;

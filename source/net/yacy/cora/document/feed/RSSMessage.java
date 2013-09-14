@@ -22,7 +22,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.document;
+package net.yacy.cora.document.feed;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -37,6 +37,7 @@ import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.cora.lod.vocabulary.Geo;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -123,7 +124,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         this.map.put(Token.guid.name(), artificialGuidPrefix + Integer.toHexString((title + description + link).hashCode()));
     }
 
-    public RSSMessage(final String title, final String description, final MultiProtocolURI link, final String guid) {
+    public RSSMessage(final String title, final String description, final MultiProtocolURL link, final String guid) {
         this.map = new HashMap<String, String>();
         if (title.length() > 0) this.map.put(Token.title.name(), title);
         if (description.length() > 0) this.map.put(Token.description.name(), description);

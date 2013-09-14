@@ -36,9 +36,9 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -57,9 +57,9 @@ public class ResumptionToken extends TreeMap<String, String> {
 
     int recordCounter;
 
-    private final DigestURI source;
+    private final DigestURL source;
 
-    public ResumptionToken(final DigestURI source, final byte[] b) throws IOException {
+    public ResumptionToken(final DigestURL source, final byte[] b) throws IOException {
         super((Collator) insensitiveCollator.clone());
         this.source = source;
         this.recordCounter = 0;
@@ -105,7 +105,7 @@ public class ResumptionToken extends TreeMap<String, String> {
      * @param url
      * @return a string containing the url up to and including the '?'
      */
-    public static String truncatedURL(final DigestURI url) {
+    public static String truncatedURL(final DigestURL url) {
         String u = url.toNormalform(true);
         final int i = u.indexOf('?');
         if (i > 0) u = u.substring(0, i + 1);
@@ -126,7 +126,7 @@ public class ResumptionToken extends TreeMap<String, String> {
      * @return
      * @throws IOException in case that no follow-up url can be generated; i.e. if the expiration date is exceeded
      */
-    public DigestURI resumptionURL() throws IOException {
+    public DigestURL resumptionURL() throws IOException {
         // decide which kind of encoding strategy was used to get a resumptionToken:
 
         final String token = getToken();
@@ -136,7 +136,7 @@ public class ResumptionToken extends TreeMap<String, String> {
 
         // encoded state
         if (token.indexOf("from=",0) >= 0) {
-            return new DigestURI(url + "verb=ListRecords&" + token);
+            return new DigestURL(url + "verb=ListRecords&" + token);
         }
 
         // cached result set
@@ -147,7 +147,7 @@ public class ResumptionToken extends TreeMap<String, String> {
             // the resumption token is still fresh
         }
         final String u = url + "verb=ListRecords&resumptionToken=" + escape(token);
-        return new DigestURI(u);
+        return new DigestURL(u);
     }
 
     public static StringBuilder escape(final String s) {

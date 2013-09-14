@@ -29,10 +29,11 @@ package net.yacy.crawler.retrieval;
 import java.util.Date;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -42,7 +43,6 @@ import net.yacy.crawler.data.ResultURLs.EventOrigin;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 public class Response {
 
@@ -69,8 +69,8 @@ public class Response {
     private final  boolean            fromCache;
 
     // doctype calculation
-    public static char docType(final MultiProtocolURI url) {
-        String ext = MultiProtocolURI.getFileExtension(url.getFileName());
+    public static char docType(final MultiProtocolURL url) {
+        String ext = MultiProtocolURL.getFileExtension(url.getFileName());
         if (ext == null) return DT_UNKNOWN;
         if (ext.equals(".gif"))  return DT_IMAGE;
         if (ext.equals(".ico"))  return DT_IMAGE;
@@ -171,7 +171,7 @@ public class Response {
         // request and response headers may be zero in case that we process surrogates
         this.requestHeader = new RequestHeader();
         this.responseHeader = new ResponseHeader(200);
-        this.responseHeader.put(HeaderFramework.CONTENT_TYPE, Classification.ext2mime(MultiProtocolURI.getFileExtension(request.url().getFileName()), "text/plain")); // tell parser how to handle the content
+        this.responseHeader.put(HeaderFramework.CONTENT_TYPE, Classification.ext2mime(MultiProtocolURL.getFileExtension(request.url().getFileName()), "text/plain")); // tell parser how to handle the content
         if (!request.isEmpty()) this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(request.size()));
         this.profile = profile;
         this.status = QUEUE_STATE_FRESH;
@@ -210,7 +210,7 @@ public class Response {
         return this.request.name();
     }
 
-    public DigestURI url() {
+    public DigestURL url() {
         return this.request.url();
     }
 
@@ -293,7 +293,7 @@ public class Response {
             return "dynamic_post";
         }
 
-        if (MultiProtocolURI.isCGI(MultiProtocolURI.getFileExtension(url().getFileName()))) {
+        if (MultiProtocolURL.isCGI(MultiProtocolURL.getFileExtension(url().getFileName()))) {
             return "dynamic_cgi";
         }
 
@@ -392,7 +392,7 @@ public class Response {
         if (url().isPOST()) {
             return false;
         }
-        if (MultiProtocolURI.isCGI(MultiProtocolURI.getFileExtension(url().getFileName()))) {
+        if (MultiProtocolURL.isCGI(MultiProtocolURL.getFileExtension(url().getFileName()))) {
             return false;
         }
 
@@ -543,7 +543,7 @@ public class Response {
             if (url().isPOST()) {
                 return "Dynamic_(POST)";
             }
-            if (MultiProtocolURI.isCGI(MultiProtocolURI.getFileExtension(url().getFileName()))) {
+            if (MultiProtocolURL.isCGI(MultiProtocolURL.getFileExtension(url().getFileName()))) {
                 return "Dynamic_(CGI)";
             }
         }
@@ -686,7 +686,7 @@ public class Response {
         // CGI access makes the page very individual, and therefore not usable in caches
         if (!profile().crawlingQ()) {
             if (url().isPOST()) { return "Dynamic_(POST)"; }
-            if (MultiProtocolURI.isCGI(MultiProtocolURI.getFileExtension(url().getFileName()))) { return "Dynamic_(CGI)"; }
+            if (MultiProtocolURL.isCGI(MultiProtocolURL.getFileExtension(url().getFileName()))) { return "Dynamic_(CGI)"; }
         }
 
         // -authorization cases in request
@@ -759,12 +759,12 @@ public class Response {
         return this.responseHeader.getCharacterEncoding();
     }
 
-    public DigestURI referrerURL() {
+    public DigestURL referrerURL() {
         if (this.requestHeader == null) return null;
         try {
             final String r = this.requestHeader.get(RequestHeader.REFERER, null);
             if (r == null) return null;
-            return new DigestURI(r);
+            return new DigestURL(r);
         } catch (final Exception e) {
             return null;
         }
@@ -775,7 +775,7 @@ public class Response {
         final String u = this.requestHeader.get(RequestHeader.REFERER, "");
         if (u == null || u.isEmpty()) return null;
         try {
-            return new DigestURI(u).hash();
+            return new DigestURL(u).hash();
         } catch (final Exception e) {
             return null;
         }

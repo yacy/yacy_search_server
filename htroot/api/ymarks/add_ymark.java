@@ -1,5 +1,6 @@
 import java.io.IOException;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -8,7 +9,6 @@ import net.yacy.data.ymark.YMarkEntry;
 import net.yacy.data.ymark.YMarkTables;
 import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.document.Parser.Failure;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -34,7 +34,7 @@ public class add_ymark {
 
             if (post.containsKey("urlHash")) {
             	final String urlHash = post.get("urlHash",YMarkUtil.EMPTY_STRING);
-            	final DigestURI url = sb.index.fulltext().getURL(urlHash.getBytes());
+            	final DigestURL url = sb.index.fulltext().getURL(urlHash.getBytes());
             	final String folders = post.get(YMarkEntry.BOOKMARK.FOLDERS.key(),YMarkEntry.BOOKMARK.FOLDERS.deflt());
             	final String tags = post.get(YMarkEntry.BOOKMARK.TAGS.key(),YMarkUtil.EMPTY_STRING);
             	try {

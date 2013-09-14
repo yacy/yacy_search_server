@@ -35,12 +35,12 @@ import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.ListManager;
 import net.yacy.data.WorkTables;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
@@ -81,9 +81,9 @@ public class Blacklist_p {
                         !urlstring.startsWith("file://")) {
                     urlstring = "http://"+urlstring;
                 }
-                DigestURI testurl;
+                DigestURL testurl;
                 try {
-                    testurl = new DigestURI(urlstring);
+                    testurl = new DigestURL(urlstring);
                 } catch (final MalformedURLException e) {
                     testurl = null;
                 }

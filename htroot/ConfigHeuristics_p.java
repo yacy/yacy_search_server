@@ -239,7 +239,7 @@ public class ConfigHeuristics_p {
         
         // re-read config (and create/update work table)
         if (sb.getConfigBool(SwitchboardConstants.HEURISTIC_OPENSEARCH, true)) {
-            OpenSearchConnector os = new OpenSearchConnector(sb, true);
+            new OpenSearchConnector(sb, true);
         }
     }
 }

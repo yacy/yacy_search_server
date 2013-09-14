@@ -28,7 +28,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.schema.CollectionSchema;
@@ -113,9 +113,9 @@ public class RemoteInstance implements SolrInstance {
         // Make a http client, connect using authentication. An url like
         // http://127.0.0.1:8983/solr/shard0
         // is proper, and contains the core name as last element in the path
-        final MultiProtocolURI u;
+        final MultiProtocolURL u;
         try {
-            u = new MultiProtocolURI(this.solrurl + this.defaultCoreName);
+            u = new MultiProtocolURL(this.solrurl + this.defaultCoreName);
         } catch (final MalformedURLException e) {
             throw new IOException(e.getMessage());
         }
@@ -222,9 +222,9 @@ public class RemoteInstance implements SolrInstance {
         if (s != null) return s;
         // create new http server
         if (this.client != null) {
-            final MultiProtocolURI u;
+            final MultiProtocolURL u;
             try {
-                u = new MultiProtocolURI(this.solrurl + name);
+                u = new MultiProtocolURL(this.solrurl + name);
             } catch (final MalformedURLException e) {
                 return null;
             }

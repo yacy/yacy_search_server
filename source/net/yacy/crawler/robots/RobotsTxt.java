@@ -35,7 +35,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -45,7 +46,6 @@ import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.blob.BEncodedHeap;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.LoaderDispatcher;
 
 public class RobotsTxt {
@@ -89,7 +89,7 @@ public class RobotsTxt {
         return this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME).size();
     }
 
-    public RobotsTxtEntry getEntry(final MultiProtocolURI theURL, final ClientIdentification.Agent agent) {
+    public RobotsTxtEntry getEntry(final MultiProtocolURL theURL, final ClientIdentification.Agent agent) {
         if (theURL == null) throw new IllegalArgumentException();
         if (!theURL.getProtocol().startsWith("http")) return null;
         return getEntry(getHostPort(theURL), agent, true);
@@ -151,9 +151,9 @@ public class RobotsTxt {
                 }
 
                 // generating the proper url to download the robots txt
-                DigestURI robotsURL = null;
+                DigestURL robotsURL = null;
                 try {
-                    robotsURL = new DigestURI((urlHostPort.endsWith(":443") ? "https://" : "http://") + urlHostPort + "/robots.txt");
+                    robotsURL = new DigestURL((urlHostPort.endsWith(":443") ? "https://" : "http://") + urlHostPort + "/robots.txt");
                 } catch (final MalformedURLException e) {
                     log.severe("Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.", e);
                     robotsURL = null;
@@ -182,7 +182,7 @@ public class RobotsTxt {
         return robotsTxt4Host;
     }
 
-    public void ensureExist(final MultiProtocolURI theURL, final ClientIdentification.Agent agent, boolean concurrent) {
+    public void ensureExist(final MultiProtocolURL theURL, final ClientIdentification.Agent agent, boolean concurrent) {
         if (theURL.isLocal()) return;
         final String urlHostPort = getHostPort(theURL);
         if (urlHostPort == null) return;
@@ -207,9 +207,9 @@ public class RobotsTxt {
                     if (robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
 
                     // generating the proper url to download the robots txt
-                    DigestURI robotsURL = null;
+                    DigestURL robotsURL = null;
                     try {
-                        robotsURL = new DigestURI((urlHostPort.endsWith(":443") ? "https://" : "http://") + urlHostPort + "/robots.txt");
+                        robotsURL = new DigestURL((urlHostPort.endsWith(":443") ? "https://" : "http://") + urlHostPort + "/robots.txt");
                     } catch (final MalformedURLException e) {
                         log.severe("Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.", e);
                         robotsURL = null;
@@ -237,7 +237,7 @@ public class RobotsTxt {
         if (concurrent) t.start(); else t.run();
     }
 
-    private void processOldEntry(RobotsTxtEntry robotsTxt4Host, DigestURI robotsURL, BEncodedHeap robotsTable) {
+    private void processOldEntry(RobotsTxtEntry robotsTxt4Host, DigestURL robotsURL, BEncodedHeap robotsTable) {
         // no robots.txt available, make an entry to prevent that the robots loading is done twice
         if (robotsTxt4Host == null) {
             // generate artificial entry
@@ -265,7 +265,7 @@ public class RobotsTxt {
         }
     }
     
-    private void processNewEntry(DigestURI robotsURL, Response response, final String[] thisAgents) {
+    private void processNewEntry(DigestURL robotsURL, Response response, final String[] thisAgents) {
         final byte[] robotsTxt = response.getContent();
         //Log.logInfo("RobotsTxt", "robots of " + robotsURL.toNormalform(true, true) + ":\n" + ((robotsTxt == null) ? "null" : UTF8.String(robotsTxt))); // debug TODO remove
         RobotsTxtParser parserResult;
@@ -309,7 +309,7 @@ public class RobotsTxt {
         }
     }
 
-    static final String getHostPort(final MultiProtocolURI theURL) {
+    static final String getHostPort(final MultiProtocolURL theURL) {
         int port = theURL.getPort();
         if (port == -1) {
             if (theURL.getProtocol().equalsIgnoreCase("http")) {

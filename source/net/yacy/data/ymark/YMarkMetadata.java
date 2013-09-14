@@ -31,19 +31,19 @@ import java.net.MalformedURLException;
 import java.util.EnumMap;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.index.Segment;
 
 public class YMarkMetadata {
-	private DigestURI uri;
+	private DigestURL uri;
 	Document document;
 	Segment indexSegment;
 
@@ -67,13 +67,13 @@ public class YMarkMetadata {
 		AUTOTAG
 	}
 
-	public YMarkMetadata(final DigestURI uri) {
+	public YMarkMetadata(final DigestURL uri) {
 		this.uri = uri;
 		this.document = null;
 		this.indexSegment = null;
 	}
 
-	public YMarkMetadata(final DigestURI uri, final Segment indexSegment) {
+	public YMarkMetadata(final DigestURL uri, final Segment indexSegment) {
 		this.uri = uri;
 		this.document = null;
 		this.indexSegment = indexSegment;
@@ -88,7 +88,7 @@ public class YMarkMetadata {
 	public YMarkMetadata(final Document document) {
 		this.document = document;
 		try {
-			this.uri = new DigestURI(this.document.dc_identifier());
+			this.uri = new DigestURL(this.document.dc_identifier());
 		} catch (final MalformedURLException e) {
 			this.uri = null;
 		}

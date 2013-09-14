@@ -69,7 +69,8 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -85,7 +86,6 @@ import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.TextParser;
 import net.yacy.document.parser.html.ContentTransformer;
 import net.yacy.document.parser.html.Transformer;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.ByteCountOutputStream;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist.BlacklistType;
@@ -307,7 +307,7 @@ public final class HTTPDProxyHandler {
             int pos=0;
             int port=0;
 
-            DigestURI url = null;
+            DigestURL url = null;
             try {
                 url = HeaderFramework.getRequestURL(conProp);
                 if (log.isFine()) log.fine(reqID +" GET "+ url);
@@ -322,7 +322,7 @@ public final class HTTPDProxyHandler {
                     final String newUrl = redirectorReader.readLine();
                     if (!newUrl.equals("")) {
                         try {
-                            url = new DigestURI(newUrl);
+                            url = new DigestURL(newUrl);
                         } catch(final MalformedURLException e){}//just keep the old one
                     }
                     if (log.isFinest()) log.finest(reqID +"    using redirector to "+ url);
@@ -443,7 +443,7 @@ public final class HTTPDProxyHandler {
         }
     }
 
-    private static void fulfillRequestFromWeb(final HashMap<String, Object> conProp, final DigestURI url, final RequestHeader requestHeader, final ResponseHeader cachedResponseHeader, final OutputStream respond, final ClientIdentification.Agent agent) {
+    private static void fulfillRequestFromWeb(final HashMap<String, Object> conProp, final DigestURL url, final RequestHeader requestHeader, final ResponseHeader cachedResponseHeader, final OutputStream respond, final ClientIdentification.Agent agent) {
         try {
         	final boolean proxyAugmentation = sb.getConfigBool("proxyAugmentation", false);
             final int reqID = requestHeader.hashCode();
@@ -695,7 +695,7 @@ public final class HTTPDProxyHandler {
 
     private static void fulfillRequestFromCache(
             final HashMap<String, Object> conProp,
-            final DigestURI url,
+            final DigestURL url,
             final RequestHeader requestHeader,
             final ResponseHeader cachedResponseHeader,
             final byte[] cacheEntry,
@@ -764,7 +764,7 @@ public final class HTTPDProxyHandler {
     public static void doHead(final HashMap<String, Object> conProp, final RequestHeader requestHeader, OutputStream respond, final ClientIdentification.Agent agent) {
 
 //        ResponseContainer res = null;
-        DigestURI url = null;
+        DigestURL url = null;
         try {
             final int reqID = requestHeader.hashCode();
             // remembering the starting time of the request
@@ -790,7 +790,7 @@ public final class HTTPDProxyHandler {
             }
 
             try {
-                url = new DigestURI("http", host, port, (args == null) ? path : path + "?" + args);
+                url = new DigestURL("http", host, port, (args == null) ? path : path + "?" + args);
             } catch (final MalformedURLException e) {
                 final String errorMsg = "ERROR: internal error with url generation: host=" +
                                   host + ", port=" + port + ", path=" + path + ", args=" + args;
@@ -881,7 +881,7 @@ public final class HTTPDProxyHandler {
         assert conProp != null : "precondition violated: conProp != null";
         assert requestHeader != null : "precondition violated: requestHeader != null";
         assert body != null : "precondition violated: body != null";
-        DigestURI url = null;
+        DigestURL url = null;
         ByteCountOutputStream countedRespond = null;
         try {
             final int reqID = requestHeader.hashCode();
@@ -908,7 +908,7 @@ public final class HTTPDProxyHandler {
             }
 
             try {
-                url = new DigestURI("http", host, port, (args == null) ? path : path + "?" + args);
+                url = new DigestURL("http", host, port, (args == null) ? path : path + "?" + args);
             } catch (final MalformedURLException e) {
                 final String errorMsg = "ERROR: internal error with url generation: host=" +
                                   host + ", port=" + port + ", path=" + path + ", args=" + args;
@@ -1358,7 +1358,7 @@ public final class HTTPDProxyHandler {
         }
     }
 
-    private static void handleProxyException(final Exception e, final HashMap<String, Object> conProp, final OutputStream respond, final DigestURI url) {
+    private static void handleProxyException(final Exception e, final HashMap<String, Object> conProp, final OutputStream respond, final DigestURL url) {
         // this may happen if
         // - the targeted host does not exist
         // - anything with the remote server was wrong.

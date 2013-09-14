@@ -40,10 +40,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 
-import org.apache.lucene.document.Document;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.core.SolrCore;
@@ -165,7 +164,7 @@ public class SolrServlet implements Filter {
                     int sz = ids.size();
                     for (int i = 0; i < sz; i++) {
                         int id = iterator.nextDoc();
-                        Document doc = searcher.doc(id);
+                        searcher.doc(id);
                     }
                 }
             }

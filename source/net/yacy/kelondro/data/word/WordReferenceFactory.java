@@ -35,7 +35,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;

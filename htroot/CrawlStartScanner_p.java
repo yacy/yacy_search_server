@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
@@ -40,7 +41,6 @@ import net.yacy.cora.protocol.Scanner.Access;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
@@ -193,10 +193,10 @@ public class CrawlStartScanner_p
             if ( post.containsKey("crawl") ) {
                 // make a pk/url mapping
                 final Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
-                final Map<byte[], DigestURI> pkmap = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
+                final Map<byte[], DigestURL> pkmap = new TreeMap<byte[], DigestURL>(Base64Order.enhancedCoder);
                 while (se.hasNext()) {
                     final Scanner.Service u = se.next().getKey();
-                    DigestURI uu;
+                    DigestURL uu;
                     try {
                         uu = u.url();
                         pkmap.put(uu.hash(), uu);
@@ -208,7 +208,7 @@ public class CrawlStartScanner_p
                 for ( final Map.Entry<String, String> entry : post.entrySet() ) {
                     if ( entry.getValue().startsWith("mark_") ) {
                         final byte[] pk = entry.getValue().substring(5).getBytes();
-                        final DigestURI url = pkmap.get(pk);
+                        final DigestURL url = pkmap.get(pk);
                         if ( url != null ) {
                             String path = "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99&directDocByURL=off";
                             path += "&crawlingURL=" + url.toNormalform(true);
@@ -244,7 +244,7 @@ public class CrawlStartScanner_p
                     final Map<byte[], String> apiCommentCache = WorkTables.commentCache(sb);
 
                     String urlString;
-                    DigestURI u;
+                    DigestURL u;
                     try {
                         final Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
                         Map.Entry<Scanner.Service, Scanner.Access> host;

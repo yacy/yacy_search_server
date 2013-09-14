@@ -26,7 +26,7 @@ import java.util.ArrayList;
 
 import org.apache.solr.common.SolrException;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;

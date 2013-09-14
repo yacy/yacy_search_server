@@ -92,10 +92,11 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
@@ -110,7 +111,6 @@ import net.yacy.data.UserDB;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ScraperInputStream;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.Seed;
@@ -1065,7 +1065,7 @@ public final class HTTPDFileHandler {
                                 // save position
                                 fis.mark(1000);
                                 // scrape document to look up charset
-                                final ScraperInputStream htmlFilter = new ScraperInputStream(fis, "UTF-8", new DigestURI("http://localhost"), null, false, 10);
+                                final ScraperInputStream htmlFilter = new ScraperInputStream(fis, "UTF-8", new DigestURL("http://localhost"), null, false, 10);
                                 final String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
                                 htmlFilter.close();
                                 if (charset != null) mimeType = mimeType + "; charset="+charset;
@@ -1587,7 +1587,7 @@ public final class HTTPDFileHandler {
 			final Matcher m = p.matcher(sbuffer);
 			final StringBuffer result = new StringBuffer(80);
 			String init, url;
-			MultiProtocolURI target;
+			MultiProtocolURL target;
 			while (m.find()) {
 				init = null;
 				if(m.group(1) != null) init = m.group(1);
@@ -1609,7 +1609,7 @@ public final class HTTPDFileHandler {
 				} else if (url.startsWith("http")) {
 					// absoulte url of form href="http://domain.com/path"
 					if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("domainlist")) {
-						if (sb.crawlStacker.urlInAcceptedDomain(new DigestURI(url)) != null) {
+						if (sb.crawlStacker.urlInAcceptedDomain(new DigestURL(url)) != null) {
 							continue;
 						}
 					}
@@ -1622,7 +1622,7 @@ public final class HTTPDFileHandler {
 					// absoulte url but same protocol of form href="//domain.com/path"
 					final String complete_url = proxyurl.getProtocol() + ":" +  url;
 					if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("domainlist")) {
-						if (sb.crawlStacker.urlInAcceptedDomain(new DigestURI(complete_url)) != null) {
+						if (sb.crawlStacker.urlInAcceptedDomain(new DigestURL(complete_url)) != null) {
 							continue;
 						}
 					}
@@ -1640,7 +1640,7 @@ public final class HTTPDFileHandler {
 				} else {
 					// relative path of form href="relative/path"
 					try {
-						target = new MultiProtocolURI("http://" + host + directory + "/" + url);
+						target = new MultiProtocolURL("http://" + host + directory + "/" + url);
 						String newurl = init + "/proxy.html?url=" + target.toString();
 						newurl = newurl.replaceAll("\\$","\\\\\\$");
 						m.appendReplacement(result, newurl);

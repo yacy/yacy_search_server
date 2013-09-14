@@ -27,7 +27,7 @@
 import java.io.File;
 import java.io.IOException;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.importer.MediawikiImporter;
 import net.yacy.search.Switchboard;

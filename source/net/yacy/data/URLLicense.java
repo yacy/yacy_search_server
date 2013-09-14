@@ -29,9 +29,9 @@ package net.yacy.data;
 import java.util.Collections;
 import java.util.Map;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.storage.SizeLimitedMap;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 
 public class URLLicense {
@@ -41,7 +41,7 @@ public class URLLicense {
     private static final int maxQueue = 10000;
     private static final Map<String, String> permissions = Collections.synchronizedMap(new SizeLimitedMap<String, String>(maxQueue));
 
-    public static String aquireLicense(final DigestURI url) {
+    public static String aquireLicense(final DigestURL url) {
         if (url == null) return "";
         // generate license key
         String license = ASCII.String(url.hash());

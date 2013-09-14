@@ -35,7 +35,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
@@ -62,7 +62,7 @@ public class SettingsAck_p {
         final Switchboard sb = (Switchboard) env;
 
         // get referer for backlink
-        final MultiProtocolURI referer = header.referer();
+        final MultiProtocolURL referer = header.referer();
         prop.put("referer", (referer == null) ? "Settings_p.html" : referer.toNormalform(true));
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
 

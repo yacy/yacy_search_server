@@ -26,26 +26,62 @@ package net.yacy.document.parser.html;
 
 import java.util.Comparator;
 
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.id.DigestURL;
 
 public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry> {
 
-    private final DigestURI url;
+    private final DigestURL imageurl;
+    private DigestURL linkurl;
     private final String alt;
+    private String anchortext;
     private final int width, height;
     private final long fileSize;
 
-    public ImageEntry(final DigestURI url, final String alt, final int width, final int height, long fileSize) {
-        assert url != null;
-        this.url = url;
+    /**
+     * an ImageEntry represents the appearance of an image in a document. It considers also that an image can be used as an button for a web link
+     * and stores the web link also.
+     * @param imageurl the link to the image
+     * @param linkurl the link which is called when the image is pressed on a web browser. null if the image was not used as link button
+     * @param anchortext the text inside the anchor body where the image link appears (including the image tag). null if the image was not used as link button
+     * @param alt the als text in the alt tag
+     * @param width the width of the image if known, or -1 if unknown
+     * @param height the height of the image if known, or -1 if unknown
+     * @param fileSize the number of bytes that the image uses on file or -1 if unknown
+     */
+    public ImageEntry(
+            final DigestURL imageurl,
+            final String alt,
+            final int width,
+            final int height,
+            long fileSize) {
+        assert imageurl != null;
+        this.imageurl = imageurl;
+        this.linkurl = null;
+        this.anchortext = null;
         this.alt = alt;
         this.width = width;
         this.height = height;
         this.fileSize = fileSize;
     }
 
-    public DigestURI url() {
-        return this.url;
+    public DigestURL url() {
+        return this.imageurl;
+    }
+
+    public void setLinkurl(DigestURL linkurl) {
+        this.linkurl = linkurl;
+    }
+    
+    public DigestURL linkurl() {
+        return this.linkurl;
+    }
+
+    public void setAnchortext(String anchortext) {
+        this.anchortext = anchortext;
+    }
+
+    public String anchortext() {
+        return this.anchortext;
     }
 
     public String alt() {
@@ -66,7 +102,8 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
 
     @Override
     public String toString() {
-        return "<img url=\"" + this.url.toNormalform(false) + "\"" +
+        if (anchortext != null) return anchortext;
+        return "<img url=\"" + this.imageurl.toNormalform(false) + "\"" +
                (this.alt != null && this.alt.length() > 0 ? " alt=\"" + this.alt + "\"" : "") +
                (this.width >= 0 ? " width=\"" + this.width + "\"" : "") +
                (this.height >= 0 ? " height=\"" + this.height + "\"" : "") +
@@ -80,8 +117,8 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
         // unfortunately it can not be ensured that all images get different hashes, but this should appear
         // only in very rare cases
         if (this.width < 0 || this.height < 0)
-            return /*0x7FFF0000 |*/ (this.url.hashCode() & 0xFFFF);
-        return ((0x7FFF - (((this.width * this.height) >> 9) & 0x7FFF)) << 16) | (this.url.hashCode() & 0xFFFF);
+            return /*0x7FFF0000 |*/ (this.imageurl.hashCode() & 0xFFFF);
+        return ((0x7FFF - (((this.width * this.height) >> 9) & 0x7FFF)) << 16) | (this.imageurl.hashCode() & 0xFFFF);
     }
 
     @Override
@@ -90,13 +127,13 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
         // this method uses the image-size ordering from the hashCode method
         // assuming that hashCode would return a 'perfect hash' this method would
         // create a total ordering on images with respect on the image size
-        assert (this.url != null);
-        if (this.url.toNormalform(true).equals((h).url.toNormalform(true))) return 0;
+        assert (this.imageurl != null);
+        if (this.imageurl.toNormalform(true).equals((h).imageurl.toNormalform(true))) return 0;
         final int thc = this.hashCode();
         final int ohc = (h).hashCode();
         if (thc < ohc) return -1;
         if (thc > ohc) return 1;
-        return this.url.toString().compareTo((h).url.toString());
+        return this.imageurl.toString().compareTo((h).imageurl.toString());
     }
 
     @Override

@@ -38,7 +38,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.NaturalOrder;

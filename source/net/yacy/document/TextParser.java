@@ -33,8 +33,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.parser.audioTagParser;
 import net.yacy.document.parser.bzipParser;
 import net.yacy.document.parser.csvParser;
@@ -63,7 +64,6 @@ import net.yacy.document.parser.zipParser;
 import net.yacy.document.parser.augment.AugmentParser;
 import net.yacy.document.parser.images.genericImageParser;
 import net.yacy.document.parser.rdfa.impl.RDFaParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
@@ -156,7 +156,7 @@ public final class TextParser {
     }
 
     public static Document[] parseSource(
-            final DigestURI location,
+            final DigestURL location,
             final String mimeType,
             final String charset,
             final File sourceFile
@@ -186,7 +186,7 @@ public final class TextParser {
     }
 
     public static Document[] parseSource(
-            final DigestURI location,
+            final DigestURL location,
             String mimeType,
             final String charset,
             final byte[] content
@@ -197,7 +197,7 @@ public final class TextParser {
         try {
             idioms = parsers(location, mimeType);
         } catch (final Parser.Failure e) {
-            final String errorMsg = "Parser Failure for extension '" + MultiProtocolURI.getFileExtension(location.getFileName()) + "' or mimetype '" + mimeType + "': " + e.getMessage();
+            final String errorMsg = "Parser Failure for extension '" + MultiProtocolURL.getFileExtension(location.getFileName()) + "' or mimetype '" + mimeType + "': " + e.getMessage();
             AbstractParser.log.warn(errorMsg);
             throw new Parser.Failure(errorMsg, location);
         }
@@ -209,7 +209,7 @@ public final class TextParser {
     }
 
     public static Document[] parseSource(
-            final DigestURI location,
+            final DigestURL location,
             String mimeType,
             final String charset,
             final long contentLength,
@@ -221,7 +221,7 @@ public final class TextParser {
         try {
             idioms = parsers(location, mimeType);
         } catch (final Parser.Failure e) {
-            final String errorMsg = "Parser Failure for extension '" + MultiProtocolURI.getFileExtension(location.getFileName()) + "' or mimetype '" + mimeType + "': " + e.getMessage();
+            final String errorMsg = "Parser Failure for extension '" + MultiProtocolURL.getFileExtension(location.getFileName()) + "' or mimetype '" + mimeType + "': " + e.getMessage();
             AbstractParser.log.warn(errorMsg);
             throw new Parser.Failure(errorMsg, location);
         }
@@ -248,14 +248,14 @@ public final class TextParser {
     }
 
     private static Document[] parseSource(
-            final DigestURI location,
+            final DigestURL location,
             final String mimeType,
             final Parser parser,
             final String charset,
             final InputStream sourceStream
         ) throws Parser.Failure {
         if (AbstractParser.log.isFine()) AbstractParser.log.fine("Parsing '" + location + "' from stream");
-        final String fileExt = MultiProtocolURI.getFileExtension(location.getFileName());
+        final String fileExt = MultiProtocolURL.getFileExtension(location.getFileName());
         final String documentCharset = htmlParser.patchCharsetEncoding(charset);
         assert parser != null;
 
@@ -269,13 +269,13 @@ public final class TextParser {
     }
 
     private static Document[] parseSource(
-            final DigestURI location,
+            final DigestURL location,
             final String mimeType,
             final Set<Parser> parsers,
             final String charset,
             final byte[] sourceArray
         ) throws Parser.Failure {
-        final String fileExt = MultiProtocolURI.getFileExtension(location.getFileName());
+        final String fileExt = MultiProtocolURL.getFileExtension(location.getFileName());
         if (AbstractParser.log.isFine()) AbstractParser.log.fine("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "' from byte[]");
         final String documentCharset = htmlParser.patchCharsetEncoding(charset);
         assert !parsers.isEmpty();
@@ -337,7 +337,7 @@ public final class TextParser {
      * @param mimeType
      * @return returns null if the content is supported. If the content is not supported, return a error string.
      */
-    public static String supports(final MultiProtocolURI url, final String mimeType) {
+    public static String supports(final MultiProtocolURL url, final String mimeType) {
         try {
             // try to get a parser. If this works, we don't need the parser itself, we just return null to show that everything is ok.
             final Set<Parser> idioms = parsers(url, mimeType);
@@ -361,11 +361,11 @@ public final class TextParser {
      * @return a list of Idiom parsers that may be appropriate for the given criteria
      * @throws Parser.Failure
      */
-    private static Set<Parser> parsers(final MultiProtocolURI url, String mimeType1) throws Parser.Failure {
+    private static Set<Parser> parsers(final MultiProtocolURL url, String mimeType1) throws Parser.Failure {
         final Set<Parser> idioms = new LinkedHashSet<Parser>(2); // LinkedSet to maintain order (genericParser should be last)
 
         // check extension
-        String ext = MultiProtocolURI.getFileExtension(url.getFileName());
+        String ext = MultiProtocolURL.getFileExtension(url.getFileName());
         Set<Parser> idiom;
         if (ext != null && ext.length() > 0) {
             ext = ext.toLowerCase();
@@ -430,12 +430,12 @@ public final class TextParser {
      * @param extention
      * @return an error if the extension is not supported, null otherwise
      */
-    public static String supportsExtension(final MultiProtocolURI url) {
-        return supportsExtension(MultiProtocolURI.getFileExtension(url.getFileName()).toLowerCase());
+    public static String supportsExtension(final MultiProtocolURL url) {
+        return supportsExtension(MultiProtocolURL.getFileExtension(url.getFileName()).toLowerCase());
     }
 
-    public static String mimeOf(final MultiProtocolURI url) {
-        return mimeOf(MultiProtocolURI.getFileExtension(url.getFileName()));
+    public static String mimeOf(final MultiProtocolURL url) {
+        return mimeOf(MultiProtocolURL.getFileExtension(url.getFileName()));
     }
 
     public static String mimeOf(final String ext) {

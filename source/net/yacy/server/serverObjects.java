@@ -59,8 +59,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.document.parser.html.CharacterCoding;
@@ -531,9 +531,9 @@ public class serverObjects implements Serializable, Cloneable {
         if (this.map.getMap().isEmpty()) return "";
         final StringBuilder param = new StringBuilder(this.map.getMap().size() * 40);
         for (final Map.Entry<String, String> entry: entrySet()) {
-            param.append(MultiProtocolURI.escape(entry.getKey()))
+            param.append(MultiProtocolURL.escape(entry.getKey()))
                 .append('=')
-                .append(MultiProtocolURI.escape(entry.getValue()))
+                .append(MultiProtocolURL.escape(entry.getValue()))
                 .append('&');
         }
         param.setLength(param.length() - 1);

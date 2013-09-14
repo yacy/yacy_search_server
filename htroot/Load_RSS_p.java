@@ -29,12 +29,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Hit;
-import net.yacy.cora.document.RSSFeed;
-import net.yacy.cora.document.RSSMessage;
-import net.yacy.cora.document.RSSReader;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.feed.Hit;
+import net.yacy.cora.document.feed.RSSFeed;
+import net.yacy.cora.document.feed.RSSMessage;
+import net.yacy.cora.document.feed.RSSReader;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -48,7 +49,6 @@ import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
@@ -169,9 +169,9 @@ public class Load_RSS_p {
                         ConcurrentLog.logException(e);
                         continue;
                     }
-                    DigestURI url = null;
+                    DigestURL url = null;
                     try {
-                        url = new DigestURI(row.get("url", ""));
+                        url = new DigestURL(row.get("url", ""));
                     } catch (final MalformedURLException e) {
                         ConcurrentLog.warn("Load_RSS", "malformed url '" + row.get("url", "") + "': " + e.getMessage());
                         continue;
@@ -203,7 +203,7 @@ public class Load_RSS_p {
                     messageurl = row.get("url", "");
                     if (messageurl.isEmpty()) continue;
                     // get referrer
-                    final DigestURI referrer = sb.getURL(row.get("referrer", "").getBytes());
+                    final DigestURL referrer = sb.getURL(row.get("referrer", "").getBytes());
                     // check if feed is registered in scheduler
                     final byte[] api_pk = row.get("api_pk");
                     final Row r = api_pk == null ? null : sb.tables.select("api", api_pk);
@@ -257,9 +257,9 @@ public class Load_RSS_p {
 
         boolean record_api = false;
 
-        DigestURI url = null;
+        DigestURL url = null;
         try {
-            url = post.containsKey("url") ? new DigestURI(post.get("url", "")) : null;
+            url = post.containsKey("url") ? new DigestURL(post.get("url", "")) : null;
         } catch (final MalformedURLException e) {
             ConcurrentLog.warn("Load_RSS_p", "url not well-formed: '" + post.get("url", "") + "'");
         }
@@ -280,12 +280,12 @@ public class Load_RSS_p {
         // index all selected items: description only
         if (rss != null && post.containsKey("indexSelectedItemContent")) {
             final RSSFeed feed = rss.getFeed();
-            List<DigestURI> list = new ArrayList<DigestURI>();
+            List<DigestURL> list = new ArrayList<DigestURL>();
             Map<String, RSSMessage> messages = new HashMap<String, RSSMessage>();
             loop: for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) try {
                     final RSSMessage message = feed.getMessage(entry.getValue().substring(5));
-                    final DigestURI messageurl = new DigestURI(message.getLink());
+                    final DigestURL messageurl = new DigestURL(message.getLink());
                     if (RSSLoader.indexTriggered.containsKey(messageurl.hash())) continue loop;
                     messages.put(ASCII.String(messageurl.hash()), message);
                 } catch (final IOException e) {
@@ -296,7 +296,7 @@ public class Load_RSS_p {
             loop: for (final Map.Entry<String, RSSMessage> entry: messages.entrySet()) {
                 try {
                     final RSSMessage message = entry.getValue();
-                    final DigestURI messageurl = new DigestURI(message.getLink());
+                    final DigestURL messageurl = new DigestURL(message.getLink());
                     if (existingurls.get(ASCII.String(messageurl.hash())) != null) continue loop;
                     list.add(messageurl);
                     RSSLoader.indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
@@ -334,10 +334,10 @@ public class Load_RSS_p {
             prop.putHTML("showitems_ttl", channel == null ? "" : channel.getTTL());
             prop.putHTML("showitems_docs", channel == null ? "" : channel.getDocs());
 
-            Map<String, DigestURI> urls = new HashMap<String, DigestURI>();
+            Map<String, DigestURL> urls = new HashMap<String, DigestURL>();
             for (final Hit item: feed) {
                 try {
-                    final DigestURI messageurl = new DigestURI(item.getLink());
+                    final DigestURL messageurl = new DigestURL(item.getLink());
                     urls.put(ASCII.String(messageurl.hash()), messageurl);
                 } catch (final MalformedURLException e) {
                     ConcurrentLog.logException(e);
@@ -349,7 +349,7 @@ public class Load_RSS_p {
             int i = 0;
             for (final Hit item: feed) {
                 try {
-                    final DigestURI messageurl = new DigestURI(item.getLink());
+                    final DigestURL messageurl = new DigestURL(item.getLink());
                     author = item.getAuthor();
                     if (author == null) author = item.getCopyright();
                     pubDate = item.getPubDate();

@@ -27,11 +27,11 @@ package net.yacy.document.parser;
 import java.io.InputStream;
 import java.util.Date;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 /**
  * this parser can parse just anything because it uses only the uri/file/path information
@@ -45,7 +45,7 @@ public class genericParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURI location, final String mimeType,
+    public Document[] parse(final DigestURL location, final String mimeType,
             final String charset, final InputStream source1)
             throws Parser.Failure, InterruptedException {
         String filename = location.getFileName();
@@ -56,7 +56,7 @@ public class genericParser extends AbstractParser implements Parser {
                 this,
                 null,
                 null,
-                singleList(filename.isEmpty() ? location.toTokens() : MultiProtocolURI.unescape(filename)), // title
+                singleList(filename.isEmpty() ? location.toTokens() : MultiProtocolURL.unescape(filename)), // title
                 "", // author
                 location.getHost(),
                 null,

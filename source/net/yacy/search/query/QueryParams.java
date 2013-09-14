@@ -40,9 +40,10 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
 import org.apache.solr.common.params.FacetParams;
 
-import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
@@ -53,7 +54,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Condenser;
 import net.yacy.document.LibraryProvider;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.RowHandleSet;
@@ -148,7 +148,7 @@ public final class QueryParams {
         this.targetlang = "en";
         this.metatags = new ArrayList<Tagging.Metatag>(0);
         this.domType = Searchdom.LOCAL;
-        this.zonecode = DigestURI.TLD_any_zone_filter;
+        this.zonecode = DigestURL.TLD_any_zone_filter;
         this.constraint = constraint;
         this.allofconstraint = false;
         this.snippetCacheStrategy = null;
@@ -550,11 +550,11 @@ public final class QueryParams {
         return this.queryGoal;
     }
 
-    public final Map<DigestURI, String> separateMatches(final Map<DigestURI, String> links) {
-        final Map<DigestURI, String> matcher = new HashMap<DigestURI, String>();
-        final Iterator <Map.Entry<DigestURI, String>> i = links.entrySet().iterator();
-        Map.Entry<DigestURI, String> entry;
-        DigestURI url;
+    public final Map<DigestURL, String> separateMatches(final Map<DigestURL, String> links) {
+        final Map<DigestURL, String> matcher = new HashMap<DigestURL, String>();
+        final Iterator <Map.Entry<DigestURL, String>> i = links.entrySet().iterator();
+        Map.Entry<DigestURL, String> entry;
+        DigestURL url;
         String anchorText;
         while (i.hasNext()) {
             entry = i.next();

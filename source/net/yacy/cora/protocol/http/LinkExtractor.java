@@ -28,18 +28,18 @@ import java.net.MalformedURLException;
 import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.MultiProtocolURL;
 
 public class LinkExtractor {
     
     private static final char lb = '<', rb = '>', dquotes = '"', space = ' ';
     private static final Object PRESENT = new Object();
     
-    private WeakHashMap<MultiProtocolURI, Object> links;
+    private WeakHashMap<MultiProtocolURL, Object> links;
     private Pattern blackpattern;
     
     public LinkExtractor(Pattern blackpattern) {
-        this.links = new WeakHashMap<MultiProtocolURI, Object>();
+        this.links = new WeakHashMap<MultiProtocolURL, Object>();
         this.blackpattern = blackpattern;
     }
     
@@ -55,7 +55,7 @@ public class LinkExtractor {
             if (u.endsWith(".")) u = u.substring(0, u.length() - 1); // remove the '.' that was appended above
             s = p + 1;
             if (this.blackpattern.matcher(u).matches()) continue;
-            try {links.put(new MultiProtocolURI(u), PRESENT);} catch (final MalformedURLException e) {}
+            try {links.put(new MultiProtocolURL(u), PRESENT);} catch (final MalformedURLException e) {}
         }
     }
 
@@ -63,10 +63,10 @@ public class LinkExtractor {
      * return the links in the text in the order as they appear
      * @return a list of urls
      */
-    public MultiProtocolURI[] getLinks() {
-        MultiProtocolURI[] urls = new MultiProtocolURI[this.links.size()];
+    public MultiProtocolURL[] getLinks() {
+        MultiProtocolURL[] urls = new MultiProtocolURL[this.links.size()];
         int i = 0;
-        for (MultiProtocolURI uri: this.links.keySet()) urls[i++] = uri;
+        for (MultiProtocolURL uri: this.links.keySet()) urls[i++] = uri;
         return urls;
     }
     

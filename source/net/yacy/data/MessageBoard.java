@@ -32,7 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.util.ConcurrentLog;

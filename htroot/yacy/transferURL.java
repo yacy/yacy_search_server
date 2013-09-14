@@ -33,8 +33,8 @@ import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.ResultURLs;

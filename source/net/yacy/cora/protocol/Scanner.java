@@ -41,10 +41,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 /**
  * a protocol scanner
@@ -99,13 +99,13 @@ public class Scanner {
             //this.hostname = Domains.getHostName(this.inetAddress);
             return this.hostname;
         }
-        public DigestURI url() throws MalformedURLException {
-            return new DigestURI(this.protocol.name() + "://" + getHostName() + "/");
+        public DigestURL url() throws MalformedURLException {
+            return new DigestURL(this.protocol.name() + "://" + getHostName() + "/");
         }
         @Override
         public String toString() {
             try {
-                return new MultiProtocolURI(this.protocol.name() + "://" + this.inetAddress.getHostAddress() + "/").toNormalform(true);
+                return new MultiProtocolURL(this.protocol.name() + "://" + this.inetAddress.getHostAddress() + "/").toNormalform(true);
             } catch (final MalformedURLException e) {
                 return "";
             }
@@ -141,7 +141,7 @@ public class Scanner {
                         }
                         if (this.getProtocol() == Protocol.smb) {
                             try {
-                                final MultiProtocolURI uri = new MultiProtocolURI(this.toString());
+                                final MultiProtocolURL uri = new MultiProtocolURL(this.toString());
                                 final String[] list = uri.list();
                                 access = list == null || list.length == 0 ? Access.empty : Access.granted;
                             } catch (final IOException e) {
@@ -192,7 +192,7 @@ public class Scanner {
      * @param url
      * @return true if the url shall be part of a search result
      */
-    public static boolean acceptURL(final MultiProtocolURI url) {
+    public static boolean acceptURL(final MultiProtocolURL url) {
         // if the scan range is empty, then all urls are accepted
         if (scancache == null || scancache.isEmpty()) return true;
 

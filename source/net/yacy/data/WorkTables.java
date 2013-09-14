@@ -39,8 +39,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.http.HTTPClient;
@@ -49,7 +50,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ymark.YMarkTables;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.search.Switchboard;
@@ -323,7 +323,7 @@ public class WorkTables extends Tables {
         row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, new Date(d));
     }
 
-    public void failURLsRegisterMissingWord(IndexCell<WordReference> indexCell, final DigestURI url, HandleSet queryHashes, final String reason) {
+    public void failURLsRegisterMissingWord(IndexCell<WordReference> indexCell, final DigestURL url, HandleSet queryHashes, final String reason) {
 
         // remove words from index
         if (indexCell != null) {

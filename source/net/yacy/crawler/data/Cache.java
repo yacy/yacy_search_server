@@ -41,7 +41,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.storage.HandleSet;
@@ -50,7 +51,6 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.blob.Compressor;
 import net.yacy.kelondro.blob.MapHeap;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
 
@@ -191,7 +191,7 @@ public final class Cache {
         fileDB.close(true);
     }
 
-    public static void store(final DigestURI url, final ResponseHeader responseHeader, final byte[] file) throws IOException {
+    public static void store(final DigestURL url, final ResponseHeader responseHeader, final byte[] file) throws IOException {
         if (maxCacheSize == 0) return;
         if (responseHeader == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: responseHeader == null");
         if (file == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: file == null");

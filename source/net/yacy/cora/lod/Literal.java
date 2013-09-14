@@ -26,7 +26,7 @@ package net.yacy.cora.lod;
 
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.MultiProtocolURL;
 
 /**
  * A literal is the possible value for a predicate.
@@ -55,7 +55,7 @@ public interface Literal {
      * assigned.
      * @return an url to a knowledge authority for the literal
      */
-    public MultiProtocolURI getSubject();
+    public MultiProtocolURL getSubject();
     
     /**
      * if a resource is poorly annotated with metadata an it shall

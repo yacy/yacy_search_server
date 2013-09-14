@@ -42,8 +42,10 @@ import java.util.regex.Pattern;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.ProcessType;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
@@ -55,7 +57,6 @@ import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.citation.CitationReference;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.search.index.Segment;
 
@@ -115,16 +116,15 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     
     public void addEdges(
             final Subgraph subgraph,
-            final DigestURI source, final ResponseHeader responseHeader, Map<String, Pattern> collections, int clickdepth_source,
-            final Map<DigestURI, Properties> alllinks, final Map<DigestURI, ImageEntry> images,
-            final boolean inbound, final Set<DigestURI> links,
+            final DigestURL source, final ResponseHeader responseHeader, Map<String, Pattern> collections, int clickdepth_source,
+            final List<ImageEntry> images, final boolean inbound, final Collection<AnchorURL> links,
             final IndexCell<CitationReference> citations) {
         boolean allAttr = this.isEmpty();
-        for (final DigestURI target_url: links) {
+        for (final AnchorURL target_url: links) {
 
             Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
             
-            final Properties p = alllinks.get(target_url);
+            final Properties p = target_url.getProperties();
             if (p == null) continue;
             final String name = p.getProperty("name", ""); // the name attribute
             final String text = p.getProperty("text", ""); // the text between the <a></a> tag
@@ -186,7 +186,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             }
             if (allAttr || contains(WebgraphSchema.source_file_ext_s) || contains(WebgraphSchema.source_file_name_s)) {
                 String source_file_name = source.getFileName();
-                String source_file_ext = MultiProtocolURI.getFileExtension(source_file_name);
+                String source_file_ext = MultiProtocolURL.getFileExtension(source_file_name);
                 add(edge, WebgraphSchema.source_file_name_s, source_file_name.toLowerCase().endsWith("." + source_file_ext) ? source_file_name.substring(0, source_file_name.length() - source_file_ext.length() - 1) : source_file_name);
                 add(edge, WebgraphSchema.source_file_ext_s, source_file_ext);
             }
@@ -209,7 +209,11 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             if (allAttr || contains(WebgraphSchema.target_linktext_t)) add(edge, WebgraphSchema.target_linktext_t, text.length() > 0 ? text : "");
             if (allAttr || contains(WebgraphSchema.target_linktext_charcount_i)) add(edge, WebgraphSchema.target_linktext_charcount_i, text.length());
             if (allAttr || contains(WebgraphSchema.target_linktext_wordcount_i)) add(edge, WebgraphSchema.target_linktext_wordcount_i, text.length() > 0 ? CommonPattern.SPACE.split(text).length : 0);
-            ImageEntry ientry = images.get(target_url);
+            
+            ImageEntry ientry = null;
+            for (ImageEntry ie: images) {
+                if (ie.linkurl() != null && ie.linkurl().equals(target_url)) {ientry = ie; break;}
+            }
             String alttext = ientry == null ? "" : ientry.alt();
             if (allAttr || contains(WebgraphSchema.target_alt_t)) add(edge, WebgraphSchema.target_alt_t, alttext);
             if (allAttr || contains(WebgraphSchema.target_alt_charcount_i)) add(edge, WebgraphSchema.target_alt_charcount_i, alttext.length());
@@ -248,7 +252,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             }
             if (allAttr || contains(WebgraphSchema.target_file_ext_s) || contains(WebgraphSchema.target_file_name_s)) {
                 String target_file_name = target_url.getFileName();
-                String target_file_ext = MultiProtocolURI.getFileExtension(target_file_name);
+                String target_file_ext = MultiProtocolURL.getFileExtension(target_file_name);
                 add(edge, WebgraphSchema.target_file_name_s, target_file_name.toLowerCase().endsWith("." + target_file_ext) ? target_file_name.substring(0, target_file_name.length() - target_file_ext.length() - 1) : target_file_name);
                 add(edge, WebgraphSchema.target_file_ext_s, target_file_ext);
             }
@@ -295,7 +299,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         
         SolrDocument doc;
         String protocol, urlstub, id;
-        DigestURI url;
+        DigestURL url;
         int proccount = 0, proccount_clickdepthchange = 0;
         try {
             while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
@@ -313,14 +317,14 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                                 protocol = (String) doc.getFieldValue(WebgraphSchema.source_protocol_s.getSolrFieldName());
                                 urlstub = (String) doc.getFieldValue(WebgraphSchema.source_urlstub_s.getSolrFieldName());
                                 id = (String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName());
-                                url = new DigestURI(protocol + "://" + urlstub, ASCII.getBytes(id));
+                                url = new DigestURL(protocol + "://" + urlstub, ASCII.getBytes(id));
                                 if (postprocessing_clickdepth(segment, doc, sid, url, WebgraphSchema.source_clickdepth_i)) proccount_clickdepthchange++;
                             }
                             if (this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
                                 protocol = (String) doc.getFieldValue(WebgraphSchema.target_protocol_s.getSolrFieldName());
                                 urlstub = (String) doc.getFieldValue(WebgraphSchema.target_urlstub_s.getSolrFieldName());
                                 id = (String) doc.getFieldValue(WebgraphSchema.target_id_s.getSolrFieldName());
-                                url = new DigestURI(protocol + "://" + urlstub, ASCII.getBytes(id));
+                                url = new DigestURL(protocol + "://" + urlstub, ASCII.getBytes(id));
                                 if (postprocessing_clickdepth(segment, doc, sid, url, WebgraphSchema.target_clickdepth_i)) proccount_clickdepthchange++;
                             }
                         }

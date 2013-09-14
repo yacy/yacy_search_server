@@ -4,7 +4,7 @@
  * @version 2008-09-18
  */
 
-package net.yacy.cora.document;
+package net.yacy.cora.util;
 
 public class JSONException extends Exception {
     /**

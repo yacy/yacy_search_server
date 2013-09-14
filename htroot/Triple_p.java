@@ -22,10 +22,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.HTTPDemon;
@@ -70,7 +70,7 @@ public class Triple_p {
 					for (String s: list.split("\n")) {
 						String newurl = s;
 						try {
-							DigestURI d = new DigestURI (s);
+							DigestURL d = new DigestURL (s);
 
 							if (d.getHost().endsWith(".yacy")) {
 								newurl = d.getProtocol()+"://"+HTTPDemon.getAlternativeResolver().resolve(d.getHost())+d.getPath();

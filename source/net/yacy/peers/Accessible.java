@@ -30,7 +30,7 @@ package net.yacy.peers;
 
 import java.io.File;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 

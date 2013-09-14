@@ -30,8 +30,8 @@ import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.kelondro.data.word.Word;
 
 public class YMarkUtil {
@@ -48,7 +48,7 @@ public class YMarkUtil {
      * @see net.yacy.kelondro.data.meta.DigestURI.DigestURI(String url, byte[] hash).hash()
      */
     public final static byte[] getBookmarkId(String url) throws MalformedURLException {
-		return (new DigestURI(url)).hash();
+		return (new DigestURL(url)).hash();
     }
 
     /**

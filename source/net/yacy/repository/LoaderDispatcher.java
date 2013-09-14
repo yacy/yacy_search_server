@@ -38,8 +38,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -58,7 +59,6 @@ import net.yacy.crawler.retrieval.SMBLoader;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
@@ -74,7 +74,7 @@ public final class LoaderDispatcher {
     private final FTPLoader ftpLoader;
     private final SMBLoader smbLoader;
     private final FileLoader fileLoader;
-    private final ConcurrentHashMap<DigestURI, Semaphore> loaderSteering; // a map that delivers a 'finish' semaphore for urls
+    private final ConcurrentHashMap<DigestURL, Semaphore> loaderSteering; // a map that delivers a 'finish' semaphore for urls
     private final ConcurrentLog log;
 
     public LoaderDispatcher(final Switchboard sb) {
@@ -87,7 +87,7 @@ public final class LoaderDispatcher {
         this.ftpLoader = new FTPLoader(sb, this.log);
         this.smbLoader = new SMBLoader(sb, this.log);
         this.fileLoader = new FileLoader(sb, this.log);
-        this.loaderSteering = new ConcurrentHashMap<DigestURI, Semaphore>();
+        this.loaderSteering = new ConcurrentHashMap<DigestURL, Semaphore>();
     }
 
     public boolean isSupportedProtocol(final String protocol) {
@@ -108,7 +108,7 @@ public final class LoaderDispatcher {
      * @return the request object
      */
     public Request request(
-            final DigestURI url,
+            final DigestURL url,
             final boolean forText,
             final boolean global
                     ) {
@@ -132,7 +132,7 @@ public final class LoaderDispatcher {
                     0);
     }
 
-    public void load(final DigestURI url, final CacheStrategy cacheStratgy, final int maxFileSize, final File targetFile, BlacklistType blacklistType, ClientIdentification.Agent agent) throws IOException {
+    public void load(final DigestURL url, final CacheStrategy cacheStratgy, final int maxFileSize, final File targetFile, BlacklistType blacklistType, ClientIdentification.Agent agent) throws IOException {
 
         final byte[] b = load(request(url, false, true), cacheStratgy, maxFileSize, blacklistType, agent).getContent();
         if (b == null) throw new IOException("load == null");
@@ -182,7 +182,7 @@ public final class LoaderDispatcher {
      */
     private Response loadInternal(final Request request, CacheStrategy cacheStrategy, final int maxFileSize, final BlacklistType blacklistType, ClientIdentification.Agent agent) throws IOException {
         // get the protocol of the next URL
-        final DigestURI url = request.url();
+        final DigestURL url = request.url();
         if (url.isFile() || url.isSMB()) cacheStrategy = CacheStrategy.NOCACHE; // load just from the file system
         final String protocol = url.getProtocol();
         final String host = url.getHost();
@@ -207,7 +207,7 @@ public final class LoaderDispatcher {
                 // in case that we want to return the cached content in the next step
                 final RequestHeader requestHeader = new RequestHeader();
                 requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent);
-                DigestURI refererURL = null;
+                DigestURL refererURL = null;
                 if (request.referrerhash() != null) refererURL = this.sb.getURL(request.referrerhash());
                 if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true));
                 final Response response = new Response(
@@ -317,7 +317,7 @@ public final class LoaderDispatcher {
         return response;
     }
 
-    private int protocolMaxFileSize(final DigestURI url) {
+    private int protocolMaxFileSize(final DigestURL url) {
     	if (url.isHTTP() || url.isHTTPS())
     		return this.sb.getConfigInt("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
     	if (url.isFTP())
@@ -348,7 +348,7 @@ public final class LoaderDispatcher {
 
         // load resource
         final Response response = load(request, cacheStrategy, maxFileSize, blacklistType, agent);
-        final DigestURI url = request.url();
+        final DigestURL url = request.url();
         if (response == null) throw new IOException("no Response for url " + url);
 
         // if it is still not available, report an error
@@ -358,11 +358,11 @@ public final class LoaderDispatcher {
         return response.parse();
     }
 
-    public Document loadDocument(final DigestURI location, final CacheStrategy cachePolicy, BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
+    public Document loadDocument(final DigestURL location, final CacheStrategy cachePolicy, BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
         // load resource
         Request request = request(location, true, false);
         final Response response = this.load(request, cachePolicy, blacklistType, agent);
-        final DigestURI url = request.url();
+        final DigestURL url = request.url();
         if (response == null) throw new IOException("no Response for url " + url);
 
         // if it is still not available, report an error
@@ -384,7 +384,7 @@ public final class LoaderDispatcher {
      * @return a map from URLs to the anchor texts of the urls
      * @throws IOException
      */
-    public final Map<DigestURI, String> loadLinks(final DigestURI url, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
+    public final Map<DigestURL, String> loadLinks(final DigestURL url, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
         final Response response = load(request(url, true, false), cacheStrategy, Integer.MAX_VALUE, blacklistType, agent);
         if (response == null) throw new IOException("response == null");
         final ResponseHeader responseHeader = response.getResponseHeader();
@@ -414,24 +414,24 @@ public final class LoaderDispatcher {
         }
     }
 
-    public void loadIfNotExistBackground(final DigestURI url, final File cache, final int maxFileSize, BlacklistType blacklistType, final ClientIdentification.Agent agent) {
+    public void loadIfNotExistBackground(final DigestURL url, final File cache, final int maxFileSize, BlacklistType blacklistType, final ClientIdentification.Agent agent) {
         new Loader(url, cache, maxFileSize, CacheStrategy.IFEXIST, blacklistType, agent).start();
     }
 
-    public void loadIfNotExistBackground(final DigestURI url, final int maxFileSize, BlacklistType blacklistType, final ClientIdentification.Agent agent) {
+    public void loadIfNotExistBackground(final DigestURL url, final int maxFileSize, BlacklistType blacklistType, final ClientIdentification.Agent agent) {
         new Loader(url, null, maxFileSize, CacheStrategy.IFEXIST, blacklistType, agent).start();
     }
 
     private class Loader extends Thread {
 
-        private final DigestURI url;
+        private final DigestURL url;
         private final File cache;
         private final int maxFileSize;
         private final CacheStrategy cacheStrategy;
         private final BlacklistType blacklistType;
         private final ClientIdentification.Agent agent;
 
-        public Loader(final DigestURI url, final File cache, final int maxFileSize, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final ClientIdentification.Agent agent) {
+        public Loader(final DigestURL url, final File cache, final int maxFileSize, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final ClientIdentification.Agent agent) {
             this.url = url;
             this.cache = cache;
             this.maxFileSize = maxFileSize;

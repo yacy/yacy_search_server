@@ -34,11 +34,11 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.storage.Configuration;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
@@ -78,7 +78,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         }
     }
     
-    public boolean postprocessing_doublecontent(Segment segment, Set<String> uniqueURLs, SolrInputDocument sid, DigestURI url) {
+    public boolean postprocessing_doublecontent(Segment segment, Set<String> uniqueURLs, SolrInputDocument sid, DigestURL url) {
         boolean changed = false;
         // FIND OUT IF THIS IS A DOUBLE DOCUMENT
         String hostid = url.hosthash();
@@ -149,7 +149,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         return changed;
     }
 
-    public boolean postprocessing_clickdepth(Segment segment, SolrDocument doc, SolrInputDocument sid, DigestURI url, SchemaDeclaration clickdepthfield) {
+    public boolean postprocessing_clickdepth(Segment segment, SolrDocument doc, SolrInputDocument sid, DigestURL url, SchemaDeclaration clickdepthfield) {
         if (!this.contains(clickdepthfield)) return false;
         // get new click depth and compare with old
         Integer oldclickdepth = (Integer) doc.getFieldValue(clickdepthfield.getSolrFieldName());
@@ -165,7 +165,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         return false;
     }
 
-    public boolean postprocessing_references(ReferenceReportCache rrCache, SolrDocument doc, SolrInputDocument sid, DigestURI url, Map<String, Long> hostExtentCount) {
+    public boolean postprocessing_references(ReferenceReportCache rrCache, SolrDocument doc, SolrInputDocument sid, DigestURL url, Map<String, Long> hostExtentCount) {
         if (!(this.contains(CollectionSchema.references_i) ||
               this.contains(CollectionSchema.references_internal_i) ||
               this.contains(CollectionSchema.references_external_i) || this.contains(CollectionSchema.references_exthosts_i))) return false;

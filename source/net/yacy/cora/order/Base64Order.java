@@ -23,7 +23,7 @@ package net.yacy.cora.order;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 
 //ATTENTION! THIS CLASS SHALL NOT IMPORT FROM OTHER PACKAGES THAN CORA AND JRE
 //BECAUSE OTHERWISE THE DEBIAN INSTALLER FAILS!

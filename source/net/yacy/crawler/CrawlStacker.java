@@ -31,16 +31,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
-import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ftp.FTPClient;
@@ -58,7 +58,6 @@ import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.SMBLoader;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.kelondro.data.citation.CitationReference;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.peers.SeedDB;
@@ -167,7 +166,7 @@ public final class CrawlStacker {
         if (this.log.isFinest()) this.log.finest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + ((entry.initiator() == null) ? "" : ASCII.String(entry.initiator())) + ", name=" + entry.name() + ", appdate=" + entry.appdate() + ", depth=" + entry.depth());
         this.requestQueue.enQueue(entry);
     }
-    public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final Map<DigestURI, Properties> hyperlinks) {
+    public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final List<AnchorURL> hyperlinks) {
         new Thread() {
             @Override
             public void run() {
@@ -177,12 +176,11 @@ public final class CrawlStacker {
         }.start();
     }
 
-    private void enqueueEntries(final byte[] initiator, final String profileHandle, final Map<DigestURI, Properties> hyperlinks, final boolean replace) {
-        for (final Map.Entry<DigestURI, Properties> e: hyperlinks.entrySet()) {
-            if (e.getKey() == null) continue;
+    private void enqueueEntries(final byte[] initiator, final String profileHandle, final List<AnchorURL> hyperlinks, final boolean replace) {
+        for (final DigestURL url: hyperlinks) {
+            if (url == null) continue;
 
             // delete old entry, if exists to force a re-load of the url (thats wanted here)
-            final DigestURI url = e.getKey();
             final byte[] urlhash = url.hash();
             if (replace) {
                 this.indexSegment.fulltext().remove(urlhash);
@@ -197,7 +195,7 @@ public final class CrawlStacker {
                     u = u + "/index.html";
                 }
                 try {
-                    final byte[] uh = new DigestURI(u).hash();
+                    final byte[] uh = new DigestURL(u).hash();
                     this.indexSegment.fulltext().remove(uh);
                     this.nextQueue.noticeURL.removeByURLHash(uh);
                     this.nextQueue.errorURL.remove(uh);
@@ -213,7 +211,7 @@ public final class CrawlStacker {
                         initiator,
                         url,
                         null,
-                        e.getValue().getProperty("name", ""),
+                        url.getProperties().getProperty("name", ""),
                         new Date(),
                         profileHandle,
                         0,
@@ -238,9 +236,9 @@ public final class CrawlStacker {
                     while ((entry = queue.take()) != FTPClient.POISON_entryInfo) {
 
                         // delete old entry, if exists to force a re-load of the url (thats wanted here)
-                        DigestURI url = null;
+                        DigestURL url = null;
                         try {
-                            url = new DigestURI("ftp://" + host + (port == 21 ? "" : ":" + port) + MultiProtocolURI.escape(entry.name));
+                            url = new DigestURL("ftp://" + host + (port == 21 ? "" : ":" + port) + MultiProtocolURL.escape(entry.name));
                         } catch (final MalformedURLException e) {
                             continue;
                         }
@@ -256,7 +254,7 @@ public final class CrawlStacker {
                                 initiator,
                                 url,
                                 null,
-                                MultiProtocolURI.unescape(entry.name),
+                                MultiProtocolURL.unescape(entry.name),
                                 entry.date,
                                 profileHandle,
                                 0,
@@ -277,7 +275,7 @@ public final class CrawlStacker {
      * @param url
      * @return null if successfull, a reason string if not successful
      */
-    public String stackSimpleCrawl(final DigestURI url) {
+    public String stackSimpleCrawl(final DigestURL url) {
     	final CrawlProfile pe = this.crawler.defaultSurrogateProfile;
     	return stackCrawl(new Request(
                 this.peers.mySeed().hash.getBytes(),
@@ -373,7 +371,7 @@ public final class CrawlStacker {
         return null;
     }
 
-    public String checkAcceptance(final DigestURI url, final CrawlProfile profile, final int depth) {
+    public String checkAcceptance(final DigestURL url, final CrawlProfile profile, final int depth) {
 
         // check if the protocol is supported
         final String urlProtocol = url.getProtocol();
@@ -512,7 +510,7 @@ public final class CrawlStacker {
      * @param url
      * @return null if the url can be accepted, a string containing a rejection reason if the url cannot be accepted
      */
-    public String urlInAcceptedDomain(final DigestURI url) {
+    public String urlInAcceptedDomain(final DigestURL url) {
         // returns true if the url can be accepted according to network.unit.domain
         if (url == null) return "url is null";
         // check domainList from network-definition
@@ -560,7 +558,7 @@ public final class CrawlStacker {
         // returns true if the url can be accepted according to network.unit.domain
         if (urlhash == null) return "url is null";
         // check if this is a local address and we are allowed to index local pages:
-        final boolean local = DigestURI.isLocal(urlhash);
+        final boolean local = DigestURL.isLocal(urlhash);
         if (this.acceptLocalURLs && local) return null;
         if (this.acceptGlobalURLs && !local) return null;
         return (local) ?

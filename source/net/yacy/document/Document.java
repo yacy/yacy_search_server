@@ -5,10 +5,6 @@
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2005
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
 //the Free Software Foundation; either version 2 of the License, or
@@ -44,31 +40,32 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 
 public class Document {
 
-    private final DigestURI source;             // the source url
+    private final DigestURL source;             // the source url
     private final String mimeType;              // mimeType as taken from http header
     private final String charset;               // the charset of the document
     private final List<String> keywords;        // most resources provide a keyword field
@@ -78,16 +75,16 @@ public class Document {
     private final List<String> sections;        // if present: more titles/headlines appearing in the document
     private final List<String> descriptions;    // an abstract, if present: short content description
     private Object text;                        // the clear text, all that is visible
-    private final Map<DigestURI, Properties> anchors; // all links embedded as clickeable entities (anchor tags)
-    private final Map<DigestURI, String> rss;   // all embedded rss feeds
-    private final Map<DigestURI, ImageEntry> images; // all visible pictures in document
+    private final Collection<AnchorURL> anchors;   // all links embedded as clickeable entities (anchor tags)
+    private final LinkedHashMap<DigestURL, String> rss;   // all embedded rss feeds
+    private final LinkedHashMap<DigestURL, ImageEntry> images; // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
-    private Map<DigestURI, String> audiolinks, videolinks, applinks, hyperlinks;
-    private Map<DigestURI, String> inboundlinks, outboundlinks;
+    private LinkedHashMap<DigestURL, String> audiolinks, videolinks, applinks, hyperlinks;
+    private LinkedHashMap<DigestURL, String> inboundlinks, outboundlinks;
     private Map<String, String> emaillinks;
-    private MultiProtocolURI favicon;
+    private MultiProtocolURL favicon;
     private boolean resorted;
     private final Set<String> languages;
     private final boolean indexingDenied;
@@ -96,7 +93,7 @@ public class Document {
     private final Map<String, Set<String>> generic_facets; // a map from vocabulary names to the set of tags for that vocabulary which apply for this document
     private final Date date;
 
-    public Document(final DigestURI location, final String mimeType, final String charset,
+    public Document(final DigestURL location, final String mimeType, final String charset,
                     final Object parserObject,
                     final Set<String> languages,
                     final String[] keywords,
@@ -105,9 +102,9 @@ public class Document {
                     final String[] sections, final List<String> abstrcts,
                     final double lon, final double lat,
                     final Object text,
-                    final Map<DigestURI, Properties> anchors,
-                    final Map<DigestURI, String> rss,
-                    final Map<DigestURI, ImageEntry> images,
+                    final Collection<AnchorURL> anchors,
+                    final LinkedHashMap<DigestURL, String> rss,
+                    final LinkedHashMap<DigestURL, ImageEntry> images,
                     final boolean indexingDenied,
                     final Date date) {
         this.source = location;
@@ -129,9 +126,9 @@ public class Document {
             this.lon = 0.0d;
             this.lat = 0.0d;
         }
-        this.anchors = (anchors == null) ? new HashMap<DigestURI, Properties>(0) : anchors;
-        this.rss = (rss == null) ? new HashMap<DigestURI, String>(0) : rss;
-        this.images = (images == null) ? new HashMap<DigestURI, ImageEntry>() : images;
+        this.anchors = (anchors == null) ? new ArrayList<AnchorURL>(0) : anchors;
+        this.rss = (rss == null) ? new LinkedHashMap<DigestURL, String>(0) : rss;
+        this.images = (images == null) ? new LinkedHashMap<DigestURL, ImageEntry>() : images;
         this.publisher = publisher;
         this.hyperlinks = null;
         this.audiolinks = null;
@@ -308,7 +305,7 @@ dc_rights
         return this.source.toNormalform(true);
     }
 
-    public DigestURI dc_source() {
+    public DigestURL dc_source() {
         return this.source;
     }
 
@@ -405,13 +402,13 @@ dc_rights
         return this.keywords;
     }
 
-    public Map<DigestURI, Properties> getAnchors() {
+    public Collection<AnchorURL> getAnchors() {
         // returns all links embedded as anchors (clickeable entities)
         // this is a url(String)/text(String) map
         return this.anchors;
     }
 
-    public Map<DigestURI, String> getRSS() {
+    public Map<DigestURL, String> getRSS() {
         // returns all links embedded as anchors (clickeable entities)
         // this is a url(String)/text(String) map
         return this.rss;
@@ -420,30 +417,30 @@ dc_rights
 
     // the next three methods provide a calculated view on the getAnchors/getImages:
 
-    public Map<DigestURI, String> getHyperlinks() {
+    public Map<DigestURL, String> getHyperlinks() {
         // this is a subset of the getAnchor-set: only links to other hyperrefs
         if (!this.resorted) resortLinks();
         return this.hyperlinks;
     }
 
-    public Map<DigestURI, String> getAudiolinks() {
+    public Map<DigestURL, String> getAudiolinks() {
         if (!this.resorted) resortLinks();
         return this.audiolinks;
     }
 
-    public Map<DigestURI, String> getVideolinks() {
+    public Map<DigestURL, String> getVideolinks() {
         if (!this.resorted) resortLinks();
         return this.videolinks;
     }
 
-    public Map<DigestURI, ImageEntry> getImages() {
+    public Map<DigestURL, ImageEntry> getImages() {
         // returns all links enbedded as pictures (visible in document)
         // this resturns a htmlFilterImageEntry collection
         if (!this.resorted) resortLinks();
         return this.images;
     }
 
-    public Map<DigestURI, String> getApplinks() {
+    public Map<DigestURL, String> getApplinks() {
         if (!this.resorted) resortLinks();
         return this.applinks;
     }
@@ -471,27 +468,25 @@ dc_rights
         synchronized (this) {
             if (this.resorted) return;
             // extract hyperlinks, medialinks and emaillinks from anchorlinks
-            DigestURI url;
             String u;
             int extpos, qpos;
             String ext = null;
             final String thishost = this.source.getHost();
-            this.inboundlinks = new HashMap<DigestURI, String>();
-            this.outboundlinks = new HashMap<DigestURI, String>();
-            this.hyperlinks = new HashMap<DigestURI, String>();
-            this.videolinks = new HashMap<DigestURI, String>();
-            this.audiolinks = new HashMap<DigestURI, String>();
-            this.applinks   = new HashMap<DigestURI, String>();
-            this.emaillinks = new HashMap<String, String>();
-            final Map<DigestURI, ImageEntry> collectedImages = new HashMap<DigestURI, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
-            for (final Map.Entry<DigestURI, ImageEntry> entry: collectedImages.entrySet()) {
+            this.inboundlinks = new LinkedHashMap<DigestURL, String>();
+            this.outboundlinks = new LinkedHashMap<DigestURL, String>();
+            this.hyperlinks = new LinkedHashMap<DigestURL, String>();
+            this.videolinks = new LinkedHashMap<DigestURL, String>();
+            this.audiolinks = new LinkedHashMap<DigestURL, String>();
+            this.applinks   = new LinkedHashMap<DigestURL, String>();
+            this.emaillinks = new LinkedHashMap<String, String>();
+            final Map<DigestURL, ImageEntry> collectedImages = new HashMap<DigestURL, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
+            for (final Map.Entry<DigestURL, ImageEntry> entry: collectedImages.entrySet()) {
                 if (entry.getKey().getHost().equals(thishost)) this.inboundlinks.put(entry.getKey(), "image"); else this.outboundlinks.put(entry.getKey(), "image");
             }
-            for (final Map.Entry<DigestURI, Properties> entry: this.anchors.entrySet()) {
-                url = entry.getKey();
+            for (final DigestURL url: this.anchors) {
                 if (url == null) continue;
-                final boolean noindex = entry.getValue().getProperty("rel", "").toLowerCase().indexOf("noindex",0) >= 0;
-                final boolean nofollow = entry.getValue().getProperty("rel", "").toLowerCase().indexOf("nofollow",0) >= 0;
+                final boolean noindex = url.getProperties().getProperty("rel", "").toLowerCase().indexOf("noindex",0) >= 0;
+                final boolean nofollow = url.getProperties().getProperty("rel", "").toLowerCase().indexOf("nofollow",0) >= 0;
                 if ((thishost == null && url.getHost() == null) ||
                     ((thishost != null && url.getHost() != null) &&
                      (url.getHost().endsWith(thishost) ||
@@ -501,7 +496,7 @@ dc_rights
                     this.outboundlinks.put(url, "anchor" + (noindex ? " noindex" : "") + (nofollow ? " nofollow" : ""));
                 }
                 u = url.toNormalform(true);
-                final String name = entry.getValue().getProperty("name", "");
+                final String name = url.getProperties().getProperty("name", "");
                 if (u.startsWith("mailto:")) {
                     this.emaillinks.put(u.substring(7), name);
                 } else {
@@ -515,7 +510,7 @@ dc_rights
                         if (Classification.isMediaExtension(ext)) {
                             // this is not a normal anchor, its a media link
                             if (Classification.isImageExtension(ext)) {
-                                ContentScraper.addImage(collectedImages, new ImageEntry(url, name, -1, -1, -1));
+                                collectedImages.put(url, new ImageEntry(url, name, -1, -1, -1));
                             }
                             else if (Classification.isAudioExtension(ext)) this.audiolinks.put(url, name);
                             else if (Classification.isVideoExtension(ext)) this.videolinks.put(url, name);
@@ -528,7 +523,7 @@ dc_rights
             }
 
             // add image links that we collected from the anchors to the image map
-            ContentScraper.addAllImages(this.images, collectedImages);
+            this.images.putAll(collectedImages);
 
             // expand the hyperlinks:
             // we add artificial hyperlinks to the hyperlink set
@@ -550,21 +545,21 @@ dc_rights
         }
     }
 
-    public static Map<MultiProtocolURI, String> allSubpaths(final Collection<?> links) {
+    public static Map<MultiProtocolURL, String> allSubpaths(final Collection<?> links) {
         // links is either a Set of Strings (urls) or a Set of
         // htmlFilterImageEntries
         final Set<String> h = new HashSet<String>();
         Iterator<?> i = links.iterator();
         Object o;
-        MultiProtocolURI url;
+        MultiProtocolURL url;
         String u;
         int pos;
         int l;
         while (i.hasNext())
             try {
                 o = i.next();
-                if (o instanceof MultiProtocolURI) url = (MultiProtocolURI) o;
-                else if (o instanceof String) url = new MultiProtocolURI((String) o);
+                if (o instanceof MultiProtocolURL) url = (MultiProtocolURL) o;
+                else if (o instanceof String) url = new MultiProtocolURL((String) o);
                 else if (o instanceof ImageEntry) url = ((ImageEntry) o).url();
                 else {
                     assert false;
@@ -585,11 +580,11 @@ dc_rights
             } catch (final MalformedURLException e) { }
         // now convert the strings to yacyURLs
         i = h.iterator();
-        final Map<MultiProtocolURI, String> v = new HashMap<MultiProtocolURI, String>();
+        final Map<MultiProtocolURL, String> v = new HashMap<MultiProtocolURL, String>();
         while (i.hasNext()) {
             u = (String) i.next();
             try {
-                url = new MultiProtocolURI(u);
+                url = new MultiProtocolURL(u);
                 v.put(url, "sub");
             } catch (final MalformedURLException e) {
             }
@@ -597,23 +592,23 @@ dc_rights
         return v;
     }
 
-    private static Map<DigestURI, String> allReflinks(final Collection<?> links) {
+    private static Map<DigestURL, String> allReflinks(final Collection<?> links) {
         // links is either a Set of Strings (with urls) or
         // htmlFilterImageEntries
         // we find all links that are part of a reference inside a url
-        final Map<DigestURI, String> v = new HashMap<DigestURI, String>();
+        final Map<DigestURL, String> v = new HashMap<DigestURL, String>();
         final Iterator<?> i = links.iterator();
         Object o;
-        DigestURI url = null;
+        DigestURL url = null;
         String u;
         int pos;
         loop: while (i.hasNext())
             try {
                 o = i.next();
-                if (o instanceof DigestURI)
-                    url = (DigestURI) o;
+                if (o instanceof DigestURL)
+                    url = (DigestURL) o;
                 else if (o instanceof String)
-                    url = new DigestURI((String) o);
+                    url = new DigestURL((String) o);
                 else if (o instanceof ImageEntry)
                     url = ((ImageEntry) o).url();
                 else {
@@ -627,7 +622,7 @@ dc_rights
                     u = u.substring(pos);
                     while ((pos = u.toLowerCase().indexOf("http://", 7)) > 0)
                         u = u.substring(pos);
-                    url = new DigestURI(u);
+                    url = new DigestURL(u);
                     if (!(v.containsKey(url)))
                         v.put(url, "ref");
                     continue loop;
@@ -637,7 +632,7 @@ dc_rights
                     u = "http:/" + u.substring(pos);
                     while ((pos = u.toLowerCase().indexOf("/www.", 7)) > 0)
                         u = "http:/" + u.substring(pos);
-                    url = new DigestURI(u);
+                    url = new DigestURL(u);
                     if (!(v.containsKey(url)))
                         v.put(url, "ref");
                     continue loop;
@@ -659,23 +654,23 @@ dc_rights
             }
             FileUtils.copy(doc.getTextStream(), (ByteArrayOutputStream) this.text);
 
-            this.anchors.putAll(doc.getAnchors());
+            this.anchors.addAll(doc.getAnchors());
             this.rss.putAll(doc.getRSS());
-            ContentScraper.addAllImages(this.images, doc.getImages());
+            this.images.putAll(doc.getImages());
         }
     }
 
     /**
      * @return the {@link URL} to the favicon that belongs to the document
      */
-    public MultiProtocolURI getFavicon() {
+    public MultiProtocolURL getFavicon() {
     	return this.favicon;
     }
 
     /**
      * @param faviconURL the {@link URL} to the favicon that belongs to the document
      */
-    public void setFavicon(final MultiProtocolURI faviconURL) {
+    public void setFavicon(final MultiProtocolURL faviconURL) {
     	this.favicon = faviconURL;
     }
 
@@ -699,14 +694,14 @@ dc_rights
         return c;
     }
 
-    public Set<DigestURI> inboundLinks() {
+    public LinkedHashMap<DigestURL, String> inboundLinks() {
         if (this.inboundlinks == null) resortLinks();
-        return (this.inboundlinks == null) ? null : this.inboundlinks.keySet();
+        return (this.inboundlinks == null) ? null : this.inboundlinks;
     }
 
-    public Set<DigestURI> outboundLinks() {
+    public LinkedHashMap<DigestURL, String> outboundLinks() {
         if (this.outboundlinks == null) resortLinks();
-        return (this.outboundlinks == null) ? null : this.outboundlinks.keySet();
+        return (this.outboundlinks == null) ? null : this.outboundlinks;
     }
 
     public boolean indexingDenied() {
@@ -774,7 +769,7 @@ dc_rights
      * @param docs
      * @return
      */
-    public static Document mergeDocuments(final DigestURI location, final String globalMime, final Document[] docs) {
+    public static Document mergeDocuments(final DigestURL location, final String globalMime, final Document[] docs) {
         if (docs == null || docs.length == 0) return null;
         if (docs.length == 1) return docs[0];
 
@@ -786,9 +781,9 @@ dc_rights
         final List<String>       descriptions  = new ArrayList<String>();
         final Collection<String> titles        = new LinkedHashSet<String>();
         final Collection<String> sectionTitles = new LinkedHashSet<String>();
-        final Map<DigestURI, Properties> anchors = new HashMap<DigestURI, Properties>();
-        final Map<DigestURI, String> rss = new HashMap<DigestURI, String>();
-        final Map<DigestURI, ImageEntry> images = new HashMap<DigestURI, ImageEntry>();
+        final List<AnchorURL>       anchors       = new ArrayList<AnchorURL>();
+        final LinkedHashMap<DigestURL, String> rss = new LinkedHashMap<DigestURL, String>();
+        final LinkedHashMap<DigestURL, ImageEntry> images = new LinkedHashMap<DigestURL, ImageEntry>();
         double lon = 0.0d, lat = 0.0d;
         Date date = new Date();
 
@@ -825,9 +820,9 @@ dc_rights
                     ConcurrentLog.logException(e);
                 }
             }
-            anchors.putAll(doc.getAnchors());
+            anchors.addAll(doc.getAnchors());
             rss.putAll(doc.getRSS());
-            ContentScraper.addAllImages(images, doc.getImages());
+            images.putAll(doc.getImages());
             if (doc.lon() != 0.0 && doc.lat() != 0.0) { lon = doc.lon(); lat = doc.lat(); }
             if (doc.date.before(date)) date = doc.date;
         }
@@ -865,24 +860,24 @@ dc_rights
                 date);
     }
 
-    public static Map<DigestURI, String> getHyperlinks(final Document[] documents) {
-        final Map<DigestURI, String> result = new HashMap<DigestURI, String>();
+    public static Map<DigestURL, String> getHyperlinks(final Document[] documents) {
+        final Map<DigestURL, String> result = new HashMap<DigestURL, String>();
         for (final Document d: documents) {
             result.putAll(d.getHyperlinks());
             final Object parser = d.getParserObject();
             if (parser instanceof ContentScraper) {
                 final ContentScraper html = (ContentScraper) parser;
                 String refresh = html.getRefreshPath();
-                if (refresh != null && refresh.length() > 0) try {result.put(new DigestURI(refresh), "refresh");} catch (final MalformedURLException e) {}
-                DigestURI canonical = html.getCanonical();
+                if (refresh != null && refresh.length() > 0) try {result.put(new DigestURL(refresh), "refresh");} catch (final MalformedURLException e) {}
+                DigestURL canonical = html.getCanonical();
                 if (canonical != null) result.put(canonical, "canonical");
             }
         }
         return result;
     }
 
-    public static Map<DigestURI, String> getImagelinks(final Document[] documents) {
-        final Map<DigestURI, String> result = new HashMap<DigestURI, String>();
+    public static Map<DigestURL, String> getImagelinks(final Document[] documents) {
+        final Map<DigestURL, String> result = new HashMap<DigestURL, String>();
         for (final Document d: documents) {
             for (final ImageEntry imageReference : d.getImages().values()) {
                 // construct a image name which contains the document title to enhance the search process for images
@@ -892,30 +887,30 @@ dc_rights
         return result;
     }
 
-    public static Map<DigestURI, String> getAudiolinks(final Document[] documents) {
-        final Map<DigestURI, String> result = new HashMap<DigestURI, String>();
+    public static Map<DigestURL, String> getAudiolinks(final Document[] documents) {
+        final Map<DigestURL, String> result = new HashMap<DigestURL, String>();
         for (final Document d: documents) {
-            for (Map.Entry<DigestURI, String> e: d.audiolinks.entrySet()) {
+            for (Map.Entry<DigestURL, String> e: d.audiolinks.entrySet()) {
                 result.put(e.getKey(), description(d, e.getValue()));
             }
         }
         return result;
     }
 
-    public static Map<DigestURI, String> getVideolinks(final Document[] documents) {
-        final Map<DigestURI, String> result = new HashMap<DigestURI, String>();
+    public static Map<DigestURL, String> getVideolinks(final Document[] documents) {
+        final Map<DigestURL, String> result = new HashMap<DigestURL, String>();
         for (final Document d: documents) {
-            for (Map.Entry<DigestURI, String> e: d.videolinks.entrySet()) {
+            for (Map.Entry<DigestURL, String> e: d.videolinks.entrySet()) {
                 result.put(e.getKey(), description(d, e.getValue()));
             }
         }
         return result;
     }
 
-    public static Map<DigestURI, String> getApplinks(final Document[] documents) {
-        final Map<DigestURI, String> result = new HashMap<DigestURI, String>();
+    public static Map<DigestURL, String> getApplinks(final Document[] documents) {
+        final Map<DigestURL, String> result = new HashMap<DigestURL, String>();
         for (final Document d: documents) {
-            for (Map.Entry<DigestURI, String> e: d.applinks.entrySet()) {
+            for (Map.Entry<DigestURL, String> e: d.applinks.entrySet()) {
                 result.put(e.getKey(), description(d, e.getValue()));
             }
         }

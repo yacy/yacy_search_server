@@ -10,7 +10,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.ConcurrentLog;
@@ -21,7 +22,6 @@ import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser.Failure;
 import net.yacy.document.SentenceReader;
 import net.yacy.document.WordTokenizer;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.repository.LoaderDispatcher;
 
@@ -60,10 +60,10 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 	}
 
 	private static Document loadDocument(final String url, final LoaderDispatcher loader, ClientIdentification.Agent agent) throws IOException {
-		DigestURI uri;
+		DigestURL uri;
 		Response response;
 		try {
-			uri = new DigestURI(url);
+			uri = new DigestURL(url);
 		} catch (final MalformedURLException e) {
 			ConcurrentLog.warn(YMarkTables.BOOKMARKS_LOG, "loadDocument failed due to malformed url: "+url);
 			return null;
@@ -161,7 +161,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			}
 			final String clean =  YMarkUtil.cleanTagsString(buffer.toString());
 			if(clean.equals(YMarkEntry.BOOKMARK.TAGS.deflt())) {
-				return MultiProtocolURI.getFileExtension(document.dc_source().getFileName());
+				return MultiProtocolURL.getFileExtension(document.dc_source().getFileName());
 			}
 			return clean;
 		} finally {

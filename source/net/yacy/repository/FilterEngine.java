@@ -11,9 +11,9 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.storage.HashARC;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 /**
  * a URL filter engine for black and white lists
@@ -51,7 +51,7 @@ public class FilterEngine {
         }
     }
 
-    protected HashARC<DigestURI, EnumSet<listTypes>> cachedUrlHashs = null;
+    protected HashARC<DigestURL, EnumSet<listTypes>> cachedUrlHashs = null;
     protected Map<String, Set<FilterEntry>> hostpaths_matchable = null;
     protected Map<String, Set<FilterEntry>> hostpaths_notmatchable = null;
 
@@ -60,7 +60,7 @@ public class FilterEngine {
         // prepare the data structure
         this.hostpaths_matchable = new HashMap<String, Set<FilterEntry>>();
         this.hostpaths_notmatchable = new HashMap<String, Set<FilterEntry>>();
-        this.cachedUrlHashs = new HashARC<DigestURI, EnumSet<listTypes>>(CACHE_SIZE);
+        this.cachedUrlHashs = new HashARC<DigestURL, EnumSet<listTypes>>(CACHE_SIZE);
     }
 
     public void clear() {
@@ -112,7 +112,7 @@ public class FilterEngine {
     	this.hostpaths_notmatchable.remove(host);
     }
 
-    public boolean isListed(final DigestURI url, final EnumSet<listTypes> type) {
+    public boolean isListed(final DigestURL url, final EnumSet<listTypes> type) {
     	// trival anwser
     	if (url.getHost() == null)
     		return false;

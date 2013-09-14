@@ -8,7 +8,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -17,7 +18,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.UserDB;
 import net.yacy.kelondro.blob.Tables.Row;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 
@@ -86,7 +86,7 @@ public class Interaction {
 		String domain = url;
 
 		try {
-			DigestURI uri = new DigestURI (url);
+			DigestURL uri = new DigestURL (url);
 
 			domain = uri.getHost();
 		} catch (final MalformedURLException e) {
@@ -105,9 +105,9 @@ public class Interaction {
 
 		String result = "";
 
-		DigestURI uri;
+		DigestURL uri;
 		try {
-			uri = new DigestURI (url);
+			uri = new DigestURL (url);
 
 			result = UTF8.String(uri.hash());
 

@@ -28,7 +28,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.CommonPattern;
 
 public class Classification {
@@ -200,11 +200,11 @@ public class Classification {
         return ext == null ? "application/octet-stream" : mimeTable.getProperty(ext.toLowerCase(), dfltMime);
     }
 
-    public static String url2mime(final MultiProtocolURI url, final String dfltMime) {
-        return url == null ? "application/octet-stream" : ext2mime(MultiProtocolURI.getFileExtension(url.getFileName()), dfltMime);
+    public static String url2mime(final MultiProtocolURL url, final String dfltMime) {
+        return url == null ? "application/octet-stream" : ext2mime(MultiProtocolURL.getFileExtension(url.getFileName()), dfltMime);
     }
 
-    public static String url2mime(final MultiProtocolURI url) {
-        return url == null ? "application/octet-stream" : ext2mime(MultiProtocolURI.getFileExtension(url.getFileName()));
+    public static String url2mime(final MultiProtocolURL url) {
+        return url == null ? "application/octet-stream" : ext2mime(MultiProtocolURL.getFileExtension(url.getFileName()));
     }
 }

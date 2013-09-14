@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.lod.Literal;
 import net.yacy.cora.lod.Vocabulary;
 
@@ -74,7 +74,7 @@ public enum CreativeCommons implements Vocabulary {
         Sharing("Sharing", "http://creativecommons.org/ns#Permission", ".*");
 
         String terminal;
-        MultiProtocolURI subject;
+        MultiProtocolURL subject;
         Pattern discoveryPattern;
 
         private PermitLiteral(
@@ -83,7 +83,7 @@ public enum CreativeCommons implements Vocabulary {
                 String discoveryPattern) {
             this.terminal = terminal;
             try {
-                this.subject = subject == null ? null : new MultiProtocolURI(subject);
+                this.subject = subject == null ? null : new MultiProtocolURL(subject);
             } catch (final MalformedURLException e) {
                 this.subject = null;
             }
@@ -94,7 +94,7 @@ public enum CreativeCommons implements Vocabulary {
         public String getTerminal() { return this.terminal; }
 
         @Override
-        public MultiProtocolURI getSubject() { return this.subject; }
+        public MultiProtocolURL getSubject() { return this.subject; }
 
         @Override
         public Pattern getDiscoveryPattern() { return this.discoveryPattern; }
@@ -110,7 +110,7 @@ public enum CreativeCommons implements Vocabulary {
         LesserCopyleft("Lesser Copyleft", "http://creativecommons.org/ns#Requirement", ".*");
 
         String terminal;
-        MultiProtocolURI subject;
+        MultiProtocolURL subject;
         Pattern discoveryPattern;
 
         private RequirementLiteral(
@@ -119,7 +119,7 @@ public enum CreativeCommons implements Vocabulary {
                 String discoveryPattern) {
             this.terminal = terminal;
             try {
-                this.subject = subject == null ? null : new MultiProtocolURI(subject);
+                this.subject = subject == null ? null : new MultiProtocolURL(subject);
             } catch (final MalformedURLException e) {
                 this.subject = null;
             }
@@ -130,7 +130,7 @@ public enum CreativeCommons implements Vocabulary {
         public String getTerminal() { return this.terminal; }
 
         @Override
-        public MultiProtocolURI getSubject() { return this.subject; }
+        public MultiProtocolURL getSubject() { return this.subject; }
 
         @Override
         public Pattern getDiscoveryPattern() { return this.discoveryPattern; }
@@ -142,7 +142,7 @@ public enum CreativeCommons implements Vocabulary {
         HighIncomeNationUse("High Income Nation Use", "http://creativecommons.org/ns#Prohibition", ".*");
 
         String terminal;
-        MultiProtocolURI subject;
+        MultiProtocolURL subject;
         Pattern discoveryPattern;
 
         private ProhibitionLiteral(
@@ -151,7 +151,7 @@ public enum CreativeCommons implements Vocabulary {
                 String discoveryPattern) {
             this.terminal = terminal;
             try {
-                this.subject = subject == null ? null : new MultiProtocolURI(subject);
+                this.subject = subject == null ? null : new MultiProtocolURL(subject);
             } catch (final MalformedURLException e) {
                 this.subject = null;
             }
@@ -162,7 +162,7 @@ public enum CreativeCommons implements Vocabulary {
         public String getTerminal() { return this.terminal; }
 
         @Override
-        public MultiProtocolURI getSubject() { return this.subject; }
+        public MultiProtocolURL getSubject() { return this.subject; }
 
         @Override
         public Pattern getDiscoveryPattern() { return this.discoveryPattern; }

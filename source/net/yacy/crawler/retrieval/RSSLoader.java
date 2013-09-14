@@ -33,11 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.RSSFeed;
-import net.yacy.cora.document.RSSMessage;
-import net.yacy.cora.document.RSSReader;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.feed.RSSFeed;
+import net.yacy.cora.document.feed.RSSMessage;
+import net.yacy.cora.document.feed.RSSReader;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -48,7 +49,6 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.HarvestProcess;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -57,12 +57,12 @@ public class RSSLoader extends Thread {
 
     public static final ARC<byte[], Date> indexTriggered = new ComparableARC<byte[], Date>(1000, Base64Order.enhancedCoder);
 
-    private final DigestURI urlf;
+    private final DigestURL urlf;
     private final Switchboard sb;
     private final Map<String, Pattern> collections;
     private final ClientIdentification.Agent agent;
 
-    public RSSLoader(final Switchboard sb, final DigestURI urlf, final Map<String, Pattern> collections, final ClientIdentification.Agent agent) {
+    public RSSLoader(final Switchboard sb, final DigestURL urlf, final Map<String, Pattern> collections, final ClientIdentification.Agent agent) {
         this.sb = sb;
         this.urlf = urlf;
         this.collections = collections;
@@ -94,13 +94,13 @@ public class RSSLoader extends Thread {
         recordAPI(this.sb, null, this.urlf, feed, 7, "seldays");
     }
 
-    public static void indexAllRssFeed(final Switchboard sb, final DigestURI url, final RSSFeed feed, Map<String, Pattern> collections) {
+    public static void indexAllRssFeed(final Switchboard sb, final DigestURL url, final RSSFeed feed, Map<String, Pattern> collections) {
         int loadCount = 0;
-        List<DigestURI> list = new ArrayList<DigestURI>();
-        Map<String, DigestURI> urlmap = new HashMap<String, DigestURI>();
+        List<DigestURL> list = new ArrayList<DigestURL>();
+        Map<String, DigestURL> urlmap = new HashMap<String, DigestURL>();
         for (final RSSMessage message: feed) {
             try {
-                final DigestURI messageurl = new DigestURI(message.getLink());
+                final DigestURL messageurl = new DigestURL(message.getLink());
                 if (indexTriggered.containsKey(messageurl.hash())) continue;
                 urlmap.put(ASCII.String(messageurl.hash()), messageurl);
             } catch (final IOException e) {
@@ -108,7 +108,7 @@ public class RSSLoader extends Thread {
             }
         }
         Map<String, HarvestProcess> existingids = sb.urlExists(urlmap.keySet());
-        for (final Map.Entry<String, DigestURI> e: urlmap.entrySet()) {
+        for (final Map.Entry<String, DigestURL> e: urlmap.entrySet()) {
             if (existingids.get(e.getKey()) != null) continue;
             list.add(e.getValue());
             indexTriggered.insertIfAbsent(ASCII.getBytes(e.getKey()), new Date());
@@ -141,7 +141,7 @@ public class RSSLoader extends Thread {
     }
 
 
-    public static void recordAPI(final Switchboard sb, final String apicall_pk, final DigestURI url, final RSSFeed feed, final int repeat_time, final String repeat_unit) {
+    public static void recordAPI(final Switchboard sb, final String apicall_pk, final DigestURL url, final RSSFeed feed, final int repeat_time, final String repeat_unit) {
         // record API action
         byte[] pk = null;
         final serverObjects post = new serverObjects();

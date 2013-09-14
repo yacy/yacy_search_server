@@ -36,12 +36,12 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.blob.MapHeap;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 public class BookmarksDB {
 
@@ -502,7 +502,7 @@ public class BookmarksDB {
             loadTimestamp();
         }
 
-        public Bookmark(final DigestURI url) {
+        public Bookmark(final DigestURL url) {
             this.entry = new HashMap<String, String>();
             this.urlHash = ASCII.String(url.hash());
             this.entry.put(BOOKMARK_URL, url.toNormalform(false));
@@ -526,11 +526,11 @@ public class BookmarksDB {
         }
 
         public Bookmark(final String url) throws MalformedURLException {
-            this(new DigestURI((url.indexOf("://") < 0) ? "http://" + url : url));
+            this(new DigestURL((url.indexOf("://") < 0) ? "http://" + url : url));
         }
 
         public Bookmark(final Map<String, String> map) throws MalformedURLException {
-            this(ASCII.String((new DigestURI(map.get(BOOKMARK_URL))).hash()), map);
+            this(ASCII.String((new DigestURL(map.get(BOOKMARK_URL))).hash()), map);
         }
 
         Map<String, String> toMap() {

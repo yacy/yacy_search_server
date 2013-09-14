@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.storage.HandleSet;

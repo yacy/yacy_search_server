@@ -6,13 +6,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.parser.rdfa.impl.RDFaParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 
 
@@ -35,7 +35,7 @@ public class AugmentParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(DigestURI url, String mimeType, String charset, InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(DigestURL url, String mimeType, String charset, InputStream source) throws Parser.Failure, InterruptedException {
 
         Document[] htmlDocs = this.rdfaParser.parse(url, mimeType, charset, source);
 
@@ -58,7 +58,7 @@ public class AugmentParser extends AbstractParser implements Parser {
         }
     }
 */
-    private void parseAndAugment(Document origDoc, DigestURI url, @SuppressWarnings("unused") String mimeType, @SuppressWarnings("unused") String charset) {
+    private void parseAndAugment(Document origDoc, DigestURL url, @SuppressWarnings("unused") String mimeType, @SuppressWarnings("unused") String charset) {
 
         Iterator<net.yacy.kelondro.blob.Tables.Row> it;
         try {

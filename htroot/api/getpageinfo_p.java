@@ -26,19 +26,21 @@
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Collection;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.robots.RobotsTxtEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -88,9 +90,9 @@ public class getpageinfo_p {
                 url = "http://" + url;
             }
             if (actions.indexOf("title",0) >= 0) {
-                DigestURI u = null;
+                DigestURL u = null;
                 try {
-                    u = new DigestURI(url);
+                    u = new DigestURL(url);
                 } catch (final MalformedURLException e) {
                     ConcurrentLog.logException(e);
                 }
@@ -128,11 +130,11 @@ public class getpageinfo_p {
                     prop.putXML("lang", (languages == null || languages.size() == 0) ? "unknown" : languages.iterator().next());
 
                     // get links and put them into a semicolon-separated list
-                    final Set<DigestURI> uris = scraper.getAnchors().keySet();
+                    final Collection<AnchorURL> uris = scraper.getAnchors();
                     final StringBuilder links = new StringBuilder(uris.size() * 80);
                     final StringBuilder filter = new StringBuilder(uris.size() * 40);
                     count = 0;
-                    for (final DigestURI uri: uris) {
+                    for (final DigestURL uri: uris) {
                         if (uri == null) continue;
                         links.append(';').append(uri.toNormalform(true));
                         filter.append('|').append(uri.getProtocol()).append("://").append(uri.getHost()).append(".*");
@@ -146,7 +148,7 @@ public class getpageinfo_p {
             }
             if (actions.indexOf("robots",0) >= 0) {
                 try {
-                    final DigestURI theURL = new DigestURI(url);
+                    final DigestURL theURL = new DigestURL(url);
 
                 	// determine if crawling of the current URL is allowed
                     ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
@@ -156,7 +158,7 @@ public class getpageinfo_p {
                     prop.putHTML("robotsInfo", robotsEntry == null ? "" : robotsEntry.getInfo());
 
                     // get the sitemap URL of the domain
-                    final MultiProtocolURI sitemapURL = robotsEntry == null ? null : robotsEntry.getSitemap();
+                    final MultiProtocolURL sitemapURL = robotsEntry == null ? null : robotsEntry.getSitemap();
                     prop.putXML("sitemap", sitemapURL == null ? "" : sitemapURL.toString());
                 } catch (final MalformedURLException e) {
                     ConcurrentLog.logException(e);
@@ -164,7 +166,7 @@ public class getpageinfo_p {
             }
             if (actions.indexOf("oai",0) >= 0) {
 				try {
-					final DigestURI theURL = new DigestURI(url
+					final DigestURL theURL = new DigestURL(url
 							+ "?verb=Identify");
 
 					final String oairesult = checkOAI(theURL.toString());

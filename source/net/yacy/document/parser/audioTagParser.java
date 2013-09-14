@@ -35,12 +35,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -69,13 +69,13 @@ public class audioTagParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURI location, final String mimeType,
+    public Document[] parse(final DigestURL location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
 
         String filename = location.getFileName();
-        final String fileext = '.' + MultiProtocolURI.getFileExtension(filename);
-        filename = filename.isEmpty() ? location.toTokens() : MultiProtocolURI.unescape(filename);
+        final String fileext = '.' + MultiProtocolURL.getFileExtension(filename);
+        filename = filename.isEmpty() ? location.toTokens() : MultiProtocolURL.unescape(filename);
     	String mime = mimeType;
    	    
     	// fix mimeType

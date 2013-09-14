@@ -55,12 +55,12 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.PDType3Font;
 import org.apache.pdfbox.util.PDFTextStripper;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -84,7 +84,7 @@ public class pdfParser extends AbstractParser implements Parser {
     }
     
     @Override
-    public Document[] parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final DigestURL location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
 
         // check memory for parser
         if (!MemoryControl.request(200 * 1024 * 1024, false))
@@ -141,7 +141,7 @@ public class pdfParser extends AbstractParser implements Parser {
         info = null;
 
         if (docTitle == null || docTitle.isEmpty()) {
-            docTitle = MultiProtocolURI.unescape(location.getFileName());
+            docTitle = MultiProtocolURL.unescape(location.getFileName());
         }
         final CharBuffer writer = new CharBuffer(odtParser.MAX_DOCSIZE);
         byte[] contentBytes = new byte[0];

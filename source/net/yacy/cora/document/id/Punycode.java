@@ -21,7 +21,7 @@
  * USA
  */
 
-package net.yacy.cora.document;
+package net.yacy.cora.document.id;
 
 
 public class Punycode {

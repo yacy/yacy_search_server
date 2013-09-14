@@ -43,8 +43,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
@@ -318,7 +318,7 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final MultiProtocolURI url) throws IOException {
+    public byte[] GETbytes(final MultiProtocolURL url) throws IOException {
         return GETbytes(url, Integer.MAX_VALUE);
     }
 
@@ -331,7 +331,7 @@ public class HTTPClient {
      * @throws IOException
      */
     public byte[] GETbytes(final String uri, final int maxBytes) throws IOException {
-        return GETbytes(new MultiProtocolURI(uri), maxBytes);
+        return GETbytes(new MultiProtocolURL(uri), maxBytes);
     }
 
 
@@ -343,7 +343,7 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final MultiProtocolURI url, final int maxBytes) throws IOException {
+    public byte[] GETbytes(final MultiProtocolURL url, final int maxBytes) throws IOException {
         final boolean localhost = Domains.isLocalhost(url.getHost());
         final String urix = url.toNormalform(true);
         HttpGet httpGet = null;
@@ -367,7 +367,7 @@ public class HTTPClient {
      */
     public void GET(final String uri) throws IOException {
         if (this.currentRequest != null) throw new IOException("Client is in use!");
-        final MultiProtocolURI url = new MultiProtocolURI(uri);
+        final MultiProtocolURL url = new MultiProtocolURL(uri);
         final String urix = url.toNormalform(true);
         HttpGet httpGet = null;
         try {
@@ -389,7 +389,7 @@ public class HTTPClient {
      * @throws IOException
      */
     public HttpResponse HEADResponse(final String uri) throws IOException {
-        final MultiProtocolURI url = new MultiProtocolURI(uri);
+        final MultiProtocolURL url = new MultiProtocolURL(uri);
         final HttpHead httpHead = new HttpHead(url.toNormalform(true));
         httpHead.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
@@ -411,7 +411,7 @@ public class HTTPClient {
      */
     public void POST(final String uri, final InputStream instream, final long length) throws IOException {
     	if (this.currentRequest != null) throw new IOException("Client is in use!");
-        final MultiProtocolURI url = new MultiProtocolURI(uri);
+        final MultiProtocolURL url = new MultiProtocolURL(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true));
         httpPost.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         String host = url.getHost();
@@ -434,7 +434,7 @@ public class HTTPClient {
      * @throws IOException
      */
     public byte[] POSTbytes(final String uri, final Map<String, ContentBody> parts, final boolean usegzip) throws IOException {
-        final MultiProtocolURI url = new MultiProtocolURI(uri);
+        final MultiProtocolURL url = new MultiProtocolURL(uri);
         return POSTbytes(url, url.getHost(), parts, usegzip);
     }
 
@@ -448,7 +448,7 @@ public class HTTPClient {
      * @return response body
      * @throws IOException
      */
-    public byte[] POSTbytes(final MultiProtocolURI url, final String vhost, final Map<String, ContentBody> post, final boolean usegzip) throws IOException {
+    public byte[] POSTbytes(final MultiProtocolURL url, final String vhost, final Map<String, ContentBody> post, final boolean usegzip) throws IOException {
     	final HttpPost httpPost = new HttpPost(url.toNormalform(true));
         httpPost.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
 
@@ -480,7 +480,7 @@ public class HTTPClient {
      * @throws IOException
      */
     public byte[] POSTbytes(final String uri, final InputStream instream, final long length) throws IOException {
-        final MultiProtocolURI url = new MultiProtocolURI(uri);
+        final MultiProtocolURL url = new MultiProtocolURL(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true));
         httpPost.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         String host = url.getHost();

@@ -32,7 +32,7 @@ package interaction;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.interaction.Interaction;

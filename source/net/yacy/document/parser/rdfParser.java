@@ -30,10 +30,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 public class rdfParser extends AbstractParser implements Parser {
 
@@ -45,7 +45,7 @@ public class rdfParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURI url, final String mimeType,
+    public Document[] parse(final DigestURL url, final String mimeType,
             final String charset, final InputStream source)
             throws Failure, InterruptedException {
 

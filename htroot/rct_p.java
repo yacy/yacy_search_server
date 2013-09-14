@@ -29,11 +29,11 @@ import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.Iterator;
 
-import net.yacy.cora.document.Hit;
-import net.yacy.cora.document.RSSFeed;
+import net.yacy.cora.document.feed.Hit;
+import net.yacy.cora.document.feed.RSSFeed;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.retrieval.Request;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
@@ -58,15 +58,15 @@ public class rct_p {
                         //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
 
                         // put url on remote crawl stack
-                        DigestURI url;
+                        DigestURL url;
                         try {
-                            url = new DigestURI(item.getLink());
+                            url = new DigestURL(item.getLink());
                         } catch (final MalformedURLException e) {
                             url = null;
                         }
                         Date loaddate;
                         loaddate = item.getPubDate();
-                        final DigestURI referrer = null; // referrer needed!
+                        final DigestURL referrer = null; // referrer needed!
                         final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(url);
                         if (urlRejectReason == null) {
                             // stack url
@@ -101,7 +101,7 @@ public class rct_p {
      * @param url
      * @return
      */
-    private static String urlToString(final DigestURI url) {
+    private static String urlToString(final DigestURL url) {
         return (url == null ? "null" : url.toNormalform(true));
     }
 

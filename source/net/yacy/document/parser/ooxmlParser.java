@@ -42,14 +42,14 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.parser.xml.ODContentHandler;
 import net.yacy.document.parser.xml.ODMetaHandler;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -91,7 +91,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
     	return parser;
     }
 
-    private Document[] parse(final DigestURI location, final String mimeType, @SuppressWarnings("unused") final String charset, final File dest) throws Parser.Failure, InterruptedException {
+    private Document[] parse(final DigestURL location, final String mimeType, @SuppressWarnings("unused") final String charset, final File dest) throws Parser.Failure, InterruptedException {
 
         CharBuffer writer = null;
         try {
@@ -201,7 +201,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final DigestURL location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
         File dest = null;
         try {
             // creating a tempfile

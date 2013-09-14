@@ -33,9 +33,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.Switchboard;
 
@@ -53,7 +53,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     public static ConcurrentHashMap<OAIPMHImporter, Object> finishedJobs = new ConcurrentHashMap<OAIPMHImporter, Object>();
 
     private final LoaderDispatcher loader;
-    private DigestURI source;
+    private DigestURL source;
     private int recordsCount, chunkCount, completeListSize;
     private final long startTime;
     private long finishTime;
@@ -62,7 +62,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     private final int serialNumber;
     private final ClientIdentification.Agent agent;
 
-    public OAIPMHImporter(final LoaderDispatcher loader, final ClientIdentification.Agent agent, final DigestURI source) {
+    public OAIPMHImporter(final LoaderDispatcher loader, final ClientIdentification.Agent agent, final DigestURL source) {
         this.agent = agent;
         this.serialNumber = importerCounter--;
         this.loader = loader;
@@ -77,7 +77,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         String url = ResumptionToken.truncatedURL(source);
         if (!url.endsWith("?")) url = url + "?";
         try {
-            this.source = new DigestURI(url + "verb=ListRecords&metadataPrefix=oai_dc");
+            this.source = new DigestURL(url + "verb=ListRecords&metadataPrefix=oai_dc");
         } catch (final MalformedURLException e) {
             // this should never happen
             ConcurrentLog.logException(e);
@@ -237,7 +237,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
      * @param source
      * @return a string that is a key for the given host
      */
-    public static final String hostID(DigestURI source) {
+    public static final String hostID(DigestURL source) {
         String s = ResumptionToken.truncatedURL(source);
         if (s.endsWith("?")) s = s.substring(0, s.length() - 1);
         if (s.endsWith("/")) s = s.substring(0, s.length() - 1);
@@ -253,7 +253,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
      * @param source
      * @return a file name for the given source. It will be different for each call for same hosts because it contains a date stamp
      */
-    public static final String filename4Source(DigestURI source) {
+    public static final String filename4Source(DigestURL source) {
         return filenamePrefix + OAIPMHImporter.filenameSeparationChar +
                OAIPMHImporter.hostID(source) + OAIPMHImporter.filenameSeparationChar +
                GenericFormatter.SHORT_MILSEC_FORMATTER.format() + ".xml";

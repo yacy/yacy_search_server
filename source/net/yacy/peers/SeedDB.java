@@ -38,8 +38,9 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -50,7 +51,6 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapDataMining;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
@@ -760,7 +760,7 @@ public final class SeedDB implements AlternativeDomainNames {
     protected String uploadSeedList(final yacySeedUploader uploader,
             final serverSwitch sb,
             final SeedDB seedDB,
-            final DigestURI seedURL) throws Exception {
+            final DigestURL seedURL) throws Exception {
 
         // upload a seed file, if possible
         if (seedURL == null) throw new NullPointerException("UPLOAD - Error: URL not given");
@@ -801,7 +801,7 @@ public final class SeedDB implements AlternativeDomainNames {
         return log;
     }
 
-    private static Iterator<String> downloadSeedFile(final DigestURI seedURL) throws IOException {
+    private static Iterator<String> downloadSeedFile(final DigestURL seedURL) throws IOException {
         // Configure http headers
         final RequestHeader reqHeader = new RequestHeader();
         reqHeader.put(HeaderFramework.PRAGMA, "no-cache");

@@ -32,9 +32,9 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
 import net.yacy.peers.operation.yacyBuildProperties;
@@ -86,7 +86,7 @@ public class ConfigUpdate_p {
                 final String release = post.get("releasedownload", "");
                 if (!release.isEmpty()) {
                     try {
-                	yacyRelease versionToDownload = new yacyRelease(new DigestURI(release));
+                	yacyRelease versionToDownload = new yacyRelease(new DigestURL(release));
 
                 	// replace this version with version which contains public key
                 	final yacyRelease.DevAndMainVersions allReleases = yacyRelease.allReleases(false, false);

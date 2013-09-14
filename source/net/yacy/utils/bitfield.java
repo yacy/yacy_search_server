@@ -20,7 +20,7 @@
 
 package net.yacy.utils;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
 
 
 public class bitfield {

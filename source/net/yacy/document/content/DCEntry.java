@@ -40,9 +40,9 @@ import java.util.TreeMap;
 import org.apache.solr.common.params.MultiMapSolrParams;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Document;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 public class DCEntry extends MultiMapSolrParams {
 
@@ -61,7 +61,7 @@ public class DCEntry extends MultiMapSolrParams {
     }
 
     public DCEntry(
-            DigestURI url,
+            DigestURL url,
             Date date,
             String title,
             String author,
@@ -115,7 +115,7 @@ public class DCEntry extends MultiMapSolrParams {
         }
     }
 
-    public DigestURI getIdentifier(boolean useRelationAsAlternative) {
+    public DigestURL getIdentifier(boolean useRelationAsAlternative) {
         String u = this.get("url");
         if (u == null) u = this.get("dc:identifier");
         if (u == null) return useRelationAsAlternative ? getRelation() : null;
@@ -125,10 +125,10 @@ public class DCEntry extends MultiMapSolrParams {
             u = bestU(urls);
         }
         try {
-            return new DigestURI(u);
+            return new DigestURL(u);
         } catch (final MalformedURLException e) {
             if (useRelationAsAlternative) {
-                DigestURI relation = this.getRelation();
+                DigestURL relation = this.getRelation();
                 if (relation != null) return relation;
                 ConcurrentLog.warn("DCEntry", "getIdentifier: url is bad, relation also: " + e.getMessage());
             }
@@ -137,7 +137,7 @@ public class DCEntry extends MultiMapSolrParams {
         }
     }
 
-    public DigestURI getRelation() {
+    public DigestURL getRelation() {
         String u = this.get("dc:relation");
         if (u == null) return null;
         String[] urls = u.split(";");
@@ -146,7 +146,7 @@ public class DCEntry extends MultiMapSolrParams {
             u = bestU(urls);
         }
         try {
-            return new DigestURI(u);
+            return new DigestURL(u);
         } catch (final MalformedURLException e) {
             ConcurrentLog.warn("DCEntry", "getRelation: url is bad: " + e.getMessage());
             return null;

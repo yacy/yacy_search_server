@@ -29,14 +29,14 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.citation.CitationReference;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.peers.graphics.WebStructureGraph;
@@ -56,7 +56,7 @@ public class webstructure {
         prop.put("citations", 0);
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         if (about != null) {
-            DigestURI url = null;
+            DigestURL url = null;
             byte[] urlhash = null;
             String hosthash = null;
             if (about.length() == 6 && Base64Order.enhancedCoder.wellformed(ASCII.getBytes(about))) {
@@ -68,7 +68,7 @@ public class webstructure {
             } else if (authenticated && about.length() > 0) {
             	// consider "about" as url or hostname
                 try {
-                    url = new DigestURI(about.indexOf("://") >= 0 ? about : "http://" + about); // accept also domains
+                    url = new DigestURL(about.indexOf("://") >= 0 ? about : "http://" + about); // accept also domains
                     urlhash = url.hash();
                     hosthash = ASCII.String(urlhash, 6, 6);
                 } catch (final MalformedURLException e) {
@@ -111,18 +111,18 @@ public class webstructure {
                     prop.put("references_documents_0_urle", url == null ? 0 : 1);
                     if (url != null) prop.putXML("references_documents_0_urle_url", url.toNormalform(true));
                     int d = 0;
-                    Iterator<DigestURI> i = scraper.inboundLinks().iterator();
+                    Iterator<DigestURL> i = scraper.inboundLinks().keySet().iterator();
             		while (i.hasNext()) {
-            			DigestURI refurl = i.next();
+            			DigestURL refurl = i.next();
                     	byte[] refhash = refurl.hash();
                     	prop.putXML("references_documents_0_anchors_" + d + "_url", refurl.toNormalform(true));
                     	prop.put("references_documents_0_anchors_" + d + "_hash", refhash);
                     	prop.put("references_documents_0_anchors_" + d + "_outbound", 0);
                     	d++;
             		}
-                    i = scraper.outboundLinks().iterator();
+                    i = scraper.outboundLinks().keySet().iterator();
             		while (i.hasNext()) {
-            			DigestURI refurl = i.next();
+            			DigestURL refurl = i.next();
                     	byte[] refhash = refurl.hash();
                     	prop.putXML("references_documents_0_anchors_" + d + "_url", refurl.toNormalform(true));
                     	prop.put("references_documents_0_anchors_" + d + "_hash", refhash);
@@ -158,7 +158,7 @@ public class webstructure {
             		while (i.hasNext()) {
                     	CitationReference cr = i.next();
                     	byte[] refhash = cr.urlhash();
-                    	DigestURI refurl = authenticated ? sb.getURL(refhash) : null;
+                    	DigestURL refurl = authenticated ? sb.getURL(refhash) : null;
                     	prop.put("citations_documents_0_anchors_" + d + "_urle", refurl == null ? 0 : 1);
                     	if (refurl != null) prop.putXML("citations_documents_0_anchors_" + d + "_urle_url", refurl.toNormalform(true));
                     	prop.put("citations_documents_0_anchors_" + d + "_urle_hash", refhash);

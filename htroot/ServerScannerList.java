@@ -23,13 +23,13 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.protocol.Scanner.Access;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -54,7 +54,7 @@ public class ServerScannerList {
             // show scancache table
             prop.put("servertable", 1);
             String urlString;
-            DigestURI u;
+            DigestURL u;
             table: while (true) {
                 try {
                     int i = 0;

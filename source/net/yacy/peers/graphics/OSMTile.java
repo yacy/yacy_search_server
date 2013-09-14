@@ -34,12 +34,12 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.visualization.RasterPlotter;
 
@@ -101,9 +101,9 @@ public class OSMTile {
     }
 
     public static BufferedImage getSingleTile(final tileCoordinates tile, final int retry) {
-        DigestURI tileURL;
+        DigestURL tileURL;
         try {
-            tileURL = new DigestURI(tile.url(retry));
+            tileURL = new DigestURL(tile.url(retry));
         } catch (final MalformedURLException e) {
             return null;
         }

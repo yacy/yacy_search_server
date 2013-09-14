@@ -39,20 +39,21 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.images.bmpParser.IMAGEMAP;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import com.drew.imaging.jpeg.JpegProcessingException;
@@ -94,7 +95,7 @@ public class genericImageParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final DigestURI location,
+            final DigestURL location,
             final String mimeType,
             final String documentCharset,
             final InputStream sourceStream) throws Parser.Failure, InterruptedException {
@@ -105,7 +106,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         String keywords = null;
         List<String> descriptions = new ArrayList<String>();
         String filename = location.getFileName();
-        String ext = MultiProtocolURI.getFileExtension(filename);
+        String ext = MultiProtocolURL.getFileExtension(filename);
         double gpslat = 0;
         double gpslon = 0;        
         if (mimeType.equals("image/bmp") || ext.equals("bmp")) {
@@ -197,13 +198,13 @@ public class genericImageParser extends AbstractParser implements Parser {
         }
 
         final HashSet<String> languages = new HashSet<String>();
-        final HashMap<DigestURI, Properties> anchors = new HashMap<DigestURI, Properties>();
-        final HashMap<DigestURI, ImageEntry> images  = new HashMap<DigestURI, ImageEntry>();
+        final List<AnchorURL> anchors = new ArrayList<AnchorURL>();
+        final LinkedHashMap<DigestURL, ImageEntry> images  = new LinkedHashMap<DigestURL, ImageEntry>();
         // add this image to the map of images
         final String infoString = ii.info.toString();
         images.put(ii.location, new ImageEntry(location, "", ii.width, ii.height, -1));
 
-        if (title == null || title.isEmpty()) title = MultiProtocolURI.unescape(filename);
+        if (title == null || title.isEmpty()) title = MultiProtocolURL.unescape(filename);
 
         return new Document[]{new Document(
              location,
@@ -237,7 +238,7 @@ public class genericImageParser extends AbstractParser implements Parser {
     }
 
     public static ImageInfo parseJavaImage(
-                            final DigestURI location,
+                            final DigestURL location,
                             final InputStream sourceStream) throws Parser.Failure {
         BufferedImage image = null;
         try {
@@ -252,7 +253,7 @@ public class genericImageParser extends AbstractParser implements Parser {
     }
 
     public static ImageInfo parseJavaImage(
-                            final DigestURI location,
+                            final DigestURL location,
                             final BufferedImage image) {
         final ImageInfo ii = new ImageInfo(location);
         ii.image = image;
@@ -289,12 +290,12 @@ public class genericImageParser extends AbstractParser implements Parser {
     }
 
     public static class ImageInfo {
-        public DigestURI location;
+        public DigestURL location;
         public BufferedImage image;
         public StringBuilder info;
         public int height;
         public int width;
-        public ImageInfo(final DigestURI location) {
+        public ImageInfo(final DigestURL location) {
             this.location = location;
             this.image = null;
             this.info = new StringBuilder();
@@ -308,10 +309,10 @@ public class genericImageParser extends AbstractParser implements Parser {
     public static void main(final String[] args) {
         final File image = new File(args[0]);
         final genericImageParser parser = new genericImageParser();
-        DigestURI uri;
+        DigestURL uri;
         try {
-            uri = new DigestURI("http://localhost/" + image.getName());
-            final Document[] document = parser.parse(uri, "image/" + MultiProtocolURI.getFileExtension(uri.getFileName()), "UTF-8", new FileInputStream(image));
+            uri = new DigestURL("http://localhost/" + image.getName());
+            final Document[] document = parser.parse(uri, "image/" + MultiProtocolURL.getFileExtension(uri.getFileName()), "UTF-8", new FileInputStream(image));
             System.out.println(document[0].toString());
         } catch (final MalformedURLException e) {
             e.printStackTrace();

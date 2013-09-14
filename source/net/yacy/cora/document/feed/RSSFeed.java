@@ -18,7 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.document;
+package net.yacy.cora.document.feed;
 
 import java.net.MalformedURLException;
 import java.util.Collections;
@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ConcurrentLog;
 
 public class RSSFeed implements Iterable<RSSMessage> {
@@ -53,11 +54,11 @@ public class RSSFeed implements Iterable<RSSMessage> {
      * @param links
      * @param source
      */
-    public RSSFeed(Set<MultiProtocolURI> links, String source) {
+    public RSSFeed(Set<MultiProtocolURL> links, String source) {
         this(Integer.MAX_VALUE);
         String u;
         RSSMessage message;
-        for (MultiProtocolURI uri: links) {
+        for (MultiProtocolURL uri: links) {
             u = uri.toNormalform(true);
             message = new RSSMessage(u, "", u);
             message.setAuthor(source);
@@ -81,10 +82,10 @@ public class RSSFeed implements Iterable<RSSMessage> {
         return this.imageURL;
     }
 
-    public Set<MultiProtocolURI> getLinks() {
-        Set<MultiProtocolURI> links = new HashSet<MultiProtocolURI>();
+    public Set<MultiProtocolURL> getLinks() {
+        Set<MultiProtocolURL> links = new HashSet<MultiProtocolURL>();
         for (RSSMessage message: this.messages.values()) {
-            try {links.add(new MultiProtocolURI(message.getLink()));} catch (final MalformedURLException e) {}
+            try {links.add(new MultiProtocolURL(message.getLink()));} catch (final MalformedURLException e) {}
         }
         return links;
     }

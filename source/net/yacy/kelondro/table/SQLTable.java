@@ -39,8 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.index.Index;

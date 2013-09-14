@@ -32,7 +32,7 @@ import java.util.SortedMap;
 
 import org.apache.solr.client.solrj.SolrQuery;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.repository.Blacklist;

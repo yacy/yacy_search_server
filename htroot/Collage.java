@@ -24,7 +24,7 @@
 
 import java.util.Random;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.ResultImages;
@@ -89,8 +89,8 @@ public class Collage {
             final int yOffset = embed ? 0 : 70;
             for (int i = 0; i < fifoSize; i++) {
 
-                final MultiProtocolURI baseURL = origins[i].baseURL;
-                final MultiProtocolURI imageURL = origins[i].imageEntry.url();
+                final MultiProtocolURL baseURL = origins[i].baseURL;
+                final MultiProtocolURL imageURL = origins[i].imageEntry.url();
 
                 // check if this loads a page from localhost, which must be prevented to protect the server
                 // against attacks to the administration interface when localhost access is granted

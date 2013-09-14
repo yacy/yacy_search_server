@@ -31,8 +31,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -42,7 +43,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ListManager;
 import net.yacy.document.Condenser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -368,7 +368,7 @@ public class IndexControlRWIs_p {
                 if ( post.containsKey("blacklisturls") ) {
                     final String[] supportedBlacklistTypes =
 					    env.getConfig("BlackLists.types", "").split(",");
-					DigestURI url;
+					DigestURL url;
 					for ( final byte[] b : urlb ) {
 					    try {
 					        urlHashes.put(b);
@@ -395,7 +395,7 @@ public class IndexControlRWIs_p {
                 }
 
                 if ( post.containsKey("blacklistdomains") ) {
-                    DigestURI url;
+                    DigestURL url;
 					for ( final byte[] b : urlb ) {
 					    try {
 					        urlHashes.put(b);
@@ -461,7 +461,7 @@ public class IndexControlRWIs_p {
             prop.put("genUrlList_flags", (flags == null) ? "" : flags.exportB64());
             prop.put("genUrlList_lines", maxlines);
             int i = 0;
-            DigestURI url;
+            DigestURL url;
             URIMetadataNode entry;
             String us;
             long rn = -1;
@@ -483,7 +483,7 @@ public class IndexControlRWIs_p {
                 prop.put("genUrlList_urlList_" + i + "_urlExists_urlStringShort",
                     (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20, 40) + "...") : ((us.length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_ranking", (entry.ranking() - rn));
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_domlength", DigestURI.domLengthEstimation(entry.hash()));
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_domlength", DigestURL.domLengthEstimation(entry.hash()));
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_tf", 1000.0 * entry.word().termFrequency());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_authority", (theSearch.getOrder() == null) ? -1 : theSearch.getOrder().authority(ASCII.String(entry.hash(), 6, 6)));
                 prop.put("genUrlList_urlList_" + i + "_urlExists_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(entry.word().lastModified())));
@@ -627,7 +627,7 @@ public class IndexControlRWIs_p {
                 filter,
                 false,
                 null,
-                DigestURI.TLD_any_zone_filter,
+                DigestURL.TLD_any_zone_filter,
                 "", 
                 false,
                 sb.index,

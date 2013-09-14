@@ -53,9 +53,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 
@@ -343,13 +343,13 @@ public class NewsPool {
         if (record.created().getTime() == 0) return;
         final Map<String, String> attributes = record.attributes();
         if (attributes.containsKey("url")){
-            if (Switchboard.urlBlacklist.isListed(BlacklistType.NEWS, new DigestURI(attributes.get("url")))){
+            if (Switchboard.urlBlacklist.isListed(BlacklistType.NEWS, new DigestURL(attributes.get("url")))){
                 System.out.println("DEBUG: ignored news-entry url blacklisted: " + attributes.get("url"));
                 return;
             }
         }
         if (attributes.containsKey("startURL")){
-            if (Switchboard.urlBlacklist.isListed(BlacklistType.NEWS, new DigestURI(attributes.get("startURL")))){
+            if (Switchboard.urlBlacklist.isListed(BlacklistType.NEWS, new DigestURL(attributes.get("startURL")))){
                 System.out.println("DEBUG: ignored news-entry url blacklisted: " + attributes.get("startURL"));
                 return;
             }

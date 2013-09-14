@@ -31,11 +31,11 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.storage.SizeLimitedSet;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.MemoryControl;
 
 
@@ -54,14 +54,14 @@ public class ResultImages {
     // the same images may be linked from different pages
     private static final Set<String> doubleCheck = new SizeLimitedSet<String>(10000);
 
-    public static void registerImages(final DigestURI source, final Document document, final boolean privateEntry) {
+    public static void registerImages(final DigestURL source, final Document document, final boolean privateEntry) {
         if (document == null) return;
         if (source == null) return;
 
         if (MemoryControl.shortStatus()) clearQueues();
         limitQueues(1000);
 
-        final Map<DigestURI, ImageEntry> images = document.getImages();
+        final Map<DigestURL, ImageEntry> images = document.getImages();
         for (final ImageEntry image: images.values()) {
             // do a double-check; attention: this can be time-consuming since this possibly needs a DNS-lookup
             if (image == null || image.url() == null) continue;
@@ -74,7 +74,7 @@ public class ResultImages {
                 image.height() > 100 &&
                 image.width() < 1200 &&
                 image.height() < 1000 &&
-                !"gif".equals(MultiProtocolURI.getFileExtension(image.url().getFileName()))) {
+                !"gif".equals(MultiProtocolURL.getFileExtension(image.url().getFileName()))) {
                 // && ((urlString.lastIndexOf(".jpg") != -1)) ||
                 // ((urlString.lastIndexOf(".png") != -1)){
 
@@ -158,8 +158,8 @@ public class ResultImages {
 
     public static class OriginEntry {
         public ImageEntry imageEntry;
-        public MultiProtocolURI baseURL;
-        public OriginEntry(final ImageEntry imageEntry, final MultiProtocolURI baseURL) {
+        public MultiProtocolURL baseURL;
+        public OriginEntry(final ImageEntry imageEntry, final MultiProtocolURL baseURL) {
             this.imageEntry = imageEntry;
             this.baseURL = baseURL;
         }

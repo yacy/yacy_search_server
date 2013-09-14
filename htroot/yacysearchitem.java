@@ -28,11 +28,12 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.feed.RSSMessage;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -41,7 +42,6 @@ import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.Cache;
 import net.yacy.data.URLLicense;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.Seed;
@@ -116,13 +116,13 @@ public class yacysearchitem {
             final ResultEntry result = theSearch.oneResult(item, timeout);
             if (result == null) return prop; // no content
             final String resultUrlstring = result.urlstring();
-            final DigestURI resultURL = result.url();
+            final DigestURL resultURL = result.url();
             final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
 
             final int port = resultURL.getPort();
-            DigestURI faviconURL = null;
+            DigestURL faviconURL = null;
             if ((fileType == FileType.HTML || fileType == FileType.JSON) && !sb.isIntranetMode()) try {
-                faviconURL = new DigestURI(resultURL.getProtocol() + "://" + resultURL.getHost() + ((port != -1) ? (":" + port) : "") + "/favicon.ico");
+                faviconURL = new DigestURL(resultURL.getProtocol() + "://" + resultURL.getHost() + ((port != -1) ? (":" + port) : "") + "/favicon.ico");
             } catch (final MalformedURLException e1) {
                 ConcurrentLog.logException(e1);
                 faviconURL = null;
@@ -166,7 +166,7 @@ public class yacysearchitem {
 				// check if url is allowed to view
 				if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("domainlist")) {
 					try {
-						if (sb.crawlStacker.urlInAcceptedDomain(new DigestURI (modifyURL)) == null) {
+						if (sb.crawlStacker.urlInAcceptedDomain(new DigestURL (modifyURL)) == null) {
 							modifyURL = "./proxy.html?url="+modifyURL;
 						}
 					} catch (final MalformedURLException e) {
@@ -177,7 +177,7 @@ public class yacysearchitem {
 
 				if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("yacy")) {
 					try {
-						if ((new DigestURI (modifyURL).getHost().endsWith(".yacy"))) {
+						if ((new DigestURL (modifyURL).getHost().endsWith(".yacy"))) {
 							modifyURL = "./proxy.html?url="+modifyURL;
 						}
 					} catch (final MalformedURLException e) {
@@ -245,7 +245,7 @@ public class yacysearchitem {
                 prop.put("content_heuristic_name", heuristic.heuristicName);
             }
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theSearch.query.id(true), SearchEventType.FINALIZATION, "" + item, 0, 0), false);
-            final String ext = MultiProtocolURI.getFileExtension(resultFileName).toLowerCase();
+            final String ext = MultiProtocolURL.getFileExtension(resultFileName).toLowerCase();
             if (ext.equals("png") || ext.equals("jpg") || ext.equals("gif")) {
                 final String license = URLLicense.aquireLicense(resultURL);
                 prop.put("content_code", license);

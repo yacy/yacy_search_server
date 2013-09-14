@@ -27,7 +27,7 @@ package net.yacy.cora.lod.vocabulary;
 
 import java.util.Set;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.lod.Literal;
 import net.yacy.cora.lod.Vocabulary;
 

@@ -1,9 +1,9 @@
 
 import java.net.MalformedURLException;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -23,7 +23,7 @@ public class delete_p {
         			return prop;
     		}
         	try {
-                if (post.containsKey("url") && switchboard.bookmarksDB.removeBookmark(ASCII.String((new DigestURI(post.get("url", "nourl"))).hash()))) {
+                if (post.containsKey("url") && switchboard.bookmarksDB.removeBookmark(ASCII.String((new DigestURL(post.get("url", "nourl"))).hash()))) {
                 	prop.put("result", "1");
                 } else if (post.containsKey("urlhash") && switchboard.bookmarksDB.removeBookmark(post.get("urlhash", "nohash"))) {
                 	prop.put("result", "1");

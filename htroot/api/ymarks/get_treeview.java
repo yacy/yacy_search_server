@@ -7,7 +7,8 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -23,7 +24,6 @@ import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -212,7 +212,7 @@ public class get_treeview {
 				}
 	        } else if (isAutoTagger || isMetadata || isURLdb || isCrawlStart) {
 	        	try {
-	                final YMarkMetadata meta = new YMarkMetadata(new DigestURI(post.get(ROOT).substring(2)), sb.index);
+	                final YMarkMetadata meta = new YMarkMetadata(new DigestURL(post.get(ROOT).substring(2)), sb.index);
 	                ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
         			final Document document = meta.loadDocument(sb.loader, agent);
         			final TreeMap<String, YMarkTag> tags = sb.tables.bookmarks.getTags(bmk_user);

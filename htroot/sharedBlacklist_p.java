@@ -38,14 +38,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.ListManager;
 import net.yacy.data.list.ListAccumulator;
 import net.yacy.data.list.XMLBlacklistImporter;
 import net.yacy.document.parser.html.CharacterCoding;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist;
@@ -137,7 +137,7 @@ public class sharedBlacklist_p {
                     // download the blacklist
                     try {
                         // get List
-                        final DigestURI u = new DigestURI(downloadURLOld);
+                        final DigestURL u = new DigestURL(downloadURLOld);
 
                         otherBlacklist = FileUtils.strings(u.get(agent));
                     } catch (final Exception e) {
@@ -155,7 +155,7 @@ public class sharedBlacklist_p {
                 prop.putHTML("page_source", downloadURL);
 
                 try {
-                    final DigestURI u = new DigestURI(downloadURL);
+                    final DigestURL u = new DigestURL(downloadURL);
                     otherBlacklist = FileUtils.strings(u.get(agent));
                 } catch (final Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);

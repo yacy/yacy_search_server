@@ -45,8 +45,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.MicroDate;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
@@ -54,7 +55,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.document.Document;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.rwi.AbstractReference;
@@ -81,10 +81,10 @@ public class WebStructureGraph {
     private final static LearnObject leanrefObjectPOISON = new LearnObject(null, null);
 
     private static class LearnObject {
-        private final DigestURI url;
-        private final Set<DigestURI> globalRefURLs;
+        private final DigestURL url;
+        private final Set<DigestURL> globalRefURLs;
 
-        private LearnObject(final DigestURI url, final Set<DigestURI> globalRefURLs) {
+        private LearnObject(final DigestURL url, final Set<DigestURL> globalRefURLs) {
             this.url = url;
             this.globalRefURLs = globalRefURLs;
         }
@@ -157,13 +157,13 @@ public class WebStructureGraph {
         this.structure_new.clear();
     }
     
-    public void generateCitationReference(final DigestURI url, final Document document) {
+    public void generateCitationReference(final DigestURL url, final Document document) {
         // generate citation reference
-        final Map<DigestURI, String> hl = document.getHyperlinks();
-        final Iterator<DigestURI> it = hl.keySet().iterator();
-        final HashSet<DigestURI> globalRefURLs = new HashSet<DigestURI>();
+        final Map<DigestURL, String> hl = document.getHyperlinks();
+        final Iterator<DigestURL> it = hl.keySet().iterator();
+        final HashSet<DigestURL> globalRefURLs = new HashSet<DigestURL>();
         final String refhost = url.getHost();
-        DigestURI u;
+        DigestURL u;
         int maxref = 1000;
         while ( it.hasNext() && maxref-- > 0 ) {
             u = it.next();
@@ -189,8 +189,8 @@ public class WebStructureGraph {
         }
     }
     
-    public void generateCitationReference(final DigestURI from, final DigestURI to) {
-        final HashSet<DigestURI> globalRefURLs = new HashSet<DigestURI>();
+    public void generateCitationReference(final DigestURL from, final DigestURL to) {
+        final HashSet<DigestURL> globalRefURLs = new HashSet<DigestURL>();
         final String refhost = from.getHost();
         if (refhost != null && to.getHost() != null && !to.getHost().equals(refhost)) globalRefURLs.add(to);
         final LearnObject lro = new LearnObject(from, globalRefURLs);
@@ -586,7 +586,7 @@ public class WebStructureGraph {
     private void learnrefs(final LearnObject lro) {
         final Set<String> refhosts = new HashSet<String>();
         String hosthash;
-        for ( final DigestURI u : lro.globalRefURLs ) {
+        for ( final DigestURL u : lro.globalRefURLs ) {
             if (Switchboard.getSwitchboard().shallTerminate()) break;
             hosthash = ASCII.String(u.hash(), 6, 6);
             if (!exists(hosthash)) {
@@ -597,7 +597,7 @@ public class WebStructureGraph {
             }
             refhosts.add(hosthash);
         }
-        final DigestURI url = lro.url;
+        final DigestURL url = lro.url;
         hosthash = ASCII.String(url.hash(), 6, 6);
 
         // parse the new reference string and join it with the stored references

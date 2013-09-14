@@ -30,10 +30,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
+
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -98,7 +99,7 @@ public class ConfigPortal {
 
                 String excludehosts = post.get("search.excludehosts", "");
                 sb.setConfig("search.excludehosts", excludehosts);
-                sb.setConfig("search.excludehosth", DigestURI.hosthashes(excludehosts));
+                sb.setConfig("search.excludehosth", DigestURL.hosthashes(excludehosts));
             }
             if (post.containsKey("searchpage_default")) {
                 // load defaults from defaults/yacy.init file

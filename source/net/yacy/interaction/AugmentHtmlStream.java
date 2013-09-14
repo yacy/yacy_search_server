@@ -8,13 +8,13 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URLEncoder;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.server.http.ServerSideIncludes;
 
@@ -83,7 +83,7 @@ public class AugmentHtmlStream {
 
     }
 
-    public static StringBuilder process(StringBuilder data, DigestURI url, RequestHeader requestHeader) {
+    public static StringBuilder process(StringBuilder data, DigestURL url, RequestHeader requestHeader) {
 
         String action =  requestHeader.get("YACYACTION");
         requestHeader.remove("YACYACTION");

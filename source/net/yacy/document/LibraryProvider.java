@@ -42,8 +42,8 @@ import java.util.TreeSet;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.WordCache;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.geo.GeonamesLocation;
 import net.yacy.cora.geo.OpenGeoDBLocation;
 import net.yacy.cora.geo.OverarchingLocation;
@@ -90,7 +90,7 @@ public class LibraryProvider {
 
         private Dictionary(final String nickname, final String url) {
             try {
-                this.filename = (new MultiProtocolURI(url)).getFileName();
+                this.filename = (new MultiProtocolURL(url)).getFileName();
             } catch (final MalformedURLException e ) {
                 assert false;
             }
