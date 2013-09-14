@@ -22,13 +22,12 @@
 //  along with this program in the file lgpl21.txt
 //  If not, see <http://www.gnu.org/licenses/>.
 //
-
 package net.yacy.http;
 
 import java.io.IOException;
 import java.util.Map.Entry;
-
 import javax.servlet.ServletException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,70 +36,63 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.server.Request;
 
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
 
 /**
- * jetty http handler
- * serves pages from cache if available and valid
+ * jetty http handler serves pages from cache if available and valid
  */
 public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler {
 
-	
-	private void handleRequestFromCache(HttpServletRequest request, HttpServletResponse response, ResponseHeader cachedResponseHeader, byte[] content) throws IOException {
-		System.err.println("handle from cache");
-		// TODO: check if-modified
-		for(Entry<String, String> entry: cachedResponseHeader.entrySet()) {
-			response.addHeader(entry.getKey(), entry.getValue());
-		}
-		response.setStatus(HttpServletResponse.SC_NON_AUTHORITATIVE_INFORMATION);
-		response.getOutputStream().write(content);
+    private void handleRequestFromCache(HttpServletRequest request, HttpServletResponse response, ResponseHeader cachedResponseHeader, byte[] content) throws IOException {
+        System.err.println("handle from cache");
+        // TODO: check if-modified
+        for (Entry<String, String> entry : cachedResponseHeader.entrySet()) {
+            response.addHeader(entry.getKey(), entry.getValue());
+        }
+        response.setStatus(HttpServletResponse.SC_NON_AUTHORITATIVE_INFORMATION);
+        response.getOutputStream().write(content);
         // we handled this request, break out of handler chain
-		Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
-		base_request.setHandled(true);
-	}
+    }
+    
+    @Override
+    public void handleRemote(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        if (request.getMethod().equals("GET")) {
+            String queryString = request.getQueryString() != null ? "?" + request.getQueryString() : "";
+            DigestURI url = new DigestURI(request.getRequestURL().toString() + queryString);
+            ResponseHeader cachedResponseHeader = Cache.getResponseHeader(url.hash());
 
-	@Override
-	public void handleRemote(String target, Request baseRequest,
-			HttpServletRequest request, HttpServletResponse response)
-			throws IOException, ServletException {
-		if(request.getMethod().equals("GET")) {
-			String queryString = request.getQueryString()!=null ? "?" + request.getQueryString() : "";
-			DigestURI url = new DigestURI(request.getRequestURL().toString() + queryString);
-			ResponseHeader cachedResponseHeader = Cache.getResponseHeader(url.hash());
-			
-			if(cachedResponseHeader != null) {
-				RequestHeader proxyHeaders = ProxyHandler.convertHeaderFromJetty(request);
-				// TODO: this convertion is only necessary
-            	final net.yacy.crawler.retrieval.Request yacyRequest = new net.yacy.crawler.retrieval.Request(
-            			null, 
-                        url, 
-                        proxyHeaders.referer() == null ? null : new DigestURI(proxyHeaders.referer().toString()).hash(), 
-                        "", 
+            if (cachedResponseHeader != null) {
+                RequestHeader proxyHeaders = ProxyHandler.convertHeaderFromJetty(request);
+                // TODO: this convertion is only necessary
+                final net.yacy.crawler.retrieval.Request yacyRequest = new net.yacy.crawler.retrieval.Request(
+                        null,
+                        url,
+                        proxyHeaders.referer() == null ? null : new DigestURI(proxyHeaders.referer().toString()).hash(),
+                        "",
                         cachedResponseHeader.lastModified(),
                         sb.crawler.defaultProxyProfile.handle(),
-                        0, 
-                        0, 
+                        0,
+                        0,
                         0,
                         0);
 
                 final Response cachedResponse = new Response(
-                		yacyRequest,
-                		proxyHeaders,
+                        yacyRequest,
+                        proxyHeaders,
                         cachedResponseHeader,
                         sb.crawler.defaultProxyProfile,
-                        false
-                );
+                        false);
                 byte[] cacheContent = Cache.getContent(url.hash());
                 if (cacheContent != null && cachedResponse.isFreshForProxy()) {
-                	handleRequestFromCache(request, response, cachedResponseHeader, cacheContent);
+                    handleRequestFromCache(request, response, cachedResponseHeader, cacheContent);
+                    baseRequest.setHandled(true);
                 }
-			}
-			
-		}
-	}
+            }
+
+        }
+    }
 
 }

@@ -30,6 +30,7 @@ import java.net.MalformedURLException;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
+import org.eclipse.jetty.security.RoleInfo;
 
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.server.Request;
@@ -42,46 +43,50 @@ import org.eclipse.jetty.server.UserIdentity;
  */
 public class YaCySecurityHandler extends SecurityHandler {
 
-	@Override
-	protected boolean checkUserDataPermissions(String pathInContext, Request request,
-			Response response, Object constraintInfo) throws IOException {
-		// check the SecurityHandler code, denying here does not provide authentication
-		return true;
-	}
+    @Override
+    protected boolean checkUserDataPermissions(String pathInContext, Request request,
+            Response response, RoleInfo constraintInfo) throws IOException {
+        // check the SecurityHandler code, denying here does not provide authentication
+        return constraintInfo.isChecked();
+    }
 
-	@Override
-	protected boolean checkWebResourcePermissions(String pathInContext, Request request,
-			Response response, Object constraintInfo, UserIdentity userIdentity) throws IOException {
-		// deny and request for authentication, if necessary
-		Boolean authMand = (Boolean)constraintInfo;
-		return !authMand || request.isUserInRole("admin");
-	}
+    @Override
+    protected boolean checkWebResourcePermissions(String pathInContext, Request request,
+            Response response, Object constraintInfo, UserIdentity userIdentity) throws IOException {
+        // deny and request for authentication, if necessary
+        boolean auth = ((RoleInfo) constraintInfo).isChecked();
+        return auth || request.isUserInRole("admin");
+    }
 
-	@Override
-	protected boolean isAuthMandatory(Request base_request, Response base_response, Object constraintInfo) {
-		Boolean authMand = (Boolean)constraintInfo;
-		return authMand;
-	}
+    @Override
+    protected boolean isAuthMandatory(Request base_request, Response base_response, Object constraintInfo) {
+        return false;
+    }
 
-	@Override
-	protected Object prepareConstraintInfo(String pathInContext, Request request) {
-		final Switchboard sb = Switchboard.getSwitchboard();
+    @Override
+    protected RoleInfo prepareConstraintInfo(String pathInContext, Request request) {
+        final Switchboard sb = Switchboard.getSwitchboard();
         final boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
         final String adminAccountBase64MD5 = sb.getConfig(YaCyLegacyCredential.ADMIN_ACCOUNT_B64MD5, "");
 
         String refererHost;
-		try {
-			refererHost = new DigestURI(request.getHeader("Referer")).getHost();
-		} catch (MalformedURLException e) {
-			refererHost = null;
-		}
+        try {
+            refererHost = new DigestURI(request.getHeader("Referer")).getHost();
+        } catch (MalformedURLException e) {
+            refererHost = null;
+        }
         final boolean accessFromLocalhost = Domains.isLocalhost(request.getRemoteHost()) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
         final boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
         final boolean protectedPage = pathInContext.indexOf("_p.") > 0;
         final boolean accountEmpty = adminAccountBase64MD5.length() == 0;
         final boolean yacyBot = request.getHeader("User-Agent").startsWith("yacybot");
-        
-		return protectedPage && ((!grantedForLocalhost && !accountEmpty) || yacyBot);
-	}
 
+        RoleInfo roleinfo = new RoleInfo();
+        if (protectedPage) { // TODO: handle admin authentication & none public site
+            roleinfo.setChecked(((grantedForLocalhost && !accountEmpty) || yacyBot));
+        } else {
+            roleinfo.setChecked(true); 
+        }
+        return roleinfo;
+    }
 }

@@ -331,7 +331,7 @@ public final class yacy {
             try {
 
             	// start jetty http server
-            	HttpServer httpServer = new HttpServer((int)port);
+            	HttpServer httpServer = new HttpServer(port);
             	httpServer.start();
                 //final HTTPDemon protocolHandler = new HTTPDemon(sb);
                 //final serverCore server = new serverCore(

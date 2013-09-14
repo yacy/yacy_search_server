@@ -193,10 +193,8 @@ public class TemplateHandler extends AbstractHandler implements Handler {
 	public void handle(String target, Request baseRequest, HttpServletRequest request,
 			HttpServletResponse response) throws IOException, ServletException {
     	Switchboard sb = Switchboard.getSwitchboard();
-    	
-		System.err.println("Page: " + target);
 		
-		String localeSelection = "default";
+	String localeSelection = Switchboard.getSwitchboard().getConfig("locale.language","default");
         File targetFile = getLocalizedFile(target, localeSelection);
         File targetClass = rewriteClassFile(new File(htDefaultPath, target));
         String targetExt = target.substring(target.lastIndexOf('.') + 1, target.length());

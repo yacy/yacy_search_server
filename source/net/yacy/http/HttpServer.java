@@ -26,44 +26,42 @@ package net.yacy.http;
 
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
 
 /**
  * class to embedded jetty http server into YaCy
  */
 public class HttpServer {
 
-    private Server server = new Server();
+    private Server server;
 
     /**
      * @param port TCP Port to listen for http requests
      */
     public HttpServer(int port) {
         Switchboard sb = Switchboard.getSwitchboard();
-
-        SelectChannelConnector connector = new SelectChannelConnector();
+        server = new Server();
+        ServerConnector connector = new ServerConnector(server);
         connector.setPort(port);
+        connector.setName("httpd:"+Integer.toString(port));
         //connector.setThreadPool(new QueuedThreadPool(20));
         server.addConnector(connector);
-
+       
         YacyDomainHandler domainHandler = new YacyDomainHandler();
         domainHandler.setAlternativeResolver(sb.peers);
 
         ResourceHandler resource_handler = new ResourceHandler();
         resource_handler.setDirectoriesListed(true);
         resource_handler.setWelcomeFiles(new String[]{"index.html"});
-
         resource_handler.setResourceBase("htroot/");
 
         HandlerList handlers = new HandlerList();
@@ -134,15 +132,7 @@ public class HttpServer {
     }
 
     public int getJobCount() {
-        return getMaxSessionCount()-server.getThreadPool().getIdleThreads(); // TODO:
+        return getMaxSessionCount() - server.getThreadPool().getIdleThreads(); // TODO:
     }
 
-    /**
-     * just for testing and debugging
-     */
-    public static void main(String[] args) throws Exception {
-        HttpServer server = new HttpServer(8090);
-        server.start();
-        server.stop();
-    }
 }

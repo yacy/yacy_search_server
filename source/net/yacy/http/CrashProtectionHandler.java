@@ -33,6 +33,7 @@ public class CrashProtectionHandler extends HandlerWrapper implements Handler, H
 		} catch (Exception e) {
 			// handle all we can
 			writeResponse(request, response, e);
+                        baseRequest.setHandled(true);
 		}
 	}
 	
@@ -44,9 +45,5 @@ public class CrashProtectionHandler extends HandlerWrapper implements Handler, H
 		exc.printStackTrace(out);
 		response.setContentType("text/plain");
         response.setStatus(500);
-        
-        // we handled this request, break out of handler chain
-		Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
-		base_request.setHandled(true);
 	}
 }

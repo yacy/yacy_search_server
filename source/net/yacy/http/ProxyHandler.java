@@ -45,7 +45,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.server.Request;
 
 import net.yacy.crawler.data.Cache;
@@ -234,8 +233,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 		}
 		
         // we handled this request, break out of handler chain
-		Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
-		base_request.setHandled(true);
+		baseRequest.setHandled(true);
 	}
 
 
