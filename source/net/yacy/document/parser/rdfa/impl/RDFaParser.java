@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
@@ -46,7 +47,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 	}
 
 	@Override
-    public Document[] parse(DigestURL url, String mimeType,
+    public Document[] parse(AnchorURL url, String mimeType,
 			String charset, InputStream source) throws Failure,
 			InterruptedException {
 
@@ -95,7 +96,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 		return doc;
 	}
 
-	private Document[] parseHtml(DigestURL url, String mimeType,
+	private Document[] parseHtml(AnchorURL url, String mimeType,
 			String charset, InputStream source) throws Failure,
 			InterruptedException {
 
@@ -178,7 +179,7 @@ public class RDFaParser extends AbstractParser implements Parser {
             if (aReader != null) {
                 RDFaParser aParser = new RDFaParser();
                 try {
-                    aParser.parse(new DigestURL(args[0]),"","",aURL.openStream());
+                    aParser.parse(new AnchorURL(args[0]),"","",aURL.openStream());
                 } catch (final FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (final IOException e) {

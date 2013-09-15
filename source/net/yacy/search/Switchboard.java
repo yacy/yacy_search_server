@@ -94,6 +94,7 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.feed.RSSReader;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.Ranking;
@@ -2480,7 +2481,7 @@ public final class Switchboard extends serverSwitch {
             // parse the document
             documents =
                 TextParser.parseSource(
-                    response.url(),
+                    new AnchorURL(response.url()),
                     response.getMimeType(),
                     response.getCharacterEncoding(),
                     response.getContent());
@@ -3408,9 +3409,9 @@ public final class Switchboard extends serverSwitch {
                 }
 
                 // get the links for a specific site
-                DigestURL url;
+                AnchorURL url;
                 try {
-                    url = new DigestURL(r);
+                    url = new AnchorURL(r);
                 } catch (final MalformedURLException e ) {
                     ConcurrentLog.logException(e);
                     return;
@@ -3447,9 +3448,9 @@ public final class Switchboard extends serverSwitch {
             public void run() {
 
                 // get the links for a specific site
-                final DigestURL startUrl;
+                final AnchorURL startUrl;
                 try {
-                    startUrl = new DigestURL(url);
+                    startUrl = new AnchorURL(url);
                 } catch (final MalformedURLException e) {
                     ConcurrentLog.logException(e);
                     return;

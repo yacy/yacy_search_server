@@ -47,6 +47,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.MicroDate;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.sorting.ClusteredScoreMap;
@@ -159,8 +160,8 @@ public class WebStructureGraph {
     
     public void generateCitationReference(final DigestURL url, final Document document) {
         // generate citation reference
-        final Map<DigestURL, String> hl = document.getHyperlinks();
-        final Iterator<DigestURL> it = hl.keySet().iterator();
+        final Map<AnchorURL, String> hl = document.getHyperlinks();
+        final Iterator<AnchorURL> it = hl.keySet().iterator();
         final HashSet<DigestURL> globalRefURLs = new HashSet<DigestURL>();
         final String refhost = url.getHost();
         DigestURL u;

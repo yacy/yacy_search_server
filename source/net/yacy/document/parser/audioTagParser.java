@@ -35,7 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
@@ -69,7 +69,7 @@ public class audioTagParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURL location, final String mimeType,
+    public Document[] parse(final AnchorURL location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
 

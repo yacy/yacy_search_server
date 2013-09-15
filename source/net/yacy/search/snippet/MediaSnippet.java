@@ -38,6 +38,7 @@ import java.util.TreeSet;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
@@ -164,15 +165,15 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     public static List<MediaSnippet> computeMediaSnippets(final DigestURL source, final Document document, final HandleSet queryhashes, final ContentDomain mediatype) {
 
         if (document == null) return new ArrayList<MediaSnippet>();
-        Map<DigestURL, String> media = null;
+        Map<AnchorURL, String> media = null;
         if (mediatype == ContentDomain.AUDIO) media = document.getAudiolinks();
         else if (mediatype == ContentDomain.VIDEO) media = document.getVideolinks();
         else if (mediatype == ContentDomain.APP) media = document.getApplinks();
         if (media == null) return null;
 
-        final Iterator<Map.Entry<DigestURL, String>> i = media.entrySet().iterator();
-        Map.Entry<DigestURL, String> entry;
-        DigestURL url;
+        final Iterator<Map.Entry<AnchorURL, String>> i = media.entrySet().iterator();
+        Map.Entry<AnchorURL, String> entry;
+        AnchorURL url;
         String desc;
         final List<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {

@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.parser.audioTagParser;
 import net.yacy.document.parser.bzipParser;
@@ -156,7 +156,7 @@ public final class TextParser {
     }
 
     public static Document[] parseSource(
-            final DigestURL location,
+            final AnchorURL location,
             final String mimeType,
             final String charset,
             final File sourceFile
@@ -186,7 +186,7 @@ public final class TextParser {
     }
 
     public static Document[] parseSource(
-            final DigestURL location,
+            final AnchorURL location,
             String mimeType,
             final String charset,
             final byte[] content
@@ -209,7 +209,7 @@ public final class TextParser {
     }
 
     public static Document[] parseSource(
-            final DigestURL location,
+            final AnchorURL location,
             String mimeType,
             final String charset,
             final long contentLength,
@@ -248,7 +248,7 @@ public final class TextParser {
     }
 
     private static Document[] parseSource(
-            final DigestURL location,
+            final AnchorURL location,
             final String mimeType,
             final Parser parser,
             final String charset,
@@ -269,7 +269,7 @@ public final class TextParser {
     }
 
     private static Document[] parseSource(
-            final DigestURL location,
+            final AnchorURL location,
             final String mimeType,
             final Set<Parser> parsers,
             final String charset,

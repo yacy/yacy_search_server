@@ -51,6 +51,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
@@ -501,7 +502,7 @@ public class MediawikiImporter extends Thread implements Importer {
     public class wikiparserrecord {
         public String title;
         String source, html, hostport, urlStub;
-        DigestURL url;
+        AnchorURL url;
         Document document;
         public wikiparserrecord(final String hostport, final String urlStub, final String title, final StringBuilder sb) {
             this.title = title;
@@ -520,7 +521,7 @@ public class MediawikiImporter extends Thread implements Importer {
         }
         public void genDocument() throws Parser.Failure {
             try {
-				this.url = new DigestURL(this.urlStub + this.title);
+				this.url = new AnchorURL(this.urlStub + this.title);
 				final Document[] parsed = TextParser.parseSource(this.url, "text/html", "UTF-8", UTF8.getBytes(this.html));
 				this.document = Document.mergeDocuments(this.url, "text/html", parsed);
 				// the wiki parser is not able to find the proper title in the source text, so it must be set here

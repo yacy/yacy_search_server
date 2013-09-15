@@ -34,7 +34,6 @@ import java.util.Date;
 import java.util.List;
 
 import net.yacy.cora.document.id.AnchorURL;
-import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -56,7 +55,7 @@ public class swfParser extends AbstractParser implements Parser {
      * all extracted information about the parsed document
      */
     @Override
-    public Document[] parse(final DigestURL location, final String mimeType,
+    public Document[] parse(final AnchorURL location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException
     {
@@ -97,7 +96,7 @@ public class swfParser extends AbstractParser implements Parser {
                 url = contents.substring(urlStart,urlEnd);
                 urlnr = Integer.toString(++urls).toString();
                 AnchorURL u = new AnchorURL(url);
-                u.getProperties().put("name", urlnr);
+                u.setNameProperty(urlnr);
                 anchors.add(u);
                 contents = contents.substring(0,urlStart)+contents.substring(urlEnd);
             }

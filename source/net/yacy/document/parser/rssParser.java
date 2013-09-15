@@ -38,7 +38,6 @@ import net.yacy.cora.document.feed.Hit;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSReader;
 import net.yacy.cora.document.id.AnchorURL;
-import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -58,7 +57,7 @@ public class rssParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURL url, final String mimeType,
+    public Document[] parse(final AnchorURL url, final String mimeType,
             final String charset, final InputStream source)
             throws Failure, InterruptedException {
         RSSReader rssReader;
@@ -80,7 +79,7 @@ public class rssParser extends AbstractParser implements Parser {
             languages = new HashSet<String>();
             languages.add(item.getLanguage());
             anchors = new ArrayList<AnchorURL>();
-            uri.getProperties().put("name", item.getTitle());
+            uri.setNameProperty(item.getTitle());
             anchors.add(uri);
             doc = new Document(
                     uri,
@@ -99,7 +98,7 @@ public class rssParser extends AbstractParser implements Parser {
                     null,
                     anchors,
                     null,
-                    new LinkedHashMap<DigestURL, ImageEntry>(),
+                    new LinkedHashMap<AnchorURL, ImageEntry>(),
                     false,
                     item.getPubDate());
             docs.add(doc);

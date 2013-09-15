@@ -55,7 +55,7 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.PDType3Font;
 import org.apache.pdfbox.util.PDFTextStripper;
 
-import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
@@ -84,7 +84,7 @@ public class pdfParser extends AbstractParser implements Parser {
     }
     
     @Override
-    public Document[] parse(final DigestURL location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final AnchorURL location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
 
         // check memory for parser
         if (!MemoryControl.request(200 * 1024 * 1024, false))

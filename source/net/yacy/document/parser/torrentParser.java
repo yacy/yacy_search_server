@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Condenser;
@@ -56,7 +56,7 @@ public class torrentParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(DigestURL location, String mimeType, String charset, InputStream source)
+    public Document[] parse(AnchorURL location, String mimeType, String charset, InputStream source)
             throws Parser.Failure, InterruptedException {
         byte[] b = null;
         try {
@@ -119,7 +119,7 @@ public class torrentParser extends AbstractParser implements Parser {
         try {
             byte[] b = FileUtils.read(new File(args[0]));
             torrentParser parser = new torrentParser();
-            Document[] d = parser.parse(new DigestURL("http://localhost/test.torrent"), null, "UTF-8", new ByteArrayInputStream(b));
+            Document[] d = parser.parse(new AnchorURL("http://localhost/test.torrent"), null, "UTF-8", new ByteArrayInputStream(b));
             Condenser c = new Condenser(d[0], true, true, LibraryProvider.dymLib, LibraryProvider.synonyms, false);
             Map<String, Word> w = c.words();
             for (Map.Entry<String, Word> e: w.entrySet()) System.out.println("Word: " + e.getKey() + " - " + e.getValue().posInText);

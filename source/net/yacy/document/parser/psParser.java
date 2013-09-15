@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Date;
 
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -256,7 +257,7 @@ public class psParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURL location, final String mimeType,
+    public Document[] parse(final AnchorURL location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
 

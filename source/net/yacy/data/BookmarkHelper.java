@@ -145,8 +145,8 @@ public class BookmarkHelper {
             writer.close();
             links = scraper.getAnchors();
         } catch (final IOException e) { ConcurrentLog.warn("BOOKMARKS", "error during load of links: "+ e.getClass() +" "+ e.getMessage());}
-        for (final DigestURL url: links) {
-            title = url.getProperties().getProperty("name", "");
+        for (final AnchorURL url: links) {
+            title = url.getNameProperty();
             ConcurrentLog.info("BOOKMARKS", "links.get(url)");
             if ("".equals(title)) {//cannot be displayed
                 title = url.toString();

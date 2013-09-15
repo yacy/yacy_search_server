@@ -35,6 +35,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.document.AbstractParser;
@@ -88,7 +89,7 @@ public class htmlParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final DigestURL location,
+            final AnchorURL location,
             final String mimeType,
             final String documentCharset,
             final InputStream sourceStream) throws Parser.Failure, InterruptedException {
@@ -126,7 +127,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 sections[p++] = headline;
             }
         }
-        LinkedHashMap<DigestURL, ImageEntry> noDoubleImages = new LinkedHashMap<DigestURL, ImageEntry>();
+        LinkedHashMap<AnchorURL, ImageEntry> noDoubleImages = new LinkedHashMap<AnchorURL, ImageEntry>();
         for (ImageEntry ie: scraper.getImages()) noDoubleImages.put(ie.url(), ie);
         final Document ppd = new Document(
                 location,
@@ -301,9 +302,9 @@ public class htmlParser extends AbstractParser implements Parser {
 
     public static void main(final String[] args) {
         // test parsing of a url
-        DigestURL url;
+        AnchorURL url;
         try {
-            url = new DigestURL(args[0]);
+            url = new AnchorURL(args[0]);
             final byte[] content = url.get(ClientIdentification.yacyInternetCrawlerAgent);
             final Document[] document = new htmlParser().parse(url, "text/html", null, new ByteArrayInputStream(content));
             final String title = document[0].dc_title();

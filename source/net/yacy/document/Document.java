@@ -77,11 +77,11 @@ public class Document {
     private Object text;                        // the clear text, all that is visible
     private final Collection<AnchorURL> anchors;   // all links embedded as clickeable entities (anchor tags)
     private final LinkedHashMap<DigestURL, String> rss;   // all embedded rss feeds
-    private final LinkedHashMap<DigestURL, ImageEntry> images; // all visible pictures in document
+    private final LinkedHashMap<AnchorURL, ImageEntry> images; // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
-    private LinkedHashMap<DigestURL, String> audiolinks, videolinks, applinks, hyperlinks;
+    private LinkedHashMap<AnchorURL, String> audiolinks, videolinks, applinks, hyperlinks;
     private LinkedHashMap<DigestURL, String> inboundlinks, outboundlinks;
     private Map<String, String> emaillinks;
     private MultiProtocolURL favicon;
@@ -104,7 +104,7 @@ public class Document {
                     final Object text,
                     final Collection<AnchorURL> anchors,
                     final LinkedHashMap<DigestURL, String> rss,
-                    final LinkedHashMap<DigestURL, ImageEntry> images,
+                    final LinkedHashMap<AnchorURL, ImageEntry> images,
                     final boolean indexingDenied,
                     final Date date) {
         this.source = location;
@@ -128,7 +128,7 @@ public class Document {
         }
         this.anchors = (anchors == null) ? new ArrayList<AnchorURL>(0) : anchors;
         this.rss = (rss == null) ? new LinkedHashMap<DigestURL, String>(0) : rss;
-        this.images = (images == null) ? new LinkedHashMap<DigestURL, ImageEntry>() : images;
+        this.images = (images == null) ? new LinkedHashMap<AnchorURL, ImageEntry>() : images;
         this.publisher = publisher;
         this.hyperlinks = null;
         this.audiolinks = null;
@@ -417,30 +417,30 @@ dc_rights
 
     // the next three methods provide a calculated view on the getAnchors/getImages:
 
-    public Map<DigestURL, String> getHyperlinks() {
+    public Map<AnchorURL, String> getHyperlinks() {
         // this is a subset of the getAnchor-set: only links to other hyperrefs
         if (!this.resorted) resortLinks();
         return this.hyperlinks;
     }
 
-    public Map<DigestURL, String> getAudiolinks() {
+    public Map<AnchorURL, String> getAudiolinks() {
         if (!this.resorted) resortLinks();
         return this.audiolinks;
     }
 
-    public Map<DigestURL, String> getVideolinks() {
+    public Map<AnchorURL, String> getVideolinks() {
         if (!this.resorted) resortLinks();
         return this.videolinks;
     }
 
-    public Map<DigestURL, ImageEntry> getImages() {
+    public Map<AnchorURL, ImageEntry> getImages() {
         // returns all links enbedded as pictures (visible in document)
         // this resturns a htmlFilterImageEntry collection
         if (!this.resorted) resortLinks();
         return this.images;
     }
 
-    public Map<DigestURL, String> getApplinks() {
+    public Map<AnchorURL, String> getApplinks() {
         if (!this.resorted) resortLinks();
         return this.applinks;
     }
@@ -474,19 +474,19 @@ dc_rights
             final String thishost = this.source.getHost();
             this.inboundlinks = new LinkedHashMap<DigestURL, String>();
             this.outboundlinks = new LinkedHashMap<DigestURL, String>();
-            this.hyperlinks = new LinkedHashMap<DigestURL, String>();
-            this.videolinks = new LinkedHashMap<DigestURL, String>();
-            this.audiolinks = new LinkedHashMap<DigestURL, String>();
-            this.applinks   = new LinkedHashMap<DigestURL, String>();
+            this.hyperlinks = new LinkedHashMap<AnchorURL, String>();
+            this.videolinks = new LinkedHashMap<AnchorURL, String>();
+            this.audiolinks = new LinkedHashMap<AnchorURL, String>();
+            this.applinks   = new LinkedHashMap<AnchorURL, String>();
             this.emaillinks = new LinkedHashMap<String, String>();
-            final Map<DigestURL, ImageEntry> collectedImages = new HashMap<DigestURL, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
-            for (final Map.Entry<DigestURL, ImageEntry> entry: collectedImages.entrySet()) {
+            final Map<AnchorURL, ImageEntry> collectedImages = new HashMap<AnchorURL, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
+            for (final Map.Entry<AnchorURL, ImageEntry> entry: collectedImages.entrySet()) {
                 if (entry.getKey().getHost().equals(thishost)) this.inboundlinks.put(entry.getKey(), "image"); else this.outboundlinks.put(entry.getKey(), "image");
             }
-            for (final DigestURL url: this.anchors) {
+            for (final AnchorURL url: this.anchors) {
                 if (url == null) continue;
-                final boolean noindex = url.getProperties().getProperty("rel", "").toLowerCase().indexOf("noindex",0) >= 0;
-                final boolean nofollow = url.getProperties().getProperty("rel", "").toLowerCase().indexOf("nofollow",0) >= 0;
+                final boolean noindex = url.getRelProperty().toLowerCase().indexOf("noindex",0) >= 0;
+                final boolean nofollow = url.getRelProperty().toLowerCase().indexOf("nofollow",0) >= 0;
                 if ((thishost == null && url.getHost() == null) ||
                     ((thishost != null && url.getHost() != null) &&
                      (url.getHost().endsWith(thishost) ||
@@ -496,7 +496,7 @@ dc_rights
                     this.outboundlinks.put(url, "anchor" + (noindex ? " noindex" : "") + (nofollow ? " nofollow" : ""));
                 }
                 u = url.toNormalform(true);
-                final String name = url.getProperties().getProperty("name", "");
+                final String name = url.getNameProperty();
                 if (u.startsWith("mailto:")) {
                     this.emaillinks.put(u.substring(7), name);
                 } else {
@@ -592,23 +592,23 @@ dc_rights
         return v;
     }
 
-    private static Map<DigestURL, String> allReflinks(final Collection<?> links) {
+    private static Map<AnchorURL, String> allReflinks(final Collection<?> links) {
         // links is either a Set of Strings (with urls) or
         // htmlFilterImageEntries
         // we find all links that are part of a reference inside a url
-        final Map<DigestURL, String> v = new HashMap<DigestURL, String>();
+        final Map<AnchorURL, String> v = new HashMap<AnchorURL, String>();
         final Iterator<?> i = links.iterator();
         Object o;
-        DigestURL url = null;
+        AnchorURL url = null;
         String u;
         int pos;
         loop: while (i.hasNext())
             try {
                 o = i.next();
-                if (o instanceof DigestURL)
-                    url = (DigestURL) o;
+                if (o instanceof AnchorURL)
+                    url = (AnchorURL) o;
                 else if (o instanceof String)
-                    url = new DigestURL((String) o);
+                    url = new AnchorURL((String) o);
                 else if (o instanceof ImageEntry)
                     url = ((ImageEntry) o).url();
                 else {
@@ -622,7 +622,7 @@ dc_rights
                     u = u.substring(pos);
                     while ((pos = u.toLowerCase().indexOf("http://", 7)) > 0)
                         u = u.substring(pos);
-                    url = new DigestURL(u);
+                    url = new AnchorURL(u);
                     if (!(v.containsKey(url)))
                         v.put(url, "ref");
                     continue loop;
@@ -632,7 +632,7 @@ dc_rights
                     u = "http:/" + u.substring(pos);
                     while ((pos = u.toLowerCase().indexOf("/www.", 7)) > 0)
                         u = "http:/" + u.substring(pos);
-                    url = new DigestURL(u);
+                    url = new AnchorURL(u);
                     if (!(v.containsKey(url)))
                         v.put(url, "ref");
                     continue loop;
@@ -783,7 +783,7 @@ dc_rights
         final Collection<String> sectionTitles = new LinkedHashSet<String>();
         final List<AnchorURL>       anchors       = new ArrayList<AnchorURL>();
         final LinkedHashMap<DigestURL, String> rss = new LinkedHashMap<DigestURL, String>();
-        final LinkedHashMap<DigestURL, ImageEntry> images = new LinkedHashMap<DigestURL, ImageEntry>();
+        final LinkedHashMap<AnchorURL, ImageEntry> images = new LinkedHashMap<AnchorURL, ImageEntry>();
         double lon = 0.0d, lat = 0.0d;
         Date date = new Date();
 
@@ -890,7 +890,7 @@ dc_rights
     public static Map<DigestURL, String> getAudiolinks(final Document[] documents) {
         final Map<DigestURL, String> result = new HashMap<DigestURL, String>();
         for (final Document d: documents) {
-            for (Map.Entry<DigestURL, String> e: d.audiolinks.entrySet()) {
+            for (Map.Entry<AnchorURL, String> e: d.audiolinks.entrySet()) {
                 result.put(e.getKey(), description(d, e.getValue()));
             }
         }
@@ -900,7 +900,7 @@ dc_rights
     public static Map<DigestURL, String> getVideolinks(final Document[] documents) {
         final Map<DigestURL, String> result = new HashMap<DigestURL, String>();
         for (final Document d: documents) {
-            for (Map.Entry<DigestURL, String> e: d.videolinks.entrySet()) {
+            for (Map.Entry<AnchorURL, String> e: d.videolinks.entrySet()) {
                 result.put(e.getKey(), description(d, e.getValue()));
             }
         }
@@ -910,7 +910,7 @@ dc_rights
     public static Map<DigestURL, String> getApplinks(final Document[] documents) {
         final Map<DigestURL, String> result = new HashMap<DigestURL, String>();
         for (final Document d: documents) {
-            for (Map.Entry<DigestURL, String> e: d.applinks.entrySet()) {
+            for (Map.Entry<AnchorURL, String> e: d.applinks.entrySet()) {
                 result.put(e.getKey(), description(d, e.getValue()));
             }
         }

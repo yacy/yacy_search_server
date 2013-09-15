@@ -26,12 +26,12 @@ package net.yacy.document.parser.html;
 
 import java.util.Comparator;
 
-import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.AnchorURL;
 
 public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry> {
 
-    private final DigestURL imageurl;
-    private DigestURL linkurl;
+    private final AnchorURL imageurl;
+    private AnchorURL linkurl;
     private final String alt;
     private String anchortext;
     private final int width, height;
@@ -49,7 +49,7 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
      * @param fileSize the number of bytes that the image uses on file or -1 if unknown
      */
     public ImageEntry(
-            final DigestURL imageurl,
+            final AnchorURL imageurl,
             final String alt,
             final int width,
             final int height,
@@ -64,15 +64,15 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
         this.fileSize = fileSize;
     }
 
-    public DigestURL url() {
+    public AnchorURL url() {
         return this.imageurl;
     }
 
-    public void setLinkurl(DigestURL linkurl) {
+    public void setLinkurl(AnchorURL linkurl) {
         this.linkurl = linkurl;
     }
     
-    public DigestURL linkurl() {
+    public AnchorURL linkurl() {
         return this.linkurl;
     }
 

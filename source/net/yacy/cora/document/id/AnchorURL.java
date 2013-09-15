@@ -28,25 +28,38 @@ public class AnchorURL extends DigestURL {
 
     private static final long serialVersionUID = 1586579902179962086L;
 
-    private Properties properties; // may contain additional url properties, such as given in html a href-links
+    private String nameProperty, textProperty, relProperty, hrefProperty; // may contain additional url properties, such as given in html a href-links
 
     public AnchorURL(final String url) throws MalformedURLException {
         super(url);
-        this.properties = new Properties();
+        this.nameProperty = "";
+        this.textProperty = "";
+        this.relProperty = "";
+        this.hrefProperty = "";
+    }
+    
+    public AnchorURL(final DigestURL url) {
+        super(url, url.hash());
+        this.nameProperty = "";
+        this.textProperty = "";
+        this.relProperty = "";
+        this.hrefProperty = "";
     }
 
     public AnchorURL(final MultiProtocolURL baseURL, final String relPath) throws MalformedURLException {
         super(baseURL, relPath);
-        this.properties = new Properties();
+        this.nameProperty = "";
+        this.textProperty = "";
+        this.relProperty = "";
+        this.hrefProperty = "";
     }
 
     public AnchorURL(final String protocol, final String host, final int port, final String path) throws MalformedURLException {
         super(protocol, host, port, path);
-        this.properties = new Properties();
-    }
-
-    public Properties getProperties() {
-        return this.properties;
+        this.nameProperty = "";
+        this.textProperty = "";
+        this.relProperty = "";
+        this.hrefProperty = "";
     }
 
     public static AnchorURL newAnchor(final DigestURL baseURL, String relPath) throws MalformedURLException {
@@ -65,4 +78,53 @@ public class AnchorURL extends DigestURL {
         }
         return new AnchorURL(baseURL, relPath);
     }
+
+    public String getNameProperty() {
+        return nameProperty;
+    }
+
+    public void setNameProperty(String name) {
+        this.nameProperty = name;
+    }
+
+    public String getTextProperty() {
+        return textProperty;
+    }
+
+    public void setTextProperty(String text) {
+        this.textProperty = text;
+    }
+
+    public String getRelProperty() {
+        return relProperty;
+    }
+
+    public void setRelProperty(String rel) {
+        this.relProperty = rel;
+    }
+
+    public String getHrefProperty() {
+        return hrefProperty;
+    }
+
+    public void setHrefProperty(String href) {
+        this.hrefProperty = href;
+    }
+
+    public void setAll(final Properties tagopts) {
+        this.nameProperty = tagopts.getProperty("name", "");
+        this.textProperty = tagopts.getProperty("text", "");
+        this.relProperty = tagopts.getProperty("rel", "");
+        this.hrefProperty = tagopts.getProperty("href", "");
+    }
+
+    public Properties getAll() {
+        final Properties tagopts = new Properties();
+        tagopts.setProperty("name", this.nameProperty);
+        tagopts.setProperty("text", this.textProperty);
+        tagopts.setProperty("rel", this.relProperty);
+        tagopts.setProperty("href", this.hrefProperty);
+        return tagopts;
+    }
+    
 }

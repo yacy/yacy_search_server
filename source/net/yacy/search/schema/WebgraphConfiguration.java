@@ -34,7 +34,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.regex.Pattern;
@@ -120,15 +119,14 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             final List<ImageEntry> images, final boolean inbound, final Collection<AnchorURL> links,
             final IndexCell<CitationReference> citations) {
         boolean allAttr = this.isEmpty();
+        int target_order = 0;
         for (final AnchorURL target_url: links) {
 
             Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
             
-            final Properties p = target_url.getProperties();
-            if (p == null) continue;
-            final String name = p.getProperty("name", ""); // the name attribute
-            final String text = p.getProperty("text", ""); // the text between the <a></a> tag
-            final String rel = p.getProperty("rel", "");   // the rel-attribute
+            final String name = target_url.getNameProperty(); // the name attribute
+            final String text = target_url.getTextProperty(); // the text between the <a></a> tag
+            final String rel = target_url.getRelProperty();   // the rel-attribute
             int ioidx = inbound ? 0 : 1;
             
             // index organization
@@ -140,6 +138,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             StringBuilder id = new StringBuilder(source_id).append(target_id).append(idi);
             SolrInputDocument edge = new SolrInputDocument();
             add(edge, WebgraphSchema.id, id.toString());
+            add(edge, WebgraphSchema.target_order_i, target_order++);
             if (allAttr || contains(WebgraphSchema.load_date_dt)) {
                 Date loadDate = new Date();
                 Date modDate = responseHeader == null ? new Date() : responseHeader.lastModified();

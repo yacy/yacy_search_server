@@ -34,10 +34,9 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
-
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -315,7 +314,7 @@ public class ViewFile {
                 i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
                 dark = (i % 2 == 0);
 
-                final Map<DigestURL, ImageEntry> ts = document.getImages();
+                final Map<AnchorURL, ImageEntry> ts = document.getImages();
                 final Iterator<ImageEntry> tsi = ts.values().iterator();
                 ImageEntry entry;
                 while (tsi.hasNext()) {
@@ -439,15 +438,14 @@ public class ViewFile {
                     final serverObjects prop,
                     final String[] wordArray,
                     int c,
-                    final Map<DigestURL, String> media,
+                    final Map<AnchorURL, String> media,
                     final String type,
                     boolean dark) {
         int i = 0;
-        for (final Map.Entry<DigestURL, String> entry : media.entrySet()) {
-            final Properties p = entry.getKey().getProperties();
-            final String name = p.getProperty("name", ""); // the name attribute
-            final String rel = p.getProperty("rel", "");   // the rel-attribute
-            final String text = p.getProperty("text", ""); // the text between the <a></a> tag
+        for (final Map.Entry<AnchorURL, String> entry : media.entrySet()) {
+            final String name = entry.getKey().getNameProperty(); // the name attribute
+            final String rel = entry.getKey().getRelProperty();   // the rel-attribute
+            final String text = entry.getKey().getTextProperty(); // the text between the <a></a> tag
 
             prop.put("viewMode_links_" + c + "_nr", c);
             prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));

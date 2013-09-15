@@ -34,7 +34,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 
-import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -55,7 +55,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("application/x-7z-compressed");
     }
 
-    public Document parse(final DigestURL location, final String mimeType, final String charset, final IInStream source) throws Parser.Failure, InterruptedException {
+    public Document parse(final AnchorURL location, final String mimeType, final String charset, final IInStream source) throws Parser.Failure, InterruptedException {
         final Document doc = new Document(
                 location,
                 mimeType,
@@ -100,12 +100,12 @@ public class sevenzipParser extends AbstractParser implements Parser {
         }
     }
 
-    public Document parse(final DigestURL location, final String mimeType, final String charset, final byte[] source) throws Parser.Failure, InterruptedException {
+    public Document parse(final AnchorURL location, final String mimeType, final String charset, final byte[] source) throws Parser.Failure, InterruptedException {
         return parse(location, mimeType, charset, new ByteArrayIInStream(source));
     }
 
     @Override
-    public Document[] parse(final DigestURL location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final AnchorURL location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
         try {
             final ByteArrayOutputStream cfos = new ByteArrayOutputStream();
             FileUtils.copy(source, cfos);
@@ -169,7 +169,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
                      Document[] theDocs;
                      // workaround for relative links in file, normally '#' shall be used behind the location, see
                      // below for reversion of the effects
-                     final DigestURL url = DigestURL.newURL(this.doc.dc_source(), this.prefix + "/" + super.filePath);
+                     final AnchorURL url = AnchorURL.newAnchor(this.doc.dc_source(), this.prefix + "/" + super.filePath);
                      final String mime = TextParser.mimeOf(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
                      theDocs = TextParser.parseSource(url, mime, null, this.cfos.toByteArray());
 

@@ -40,6 +40,7 @@ import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -68,7 +69,7 @@ public class sitemapParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURL url, final String mimeType,
+    public Document[] parse(final AnchorURL url, final String mimeType,
             final String charset, final InputStream source)
             throws Failure, InterruptedException {
         final List<Document> docs = new ArrayList<Document>();
@@ -95,7 +96,7 @@ public class sitemapParser extends AbstractParser implements Parser {
                     null,
                     null,
                     null,
-                    new LinkedHashMap<DigestURL, ImageEntry>(),
+                    new LinkedHashMap<AnchorURL, ImageEntry>(),
                     false,
                     new Date());
             docs.add(doc);

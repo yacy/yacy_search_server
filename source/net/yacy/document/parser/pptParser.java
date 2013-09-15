@@ -31,7 +31,7 @@ import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.Date;
 
-import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -60,7 +60,7 @@ public class pptParser extends AbstractParser implements Parser {
      * all extracted information about the parsed document
      */
     @Override
-    public Document[] parse(final DigestURL location, final String mimeType,
+    public Document[] parse(final AnchorURL location, final String mimeType,
             final String charset, final InputStream source) throws Parser.Failure,
             InterruptedException {
         try {

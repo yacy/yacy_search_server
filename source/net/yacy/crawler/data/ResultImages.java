@@ -31,6 +31,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.storage.SizeLimitedSet;
@@ -61,7 +62,7 @@ public class ResultImages {
         if (MemoryControl.shortStatus()) clearQueues();
         limitQueues(1000);
 
-        final Map<DigestURL, ImageEntry> images = document.getImages();
+        final Map<AnchorURL, ImageEntry> images = document.getImages();
         for (final ImageEntry image: images.values()) {
             // do a double-check; attention: this can be time-consuming since this possibly needs a DNS-lookup
             if (image == null || image.url() == null) continue;

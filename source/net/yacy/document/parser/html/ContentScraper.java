@@ -325,7 +325,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String src = tagopts.getProperty("src", EMPTY_STRING);
             try {
                 if (src.length() > 0) {
-                    final DigestURL url = absolutePath(src);
+                    final AnchorURL url = absolutePath(src);
                     if (url != null) {
                         final int width = Integer.parseInt(tagopts.getProperty("width", "-1"));
                         final int height = Integer.parseInt(tagopts.getProperty("height", "-1"));
@@ -342,7 +342,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         } else if (tagname.equalsIgnoreCase("frame")) {
             final AnchorURL src = absolutePath(tagopts.getProperty("src", EMPTY_STRING));
             tagopts.put("src", src.toNormalform(true));
-            src.getProperties().putAll(tagopts);
+            src.setAll(tagopts);
             this.anchors.add(src);
             this.frames.add(src);
             this.evaluationScores.match(Element.framepath, src.toNormalform(true));
@@ -378,10 +378,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             //String alt   = tagopts.getProperty("alt",EMPTY_STRING);
             final String href  = tagopts.getProperty("href", EMPTY_STRING);
             if (href.length() > 0) {
-                tagopts.put("nme", areatitle);
+                tagopts.put("name", areatitle);
                 AnchorURL url = absolutePath(href);
                 tagopts.put("href", url.toNormalform(true));
-                url.getProperties().putAll(tagopts);
+                url.setAll(tagopts);
                 this.anchors.add(url);
             }
         } else if (tagname.equalsIgnoreCase("link")) {
@@ -401,7 +401,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     this.favicon = newLink;
                 } else if (rel.equalsIgnoreCase("canonical")) {
                     tagopts.put("name", this.titles.size() == 0 ? "" : this.titles.iterator().next());
-                    newLink.getProperties().putAll(tagopts);
+                    newLink.setAll(tagopts);
                     this.anchors.add(newLink);
                     this.canonical = newLink;
                 } else if (rel.equalsIgnoreCase("publisher")) {
@@ -417,7 +417,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     this.evaluationScores.match(Element.csspath, href);
                 } else if (!rel.equalsIgnoreCase("stylesheet") && !rel.equalsIgnoreCase("alternate stylesheet")) {
                     tagopts.put("name", linktitle);
-                    newLink.getProperties().putAll(tagopts);
+                    newLink.setAll(tagopts);
                     this.anchors.add(newLink);
                 }
             }
@@ -432,7 +432,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                         tagopts.put("src", url.toNormalform(true));
                         final EmbedEntry ie = new EmbedEntry(url, width, height, tagopts.getProperty("type", EMPTY_STRING), tagopts.getProperty("pluginspage", EMPTY_STRING));
                         this.embeds.put(url, ie);
-                        url.getProperties().putAll(tagopts);
+                        url.setAll(tagopts);
                         this.anchors.add(url);
                     }
                 }
@@ -442,13 +442,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (name.equalsIgnoreCase("movie")) {
                 AnchorURL url = absolutePath(tagopts.getProperty("value", EMPTY_STRING));
                 tagopts.put("value", url.toNormalform(true));
-                url.getProperties().putAll(tagopts);
+                url.setAll(tagopts);
                 this.anchors.add(url);
             }
         } else if (tagname.equalsIgnoreCase("iframe")) {
             final AnchorURL src = absolutePath(tagopts.getProperty("src", EMPTY_STRING));
             tagopts.put("src", src.toNormalform(true));
-            src.getProperties().putAll(tagopts);
+            src.setAll(tagopts);
             this.anchors.add(src);
             this.iframes.add(src);
             this.evaluationScores.match(Element.iframepath, src.toNormalform(true));
@@ -475,9 +475,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     final ImageEntry ie = new ImageEntry(url, recursiveParse(url, text), -1, -1, -1);
                     this.images.add(ie);
                 } else {
-                    tagopts.put("text", recursiveParse(url, text));
+                    tagopts.put("text", new String(text));
                     tagopts.put("href", url.toNormalform(true)); // we must assign this because the url may have resolved backpaths and may not be absolute
-                    url.getProperties().putAll(tagopts);
+                    url.setAll(tagopts);
+                    recursiveParse(url, text);
                     this.anchors.add(url);
                 }
             }
@@ -541,7 +542,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.evaluationScores.match(Element.comment, LB.matcher(new String(comment)).replaceAll(" "));
     }
 
-    private String recursiveParse(final DigestURL linkurl, final char[] inlineHtml) {
+    private String recursiveParse(final AnchorURL linkurl, final char[] inlineHtml) {
         if (inlineHtml.length < 14) return cleanLine(CharacterCoding.html2unicode(stripAllTags(inlineHtml)));
 
         // start a new scraper to parse links inside this text

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.ymark.YMarkUtil;
@@ -35,7 +36,7 @@ public class AugmentParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(DigestURL url, String mimeType, String charset, InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(AnchorURL url, String mimeType, String charset, InputStream source) throws Parser.Failure, InterruptedException {
 
         Document[] htmlDocs = this.rdfaParser.parse(url, mimeType, charset, source);
 

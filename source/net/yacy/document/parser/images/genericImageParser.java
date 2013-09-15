@@ -46,7 +46,6 @@ import java.util.Set;
 import javax.imageio.ImageIO;
 
 import net.yacy.cora.document.id.AnchorURL;
-import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
@@ -95,7 +94,7 @@ public class genericImageParser extends AbstractParser implements Parser {
 
     @Override
     public Document[] parse(
-            final DigestURL location,
+            final AnchorURL location,
             final String mimeType,
             final String documentCharset,
             final InputStream sourceStream) throws Parser.Failure, InterruptedException {
@@ -199,7 +198,7 @@ public class genericImageParser extends AbstractParser implements Parser {
 
         final HashSet<String> languages = new HashSet<String>();
         final List<AnchorURL> anchors = new ArrayList<AnchorURL>();
-        final LinkedHashMap<DigestURL, ImageEntry> images  = new LinkedHashMap<DigestURL, ImageEntry>();
+        final LinkedHashMap<AnchorURL, ImageEntry> images  = new LinkedHashMap<AnchorURL, ImageEntry>();
         // add this image to the map of images
         final String infoString = ii.info.toString();
         images.put(ii.location, new ImageEntry(location, "", ii.width, ii.height, -1));
@@ -238,7 +237,7 @@ public class genericImageParser extends AbstractParser implements Parser {
     }
 
     public static ImageInfo parseJavaImage(
-                            final DigestURL location,
+                            final AnchorURL location,
                             final InputStream sourceStream) throws Parser.Failure {
         BufferedImage image = null;
         try {
@@ -253,7 +252,7 @@ public class genericImageParser extends AbstractParser implements Parser {
     }
 
     public static ImageInfo parseJavaImage(
-                            final DigestURL location,
+                            final AnchorURL location,
                             final BufferedImage image) {
         final ImageInfo ii = new ImageInfo(location);
         ii.image = image;
@@ -290,12 +289,12 @@ public class genericImageParser extends AbstractParser implements Parser {
     }
 
     public static class ImageInfo {
-        public DigestURL location;
+        public AnchorURL location;
         public BufferedImage image;
         public StringBuilder info;
         public int height;
         public int width;
-        public ImageInfo(final DigestURL location) {
+        public ImageInfo(final AnchorURL location) {
             this.location = location;
             this.image = null;
             this.info = new StringBuilder();
@@ -309,9 +308,9 @@ public class genericImageParser extends AbstractParser implements Parser {
     public static void main(final String[] args) {
         final File image = new File(args[0]);
         final genericImageParser parser = new genericImageParser();
-        DigestURL uri;
+        AnchorURL uri;
         try {
-            uri = new DigestURL("http://localhost/" + image.getName());
+            uri = new AnchorURL("http://localhost/" + image.getName());
             final Document[] document = parser.parse(uri, "image/" + MultiProtocolURL.getFileExtension(uri.getFileName()), "UTF-8", new FileInputStream(image));
             System.out.println(document[0].toString());
         } catch (final MalformedURLException e) {

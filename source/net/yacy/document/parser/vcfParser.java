@@ -41,7 +41,6 @@ import java.util.List;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
-import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -65,7 +64,7 @@ public class vcfParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURL url, final String mimeType, final String charset, final InputStream source)
+    public Document[] parse(final AnchorURL url, final String mimeType, final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
 
         try {
@@ -180,7 +179,7 @@ public class vcfParser extends AbstractParser implements Parser {
                     } else if (key.toUpperCase().startsWith("URL")) {
                         try {
                             final AnchorURL newURL = new AnchorURL(value);
-                            newURL.getProperties().put("name", newURL.toString());
+                            newURL.setNameProperty(newURL.toString());
                             anchors.add(newURL);
                             //parsedData.put(key,value);
                         } catch (final MalformedURLException ex) {/* ignore this */}

@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -53,7 +52,6 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
 
     // class variables
     private byte[] hash;
-    private Properties properties; // may contain additional url properties, such as given in html a href-links
 
     /**
      * Shortcut, calculate hash for shorted url/hostname
@@ -117,7 +115,6 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
     public DigestURL(final String url) throws MalformedURLException {
         super(url);
         this.hash = null;
-        this.properties = new Properties();
     }
 
     /**
@@ -129,7 +126,6 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
     public DigestURL(final String url, final byte[] hash) throws MalformedURLException {
         super(url);
         this.hash = hash;
-        this.properties = new Properties();
     }
     
     /**
@@ -140,19 +136,16 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
     public DigestURL(final MultiProtocolURL baseURL, final byte[] hash) {
         super(baseURL);
         this.hash = hash;
-        this.properties = new Properties();
     }
 
     public DigestURL(final MultiProtocolURL baseURL, final String relPath) throws MalformedURLException {
         super(baseURL, relPath);
         this.hash = null;
-        this.properties = new Properties();
     }
 
     public DigestURL(final String protocol, final String host, final int port, final String path) throws MalformedURLException {
         super(protocol, host, port, path);
         this.hash = null;
-        this.properties = new Properties();
     }
 
     public static DigestURL newURL(final DigestURL baseURL, String relPath) throws MalformedURLException {
@@ -173,10 +166,6 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
     }
     
     private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
-
-    public Properties getProperties() {
-        return this.properties;
-    }
     
     @Override
     public int hashCode() {

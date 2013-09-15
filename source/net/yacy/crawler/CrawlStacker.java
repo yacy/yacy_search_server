@@ -177,7 +177,7 @@ public final class CrawlStacker {
     }
 
     private void enqueueEntries(final byte[] initiator, final String profileHandle, final List<AnchorURL> hyperlinks, final boolean replace) {
-        for (final DigestURL url: hyperlinks) {
+        for (final AnchorURL url: hyperlinks) {
             if (url == null) continue;
 
             // delete old entry, if exists to force a re-load of the url (thats wanted here)
@@ -211,7 +211,7 @@ public final class CrawlStacker {
                         initiator,
                         url,
                         null,
-                        url.getProperties().getProperty("name", ""),
+                        url.getNameProperty(),
                         new Date(),
                         profileHandle,
                         0,
