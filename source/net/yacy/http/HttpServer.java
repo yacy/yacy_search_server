@@ -26,6 +26,10 @@ package net.yacy.http;
 
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.util.EnumSet;
+import javax.servlet.DispatcherType;
+import net.yacy.cora.federate.solr.SolrServlet;
+import net.yacy.cora.federate.solr.SolrServlet.Servlet404;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 
@@ -33,9 +37,13 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 
 /**
  * class to embedded jetty http server into YaCy
@@ -63,7 +71,7 @@ public class HttpServer {
         resource_handler.setDirectoriesListed(true);
         resource_handler.setWelcomeFiles(new String[]{"index.html"});
         resource_handler.setResourceBase("htroot/");
-
+ 
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[]
            {domainHandler, new ProxyCacheHandler(), new ProxyHandler(),
@@ -79,8 +87,19 @@ public class HttpServer {
         ContextHandler context = new ContextHandler();
         context.setContextPath("/");
         context.setHandler(securityHandler);
+      
+        //add SolrServlet
+        ServletContextHandler servletcontext = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        servletcontext.setContextPath("/solr/");
+        servletcontext.addServlet(new ServletHolder(Servlet404.class),"/*");  
 
-        server.setHandler(context);
+        SolrServlet.initCore(sb.index.fulltext().getDefaultEmbeddedConnector());
+        servletcontext.addFilter(new FilterHolder(SolrServlet.class), "/*", EnumSet.of(DispatcherType.REQUEST));
+        ContextHandlerCollection contexts = new ContextHandlerCollection();
+        
+        contexts.setHandlers(new Handler[] { context, servletcontext });
+        server.setHandler(contexts);
+      
     }
 
     /**
