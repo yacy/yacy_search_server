@@ -24,15 +24,14 @@
 
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.CrawlStacker;
-import net.yacy.crawler.data.ZURL;
-import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
+import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -73,27 +72,19 @@ public class IndexCreateParserErrors_p {
             }
             dark = true;
             DigestURL url;
-            byte[] initiatorHash, executorHash;
-            Seed initiatorSeed, executorSeed;
             int j=0;
-            ArrayList<ZURL.Entry> l = sb.crawlQueues.errorURL.list(showRejectedCount);
-            ZURL.Entry entry;
+            ArrayList<CollectionConfiguration.FailDoc> l = sb.crawlQueues.errorURL.list(showRejectedCount);
+            CollectionConfiguration.FailDoc entry;
             for (int i = l.size() - 1; i >= 0; i--) {
                 entry = l.get(i);
                 if (entry == null) continue;
-                url = entry.url();
+                url = entry.getDigestURL();
                 if (url == null) continue;
-
-                initiatorHash = entry.initiator();
-                executorHash = entry.executor();
-                initiatorSeed = (initiatorHash == null) ? null : sb.peers.getConnected(ASCII.String(initiatorHash));
-                executorSeed = (executorHash == null) ? null : sb.peers.getConnected(ASCII.String(executorHash));
-                prop.putHTML("rejected_list_"+j+"_time", GenericFormatter.SIMPLE_FORMATTER.format(entry.workdate()));
-                prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
-                prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
+                
+                prop.putHTML("rejected_list_"+j+"_time", GenericFormatter.SIMPLE_FORMATTER.format(new Date()));
                 prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false));
                 
-                String cause = entry.anycause();
+                String cause = entry.getFailReason();
                 if (cause.startsWith(CrawlStacker.ERROR_NO_MATCH_MUST_MATCH_FILTER)) {
                     prop.put("rejected_list_"+j+"_failreason", "(<a href=\"/RegexTest.html?text=" + url.toNormalform(false) +
                             "&regex=" + cause.substring(CrawlStacker.ERROR_NO_MATCH_MUST_MATCH_FILTER.length()) + "\">test</a>) " + cause);

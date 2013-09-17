@@ -37,6 +37,7 @@ import java.util.regex.PatternSyntaxException;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -44,8 +45,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.CrawlProfile;
-import net.yacy.crawler.data.ZURL.FailCategory;
-import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.SitemapImporter;
 import net.yacy.data.WorkTables;
 import net.yacy.document.Document;
@@ -392,7 +391,7 @@ public class Crawler_p {
                 for (DigestURL u: rootURLs) {
                     hosthashes.add(ASCII.getBytes(u.hosthash()));
                 }
-                sb.crawlQueues.errorURL.removeHosts(hosthashes, false);
+                sb.crawlQueues.errorURL.removeHosts(hosthashes);
                 for (byte[] hosthash: hosthashes) {
                     try {
                         String deletequery = CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]";
@@ -440,24 +439,7 @@ public class Crawler_p {
                         } else {
                             StringBuilder fr = new StringBuilder();
                             for (Map.Entry<DigestURL, String> failure: failurls.entrySet()) {
-                                sb.crawlQueues.errorURL.push(
-                                    new Request(
-                                            sb.peers.mySeed().hash.getBytes(),
-                                            failure.getKey(),
-                                            null,
-                                            "",
-                                            new Date(),
-                                            profile.handle(),
-                                            0,
-                                            0,
-                                            0,
-                                            0),
-                                    null,
-                                    sb.peers.mySeed().hash.getBytes(),
-                                    new Date(),
-                                    1,
-                                    FailCategory.FINAL_LOAD_CONTEXT,
-                                    failure.getValue(), -1);
+                                sb.crawlQueues.errorURL.push(failure.getKey(), null, FailCategory.FINAL_LOAD_CONTEXT, failure.getValue(), -1);
                                 fr.append(failure.getValue()).append('/');
                             }
     

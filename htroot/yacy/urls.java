@@ -25,14 +25,11 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.IOException;
-import java.util.Date;
-
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.NoticedURL;
-import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.peers.Protocol;
@@ -80,15 +77,7 @@ public class urls {
                 referrer = sb.getURL(entry.referrerhash());
 
                 // place url to notice-url db
-                sb.crawlQueues.delegatedURL.push(
-                                entry,
-                                null,
-                                sb.peers.mySeed().hash.getBytes(),
-                                new Date(),
-                                0,
-                                FailCategory.FINAL_PROCESS_CONTEXT,
-                                "client=____________",
-                                -1);
+                sb.crawlQueues.delegatedURL.put(ASCII.String(entry.url().hash()), entry.url());
 
                 // create RSS entry
                 prop.put("item_" + c + "_title", "");

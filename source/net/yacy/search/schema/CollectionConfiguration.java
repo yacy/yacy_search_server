@@ -80,6 +80,7 @@ import net.yacy.kelondro.util.Bitfield;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
+import net.yacy.search.query.QueryParams;
 import net.yacy.search.schema.WebgraphConfiguration.Subgraph;
 
 import org.apache.solr.common.SolrDocument;
@@ -1195,34 +1196,73 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         return il;
     }
     */
-    
-    /**
-     * register an entry as error document
-     * @param digestURI
-     * @param failReason
-     * @param httpstatus
-     * @throws IOException
-     */
-    public SolrInputDocument err(final DigestURL digestURI, final Map<String, Pattern> collections, final String failReason, final FailType failType, final int httpstatus) throws IOException {
-        boolean allAttr = this.isEmpty();
-        assert allAttr || contains(CollectionSchema.failreason_s);
-        
-        final SolrInputDocument doc = new SolrInputDocument();
-        String url = addURIAttributes(doc, allAttr, digestURI, Response.docType(digestURI));
-        if (allAttr || contains(CollectionSchema.load_date_dt)) add(doc, CollectionSchema.load_date_dt, new Date());
-        
-        // fail reason and status
-        if (allAttr || contains(CollectionSchema.failreason_s)) add(doc, CollectionSchema.failreason_s, failReason);
-        if (allAttr || contains(CollectionSchema.failtype_s)) add(doc, CollectionSchema.failtype_s, failType.name());
-        if (allAttr || contains(CollectionSchema.httpstatus_i)) add(doc, CollectionSchema.httpstatus_i, httpstatus);
-        if (allAttr || contains(CollectionSchema.collection_sxt) && collections != null && collections.size() > 0) {
-            List<String> cs = new ArrayList<String>();
-            for (Map.Entry<String, Pattern> e: collections.entrySet()) {
-                if (e.getValue().matcher(url).matches()) cs.add(e.getKey());
-            }
-            add(doc, CollectionSchema.collection_sxt, cs);
-        }
-        return doc;
-    }
 
+    public static class FailDoc {
+        DigestURL digestURL;
+        final Map<String, Pattern> collections;
+        final String failReason;
+        final FailType failType;
+        final int httpstatus;
+        final Date failtime;
+        public FailDoc(final DigestURL digestURL, final Map<String, Pattern> collections, final String failReason, final FailType failType, final int httpstatus) {
+            this.digestURL = digestURL;
+            this.collections = collections;
+            this.failReason = failReason;
+            this.failType = failType;
+            this.httpstatus = httpstatus;
+            this.failtime = new Date();
+        }
+        public FailDoc(final SolrDocument doc) {
+            try {
+                this.digestURL = new DigestURL((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
+            } catch (MalformedURLException e) {
+                this.digestURL = null;
+            }
+            this.collections = new HashMap<String, Pattern>();
+            Collection<Object> c = doc.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName());
+            for (Object cn: c) this.collections.put((String) cn, QueryParams.catchall_pattern);
+            this.failReason = (String) doc.getFieldValue(CollectionSchema.failreason_s.getSolrFieldName());
+            this.failType = FailType.valueOf((String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName()));
+            this.httpstatus = (Integer) doc.getFieldValue(CollectionSchema.httpstatus_i.getSolrFieldName());
+            this.failtime = (Date) doc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
+        }
+        public DigestURL getDigestURL() {
+            return digestURL;
+        }
+        public Map<String, Pattern> getCollections() {
+            return collections;
+        }
+        public String getFailReason() {
+            return failReason;
+        }
+        public FailType getFailType() {
+            return failType;
+        }
+        public int getHttpstatus() {
+            return httpstatus;
+        }
+        public SolrInputDocument toSolr(CollectionConfiguration configuration) {
+            boolean allAttr = configuration.isEmpty();
+            assert allAttr || configuration.contains(CollectionSchema.failreason_s);
+            
+            final SolrInputDocument doc = new SolrInputDocument();
+            String url = configuration.addURIAttributes(doc, allAttr, this.getDigestURL(), Response.docType(this.getDigestURL()));
+            if (allAttr || configuration.contains(CollectionSchema.load_date_dt)) configuration.add(doc, CollectionSchema.load_date_dt, new Date());
+            
+            // fail reason and status
+            if (allAttr || configuration.contains(CollectionSchema.failreason_s)) configuration.add(doc, CollectionSchema.failreason_s, this.getFailReason());
+            if (allAttr || configuration.contains(CollectionSchema.failtype_s)) configuration.add(doc, CollectionSchema.failtype_s, this.getFailType().name());
+            if (allAttr || configuration.contains(CollectionSchema.httpstatus_i)) configuration.add(doc, CollectionSchema.httpstatus_i, this.getHttpstatus());
+            if (allAttr || configuration.contains(CollectionSchema.collection_sxt) && this.getCollections() != null && this.getCollections().size() > 0) {
+                List<String> cs = new ArrayList<String>();
+                for (Map.Entry<String, Pattern> e: this.getCollections().entrySet()) {
+                    if (e.getValue().matcher(url).matches()) cs.add(e.getKey());
+                }
+                configuration.add(doc, CollectionSchema.collection_sxt, cs);
+            }
+            return doc;
+        }
+        
+    }
+    
 }

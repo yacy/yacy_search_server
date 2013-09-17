@@ -30,11 +30,11 @@
 import java.io.IOException;
 
 import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
-import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
@@ -161,14 +161,7 @@ public final class crawlReceipt {
         }
 
         sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work is transformed into an error case
-        sb.crawlQueues.errorURL.push(
-                entry.toBalancerEntry(iam),
-                null,
-                youare.getBytes(),
-                null,
-                0,
-                FailCategory.FINAL_LOAD_CONTEXT,
-                result + ":" + reason, -1);
+        sb.crawlQueues.errorURL.push(entry.url(), null, FailCategory.FINAL_LOAD_CONTEXT, result + ":" + reason, -1);
         //switchboard.noticeURL.remove(receivedUrlhash);
         prop.put("delay", "3600");
         return prop;

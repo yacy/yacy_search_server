@@ -36,6 +36,7 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -43,7 +44,6 @@ import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.Latency;
-import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.document.TextParser;
 import net.yacy.search.Switchboard;
 
@@ -156,7 +156,7 @@ public class FTPLoader {
         if (berr.size() > 0 || response == null) {
             // some error logging
             final String detail = (berr.size() > 0) ? "Errorlog: " + berr.toString() : "";
-            this.sb.crawlQueues.errorURL.push(request, profile, ASCII.getBytes(this.sb.peers.mySeed().hash), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, " ftp server download, " + detail, -1);
+            this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, " ftp server download, " + detail, -1);
             throw new IOException("FTPLoader: Unable to download URL '" + request.url().toString() + "': " + detail);
         }
 

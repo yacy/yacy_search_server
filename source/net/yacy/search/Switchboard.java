@@ -97,6 +97,7 @@ import net.yacy.cora.document.feed.RSSReader;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
@@ -127,7 +128,6 @@ import net.yacy.crawler.data.ResultImages;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
-import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.crawler.robots.RobotsTxt;
@@ -1789,16 +1789,9 @@ public final class Switchboard extends serverSwitch {
         // in the noIndexReason is set, indexing is not allowed
         if ( noIndexReason != null ) {
             // log cause and close queue
-            final DigestURL referrerURL = response.referrerURL();
             //if (log.isFine()) log.logFine("deQueue: not indexed any word in URL " + response.url() + "; cause: " + noIndexReason);
-            addURLtoErrorDB(
-                response.url(),
-                response.profile(),
-                (referrerURL == null) ? null : referrerURL.hash(),
-                response.initiator(),
-                response.name(),
-                FailCategory.FINAL_PROCESS_CONTEXT,
-                noIndexReason);
+            // create a new errorURL DB entry
+            this.crawlQueues.errorURL.push(response.url(), response.profile(), FailCategory.FINAL_PROCESS_CONTEXT, noIndexReason, -1);
             // finish this entry
             return "not allowed: " + noIndexReason;
         }
@@ -1991,7 +1984,7 @@ public final class Switchboard extends serverSwitch {
     
     public int cleanupJobSize() {
         int c = 1; // "es gibt immer was zu tun"
-        if ( (this.crawlQueues.delegatedURL.stackSize() > 1000) ) {
+        if ( (this.crawlQueues.delegatedURL.size() > 1000) ) {
             c++;
         }
         if ( (this.crawlQueues.errorURL.stackSize() > 1000) ) {
@@ -2101,13 +2094,13 @@ public final class Switchboard extends serverSwitch {
 
             // clean up delegated stack
             checkInterruption();
-            if ( (this.crawlQueues.delegatedURL.stackSize() > 1000) ) {
+            if ( (this.crawlQueues.delegatedURL.size() > 1000) ) {
                 if ( this.log.isFine() ) {
                     this.log.fine("Cleaning Delegated-URLs report stack, "
-                        + this.crawlQueues.delegatedURL.stackSize()
+                        + this.crawlQueues.delegatedURL.size()
                         + " entries on stack");
                 }
-                this.crawlQueues.delegatedURL.clearStack();
+                this.crawlQueues.delegatedURL.clear();
             }
 
             // clean up error stack
@@ -2428,7 +2421,6 @@ public final class Switchboard extends serverSwitch {
 
     public IndexingQueueEntry parseDocument(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_PARSING);
-
         Document[] documents = null;
         try {
             documents = parseDocument(in.queueEntry);
@@ -2439,7 +2431,7 @@ public final class Switchboard extends serverSwitch {
         }
         if ( documents == null ) {
             return null;
-        }
+        }        
         return new IndexingQueueEntry(in.queueEntry, documents, null);
     }
 
@@ -2465,14 +2457,8 @@ public final class Switchboard extends serverSwitch {
             response.setContent(Cache.getContent(response.url().hash()));
             if ( response.getContent() == null ) {
                 this.log.warn("the resource '" + response.url() + "' is missing in the cache.");
-                addURLtoErrorDB(
-                    response.url(),
-                    response.profile(),
-                    response.referrerHash(),
-                    response.initiator(),
-                    response.name(),
-                    FailCategory.FINAL_LOAD_CONTEXT,
-                    "missing in cache");
+                // create a new errorURL DB entry
+                this.crawlQueues.errorURL.push(response.url(), response.profile(), FailCategory.FINAL_LOAD_CONTEXT, "missing in cache", -1);
                 return null;
             }
         }
@@ -2490,20 +2476,37 @@ public final class Switchboard extends serverSwitch {
             }
         } catch (final Parser.Failure e ) {
             this.log.warn("Unable to parse the resource '" + response.url() + "'. " + e.getMessage());
-            addURLtoErrorDB(
-                response.url(),
-                response.profile(),
-                response.referrerHash(),
-                response.initiator(),
-                response.name(),
-                FailCategory.FINAL_PROCESS_CONTEXT,
-                e.getMessage());
+            // create a new errorURL DB entry
+            this.crawlQueues.errorURL.push(response.url(), response.profile(), FailCategory.FINAL_PROCESS_CONTEXT, e.getMessage(), -1);
             return null;
         }
-
         final long parsingEndTime = System.currentTimeMillis();
+        
+        
         // put anchors on crawl stack
         final long stackStartTime = System.currentTimeMillis();
+        // check if the documents have valid urls; this is not a bug patch; it is possible that
+        // i.e. the result of a feed parsing results in documents from domains which shall be filtered by the crawl profile
+        if (response.profile() != null) {
+            ArrayList<Document> newDocs = new ArrayList<Document>();
+            for (Document doc: documents) {
+                String rejectReason = this.crawlStacker.checkAcceptance(doc.dc_source(), response.profile(), 1 /*depth is irrelevant here, we just make clear its not the start url*/);
+                if (rejectReason == null) {
+                    newDocs.add(doc);
+                } else {
+                    // we consider this as fail urls to have a tracking of the problem
+                    if (rejectReason != null && !rejectReason.startsWith("double in")) {
+                        final CrawlProfile profile = this.crawler.getActive(UTF8.getBytes(response.profile().handle()));
+                        this.crawlStacker.nextQueue.errorURL.push(response.url(), profile, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
+                    }
+                }
+            }
+            if (newDocs.size() != documents.length) {
+                documents = (Document[]) newDocs.toArray();
+            }
+        }
+        
+        // collect anchors within remaining documents
         if ((processCase == EventOrigin.PROXY_LOAD || processCase == EventOrigin.LOCAL_CRAWLING) &&
             (
                 response.profile() == null ||
@@ -2592,14 +2595,8 @@ public final class Switchboard extends serverSwitch {
         if (!(profile.indexUrlMustMatchPattern() == CrawlProfile.MATCH_ALL_PATTERN || profile.indexUrlMustMatchPattern().matcher(urls).matches()) ||
              (profile.indexUrlMustNotMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && profile.indexUrlMustNotMatchPattern().matcher(urls).matches())) {
             if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + profile.indexUrlMustMatchPattern().pattern() + ", indexUrlMustNotMatchPattern = " + profile.indexUrlMustNotMatchPattern().pattern());
-            addURLtoErrorDB(
-                    in.queueEntry.url(),
-                    profile,
-                    in.queueEntry.referrerHash(),
-                    in.queueEntry.initiator(),
-                    in.queueEntry.name(),
-                    FailCategory.FINAL_PROCESS_CONTEXT,
-                    "indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + profile.indexUrlMustMatchPattern().pattern() + ", indexUrlMustNotMatchPattern = " + profile.indexUrlMustNotMatchPattern().pattern());
+            // create a new errorURL DB entry
+            this.crawlQueues.errorURL.push(in.queueEntry.url(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + profile.indexUrlMustMatchPattern().pattern() + ", indexUrlMustNotMatchPattern = " + profile.indexUrlMustNotMatchPattern().pattern(), -1);
             return new IndexingQueueEntry(in.queueEntry, in.documents, null);
         }
         
@@ -2608,27 +2605,15 @@ public final class Switchboard extends serverSwitch {
         docloop: for (final Document document : in.documents) {
             if (document.indexingDenied() && profile.obeyHtmlRobotsNoindex()) {
                 if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': denied by document-attached noindexing rule");
-                addURLtoErrorDB(
-                    in.queueEntry.url(),
-                    profile,
-                    in.queueEntry.referrerHash(),
-                    in.queueEntry.initiator(),
-                    in.queueEntry.name(),
-                    FailCategory.FINAL_PROCESS_CONTEXT,
-                    "denied by document-attached noindexing rule");
+                // create a new errorURL DB entry
+                this.crawlQueues.errorURL.push(in.queueEntry.url(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "denied by document-attached noindexing rule", -1);
                 continue docloop;
             }
             if (!(profile.indexContentMustMatchPattern() == CrawlProfile.MATCH_ALL_PATTERN || profile.indexContentMustMatchPattern().matcher(document.getTextString()).matches()) ||
                  (profile.indexContentMustNotMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && profile.indexContentMustNotMatchPattern().matcher(document.getTextString()).matches())) {
                 if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': indexing prevented by regular expression on content; indexContentMustMatchPattern = " + profile.indexContentMustMatchPattern().pattern() + ", indexContentMustNotMatchPattern = " + profile.indexContentMustNotMatchPattern().pattern());
-                addURLtoErrorDB(
-                    in.queueEntry.url(),
-                    profile,
-                    in.queueEntry.referrerHash(),
-                    in.queueEntry.initiator(),
-                    in.queueEntry.name(),
-                    FailCategory.FINAL_PROCESS_CONTEXT,
-                    "indexing prevented by regular expression on content; indexContentMustMatchPattern = " + profile.indexContentMustMatchPattern().pattern() + ", indexContentMustNotMatchPattern = " + profile.indexContentMustNotMatchPattern().pattern());
+                // create a new errorURL DB entry
+                this.crawlQueues.errorURL.push(in.queueEntry.url(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "indexing prevented by regular expression on content; indexContentMustMatchPattern = " + profile.indexContentMustMatchPattern().pattern() + ", indexContentMustNotMatchPattern = " + profile.indexContentMustNotMatchPattern().pattern(), -1);
                 continue docloop;
             }
             doclist.add(document);
@@ -2705,30 +2690,18 @@ public final class Switchboard extends serverSwitch {
 
         if (condenser == null || (document.indexingDenied() && profile.obeyHtmlRobotsNoindex())) {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by rule in document, process case=" + processCase);
-            addURLtoErrorDB(
-                url,
-                profile,
-                (referrerURL == null) ? null : referrerURL.hash(),
-                queueEntry.initiator(),
-                dc_title,
-                FailCategory.FINAL_PROCESS_CONTEXT,
-                "denied by rule in document, process case=" + processCase);
+            // create a new errorURL DB entry
+            this.crawlQueues.errorURL.push(url, profile, FailCategory.FINAL_PROCESS_CONTEXT, "denied by rule in document, process case=" + processCase, -1);
             return;
         }
 
         if ( profile != null && !profile.indexText() && !profile.indexMedia() ) {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
-            addURLtoErrorDB(
-                url,
-                profile,
-                (referrerURL == null) ? null : referrerURL.hash(),
-                queueEntry.initiator(),
-                dc_title,
-                FailCategory.FINAL_LOAD_CONTEXT,
-                "denied by profile rule, process case="
-                    + processCase
-                    + ", profile name = "
-                    + profile.collectionName());
+            // create a new errorURL DB entry
+            this.crawlQueues.errorURL.push(url, profile, FailCategory.FINAL_LOAD_CONTEXT, "denied by profile rule, process case="
+                                + processCase
+                                + ", profile name = "
+                                + profile.collectionName(), -1);
             return;
         }
 
@@ -2906,7 +2879,7 @@ public final class Switchboard extends serverSwitch {
         // remove the document from the error-db
         byte[] hosthash = new byte[6]; System.arraycopy(urlhash, 6, hosthash, 0, 6);
         List<byte[]> hosthashes = new ArrayList<byte[]>(); hosthashes.add(hosthash);
-        this.crawlQueues.errorURL.removeHosts(hosthashes, false);
+        this.crawlQueues.errorURL.removeHosts(hosthashes);
         this.crawlQueues.removeURL(urlhash);
 
         // get a scraper to get the title
@@ -3371,31 +3344,6 @@ public final class Switchboard extends serverSwitch {
             this.log.info("dhtTransferJob: result from dequeueing: " + ((dequeued) ? "true" : "false"));
         }
         return hasDoneSomething;
-    }
-
-    private void addURLtoErrorDB(
-        final DigestURL url,
-        final CrawlProfile profile,
-        final byte[] referrerHash,
-        final byte[] initiator,
-        final String name,
-        final FailCategory failCategory,
-        final String failreason) {
-        // assert initiator != null; // null == proxy
-        // create a new errorURL DB entry
-        final Request bentry =
-            new Request(
-                initiator,
-                url,
-                referrerHash,
-                (name == null) ? "" : name,
-                new Date(),
-                null,
-                0,
-                0,
-                0,
-                0);
-        this.crawlQueues.errorURL.push(bentry, profile, initiator, new Date(), 0, failCategory, failreason, -1);
     }
 
     public final void heuristicSite(final SearchEvent searchEvent, final String host) {

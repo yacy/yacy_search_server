@@ -663,7 +663,7 @@ public class yacysearch {
                     authenticated,
                     indexSegment,
                     ranking,
-                    header.get(RequestHeader.USER_AGENT, ""),
+                    header.get(HeaderFramework.USER_AGENT, ""),
                     sb.getConfigBool(SwitchboardConstants.SEARCH_VERIFY_DELETE, false)
                         && sb.getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false)
                         && sb.peers.mySeed().getFlagAcceptRemoteIndex(),

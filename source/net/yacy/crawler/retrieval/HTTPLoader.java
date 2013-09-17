@@ -25,10 +25,9 @@
 package net.yacy.crawler.retrieval;
 
 import java.io.IOException;
-import java.util.Date;
 
-import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -37,7 +36,6 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.Latency;
-import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.kelondro.io.ByteCount;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
@@ -79,10 +77,8 @@ public final class HTTPLoader {
 
     private Response load(final Request request, CrawlProfile profile, final int retryCount, final int maxFileSize, final BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
 
-        byte[] myHash = ASCII.getBytes(this.sb.peers.mySeed().hash);
-
         if (retryCount < 0) {
-            this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "retry counter exceeded", -1);
+            this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "retry counter exceeded", -1);
             throw new IOException("retry counter exceeded for URL " + request.url().toString() + ". Processing aborted.");
         }
 
@@ -98,7 +94,7 @@ public final class HTTPLoader {
         // check if url is in blacklist
         final String hostlow = host.toLowerCase();
         if (blacklistType != null && Switchboard.urlBlacklist.isListed(blacklistType, hostlow, path)) {
-            this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
+            this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("CRAWLER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
         }
 
@@ -145,7 +141,7 @@ public final class HTTPLoader {
             redirectionUrlString = redirectionUrlString == null ? "" : redirectionUrlString.trim();
 
             if (redirectionUrlString.isEmpty()) {
-                this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "no redirection url provided, field '" + HeaderFramework.LOCATION + "' is empty", statusCode);
+                this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "no redirection url provided, field '" + HeaderFramework.LOCATION + "' is empty", statusCode);
                 throw new IOException("REJECTED EMTPY REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL " + requestURLString);
             }
 
@@ -159,13 +155,13 @@ public final class HTTPLoader {
             this.sb.webStructure.generateCitationReference(url, redirectionUrl);
             
             if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_RECORD_REDIRECTS, true)) {
-                this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.FINAL_REDIRECT_RULE, "redirect to " + redirectionUrlString, statusCode);
+                this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.FINAL_REDIRECT_RULE, "redirect to " + redirectionUrlString, statusCode);
             }
 
     	    if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {
                 // if we are already doing a shutdown we don't need to retry crawling
                 if (Thread.currentThread().isInterrupted()) {
-                    this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "server shutdown", statusCode);
+                    this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.FINAL_LOAD_CONTEXT, "server shutdown", statusCode);
                     throw new IOException("CRAWLER Retry of URL=" + requestURLString + " aborted because of server shutdown.");
                 }
 
@@ -174,11 +170,11 @@ public final class HTTPLoader {
                 return load(request, profile, retryCount - 1, maxFileSize, blacklistType, agent);
     	    }
             // we don't want to follow redirects
-            this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
+            this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
             throw new IOException("REJECTED UNWANTED REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL " + requestURLString);
         } else if (responseBody == null) {
     	    // no response, reject file
-            this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "no response body", statusCode);
+            this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "no response body", statusCode);
             throw new IOException("REJECTED EMPTY RESPONSE BODY '" + client.getHttpResponse().getStatusLine() + "' for URL " + requestURLString);
     	} else if (statusCode == 200 || statusCode == 203) {
             // the transfer is ok
@@ -189,7 +185,7 @@ public final class HTTPLoader {
 
             // check length again in case it was not possible to get the length before loading
             if (maxFileSize >= 0 && contentLength > maxFileSize) {
-            	this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.FINAL_PROCESS_CONTEXT, "file size limit exceeded", statusCode);
+            	this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "file size limit exceeded", statusCode);
             	throw new IOException("REJECTED URL " + request.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)");
             }
 
@@ -206,7 +202,7 @@ public final class HTTPLoader {
             return response;
     	} else {
             // if the response has not the right response type then reject file
-        	this.sb.crawlQueues.errorURL.push(request, profile, myHash, new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "wrong http status code", statusCode);
+        	this.sb.crawlQueues.errorURL.push(request.url(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "wrong http status code", statusCode);
             throw new IOException("REJECTED WRONG STATUS TYPE '" + client.getHttpResponse().getStatusLine() + "' for URL " + requestURLString);
         }
     }
