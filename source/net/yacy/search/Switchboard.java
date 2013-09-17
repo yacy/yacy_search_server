@@ -2878,9 +2878,8 @@ public final class Switchboard extends serverSwitch {
         
         // remove the document from the error-db
         byte[] hosthash = new byte[6]; System.arraycopy(urlhash, 6, hosthash, 0, 6);
-        List<byte[]> hosthashes = new ArrayList<byte[]>(); hosthashes.add(hosthash);
-        this.crawlQueues.errorURL.removeHosts(hosthashes);
-        this.crawlQueues.removeURL(urlhash);
+        this.crawlQueues.errorURL.removeHost(hosthash);
+        this.index.fulltext().remove(urlhash);
 
         // get a scraper to get the title
         Document scraper;

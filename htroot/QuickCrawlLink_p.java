@@ -32,7 +32,6 @@
 import java.net.MalformedURLException;
 import java.util.Date;
 
-import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -128,7 +127,6 @@ public class QuickCrawlLink_p {
             final byte[] urlhash = crawlingStartURL.hash();
             indexSegment.fulltext().remove(urlhash);
             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
-            sb.crawlQueues.errorURL.remove(ASCII.String(urlhash));
 
             // create crawling profile
             CrawlProfile pe = null;

@@ -79,28 +79,14 @@ public class ErrorCache {
         this.fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
     }
 
-    public void remove(final String hash) {
-        if (hash == null) return;
-        this.stack.remove(hash);
+    public void removeHost(final byte[] hosthash) {
+        if (hosthash == null) return;
         try {
-            this.fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.id.getSolrFieldName() + ":\"" + hash + "\" AND " + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
-        } catch (final IOException e) {
-            return;
-        }
-    }
-
-    public void removeHosts(final Iterable<byte[]> hosthashes) {
-        if (hosthashes == null) return;
-        try {
-            for (byte[] hosthash : hosthashes) {
-                this.fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
-            }
+            this.fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
             Iterator<String> i = ErrorCache.this.stack.keySet().iterator();
             while (i.hasNext()) {
                 String b = i.next();
-                for (byte[] hosthash : hosthashes) {
-                    if (NaturalOrder.naturalOrder.equal(hosthash, 0, ASCII.getBytes(b), 6, 6)) i.remove();
-                }
+                if (NaturalOrder.naturalOrder.equal(hosthash, 0, ASCII.getBytes(b), 6, 6)) i.remove();
             }
         } catch (final IOException e) {
         }

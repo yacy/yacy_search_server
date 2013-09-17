@@ -27,7 +27,6 @@ package net.yacy.crawler;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -185,9 +184,7 @@ public final class CrawlStacker {
             if (replace) {
                 this.indexSegment.fulltext().remove(urlhash);
                 byte[] hosthash = new byte[6]; System.arraycopy(urlhash, 6, hosthash, 0, 6);
-                List<byte[]> hosthashes = new ArrayList<byte[]>(); hosthashes.add(hosthash);
-                this.nextQueue.errorURL.removeHosts(hosthashes);
-                this.nextQueue.removeURL(urlhash);
+                this.nextQueue.errorURL.removeHost(hosthash);
                 String u = url.toNormalform(true);
                 if (u.endsWith("/")) {
                     u = u + "index.html";
@@ -198,7 +195,6 @@ public final class CrawlStacker {
                     final byte[] uh = new DigestURL(u).hash();
                     this.indexSegment.fulltext().remove(uh);
                     this.nextQueue.noticeURL.removeByURLHash(uh);
-                    this.nextQueue.errorURL.remove(ASCII.String(uh));
                 } catch (final MalformedURLException e1) {}
             }
 
@@ -246,7 +242,6 @@ public final class CrawlStacker {
                         if (replace) {
                             CrawlStacker.this.indexSegment.fulltext().remove(urlhash);
                             cq.noticeURL.removeByURLHash(urlhash);
-                            cq.errorURL.remove(ASCII.String(urlhash));
                         }
 
                         // put entry on crawl stack

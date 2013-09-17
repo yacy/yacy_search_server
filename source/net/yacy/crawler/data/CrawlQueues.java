@@ -119,11 +119,6 @@ public class CrawlQueues {
         this.workers.clear();
         this.remoteCrawlProviderHashes.clear();
         this.noticeURL.clear();
-        try {
-            this.errorURL.clear();
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-        }
         this.delegatedURL.clear();
     }
 
@@ -154,7 +149,6 @@ public class CrawlQueues {
         assert hash != null && hash.length == 12;
         this.noticeURL.removeByURLHash(hash);
         this.delegatedURL.remove(hash);
-        this.errorURL.remove(ASCII.String(hash));
     }
 
     public DigestURL getURL(final byte[] urlhash) {

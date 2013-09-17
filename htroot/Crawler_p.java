@@ -24,7 +24,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,7 +55,6 @@ import net.yacy.peers.NewsPool;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -387,16 +385,9 @@ public class Crawler_p {
                 try {sb.crawlQueues.noticeURL.removeByProfileHandle(profile.handle(), 10000);} catch (final SpaceExceededException e1) {}
                 
                 // delete all error urls for that domain
-                List<byte[]> hosthashes = new ArrayList<byte[]>();
                 for (DigestURL u: rootURLs) {
-                    hosthashes.add(ASCII.getBytes(u.hosthash()));
-                }
-                sb.crawlQueues.errorURL.removeHosts(hosthashes);
-                for (byte[] hosthash: hosthashes) {
-                    try {
-                        String deletequery = CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]";
-                        sb.index.fulltext().getDefaultConnector().deleteByQuery(deletequery);
-                    } catch (final IOException e) {ConcurrentLog.logException(e);}
+                    sb.index.fulltext().remove(u.hash());
+                    sb.crawlQueues.errorURL.removeHost(ASCII.getBytes(u.hosthash()));
                 }
                 sb.index.fulltext().commit(true);
                 
