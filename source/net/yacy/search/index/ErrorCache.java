@@ -23,7 +23,7 @@ package net.yacy.search.index;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
@@ -48,12 +48,12 @@ public class ErrorCache {
     private static final int maxStackSize = 1000;
 
     // the class object
-    private final LinkedHashMap<String, CollectionConfiguration.FailDoc> stack;
+    private final ConcurrentHashMap<String, CollectionConfiguration.FailDoc> stack;
     private final Fulltext fulltext;
 
     public ErrorCache(final Fulltext fulltext) {
         this.fulltext = fulltext;
-        this.stack = new LinkedHashMap<String, CollectionConfiguration.FailDoc>();
+        this.stack = new ConcurrentHashMap<String, CollectionConfiguration.FailDoc>();
         try {
             // fill stack with latest values
             final SolrQuery params = new SolrQuery();
