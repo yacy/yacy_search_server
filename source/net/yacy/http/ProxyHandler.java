@@ -93,7 +93,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 		proxyHeaders.remove(RequestHeader.KEEP_ALIVE);
 		proxyHeaders.remove(RequestHeader.CONTENT_LENGTH);
 
-		final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
+		final HTTPClient client = new HTTPClient(ClientIdentification.yacyProxyAgent);
 		int timeout = 60000;
 		client.setTimout(timeout);
 		client.setHeader(proxyHeaders.entrySet());
@@ -101,7 +101,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 		// send request
 		try {
 			String queryString = request.getQueryString()!=null ? "?" + request.getQueryString() : "";
-			String url = request.getRequestURL().toString() + queryString;
+                        String url = request.getRequestURL().toString() + queryString;
 			if (request.getMethod().equals("GET")) {
 				client.GET(url);
 			} else if (request.getMethod().equals("POST")) {

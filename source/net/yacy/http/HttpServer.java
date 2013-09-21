@@ -36,7 +36,6 @@ import net.yacy.search.Switchboard;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -57,13 +56,14 @@ public class HttpServer {
      */
     public HttpServer(int port) {
         Switchboard sb = Switchboard.getSwitchboard();
+        
         server = new Server();
         ServerConnector connector = new ServerConnector(server);
         connector.setPort(port);
         connector.setName("httpd:"+Integer.toString(port));
         //connector.setThreadPool(new QueuedThreadPool(20));
         server.addConnector(connector);
-       
+      
         YacyDomainHandler domainHandler = new YacyDomainHandler();
         domainHandler.setAlternativeResolver(sb.peers);
 
@@ -71,11 +71,28 @@ public class HttpServer {
         resource_handler.setDirectoriesListed(true);
         resource_handler.setWelcomeFiles(new String[]{"index.html"});
         resource_handler.setResourceBase("htroot/");
- 
+
+        //add SolrServlet
+        ServletContextHandler solrContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        solrContext.setContextPath("/solr/");       
+        solrContext.addServlet(new ServletHolder(Servlet404.class),"/*");  
+     
+        SolrServlet.initCore(sb.index.fulltext().getDefaultEmbeddedConnector());
+        solrContext.addFilter(new FilterHolder(SolrServlet.class), "/*", EnumSet.of(DispatcherType.REQUEST));
+
+        ServletContextHandler htrootContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        htrootContext.setContextPath("/");  
+        ServletHolder sholder = new ServletHolder(YaCyDefaultServlet.class);
+        sholder.setInitParameter("resourceBase", "htroot");
+        htrootContext.addServlet(sholder,"/*");    
+        
+        ContextHandlerCollection servletContext = new ContextHandlerCollection();                
+        servletContext.setHandlers(new Handler[] { solrContext, htrootContext });        
+
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[]
            {domainHandler, new ProxyCacheHandler(), new ProxyHandler(),
-            new RewriteHandler(), new SSIHandler(new TemplateHandler()),
+            new RewriteHandler(),  servletContext,
             resource_handler, new DefaultHandler()});
 
         YaCySecurityHandler securityHandler = new YaCySecurityHandler();
@@ -83,23 +100,8 @@ public class HttpServer {
         securityHandler.setRealmName("YaCy Admin Interface");
         securityHandler.setHandler(new CrashProtectionHandler(handlers));
 
-        // context handler for dispatcher and security
-        ContextHandler context = new ContextHandler();
-        context.setContextPath("/");
-        context.setHandler(securityHandler);
-      
-        //add SolrServlet
-        ServletContextHandler servletcontext = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        servletcontext.setContextPath("/solr/");
-        servletcontext.addServlet(new ServletHolder(Servlet404.class),"/*");  
-
-        SolrServlet.initCore(sb.index.fulltext().getDefaultEmbeddedConnector());
-        servletcontext.addFilter(new FilterHolder(SolrServlet.class), "/*", EnumSet.of(DispatcherType.REQUEST));
-        ContextHandlerCollection contexts = new ContextHandlerCollection();
-        
-        contexts.setHandlers(new Handler[] { context, servletcontext });
-        server.setHandler(contexts);
-      
+        securityHandler.setHandler(new CrashProtectionHandler(servletContext));
+        server.setHandler(securityHandler);
     }
 
     /**
