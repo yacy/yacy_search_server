@@ -785,8 +785,17 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         
         String content = document.getTextString();
+        String tokens = digestURI.toTokens();
         if (content == null || content.length() == 0) {
-            content = digestURI.toTokens();
+            content = tokens;
+        } else {
+            String[] t = tokens.split(" ");
+            for (String r: t) {
+                if (r.length() > 0 &&
+                    content.indexOf(" " + r + " ") < 0 &&
+                    !content.startsWith(r + " ") &&
+                    !content.endsWith(" " + r)) content += " " + r;
+            }
         }
         
         if ((allAttr || contains(CollectionSchema.images_text_t)) && MultiProtocolURL.isImage(MultiProtocolURL.getFileExtension(digestURI.getFileName()))) {
