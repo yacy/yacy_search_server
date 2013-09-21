@@ -219,7 +219,7 @@ public final class Condenser {
             document.addMetatags(this.tags);
         }
 
-        if (synlib != null) {
+        if (synlib != null && synlib.size() > 0) {
             for (String word: this.words.keySet()) {
                 Set<String> syms = synlib.getSynonyms(word);
                 if (syms != null) this.synonyms.addAll(syms);
@@ -228,7 +228,7 @@ public final class Condenser {
         String text = document.getTextString();
         
         // create the synonyms set
-        if (synonyms != null) {
+        if (synonyms != null && synlib.size() > 0) {
             for (String word: this.words.keySet()) {
                 Set<String> syms = synlib.getSynonyms(word);
                 if (syms != null) this.synonyms.addAll(syms);
