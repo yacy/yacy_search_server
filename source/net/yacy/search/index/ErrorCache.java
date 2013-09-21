@@ -22,8 +22,10 @@ package net.yacy.search.index;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
@@ -48,12 +50,12 @@ public class ErrorCache {
     private static final int maxStackSize = 1000;
 
     // the class object
-    private final ConcurrentHashMap<String, CollectionConfiguration.FailDoc> stack;
+    private final Map<String, CollectionConfiguration.FailDoc> stack;
     private final Fulltext fulltext;
 
     public ErrorCache(final Fulltext fulltext) {
         this.fulltext = fulltext;
-        this.stack = new ConcurrentHashMap<String, CollectionConfiguration.FailDoc>();
+        this.stack = new LinkedHashMap<String, CollectionConfiguration.FailDoc>();
         try {
             // fill stack with latest values
             final SolrQuery params = new SolrQuery();
@@ -75,7 +77,7 @@ public class ErrorCache {
     }
 
     public void clear() throws IOException {
-        if (this.stack != null) this.stack.clear();
+        if (this.stack != null) synchronized (this.stack) {this.stack.clear();}
         this.fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
     }
 
@@ -83,10 +85,12 @@ public class ErrorCache {
         if (hosthash == null) return;
         try {
             this.fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
+            synchronized (this.stack) {
             Iterator<String> i = ErrorCache.this.stack.keySet().iterator();
-            while (i.hasNext()) {
-                String b = i.next();
-                if (NaturalOrder.naturalOrder.equal(hosthash, 0, ASCII.getBytes(b), 6, 6)) i.remove();
+                while (i.hasNext()) {
+                    String b = i.next();
+                    if (NaturalOrder.naturalOrder.equal(hosthash, 0, ASCII.getBytes(b), 6, 6)) i.remove();
+                }
             }
         } catch (final IOException e) {
         }
@@ -104,7 +108,9 @@ public class ErrorCache {
                 url, profile == null ? null : profile.collections(),
                 failCategory.name() + " " + reason, failCategory.failType,
                 httpcode);
-        this.stack.put(ASCII.String(url.hash()), failDoc);
+        synchronized (this.stack) {
+            this.stack.put(ASCII.String(url.hash()), failDoc);
+        }
         if (this.fulltext.getDefaultConnector() != null && failCategory.store) {
             // send the error to solr
             try {
@@ -114,20 +120,36 @@ public class ErrorCache {
                 ConcurrentLog.warn("SOLR", "failed to send error " + url.toNormalform(true) + " to solr: " + e.getMessage());
             }
         }
-        while (this.stack.size() > maxStackSize)
-            this.stack.remove(this.stack.keySet().iterator());
+        checkStackSize();
+    }
+    
+    private void checkStackSize() {
+        synchronized (this.stack) {
+            int dc = this.stack.size() - maxStackSize;
+            if (dc > 0) {
+                Collection<String> d = new ArrayList<String>();
+                Iterator<String> i = this.stack.keySet().iterator();
+                while (dc-- > 0 && i.hasNext()) d.add(i.next());
+                for (String s: d) this.stack.remove(s);
+            }
+        }        
     }
 
     public ArrayList<CollectionConfiguration.FailDoc> list(int max) {
         final ArrayList<CollectionConfiguration.FailDoc> l = new ArrayList<CollectionConfiguration.FailDoc>();
-        Iterator<CollectionConfiguration.FailDoc> fdi = this.stack.values().iterator();
-        for (int i = 0; i < this.stack.size() - max; i++) fdi.next();
-        while (fdi.hasNext()) l.add(fdi.next());
+        synchronized (this.stack) {
+            Iterator<CollectionConfiguration.FailDoc> fdi = this.stack.values().iterator();
+            for (int i = 0; i < this.stack.size() - max; i++) fdi.next();
+            while (fdi.hasNext()) l.add(fdi.next());
+        }
         return l;
     }
 
     public CollectionConfiguration.FailDoc get(final String urlhash) {
-        CollectionConfiguration.FailDoc fd = this.stack.get(urlhash);
+        CollectionConfiguration.FailDoc fd;
+        synchronized (this.stack) {
+            fd = this.stack.get(urlhash);
+        }
         if (fd != null) return fd;
         try {
             SolrDocument doc = this.fulltext.getDefaultConnector().getDocumentById(urlhash);
@@ -148,11 +170,15 @@ public class ErrorCache {
     }
 
     public void clearStack() {
-        this.stack.clear();
+        synchronized (this.stack) {
+            this.stack.clear();
+        }
     }
 
     public int stackSize() {
-        return this.stack.size();
+        synchronized (this.stack) {
+            return this.stack.size();
+        }
     }
 
 }
