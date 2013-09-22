@@ -74,7 +74,7 @@ public class HttpServer {
 
         //add SolrServlet
         ServletContextHandler solrContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        solrContext.setContextPath("/solr/");       
+        solrContext.setContextPath("/solr");       
         solrContext.addServlet(new ServletHolder(Servlet404.class),"/*");  
      
         SolrServlet.initCore(sb.index.fulltext().getDefaultEmbeddedConnector());
@@ -83,8 +83,9 @@ public class HttpServer {
         ServletContextHandler htrootContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
         htrootContext.setContextPath("/");  
         ServletHolder sholder = new ServletHolder(YaCyDefaultServlet.class);
-        sholder.setInitParameter("resourceBase", "htroot");
+        sholder.setInitParameter("resourceBase", "htroot");        
         htrootContext.addServlet(sholder,"/*");    
+        htrootContext.setWelcomeFiles(new String[]{"index.html"});
         
         ContextHandlerCollection servletContext = new ContextHandlerCollection();                
         servletContext.setHandlers(new Handler[] { solrContext, htrootContext });        

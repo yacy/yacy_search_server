@@ -71,6 +71,10 @@ net.yacy.kelondro.logging.LogalizerHandler.enabled = false
 net.yacy.kelondro.logging.LogalizerHandler.debug = false
 net.yacy.kelondro.logging.LogalizerHandler.parserPackage = net.yacy.kelondro.logging
 
+# Poperties for the HttpServer (Jetty)
+org.eclipse.jetty.io.level = INFO
+org.eclipse.jetty.http.HttpParser.level = INFO
+
 org.apache.http.level = OFF
 org.apache.commons.httpclient.level = OFF
 httpclient.wire.level = OFF
