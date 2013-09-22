@@ -42,6 +42,7 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -50,7 +51,6 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
-import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.crawler.retrieval.FTPLoader;
 import net.yacy.crawler.retrieval.FileLoader;
 import net.yacy.crawler.retrieval.HTTPLoader;
@@ -191,7 +191,7 @@ public final class LoaderDispatcher {
         
         // check if url is in blacklist
         if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(), url.getFile())) {
-            this.sb.crawlQueues.errorURL.push(request, crawlProfile, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
+            this.sb.crawlQueues.errorURL.push(request.url(), crawlProfile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
         }
 

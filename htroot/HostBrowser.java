@@ -439,7 +439,7 @@ public class HostBrowser {
                                 FailType failType = errorDocs.get(entry.getKey());
                                 if (failType == null) {
                                     // maybe this is only in the errorURL
-                                    prop.put("files_list_" + c + "_type_stored_error", process == HarvestProcess.ERRORS ? sb.crawlQueues.errorURL.get(uri.hash()).anycause() : "unknown error");
+                                    prop.put("files_list_" + c + "_type_stored_error", process == HarvestProcess.ERRORS ? sb.crawlQueues.errorURL.get(ASCII.String(uri.hash())).getFailReason() : "unknown error");
                                 } else {
                                     prop.put("files_list_" + c + "_type_stored_error", failType == FailType.excl ? "excluded from indexing" : "load fail");
                                 }

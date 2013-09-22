@@ -84,6 +84,10 @@ public class SynonymLibrary {
         }
     }
 
+    public int size() {
+        return this.lib.size();
+    }
+    
     /**
      * for a given word, return a list of synonym words
      * @param word

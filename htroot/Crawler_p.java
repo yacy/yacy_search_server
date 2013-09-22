@@ -24,7 +24,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,6 +36,7 @@ import java.util.regex.PatternSyntaxException;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -44,8 +44,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.CrawlProfile;
-import net.yacy.crawler.data.ZURL.FailCategory;
-import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.SitemapImporter;
 import net.yacy.data.WorkTables;
 import net.yacy.document.Document;
@@ -57,7 +55,6 @@ import net.yacy.peers.NewsPool;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -388,16 +385,9 @@ public class Crawler_p {
                 try {sb.crawlQueues.noticeURL.removeByProfileHandle(profile.handle(), 10000);} catch (final SpaceExceededException e1) {}
                 
                 // delete all error urls for that domain
-                List<byte[]> hosthashes = new ArrayList<byte[]>();
                 for (DigestURL u: rootURLs) {
-                    hosthashes.add(ASCII.getBytes(u.hosthash()));
-                }
-                sb.crawlQueues.errorURL.removeHosts(hosthashes, false);
-                for (byte[] hosthash: hosthashes) {
-                    try {
-                        String deletequery = CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]";
-                        sb.index.fulltext().getDefaultConnector().deleteByQuery(deletequery);
-                    } catch (final IOException e) {ConcurrentLog.logException(e);}
+                    sb.index.fulltext().remove(u.hash());
+                    sb.crawlQueues.errorURL.removeHost(ASCII.getBytes(u.hosthash()));
                 }
                 sb.index.fulltext().commit(true);
                 
@@ -440,24 +430,7 @@ public class Crawler_p {
                         } else {
                             StringBuilder fr = new StringBuilder();
                             for (Map.Entry<DigestURL, String> failure: failurls.entrySet()) {
-                                sb.crawlQueues.errorURL.push(
-                                    new Request(
-                                            sb.peers.mySeed().hash.getBytes(),
-                                            failure.getKey(),
-                                            null,
-                                            "",
-                                            new Date(),
-                                            profile.handle(),
-                                            0,
-                                            0,
-                                            0,
-                                            0),
-                                    null,
-                                    sb.peers.mySeed().hash.getBytes(),
-                                    new Date(),
-                                    1,
-                                    FailCategory.FINAL_LOAD_CONTEXT,
-                                    failure.getValue(), -1);
+                                sb.crawlQueues.errorURL.push(failure.getKey(), null, FailCategory.FINAL_LOAD_CONTEXT, failure.getValue(), -1);
                                 fr.append(failure.getValue()).append('/');
                             }
     

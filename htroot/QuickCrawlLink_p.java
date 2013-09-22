@@ -127,7 +127,6 @@ public class QuickCrawlLink_p {
             final byte[] urlhash = crawlingStartURL.hash();
             indexSegment.fulltext().remove(urlhash);
             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
-            sb.crawlQueues.errorURL.remove(urlhash);
 
             // create crawling profile
             CrawlProfile pe = null;

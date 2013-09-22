@@ -120,14 +120,19 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             final IndexCell<CitationReference> citations) {
         boolean allAttr = this.isEmpty();
         int target_order = 0;
+        boolean generalNofollow = responseHeader.get("X-Robots-Tag", "").indexOf("nofollow") >= 0;
         for (final AnchorURL target_url: links) {
 
             Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
             
             final String name = target_url.getNameProperty(); // the name attribute
             final String text = target_url.getTextProperty(); // the text between the <a></a> tag
-            final String rel = target_url.getRelProperty();   // the rel-attribute
+            String rel = target_url.getRelProperty();         // the rel-attribute
             int ioidx = inbound ? 0 : 1;
+            if (generalNofollow) {
+                // patch the rel attribute since the header makes nofollow valid for all links
+                if (rel.length() == 0) rel = "nofollow"; else if (rel.indexOf("nofollow") < 0) rel += ",nofollow"; 
+            }
             
             // index organization
             StringBuilder idi = new StringBuilder(8);

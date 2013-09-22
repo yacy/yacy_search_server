@@ -40,17 +40,16 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.Hit;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.NoticedURL.StackType;
-import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.crawler.robots.RobotsTxtEntry;
-import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.WorkflowJob;
 import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
@@ -59,11 +58,10 @@ import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.IndexingQueueEntry;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.ErrorCache;
+import net.yacy.search.schema.CollectionConfiguration;
 
 public class CrawlQueues {
-
-    private static final String ERROR_DB_FILENAME = "urlError4.db";
-    private static final String DELEGATED_DB_FILENAME = "urlDelegated4.db";
 
     private Switchboard sb;
     private ConcurrentLog log;
@@ -71,7 +69,8 @@ public class CrawlQueues {
     private final ArrayList<String> remoteCrawlProviderHashes;
 
     public  NoticedURL noticeURL;
-    public  ZURL errorURL, delegatedURL;
+    public  ErrorCache errorURL;
+    public Map<String, DigestURL> delegatedURL;
 
     public CrawlQueues(final Switchboard sb, final File queuePath) {
         this.sb = sb;
@@ -82,10 +81,8 @@ public class CrawlQueues {
         // start crawling management
         this.log.config("Starting Crawling Management");
         this.noticeURL = new NoticedURL(queuePath, sb.useTailCache, sb.exceed134217727);
-        FileUtils.deletedelete(new File(queuePath, ERROR_DB_FILENAME));
-        this.errorURL = new ZURL(sb.index.fulltext(), queuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
-        this.delegatedURL = new ZURL(sb.index.fulltext(), queuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
-        try {this.errorURL.clear();} catch (IOException e) {} // start with empty errors each time
+        this.errorURL = new ErrorCache(sb.index.fulltext());
+        this.delegatedURL = new ConcurrentHashMap<String, DigestURL>();
     }
 
     public void relocate(final File newQueuePath) {
@@ -95,10 +92,8 @@ public class CrawlQueues {
         this.remoteCrawlProviderHashes.clear();
 
         this.noticeURL = new NoticedURL(newQueuePath, this.sb.useTailCache, this.sb.exceed134217727);
-        FileUtils.deletedelete(new File(newQueuePath, ERROR_DB_FILENAME));
-        this.errorURL = new ZURL(this.sb.index.fulltext(), newQueuePath, ERROR_DB_FILENAME, false, this.sb.useTailCache, this.sb.exceed134217727);
-        this.delegatedURL = new ZURL(this.sb.index.fulltext(), newQueuePath, DELEGATED_DB_FILENAME, true, this.sb.useTailCache, this.sb.exceed134217727);
-        try {this.errorURL.clear();} catch (IOException e) {} // start with empty errors each time
+        this.errorURL = new ErrorCache(this.sb.index.fulltext());
+        this.delegatedURL = new ConcurrentHashMap<String, DigestURL>();
     }
 
     public synchronized void close() {
@@ -114,8 +109,7 @@ public class CrawlQueues {
             }
         }
         this.noticeURL.close();
-        this.errorURL.close();
-        this.delegatedURL.close();
+        this.delegatedURL.clear();
     }
 
     public void clear() {
@@ -125,16 +119,7 @@ public class CrawlQueues {
         this.workers.clear();
         this.remoteCrawlProviderHashes.clear();
         this.noticeURL.clear();
-        try {
-            this.errorURL.clear();
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-        }
-        try {
-            this.delegatedURL.clear();
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-        }
+        this.delegatedURL.clear();
     }
 
     /**
@@ -143,7 +128,7 @@ public class CrawlQueues {
      * @return if the hash exists, the name of the database is returned, otherwise null is returned
      */
     public HarvestProcess exists(final byte[] hash) {
-        if (this.delegatedURL.exists(hash)) {
+        if (this.delegatedURL.containsKey(ASCII.String(hash))) {
             return HarvestProcess.DELEGATED;
         }
         if (this.errorURL.exists(hash)) {
@@ -164,7 +149,6 @@ public class CrawlQueues {
         assert hash != null && hash.length == 12;
         this.noticeURL.removeByURLHash(hash);
         this.delegatedURL.remove(hash);
-        this.errorURL.remove(hash);
     }
 
     public DigestURL getURL(final byte[] urlhash) {
@@ -172,13 +156,13 @@ public class CrawlQueues {
         if (urlhash == null || urlhash.length == 0) {
             return null;
         }
-        ZURL.Entry ee = this.delegatedURL.get(urlhash);
-        if (ee != null) {
-            return ee.url();
+        DigestURL u = this.delegatedURL.get(ASCII.String(urlhash));
+        if (u != null) {
+            return u;
         }
-        ee = this.errorURL.get(urlhash);
+        CollectionConfiguration.FailDoc ee = this.errorURL.get(ASCII.String(urlhash));
         if (ee != null) {
-            return ee.url();
+            return ee.getDigestURL();
         }
         for (final Loader w: this.workers.values()) {
             if (Base64Order.enhancedCoder.equal(w.request.url().hash(), urlhash)) {
@@ -639,14 +623,7 @@ public class CrawlQueues {
                     (robotsEntry = CrawlQueues.this.sb.robots.getEntry(this.request.url(), this.profile.getAgent())) != null &&
                     robotsEntry.isDisallowed(this.request.url())) {
                     //if (log.isFine()) log.logFine("Crawling of URL '" + request.url().toString() + "' disallowed by robots.txt.");
-                    CrawlQueues.this.errorURL.push(
-                            this.request,
-                            profile,
-                            ASCII.getBytes(CrawlQueues.this.sb.peers.mySeed().hash),
-                            new Date(),
-                            1,
-                            FailCategory.FINAL_ROBOTS_RULE,
-                            "denied by robots.txt", -1);
+                    CrawlQueues.this.errorURL.push(this.request.url(), profile, FailCategory.FINAL_ROBOTS_RULE, "denied by robots.txt", -1);
                     this.request.setStatus("worker-disallowed", WorkflowJob.STATUS_FINISHED);
                 } else {
                     // starting a load from the internet
@@ -679,28 +656,14 @@ public class CrawlQueues {
                     }
 
                     if (result != null) {
-                        CrawlQueues.this.errorURL.push(
-                                this.request,
-                                profile,
-                                ASCII.getBytes(CrawlQueues.this.sb.peers.mySeed().hash),
-                                new Date(),
-                                1,
-                                FailCategory.TEMPORARY_NETWORK_FAILURE,
-                                "cannot load: " + result, -1);
+                        CrawlQueues.this.errorURL.push(this.request.url(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "cannot load: " + result, -1);
                         this.request.setStatus("worker-error", WorkflowJob.STATUS_FINISHED);
                     } else {
                         this.request.setStatus("worker-processed", WorkflowJob.STATUS_FINISHED);
                     }
                 }
             } catch (final Exception e) {
-                CrawlQueues.this.errorURL.push(
-                        this.request,
-                        profile,
-                        ASCII.getBytes(CrawlQueues.this.sb.peers.mySeed().hash),
-                        new Date(),
-                        1,
-                        FailCategory.TEMPORARY_NETWORK_FAILURE,
-                        e.getMessage() + " - in worker", -1);
+                CrawlQueues.this.errorURL.push(this.request.url(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, e.getMessage() + " - in worker", -1);
                 ConcurrentLog.logException(e);
                 this.request.setStatus("worker-exception", WorkflowJob.STATUS_FINISHED);
             } finally {

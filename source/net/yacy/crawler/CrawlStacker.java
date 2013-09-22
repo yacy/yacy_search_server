@@ -27,7 +27,6 @@ package net.yacy.crawler;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -41,6 +40,7 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ftp.FTPClient;
@@ -49,9 +49,7 @@ import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.data.NoticedURL;
 import net.yacy.crawler.data.ResultURLs;
-import net.yacy.crawler.data.ZURL;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
-import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.crawler.retrieval.FTPLoader;
 import net.yacy.crawler.retrieval.HTTPLoader;
 import net.yacy.crawler.retrieval.Request;
@@ -65,6 +63,7 @@ import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.FilterEngine;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
+import net.yacy.search.schema.CollectionConfiguration;
 
 public final class CrawlStacker {
     
@@ -75,7 +74,7 @@ public final class CrawlStacker {
     private final ConcurrentLog log = new ConcurrentLog("STACKCRAWL");
     private final RobotsTxt robots;
     private final WorkflowProcessor<Request>  requestQueue;
-    private final CrawlQueues       nextQueue;
+    public  final CrawlQueues       nextQueue;
     private final CrawlSwitchboard  crawler;
     private final Segment           indexSegment;
     private final SeedDB            peers;
@@ -151,7 +150,7 @@ public final class CrawlStacker {
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null && !rejectReason.startsWith("double in")) {
                 final CrawlProfile profile = this.crawler.getActive(UTF8.getBytes(entry.profileHandle()));
-                this.nextQueue.errorURL.push(entry, profile, ASCII.getBytes(this.peers.mySeed().hash), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
+                this.nextQueue.errorURL.push(entry.url(), profile, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
             }
         } catch (final Exception e) {
             CrawlStacker.this.log.warn("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);
@@ -185,9 +184,7 @@ public final class CrawlStacker {
             if (replace) {
                 this.indexSegment.fulltext().remove(urlhash);
                 byte[] hosthash = new byte[6]; System.arraycopy(urlhash, 6, hosthash, 0, 6);
-                List<byte[]> hosthashes = new ArrayList<byte[]>(); hosthashes.add(hosthash);
-                this.nextQueue.errorURL.removeHosts(hosthashes, false);
-                this.nextQueue.removeURL(urlhash);
+                this.nextQueue.errorURL.removeHost(hosthash);
                 String u = url.toNormalform(true);
                 if (u.endsWith("/")) {
                     u = u + "index.html";
@@ -198,7 +195,6 @@ public final class CrawlStacker {
                     final byte[] uh = new DigestURL(u).hash();
                     this.indexSegment.fulltext().remove(uh);
                     this.nextQueue.noticeURL.removeByURLHash(uh);
-                    this.nextQueue.errorURL.remove(uh);
                 } catch (final MalformedURLException e1) {}
             }
 
@@ -246,7 +242,6 @@ public final class CrawlStacker {
                         if (replace) {
                             CrawlStacker.this.indexSegment.fulltext().remove(urlhash);
                             cq.noticeURL.removeByURLHash(urlhash);
-                            cq.errorURL.remove(urlhash);
                         }
 
                         // put entry on crawl stack
@@ -425,8 +420,8 @@ public final class CrawlStacker {
             if (dbocc != null) {
                 // do double-check
                 if (dbocc == HarvestProcess.ERRORS) {
-                    final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
-                    return "double in: errors (" + errorEntry.anycause() + ")";
+                    final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(ASCII.String(url.hash()));
+                    return "double in: errors (" + errorEntry.getFailReason() + ")";
                 }
                 return "double in: " + dbocc.toString();
             }
@@ -441,9 +436,9 @@ public final class CrawlStacker {
                     return "double in: LURL-DB, oldDate = " + oldDate.toString();
                 }
                 if (dbocc == HarvestProcess.ERRORS) {
-                    final ZURL.Entry errorEntry = this.nextQueue.errorURL.get(url.hash());
-                    if (this.log.isInfo()) this.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "', previous cause: " + errorEntry.anycause());
-                    return "double in: errors (" + errorEntry.anycause() + "), oldDate = " + oldDate.toString();
+                    final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(ASCII.String(url.hash()));
+                    if (this.log.isInfo()) this.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "', previous cause: " + errorEntry.getFailReason());
+                    return "double in: errors (" + errorEntry.getFailReason() + "), oldDate = " + oldDate.toString();
                 }
                 if (this.log.isInfo()) this.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "'. ");
                 return "double in: " + dbocc.toString() + ", oldDate = " + oldDate.toString();

@@ -390,7 +390,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
             if (newLink != null) {
                 tagopts.put("href", newLink.toNormalform(true));
-                final String rel = tagopts.getProperty("rel", EMPTY_STRING);
+                String rel = tagopts.getProperty("rel", EMPTY_STRING);
                 final String linktitle = tagopts.getProperty("title", EMPTY_STRING);
                 final String type = tagopts.getProperty("type", EMPTY_STRING);
                 final String hreflang = tagopts.getProperty("hreflang", EMPTY_STRING);
@@ -475,6 +475,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     final ImageEntry ie = new ImageEntry(url, recursiveParse(url, text), -1, -1, -1);
                     this.images.add(ie);
                 } else {
+                    if (followDenied()) {
+                        String rel = tagopts.getProperty("rel", EMPTY_STRING);
+                        if (rel.length() == 0) rel = "nofollow"; else if (rel.indexOf("nofollow") < 0) rel += ",nofollow"; 
+                        tagopts.put("rel", rel);
+                    }
                     tagopts.put("text", new String(text));
                     tagopts.put("href", url.toNormalform(true)); // we must assign this because the url may have resolved backpaths and may not be absolute
                     url.setAll(tagopts);
@@ -763,6 +768,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         final String s = this.metas.get("robots");
         if (s == null) return false;
         if (s.indexOf("noindex",0) >= 0) return true;
+        return false;
+    }
+    
+    public boolean followDenied() {
+        final String s = this.metas.get("robots");
+        if (s == null) return false;
+        if (s.indexOf("nofollow",0) >= 0) return true;
         return false;
     }
 

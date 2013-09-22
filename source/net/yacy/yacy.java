@@ -622,8 +622,8 @@ public final class yacy {
 	        if (OS.isWindows) headless = false;
 	        if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) headless = false;
 	        System.setProperty("java.awt.headless", headless ? "true" : "false");
-                System.setProperty("java.net.preferIPv4Stack", "true");
-
+            // System.setProperty("java.net.preferIPv4Stack", "true"); // DO NOT PREFER IPv6, i.e. freifunk uses ipv6 only and host resolving does not work
+           
 	        String s = ""; for (final String a: args) s += a + " ";
 	        yacyRelease.startParameter = s.trim();
 

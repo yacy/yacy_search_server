@@ -40,6 +40,7 @@ import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -48,8 +49,6 @@ import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.crawler.data.ZURL.FailCategory;
-import net.yacy.crawler.retrieval.Request;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.WordTokenizer;
@@ -59,6 +58,7 @@ import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 
 
+@SuppressWarnings("unused")
 public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaSnippet> {
     public ContentDomain type;
     public DigestURL href, source;
@@ -260,7 +260,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
 
         // check if url is in blacklist
         if (Switchboard.urlBlacklist.isListed(blacklistType, url.getHost().toLowerCase(), url.getFile())) {
-            Switchboard.getSwitchboard().crawlQueues.errorURL.push(new Request(url, null), null, ASCII.getBytes(Switchboard.getSwitchboard().peers.mySeed().hash), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
+            Switchboard.getSwitchboard().crawlQueues.errorURL.push(url, null, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             ConcurrentLog.fine("snippet fetch", "MEDIA-SNIPPET Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
             isBlacklisted = true;
         }
