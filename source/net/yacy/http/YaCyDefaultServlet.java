@@ -134,15 +134,17 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
     private MimeTypes _mimeTypes;
     private String _relativeResourceBase;
     
-    private final String htLocalePath = "DATA/LOCALE/htroot";
-    private final String htDocsPath = "DATA/HTDOCS";    
+    private File htLocalePath;
+    private File htDocsPath;    
     private static final serverClassLoader provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
     private ConcurrentHashMap<File, SoftReference<Method>> templateMethodCache = null;
 
     /* ------------------------------------------------------------ */
     @Override
-    public void init()
-            throws UnavailableException {
+    public void init() throws UnavailableException {
+        htDocsPath = Switchboard.getSwitchboard().htDocsPath;
+        htLocalePath = Switchboard.getSwitchboard().getDataPath("locale.translated_html", "DATA/LOCALE/htroot");
+        
         _servletContext = getServletContext();
 
         _mimeTypes = new MimeTypes(); 
@@ -243,7 +245,7 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
             pathInfo = request.getPathInfo();
 
             // Is this a Range request?
-            reqRanges = request.getHeaders(HttpHeader.RANGE.asString());
+            reqRanges = request.getHeaders(HeaderFramework.RANGE);
             if (!hasDefinedRange(reqRanges)) {
                 reqRanges = null;
             }
@@ -409,14 +411,14 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
                         // Look for GzipFiltered version of etag
                         if (content.getETag().toString().equals(request.getAttribute("o.e.j.s.GzipFilter.ETag"))) {
                             response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                            response.setHeader(HttpHeader.ETAG.asString(), if_non_match_etag);
+                            response.setHeader(HeaderFramework.ETAG, if_non_match_etag);
                             return false;
                         }
 
                         // Handle special case of exact match.
                         if (content.getETag().toString().equals(if_non_match_etag)) {
                             response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                            response.setHeader(HttpHeader.ETAG.asString(), content.getETag());
+                            response.setHeader(HeaderFramework.ETAG, content.getETag());
                             return false;
                         }
 
@@ -426,7 +428,7 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
                             String tag = quoted.nextToken();
                             if (content.getETag().toString().equals(tag)) {
                                 response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                                response.setHeader(HttpHeader.ETAG.asString(), content.getETag());
+                                response.setHeader(HeaderFramework.ETAG, content.getETag());
                                 return false;
                             }
                         }
@@ -444,7 +446,7 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
                     if (mdlm != null && ifms.equals(mdlm)) {
                         response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                         if (_etags) {
-                            response.setHeader(HttpHeader.ETAG.asString(), content.getETag());
+                            response.setHeader(HeaderFramework.ETAG, content.getETag());
                         }
                         response.flushBuffer();
                         return false;
@@ -454,7 +456,7 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
                     if (ifmsl != -1 && resource.lastModified() / 1000 <= ifmsl / 1000) {
                         response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                         if (_etags) {
-                            response.setHeader(HttpHeader.ETAG.asString(), content.getETag());
+                            response.setHeader(HeaderFramework.ETAG, content.getETag());
                         }
                         response.flushBuffer();
                         return false;
@@ -585,7 +587,7 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
             if (ranges == null || ranges.size() == 0) {
                 writeHeaders(response, content, content_length);
                 response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-                response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
+                response.setHeader(HeaderFramework.CONTENT_RANGE,
                         InclusiveByteRange.to416HeaderRangeString(content_length));
                 resource.writeTo(out, 0, content_length);
                 return;
@@ -598,7 +600,7 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
                 long singleLength = singleSatisfiableRange.getSize(content_length);
                 writeHeaders(response, content, singleLength);
                 response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-                response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
+                response.setHeader(HeaderFramework.CONTENT_RANGE,
                         singleSatisfiableRange.toHeaderRangeString(content_length));
                 resource.writeTo(out, singleSatisfiableRange.getFirst(content_length), singleLength);
                 return;
@@ -639,8 +641,8 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
                 length +=
                         ((i > 0) ? 2 : 0)
                         + 2 + multi.getBoundary().length() + 2
-                        + (mimetype == null ? 0 : HttpHeader.CONTENT_TYPE.asString().length() + 2 + mimetype.length()) + 2
-                        + HttpHeader.CONTENT_RANGE.asString().length() + 2 + header[i].length() + 2
+                        + (mimetype == null ? 0 : HeaderFramework.CONTENT_TYPE.length() + 2 + mimetype.length()) + 2
+                        + HeaderFramework.CONTENT_RANGE.length() + 2 + header[i].length() + 2
                         + 2
                         + (ibr.getLast(content_length) - ibr.getFirst(content_length)) + 1;
             }
@@ -649,7 +651,7 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
 
             for (int i = 0; i < ranges.size(); i++) {
                 InclusiveByteRange ibr = ranges.get(i);
-                multi.startPart(mimetype, new String[]{HttpHeader.CONTENT_RANGE + ": " + header[i]});
+                multi.startPart(mimetype, new String[]{HeaderFramework.CONTENT_RANGE + ": " + header[i]});
 
                 long start = ibr.getFirst(content_length);
                 long size = ibr.getSize(content_length);
@@ -691,11 +693,11 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
             HttpFields fields = r.getHttpFields();
 
             if (content.getLastModified() != null) {
-                fields.put(HttpHeader.LAST_MODIFIED, content.getLastModified());
+                fields.put(HeaderFramework.LAST_MODIFIED, content.getLastModified());
             } else if (content.getResource() != null) {
                 long lml = content.getResource().lastModified();
                 if (lml != -1) {
-                    fields.putDateField(HttpHeader.LAST_MODIFIED, lml);
+                    fields.putDateField(HeaderFramework.LAST_MODIFIED, lml);
                 }
             }
 
@@ -706,26 +708,26 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
             writeOptionHeaders(fields);
 
             if (_etags) {
-                fields.put(HttpHeader.ETAG, content.getETag());
+                fields.put(HeaderFramework.ETAG, content.getETag());
             }
         } else {
             long lml = content.getResource().lastModified();
             if (lml >= 0) {
-                response.setDateHeader(HttpHeader.LAST_MODIFIED.asString(), lml);
+                response.setDateHeader(HeaderFramework.LAST_MODIFIED, lml);
             }
 
             if (count != -1) {
                 if (count < Integer.MAX_VALUE) {
                     response.setContentLength((int) count);
                 } else {
-                    response.setHeader(HttpHeader.CONTENT_LENGTH.asString(), Long.toString(count));
+                    response.setHeader(HeaderFramework.CONTENT_LENGTH, Long.toString(count));
                 }
             }
 
             writeOptionHeaders(response);
 
             if (_etags) {
-                response.setHeader(HttpHeader.ETAG.asString(), content.getETag().toString());
+                response.setHeader(HeaderFramework.ETAG, content.getETag().toString());
             }
         }
     }
@@ -733,14 +735,14 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
     /* ------------------------------------------------------------ */
     protected void writeOptionHeaders(HttpFields fields) {
         if (_acceptRanges) {
-            fields.put(HttpHeader.ACCEPT_RANGES, "bytes");
+            fields.put(HeaderFramework.ACCEPT_RANGES, "bytes");
         }
     }
 
     /* ------------------------------------------------------------ */
     protected void writeOptionHeaders(HttpServletResponse response) {
         if (_acceptRanges) {
-            response.setHeader(HttpHeader.ACCEPT_RANGES.asString(), "bytes");
+            response.setHeader(HeaderFramework.ACCEPT_RANGES, "bytes");
         }
     }
 
@@ -790,7 +792,6 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
             return docsPath;
         }
         return _resourceBase.addPath(path).getFile();
-        //return new File(htDefaultPath, path);
     }
 
     private File rewriteClassFile(final File template) {

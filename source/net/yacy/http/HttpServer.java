@@ -100,7 +100,6 @@ public class HttpServer {
         securityHandler.setRealmName("YaCy Admin Interface");
         securityHandler.setHandler(new CrashProtectionHandler(handlers));
 
-        securityHandler.setHandler(new CrashProtectionHandler(servletContext));
         server.setHandler(securityHandler);
     }
 
