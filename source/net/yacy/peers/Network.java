@@ -50,12 +50,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.RSSFeed;
-import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.feed.RSSFeed;
+import net.yacy.cora.document.feed.RSSMessage;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.peers.operation.yacySeedUploadFile;
 import net.yacy.peers.operation.yacySeedUploadFtp;
 import net.yacy.peers.operation.yacySeedUploadScp;
@@ -753,7 +753,7 @@ public class Network
             }
 
             // ensure that the seed file url is configured properly
-            DigestURI seedURL;
+            DigestURL seedURL;
             try {
                 final String seedURLStr = sb.peers.mySeed().get(Seed.SEEDLISTURL, "");
                 if ( seedURLStr.isEmpty() ) {
@@ -763,7 +763,7 @@ public class Network
                     "https://")) ) {
                     throw new MalformedURLException("Unsupported protocol.");
                 }
-                seedURL = new DigestURI(seedURLStr);
+                seedURL = new DigestURL(seedURLStr);
                 final String host = seedURL.getHost();
                 if (Domains.isLocalhost(host)) { // check seedlist reacheable
                     final String errorMsg = "seedURL in localhost rejected (localhost can't be reached from outside)";

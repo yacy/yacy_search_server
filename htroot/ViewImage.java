@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Map;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
@@ -41,7 +42,6 @@ import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.URLLicense;
 import net.yacy.document.ImageParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
@@ -74,9 +74,9 @@ public class ViewImage {
         final String urlLicense = post.get("code", "");
         final boolean auth = Domains.isLocalhost(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "")) || sb.verifyAuthentication(header); // handle access rights
 
-        DigestURI url = null;
+        DigestURL url = null;
         if ((urlString.length() > 0) && (auth)) try {
-            url = new DigestURI(urlString);
+            url = new DigestURL(urlString);
         } catch (final MalformedURLException e1) {
             url = null;
         }
@@ -84,7 +84,7 @@ public class ViewImage {
         if ((url == null) && (urlLicense.length() > 0)) {
             urlString = URLLicense.releaseLicense(urlLicense);
             try {
-                url = new DigestURI(urlString);
+                url = new DigestURL(urlString);
             } catch (final MalformedURLException e1) {
                 url = null;
                 urlString = null;

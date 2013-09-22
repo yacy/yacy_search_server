@@ -23,7 +23,7 @@ package net.yacy.cora.federate.yacy;
 import java.io.Serializable;
 import java.util.HashMap;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.order.Base64Order;
 
 /**

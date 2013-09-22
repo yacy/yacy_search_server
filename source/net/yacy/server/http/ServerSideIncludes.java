@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ByteBuffer;

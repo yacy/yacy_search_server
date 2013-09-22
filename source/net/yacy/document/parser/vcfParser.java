@@ -38,14 +38,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 /**
  * Vcard specification: http://www.imc.org/pdi/vcard-21.txt
@@ -65,14 +64,14 @@ public class vcfParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURI url, final String mimeType, final String charset, final InputStream source)
+    public Document[] parse(final AnchorURL url, final String mimeType, final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
 
         try {
             final StringBuilder parsedTitle = new StringBuilder();
             final StringBuilder parsedDataText = new StringBuilder();
             final HashMap<String, String> parsedData = new HashMap<String, String>();
-            final HashMap<DigestURI, Properties> anchors = new HashMap<DigestURI, Properties>();
+            final List<AnchorURL> anchors = new ArrayList<AnchorURL>();
             final LinkedList<String> parsedNames = new LinkedList<String>();
 
             boolean useLastLine = false;
@@ -179,10 +178,9 @@ public class vcfParser extends AbstractParser implements Parser {
                         parsedData.clear();
                     } else if (key.toUpperCase().startsWith("URL")) {
                         try {
-                            final DigestURI newURL = new DigestURI(value);
-                            final Properties p = new Properties();
-                            p.put("name", newURL.toString());
-                            anchors.put(newURL, p);
+                            final AnchorURL newURL = new AnchorURL(value);
+                            newURL.setNameProperty(newURL.toString());
+                            anchors.add(newURL);
                             //parsedData.put(key,value);
                         } catch (final MalformedURLException ex) {/* ignore this */}
                     } else if (

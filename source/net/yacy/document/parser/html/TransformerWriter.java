@@ -44,9 +44,9 @@ import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
 
 
@@ -234,15 +234,10 @@ public final class TransformerWriter extends Writer {
         }
 
         // it's a tag! which one?
-        StringBuilder ret0 = new StringBuilder();
         if (opening) {
-            // case (5): the opening should not be here. we close the previous tag as if it had been closed correctly
-            // this may happen if the html is not well-formed, like forgotten close tags
-            ret0.append(filterTagCloseing(quotechar));
-
-            // after this point we just go on and process a new tag
-            ret0.append(filterTagOpening(tag, content, quotechar));
-            return ret0.toString().toCharArray();
+            // case (5): the opening should not be here. But we keep the order anyway
+            this.filterCont.append(filterTagOpening(tag, content, quotechar));
+            return filterTagCloseing(quotechar);
         }
 
         if (!tag.equalsIgnoreCase(this.filterTag)) {
@@ -545,7 +540,7 @@ public final class TransformerWriter extends Writer {
         System.exit(0);
         final char[] buffer = new char[512];
         try {
-            final ContentScraper scraper = new ContentScraper(new DigestURI("http://localhost:8090"), 1000);
+            final ContentScraper scraper = new ContentScraper(new DigestURL("http://localhost:8090"), 1000);
             final Transformer transformer = new ContentTransformer();
             final Reader is = new FileReader(args[0]);
             final FileOutputStream fos = new FileOutputStream(new File(args[0] + ".out"));

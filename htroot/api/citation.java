@@ -30,12 +30,12 @@ import java.util.TreeSet;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.document.SentenceReader;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.search.schema.CollectionSchema;
@@ -56,7 +56,7 @@ public class citation {
         prop.put("citations", 0);
         prop.put("sentences", 0);
 
-        DigestURI uri = null;
+        DigestURL uri = null;
         String url = "";
         String hash = "";
         int ch = 10;
@@ -81,7 +81,7 @@ public class citation {
         
         if (url.length() > 0) {
             try {
-                uri = new DigestURI(url, null);
+                uri = new DigestURL(url, null);
                 hash = ASCII.String(uri.hash());
             } catch (final MalformedURLException e) {}
         }
@@ -118,7 +118,7 @@ public class citation {
         
         // for each line make a statistic about the number of occurrences somewhere else
         OrderedScoreMap<String> scores = new OrderedScoreMap<String>(null); // accumulates scores for citating urls
-        LinkedHashMap<String, Set<DigestURI>> sentenceOcc = new LinkedHashMap<String, Set<DigestURI>>();
+        LinkedHashMap<String, Set<DigestURL>> sentenceOcc = new LinkedHashMap<String, Set<DigestURL>>();
         for (String sentence: sentences) {
             if (sentence == null || sentence.length() < 40) {
                 // do not count the very short sentences
@@ -130,12 +130,12 @@ public class citation {
                 SolrDocumentList doclist = connector.getDocumentListByQuery("text_t:\"" + sentence + "\"", 0, 100, CollectionSchema.sku.getSolrFieldName());
                 int count = (int) doclist.getNumFound();
                 if (count > 0) {
-                    Set<DigestURI> list = new TreeSet<DigestURI>();
+                    Set<DigestURL> list = new TreeSet<DigestURL>();
                     for (SolrDocument d: doclist) {
                         String u = (String) d.getFieldValue(CollectionSchema.sku.getSolrFieldName());
                         if (u == null || u.equals(url)) continue;
                         scores.inc(u);
-                        try {list.add(new DigestURI(u, null));} catch (final MalformedURLException e) {}
+                        try {list.add(new DigestURL(u, null));} catch (final MalformedURLException e) {}
                     }
                     sentenceOcc.put(sentence, list);
                 }
@@ -147,13 +147,13 @@ public class citation {
         
         // iterate the sentences
         int i = 0;
-        for (Map.Entry<String, Set<DigestURI>> se: sentenceOcc.entrySet()) {
+        for (Map.Entry<String, Set<DigestURL>> se: sentenceOcc.entrySet()) {
             prop.put("sentences_" + i + "_dt", i);
             StringBuilder dd = new StringBuilder(se.getKey());
-            Set<DigestURI> app = se.getValue();
+            Set<DigestURL> app = se.getValue();
             if (app != null && app.size() > 0) {
                 dd.append("<br/>appears in:");
-                for (DigestURI u: app) {
+                for (DigestURL u: app) {
                     if (u != null) {
                         dd.append(" <a href=\"").append(u.toNormalform(false)).append("\">").append(u.getHost()).append("</a>");
                     }
@@ -168,12 +168,12 @@ public class citation {
         i = 0;
         for (String u: scores.keyList(false)) {
             try {
-                DigestURI uu = new DigestURI(u, null);
+                DigestURL uu = new DigestURL(u, null);
                 prop.put("citations_" + i + "_dt", "<a href=\"" + u + "\">" + u + "</a>");
                 StringBuilder dd = new StringBuilder();
                 dd.append("makes ").append(Integer.toString(scores.get(u))).append(" citations: of ").append(url);
-                for (Map.Entry<String, Set<DigestURI>> se: sentenceOcc.entrySet()) {
-                    Set<DigestURI> occurls = se.getValue();
+                for (Map.Entry<String, Set<DigestURL>> se: sentenceOcc.entrySet()) {
+                    Set<DigestURL> occurls = se.getValue();
                     if (occurls != null && occurls.contains(uu)) dd.append("<br/><a href=\"/solr/select?q=text_t:%22").append(se.getKey().replace('"', '\'')).append("%22&rows=100&grep=&wt=grephtml\">").append(se.getKey()).append("</a>");
                 }
                 prop.put("citations_" + i + "_dd", dd.toString());
@@ -187,7 +187,7 @@ public class citation {
         for (String u: scores.keyList(false)) {
             if (scores.get(u) < ch) continue;
             try {
-                DigestURI uu = new DigestURI(u, null);
+                DigestURL uu = new DigestURL(u, null);
                 if (uu.getOrganization().equals(uri.getOrganization())) continue;
                 prop.put("similar_links_" + i + "_url", u);
                 i++;

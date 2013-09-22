@@ -30,12 +30,12 @@ import java.util.regex.Pattern;
 import org.apache.solr.common.SolrDocument;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.data.WorkTables;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.QueryModifier;
 import net.yacy.search.schema.CollectionSchema;
@@ -129,7 +129,7 @@ public class IndexDeletion_p {
                         if (urlStub.startsWith("ftp")) urlStub = "ftp://" + urlStub; else urlStub = "http://" + urlStub;
                     }
                     try {
-                        DigestURI u = new DigestURI(urlStub);
+                        DigestURL u = new DigestURL(urlStub);
                         BlockingQueue<SolrDocument> dq = defaultConnector.concurrentDocumentsByQuery(CollectionSchema.host_s.getSolrFieldName() + ":\"" + u.getHost() + "\"", 0, 100000000, Long.MAX_VALUE, 100, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
                         SolrDocument doc;
                         try {

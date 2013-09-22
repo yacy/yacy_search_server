@@ -28,7 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.SortedMap;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;

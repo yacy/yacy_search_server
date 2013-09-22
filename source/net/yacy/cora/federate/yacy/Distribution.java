@@ -20,8 +20,8 @@
 
 package net.yacy.cora.federate.yacy;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.Base64Order;
 
 /**

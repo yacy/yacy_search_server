@@ -36,9 +36,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ByteArray;
 
 
@@ -94,7 +94,7 @@ public class RobotsTxtEntry {
     }
 
     protected RobotsTxtEntry(
-            final MultiProtocolURI theURL,
+            final MultiProtocolURL theURL,
             final List<String> allowPathList,
             final List<String> disallowPathList,
             final Date loadedDate,
@@ -177,11 +177,11 @@ public class RobotsTxtEntry {
      * get the sitemap url
      * @return the sitemap url or null if no sitemap url is given
      */
-    public MultiProtocolURI getSitemap() {
+    public MultiProtocolURL getSitemap() {
         final String url = this.mem.containsKey(SITEMAP)? UTF8.String(this.mem.get(SITEMAP)): null;
         if (url == null) return null;
         try {
-            return new MultiProtocolURI(url);
+            return new MultiProtocolURL(url);
         } catch (final MalformedURLException e) {
             return null;
         }
@@ -228,7 +228,7 @@ public class RobotsTxtEntry {
         return 0;
     }
 
-    public boolean isDisallowed(final MultiProtocolURI subpathURL) {
+    public boolean isDisallowed(final MultiProtocolURL subpathURL) {
         String path = subpathURL.getFile();
         if (this.mem == null) {
             this.info = "no robots file available";

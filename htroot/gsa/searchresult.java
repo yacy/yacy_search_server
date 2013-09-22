@@ -25,7 +25,7 @@ import java.io.Writer;
 import java.util.Date;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;

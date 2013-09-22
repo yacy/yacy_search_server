@@ -29,7 +29,7 @@
 
 import java.io.IOException;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.ResultURLs;

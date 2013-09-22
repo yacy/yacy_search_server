@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 

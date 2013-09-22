@@ -24,8 +24,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -37,7 +38,6 @@ import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.Latency;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.robots.RobotsTxt;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.BufferedObjectIndex;
 import net.yacy.kelondro.index.Row;
@@ -210,7 +210,7 @@ public class CrawlQueue {
      * @param crawlURL
      * @return the sleep time in milliseconds; may be negative for no sleep time
      */
-    private long getDomainSleepTime(final RobotsTxt robots, final CrawlProfile profileEntry, final DigestURI crawlURL) {
+    private long getDomainSleepTime(final RobotsTxt robots, final CrawlProfile profileEntry, final DigestURL crawlURL) {
         if (profileEntry == null) return 0;
         long sleeptime = (
             profileEntry.cacheStrategy() == CacheStrategy.CACHEONLY ||
@@ -228,7 +228,7 @@ public class CrawlQueue {
      * @param crawlURL
      * @return
      */
-    private long getRobotsTime(final RobotsTxt robots, final DigestURI crawlURL, ClientIdentification.Agent agent) {
+    private long getRobotsTime(final RobotsTxt robots, final DigestURL crawlURL, ClientIdentification.Agent agent) {
         long sleeptime = Latency.waitingRobots(crawlURL, robots, agent); // this uses the robots.txt database and may cause a loading of robots.txt from the server
         return sleeptime < 0 ? 0 : sleeptime;
     }

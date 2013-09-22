@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;

@@ -32,8 +32,8 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.storage.HandleMap;
 import net.yacy.cora.util.ByteArray;

@@ -24,7 +24,7 @@ import java.io.Serializable;
 import java.util.Collection;
 
 import net.yacy.cora.date.MicroDate;
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.util.ByteArray;
 import net.yacy.kelondro.data.word.Word;

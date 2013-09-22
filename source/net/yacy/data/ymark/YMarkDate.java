@@ -31,7 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 
 public class YMarkDate {
 

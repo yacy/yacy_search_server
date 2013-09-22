@@ -33,7 +33,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.order.NaturalOrder;
 
 /**

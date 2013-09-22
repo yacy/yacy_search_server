@@ -39,18 +39,18 @@ import java.util.TreeMap;
 
 import org.apache.solr.common.params.MapSolrParams;
 
-import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.WordCache;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.analysis.EnhancedTextProfileSignature;
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.language.synonyms.SynonymLibrary;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.language.Identificator;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.util.Bitfield;
@@ -113,7 +113,7 @@ public final class Condenser {
         // add the URL components to the word list
         insertTextToWords(new SentenceReader(document.dc_source().toTokens()), 0, WordReferenceRow.flag_app_dc_identifier, this.RESULT_FLAGS, false, meaningLib);
 
-        Map.Entry<DigestURI, String> entry;
+        Map.Entry<AnchorURL, String> entry;
         if (indexText) {
             createCondensement(document.getTextString(), meaningLib, doAutotagging);
             // the phrase counter:
@@ -165,7 +165,7 @@ public final class Condenser {
         if (indexMedia) {
             // add anchor descriptions: here, we also add the url components
             // audio
-            Iterator<Map.Entry<DigestURI, String>> i = document.getAudiolinks().entrySet().iterator();
+            Iterator<Map.Entry<AnchorURL, String>> i = document.getAudiolinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
                 insertTextToWords(new SentenceReader(entry.getKey().toNormalform(true)), 99, flag_cat_hasaudio, this.RESULT_FLAGS, false, meaningLib);
@@ -191,7 +191,7 @@ public final class Condenser {
             // images
             final Iterator<ImageEntry> j = document.getImages().values().iterator();
             ImageEntry ientry;
-            MultiProtocolURI url;
+            MultiProtocolURL url;
             while (j.hasNext()) {
                 ientry = j.next();
                 url = ientry.url();

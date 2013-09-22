@@ -23,7 +23,7 @@
  */
 
 
-package net.yacy.cora.document;
+package net.yacy.cora.document.id;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -47,9 +47,10 @@ import java.util.regex.Pattern;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
-import net.yacy.cora.document.Punycode.PunycodeException;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.Punycode.PunycodeException;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.TimeoutRequest;
@@ -61,9 +62,9 @@ import net.yacy.cora.util.CommonPattern;
  * MultiProtocolURI provides a URL object for multiple protocols like http, https, ftp, smb and file
  *
  */
-public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolURI> {
+public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolURL> {
 
-    public static final MultiProtocolURI POISON = new MultiProtocolURI(); // poison pill for concurrent link generators
+    public static final MultiProtocolURL POISON = new MultiProtocolURL(); // poison pill for concurrent link generators
 
     private static final Pattern ampPattern = Pattern.compile(Pattern.quote("&amp;"));
     private static final long serialVersionUID = -1173233022912141884L;
@@ -96,7 +97,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     /**
      * initialization of a MultiProtocolURI to produce poison pills for concurrent blocking queues
      */
-    public MultiProtocolURI()  {
+    public MultiProtocolURL()  {
         this.protocol = null;
         this.host = null;
         this.hostAddress = null;
@@ -108,11 +109,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         this.port = -1;
     }
 
-    public MultiProtocolURI(final File file) throws MalformedURLException {
+    public MultiProtocolURL(final File file) throws MalformedURLException {
         this("file", "", -1, file.getAbsolutePath());
     }
 
-    protected MultiProtocolURI(final MultiProtocolURI url) {
+    protected MultiProtocolURL(final MultiProtocolURL url) {
         this.protocol = url.protocol;
         this.host = url.host;
         this.hostAddress = null;
@@ -124,7 +125,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         this.port = url.port;
     }
 
-    public MultiProtocolURI(String url) throws MalformedURLException {
+    public MultiProtocolURL(String url) throws MalformedURLException {
         if (url == null) throw new MalformedURLException("url string is null");
 
         this.hostAddress = null;
@@ -275,7 +276,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return this.contentDomain;
     }
 
-    public static MultiProtocolURI newURL(final String baseURL, String relPath) throws MalformedURLException {
+    public static MultiProtocolURL newURL(final String baseURL, String relPath) throws MalformedURLException {
         if (relPath.startsWith("//")) {
             // patch for urls starting with "//" which can be found in the wild
             relPath = "http:" + relPath;
@@ -287,12 +288,12 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             isFile(relPath) ||
             isSMB(relPath)/*||
             relPath.contains(":") && patternMail.matcher(relPath.toLowerCase()).find()*/) {
-            return new MultiProtocolURI(relPath);
+            return new MultiProtocolURL(relPath);
         }
-        return new MultiProtocolURI(new MultiProtocolURI(baseURL), relPath);
+        return new MultiProtocolURL(new MultiProtocolURL(baseURL), relPath);
     }
 
-    public static MultiProtocolURI newURL(final MultiProtocolURI baseURL, String relPath) throws MalformedURLException {
+    public static MultiProtocolURL newURL(final MultiProtocolURL baseURL, String relPath) throws MalformedURLException {
         if (relPath.startsWith("//")) {
             // patch for urls starting with "//" which can be found in the wild
             relPath = (baseURL == null) ? "http:" + relPath : baseURL.getProtocol() + ":" + relPath;
@@ -304,12 +305,12 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             isFile(relPath) ||
             isSMB(relPath)/*||
             relPath.contains(":") && patternMail.matcher(relPath.toLowerCase()).find()*/) {
-            return new MultiProtocolURI(relPath);
+            return new MultiProtocolURL(relPath);
         }
-        return new MultiProtocolURI(baseURL, relPath);
+        return new MultiProtocolURL(baseURL, relPath);
     }
 
-    public MultiProtocolURI(final MultiProtocolURI baseURL, String relPath) throws MalformedURLException {
+    public MultiProtocolURL(final MultiProtocolURL baseURL, String relPath) throws MalformedURLException {
         if (baseURL == null) throw new MalformedURLException("base URL is null");
         if (relPath == null) throw new MalformedURLException("relPath is null");
 
@@ -361,7 +362,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         escape();
     }
 
-    public MultiProtocolURI(final String protocol, String host, final int port, final String path) throws MalformedURLException {
+    public MultiProtocolURL(final String protocol, String host, final int port, final String path) throws MalformedURLException {
         if (protocol == null) throw new MalformedURLException("protocol is null");
         if (host.indexOf(':') >= 0 && host.charAt(0) != '[') host = '[' + host + ']'; // IPv6 host must be enclosed in square brackets
         this.protocol = protocol;
@@ -948,8 +949,8 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
-        if (!(obj instanceof MultiProtocolURI)) return false;
-        final MultiProtocolURI other = (MultiProtocolURI) obj;
+        if (!(obj instanceof MultiProtocolURL)) return false;
+        final MultiProtocolURL other = (MultiProtocolURL) obj;
 
         return
           ((this.protocol == null && other.protocol == null) || (this.protocol != null && other.protocol != null && this.protocol.equals(other.protocol))) &&
@@ -961,7 +962,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     @Override
-    public int compareTo(final MultiProtocolURI h) {
+    public int compareTo(final MultiProtocolURL h) {
         int c;
         if (this.protocol != null && h.protocol != null && (c = this.protocol.compareTo(h.protocol)) != 0) return c;
         if (this.host != null && h.host != null && (c = this.host.compareTo(h.host)) != 0) return c;
@@ -2167,12 +2168,12 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
           };
         //MultiProtocolURI.initSessionIDNames(FileUtils.loadList(new File("defaults/sessionid.names")));
         String environment, url;
-        MultiProtocolURI aURL, aURL1;
+        MultiProtocolURL aURL, aURL1;
         java.net.URL jURL;
         for (String[] element : test) {
             environment = element[0];
             url = element[1];
-            try {aURL = MultiProtocolURI.newURL(environment, url);} catch (final MalformedURLException e) {e.printStackTrace(); aURL = null;}
+            try {aURL = MultiProtocolURL.newURL(environment, url);} catch (final MalformedURLException e) {e.printStackTrace(); aURL = null;}
             if (environment == null) {
                 try {jURL = new java.net.URL(url);} catch (final MalformedURLException e) {jURL = null;}
             } else {
@@ -2190,7 +2191,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
             // check stability: the normalform of the normalform must be equal to the normalform
             if (aURL != null) try {
-                aURL1 = new MultiProtocolURI(aURL.toNormalform(false));
+                aURL1 = new MultiProtocolURL(aURL.toNormalform(false));
                 if (!(aURL1.toNormalform(false).equals(aURL.toNormalform(false)))) {
                     System.out.println("no stability for url:");
                     System.out.println("aURL0=" + aURL.toString());

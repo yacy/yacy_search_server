@@ -25,11 +25,11 @@ package net.yacy.document.importer;
 import java.io.File;
 import java.io.IOException;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Response;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
 
@@ -42,10 +42,10 @@ import net.yacy.repository.LoaderDispatcher;
 
 public class OAIPMHLoader {
 
-    private final DigestURI source;
+    private final DigestURL source;
     private final ResumptionToken resumptionToken;
 
-    public OAIPMHLoader(final LoaderDispatcher loader, final DigestURI source, final File targetDir, final ClientIdentification.Agent agent) throws IOException {
+    public OAIPMHLoader(final LoaderDispatcher loader, final DigestURL source, final File targetDir, final ClientIdentification.Agent agent) throws IOException {
         this.source = source;
 
         // load the file from the net

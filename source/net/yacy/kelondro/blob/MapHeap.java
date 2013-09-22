@@ -44,7 +44,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.ByteOrder;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.NaturalOrder;

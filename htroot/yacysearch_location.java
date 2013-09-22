@@ -23,7 +23,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.federate.opensearch.SRURSSConnector;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.protocol.Domains;

@@ -50,7 +50,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.zip.GZIPInputStream;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
@@ -60,7 +62,6 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.content.SurrogateReader;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
@@ -193,7 +194,7 @@ public class MediawikiImporter extends Thread implements Importer {
                         q = this.urlStub.lastIndexOf('/');
                         if (q > 0) this.urlStub = this.urlStub.substring(0, q + 1);
                     }
-                    final DigestURI uri = new DigestURI(this.urlStub);
+                    final DigestURL uri = new DigestURL(this.urlStub);
                     this.hostport = uri.getHost();
                     if (uri.getPort() != 80) this.hostport += ":" + uri.getPort();
                     continue;
@@ -501,7 +502,7 @@ public class MediawikiImporter extends Thread implements Importer {
     public class wikiparserrecord {
         public String title;
         String source, html, hostport, urlStub;
-        DigestURI url;
+        AnchorURL url;
         Document document;
         public wikiparserrecord(final String hostport, final String urlStub, final String title, final StringBuilder sb) {
             this.title = title;
@@ -520,7 +521,7 @@ public class MediawikiImporter extends Thread implements Importer {
         }
         public void genDocument() throws Parser.Failure {
             try {
-				this.url = new DigestURI(this.urlStub + this.title);
+				this.url = new AnchorURL(this.urlStub + this.title);
 				final Document[] parsed = TextParser.parseSource(this.url, "text/html", "UTF-8", UTF8.getBytes(this.html));
 				this.document = Document.mergeDocuments(this.url, "text/html", parsed);
 				// the wiki parser is not able to find the proper title in the source text, so it must be set here

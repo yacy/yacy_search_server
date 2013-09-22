@@ -2,7 +2,7 @@ package net.yacy.data.ymark;
 
 import java.util.Comparator;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.kelondro.blob.Tables;
 
 public class TablesRowComparator implements Comparator<Tables.Row> {

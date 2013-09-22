@@ -35,9 +35,11 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -52,7 +54,6 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
@@ -60,13 +61,13 @@ import net.yacy.search.Switchboard;
 
 public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaSnippet> {
     public ContentDomain type;
-    public DigestURI href, source;
+    public DigestURL href, source;
     public String name, attr, mime;
     public long ranking;
     public int width, height;
     public long fileSize;
 
-    public MediaSnippet(final ContentDomain type, final DigestURI href, final String mime, final String name, final long fileSize, final String attr, final long ranking, final DigestURI source) {
+    public MediaSnippet(final ContentDomain type, final DigestURL href, final String mime, final String name, final long fileSize, final String attr, final long ranking, final DigestURL source) {
         this.type = type;
         this.href = href;
         this.mime = mime;
@@ -86,7 +87,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         if ((this.attr == null) || (this.attr.isEmpty())) this.attr = "_";
     }
 
-    public MediaSnippet(final ContentDomain type, final DigestURI href, final String mime, final String name, final long fileSize, final int width, final int height, final long ranking, final DigestURI source) {
+    public MediaSnippet(final ContentDomain type, final DigestURL href, final String mime, final String name, final long fileSize, final int width, final int height, final long ranking, final DigestURL source) {
         this.type = type;
         this.href = href;
         this.mime = mime;
@@ -135,7 +136,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return o1.compareTo(o2);
     }
 
-    public static List<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final Classification.ContentDomain mediatype, final CacheStrategy cacheStrategy, final boolean reindexing) {
+    public static List<MediaSnippet> retrieveMediaSnippets(final DigestURL url, final HandleSet queryhashes, final Classification.ContentDomain mediatype, final CacheStrategy cacheStrategy, final boolean reindexing) {
         if (queryhashes.isEmpty()) {
             ConcurrentLog.fine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();
@@ -161,18 +162,18 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return a;
     }
 
-    public static List<MediaSnippet> computeMediaSnippets(final DigestURI source, final Document document, final HandleSet queryhashes, final ContentDomain mediatype) {
+    public static List<MediaSnippet> computeMediaSnippets(final DigestURL source, final Document document, final HandleSet queryhashes, final ContentDomain mediatype) {
 
         if (document == null) return new ArrayList<MediaSnippet>();
-        Map<DigestURI, String> media = null;
+        Map<AnchorURL, String> media = null;
         if (mediatype == ContentDomain.AUDIO) media = document.getAudiolinks();
         else if (mediatype == ContentDomain.VIDEO) media = document.getVideolinks();
         else if (mediatype == ContentDomain.APP) media = document.getApplinks();
         if (media == null) return null;
 
-        final Iterator<Map.Entry<DigestURI, String>> i = media.entrySet().iterator();
-        Map.Entry<DigestURI, String> entry;
-        DigestURI url;
+        final Iterator<Map.Entry<AnchorURL, String>> i = media.entrySet().iterator();
+        Map.Entry<AnchorURL, String> entry;
+        AnchorURL url;
         String desc;
         final List<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
@@ -189,7 +190,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return result;
     }
 
-    public static List<MediaSnippet> computeImageSnippets(final DigestURI source, final Document document, final HandleSet queryhashes) {
+    public static List<MediaSnippet> computeImageSnippets(final DigestURL source, final Document document, final HandleSet queryhashes) {
 
         final SortedSet<ImageEntry> images = new TreeSet<ImageEntry>();
         images.addAll(document.getImages().values()); // iterates images in descending size order!
@@ -197,7 +198,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
 
         final Iterator<ImageEntry> i = images.iterator();
         ImageEntry ientry;
-        DigestURI url;
+        DigestURL url;
         String desc;
         final List<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
@@ -253,7 +254,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
      * @param   blacklistType   Type of blacklist (see class Blacklist, BLACKLIST_FOO)
      * @return  isBlacklisted   Wether the given URL is blacklisted
      */
-    private static boolean isUrlBlacklisted (final BlacklistType blacklistType, final DigestURI url) {
+    private static boolean isUrlBlacklisted (final BlacklistType blacklistType, final DigestURL url) {
         // Default is not blacklisted
         boolean isBlacklisted = false;
 

@@ -33,9 +33,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.date.MicroDate;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.ConcurrentLog;
@@ -83,7 +83,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.positions = new LinkedBlockingQueue<Integer>();
         this.positions.add(1);
         String urlNormalform = md.url().toNormalform(true);
-        this.urlcomps = MultiProtocolURI.urlComps(urlNormalform).length;
+        this.urlcomps = MultiProtocolURL.urlComps(urlNormalform).length;
         this.urllength = urlNormalform.length();
         this.virtualAge = -1; // compute that later
         // the following fields cannot be computed here very easy and are just filled with dummy values

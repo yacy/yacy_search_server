@@ -17,13 +17,14 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.rdfa.IRDFaTriple;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 /**
  * @author fgandon
@@ -46,7 +47,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 	}
 
 	@Override
-    public Document[] parse(DigestURI url, String mimeType,
+    public Document[] parse(AnchorURL url, String mimeType,
 			String charset, InputStream source) throws Failure,
 			InterruptedException {
 
@@ -67,7 +68,7 @@ public class RDFaParser extends AbstractParser implements Parser {
         return htmlDocs;
 	}
 
-	private static Document parseRDFa(DigestURI url, String mimeType,
+	private static Document parseRDFa(DigestURL url, String mimeType,
 			String charset, InputStream source) {
 		RDFaTripleImpl triple;
 		IRDFaTriple[] allTriples = null;
@@ -95,7 +96,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 		return doc;
 	}
 
-	private Document[] parseHtml(DigestURI url, String mimeType,
+	private Document[] parseHtml(AnchorURL url, String mimeType,
 			String charset, InputStream source) throws Failure,
 			InterruptedException {
 
@@ -110,7 +111,7 @@ public class RDFaParser extends AbstractParser implements Parser {
 		return htmlDocs;
 	}
 
-	private static Document convertAllTriplesToDocument(DigestURI url,
+	private static Document convertAllTriplesToDocument(DigestURL url,
 			String mimeType, String charset, IRDFaTriple[] allTriples) {
 
 		//Set<String> languages = new HashSet<String>(2);
@@ -178,7 +179,7 @@ public class RDFaParser extends AbstractParser implements Parser {
             if (aReader != null) {
                 RDFaParser aParser = new RDFaParser();
                 try {
-                    aParser.parse(new DigestURI(args[0]),"","",aURL.openStream());
+                    aParser.parse(new AnchorURL(args[0]),"","",aURL.openStream());
                 } catch (final FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (final IOException e) {

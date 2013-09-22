@@ -27,9 +27,9 @@ package net.yacy.utils;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.http.ProxySettings;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 public class loaderThreads {
 
@@ -60,7 +60,7 @@ public class loaderThreads {
         this.failed = 0;
     }
 
-    public void newThread(final String name, final DigestURI url, final loaderProcess process, final ClientIdentification.Agent agent) {
+    public void newThread(final String name, final DigestURL url, final loaderProcess process, final ClientIdentification.Agent agent) {
         final Thread t = new loaderThread(url, process, agent);
         this.threads.put(name, t);
         t.start();
@@ -103,14 +103,14 @@ public class loaderThreads {
     }
 
     protected class loaderThread extends Thread {
-        private final DigestURI url;
+        private final DigestURL url;
         private Exception error;
         private final loaderProcess process;
         private byte[] page;
         private boolean loaded;
         final ClientIdentification.Agent agent;
 
-        public loaderThread(final DigestURI url, final loaderProcess process, final ClientIdentification.Agent agent) {
+        public loaderThread(final DigestURL url, final loaderProcess process, final ClientIdentification.Agent agent) {
             this.url = url;
             this.process = process;
             this.error = null;

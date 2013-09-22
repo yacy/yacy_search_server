@@ -24,7 +24,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.document;
+package net.yacy.cora.document.encoding;
 
 import java.util.Comparator;
 

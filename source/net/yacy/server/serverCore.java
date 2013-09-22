@@ -58,7 +58,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;

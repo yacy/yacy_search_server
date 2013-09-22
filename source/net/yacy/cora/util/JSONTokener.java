@@ -30,7 +30,7 @@ SOFTWARE.
  * @version 2010-02-02
  */
 
-package net.yacy.cora.document;
+package net.yacy.cora.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;

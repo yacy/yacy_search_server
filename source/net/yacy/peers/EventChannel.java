@@ -29,8 +29,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import net.yacy.cora.document.RSSFeed;
-import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.document.feed.RSSFeed;
+import net.yacy.cora.document.feed.RSSMessage;
 
 public enum EventChannel {
     TEST,

@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.TreeSet;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.kelondro.io.CharBuffer;
 
 public class ContentTransformer extends AbstractTransformer implements Transformer {

@@ -72,6 +72,7 @@ public enum WebgraphSchema implements SchemaDeclaration {
     
     // target information
     target_id_s(SolrType.string, true, true, false, false, false, "primary key of document, the URL hash (target)"),
+    target_order_i(SolrType.num_integer, true, true, false, false, false, "order number of target url, a count from first to last URL on the source page (target)"),
     target_protocol_s(SolrType.string, true, true, false, false, false, "the protocol of the url (target)"),
     target_urlstub_s(SolrType.string, true, true, false, false, false, "the url without the protocol (target)"),
     target_file_name_s(SolrType.string, true, true, false, false, false, "the file name without the extension (target)"),

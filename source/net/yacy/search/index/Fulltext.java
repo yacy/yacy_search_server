@@ -42,8 +42,9 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
@@ -62,7 +63,6 @@ import net.yacy.cora.storage.ZIPReader;
 import net.yacy.cora.storage.ZIPWriter;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.parser.html.CharacterCoding;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
@@ -319,7 +319,7 @@ public final class Fulltext {
         return x;
     }
 
-    public DigestURI getURL(final byte[] urlHash) {
+    public DigestURL getURL(final byte[] urlHash) {
         if (urlHash == null || this.getDefaultConnector() == null) return null;
         
         String x;
@@ -330,7 +330,7 @@ public final class Fulltext {
         }
         if (x == null) return null;
         try {
-            DigestURI uri = new DigestURI(x, urlHash);
+            DigestURL uri = new DigestURL(x, urlHash);
             return uri;
         } catch (final MalformedURLException e) {
             return null;
@@ -531,8 +531,8 @@ public final class Fulltext {
      * @param concurrently if true, then the method returnes immediately and runs concurrently
      */
     public int remove(final String basepath, Date freshdate) {
-        DigestURI uri;
-        try {uri = new DigestURI(basepath);} catch (final MalformedURLException e) {return 0;}
+        DigestURL uri;
+        try {uri = new DigestURL(basepath);} catch (final MalformedURLException e) {return 0;}
         final String host = uri.getHost();
         final String collectionQuery = CollectionSchema.host_s.getSolrFieldName() + ":\"" + host + "\"" +
                 ((freshdate != null && freshdate.before(new Date())) ? (" AND " + CollectionSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") : "");
@@ -829,12 +829,12 @@ public final class Fulltext {
                             pw.println(url);
                         }
                         if (this.format == 1) {
-                            if (title != null) pw.println("<a href=\"" + MultiProtocolURI.escape(url) + "\">" + CharacterCoding.unicode2xml((String) title.iterator().next(), true) + "</a>");
+                            if (title != null) pw.println("<a href=\"" + MultiProtocolURL.escape(url) + "\">" + CharacterCoding.unicode2xml((String) title.iterator().next(), true) + "</a>");
                         }
                         if (this.format == 2) {
                             pw.println("<item>");
                             if (title != null) pw.println("<title>" + CharacterCoding.unicode2xml((String) title.iterator().next(), true) + "</title>");
-                            pw.println("<link>" + MultiProtocolURI.escape(url) + "</link>");
+                            pw.println("<link>" + MultiProtocolURL.escape(url) + "</link>");
                             if (author != null && !author.isEmpty()) pw.println("<author>" + CharacterCoding.unicode2xml(author, true) + "</author>");
                             if (descriptions != null && descriptions.length > 0) {
                                 for (String d: descriptions) pw.println("<description>" + CharacterCoding.unicode2xml(d, true) + "</description>");
@@ -889,7 +889,7 @@ public final class Fulltext {
         count += 10; // make some more to prevent that we have to do this again after deletions too soon.
         if (count < 0 || domainScore.sizeSmaller(count)) count = domainScore.size();
         this.statsDump = new ArrayList<HostStat>();
-        DigestURI url;
+        DigestURL url;
         while (j.hasNext()) {
             urlhash = j.next();
             if (urlhash == null) continue;

@@ -31,6 +31,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -38,7 +39,6 @@ import net.yacy.data.WorkTables;
 import net.yacy.document.importer.OAIPMHImporter;
 import net.yacy.document.importer.OAIPMHLoader;
 import net.yacy.document.importer.ResumptionToken;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -59,9 +59,9 @@ public class IndexImportOAIPMH_p {
             if (post.containsKey("urlstartone")) {
                 String oaipmhurl = post.get("urlstartone");
                 if (oaipmhurl.indexOf('?',0) < 0) oaipmhurl = oaipmhurl + "?verb=ListRecords&metadataPrefix=oai_dc";
-                DigestURI url = null;
+                DigestURL url = null;
                 try {
-                    url = new DigestURI(oaipmhurl);
+                    url = new DigestURL(oaipmhurl);
                     ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
                     final OAIPMHLoader r = new OAIPMHLoader(sb.loader, url, sb.surrogatesInPath, agent);
                     final ResumptionToken rt = r.getResumptionToken();
@@ -72,7 +72,7 @@ public class IndexImportOAIPMH_p {
 
                     // set next default url
                     try {
-                        final DigestURI nexturl = (rt == null) ? null : rt.resumptionURL();
+                        final DigestURL nexturl = (rt == null) ? null : rt.resumptionURL();
                         if (rt != null) prop.put("defaulturl", (nexturl == null) ? "" : nexturl.toNormalform(true));
                     } catch (final MalformedURLException e) {
                         prop.put("defaulturl", e.getMessage());
@@ -94,9 +94,9 @@ public class IndexImportOAIPMH_p {
             if (post.get("urlstart", "").length() > 0) {
                 final String oaipmhurl = post.get("urlstart", "");
                 sb.tables.recordAPICall(post, "IndexImportOAIPMH_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "OAI-PMH import for " + oaipmhurl);
-                DigestURI url = null;
+                DigestURL url = null;
                 try {
-                    url = new DigestURI(oaipmhurl);
+                    url = new DigestURL(oaipmhurl);
                     ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
                     final OAIPMHImporter job = new OAIPMHImporter(sb.loader, agent, url);
                     job.start();
@@ -129,12 +129,12 @@ public class IndexImportOAIPMH_p {
                 final Random r = new Random(System.currentTimeMillis());
 
                 // start jobs for the sources
-                DigestURI url = null;
+                DigestURL url = null;
                 ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
                 while (!sourceList.isEmpty()) {
                     final String oaipmhurl = sourceList.remove(r.nextInt(sourceList.size()));
                     try {
-                        url = new DigestURI(oaipmhurl);
+                        url = new DigestURL(oaipmhurl);
                         final OAIPMHImporter job = new OAIPMHImporter(sb.loader, agent, url);
                         job.start();
                     } catch (final MalformedURLException e) {

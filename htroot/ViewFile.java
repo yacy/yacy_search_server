@@ -34,11 +34,11 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
-
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
@@ -54,7 +54,6 @@ import net.yacy.document.SentenceReader;
 import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
@@ -107,7 +106,7 @@ public class ViewFile {
         final String viewMode = post.get("viewMode","parsed");
         prop.put("error_vMode-" + viewMode, "1");
 
-        DigestURI url = null;
+        DigestURL url = null;
         String descr = "";
         final int wordCount = 0;
         int size = 0;
@@ -127,7 +126,7 @@ public class ViewFile {
             }
 
             // define an url by post parameter
-            url = new DigestURI(MultiProtocolURI.unescape(urlString));
+            url = new DigestURL(MultiProtocolURL.unescape(urlString));
             urlHash = ASCII.String(url.hash());
             pre = post.getBoolean("pre");
         } catch (final MalformedURLException e) {}
@@ -185,7 +184,7 @@ public class ViewFile {
         }
 
         final String[] wordArray = wordArray(post.get("words", null));
-        final String ext = MultiProtocolURI.getFileExtension(url.getFileName());
+        final String ext = MultiProtocolURL.getFileExtension(url.getFileName());
         if (viewMode.equals("plain")) {
 
             // TODO: how to handle very large files here ?
@@ -311,11 +310,11 @@ public class ViewFile {
                 prop.put("viewMode", VIEW_MODE_AS_LINKLIST);
                 boolean dark = true;
                 int i = 0;
-                i += putMediaInfo(prop, wordArray, i, document.getVideolinks(), "video", (i % 2 == 0), document.getAnchors());
-                i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0), document.getAnchors());
+                i += putMediaInfo(prop, wordArray, i, document.getVideolinks(), "video", (i % 2 == 0));
+                i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
                 dark = (i % 2 == 0);
 
-                final Map<DigestURI, ImageEntry> ts = document.getImages();
+                final Map<AnchorURL, ImageEntry> ts = document.getImages();
                 final Iterator<ImageEntry> tsi = ts.values().iterator();
                 ImageEntry entry;
                 while (tsi.hasNext()) {
@@ -335,8 +334,8 @@ public class ViewFile {
                     dark = !dark;
                     i++;
                 }
-                i += putMediaInfo(prop, wordArray, i, document.getApplinks(), "app", (i % 2 == 0), document.getAnchors());
-                i += putMediaInfo(prop, wordArray, i, document.getHyperlinks(), "link", (i % 2 == 0), document.getAnchors());
+                i += putMediaInfo(prop, wordArray, i, document.getApplinks(), "app", (i % 2 == 0));
+                i += putMediaInfo(prop, wordArray, i, document.getHyperlinks(), "link", (i % 2 == 0));
                 prop.put("viewMode_links", i);
 
             }
@@ -439,16 +438,14 @@ public class ViewFile {
                     final serverObjects prop,
                     final String[] wordArray,
                     int c,
-                    final Map<DigestURI, String> media,
+                    final Map<AnchorURL, String> media,
                     final String type,
-                    boolean dark,
-                    final Map<DigestURI, Properties> alllinks) {
+                    boolean dark) {
         int i = 0;
-        for (final Map.Entry<DigestURI, String> entry : media.entrySet()) {
-            final Properties p = alllinks.get(entry.getKey());
-            final String name = p.getProperty("name", ""); // the name attribute
-            final String rel = p.getProperty("rel", "");   // the rel-attribute
-            final String text = p.getProperty("text", ""); // the text between the <a></a> tag
+        for (final Map.Entry<AnchorURL, String> entry : media.entrySet()) {
+            final String name = entry.getKey().getNameProperty(); // the name attribute
+            final String rel = entry.getKey().getRelProperty();   // the rel-attribute
+            final String text = entry.getKey().getTextProperty(); // the text between the <a></a> tag
 
             prop.put("viewMode_links_" + c + "_nr", c);
             prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));

@@ -31,10 +31,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 // this is a new implementation of this parser idiom using multiple documents as result set
 
@@ -57,7 +57,7 @@ public class sidAudioParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURI location, final String mimeType,
+    public Document[] parse(final AnchorURL location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
         try {

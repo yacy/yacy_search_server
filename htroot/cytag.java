@@ -28,8 +28,9 @@
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
+
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.ImageParser;
@@ -45,7 +46,7 @@ public class cytag {
     public static Image respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         
         final Switchboard sb = (Switchboard)env;
-        final MultiProtocolURI referer = header.referer();
+        final MultiProtocolURL referer = header.referer();
         
         // harvest request information
         StringBuilder connect = new StringBuilder();

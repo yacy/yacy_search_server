@@ -34,8 +34,9 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
@@ -118,10 +119,10 @@ public class URIMetadataRow {
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
-        DigestURI url;
+        DigestURL url;
         String urls = crypt.simpleDecode(prop.getProperty("url", ""));
         try {
-            url = new DigestURI(urls);
+            url = new DigestURL(urls);
         } catch (final MalformedURLException e) {
             throw new kelondroException("bad url: " + urls);
         }
@@ -210,7 +211,7 @@ public class URIMetadataRow {
     }
 
     private static byte[] encodeComp(
-            final DigestURI url,
+            final DigestURL url,
             final String dc_title,
             final String dc_creator,
             final String dc_subject,
@@ -252,7 +253,7 @@ public class URIMetadataRow {
         return this.metadata().matches(matcher);
     }
 
-    public DigestURI url() {
+    public DigestURL url() {
         return this.metadata().url();
     }
 
@@ -465,7 +466,7 @@ public class URIMetadataRow {
     }
 
     private class Components {
-        private DigestURI url;
+        private DigestURL url;
         private String urlRaw;
         private byte[] urlHash;
         private final String dc_title, dc_creator, dc_subject, dc_publisher;
@@ -493,10 +494,10 @@ public class URIMetadataRow {
             if (this.url != null) return matcher.matcher(this.url.toNormalform(true).toLowerCase()).matches();
             return false;
         }
-        public DigestURI url() {
+        public DigestURL url() {
             if (this.url == null) {
                 try {
-                    this.url = new DigestURI(this.urlRaw, this.urlHash);
+                    this.url = new DigestURL(this.urlRaw, this.urlHash);
                 } catch (final MalformedURLException e) {
                     this.url = null;
                 }

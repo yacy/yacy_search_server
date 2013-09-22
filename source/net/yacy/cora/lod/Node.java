@@ -27,7 +27,7 @@ package net.yacy.cora.lod;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.lod.vocabulary.Rdf;
 
 /**

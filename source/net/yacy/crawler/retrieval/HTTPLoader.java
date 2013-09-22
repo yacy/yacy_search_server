@@ -27,7 +27,8 @@ package net.yacy.crawler.retrieval;
 import java.io.IOException;
 import java.util.Date;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -37,7 +38,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.Latency;
 import net.yacy.crawler.data.ZURL.FailCategory;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.ByteCount;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
@@ -86,7 +86,7 @@ public final class HTTPLoader {
             throw new IOException("retry counter exceeded for URL " + request.url().toString() + ". Processing aborted.");
         }
 
-        DigestURI url = request.url();
+        DigestURL url = request.url();
 
         final String host = url.getHost();
         if (host == null || host.length() < 2) throw new IOException("host is not well-formed: '" + host + "'");
@@ -107,7 +107,7 @@ public final class HTTPLoader {
         if(yacyResolver != null) {
         	final String yAddress = yacyResolver.resolve(host);
         	if(yAddress != null) {
-        		url = new DigestURI(url.getProtocol() + "://" + yAddress + path);
+        		url = new DigestURL(url.getProtocol() + "://" + yAddress + path);
         	}
         }
 
@@ -117,7 +117,7 @@ public final class HTTPLoader {
         // create a request header
         final RequestHeader requestHeader = new RequestHeader();
         requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent);
-        DigestURI refererURL = null;
+        DigestURL refererURL = null;
         if (request.referrerhash() != null) refererURL = this.sb.getURL(request.referrerhash());
         if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true));
         requestHeader.put(HeaderFramework.ACCEPT, this.sb.getConfig("crawler.http.accept", DEFAULT_ACCEPT));
@@ -150,7 +150,7 @@ public final class HTTPLoader {
             }
 
             // normalize URL
-            final DigestURI redirectionUrl = DigestURI.newURL(request.url(), redirectionUrlString);
+            final DigestURL redirectionUrl = DigestURL.newURL(request.url(), redirectionUrlString);
 
             // restart crawling with new url
             this.log.info("CRAWLER Redirection detected ('" + client.getHttpResponse().getStatusLine() + "') for URL " + requestURLString);
@@ -283,7 +283,7 @@ public final class HTTPLoader {
                     }
 
                     // normalizing URL
-                    final DigestURI redirectionUrl = DigestURI.newURL(request.url(), redirectionUrlString);
+                    final DigestURL redirectionUrl = DigestURL.newURL(request.url(), redirectionUrlString);
 
 
                     // if we are already doing a shutdown we don't need to retry crawling

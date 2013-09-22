@@ -28,13 +28,13 @@ package net.yacy.crawler.retrieval;
 import java.net.MalformedURLException;
 import java.util.Date;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.document.parser.sitemapParser;
 import net.yacy.document.parser.sitemapParser.URLEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
 
@@ -42,10 +42,10 @@ public class SitemapImporter extends Thread {
 
     private CrawlProfile crawlingProfile = null;
     private static final ConcurrentLog logger = new ConcurrentLog("SITEMAP");
-    private DigestURI siteMapURL = null;
+    private DigestURL siteMapURL = null;
     private final Switchboard sb;
 
-    public SitemapImporter(final Switchboard sb, final DigestURI sitemapURL, final CrawlProfile profileEntry) {
+    public SitemapImporter(final Switchboard sb, final DigestURL sitemapURL, final CrawlProfile profileEntry) {
         assert sitemapURL != null;
         this.sb = sb;
         this.siteMapURL = sitemapURL;
@@ -72,9 +72,9 @@ public class SitemapImporter extends Thread {
 
         // get the url hash
         byte[] nexturlhash = null;
-        DigestURI url = null;
+        DigestURL url = null;
         try {
-            url = new DigestURI(entry.url());
+            url = new DigestURL(entry.url());
             nexturlhash = url.hash();
         } catch (final MalformedURLException e1) {
         }

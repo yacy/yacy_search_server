@@ -34,9 +34,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Hit;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.feed.Hit;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.EventChannel;

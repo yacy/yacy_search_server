@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.document.feed.RSSMessage;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.cora.lod.vocabulary.Geo;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
@@ -181,7 +181,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                     String u = value.stringValue();
                     solitaireTag(writer, RSSMessage.Token.link.name(), u);
                     try {
-                        MultiProtocolURI url = new MultiProtocolURI(u);
+                        MultiProtocolURL url = new MultiProtocolURL(u);
                         solitaireTag(writer, YaCyMetadata.host.getURIref(), url.getHost());
                         solitaireTag(writer, YaCyMetadata.path.getURIref(), url.getPath());
                         solitaireTag(writer, YaCyMetadata.file.getURIref(), url.getFileName());

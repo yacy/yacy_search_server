@@ -26,7 +26,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.lod.vocabulary.DCTerms;
 import net.yacy.cora.lod.vocabulary.Owl;
 import net.yacy.cora.lod.vocabulary.Tagging;
@@ -35,7 +36,6 @@ import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.LibraryProvider;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
@@ -59,8 +59,8 @@ public class Vocabulary_p {
                     // create a vocabulary
                     if (discovername != null && discovername.length() > 0) {
                         String discoverobjectspace = post.get("discoverobjectspace", "");
-                        MultiProtocolURI discoveruri = null;
-                        if (discoverobjectspace.length() > 0) try {discoveruri = new MultiProtocolURI(discoverobjectspace);} catch (final MalformedURLException e) {}
+                        MultiProtocolURL discoveruri = null;
+                        if (discoverobjectspace.length() > 0) try {discoveruri = new MultiProtocolURL(discoverobjectspace);} catch (final MalformedURLException e) {}
                         if (discoveruri == null) discoverobjectspace = "";
                         Map<String, Tagging.SOTuple> table = new TreeMap<String, Tagging.SOTuple>();
                         File propFile = LibraryProvider.autotagging.getVocabularyFile(discovername);
@@ -72,9 +72,9 @@ public class Vocabulary_p {
                         Segment segment = sb.index;
                         String t;
                         if (!discoverNot) {
-                            Iterator<DigestURI> ui = segment.urlSelector(discoveruri, 600000L, 100000);
+                            Iterator<DigestURL> ui = segment.urlSelector(discoveruri, 600000L, 100000);
                             while (ui.hasNext()) {
-                                DigestURI u = ui.next();
+                                DigestURL u = ui.next();
                                 String u0 = u.toNormalform(true);
                                 t = "";
                                 if (discoverFromPath) {
@@ -131,7 +131,7 @@ public class Vocabulary_p {
                     if (post.get("add_new", "").equals("checked") && post.get("newterm", "").length() > 0) {
                     	String objectlink = post.get("newobjectlink", "");
                     	if (objectlink.length() > 0) try {
-                    		objectlink = new MultiProtocolURI(objectlink).toNormalform(true);
+                    		objectlink = new MultiProtocolURL(objectlink).toNormalform(true);
                     	} catch (final MalformedURLException e) {}
                         vocabulary.put(post.get("newterm", ""), post.get("newsynonyms", ""), objectlink);
                     }

@@ -30,13 +30,13 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.lod.JenaTripleStore;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.search.Switchboard;
@@ -90,7 +90,7 @@ public class yacydoc {
 
         if (urlstring.length() > 0 && urlhash.isEmpty()) {
             try {
-                final DigestURI url = new DigestURI(urlstring);
+                final DigestURL url = new DigestURL(urlstring);
                 urlhash = ASCII.String(url.hash());
             } catch (final MalformedURLException e) {
                 ConcurrentLog.logException(e);

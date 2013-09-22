@@ -44,11 +44,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.lod.vocabulary.Tagging;
@@ -68,7 +69,6 @@ import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -96,6 +96,7 @@ import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.snippet.ResultEntry;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.search.snippet.TextSnippet.ResultClass;
+
 import org.apache.solr.common.SolrDocument;
 
 public final class SearchEvent {
@@ -844,7 +845,7 @@ public final class SearchEvent {
                 }
                 
                 // filter out media links in text search, if wanted
-                String ext = MultiProtocolURI.getFileExtension(iEntry.url().getFileName());
+                String ext = MultiProtocolURL.getFileExtension(iEntry.url().getFileName());
                 if (this.query.contentdom == ContentDomain.TEXT && Classification.isImageExtension(ext) && this.excludeintext_image) {
                     if (log.isFine()) log.fine("dropped Node: file name domain does not match");
                     continue pollloop;
@@ -1037,7 +1038,7 @@ public final class SearchEvent {
             }
             
             // filter out media links in text search, if wanted
-            String ext = MultiProtocolURI.getFileExtension(page.url().getFileName());
+            String ext = MultiProtocolURL.getFileExtension(page.url().getFileName());
             if (this.query.contentdom == ContentDomain.TEXT && Classification.isImageExtension(ext) && this.excludeintext_image) {
                 if (log.isFine()) log.fine("dropped RWI: file name domain does not match");
                 continue;
@@ -1267,8 +1268,8 @@ public final class SearchEvent {
 
         // apply 'common-sense' heuristic using references
         final String urlstring = rentry.url().toNormalform(true);
-        final String[] urlcomps = MultiProtocolURI.urlComps(urlstring);
-        final String[] descrcomps = MultiProtocolURI.splitpattern.split(rentry.title().toLowerCase());
+        final String[] urlcomps = MultiProtocolURL.urlComps(urlstring);
+        final String[] descrcomps = MultiProtocolURL.splitpattern.split(rentry.title().toLowerCase());
         for (final String urlcomp : urlcomps) {
             int tc = topwords.get(urlcomp);
             if (tc > 0) r += Math.max(1, tc) << this.query.ranking.coeff_urlcompintoplist;
@@ -1422,7 +1423,7 @@ public final class SearchEvent {
                     String a = alt != null && alt.size() > c ? (String) SetTools.nth(alt, c) : "";
                     if (query.getQueryGoal().matches((String) i) || query.getQueryGoal().matches(a)) {
                         try {
-                            DigestURI imageUrl = new DigestURI((prt != null && prt.size() > c ? SetTools.nth(prt, c) : "http") + "://" + i);
+                            DigestURL imageUrl = new DigestURL((prt != null && prt.size() > c ? SetTools.nth(prt, c) : "http") + "://" + i);
                             Object heightO = SetTools.nth(doc.getFieldValues(CollectionSchema.images_height_val.getSolrFieldName()), c);
                             Object widthO = SetTools.nth(doc.getFieldValues(CollectionSchema.images_width_val.getSolrFieldName()), c);
                             String id = ASCII.String(imageUrl.hash());
@@ -1434,12 +1435,12 @@ public final class SearchEvent {
                     c++;
                 }
             }
-            if (MultiProtocolURI.isImage(MultiProtocolURI.getFileExtension(ms.url().getFileName()))) {
+            if (MultiProtocolURL.isImage(MultiProtocolURL.getFileExtension(ms.url().getFileName()))) {
                 String id = ASCII.String(ms.hash());
                 if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), ms.url(), "", ms.title(), 0, 0, 0));
             }
             if (img != null && img.size() > 0) {
-                DigestURI imageUrl = new DigestURI((prt != null && prt.size() > 0 ? SetTools.nth(prt, 0) : "http") + "://" + SetTools.nth(img, 0));
+                DigestURL imageUrl = new DigestURL((prt != null && prt.size() > 0 ? SetTools.nth(prt, 0) : "http") + "://" + SetTools.nth(img, 0));
                 String imagetext =  alt != null && alt.size() > 0 ? (String) SetTools.nth(alt, 0) : "";
                 String id = ASCII.String(imageUrl.hash());
                 if (!imageViewed.containsKey(id) && !imageSpare.containsKey(id)) imageSpare.put(id, new ImageResult(ms.url(), imageUrl, "", imagetext, 0, 0, 0));
@@ -1450,10 +1451,10 @@ public final class SearchEvent {
     }
 
     public class ImageResult {
-        public DigestURI imageUrl, sourceUrl;
+        public DigestURL imageUrl, sourceUrl;
         public String mimetype = "", imagetext = "";
         public int width = 0, height = 0, fileSize = 0;
-        public ImageResult(DigestURI sourceUrl, DigestURI imageUrl, String mimetype, String imagetext, int width, int height, int fileSize) {
+        public ImageResult(DigestURL sourceUrl, DigestURL imageUrl, String mimetype, String imagetext, int width, int height, int fileSize) {
             this.sourceUrl = sourceUrl;
             this.imageUrl = imageUrl;
             this.mimetype = mimetype;
@@ -1638,7 +1639,7 @@ public final class SearchEvent {
     protected void addTopics(final ResultEntry resultEntry) {
         // take out relevant information for reference computation
         if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;
-        final String[] descrcomps = MultiProtocolURI.splitpattern.split(resultEntry.title().toLowerCase()); // words in the description
+        final String[] descrcomps = MultiProtocolURL.splitpattern.split(resultEntry.title().toLowerCase()); // words in the description
 
         // add references
         addTopic(descrcomps);

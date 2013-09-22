@@ -33,13 +33,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import org.apache.tools.tar.TarEntry;
@@ -61,11 +61,11 @@ public class tarParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURI url, final String mimeType, final String charset, InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final AnchorURL url, final String mimeType, final String charset, InputStream source) throws Parser.Failure, InterruptedException {
 
         final List<Document> docacc = new ArrayList<Document>();
         Document[] subDocs = null;
-        final String ext = MultiProtocolURI.getFileExtension(url.getFileName()).toLowerCase();
+        final String ext = MultiProtocolURL.getFileExtension(url.getFileName()).toLowerCase();
         if (ext.equals("gz") || ext.equals("tgz")) {
             try {
                 source = new GZIPInputStream(source);
@@ -90,7 +90,7 @@ public class tarParser extends AbstractParser implements Parser {
                 try {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
                     FileUtils.copy(tis, tmp, entry.getSize());
-                    subDocs = TextParser.parseSource(DigestURI.newURL(url, "#" + name), mime, null, tmp);
+                    subDocs = TextParser.parseSource(AnchorURL.newAnchor(url, "#" + name), mime, null, tmp);
                     if (subDocs == null) continue;
                     for (final Document d: subDocs) docacc.add(d);
                 } catch (final Parser.Failure e) {

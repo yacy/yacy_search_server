@@ -20,15 +20,15 @@
 
 package net.yacy.document.parser.html;
 
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.id.DigestURL;
 
 public class EmbedEntry {
 
-    private final DigestURI url;
+    private final DigestURL url;
     private final int width, height;
     private final String type, pluginspage;
 
-    public EmbedEntry(final DigestURI url, int width, int height, String type, String pluginspage) {
+    public EmbedEntry(final DigestURL url, int width, int height, String type, String pluginspage) {
         this.url = url;
         this.width = width;
         this.height = height;
@@ -36,7 +36,7 @@ public class EmbedEntry {
         this.pluginspage = pluginspage;
     }
 
-    public DigestURI getUrl() {
+    public DigestURL getUrl() {
         return this.url;
     }
 

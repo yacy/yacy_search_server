@@ -35,19 +35,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.analysis.EnhancedTextProfileSignature;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.FailType;
@@ -72,7 +73,6 @@ import net.yacy.document.SentenceReader;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.citation.CitationReference;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.rwi.IndexCell;
@@ -204,7 +204,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param doctype
      * @return the normalized url
      */
-    public String addURIAttributes(final SolrInputDocument doc, final boolean allAttr, final DigestURI digestURI, final char doctype) {
+    public String addURIAttributes(final SolrInputDocument doc, final boolean allAttr, final DigestURL digestURI, final char doctype) {
         add(doc, CollectionSchema.id, ASCII.String(digestURI.hash()));
         String us = digestURI.toNormalform(true);
         add(doc, CollectionSchema.sku, us);
@@ -228,7 +228,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         
         // path elements of link
         String filename = digestURI.getFileName();
-        String extension = MultiProtocolURI.getFileExtension(filename);
+        String extension = MultiProtocolURL.getFileExtension(filename);
         if (allAttr || contains(CollectionSchema.url_chars_i)) add(doc, CollectionSchema.url_chars_i, us.length());
         if (allAttr || contains(CollectionSchema.url_protocol_s)) add(doc, CollectionSchema.url_protocol_s, digestURI.getProtocol());
         if (allAttr || contains(CollectionSchema.url_paths_sxt)) add(doc, CollectionSchema.url_paths_sxt, digestURI.getPaths());
@@ -357,12 +357,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     
     public SolrVector yacy2solr(
             final String id, final Map<String, Pattern> collections, final ResponseHeader responseHeader,
-            final Document document, final Condenser condenser, final DigestURI referrerURL, final String language,
+            final Document document, final Condenser condenser, final DigestURL referrerURL, final String language,
             final IndexCell<CitationReference> citations,
             final WebgraphConfiguration webgraph) {
         // we use the SolrCell design as index schema
         SolrVector doc = new SolrVector();
-        final DigestURI digestURI = document.dc_source();
+        final DigestURL digestURI = document.dc_source();
         boolean allAttr = this.isEmpty();
         String url = addURIAttributes(doc, allAttr, digestURI, Response.docType(digestURI));
         
@@ -464,12 +464,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         
         // get list of all links; they will be shrinked by urls that appear in other fields of the solr schema
-        Set<DigestURI> inboundLinks = document.inboundLinks();
-        Set<DigestURI> outboundLinks = document.outboundLinks();
+        LinkedHashMap<DigestURL,String> inboundLinks = document.inboundLinks();
+        LinkedHashMap<DigestURL,String> outboundLinks = document.outboundLinks();
 
         Subgraph subgraph = new Subgraph(inboundLinks.size(), outboundLinks.size());
-        Map<DigestURI, Properties> alllinks = document.getAnchors();
-        Map<DigestURI, ImageEntry> images = new HashMap<DigestURI, ImageEntry>();
+        List<ImageEntry> images = new ArrayList<ImageEntry>();
         int c = 0;
         final Object parser = document.getParserObject();
         boolean containsCanonical = false;
@@ -582,18 +581,17 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             if (li.length > 0) add(doc, CollectionSchema.li_txt, li);
 
             // images
-            final Collection<ImageEntry> imagesc = images.values();
-            final ArrayList<String> imgprots = new ArrayList<String>(imagesc.size());
-            final Integer[] imgheights = new Integer[imagesc.size()];
-            final Integer[] imgwidths = new Integer[imagesc.size()];
-            final Integer[] imgpixels = new Integer[imagesc.size()];
-            final String[] imgstubs = new String[imagesc.size()];
-            final String[] imgalts  = new String[imagesc.size()];
+            final ArrayList<String> imgprots = new ArrayList<String>(images.size());
+            final Integer[] imgheights = new Integer[images.size()];
+            final Integer[] imgwidths = new Integer[images.size()];
+            final Integer[] imgpixels = new Integer[images.size()];
+            final String[] imgstubs = new String[images.size()];
+            final String[] imgalts  = new String[images.size()];
             int withalt = 0;
             int i = 0;
             LinkedHashSet<String> images_text_map = new LinkedHashSet<String>();
-            for (final ImageEntry ie: imagesc) {
-                final MultiProtocolURI uri = ie.url();
+            for (final ImageEntry ie: images) {
+                final MultiProtocolURL uri = ie.url();
                 inboundLinks.remove(uri);
                 outboundLinks.remove(uri);
                 imgheights[i] = ie.height();
@@ -613,7 +611,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
             StringBuilder images_text = new StringBuilder(images_text_map.size() * 6 + 1);
             for (String s: images_text_map) images_text.append(s.trim()).append(' ');
-            if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, imagesc.size());
+            if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, images.size());
             if (allAttr || contains(CollectionSchema.images_protocol_sxt)) add(doc, CollectionSchema.images_protocol_sxt, protocolList2indexedList(imgprots));
             if (allAttr || contains(CollectionSchema.images_urlstub_sxt)) add(doc, CollectionSchema.images_urlstub_sxt, imgstubs);
             if (allAttr || contains(CollectionSchema.images_alt_sxt)) add(doc, CollectionSchema.images_alt_sxt, imgalts);
@@ -625,11 +623,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // style sheets
             if (allAttr || contains(CollectionSchema.css_tag_sxt)) {
-                final Map<DigestURI, String> csss = html.getCSS();
+                final Map<DigestURL, String> csss = html.getCSS();
                 final String[] css_tag = new String[csss.size()];
                 final String[] css_url = new String[csss.size()];
                 c = 0;
-                for (final Map.Entry<DigestURI, String> entry: csss.entrySet()) {
+                for (final Map.Entry<DigestURL, String> entry: csss.entrySet()) {
                     final String cssurl = entry.getKey().toNormalform(false);
                     inboundLinks.remove(cssurl);
                     outboundLinks.remove(cssurl);
@@ -646,10 +644,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // Scripts
             if (allAttr || contains(CollectionSchema.scripts_sxt)) {
-                final Set<DigestURI> scriptss = html.getScript();
+                final Set<DigestURL> scriptss = html.getScript();
                 final String[] scripts = new String[scriptss.size()];
                 c = 0;
-                for (final DigestURI u: scriptss) {
+                for (final DigestURL u: scriptss) {
                     inboundLinks.remove(u);
                     outboundLinks.remove(u);
                     scripts[c++] = u.toNormalform(false);
@@ -660,10 +658,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // Frames
             if (allAttr || contains(CollectionSchema.frames_sxt)) {
-                final Set<DigestURI> framess = html.getFrames();
+                final Set<DigestURL> framess = html.getFrames();
                 final String[] frames = new String[framess.size()];
                 c = 0;
-                for (final DigestURI u: framess) {
+                for (final DigestURL u: framess) {
                     inboundLinks.remove(u);
                     outboundLinks.remove(u);
                     frames[c++] = u.toNormalform(false);
@@ -677,10 +675,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // IFrames
             if (allAttr || contains(CollectionSchema.iframes_sxt)) {
-                final Set<DigestURI> iframess = html.getIFrames();
+                final Set<DigestURL> iframess = html.getIFrames();
                 final String[] iframes = new String[iframess.size()];
                 c = 0;
-                for (final DigestURI u: iframess) {
+                for (final DigestURL u: iframess) {
                     inboundLinks.remove(u);
                     outboundLinks.remove(u);
                     iframes[c++] = u.toNormalform(false);
@@ -694,7 +692,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // canonical tag
             if (allAttr || contains(CollectionSchema.canonical_s)) {
-                final DigestURI canonical = html.getCanonical();
+                final DigestURL canonical = html.getCanonical();
                 if (canonical != null && !ASCII.String(canonical.hash()).equals(id)) {
                     containsCanonical = true;
                     inboundLinks.remove(canonical);
@@ -711,9 +709,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             if (allAttr || contains(CollectionSchema.refresh_s)) {
                 String refresh = html.getRefreshPath();
                 if (refresh != null && refresh.length() > 0) {
-                    MultiProtocolURI refreshURL;
+                    MultiProtocolURL refreshURL;
                     try {
-                        refreshURL = refresh.startsWith("http") ? new MultiProtocolURI(html.getRefreshPath()) : new MultiProtocolURI(digestURI, html.getRefreshPath());
+                        refreshURL = refresh.startsWith("http") ? new MultiProtocolURL(html.getRefreshPath()) : new MultiProtocolURL(digestURI, html.getRefreshPath());
                         if (refreshURL != null) {
                             inboundLinks.remove(refreshURL);
                             outboundLinks.remove(refreshURL);
@@ -727,8 +725,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // flash embedded
             if (allAttr || contains(CollectionSchema.flash_b)) {
-                MultiProtocolURI[] flashURLs = html.getFlash();
-                for (MultiProtocolURI u: flashURLs) {
+                MultiProtocolURL[] flashURLs = html.getFlash();
+                for (MultiProtocolURL u: flashURLs) {
                     // remove all flash links from ibound/outbound links
                     inboundLinks.remove(u);
                     outboundLinks.remove(u);
@@ -755,7 +753,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 final String[] ccs = new String[html.getHreflang().size()];
                 final String[] urls = new String[html.getHreflang().size()];
                 c = 0;
-                for (Map.Entry<String, DigestURI> e: html.getHreflang().entrySet()) {
+                for (Map.Entry<String, DigestURL> e: html.getHreflang().entrySet()) {
                     ccs[c] = e.getKey();
                     urls[c] = e.getValue().toNormalform(true);
                     c++;
@@ -769,7 +767,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 final String[] navs = new String[html.getNavigation().size()];
                 final String[] urls = new String[html.getNavigation().size()];
                 c = 0;
-                for (Map.Entry<String, DigestURI> e: html.getNavigation().entrySet()) {
+                for (Map.Entry<String, DigestURL> e: html.getNavigation().entrySet()) {
                     navs[c] = e.getKey();
                     urls[c] = e.getValue().toNormalform(true);
                     c++;
@@ -790,7 +788,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             content = digestURI.toTokens();
         }
         
-        if ((allAttr || contains(CollectionSchema.images_text_t)) && MultiProtocolURI.isImage(MultiProtocolURI.getFileExtension(digestURI.getFileName()))) {
+        if ((allAttr || contains(CollectionSchema.images_text_t)) && MultiProtocolURL.isImage(MultiProtocolURL.getFileExtension(digestURI.getFileName()))) {
             add(doc, CollectionSchema.images_text_t, content); // the content may contain the exif data from the image parser
             content = digestURI.toTokens(); // remove all other entry but the url tokens
         }
@@ -816,8 +814,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // create a subgraph
         if (!containsCanonical) {
             // a document with canonical tag should not get a webgraph relation, because that belongs to the canonical document
-            webgraph.addEdges(subgraph, digestURI, responseHeader, collections, clickdepth, alllinks, images, true, inboundLinks, citations);
-            webgraph.addEdges(subgraph, digestURI, responseHeader, collections, clickdepth, alllinks, images, false, outboundLinks, citations);
+            webgraph.addEdges(subgraph, digestURI, responseHeader, collections, clickdepth, images, true, document.getAnchors(), citations);
         }
             
         // list all links
@@ -919,7 +916,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 Collection<Object> proctags = doc.getFieldValues(CollectionSchema.process_sxt.getSolrFieldName());
                 
                 try {
-                    DigestURI url = new DigestURI((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())));
+                    DigestURL url = new DigestURL((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName())));
                     byte[] id = url.hash();
                     SolrInputDocument sid = this.toSolrInputDocument(doc);
                     
@@ -1206,7 +1203,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param httpstatus
      * @throws IOException
      */
-    public SolrInputDocument err(final DigestURI digestURI, final Map<String, Pattern> collections, final String failReason, final FailType failType, final int httpstatus) throws IOException {
+    public SolrInputDocument err(final DigestURL digestURI, final Map<String, Pattern> collections, final String failReason, final FailType failType, final int httpstatus) throws IOException {
         boolean allAttr = this.isEmpty();
         assert allAttr || contains(CollectionSchema.failreason_s);
         

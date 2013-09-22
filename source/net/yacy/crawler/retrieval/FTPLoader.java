@@ -32,9 +32,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -44,7 +45,6 @@ import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.Latency;
 import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.document.TextParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 
 public class FTPLoader {
@@ -72,7 +72,7 @@ public class FTPLoader {
         Latency.updateBeforeLoad(request.url());
         
         final long start = System.currentTimeMillis();
-        final DigestURI entryUrl = request.url();
+        final DigestURL entryUrl = request.url();
         final String fullPath = getPath(entryUrl);
 
         // the return value
@@ -119,7 +119,7 @@ public class FTPLoader {
                 // directory -> get list of files
                 final RequestHeader requestHeader = new RequestHeader();
                 if (request.referrerhash() != null) {
-                    final DigestURI u = this.sb.getURL(request.referrerhash());
+                    final DigestURL u = this.sb.getURL(request.referrerhash());
                     if (u != null) requestHeader.put(RequestHeader.REFERER, u.toNormalform(true));
                 }
 
@@ -176,7 +176,7 @@ public class FTPLoader {
     /**
      * establish a connection to the ftp server (open, login, set transfer mode)
      */
-    private boolean openConnection(final FTPClient ftpClient, final DigestURI entryUrl) {
+    private boolean openConnection(final FTPClient ftpClient, final DigestURL entryUrl) {
         // get username and password
         final String userInfo = entryUrl.getUserInfo();
         String userName = "anonymous", userPwd = "anonymous";
@@ -215,7 +215,7 @@ public class FTPLoader {
 
     private Response getFile(final FTPClient ftpClient, final Request request, final boolean acceptOnlyParseable) throws IOException {
         // determine the mimetype of the resource
-        final DigestURI url = request.url();
+        final DigestURL url = request.url();
         final String mime = TextParser.mimeOf(url);
         final String path = getPath(url);
 
@@ -225,7 +225,7 @@ public class FTPLoader {
         // create response header
         final RequestHeader requestHeader = new RequestHeader();
         if (request.referrerhash() != null) {
-            final DigestURI refurl = this.sb.getURL(request.referrerhash());
+            final DigestURL refurl = this.sb.getURL(request.referrerhash());
             if (refurl != null) requestHeader.put(RequestHeader.REFERER, refurl.toNormalform(true));
         }
         final ResponseHeader responseHeader = new ResponseHeader(200);
@@ -281,8 +281,8 @@ public class FTPLoader {
      * @param entryUrl
      * @return
      */
-    private String getPath(final MultiProtocolURI entryUrl) {
-        return MultiProtocolURI.unescape(entryUrl.getPath()).replace("\"", "\"\"");
+    private String getPath(final MultiProtocolURL entryUrl) {
+        return MultiProtocolURL.unescape(entryUrl.getPath()).replace("\"", "\"\"");
     }
 
 }

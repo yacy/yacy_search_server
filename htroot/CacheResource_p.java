@@ -24,13 +24,13 @@
 
 import java.net.MalformedURLException;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.Cache;
 import net.yacy.document.ImageParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
@@ -44,9 +44,9 @@ public class CacheResource_p {
         if (post == null) return prop;
 
         final String u = post.get("url", "");
-        DigestURI url;
+        DigestURL url;
         try {
-            url = new DigestURI(u);
+            url = new DigestURL(u);
         } catch (final MalformedURLException e) {
             ConcurrentLog.logException(e);
             return prop;

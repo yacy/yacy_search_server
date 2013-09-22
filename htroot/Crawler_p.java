@@ -30,12 +30,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -50,7 +51,6 @@ import net.yacy.data.WorkTables;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.NewsPool;
@@ -175,7 +175,7 @@ public class Crawler_p {
                 
                 String crawlingStart0 = post.get("crawlingURL","").trim(); // the crawljob start url
                 String[] rootURLs0 = crawlingStart0.indexOf('\n') > 0 || crawlingStart0.indexOf('\r') > 0 ? crawlingStart0.split("[\\r\\n]+") : crawlingStart0.split(Pattern.quote("|"));
-                Set<DigestURI> rootURLs = new HashSet<DigestURI>();
+                Set<DigestURL> rootURLs = new HashSet<DigestURL>();
                 String crawlName = "";
                 if (crawlingFile == null) for (String crawlingStart: rootURLs0) {
                     if (crawlingStart == null || crawlingStart.length() == 0) continue;
@@ -185,7 +185,7 @@ public class Crawler_p {
                         if (crawlingStart.startsWith("ftp")) crawlingStart = "ftp://" + crawlingStart; else crawlingStart = "http://" + crawlingStart;
                     }
                     try {
-                        DigestURI crawlingStartURL = new DigestURI(crawlingStart);
+                        DigestURL crawlingStartURL = new DigestURL(crawlingStart);
                         rootURLs.add(crawlingStartURL);
                         crawlName += ((crawlingStartURL.getHost() == null) ? crawlingStartURL.toNormalform(true) : crawlingStartURL.getHost()) + ',';
                         if (crawlingStartURL != null && (crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
@@ -288,14 +288,14 @@ public class Crawler_p {
                 
                 if ("sitelist".equals(crawlingMode)) {
                     newcrawlingMustNotMatch = CrawlProfile.MATCH_NEVER_STRING;
-                    Set<DigestURI> newRootURLs = new HashSet<DigestURI>();
-                    for (DigestURI sitelistURL: rootURLs) {
+                    Set<DigestURL> newRootURLs = new HashSet<DigestURL>();
+                    for (DigestURL sitelistURL: rootURLs) {
                         // download document
                         Document scraper;
                         try {
                             scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, agent);
                             // get links and generate filter
-                            for (DigestURI u: scraper.getAnchors().keySet()) {
+                            for (DigestURL u: scraper.getAnchors()) {
                                 newRootURLs.add(u);
                             }
                         } catch (final IOException e) {
@@ -313,14 +313,14 @@ public class Crawler_p {
                     if (fullDomain) {
                         siteFilter = CrawlProfile.siteFilter(rootURLs);
                         if (deleteold) {
-                            for (DigestURI u: rootURLs) {
+                            for (DigestURL u: rootURLs) {
                                 sb.index.fulltext().deleteDomainHashpart(u.hosthash(), deleteageDate);
                             }
                         }
                     } else if (subPath) {
                         siteFilter = CrawlProfile.subpathFilter(rootURLs);
                         if (deleteold) {
-                            for (DigestURI u: rootURLs) {
+                            for (DigestURL u: rootURLs) {
                                 String basepath = u.toNormalform(true);
                                 if (!basepath.endsWith("/")) {int p = basepath.lastIndexOf("/"); if (p > 0) basepath = basepath.substring(0, p + 1);}
                                 int count = sb.index.fulltext().remove(basepath, deleteageDate);
@@ -339,7 +339,7 @@ public class Crawler_p {
                 // check if the crawl filter works correctly
                 try {
                     Pattern mmp = Pattern.compile(newcrawlingMustMatch);
-                    for (DigestURI u: rootURLs) {
+                    for (DigestURL u: rootURLs) {
                         assert mmp.matcher(u.toNormalform(true)).matches() : "pattern " + mmp.toString() + " does not match url " + u.toNormalform(true);
                     }
                 } catch (final PatternSyntaxException e) {
@@ -389,7 +389,7 @@ public class Crawler_p {
                 
                 // delete all error urls for that domain
                 List<byte[]> hosthashes = new ArrayList<byte[]>();
-                for (DigestURI u: rootURLs) {
+                for (DigestURL u: rootURLs) {
                     hosthashes.add(ASCII.getBytes(u.hosthash()));
                 }
                 sb.crawlQueues.errorURL.removeHosts(hosthashes, false);
@@ -411,8 +411,8 @@ public class Crawler_p {
                         
                         // stack requests
                         sb.crawler.putActive(handle, profile);
-                        final Set<DigestURI> successurls = new HashSet<DigestURI>();
-                        final Map<DigestURI,String> failurls = new HashMap<DigestURI, String>();
+                        final Set<DigestURL> successurls = new HashSet<DigestURL>();
+                        final Map<DigestURL,String> failurls = new HashMap<DigestURL, String>();
                         sb.stackURLs(rootURLs, profile, successurls, failurls);
 
                         if (failurls.size() == 0) {
@@ -439,7 +439,7 @@ public class Crawler_p {
                             }
                         } else {
                             StringBuilder fr = new StringBuilder();
-                            for (Map.Entry<DigestURI, String> failure: failurls.entrySet()) {
+                            for (Map.Entry<DigestURL, String> failure: failurls.entrySet()) {
                                 sb.crawlQueues.errorURL.push(
                                     new Request(
                                             sb.peers.mySeed().hash.getBytes(),
@@ -470,7 +470,7 @@ public class Crawler_p {
                 } else if ("sitemap".equals(crawlingMode)) {
                     final String sitemapURLStr = post.get("sitemapURL","");
                     try {
-                        final DigestURI sitemapURL = new DigestURI(sitemapURLStr);
+                        final DigestURL sitemapURL = new DigestURL(sitemapURLStr);
                         sb.crawler.putActive(handle, profile);
                         final SitemapImporter importer = new SitemapImporter(sb, sitemapURL, profile);
                         importer.start();
@@ -488,7 +488,7 @@ public class Crawler_p {
                         try {
                             // check if the crawl filter works correctly
                             Pattern.compile(newcrawlingMustMatch);
-                            final ContentScraper scraper = new ContentScraper(new DigestURI(crawlingFile), 10000000);
+                            final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000);
                             final Writer writer = new TransformerWriter(null, null, scraper, null, false);
                             if (crawlingFile != null && crawlingFile.exists()) {
                                 FileUtils.copy(new FileInputStream(crawlingFile), writer);
@@ -498,12 +498,12 @@ public class Crawler_p {
                             writer.close();
 
                             // get links and generate filter
-                            final Map<DigestURI, Properties> hyperlinks = scraper.getAnchors();
+                            final List<AnchorURL> hyperlinks = scraper.getAnchors();
                             if (newcrawlingdepth > 0) {
                                 if (fullDomain) {
-                                    newcrawlingMustMatch = CrawlProfile.siteFilter(hyperlinks.keySet());
+                                    newcrawlingMustMatch = CrawlProfile.siteFilter(hyperlinks);
                                 } else if (subPath) {
-                                    newcrawlingMustMatch = CrawlProfile.subpathFilter(hyperlinks.keySet());
+                                    newcrawlingMustMatch = CrawlProfile.subpathFilter(hyperlinks);
                                 }
                             }
 

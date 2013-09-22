@@ -35,10 +35,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.Hit;
-import net.yacy.cora.document.RSSFeed;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.feed.Hit;
+import net.yacy.cora.document.feed.RSSFeed;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ConnectionInfo;
@@ -49,7 +50,6 @@ import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.crawler.robots.RobotsTxtEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.WorkflowJob;
 import net.yacy.peers.DHTSelection;
@@ -167,7 +167,7 @@ public class CrawlQueues {
         this.errorURL.remove(hash);
     }
 
-    public DigestURI getURL(final byte[] urlhash) {
+    public DigestURL getURL(final byte[] urlhash) {
         assert urlhash != null;
         if (urlhash == null || urlhash.length == 0) {
             return null;
@@ -317,7 +317,7 @@ public class CrawlQueues {
         if (profile != null) {
 
             // check if the protocol is supported
-            final DigestURI url = urlEntry.url();
+            final DigestURL url = urlEntry.url();
             final String urlProtocol = url.getProtocol();
             if (this.sb.loader.isSupportedProtocol(urlProtocol)) {
                 if (this.log.isFine()) {
@@ -502,19 +502,19 @@ public class CrawlQueues {
         }
 
         // parse the rss
-        DigestURI url, referrer;
+        DigestURL url, referrer;
         Date loaddate;
         for (final Hit item: feed) {
             //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
 
             // put url on remote crawl stack
             try {
-                url = new DigestURI(item.getLink());
+                url = new DigestURL(item.getLink());
             } catch (final MalformedURLException e) {
                 continue;
             }
             try {
-                referrer = new DigestURI(item.getReferrer());
+                referrer = new DigestURL(item.getReferrer());
             } catch (final MalformedURLException e) {
                 referrer = null;
             }
@@ -548,7 +548,7 @@ public class CrawlQueues {
      * @param url
      * @return
      */
-    private static String urlToString(final DigestURI url) {
+    private static String urlToString(final DigestURL url) {
         return (url == null ? "null" : url.toNormalform(true));
     }
 

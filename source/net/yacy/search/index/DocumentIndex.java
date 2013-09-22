@@ -34,13 +34,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.solr.common.SolrInputDocument;
 
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.WebgraphConfiguration;
@@ -52,14 +53,14 @@ import net.yacy.search.schema.WebgraphConfiguration;
  */
 public class DocumentIndex extends Segment {
 
-    private static DigestURI poison;
+    private static AnchorURL poison;
     static {
         try {
-            poison = new DigestURI("file://.");
+            poison = new AnchorURL("file://.");
         } catch (final MalformedURLException e ) {
         }
     }
-    BlockingQueue<DigestURI> queue; // a queue of document ID's
+    BlockingQueue<AnchorURL> queue; // a queue of document ID's
     private final Worker[] worker;
     CallbackListener callback;
 
@@ -80,7 +81,7 @@ public class DocumentIndex extends Segment {
         super.fulltext().connectLocalSolr();
         super.fulltext().writeWebgraph(true);
         this.callback = callback;
-        this.queue = new LinkedBlockingQueue<DigestURI>(WorkflowProcessor.availableCPU * 300);
+        this.queue = new LinkedBlockingQueue<AnchorURL>(WorkflowProcessor.availableCPU * 300);
         this.worker = new Worker[WorkflowProcessor.availableCPU];
         for ( int i = 0; i < WorkflowProcessor.availableCPU; i++ ) {
             this.worker[i] = new Worker(i);
@@ -96,7 +97,7 @@ public class DocumentIndex extends Segment {
 
         @Override
         public void run() {
-            DigestURI f;
+            AnchorURL f;
             SolrInputDocument[] resultRows;
             try {
                 while ( (f = DocumentIndex.this.queue.take()) != poison ) {
@@ -134,7 +135,7 @@ public class DocumentIndex extends Segment {
         this.queue.clear();
     }
 
-    private SolrInputDocument[] add(final DigestURI url) throws IOException {
+    private SolrInputDocument[] add(final AnchorURL url) throws IOException {
         if ( url == null ) {
             throw new IOException("file = null");
         }
@@ -183,7 +184,7 @@ public class DocumentIndex extends Segment {
      *
      * @param start
      */
-    public void addConcurrent(final DigestURI start) throws IOException {
+    public void addConcurrent(final AnchorURL start) throws IOException {
         assert (start != null);
         assert (start.canRead()) : start.toString();
         if ( !start.isDirectory() ) {
@@ -194,10 +195,10 @@ public class DocumentIndex extends Segment {
             return;
         }
         final String[] s = start.list();
-        DigestURI w;
+        AnchorURL w;
         for ( final String t : s ) {
             try {
-                w = new DigestURI(start, t);
+                w = new AnchorURL(start, t);
                 if ( w.canRead() && !w.isHidden() ) {
                     if ( w.isDirectory() ) {
                         addConcurrent(w);
@@ -240,9 +241,9 @@ public class DocumentIndex extends Segment {
 
     public interface CallbackListener
     {
-        public void commit(DigestURI f, SolrInputDocument resultRow);
+        public void commit(DigestURL f, SolrInputDocument resultRow);
 
-        public void fail(DigestURI f, String failReason);
+        public void fail(DigestURL f, String failReason);
     }
 
 }

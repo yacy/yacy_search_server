@@ -39,7 +39,8 @@ import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -53,7 +54,6 @@ import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.BookmarksDB.Tag;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.peers.NewsPool;
 import net.yacy.search.Switchboard;
@@ -247,7 +247,7 @@ public class Bookmarks {
 
                 try {
                     final File file = new File(post.get("htmlfile"));
-                    BookmarkHelper.importFromBookmarks(sb.bookmarksDB, new DigestURI(file), post.get("htmlfile$file"), tags, isPublic);
+                    BookmarkHelper.importFromBookmarks(sb.bookmarksDB, new DigestURL(file), post.get("htmlfile$file"), tags, isPublic);
                 } catch (final MalformedURLException e) {}
 
                 ConcurrentLog.info("BOOKMARKS", "success!!");

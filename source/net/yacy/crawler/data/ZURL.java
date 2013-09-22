@@ -37,14 +37,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.solr.common.SolrInputDocument;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.FailType;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.retrieval.Request;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
@@ -211,7 +211,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
 
     public ArrayList<ZURL.Entry> list(int max) {
         final ArrayList<ZURL.Entry> l = new ArrayList<ZURL.Entry>();
-        DigestURI url;
+        DigestURL url;
         for (final ZURL.Entry entry: this) {
             if (entry == null) continue;
             url = entry.url();
@@ -330,7 +330,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             return;
         }
 
-        public DigestURI url() {
+        public DigestURL url() {
             return this.bentry.url();
         }
 

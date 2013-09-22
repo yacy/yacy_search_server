@@ -29,7 +29,7 @@ package net.yacy.peers.operation;
 
 import java.security.PublicKey;
 
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.id.DigestURL;
 
 
 /**
@@ -37,15 +37,15 @@ import net.yacy.kelondro.data.meta.DigestURI;
  *
  */
 public class yacyUpdateLocation {
-    private final DigestURI locationURL;
+    private final DigestURL locationURL;
     private final PublicKey publicKey;
 
-    public yacyUpdateLocation(DigestURI locationURL, PublicKey publicKey) {
+    public yacyUpdateLocation(DigestURL locationURL, PublicKey publicKey) {
 	this.locationURL = locationURL;
 	this.publicKey = publicKey;
     }
 
-    public DigestURI getLocationURL() {
+    public DigestURL getLocationURL() {
 	return this.locationURL;
     }
     public PublicKey getPublicKey() {

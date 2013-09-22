@@ -28,12 +28,12 @@ import java.io.IOException;
 import java.util.Date;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.NoticedURL;
 import net.yacy.crawler.data.ZURL.FailCategory;
 import net.yacy.crawler.retrieval.Request;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.peers.Protocol;
 import net.yacy.search.Switchboard;
@@ -65,7 +65,7 @@ public class urls {
             final long timeout = System.currentTimeMillis() + maxTime;
             int c = 0;
             Request entry;
-            DigestURI referrer;
+            DigestURL referrer;
             while ((maxCount > 0) &&
                    (System.currentTimeMillis() < timeout) &&
                    (sb.crawlQueues.noticeURL.stackSize(stackType) > 0)) {
@@ -112,7 +112,7 @@ public class urls {
             final int count = urlhashes.length() / 12;
         	int c = 0;
         	URIMetadataNode entry;
-            DigestURI referrer;
+            DigestURL referrer;
             for (int i = 0; i < count; i++) {
                 entry = sb.index.fulltext().getMetadata(ASCII.getBytes(urlhashes.substring(12 * i, 12 * (i + 1))));
                 if (entry == null) continue;

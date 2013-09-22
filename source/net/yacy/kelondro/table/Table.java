@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.storage.HandleMap;

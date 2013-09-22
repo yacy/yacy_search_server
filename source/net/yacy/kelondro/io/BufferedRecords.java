@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 

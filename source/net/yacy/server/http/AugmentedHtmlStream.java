@@ -9,19 +9,19 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.interaction.AugmentHtmlStream;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 public class AugmentedHtmlStream extends FilterOutputStream {
     private final Writer out;
     private final ByteArrayOutputStream buffer;
     private final Charset charset;
-    private final DigestURI url;
+    private final DigestURL url;
     private final String urls;
     private final RequestHeader requestHeader;
 
-    public AugmentedHtmlStream(OutputStream out, Charset charset, DigestURI url, RequestHeader requestHeader) {
+    public AugmentedHtmlStream(OutputStream out, Charset charset, DigestURL url, RequestHeader requestHeader) {
         super(out);
         this.out = new BufferedWriter(new OutputStreamWriter(out, charset));
         this.buffer = new ByteArrayOutputStream();

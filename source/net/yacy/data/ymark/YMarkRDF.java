@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.lod.vocabulary.AnnoteaA;
 import net.yacy.cora.lod.vocabulary.AnnoteaB;
 import net.yacy.cora.lod.vocabulary.DCElements;

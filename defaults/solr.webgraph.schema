@@ -129,6 +129,9 @@ target_name_t
 ## primary key of document, the URL hash (target)
 target_id_s
 
+## order number of target url, a count from first to last URL on the source page (target)
+target_order_i    
+
 ## the protocol of the url (target)
 target_protocol_s
 

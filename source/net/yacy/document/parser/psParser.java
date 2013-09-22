@@ -36,10 +36,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Date;
 
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 
@@ -84,7 +85,7 @@ public class psParser extends AbstractParser implements Parser {
     }
 
 
-    private Document[] parse(final DigestURI location, final String mimeType, @SuppressWarnings("unused") final String charset, final File sourceFile) throws Parser.Failure, InterruptedException {
+    private Document[] parse(final DigestURL location, final String mimeType, @SuppressWarnings("unused") final String charset, final File sourceFile) throws Parser.Failure, InterruptedException {
 
     	File outputFile = null;
         try {
@@ -256,7 +257,7 @@ public class psParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURI location, final String mimeType,
+    public Document[] parse(final AnchorURL location, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
 

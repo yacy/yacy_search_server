@@ -32,11 +32,11 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 
@@ -55,7 +55,7 @@ public class gzipParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final AnchorURL location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
 
         File tempFile = null;
         Document[] docs = null;

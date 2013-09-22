@@ -11,7 +11,7 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.NaturalOrder;

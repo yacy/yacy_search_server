@@ -31,7 +31,7 @@ import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -40,6 +40,8 @@ import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -50,7 +52,6 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.ByteCountInputStream;
 
 import org.w3c.dom.CharacterData;
@@ -68,17 +69,17 @@ public class sitemapParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURI url, final String mimeType,
+    public Document[] parse(final AnchorURL url, final String mimeType,
             final String charset, final InputStream source)
             throws Failure, InterruptedException {
         final List<Document> docs = new ArrayList<Document>();
         SitemapReader sitemap = new SitemapReader(source, ClientIdentification.yacyInternetCrawlerAgent);
         sitemap.start();
-        DigestURI uri;
+        DigestURL uri;
         Document doc;
         URLEntry item;
         while ((item = sitemap.take()) != POISON_URLEntry) try {
-            uri = new DigestURI(item.loc);
+            uri = new DigestURL(item.loc);
             doc = new Document(
                     uri,
                     TextParser.mimeOf(url),
@@ -95,7 +96,7 @@ public class sitemapParser extends AbstractParser implements Parser {
                     null,
                     null,
                     null,
-                    new HashMap<DigestURI, ImageEntry>(),
+                    new LinkedHashMap<AnchorURL, ImageEntry>(),
                     false,
                     new Date());
             docs.add(doc);
@@ -108,7 +109,7 @@ public class sitemapParser extends AbstractParser implements Parser {
         return da;
     }
 
-    public static SitemapReader parse(final DigestURI sitemapURL, final ClientIdentification.Agent agent) throws IOException {
+    public static SitemapReader parse(final DigestURL sitemapURL, final ClientIdentification.Agent agent) throws IOException {
         // download document
         ConcurrentLog.info("SitemapReader", "loading sitemap from " + sitemapURL.toNormalform(true));
         final RequestHeader requestHeader = new RequestHeader();
@@ -160,7 +161,7 @@ public class sitemapParser extends AbstractParser implements Parser {
                     String url = new SitemapEntry((Element) sitemapNodes.item(i)).url();
                     if (url != null && url.length() > 0) {
                         try {
-                            final SitemapReader r = parse(new DigestURI(url), agent);
+                            final SitemapReader r = parse(new DigestURL(url), agent);
                             r.start();
                             URLEntry item;
                             while ((item = r.take()) != POISON_URLEntry) {

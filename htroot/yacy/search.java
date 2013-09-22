@@ -36,10 +36,11 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
-import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.feed.RSSMessage;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -50,7 +51,6 @@ import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -241,7 +241,7 @@ public final class search {
                     null,
                     false,
                     null,
-                    DigestURI.TLD_any_zone_filter,
+                    DigestURL.TLD_any_zone_filter,
                     client,
                     false,
                     indexSegment,
@@ -305,7 +305,7 @@ public final class search {
                     constraint,
                     false,
                     null,
-                    DigestURI.TLD_any_zone_filter,
+                    DigestURL.TLD_any_zone_filter,
                     client,
                     false,
                     sb.index,

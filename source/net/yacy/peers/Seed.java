@@ -60,8 +60,8 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;

@@ -29,22 +29,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
-import net.yacy.cora.document.Hit;
-import net.yacy.cora.document.RSSFeed;
-import net.yacy.cora.document.RSSReader;
+import net.yacy.cora.document.feed.Hit;
+import net.yacy.cora.document.feed.RSSFeed;
+import net.yacy.cora.document.feed.RSSReader;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 public class rssParser extends AbstractParser implements Parser {
 
@@ -59,7 +57,7 @@ public class rssParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(final DigestURI url, final String mimeType,
+    public Document[] parse(final AnchorURL url, final String mimeType,
             final String charset, final InputStream source)
             throws Failure, InterruptedException {
         RSSReader rssReader;
@@ -72,18 +70,17 @@ public class rssParser extends AbstractParser implements Parser {
         final RSSFeed feed = rssReader.getFeed();
         //RSSMessage channel = feed.getChannel();
         final List<Document> docs = new ArrayList<Document>();
-        DigestURI uri;
+        AnchorURL uri;
         Set<String> languages;
-        Map<DigestURI, Properties> anchors;
+        List<AnchorURL> anchors;
         Document doc;
         for (final Hit item: feed) try {
-            uri = new DigestURI(item.getLink());
+            uri = new AnchorURL(item.getLink());
             languages = new HashSet<String>();
             languages.add(item.getLanguage());
-            anchors = new HashMap<DigestURI, Properties>();
-            Properties p = new Properties();
-            p.put("name", item.getTitle());
-            anchors.put(uri, p);
+            anchors = new ArrayList<AnchorURL>();
+            uri.setNameProperty(item.getTitle());
+            anchors.add(uri);
             doc = new Document(
                     uri,
                     TextParser.mimeOf(url),
@@ -101,7 +98,7 @@ public class rssParser extends AbstractParser implements Parser {
                     null,
                     anchors,
                     null,
-                    new HashMap<DigestURI, ImageEntry>(),
+                    new LinkedHashMap<AnchorURL, ImageEntry>(),
                     false,
                     item.getPubDate());
             docs.add(doc);

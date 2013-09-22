@@ -32,9 +32,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.RSSMessage;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;

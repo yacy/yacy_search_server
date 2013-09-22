@@ -24,7 +24,7 @@ package net.yacy.cora.geo;
 
 import java.util.Comparator;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 
 
 public class GeoLocation extends IntegerGeoPoint implements Comparable<GeoLocation>, Comparator<GeoLocation> {

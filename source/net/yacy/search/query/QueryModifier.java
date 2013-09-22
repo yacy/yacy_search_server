@@ -24,8 +24,8 @@ import java.util.ArrayList;
 
 import org.apache.solr.common.params.CommonParams;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 
@@ -104,7 +104,7 @@ public class QueryModifier {
             while ( sitehost.endsWith(".") ) {
                 sitehost = sitehost.substring(0, sitehost.length() - 1);
             }
-            sitehash = DigestURI.hosthash(sitehost);
+            sitehash = DigestURL.hosthash(sitehost);
             add("site:" + sitehost);
         }
         

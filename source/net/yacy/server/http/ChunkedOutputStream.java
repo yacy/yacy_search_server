@@ -29,8 +29,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.server.serverCore;

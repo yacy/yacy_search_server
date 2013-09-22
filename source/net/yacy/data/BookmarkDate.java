@@ -37,8 +37,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;

@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -31,7 +32,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.crawler.robots.RobotsTxtEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -49,7 +49,7 @@ public class CrawlCheck_p {
         if (post.containsKey("crawlcheck")) {
             
             // get the list of rootURls for this crawl start
-            Set<DigestURI> rootURLs = new HashSet<DigestURI>();
+            Set<DigestURL> rootURLs = new HashSet<DigestURL>();
             String crawlingStart0 = post.get("crawlingURLs","").trim();
             String[] rootURLs0 = crawlingStart0.indexOf('\n') > 0 || crawlingStart0.indexOf('\r') > 0 ? crawlingStart0.split("[\\r\\n]+") : crawlingStart0.split(Pattern.quote("|"));
             for (String crawlingStart: rootURLs0) {
@@ -61,7 +61,7 @@ public class CrawlCheck_p {
                     if (crawlingStart.startsWith("ftp")) crawlingStart = "ftp://" + crawlingStart;
                 }
                 try {
-                    DigestURI crawlingStartURL = new DigestURI(crawlingStart);
+                    DigestURL crawlingStartURL = new DigestURL(crawlingStart);
                     rootURLs.add(crawlingStartURL);
                 } catch (final MalformedURLException e) {
                     ConcurrentLog.logException(e);
@@ -78,7 +78,7 @@ public class CrawlCheck_p {
                 // and analyze the urls to make the table rows
                 StringBuilder s = new StringBuilder(300);
                 int row = 0;
-                for (DigestURI u: rootURLs) {
+                for (DigestURL u: rootURLs) {
                     s.append(u.toNormalform(true)).append('\n');
                     prop.put("table_list_" + row + "_url", u.toNormalform(true));
 

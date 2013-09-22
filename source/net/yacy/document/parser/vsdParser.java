@@ -32,11 +32,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.apache.poi.hdgf.extractor.VisioTextExtractor;
 import org.apache.poi.hpsf.SummaryInformation;
@@ -66,7 +66,7 @@ public class vsdParser extends AbstractParser implements Parser {
      * all extracted information about the parsed document
      */
     @Override
-    public Document[] parse(final DigestURI location, final String mimeType, final String charset, final InputStream source)
+    public Document[] parse(final AnchorURL location, final String mimeType, final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
 
     	Document theDoc = null;

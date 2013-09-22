@@ -26,8 +26,8 @@ package net.yacy.peers;
 
 import java.util.Map;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.peers.operation.yacyVersion;

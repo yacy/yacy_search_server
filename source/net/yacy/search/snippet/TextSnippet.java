@@ -33,7 +33,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -50,7 +51,6 @@ import net.yacy.document.SentenceReader;
 import net.yacy.document.SnippetExtractor;
 import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.CharacterCoding;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.peers.RemoteSearch;
@@ -156,7 +156,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             final boolean reindexing) {
         // heise = "0OQUNU3JSs05"
         
-        final DigestURI url = row.url();
+        final DigestURL url = row.url();
         if (queryhashes.isEmpty()) {
             //System.out.println("found no queryhashes for URL retrieve " + url);
             init(url.hash(), null, false, ResultClass.ERROR_NO_HASH_GIVEN, "no query hashes given");

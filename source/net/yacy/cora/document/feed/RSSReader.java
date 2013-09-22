@@ -18,7 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.document;
+package net.yacy.cora.document.feed;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -30,7 +30,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import net.yacy.cora.document.RSSMessage.Token;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.feed.RSSMessage.Token;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.EntityResolver;

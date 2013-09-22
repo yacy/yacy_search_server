@@ -30,10 +30,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -42,7 +43,6 @@ import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.document.TextParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 
@@ -59,12 +59,12 @@ public class FileLoader {
     }
 
     public Response load(final Request request, boolean acceptOnlyParseable) throws IOException {
-        DigestURI url = request.url();
+        DigestURL url = request.url();
         if (!url.getProtocol().equals("file")) throw new IOException("wrong loader for FileLoader: " + url.getProtocol());
 
         RequestHeader requestHeader = new RequestHeader();
         if (request.referrerhash() != null) {
-            DigestURI ur = this.sb.getURL(request.referrerhash());
+            DigestURL ur = this.sb.getURL(request.referrerhash());
             if (ur != null) requestHeader.put(RequestHeader.REFERER, ur.toNormalform(true));
         }
 
@@ -96,7 +96,7 @@ public class FileLoader {
         }
 
         // create response header
-        String mime = Classification.ext2mime(MultiProtocolURI.getFileExtension(url.getFileName()));
+        String mime = Classification.ext2mime(MultiProtocolURL.getFileExtension(url.getFileName()));
         ResponseHeader responseHeader = new ResponseHeader(200);
         responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date(url.lastModified())));
         responseHeader.put(HeaderFramework.CONTENT_TYPE, mime);

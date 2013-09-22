@@ -31,12 +31,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.peers.NewsDB;
@@ -136,7 +136,7 @@ public class Surftips {
 
                 url = row.getPrimaryKeyUTF8().trim();
                 try{
-                	if(Switchboard.urlBlacklist.isListed(BlacklistType.SURFTIPS ,new DigestURI(url)))
+                	if(Switchboard.urlBlacklist.isListed(BlacklistType.SURFTIPS ,new DigestURL(url)))
                 		continue;
                 }catch(final MalformedURLException e){continue;}
                 title = row.getColUTF8(1);
@@ -306,13 +306,13 @@ public class Surftips {
             // add/subtract votes and write record
             if (entry != null) {
                 try {
-                    urlhash = UTF8.String((new DigestURI(url)).hash());
+                    urlhash = UTF8.String((new DigestURL(url)).hash());
                 } catch (final MalformedURLException e) {
                     urlhash = null;
                 }
                 if (urlhash == null)
                     try {
-                        urlhash = UTF8.String((new DigestURI("http://"+url)).hash());
+                        urlhash = UTF8.String((new DigestURL("http://"+url)).hash());
                     } catch (final MalformedURLException e) {
                         urlhash = null;
                     }

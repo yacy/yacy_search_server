@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter.ResHead;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.data.URLLicense;
@@ -134,7 +134,7 @@ public class YJsonResponseWriter implements QueryResponseWriter {
             List<IndexableField> fields = doc.getFields();
             int fieldc = fields.size();
             List<String> texts = new ArrayList<String>();
-            MultiProtocolURI url = null;
+            MultiProtocolURL url = null;
             String urlhash = null;
             List<String> descriptions = new ArrayList<String>();
             String title = "";
@@ -153,12 +153,12 @@ public class YJsonResponseWriter implements QueryResponseWriter {
                 if (CollectionSchema.sku.getSolrFieldName().equals(fieldName)) {
                     String u = value.stringValue();
                     try {
-                        url = new MultiProtocolURI(u);
+                        url = new MultiProtocolURL(u);
                         String filename = url.getFileName();
                         solitaireTag(writer, "link", u);
                         solitaireTag(writer, "file", filename);
                         // get image license
-                        if (MultiProtocolURI.isImage(filename)) URLLicense.aquireLicense(urlhash, url.toNormalform(true));
+                        if (MultiProtocolURL.isImage(filename)) URLLicense.aquireLicense(urlhash, url.toNormalform(true));
                     } catch (final MalformedURLException e) {}
                     continue;
                 }

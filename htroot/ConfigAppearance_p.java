@@ -39,9 +39,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -101,7 +101,7 @@ public class ConfigAppearance_p {
 
                 final Iterator<String> it;
                 try {
-                    final DigestURI u = new DigestURI(url);
+                    final DigestURL u = new DigestURL(url);
                     it = FileUtils.strings(u.get(ClientIdentification.yacyInternetCrawlerAgent));
                 } catch (final IOException e) {
                     prop.put("status", "1");// unable to get URL

@@ -39,10 +39,10 @@ import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.SurrogateReader;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 
 public class PhpBB3Dao implements Dao {
@@ -208,9 +208,9 @@ public class PhpBB3Dao implements Dao {
     }
 
     protected DCEntry parseResultSet(ResultSet rs) throws SQLException, MalformedURLException {
-        DigestURI url;
+        DigestURL url;
         int item = rs.getInt("post_id");
-        url = new DigestURI(this.urlstub + "/viewtopic.php?t=" + item);
+        url = new DigestURL(this.urlstub + "/viewtopic.php?t=" + item);
         String subject = rs.getString("post_subject");
         String text = xmlCleaner(rs.getString("post_text"));
         String user = getUser(rs.getInt("poster_id"));
@@ -271,7 +271,7 @@ public class PhpBB3Dao implements Dao {
     ) {
         try {
             // generate output file name and attributes
-            String targethost = new DigestURI(this.urlstub).getHost();
+            String targethost = new DigestURL(this.urlstub).getHost();
             int fc = 0;
             File outputfiletmp = null, outputfile = null;
 

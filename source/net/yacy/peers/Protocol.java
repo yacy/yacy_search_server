@@ -59,17 +59,13 @@ import java.util.TreeMap;
 
 import net.yacy.migration;
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.JSONArray;
-import net.yacy.cora.document.JSONException;
-import net.yacy.cora.document.JSONObject;
-import net.yacy.cora.document.JSONTokener;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.RSSFeed;
-import net.yacy.cora.document.RSSMessage;
-import net.yacy.cora.document.RSSReader;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.feed.RSSFeed;
+import net.yacy.cora.document.feed.RSSMessage;
+import net.yacy.cora.document.feed.RSSReader;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.opensearch.SRURSSConnector;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
@@ -85,6 +81,10 @@ import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.JSONArray;
+import net.yacy.cora.util.JSONException;
+import net.yacy.cora.util.JSONObject;
+import net.yacy.cora.util.JSONTokener;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
@@ -154,7 +154,7 @@ public final class Protocol {
         final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
         httpClient.setTimout(timeout);
         return httpClient.POSTbytes(
-            new MultiProtocolURI("http://" + targetAddress + "/yacy/" + filename),
+            new MultiProtocolURL("http://" + targetAddress + "/yacy/" + filename),
             Seed.b64Hash2hexHash(targetPeerHash) + ".yacyh",
             parts,
             false);
@@ -197,7 +197,7 @@ public final class Protocol {
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 30000);
             content =
                 httpClient.POSTbytes(
-                    new MultiProtocolURI("http://" + address + "/yacy/hello.html"),
+                    new MultiProtocolURL("http://" + address + "/yacy/hello.html"),
                     Seed.b64Hash2hexHash(otherHash) + ".yacyh",
                     parts,
                     false);
@@ -517,7 +517,7 @@ public final class Protocol {
             // final byte[] result = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/urls.xml"), (int) maxTime, target.getHexHash() + ".yacyh", parts);
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, (int) maxTime);
             final byte[] result =
-                httpClient.POSTbytes(new MultiProtocolURI("http://"
+                httpClient.POSTbytes(new MultiProtocolURL("http://"
                     + target.getClusterAddress()
                     + "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false);
             final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
@@ -938,7 +938,7 @@ public final class Protocol {
             }
 
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 8000);
-            byte[] a = httpClient.POSTbytes(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), hostname, parts, false);
+            byte[] a = httpClient.POSTbytes(new MultiProtocolURL("http://" + hostaddress + "/yacy/search.html"), hostname, parts, false);
             if (a != null && a.length > 200000) {
                 // there is something wrong. This is too large, maybe a hack on the other side?
                 a = null;
@@ -1294,7 +1294,7 @@ public final class Protocol {
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 10000);
             final byte[] content =
                 httpClient.POSTbytes(
-                    new MultiProtocolURI("http://" + address + "/yacy/crawlReceipt.html"),
+                    new MultiProtocolURL("http://" + address + "/yacy/crawlReceipt.html"),
                     target.getHexHash() + ".yacyh",
                     parts,
                     false);
@@ -1473,7 +1473,7 @@ public final class Protocol {
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
             final byte[] content =
                 httpClient.POSTbytes(
-                    new MultiProtocolURI("http://" + address + "/yacy/transferRWI.html"),
+                    new MultiProtocolURL("http://" + address + "/yacy/transferRWI.html"),
                     targetSeed.getHexHash() + ".yacyh",
                     parts,
                     gzipBody);
@@ -1531,7 +1531,7 @@ public final class Protocol {
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
             final byte[] content =
                 httpClient.POSTbytes(
-                    new MultiProtocolURI("http://" + address + "/yacy/transferURL.html"),
+                    new MultiProtocolURL("http://" + address + "/yacy/transferURL.html"),
                     targetSeed.getHexHash() + ".yacyh",
                     parts,
                     gzipBody);
@@ -1564,7 +1564,7 @@ public final class Protocol {
             final HTTPClient httpclient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 15000);
             final byte[] content =
                 httpclient.POSTbytes(
-                    new MultiProtocolURI("http://" + address + "/yacy/profile.html"),
+                    new MultiProtocolURL("http://" + address + "/yacy/profile.html"),
                     targetSeed.getHexHash() + ".yacyh",
                     parts,
                     false);

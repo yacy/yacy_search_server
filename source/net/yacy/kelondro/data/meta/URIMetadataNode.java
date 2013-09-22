@@ -33,11 +33,12 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.MicroDate;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
@@ -61,7 +62,7 @@ public class URIMetadataNode {
     
     private byte[] hash = null;
     private String urlRaw = null, keywords = null;
-    private DigestURI url = null;
+    private DigestURL url = null;
     private Bitfield flags = null;
     private int imagec = -1, audioc = -1, videoc = -1, appc = -1;
     private double lat = Double.NaN, lon = Double.NaN;
@@ -79,7 +80,7 @@ public class URIMetadataNode {
         this.hash = ASCII.getBytes(getString(CollectionSchema.id));
         this.urlRaw = getString(CollectionSchema.sku);
         try {
-            this.url = new DigestURI(this.urlRaw, this.hash);
+            this.url = new DigestURL(this.urlRaw, this.hash);
         } catch (final MalformedURLException e) {
             ConcurrentLog.logException(e);
             this.url = null;
@@ -110,7 +111,7 @@ public class URIMetadataNode {
         return getDate(CollectionSchema.last_modified);
     }
 
-    public DigestURI url() {
+    public DigestURL url() {
         return this.url;
     }
 
@@ -202,7 +203,7 @@ public class URIMetadataNode {
         if (flags == null) {
             this.flags = new Bitfield();
             if (dc_subject() != null && dc_subject().indexOf("indexof") >= 0) this.flags.set(Condenser.flag_cat_indexof, true);
-            ContentDomain cd = Classification.getContentDomain(MultiProtocolURI.getFileExtension(this.url().getFileName()));
+            ContentDomain cd = Classification.getContentDomain(MultiProtocolURL.getFileExtension(this.url().getFileName()));
             if (lon() != 0.0d || lat() != 0.0d) this.flags.set(Condenser.flag_cat_haslocation, true);
             if (cd == ContentDomain.IMAGE || limage() > 0) this.flags.set(Condenser.flag_cat_hasimage, true);
             if (cd == ContentDomain.AUDIO || laudio() > 0) this.flags.set(Condenser.flag_cat_hasaudio, true);

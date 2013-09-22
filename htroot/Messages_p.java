@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.MessageBoard;

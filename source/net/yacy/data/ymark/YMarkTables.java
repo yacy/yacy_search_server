@@ -42,7 +42,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
@@ -53,7 +54,6 @@ import net.yacy.kelondro.blob.TableColumnIndexException;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.blob.TablesColumnIndex;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.LoaderDispatcher;
 
 public class YMarkTables {
@@ -364,10 +364,10 @@ public class YMarkTables {
     }
 
     public void createBookmark(final LoaderDispatcher loader, final String url, final ClientIdentification.Agent agent, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure {
-    	createBookmark(loader, new DigestURI(url), agent, bmk_user, autotag, tagsString, foldersString);
+    	createBookmark(loader, new DigestURL(url), agent, bmk_user, autotag, tagsString, foldersString);
     }
 
-    public void createBookmark(final LoaderDispatcher loader, final DigestURI url, final ClientIdentification.Agent agent, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure {
+    public void createBookmark(final LoaderDispatcher loader, final DigestURL url, final ClientIdentification.Agent agent, final String bmk_user, final boolean autotag, final String tagsString, final String foldersString) throws IOException, Failure {
 
     	final YMarkEntry bmk_entry = new YMarkEntry(false);
         final YMarkMetadata meta = new YMarkMetadata(url);

@@ -29,11 +29,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.crawler.robots.RobotsTxtEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.MemoryControl;
 
 
@@ -50,7 +50,7 @@ public class Latency {
      * @param url
      * @param robotsCrawlDelay the crawl-delay given by the robots; 0 if not exist
      */
-    public static void updateAfterSelection(final DigestURI url, final long robotsCrawlDelay) {
+    public static void updateAfterSelection(final DigestURL url, final long robotsCrawlDelay) {
         final String host = url.getHost();
         if (host == null) return;
         String hosthash = url.hosthash();
@@ -67,7 +67,7 @@ public class Latency {
      * @param url
      * @param time the time to load the file in milliseconds
      */
-    public static void updateBeforeLoad(final DigestURI url) {
+    public static void updateBeforeLoad(final DigestURL url) {
         final String host = url.getHost();
         if (host == null) return;
         String hosthash = url.hosthash();
@@ -86,7 +86,7 @@ public class Latency {
      * @param url
      * @param time the time to load the file in milliseconds
      */
-    public static void updateAfterLoad(final DigestURI url, final long time) {
+    public static void updateAfterLoad(final DigestURL url, final long time) {
         final String host = url.getHost();
         if (host == null) return;
         String hosthash = url.hosthash();
@@ -100,7 +100,7 @@ public class Latency {
         }
     }
 
-    private static Host host(final DigestURI url) {
+    private static Host host(final DigestURL url) {
         final String host = url.getHost();
         if (host == null) return null;
         return map.get(url.hosthash());
@@ -119,7 +119,7 @@ public class Latency {
      * @param thisAgents
      * @return the waiting time in milliseconds; 0 if not known; -1 if host gives us special rights
      */
-    public static int waitingRobots(final MultiProtocolURI url, final RobotsTxt robots, final ClientIdentification.Agent agent) {
+    public static int waitingRobots(final MultiProtocolURL url, final RobotsTxt robots, final ClientIdentification.Agent agent) {
         int robotsDelay = 0;
         RobotsTxtEntry robotsEntry = robots.getEntry(url, agent);
         robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
@@ -187,7 +187,7 @@ public class Latency {
      * @param agent
      * @return the remaining waiting time in milliseconds. can be negative to reflect the due-time after a possible nex loading time
      */
-    public static int waitingRemaining(final DigestURI url, final RobotsTxt robots, final ClientIdentification.Agent agent) {
+    public static int waitingRemaining(final DigestURL url, final RobotsTxt robots, final ClientIdentification.Agent agent) {
 
         // first check if the domain was _ever_ accessed before
         final Host host = host(url);
@@ -200,7 +200,7 @@ public class Latency {
         // for CGI accesses, we double the minimum time
         // mostly there is a database access in the background
         // which creates a lot of unwanted IO on target site
-        if (MultiProtocolURI.isCGI(url.getFileName())) waiting = waiting * 2;
+        if (MultiProtocolURL.isCGI(url.getFileName())) waiting = waiting * 2;
 
         // if we have accessed the domain many times, get slower (the flux factor)
         if (!local) waiting += host.flux(waiting);
@@ -219,7 +219,7 @@ public class Latency {
         return Math.min(60000, waiting) - timeSinceLastAccess;
     }
     
-    public static String waitingRemainingExplain(final DigestURI url, final RobotsTxt robots, final ClientIdentification.Agent agent) {
+    public static String waitingRemainingExplain(final DigestURL url, final RobotsTxt robots, final ClientIdentification.Agent agent) {
 
         // first check if the domain was _ever_ accessed before
         final Host host = host(url);
@@ -234,7 +234,7 @@ public class Latency {
         // for CGI accesses, we double the minimum time
         // mostly there is a database access in the background
         // which creates a lot of unwanted IO on target site
-        if (MultiProtocolURI.isCGI(url.getFileName())) { waiting = waiting * 2; s.append(", isCGI = true -> double"); }
+        if (MultiProtocolURL.isCGI(url.getFileName())) { waiting = waiting * 2; s.append(", isCGI = true -> double"); }
 
         // if we have accessed the domain many times, get slower (the flux factor)
         int flux = host.flux(waiting);

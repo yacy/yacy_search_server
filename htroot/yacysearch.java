@@ -42,9 +42,9 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
-import net.yacy.cora.document.RSSMessage;
-import net.yacy.cora.document.UTF8;
-
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.feed.RSSMessage;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.opensearch.OpenSearchConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
@@ -62,7 +62,6 @@ import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.Formatter;
@@ -606,7 +605,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
-                final DigestURI url = indexSegment.fulltext().getURL(UTF8.getBytes(bookmarkHash));
+                final DigestURL url = indexSegment.fulltext().getURL(UTF8.getBytes(bookmarkHash));
                 if ( url != null ) {
                     try {
                         sb.tables.bookmarks.createBookmark(
@@ -658,8 +657,8 @@ public class yacysearch {
                     clustersearch && global ? QueryParams.Searchdom.CLUSTER : (global && indexReceiveGranted ? QueryParams.Searchdom.GLOBAL : QueryParams.Searchdom.LOCAL),
                     constraint,
                     true,
-                    DigestURI.hosthashess(sb.getConfig("search.excludehosth", "")),
-                    DigestURI.TLD_any_zone_filter,
+                    DigestURL.hosthashess(sb.getConfig("search.excludehosth", "")),
+                    DigestURL.TLD_any_zone_filter,
                     client,
                     authenticated,
                     indexSegment,

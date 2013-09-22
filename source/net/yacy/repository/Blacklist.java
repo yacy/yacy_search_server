@@ -45,11 +45,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ListManager;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.RowHandleSet;
@@ -405,7 +405,7 @@ public class Blacklist {
      * @param url Entry to be checked
      * @return  Whether the given entry is blacklisted
      */
-    public final boolean isListed(final BlacklistType blacklistType, final DigestURI url) {
+    public final boolean isListed(final BlacklistType blacklistType, final DigestURL url) {
         if (url == null) {
             throw new IllegalArgumentException("url may not be null");
         }

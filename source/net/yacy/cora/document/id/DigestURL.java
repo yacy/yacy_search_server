@@ -1,28 +1,24 @@
-// DigestURI.java
-// (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 13.07.2006 on http://yacy.net
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
-// LICENSE
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  DigestURL
+ *  Copyright 2006 by Michael Peter Christen
+ *  first published 13.07.2006 on http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-package net.yacy.kelondro.data.meta;
+package net.yacy.cora.document.id;
 
 // this class exist to provide a system-wide normal form representation of urls,
 // and to prevent that java.net.URL usage causes DNS queries which are used in java.net.
@@ -34,15 +30,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.index.RowHandleSet;
 
 /**
  * URI-object providing YaCy-hash computation
@@ -51,7 +45,7 @@ import net.yacy.kelondro.index.RowHandleSet;
  * For URIs pointing to resources not globally available,
  * the domainhash-part gets one reserved value
  */
-public class DigestURI extends MultiProtocolURI implements Serializable {
+public class DigestURL extends MultiProtocolURL implements Serializable {
 
     private static final long serialVersionUID = -1173233022912141885L;
     public  static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
@@ -67,9 +61,9 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     public static String hosthash(final String host) {
         String h = host;
         if (!h.startsWith("http://")) h = "http://" + h;
-        DigestURI url = null;
+        DigestURL url = null;
         try {
-            url = new DigestURI(h);
+            url = new DigestURL(h);
         } catch (final MalformedURLException e) {
             ConcurrentLog.logException(e);
             return null;
@@ -111,14 +105,14 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     /**
      * DigestURI from File
      */
-    public DigestURI(final File file) throws MalformedURLException {
+    public DigestURL(final File file) throws MalformedURLException {
         this("file", "", -1, file.getAbsolutePath());
     }
 
     /**
      * DigestURI from URI string
      */
-    public DigestURI(final String url) throws MalformedURLException {
+    public DigestURL(final String url) throws MalformedURLException {
         super(url);
         this.hash = null;
     }
@@ -129,43 +123,32 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
      * @param hash already calculated hash for url
      * @throws MalformedURLException
      */
-    public DigestURI(final String url, final byte[] hash) throws MalformedURLException {
+    public DigestURL(final String url, final byte[] hash) throws MalformedURLException {
         super(url);
         this.hash = hash;
     }
-
-    /**
-     * DigestURI from general URI
-     * @param u
-     */
-    /*
-    private DigestURI(final MultiProtocolURI u) {
-        super(u);
-        this.hash = (u instanceof DigestURI) ? ((DigestURI) u).hash : null;
-    }
-    */
     
     /**
      * DigestURI from general URI, hash already calculated
      * @param baseURL
      * @param hash
      */
-    public DigestURI(final MultiProtocolURI baseURL, final byte[] hash) {
+    public DigestURL(final MultiProtocolURL baseURL, final byte[] hash) {
         super(baseURL);
         this.hash = hash;
     }
 
-    public DigestURI(final MultiProtocolURI baseURL, final String relPath) throws MalformedURLException {
+    public DigestURL(final MultiProtocolURL baseURL, final String relPath) throws MalformedURLException {
         super(baseURL, relPath);
         this.hash = null;
     }
 
-    public DigestURI(final String protocol, final String host, final int port, final String path) throws MalformedURLException {
+    public DigestURL(final String protocol, final String host, final int port, final String path) throws MalformedURLException {
         super(protocol, host, port, path);
         this.hash = null;
     }
 
-    public static DigestURI newURL(final DigestURI baseURL, String relPath) throws MalformedURLException {
+    public static DigestURL newURL(final DigestURL baseURL, String relPath) throws MalformedURLException {
         if (relPath.startsWith("//")) {
             // patch for urls starting with "//" which can be found in the wild
             relPath = (baseURL == null) ? "http:" + relPath : baseURL.getProtocol() + ":" + relPath;
@@ -177,13 +160,13 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
             isFile(relPath) ||
             isSMB(relPath)/*||
             relPath.contains(":") && patternMail.matcher(relPath.toLowerCase()).find()*/) {
-            return new DigestURI(relPath);
+            return new DigestURL(relPath);
         }
-        return new DigestURI(baseURL, relPath);
+        return new DigestURL(baseURL, relPath);
     }
     
     private int hashCache = Integer.MIN_VALUE; // if this is used in a compare method many times, a cache is useful
-
+    
     @Override
     public int hashCode() {
         if (this.hashCache == Integer.MIN_VALUE) {
@@ -301,25 +284,6 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     
     public final boolean probablyRootURL() {
         return this.path.length() <= 1 || rootPattern.matcher(this.path).matches();
-    }
-    
-    public RowHandleSet getPossibleRootHashes() {
-        RowHandleSet rootCandidates = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 10);
-        String rootStub = this.getProtocol() + "://" + this.getHost();
-        try {
-            rootCandidates.put(new DigestURI(rootStub).hash());
-            rootCandidates.put(new DigestURI(rootStub + "/").hash());
-            rootCandidates.put(new DigestURI(rootStub + "/index.htm").hash());
-            rootCandidates.put(new DigestURI(rootStub + "/index.html").hash());
-            rootCandidates.put(new DigestURI(rootStub + "/index.php").hash());
-            rootCandidates.put(new DigestURI(rootStub + "/home.htm").hash());
-            rootCandidates.put(new DigestURI(rootStub + "/home.html").hash());
-            rootCandidates.put(new DigestURI(rootStub + "/home.php").hash());
-            rootCandidates.put(new DigestURI(rootStub + "/default.htm").hash());
-            rootCandidates.put(new DigestURI(rootStub + "/default.html").hash());
-            rootCandidates.put(new DigestURI(rootStub + "/default.php").hash());
-        } catch (final Throwable e) {}
-        return rootCandidates;
     }
 
     private static final String hosthash5(final String protocol, final String host, final int port) {

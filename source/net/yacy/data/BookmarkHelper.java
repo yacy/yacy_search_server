@@ -32,13 +32,11 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -47,14 +45,15 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.BookmarksDB.Tag;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -116,7 +115,7 @@ public class BookmarkHelper {
     // bookmarksDB's Import/Export functions
     // --------------------------------------
 
-    public static int importFromBookmarks(final BookmarksDB db, final DigestURI baseURL, final String input, final String tag, final boolean importPublic){
+    public static int importFromBookmarks(final BookmarksDB db, final DigestURL baseURL, final String input, final String tag, final boolean importPublic){
         try {
             // convert string to input stream
             final ByteArrayInputStream byteIn = new ByteArrayInputStream(UTF8.getBytes(input));
@@ -129,13 +128,12 @@ public class BookmarkHelper {
         }
     }
 
-    private static int importFromBookmarks(final BookmarksDB db, final DigestURI baseURL, final InputStreamReader input, final String tag, final boolean importPublic){
+    private static int importFromBookmarks(final BookmarksDB db, final DigestURL baseURL, final InputStreamReader input, final String tag, final boolean importPublic){
 
         int importCount = 0;
 
-        Map<DigestURI, Properties> links = new HashMap<DigestURI, Properties>();
+        Collection<AnchorURL> links = new ArrayList<AnchorURL>();
         String title;
-        DigestURI url;
         Bookmark bm;
         final Set<String> tags=ListManager.string2set(tag); //this allow multiple default tags
         try {
@@ -147,9 +145,8 @@ public class BookmarkHelper {
             writer.close();
             links = scraper.getAnchors();
         } catch (final IOException e) { ConcurrentLog.warn("BOOKMARKS", "error during load of links: "+ e.getClass() +" "+ e.getMessage());}
-        for (final Entry<DigestURI, Properties> link: links.entrySet()) {
-            url = link.getKey();
-            title = link.getValue().getProperty("name", "");
+        for (final AnchorURL url: links) {
+            title = url.getNameProperty();
             ConcurrentLog.info("BOOKMARKS", "links.get(url)");
             if ("".equals(title)) {//cannot be displayed
                 title = url.toString();

@@ -52,8 +52,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
@@ -65,7 +66,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.data.UserDB;
 import net.yacy.document.parser.html.CharacterCoding;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
@@ -1071,7 +1071,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
 
             String urlString;
             try {
-                urlString = (new DigestURI((method.equals(HeaderFramework.METHOD_CONNECT)?"https":"http"), host, port, (args == null) ? path : path + "?" + args)).toString();
+                urlString = (new DigestURL((method.equals(HeaderFramework.METHOD_CONNECT)?"https":"http"), host, port, (args == null) ? path : path + "?" + args)).toString();
             } catch (final MalformedURLException e) {
                 urlString = "invalid URL";
             }

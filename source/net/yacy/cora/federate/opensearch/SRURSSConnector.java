@@ -30,11 +30,11 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.RSSFeed;
-import net.yacy.cora.document.RSSMessage;
-import net.yacy.cora.document.RSSReader;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.feed.RSSFeed;
+import net.yacy.cora.document.feed.RSSMessage;
+import net.yacy.cora.document.feed.RSSReader;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.SearchAccumulator;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -163,9 +163,9 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
             final CacheStrategy cacheStrategy,
             final boolean global,
             final ClientIdentification.Agent agent) throws IOException {
-        MultiProtocolURI uri = null;
+        MultiProtocolURL uri = null;
         try {
-            uri = new MultiProtocolURI(rssSearchServiceURL);
+            uri = new MultiProtocolURL(rssSearchServiceURL);
         } catch (final MalformedURLException e) {
             throw new IOException("cora.Search failed asking peer '" + rssSearchServiceURL + "': bad url, " + e.getMessage());
         }
@@ -182,7 +182,7 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
             parts.put("nav", UTF8.StringBody("none"));
             // result = HTTPConnector.getConnector(userAgent == null ? MultiProtocolURI.yacybotUserAgent : userAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);
             final HTTPClient httpClient = new HTTPClient(agent);
-            result = httpClient.POSTbytes(new MultiProtocolURI(rssSearchServiceURL), uri.getHost(), parts, false);
+            result = httpClient.POSTbytes(new MultiProtocolURL(rssSearchServiceURL), uri.getHost(), parts, false);
 
             final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
             if (reader == null) {

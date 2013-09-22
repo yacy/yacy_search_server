@@ -33,12 +33,12 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -229,7 +229,7 @@ public class ReferenceOrder {
         final int maxmaxpos = this.max.maxposition();
         final int minminpos = this.min.minposition();
         final long r =
-             ((256 - DigestURI.domLengthNormalized(t.urlhash())) << this.ranking.coeff_domlength)
+             ((256 - DigestURL.domLengthNormalized(t.urlhash())) << this.ranking.coeff_domlength)
            + ((this.max.urlcomps()      == this.min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - this.min.urlcomps()     ) << 8) / (this.max.urlcomps()     - this.min.urlcomps())     )) << this.ranking.coeff_urlcomps)
            + ((this.max.urllength()     == this.min.urllength()  )   ? 0 : (256 - (((t.urllength()    - this.min.urllength()    ) << 8) / (this.max.urllength()    - this.min.urllength())    )) << this.ranking.coeff_urllength)
            + ((maxmaxpos == minminpos)                               ? 0 : (256 - (((t.minposition() - minminpos) << 8) / (maxmaxpos - minminpos))) << this.ranking.coeff_posintext)
@@ -270,7 +270,7 @@ public class ReferenceOrder {
         assert t != null;
         assert this.ranking != null;
         final long r =
-             ((256 - DigestURI.domLengthNormalized(t.hash())) << this.ranking.coeff_domlength)
+             ((256 - DigestURL.domLengthNormalized(t.hash())) << this.ranking.coeff_domlength)
            + ((256 - (t.urllength() << 8)) << this.ranking.coeff_urllength)
            + (t.virtualAge()  << this.ranking.coeff_date)
            + (t.wordsintitle()<< this.ranking.coeff_wordsintitle)

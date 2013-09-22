@@ -26,8 +26,8 @@ package net.yacy.document;
 import java.io.InputStream;
 import java.util.Set;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 
 public interface Parser {
 
@@ -54,7 +54,7 @@ public interface Parser {
      * @throws InterruptedException
      */
     public Document[] parse(
-            DigestURI url,
+            AnchorURL url,
             String mimeType,
             String charset,
             InputStream source
@@ -91,22 +91,22 @@ public interface Parser {
     public class Failure extends Exception {
 
         private static final long serialVersionUID = 2278214953869122883L;
-        private MultiProtocolURI url = null;
+        private MultiProtocolURL url = null;
         public Failure() {
             super();
         }
 
-        public Failure(final String message, final MultiProtocolURI url) {
+        public Failure(final String message, final MultiProtocolURL url) {
             super(message + "; url = " + url.toNormalform(true));
             this.url = url;
         }
 
-        public Failure(final String message, final MultiProtocolURI url, Throwable e) {
+        public Failure(final String message, final MultiProtocolURL url, Throwable e) {
             super(message + "; url = " + url.toNormalform(true), e);
             this.url = url;
         }
 
-        public MultiProtocolURI getURL() {
+        public MultiProtocolURL getURL() {
             return this.url;
         }
     }

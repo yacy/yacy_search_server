@@ -29,7 +29,7 @@ package net.yacy.kelondro.data.navigation;
 import java.io.Serializable;
 import java.util.Collection;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.rwi.AbstractReference;
 import net.yacy.kelondro.rwi.Reference;

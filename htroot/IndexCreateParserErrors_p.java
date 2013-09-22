@@ -26,11 +26,11 @@
 import java.util.ArrayList;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.CrawlStacker;
 import net.yacy.crawler.data.ZURL;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -72,7 +72,7 @@ public class IndexCreateParserErrors_p {
                 prop.put("rejected_only-latest", "0");
             }
             dark = true;
-            DigestURI url;
+            DigestURL url;
             byte[] initiatorHash, executorHash;
             Seed initiatorSeed, executorSeed;
             int j=0;

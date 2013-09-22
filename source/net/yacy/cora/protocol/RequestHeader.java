@@ -24,8 +24,8 @@ import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.Map;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 
 public class RequestHeader extends HeaderFramework {
 
@@ -70,18 +70,18 @@ public class RequestHeader extends HeaderFramework {
         super(reverseMappingCache, othermap);
     }
 
-    public DigestURI referer() {
+    public DigestURL referer() {
         final String referer = get(REFERER, null);
         if (referer == null) return null;
         try {
-            return new DigestURI(referer);
+            return new DigestURL(referer);
         } catch (final MalformedURLException e) {
             return null;
         }
     }
 
     public String refererHost() {
-        final MultiProtocolURI url = referer();
+        final MultiProtocolURL url = referer();
         if (url == null) return null;
         return url.getHost();
     }

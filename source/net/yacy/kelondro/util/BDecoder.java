@@ -36,8 +36,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.document.encoding.UTF8;
 
 public class BDecoder {
 

@@ -30,7 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Set;
 
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.util.FileUtils;

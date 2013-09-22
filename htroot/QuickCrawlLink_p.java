@@ -32,7 +32,8 @@
 import java.net.MalformedURLException;
 import java.util.Date;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
@@ -41,7 +42,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.NumberTools;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Request;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.server.serverObjects;
@@ -112,12 +112,12 @@ public class QuickCrawlLink_p {
 
         if (crawlingStart != null) {
             crawlingStart = crawlingStart.trim();
-            try {crawlingStart = new DigestURI(crawlingStart).toNormalform(true);} catch (final MalformedURLException e1) {}
+            try {crawlingStart = new DigestURL(crawlingStart).toNormalform(true);} catch (final MalformedURLException e1) {}
 
             // check if url is proper
-            DigestURI crawlingStartURL = null;
+            DigestURL crawlingStartURL = null;
             try {
-                crawlingStartURL = new DigestURI(crawlingStart);
+                crawlingStartURL = new DigestURL(crawlingStart);
             } catch (final MalformedURLException e) {
                 prop.put("mode_status", "1");
                 prop.put("mode_code", "1");

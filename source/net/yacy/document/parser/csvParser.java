@@ -33,10 +33,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 /**
  * a parser for comma-separated values
@@ -51,7 +51,7 @@ public class csvParser extends AbstractParser implements Parser {
     }
 
     @Override
-    public Document[] parse(DigestURI location, String mimeType, String charset, InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(AnchorURL location, String mimeType, String charset, InputStream source) throws Parser.Failure, InterruptedException {
         // construct a document using all cells of the document
         // the first row is used as headline
         // all lines are artificially terminated by a '.' to separate them as sentence for the condenser.

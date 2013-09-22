@@ -33,11 +33,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.document.content.DCEntry;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.search.Switchboard;
 
 public class YMarkEntry extends TreeMap<String, String> {
@@ -237,7 +237,7 @@ public class YMarkEntry extends TreeMap<String, String> {
     }
 
     public void crawl(final YMarkCrawlStart.CRAWLSTART type, final boolean medialink, final Switchboard sb) throws MalformedURLException {
-		final DigestURI url = new DigestURI(this.get(BOOKMARK.URL.key()));
+		final DigestURL url = new DigestURL(this.get(BOOKMARK.URL.key()));
 		switch(type) {
 			case SINGLE:
 				YMarkCrawlStart.crawlStart(sb, url, CrawlProfile.MATCH_ALL_STRING, CrawlProfile.MATCH_NEVER_STRING, 0, true, medialink);
