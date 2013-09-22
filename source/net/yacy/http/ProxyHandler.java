@@ -34,13 +34,13 @@ import java.util.Enumeration;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.document.TextParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -117,7 +117,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 			cleanResponseHeader(responseHeader);
 			
 			// TODO: is this fast, if not, use value from ProxyCacheHandler
-			DigestURI digestURI = new DigestURI(url);
+			DigestURL digestURI = new DigestURL(url);
 			ResponseHeader cachedResponseHeader = Cache.getResponseHeader(digestURI.hash());
 
             // the cache does either not exist or is (supposed to be) stale
@@ -126,7 +126,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
                 // delete the cache
                 ResponseHeader rh = Cache.getResponseHeader(digestURI.hash());
                 if (rh != null && (sizeBeforeDelete = rh.getContentLength()) == 0) {
-                    byte[] b = Cache.getContent(new DigestURI(url).hash());
+                    byte[] b = Cache.getContent(new DigestURL(url).hash());
                     if (b != null) sizeBeforeDelete = b.length;
                 }
                 Cache.delete(digestURI.hash());

@@ -30,10 +30,10 @@ import javax.servlet.ServletException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.yacy.cora.document.id.DigestURL;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
@@ -61,7 +61,7 @@ public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler 
     public void handleRemote(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         if (request.getMethod().equals("GET")) {
             String queryString = request.getQueryString() != null ? "?" + request.getQueryString() : "";
-            DigestURI url = new DigestURI(request.getRequestURL().toString() + queryString);
+            DigestURL url = new DigestURL(request.getRequestURL().toString() + queryString);
             ResponseHeader cachedResponseHeader = Cache.getResponseHeader(url.hash());
 
             if (cachedResponseHeader != null) {
@@ -70,7 +70,7 @@ public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler 
                 final net.yacy.crawler.retrieval.Request yacyRequest = new net.yacy.crawler.retrieval.Request(
                         null,
                         url,
-                        proxyHeaders.referer() == null ? null : new DigestURI(proxyHeaders.referer().toString()).hash(),
+                        proxyHeaders.referer() == null ? null : new DigestURL(proxyHeaders.referer().toString()).hash(),
                         "",
                         cachedResponseHeader.lastModified(),
                         sb.crawler.defaultProxyProfile.handle(),
