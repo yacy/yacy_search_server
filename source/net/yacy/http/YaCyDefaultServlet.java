@@ -124,7 +124,7 @@ import org.eclipse.jetty.util.resource.ResourceFactory;
  */
 public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
 
-    private static final long serialVersionUID = 4930458713846881193L;
+    private static final long serialVersionUID = 4900000000000001110L;
     private ServletContext _servletContext;
     private boolean _acceptRanges = true;
     private boolean _dirAllowed = true;
@@ -985,6 +985,7 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
         OutputStream out = response.getOutputStream();
 
 
+        // remove virtual host "currentyacypeer"
         int off = 0; // starting offset
         int x = buffer.indexOf("/currentyacypeer/".getBytes(), off);
         while (x >= 0) {
@@ -995,6 +996,7 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
             x = buffer.indexOf("/currentyacypeer/".getBytes(), off);
         }
 
+        // check and handle SSI (ServerSideIncludes)
         off = 0;
         int p = buffer.indexOf("<!--#".getBytes(), off);
         int q;
@@ -1011,6 +1013,7 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
         out.flush();
     }
 	
+    // parse SSI line and include resource
     private void parseSSI(final net.yacy.cora.util.ByteBuffer in, final int off, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (in.startsWith("<!--#include virtual=\"".getBytes(), off)) {
             final int q = in.indexOf("\"".getBytes(), off + 22);

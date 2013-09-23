@@ -26,7 +26,7 @@ package net.yacy.http;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.search.Switchboard;
@@ -71,7 +71,7 @@ public class YaCySecurityHandler extends SecurityHandler {
 
         String refererHost;
         try {
-            refererHost = new DigestURL(request.getHeader("Referer")).getHost();
+            refererHost = new MultiProtocolURL(request.getHeader("Referer")).getHost();
         } catch (MalformedURLException e) {
             refererHost = null;
         }
