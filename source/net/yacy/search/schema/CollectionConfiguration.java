@@ -201,20 +201,21 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * add uri attributes to solr document
      * @param doc
      * @param allAttr
-     * @param digestURI
+     * @param digestURL
      * @param doctype
      * @return the normalized url
      */
-    public String addURIAttributes(final SolrInputDocument doc, final boolean allAttr, final DigestURL digestURI, final char doctype) {
-        add(doc, CollectionSchema.id, ASCII.String(digestURI.hash()));
-        String us = digestURI.toNormalform(true);
+    public String addURIAttributes(final SolrInputDocument doc, final boolean allAttr, final DigestURL digestURL, final char doctype) {
+        add(doc, CollectionSchema.id, ASCII.String(digestURL.hash()));
+        if (allAttr || contains(CollectionSchema.host_id_s)) add(doc, CollectionSchema.host_id_s, digestURL.hosthash());
+        String us = digestURL.toNormalform(true);
         add(doc, CollectionSchema.sku, us);
         if (allAttr || contains(CollectionSchema.ip_s)) {
-            final InetAddress address = digestURI.getInetAddress();
+            final InetAddress address = digestURL.getInetAddress();
             if (address != null) add(doc, CollectionSchema.ip_s, address.getHostAddress());
         }
         String host = null;
-        if ((host = digestURI.getHost()) != null) {
+        if ((host = digestURL.getHost()) != null) {
             String dnc = Domains.getDNC(host);
             String subdomOrga = host.length() - dnc.length() <= 0 ? "" : host.substring(0, host.length() - dnc.length() - 1);
             int p = subdomOrga.lastIndexOf('.');
@@ -228,17 +229,17 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         
         // path elements of link
-        String filename = digestURI.getFileName();
+        String filename = digestURL.getFileName();
         String extension = MultiProtocolURL.getFileExtension(filename);
         if (allAttr || contains(CollectionSchema.url_chars_i)) add(doc, CollectionSchema.url_chars_i, us.length());
-        if (allAttr || contains(CollectionSchema.url_protocol_s)) add(doc, CollectionSchema.url_protocol_s, digestURI.getProtocol());
-        if (allAttr || contains(CollectionSchema.url_paths_sxt)) add(doc, CollectionSchema.url_paths_sxt, digestURI.getPaths());
+        if (allAttr || contains(CollectionSchema.url_protocol_s)) add(doc, CollectionSchema.url_protocol_s, digestURL.getProtocol());
+        if (allAttr || contains(CollectionSchema.url_paths_sxt)) add(doc, CollectionSchema.url_paths_sxt, digestURL.getPaths());
         if (allAttr || contains(CollectionSchema.url_file_name_s)) add(doc, CollectionSchema.url_file_name_s, filename.toLowerCase().endsWith("." + extension) ? filename.substring(0, filename.length() - extension.length() - 1) : filename);
         if (allAttr || contains(CollectionSchema.url_file_ext_s)) add(doc, CollectionSchema.url_file_ext_s, extension);
         if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, Response.doctype2mime(extension, doctype));
         
 
-        Map<String, String> searchpart = digestURI.getSearchpartMap();
+        Map<String, String> searchpart = digestURL.getSearchpartMap();
         if (searchpart == null) {
             if (allAttr || contains(CollectionSchema.url_parameter_i)) add(doc, CollectionSchema.url_parameter_i, 0);
         } else {
@@ -309,7 +310,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // fields that are in URIMetadataRow additional to yacy2solr basic requirement
         if (allAttr || contains(CollectionSchema.load_date_dt)) add(doc, CollectionSchema.load_date_dt, md.loaddate());
         if (allAttr || contains(CollectionSchema.fresh_date_dt)) add(doc, CollectionSchema.fresh_date_dt, md.freshdate());
-        if (allAttr || contains(CollectionSchema.host_id_s)) add(doc, CollectionSchema.host_id_s, md.hosthash());
         if ((allAttr || contains(CollectionSchema.referrer_id_s)) && md.referrerHash() != null) add(doc, CollectionSchema.referrer_id_s, ASCII.String(md.referrerHash()));
         if (allAttr || contains(CollectionSchema.md5_s)) add(doc, CollectionSchema.md5_s, md.md5());
         if (allAttr || contains(CollectionSchema.publisher_t)) add(doc, CollectionSchema.publisher_t, md.dc_publisher());
@@ -357,27 +357,25 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     }
     
     public SolrVector yacy2solr(
-            final String id, final Map<String, Pattern> collections, final ResponseHeader responseHeader,
+            final Map<String, Pattern> collections, final ResponseHeader responseHeader,
             final Document document, final Condenser condenser, final DigestURL referrerURL, final String language,
             final IndexCell<CitationReference> citations,
             final WebgraphConfiguration webgraph) {
         // we use the SolrCell design as index schema
         SolrVector doc = new SolrVector();
-        final DigestURL digestURI = document.dc_source();
+        final DigestURL digestURL = document.dc_source();
+        final String id = ASCII.String(digestURL.hash());
         boolean allAttr = this.isEmpty();
-        String url = addURIAttributes(doc, allAttr, digestURI, Response.docType(digestURI));
+        String url = addURIAttributes(doc, allAttr, digestURL, Response.docType(digestURL));
         
         Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
         
-        add(doc, CollectionSchema.id, id);
-        String us = digestURI.toNormalform(true);
+        String us = digestURL.toNormalform(true);
 
         int clickdepth = 999;
         if ((allAttr || contains(CollectionSchema.clickdepth_i)) && citations != null) {
-            if (digestURI.probablyRootURL()) {
-                boolean lc = this.lazy; this.lazy = false;
+            if (digestURL.probablyRootURL()) {
                 clickdepth = 0;
-                this.lazy = lc;
             } else {
                 clickdepth = 999;
             }
@@ -712,7 +710,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 if (refresh != null && refresh.length() > 0) {
                     MultiProtocolURL refreshURL;
                     try {
-                        refreshURL = refresh.startsWith("http") ? new MultiProtocolURL(html.getRefreshPath()) : new MultiProtocolURL(digestURI, html.getRefreshPath());
+                        refreshURL = refresh.startsWith("http") ? new MultiProtocolURL(html.getRefreshPath()) : new MultiProtocolURL(digestURL, html.getRefreshPath());
                         if (refreshURL != null) {
                             inboundLinks.remove(refreshURL);
                             outboundLinks.remove(refreshURL);
@@ -785,7 +783,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         
         String content = document.getTextString();
-        String tokens = digestURI.toTokens();
+        String tokens = digestURL.toTokens();
         if (content == null || content.length() == 0) {
             content = tokens;
         } else {
@@ -798,9 +796,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
         }
         
-        if ((allAttr || contains(CollectionSchema.images_text_t)) && MultiProtocolURL.isImage(MultiProtocolURL.getFileExtension(digestURI.getFileName()))) {
+        if ((allAttr || contains(CollectionSchema.images_text_t)) && MultiProtocolURL.isImage(MultiProtocolURL.getFileExtension(digestURL.getFileName()))) {
             add(doc, CollectionSchema.images_text_t, content); // the content may contain the exif data from the image parser
-            content = digestURI.toTokens(); // remove all other entry but the url tokens
+            content = digestURL.toTokens(); // remove all other entry but the url tokens
         }
         
         // content (must be written after special parser data, since this can influence the content)
@@ -824,7 +822,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // create a subgraph
         if (!containsCanonical) {
             // a document with canonical tag should not get a webgraph relation, because that belongs to the canonical document
-            webgraph.addEdges(subgraph, digestURI, responseHeader, collections, clickdepth, images, true, document.getAnchors(), citations);
+            webgraph.addEdges(subgraph, digestURL, responseHeader, collections, clickdepth, images, true, document.getAnchors(), citations);
         }
             
         // list all links
@@ -850,7 +848,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         int size = (int) Math.max(document.dc_source().length(), responseHeader == null ? 0 : responseHeader.getContentLength());
         if (allAttr || contains(CollectionSchema.load_date_dt)) add(doc, CollectionSchema.load_date_dt, loadDate);
         if (allAttr || contains(CollectionSchema.fresh_date_dt)) add(doc, CollectionSchema.fresh_date_dt, new Date(loadDate.getTime() + Math.max(0, loadDate.getTime() - modDate.getTime()) / 2)); // freshdate, computed with Proxy-TTL formula
-        if (allAttr || contains(CollectionSchema.host_id_s)) add(doc, CollectionSchema.host_id_s, document.dc_source().hosthash());
         if ((allAttr || contains(CollectionSchema.referrer_id_s)) && referrerURL != null) add(doc, CollectionSchema.referrer_id_s, ASCII.String(referrerURL.hash()));
         //if (allAttr || contains(SolrField.md5_s)) add(solrdoc, SolrField.md5_s, new byte[0]);
         if (allAttr || contains(CollectionSchema.publisher_t)) add(doc, CollectionSchema.publisher_t, document.dc_publisher());
@@ -1268,6 +1265,21 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     if (e.getValue().matcher(url).matches()) cs.add(e.getKey());
                 }
                 configuration.add(doc, CollectionSchema.collection_sxt, cs);
+            }
+
+            // clickdepth, cr and postprocessing
+            Set<ProcessType> processTypes = new LinkedHashSet<ProcessType>();
+            if ((allAttr || configuration.contains(CollectionSchema.clickdepth_i))) {
+                processTypes.add(ProcessType.CLICKDEPTH); // postprocessing needed; this is also needed if the depth is positive; there could be a shortcut
+                CollectionSchema.clickdepth_i.add(doc, digestURL.probablyRootURL() ? 0 : 999); // no lazy value checking to get a '0' into the index
+            }
+            if (allAttr || (configuration.contains(CollectionSchema.cr_host_chance_d) && configuration.contains(CollectionSchema.cr_host_count_i) && configuration.contains(CollectionSchema.cr_host_norm_i))) {
+                processTypes.add(ProcessType.CITATION); // postprocessing needed
+            }
+            if (allAttr || configuration.contains(CollectionSchema.process_sxt)) {
+                List<String> p = new ArrayList<String>();
+                for (ProcessType t: processTypes) p.add(t.name());
+                configuration.add(doc, CollectionSchema.process_sxt, p);
             }
             return doc;
         }
