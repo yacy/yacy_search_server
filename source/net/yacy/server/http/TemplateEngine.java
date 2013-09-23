@@ -391,7 +391,6 @@ public final class TemplateEngine {
 
             // #%
             } else if ((bb & 0xFF) == pcChar) { //include
-                final ByteBuffer include = new ByteBuffer();
                 keyStream.reset(); //reset stream
                 if(transferUntil(pis, keyStream, iClose)){
                     byte[] filename = keyStream.toByteArray();
@@ -403,6 +402,7 @@ public final class TemplateEngine {
                         filename= replacePattern(patternkey, pattern, dflt);
                     }
                     if (filename.length > 0 && !java.util.Arrays.equals(filename, dflt)) {
+                        final ByteBuffer include = new ByteBuffer();
                         BufferedReader br = null;
                         try{
                             //br = new BufferedReader(new InputStreamReader(new FileInputStream( filename ))); //Simple Include
@@ -422,9 +422,9 @@ public final class TemplateEngine {
                         structure.append(ASCII.getBytes("<fileinclude file=\"")).append(filename).append(close_tagn);
                         structure.append(writeTemplate(pis2, out, pattern, dflt, new byte[0])); //clear pattern prefix for include
                         structure.append(ASCII.getBytes("</fileinclude>\n"));
+                        include.close();
                     }
                 }
-
             // # - no special character. This is simply a '#' without meaning
             } else { //no match, but a single hash (output # + bb)
                 out.write(hashChar);

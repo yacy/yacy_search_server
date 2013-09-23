@@ -48,7 +48,6 @@ import net.yacy.cora.util.ConcurrentLog;
 public class DigestURL extends MultiProtocolURL implements Serializable {
 
     private static final long serialVersionUID = -1173233022912141885L;
-    public  static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
 
     // class variables
     private byte[] hash;

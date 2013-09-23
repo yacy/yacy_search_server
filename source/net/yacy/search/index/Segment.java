@@ -619,7 +619,7 @@ public class Segment {
         char docType = Response.docType(document.dc_format());
         
         // CREATE SOLR DOCUMENT
-        final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(id, collections, responseHeader, document, condenser, referrerURL, language, urlCitationIndex, this.fulltext.getWebgraphConfiguration());
+        final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(collections, responseHeader, document, condenser, referrerURL, language, urlCitationIndex, this.fulltext.getWebgraphConfiguration());
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
         if (this.connectedCitation()) {
