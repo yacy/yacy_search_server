@@ -668,7 +668,8 @@ public class yacysearch {
                         && sb.getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false)
                         && sb.peers.mySeed().getFlagAcceptRemoteIndex(),
                     false,
-                    lat, lon, rad);
+                    lat, lon, rad,
+                    sb.getConfig("search_navigation","").split(","));
             EventTracker.delete(EventTracker.EClass.SEARCH);
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
                 theQuery.id(true),

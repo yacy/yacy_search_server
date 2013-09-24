@@ -251,7 +251,8 @@ public final class search {
                     false,
                     0.0d,
                     0.0d,
-                    0.0d
+                    0.0d,
+                    new String[0]
                     );
             Network.log.info("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
 
@@ -315,7 +316,8 @@ public final class search {
                     false,
                     0.0d,
                     0.0d,
-                    0.0d
+                    0.0d,
+                    new String[0]
                     );
             Network.log.info("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
             EventChannel.channels(EventChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()), ""));
