@@ -24,10 +24,10 @@
 
 package net.yacy.cora.document.encoding;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Comparator;
 
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.content.StringBody;
 
 /**
@@ -45,6 +45,7 @@ public class UTF8 implements Comparator<String> {
     static {
         charset = Charset.forName("UTF-8");
     }
+    private final static ContentType contentType = ContentType.TEXT_PLAIN.withCharset(charset);
 
     public static final UTF8 insensitiveUTF8Comparator = new UTF8(true);
     public static final UTF8 identityUTF8Comparator = new UTF8(false);
@@ -103,12 +104,7 @@ public class UTF8 implements Comparator<String> {
     }
 
     public final static StringBody StringBody(final String s) {
-        try {
-            return new StringBody(s == null ? "" : s, charset);
-        } catch (final UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return new StringBody(s == null ? "" : s, contentType);
     }
 
     /**
