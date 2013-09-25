@@ -74,8 +74,8 @@ public class Domains {
     private static final String PRESENT = "";
     private static final Pattern LOCAL_PATTERNS = Pattern.compile("(10\\..*)|(127\\..*)|(172\\.(1[6-9]|2[0-9]|3[0-1])\\..*)|(169\\.254\\..*)|(192\\.168\\..*)|(localhost)|(\\[?\\:\\:1/.*)|(\\[?fc.*)|(\\[?fd.*)|(\\[?(fe80|0)\\:0\\:0\\:0\\:0\\:0\\:0\\:1.*)");
     
-    private static final int MAX_NAME_CACHE_HIT_SIZE = 100000;
-    private static final int MAX_NAME_CACHE_MISS_SIZE = 100000;
+    private static final int MAX_NAME_CACHE_HIT_SIZE = 10000;
+    private static final int MAX_NAME_CACHE_MISS_SIZE = 1000;
     private static final int CONCURRENCY_LEVEL = Runtime.getRuntime().availableProcessors() * 2;
 
     // a dns cache
@@ -782,7 +782,7 @@ public class Domains {
                         public InetAddress call() throws Exception {
                             return InetAddress.getByName(host);
                         }
-                    }, 1000L, TimeUnit.MILLISECONDS, false);
+                    }, 3000L, TimeUnit.MILLISECONDS, false);
                     //ip = TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
                 }
                 //.out.println("DNSLOOKUP-*LOOKUP* " + host + ", time = " + (System.currentTimeMillis() - t) + "ms");

@@ -2009,7 +2009,7 @@ public final class Switchboard extends serverSwitch {
             // clear caches
             if (WordCache.sizeCommonWords() > 1000) WordCache.clearCommonWords();
             Word.clearCache();
-            Domains.clear();
+            // Domains.clear();
             
             // clean up image stack
             ResultImages.clearQueues();
@@ -2274,7 +2274,10 @@ public final class Switchboard extends serverSwitch {
             // if no crawl is running and processing is activated:
             // execute the (post-) processing steps for all entries that have a process tag assigned
             if (this.crawlQueues.coreCrawlJobSize() == 0) {
-                if (this.crawlQueues.noticeURL.isEmpty()) this.crawlQueues.noticeURL.clear(); // flushes more caches 
+                if (this.crawlQueues.noticeURL.isEmpty()) {
+                	Domains.clear();
+                	this.crawlQueues.noticeURL.clear(); // flushes more caches 
+                }
                 postprocessingRunning = true;
                 int proccount = 0;
                 proccount += index.fulltext().getDefaultConfiguration().postprocessing(index);
@@ -2827,7 +2830,7 @@ public final class Switchboard extends serverSwitch {
 
     public void stackURLs(Set<DigestURL> rootURLs, final CrawlProfile profile, final Set<DigestURL> successurls, final Map<DigestURL,String> failurls) {
         if (rootURLs == null || rootURLs.size() == 0) return;
-        List<Thread> stackthreads = new ArrayList<Thread>(); // do this concurrently
+        final List<Thread> stackthreads = new ArrayList<Thread>(); // do this concurrently
         for (DigestURL url: rootURLs) {
             final DigestURL turl = url;
             Thread t = new Thread() {
@@ -2838,9 +2841,9 @@ public final class Switchboard extends serverSwitch {
             };
             t.start();
             stackthreads.add(t);
-            try {Thread.sleep(10);} catch (final InterruptedException e) {} // to prevent that this fires more than 100 connections pre second!
+            try {Thread.sleep(100);} catch (final InterruptedException e) {} // to prevent that this fires more than 10 connections pre second!
         }
-        long waitingtime = 1 + (30000 / rootURLs.size()); // at most wait only halve an minute to prevent that the crawl start runs into a time-out
+        final long waitingtime = 10 + (30000 / rootURLs.size()); // at most wait only halve an minute to prevent that the crawl start runs into a time-out
         for (Thread t: stackthreads) try {t.join(waitingtime);} catch (final InterruptedException e) {}
     }
     
