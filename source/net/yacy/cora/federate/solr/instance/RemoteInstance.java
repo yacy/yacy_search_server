@@ -46,15 +46,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.entity.GzipDecompressingEntity;
-import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicAuthCache;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
@@ -63,7 +55,7 @@ import org.apache.solr.client.solrj.impl.HttpSolrServer;
 public class RemoteInstance implements SolrInstance {
     
     private String solrurl;
-    private final DefaultHttpClient client;
+    private final org.apache.http.impl.client.DefaultHttpClient client;
 // 4.3    private final CloseableHttpClient client;
     private final String defaultCoreName;
     private final HttpSolrServer defaultServer;
@@ -182,25 +174,25 @@ public class RemoteInstance implements SolrInstance {
 //    		this.client = builder.build();
         	
 // old Stuff START
-            PoolingClientConnectionManager cm = new PoolingClientConnectionManager(); // try also: ThreadSafeClientConnManager
+            org.apache.http.impl.conn.PoolingClientConnectionManager cm = new org.apache.http.impl.conn.PoolingClientConnectionManager(); // try also: ThreadSafeClientConnManager
             cm.setMaxTotal(100);
             
-            this.client = new DefaultHttpClient(cm) {
+            this.client = new org.apache.http.impl.client.DefaultHttpClient(cm) {
                 @Override
                 protected HttpContext createHttpContext() {
                     HttpContext context = super.createHttpContext();
-                    AuthCache authCache = new BasicAuthCache();
+                    AuthCache authCache = new org.apache.http.impl.client.BasicAuthCache();
                     BasicScheme basicAuth = new BasicScheme();
                     HttpHost targetHost = new HttpHost(u.getHost(), u.getPort(), u.getProtocol());
                     authCache.put(targetHost, basicAuth);
-                    context.setAttribute(ClientContext.AUTH_CACHE, authCache);
-                    this.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false)); // no retries needed; we expect connections to fail; therefore we should not retry
+                    context.setAttribute(org.apache.http.client.protocol.ClientContext.AUTH_CACHE, authCache);
+                    this.setHttpRequestRetryHandler(new org.apache.http.impl.client.DefaultHttpRequestRetryHandler(0, false)); // no retries needed; we expect connections to fail; therefore we should not retry
                     return context;
                 }
             };
-            HttpParams params = this.client.getParams();
-            HttpConnectionParams.setConnectionTimeout(params, timeout);
-            HttpConnectionParams.setSoTimeout(params, timeout);
+            org.apache.http.params.HttpParams params = this.client.getParams();
+            org.apache.http.params.HttpConnectionParams.setConnectionTimeout(params, timeout);
+            org.apache.http.params.HttpConnectionParams.setSoTimeout(params, timeout);
             this.client.addRequestInterceptor(new HttpRequestInterceptor() {
                 @Override
                 public void process(final HttpRequest request, final HttpContext context) throws IOException {
@@ -227,7 +219,7 @@ public class RemoteInstance implements SolrInstance {
                     }
                 }
             });
-            BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
+            org.apache.http.impl.client.BasicCredentialsProvider credsProvider = new org.apache.http.impl.client.BasicCredentialsProvider();
             credsProvider.setCredentials(new AuthScope(host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(solraccount, solrpw));
             this.client.setCredentialsProvider(credsProvider);
 // old Stuff END
