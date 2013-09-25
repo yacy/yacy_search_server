@@ -534,7 +534,7 @@ public final class CrawlSwitchboard {
         return hasDoneSomething;
     }
 
-    public int cleanFinishesProfiles(CrawlQueues crawlQueues) {
+    public Set<String> getFinishesProfiles(CrawlQueues crawlQueues) {
         // clear the counter cache
         this.profilesActiveCrawlsCounter.clear();        
         
@@ -547,7 +547,7 @@ public final class CrawlSwitchboard {
                 deletionCandidate.add(ASCII.String(handle));
             }
         }
-        if (deletionCandidate.size() == 0) return 0;
+        if (deletionCandidate.size() == 0) return new HashSet<String>(0);
         
         // iterate through all the queues and see if one of these handles appear there
         // this is a time-consuming process, set a time-out
@@ -564,15 +564,18 @@ public final class CrawlSwitchboard {
                     if (us == null) {us =  new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0); this.profilesActiveCrawlsCounter.put(handle, us);}
                     if (us.size() < 100) us.put(r.url().hash()); // store the hash, but not too many
                     deletionCandidate.remove(handle);
-                    if (deletionCandidate.size() == 0) return 0;
-                    if (System.currentTimeMillis() > timeout) return 0; // give up; this is too large
+                    if (deletionCandidate.size() == 0) return new HashSet<String>(0);
+                    if (System.currentTimeMillis() > timeout) return new HashSet<String>(0); // give up; this is too large
                 }
-                if (deletionCandidate.size() == 0) return 0;
+                if (deletionCandidate.size() == 0) return new HashSet<String>(0);
             }
         } catch (final Throwable e) {
-            return 0;
+            return new HashSet<String>(0);
         }
-        
+        return deletionCandidate;
+    }
+    
+    public void cleanProfiles(Set<String> deletionCandidate) {
         // all entries that are left are candidates for deletion; do that now
         for (String h: deletionCandidate) {
             byte[] handle = ASCII.getBytes(h);
@@ -582,7 +585,6 @@ public final class CrawlSwitchboard {
                 this.removeActive(handle);
             }
         }
-        return deletionCandidate.size();
     }
     
     public synchronized void close() {
