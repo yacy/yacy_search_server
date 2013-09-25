@@ -37,24 +37,18 @@ import net.yacy.search.schema.WebgraphSchema;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.AuthCache;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.GzipDecompressingEntity;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
@@ -62,8 +56,8 @@ import org.apache.solr.client.solrj.impl.HttpSolrServer;
 public class RemoteInstance implements SolrInstance {
     
     private String solrurl;
-    private final DefaultHttpClient client;
-    
+ // old Stuff:    private final DefaultHttpClient client;
+    private final CloseableHttpClient client;
     private final String defaultCoreName;
     private final HttpSolrServer defaultServer;
     private final Collection<String> coreNames;
@@ -133,26 +127,24 @@ public class RemoteInstance implements SolrInstance {
             }
         }
         if (solraccount.length() > 0) {
-            PoolingClientConnectionManager cm = new PoolingClientConnectionManager(); // try also: ThreadSafeClientConnManager
-            cm.setMaxTotal(100);
-            
-            this.client = new DefaultHttpClient(cm) {
-                @Override
-                protected HttpContext createHttpContext() {
-                    HttpContext context = super.createHttpContext();
-                    AuthCache authCache = new BasicAuthCache();
-                    BasicScheme basicAuth = new BasicScheme();
-                    HttpHost targetHost = new HttpHost(u.getHost(), u.getPort(), u.getProtocol());
-                    authCache.put(targetHost, basicAuth);
-                    context.setAttribute(ClientContext.AUTH_CACHE, authCache);
-                    this.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false)); // no retries needed; we expect connections to fail; therefore we should not retry
-                    return context;
-                }
-            };
-            HttpParams params = this.client.getParams();
-            HttpConnectionParams.setConnectionTimeout(params, timeout);
-            HttpConnectionParams.setSoTimeout(params, timeout);
-            this.client.addRequestInterceptor(new HttpRequestInterceptor() {
+        	final PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        	cm.setMaxTotal(100);
+        	
+        	final RequestConfig.Builder reqBuilder = RequestConfig.custom();
+        	reqBuilder.setSocketTimeout(timeout);
+        	reqBuilder.setConnectTimeout(timeout);
+        	reqBuilder.setConnectionRequestTimeout(timeout);
+        	
+        	final BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
+            credsProvider.setCredentials(new AuthScope(host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(solraccount, solrpw));
+        	
+        	final HttpClientBuilder builder = HttpClientBuilder.create();
+        	builder.setConnectionManager(cm);
+        	builder.setDefaultRequestConfig(reqBuilder.build());
+        	builder.setDefaultCredentialsProvider(credsProvider);
+        	builder.disableAutomaticRetries(); // no retries needed; we expect connections to fail; therefore we should not retry
+        	// ask for gzip - why not using net.yacy.cora.protocol.http.GzipRequestInterceptor?
+    		builder.addInterceptorLast(new HttpRequestInterceptor() {
                 @Override
                 public void process(final HttpRequest request, final HttpContext context) throws IOException {
                     if (!request.containsHeader("Accept-Encoding")) request.addHeader("Accept-Encoding", "gzip");
@@ -160,7 +152,8 @@ public class RemoteInstance implements SolrInstance {
                 }
 
             });
-            this.client.addResponseInterceptor(new HttpResponseInterceptor() {
+    		// uncompress gzip - why not using net.yacy.cora.protocol.http.GzipResponseInterceptor?
+    		builder.addInterceptorLast(new HttpResponseInterceptor() {
                 @Override
                 public void process(final HttpResponse response, final HttpContext context) throws IOException {
                     HttpEntity entity = response.getEntity();
@@ -178,9 +171,57 @@ public class RemoteInstance implements SolrInstance {
                     }
                 }
             });
-            BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
-            credsProvider.setCredentials(new AuthScope(host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(solraccount, solrpw));
-            this.client.setCredentialsProvider(credsProvider);
+    		this.client = builder.build();
+        	
+// old Stuff:
+//            PoolingClientConnectionManager cm = new PoolingClientConnectionManager(); // try also: ThreadSafeClientConnManager
+//            cm.setMaxTotal(100);
+//            
+//            this.client = new DefaultHttpClient(cm) {
+//                @Override
+//                protected HttpContext createHttpContext() {
+//  Auth-caching      HttpContext context = super.createHttpContext();
+//  is done           AuthCache authCache = new BasicAuthCache();
+//  by default        BasicScheme basicAuth = new BasicScheme();
+//  since 4.1         HttpHost targetHost = new HttpHost(u.getHost(), u.getPort(), u.getProtocol());
+//                    authCache.put(targetHost, basicAuth);
+//                    context.setAttribute(ClientContext.AUTH_CACHE, authCache);
+//                    this.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false)); // no retries needed; we expect connections to fail; therefore we should not retry
+//                    return context;
+//                }
+//            };
+//            HttpParams params = this.client.getParams();
+//            HttpConnectionParams.setConnectionTimeout(params, timeout);
+//            HttpConnectionParams.setSoTimeout(params, timeout);
+//            this.client.addRequestInterceptor(new HttpRequestInterceptor() {
+//                @Override
+//                public void process(final HttpRequest request, final HttpContext context) throws IOException {
+//                    if (!request.containsHeader("Accept-Encoding")) request.addHeader("Accept-Encoding", "gzip");
+//                    if (!request.containsHeader("Connection")) request.addHeader("Connection", "close"); // prevent CLOSE_WAIT
+//                }
+//
+//            });
+//            this.client.addResponseInterceptor(new HttpResponseInterceptor() {
+//                @Override
+//                public void process(final HttpResponse response, final HttpContext context) throws IOException {
+//                    HttpEntity entity = response.getEntity();
+//                    if (entity != null) {
+//                        Header ceheader = entity.getContentEncoding();
+//                        if (ceheader != null) {
+//                            HeaderElement[] codecs = ceheader.getElements();
+//                            for (HeaderElement codec : codecs) {
+//                                if (codec.getName().equalsIgnoreCase("gzip")) {
+//                                    response.setEntity(new GzipDecompressingEntity(response.getEntity()));
+//                                    return;
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            });
+//            BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
+//            credsProvider.setCredentials(new AuthScope(host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(solraccount, solrpw));
+//            this.client.setCredentialsProvider(credsProvider);
         } else {
             this.client = null;
         }
@@ -248,7 +289,13 @@ public class RemoteInstance implements SolrInstance {
 
     @Override
     public void close() {
-        if (this.client != null) this.client.getConnectionManager().shutdown();
+// old Stuff:        if (this.client != null) this.client.getConnectionManager().shutdown();
+    	if (this.client != null)
+			try {
+				this.client.close();
+			} catch (final IOException e) {
+				// TODO Auto-generated catch block
+			}
     }
 
 }

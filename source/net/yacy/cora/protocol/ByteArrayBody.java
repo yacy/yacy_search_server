@@ -28,6 +28,7 @@ package net.yacy.cora.protocol;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MIME;
 import org.apache.http.entity.mime.content.AbstractContentBody;
 
@@ -42,7 +43,7 @@ public class ByteArrayBody extends AbstractContentBody {
 	 * @param filename
 	 */
 	public ByteArrayBody(final byte[] bytes, final String filename) {
-		super("application/octet-stream");
+		super(ContentType.APPLICATION_OCTET_STREAM);
 		this.bytes = bytes;
 		this.filename = filename;
 	}
