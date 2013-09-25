@@ -360,7 +360,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             final Map<String, Pattern> collections, final ResponseHeader responseHeader,
             final Document document, final Condenser condenser, final DigestURL referrerURL, final String language,
             final IndexCell<CitationReference> citations,
-            final WebgraphConfiguration webgraph) {
+            final WebgraphConfiguration webgraph, final String sourceName) {
         // we use the SolrCell design as index schema
         SolrVector doc = new SolrVector();
         final DigestURL digestURL = document.dc_source();
@@ -822,7 +822,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // create a subgraph
         if (!containsCanonical) {
             // a document with canonical tag should not get a webgraph relation, because that belongs to the canonical document
-            webgraph.addEdges(subgraph, digestURL, responseHeader, collections, clickdepth, images, true, document.getAnchors(), citations);
+            webgraph.addEdges(subgraph, digestURL, responseHeader, collections, clickdepth, images, true, document.getAnchors(), citations, sourceName);
         }
             
         // list all links
@@ -871,6 +871,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             List<String> p = new ArrayList<String>();
             for (ProcessType t: processTypes) p.add(t.name());
             add(doc, CollectionSchema.process_sxt, p);
+            if (allAttr || contains(CollectionSchema.harvestkey_s)) {
+                add(doc, CollectionSchema.harvestkey_s, sourceName);
+            }
         }
         return doc;
     }
@@ -882,7 +885,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param urlCitation
      * @return
      */
-    public int postprocessing(final Segment segment) {
+    public int postprocessing(final Segment segment, String harvestkey) {
         if (!this.contains(CollectionSchema.process_sxt)) return 0;
         if (!segment.connectedCitation()) return 0;
         SolrConnector connector = segment.fulltext().getDefaultConnector();
@@ -891,7 +894,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         Map<byte[], CRV> ranking = new TreeMap<byte[], CRV>(Base64Order.enhancedCoder);
         try {
             // collect hosts from index which shall take part in citation computation
-            ReversibleScoreMap<String> hostscore = connector.getFacets(CollectionSchema.process_sxt.getSolrFieldName() + ":" + ProcessType.CITATION.toString(), 10000, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
+            ReversibleScoreMap<String> hostscore = connector.getFacets(
+                    (harvestkey == null ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
+                    CollectionSchema.process_sxt.getSolrFieldName() + ":" + ProcessType.CITATION.toString(),
+                    10000, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
             if (hostscore == null) hostscore = new ClusteredScoreMap<String>();
             // for each host, do a citation rank computation
             for (String host: hostscore.keyList(true)) {
@@ -912,7 +918,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         
         // process all documents
-        BlockingQueue<SolrDocument> docs = connector.concurrentDocumentsByQuery(CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 10000, 60000, 50);
+        BlockingQueue<SolrDocument> docs = connector.concurrentDocumentsByQuery(
+                (harvestkey == null ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
+                CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]",
+                0, 10000, 60000, 50);
         SolrDocument doc;
         int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0, proccount_citationchange = 0, proccount_uniquechange = 0;
         Map<String, Long> hostExtentCache = new HashMap<String, Long>(); // a mapping from the host id to the number of documents which contain this host-id
@@ -961,8 +970,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     }
                     if (postprocessing_references(rrCache, doc, sid, url, hostExtentCache)) proccount_referencechange++;
                     
-                    // all processing steps checked, remove the processing tag
+                    // all processing steps checked, remove the processing and harvesting key
                     sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());
+                    sid.removeField(CollectionSchema.harvestkey_s.getSolrFieldName());
                     
                     // send back to index
                     //connector.deleteById(ASCII.String(id));

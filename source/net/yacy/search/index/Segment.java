@@ -599,7 +599,7 @@ public class Segment {
             final Document document,
             final Condenser condenser,
             final SearchEvent searchEvent,
-            final String sourceName,
+            final String sourceName, // contains the crawl profile hash if this comes from a web crawl
             final boolean storeToRWI
             ) {
         final long startTime = System.currentTimeMillis();
@@ -619,7 +619,7 @@ public class Segment {
         char docType = Response.docType(document.dc_format());
         
         // CREATE SOLR DOCUMENT
-        final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(collections, responseHeader, document, condenser, referrerURL, language, urlCitationIndex, this.fulltext.getWebgraphConfiguration());
+        final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(collections, responseHeader, document, condenser, referrerURL, language, urlCitationIndex, this.fulltext.getWebgraphConfiguration(), sourceName);
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
         if (this.connectedCitation()) {

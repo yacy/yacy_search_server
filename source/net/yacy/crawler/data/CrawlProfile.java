@@ -148,7 +148,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         }
         if (name.length() > 256) name = name.substring(256);
         this.doms = new ConcurrentHashMap<String, AtomicInteger>();
-        final String handle = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(name)).substring(0, Word.commonHashLength);
+        final String handle = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(name + crawlerUrlMustMatch + depth + crawlerUrlMustNotMatch + domMaxPages)).substring(0, Word.commonHashLength);
         put(HANDLE,           handle);
         put(NAME,             name);
         put(AGENT_NAME, userAgentName);

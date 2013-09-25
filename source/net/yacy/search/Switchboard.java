@@ -2135,8 +2135,17 @@ public final class Switchboard extends serverSwitch {
                 Set<String> deletionCandidates = this.crawler.getFinishesProfiles(this.crawlQueues);
                 int cleanup =  deletionCandidates.size();
                 if (cleanup > 0) {
+                    // run postprocessing on these profiles
+                    postprocessingRunning = true;
+                    int proccount = 0;
+                    for (String profileHash: deletionCandidates) {
+                        proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, profileHash);
+                        proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, profileHash);
+                    }
+                    postprocessingRunning = false;
+                    
                     this.crawler.cleanProfiles(deletionCandidates);
-                    log.info("cleanup removed " + cleanup + " crawl profiles");
+                    log.info("cleanup removed " + cleanup + " crawl profiles, post-processed " + proccount + " documents");
                 }
             }
             
@@ -2277,8 +2286,8 @@ public final class Switchboard extends serverSwitch {
                 if (this.crawlQueues.noticeURL.isEmpty()) this.crawlQueues.noticeURL.clear(); // flushes more caches 
                 postprocessingRunning = true;
                 int proccount = 0;
-                proccount += index.fulltext().getDefaultConfiguration().postprocessing(index);
-                proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index);
+                proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, null);
+                proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, null);
                 long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
                 long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
                 long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
@@ -2665,18 +2674,28 @@ public final class Switchboard extends serverSwitch {
         // the condenser may be null in case that an indexing is not wanted (there may be a no-indexing flag in the file)
         if ( in.condenser != null ) {
             for ( int i = 0; i < in.documents.length; i++ ) {
+                CrawlProfile profile = in.queueEntry.profile();
                 storeDocumentIndex(
                     in.queueEntry,
                     in.queueEntry.profile().collections(),
                     in.documents[i],
                     in.condenser[i],
                     null,
-                    "crawler/indexing queue");
+                    profile == null ? "crawler" : profile.handle());
             }
         }
         in.queueEntry.updateStatus(Response.QUEUE_STATE_FINISHED);
     }
 
+    /**
+     * 
+     * @param queueEntry
+     * @param collections
+     * @param document
+     * @param condenser
+     * @param searchEvent
+     * @param sourceName if this document was created by a crawl, then the sourceName contains the crawl hash
+     */
     private void storeDocumentIndex(
         final Response queueEntry,
         final Map<String, Pattern> collections,
