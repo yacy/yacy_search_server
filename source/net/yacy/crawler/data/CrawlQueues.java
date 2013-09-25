@@ -255,7 +255,7 @@ public class CrawlQueues {
                         this.log.severe(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                         return true;
                     }
-                    final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(profileHandle));
+                    final CrawlProfile profile = this.sb.crawler.get(ASCII.getBytes(profileHandle));
                     if (profile == null) {
                         this.log.severe(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                         return true;
@@ -297,7 +297,7 @@ public class CrawlQueues {
      * @return
      */
     private void load(final Request urlEntry, final String stats, final String profileHandle) {
-        final CrawlProfile profile = this.sb.crawler.getActive(UTF8.getBytes(profileHandle));
+        final CrawlProfile profile = this.sb.crawler.get(UTF8.getBytes(profileHandle));
         if (profile != null) {
 
             // check if the protocol is supported
@@ -606,7 +606,7 @@ public class CrawlQueues {
             this.request.setStatus("worker-initialized", WorkflowJob.STATUS_INITIATED);
             this.code = Integer.valueOf(entry.hashCode());
             this.setPriority(Thread.MIN_PRIORITY); // http requests from the crawler should not cause that other functions work worse
-            this.profile = CrawlQueues.this.sb.crawler.getActive(UTF8.getBytes(this.request.profileHandle()));
+            this.profile = CrawlQueues.this.sb.crawler.get(UTF8.getBytes(this.request.profileHandle()));
         }
 
         private long age() {

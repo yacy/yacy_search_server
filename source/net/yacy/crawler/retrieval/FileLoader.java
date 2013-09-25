@@ -83,7 +83,7 @@ public class FileLoader {
             ResponseHeader responseHeader = new ResponseHeader(200);
             responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
-            final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
+            final CrawlProfile profile = this.sb.crawler.get(ASCII.getBytes(request.profileHandle()));
             Response response = new Response(
                     request,
                     requestHeader,
@@ -123,7 +123,7 @@ public class FileLoader {
 
             // create response with metadata only
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/plain");
-            final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
+            final CrawlProfile profile = this.sb.crawler.get(ASCII.getBytes(request.profileHandle()));
             Response response = new Response(
                     request,
                     requestHeader,
@@ -140,7 +140,7 @@ public class FileLoader {
         is.close();
 
         // create response with loaded content
-        final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
+        final CrawlProfile profile = this.sb.crawler.get(ASCII.getBytes(request.profileHandle()));
         Response response = new Response(
                 request,
                 requestHeader,

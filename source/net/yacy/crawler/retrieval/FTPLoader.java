@@ -101,7 +101,7 @@ public class FTPLoader {
         // create new ftp client
         final FTPClient ftpClient = new FTPClient();
 
-        final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
+        final CrawlProfile profile = this.sb.crawler.get(ASCII.getBytes(request.profileHandle()));
         // get a connection
         if (openConnection(ftpClient, entryUrl)) {
             // test if the specified file is a directory
@@ -249,7 +249,7 @@ public class FTPLoader {
 
             // create response with metadata only
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/plain");
-            final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
+            final CrawlProfile profile = this.sb.crawler.get(ASCII.getBytes(request.profileHandle()));
             final Response response = new Response(
                     request,
                     requestHeader,
@@ -264,7 +264,7 @@ public class FTPLoader {
         final byte[] b = ftpClient.get(path);
 
         // create a response
-        final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
+        final CrawlProfile profile = this.sb.crawler.get(ASCII.getBytes(request.profileHandle()));
         final Response response = new Response(
                 request,
                 requestHeader,

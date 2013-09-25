@@ -187,7 +187,7 @@ public final class LoaderDispatcher {
         if (url.isFile() || url.isSMB()) cacheStrategy = CacheStrategy.NOCACHE; // load just from the file system
         final String protocol = url.getProtocol();
         final String host = url.getHost();
-        final CrawlProfile crawlProfile = request.profileHandle() == null ? null : this.sb.crawler.getActive(UTF8.getBytes(request.profileHandle()));
+        final CrawlProfile crawlProfile = request.profileHandle() == null ? null : this.sb.crawler.get(UTF8.getBytes(request.profileHandle()));
         
         // check if url is in blacklist
         if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(), url.getFile())) {

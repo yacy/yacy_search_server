@@ -166,6 +166,23 @@ public final class CrawlSwitchboard {
             / 1024);
     }
 
+    /**
+     * Get a profile from active or passive stack. Should be used to be sure not to miss old, cleaned profiles.
+     * A profile that was discovered from the passive stack is automatically shifted back to the active stack.
+     * @param profileKey
+     * @return
+     */
+    public CrawlProfile get(final byte[] profileKey) {
+        CrawlProfile profile = getActive(profileKey);
+        if (profile != null) return profile;
+        profile = getPassive(profileKey);
+        if (profile == null) return null;
+        // clean up
+        this.putActive(profileKey, profile);
+        this.removePassive(profileKey);
+        return profile;
+    }
+
     public CrawlProfile getActive(final byte[] profileKey) {
         if ( profileKey == null ) {
             return null;

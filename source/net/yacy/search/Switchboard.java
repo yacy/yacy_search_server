@@ -2514,7 +2514,7 @@ public final class Switchboard extends serverSwitch {
                 } else {
                     // we consider this as fail urls to have a tracking of the problem
                     if (rejectReason != null && !rejectReason.startsWith("double in")) {
-                        final CrawlProfile profile = this.crawler.getActive(UTF8.getBytes(response.profile().handle()));
+                        final CrawlProfile profile = this.crawler.get(UTF8.getBytes(response.profile().handle()));
                         this.crawlStacker.nextQueue.errorURL.push(response.url(), profile, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
                     }
                 }
@@ -3002,7 +3002,7 @@ public final class Switchboard extends serverSwitch {
                 continue;
             }
             final Request request = this.loader.request(e.getValue(), true, true);
-            final CrawlProfile profile = this.crawler.getActive(ASCII.getBytes(request.profileHandle()));
+            final CrawlProfile profile = this.crawler.get(ASCII.getBytes(request.profileHandle()));
             final String acceptedError = this.crawlStacker.checkAcceptance(e.getValue(), profile, 0);
             if (acceptedError != null) {
                 this.log.warn("addToIndex: cannot load " + urlName + ": " + acceptedError);
@@ -3032,7 +3032,7 @@ public final class Switchboard extends serverSwitch {
                         final Document[] documents = response.parse();
                         if (documents != null) {
                             for (final Document document: documents) {
-                                final CrawlProfile profile = crawler.getActive(ASCII.getBytes(request.profileHandle()));
+                                final CrawlProfile profile = crawler.get(ASCII.getBytes(request.profileHandle()));
                                 if (document.indexingDenied() && (profile == null || profile.obeyHtmlRobotsNoindex())) {
                                     throw new Parser.Failure("indexing is denied", url);
                                 }
@@ -3075,7 +3075,7 @@ public final class Switchboard extends serverSwitch {
             if (existingids.contains(e.getKey())) continue; // double
             DigestURL url = e.getValue();
             final Request request = this.loader.request(url, true, true);
-            final CrawlProfile profile = this.crawler.getActive(ASCII.getBytes(request.profileHandle()));
+            final CrawlProfile profile = this.crawler.get(ASCII.getBytes(request.profileHandle()));
             final String acceptedError = this.crawlStacker.checkAcceptance(url, profile, 0);
             if (acceptedError != null) {
                 this.log.info("addToCrawler: cannot load " + url.toNormalform(true) + ": " + acceptedError);
