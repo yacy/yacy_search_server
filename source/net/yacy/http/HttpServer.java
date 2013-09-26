@@ -80,6 +80,7 @@ public class HttpServer {
         SolrServlet.initCore(sb.index.fulltext().getDefaultEmbeddedConnector());
         solrContext.addFilter(new FilterHolder(SolrServlet.class), "/*", EnumSet.of(DispatcherType.REQUEST));
 
+        // configure root context
         ServletContextHandler htrootContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
         htrootContext.setContextPath("/");  
         ServletHolder sholder = new ServletHolder(YaCyDefaultServlet.class);

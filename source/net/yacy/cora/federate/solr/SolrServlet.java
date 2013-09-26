@@ -122,7 +122,12 @@ public class SolrServlet implements Filter {
 
             // prepare request to solr
             hrequest.setAttribute("org.apache.solr.CoreContainer", core);
-            MultiMapSolrParams mmsp = SolrRequestParsers.parseQueryString(hrequest.getQueryString());
+            // add default search field if missing 
+            String queryStr = hrequest.getQueryString();
+            if (!queryStr.contains("&df=")) {
+                queryStr = queryStr + "&df=*";
+            }
+            MultiMapSolrParams mmsp = SolrRequestParsers.parseQueryString(queryStr);
             req = connector.request(mmsp);
 
             SolrQueryResponse rsp = connector.query(req);
