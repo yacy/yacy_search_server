@@ -303,7 +303,9 @@ public final class CrawlStacker {
             return error;
         }
 
-        error = checkAcceptance(entry.url(), profile, entry.depth());
+        error = checkAcceptanceChangeable(entry.url(), profile, entry.depth());
+        if (error != null) return error;
+        error = checkAcceptanceInitially(entry.url(), profile);
         if (error != null) return error;
 
         // store information
@@ -367,7 +369,76 @@ public final class CrawlStacker {
         return null;
     }
 
-    public String checkAcceptance(final DigestURL url, final CrawlProfile profile, final int depth) {
+    /**
+     * Test if an url shall be accepted for crawl using attributes that are consistent for the whole crawl
+     * These tests are incomplete and must be followed with an checkAcceptanceChangeable - test.
+     * @param url
+     * @param profile
+     * @return null if the url is accepted, an error string in case if the url is not accepted with an error description
+     */
+    public String checkAcceptanceInitially(final DigestURL url, final CrawlProfile profile) {
+
+        final String urlstring = url.toString();
+        // check if the url is double registered
+        final HarvestProcess dbocc = this.nextQueue.exists(url.hash()); // returns the name of the queue if entry exists
+        final Date oldDate = this.indexSegment.fulltext().getLoadDate(ASCII.String(url.hash()));
+        if (oldDate == null) {
+            if (dbocc != null) {
+                // do double-check
+                if (dbocc == HarvestProcess.ERRORS) {
+                    final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(ASCII.String(url.hash()));
+                    return "double in: errors (" + errorEntry.getFailReason() + ")";
+                }
+                return "double in: " + dbocc.toString();
+            }
+        } else {
+            final boolean recrawl = profile.recrawlIfOlder() > oldDate.getTime();
+            if (recrawl) {
+                if (this.log.isInfo())
+                    this.log.info("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
+                        ((System.currentTimeMillis() - oldDate.getTime()) / 60000 / 60 / 24) + " days ago.");
+            } else {
+                if (dbocc == null) {
+                    return "double in: LURL-DB, oldDate = " + oldDate.toString();
+                }
+                if (dbocc == HarvestProcess.ERRORS) {
+                    final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(ASCII.String(url.hash()));
+                    if (this.log.isInfo()) this.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "', previous cause: " + errorEntry.getFailReason());
+                    return "double in: errors (" + errorEntry.getFailReason() + "), oldDate = " + oldDate.toString();
+                }
+                if (this.log.isInfo()) this.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "'. ");
+                return "double in: " + dbocc.toString() + ", oldDate = " + oldDate.toString();
+            }
+        }
+
+        // deny urls that exceed allowed number of occurrences
+        final int maxAllowedPagesPerDomain = profile.domMaxPages();
+        if (maxAllowedPagesPerDomain < Integer.MAX_VALUE && maxAllowedPagesPerDomain > 0) {
+            final AtomicInteger dp = profile.getCount(url.getHost());
+            if (dp != null && dp.get() >= maxAllowedPagesPerDomain) {
+                if (this.log.isFine()) this.log.fine("URL '" + urlstring + "' appeared too often in crawl stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
+                return "crawl stack domain counter exceeded (test by profile)";
+            }
+
+            /*
+            if (ResultURLs.domainCount(EventOrigin.LOCAL_CRAWLING, url.getHost()) >= maxAllowedPagesPerDomain) {
+                if (this.log.isFine()) this.log.fine("URL '" + urlstring + "' appeared too often in result stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
+                return "result stack domain counter exceeded (test by domainCount)";
+            }
+            */
+        }
+
+        return null;
+    }
+
+    /**
+     * Test if an url shall be accepted using attributes that are defined by a crawl start but can be changed during a crawl.
+     * @param url
+     * @param profile
+     * @param depth
+     * @return null if the url is accepted, an error string in case if the url is not accepted with an error description
+     */
+    public String checkAcceptanceChangeable(final DigestURL url, final CrawlProfile profile, final int depth) {
 
         // check if the protocol is supported
         final String urlProtocol = url.getProtocol();
@@ -414,53 +485,6 @@ public final class CrawlStacker {
             return "post url not allowed";
         }
 
-        // check if the url is double registered
-        final HarvestProcess dbocc = this.nextQueue.exists(url.hash()); // returns the name of the queue if entry exists
-        final Date oldDate = this.indexSegment.fulltext().getLoadDate(ASCII.String(url.hash()));
-        if (oldDate == null) {
-            if (dbocc != null) {
-                // do double-check
-                if (dbocc == HarvestProcess.ERRORS) {
-                    final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(ASCII.String(url.hash()));
-                    return "double in: errors (" + errorEntry.getFailReason() + ")";
-                }
-                return "double in: " + dbocc.toString();
-            }
-        } else {
-            final boolean recrawl = profile.recrawlIfOlder() > oldDate.getTime();
-            if (recrawl) {
-                if (this.log.isInfo())
-                    this.log.info("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
-                        ((System.currentTimeMillis() - oldDate.getTime()) / 60000 / 60 / 24) + " days ago.");
-            } else {
-                if (dbocc == null) {
-                    return "double in: LURL-DB, oldDate = " + oldDate.toString();
-                }
-                if (dbocc == HarvestProcess.ERRORS) {
-                    final CollectionConfiguration.FailDoc errorEntry = this.nextQueue.errorURL.get(ASCII.String(url.hash()));
-                    if (this.log.isInfo()) this.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "', previous cause: " + errorEntry.getFailReason());
-                    return "double in: errors (" + errorEntry.getFailReason() + "), oldDate = " + oldDate.toString();
-                }
-                if (this.log.isInfo()) this.log.info("URL '" + urlstring + "' is double registered in '" + dbocc.toString() + "'. ");
-                return "double in: " + dbocc.toString() + ", oldDate = " + oldDate.toString();
-            }
-        }
-
-        // deny urls that exceed allowed number of occurrences
-        final int maxAllowedPagesPerDomain = profile.domMaxPages();
-        if (maxAllowedPagesPerDomain < Integer.MAX_VALUE && maxAllowedPagesPerDomain > 0) {
-            final AtomicInteger dp = profile.getCount(url.getHost());
-            if (dp != null && dp.get() >= maxAllowedPagesPerDomain) {
-                if (this.log.isFine()) this.log.fine("URL '" + urlstring + "' appeared too often in crawl stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
-                return "crawl stack domain counter exceeded";
-            }
-
-            if (ResultURLs.domainCount(EventOrigin.LOCAL_CRAWLING, url.getHost()) >= maxAllowedPagesPerDomain) {
-                if (this.log.isFine()) this.log.fine("URL '" + urlstring + "' appeared too often in result stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
-                return "result stack domain counter exceeded";
-            }
-        }
-
         // the following filters use a DNS lookup to check if the url matches with IP filter
         // this is expensive and those filters are check at the end of all other tests
 
@@ -498,7 +522,6 @@ public final class CrawlStacker {
 
         return null;
     }
-
 
     /**
      * Test a url if it can be used for crawling/indexing

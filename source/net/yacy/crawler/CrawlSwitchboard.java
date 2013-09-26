@@ -107,8 +107,9 @@ public final class CrawlSwitchboard {
 
     public CrawlSwitchboard(final String networkName, Switchboard switchboard) {
 
-        this.log = switchboard.log;
-        this.queuesRoot = switchboard.queuesRoot;
+        this.switchboard = switchboard;
+        this.log = this.switchboard.log;
+        this.queuesRoot = this.switchboard.queuesRoot;
         this.log.info("Initializing Word Index for the network '" + networkName + "'.");
 
         if ( networkName == null || networkName.isEmpty() ) {
@@ -595,6 +596,7 @@ public final class CrawlSwitchboard {
                 deletionCandidate.remove(request.profileHandle());
             }
         } catch (final Throwable e) {
+            ConcurrentLog.logException(e);
             return new HashSet<String>(0);
         }
         return deletionCandidate;

@@ -2508,7 +2508,7 @@ public final class Switchboard extends serverSwitch {
         if (response.profile() != null) {
             ArrayList<Document> newDocs = new ArrayList<Document>();
             for (Document doc: documents) {
-                String rejectReason = this.crawlStacker.checkAcceptance(doc.dc_source(), response.profile(), 1 /*depth is irrelevant here, we just make clear its not the start url*/);
+                String rejectReason = this.crawlStacker.checkAcceptanceChangeable(doc.dc_source(), response.profile(), 1 /*depth is irrelevant here, we just make clear its not the start url*/);
                 if (rejectReason == null) {
                     newDocs.add(doc);
                 } else {
@@ -3003,7 +3003,7 @@ public final class Switchboard extends serverSwitch {
             }
             final Request request = this.loader.request(e.getValue(), true, true);
             final CrawlProfile profile = this.crawler.get(ASCII.getBytes(request.profileHandle()));
-            final String acceptedError = this.crawlStacker.checkAcceptance(e.getValue(), profile, 0);
+            final String acceptedError = this.crawlStacker.checkAcceptanceChangeable(e.getValue(), profile, 0);
             if (acceptedError != null) {
                 this.log.warn("addToIndex: cannot load " + urlName + ": " + acceptedError);
                 continue;
@@ -3076,7 +3076,8 @@ public final class Switchboard extends serverSwitch {
             DigestURL url = e.getValue();
             final Request request = this.loader.request(url, true, true);
             final CrawlProfile profile = this.crawler.get(ASCII.getBytes(request.profileHandle()));
-            final String acceptedError = this.crawlStacker.checkAcceptance(url, profile, 0);
+            String acceptedError = this.crawlStacker.checkAcceptanceChangeable(url, profile, 0);
+            if (acceptedError == null) acceptedError = this.crawlStacker.checkAcceptanceInitially(url, profile);
             if (acceptedError != null) {
                 this.log.info("addToCrawler: cannot load " + url.toNormalform(true) + ": " + acceptedError);
                 return;
