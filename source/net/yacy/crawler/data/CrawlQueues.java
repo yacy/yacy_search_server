@@ -269,14 +269,13 @@ public class CrawlQueues {
                 if (urlEntry == null) {
                     continue;
                 }
-                final String profileHandle = urlEntry.profileHandle();
                 // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
                 // profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
-                if (profileHandle == null) {
+                if (urlEntry.profileHandle() == null) {
                     this.log.severe(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                     return true;
                 }
-                load(urlEntry, stats, profileHandle);
+                load(urlEntry, stats);
                 return true;
             } catch (final IOException e) {
                 this.log.severe(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
@@ -296,8 +295,8 @@ public class CrawlQueues {
      * @param stats String for log prefixing
      * @return
      */
-    private void load(final Request urlEntry, final String stats, final String profileHandle) {
-        final CrawlProfile profile = this.sb.crawler.get(UTF8.getBytes(profileHandle));
+    private void load(final Request urlEntry, final String stats) {
+        final CrawlProfile profile = this.sb.crawler.get(UTF8.getBytes(urlEntry.profileHandle()));
         if (profile != null) {
 
             // check if the protocol is supported
@@ -574,11 +573,7 @@ public class CrawlQueues {
         try {
             final Request urlEntry = this.noticeURL.pop(NoticedURL.StackType.REMOTE, true, this.sb.crawler, this.sb.robots);
             if (urlEntry == null) return false;
-            final String profileHandle = urlEntry.profileHandle();
-            // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
-            // profileHandle = " + profileHandle + ", urlEntry.url = " +
-            // urlEntry.url());
-            load(urlEntry, stats, profileHandle);
+            load(urlEntry, stats);
             return true;
         } catch (final IOException e) {
             this.log.severe(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);

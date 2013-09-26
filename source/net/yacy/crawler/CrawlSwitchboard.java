@@ -80,8 +80,8 @@ public final class CrawlSwitchboard {
         DEFAULT_PROFILES.add(CRAWL_PROFILE_SURROGATE);
     }
     
-    public static final String DBFILE_ACTIVE_CRAWL_PROFILES = "crawlProfilesActive.heap";
-    public static final String DBFILE_PASSIVE_CRAWL_PROFILES = "crawlProfilesPassive.heap";
+    public static final String DBFILE_ACTIVE_CRAWL_PROFILES = "crawlProfilesActive1.heap";
+    public static final String DBFILE_PASSIVE_CRAWL_PROFILES = "crawlProfilesPassive1.heap";
 
     public static final long CRAWL_PROFILE_PROXY_RECRAWL_CYCLE = 60L * 24L;
     public static final long CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L;
@@ -103,21 +103,22 @@ public final class CrawlSwitchboard {
     public CrawlProfile defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
     public CrawlProfile defaultSurrogateProfile;
     private final File queuesRoot;
+    private Switchboard switchboard;
 
-    public CrawlSwitchboard(final String networkName, final ConcurrentLog log, final File queuesRoot) {
+    public CrawlSwitchboard(final String networkName, Switchboard switchboard) {
 
-        log.info("Initializing Word Index for the network '" + networkName + "'.");
+        this.log = switchboard.log;
+        this.queuesRoot = switchboard.queuesRoot;
+        this.log.info("Initializing Word Index for the network '" + networkName + "'.");
 
         if ( networkName == null || networkName.isEmpty() ) {
             log.severe("no network name given - shutting down");
             System.exit(0);
         }
-        this.log = log;
         this.profilesActiveCrawlsCache = Collections.synchronizedMap(new TreeMap<byte[], CrawlProfile>(Base64Order.enhancedCoder));
         this.profilesActiveCrawlsCounter = new ConcurrentHashMap<String, RowHandleSet>();
 
         // make crawl profiles database and default profiles
-        this.queuesRoot = queuesRoot;
         this.queuesRoot.mkdirs();
         this.log.config("Initializing Crawl Profiles");
 
@@ -254,10 +255,12 @@ public final class CrawlSwitchboard {
     public void putActive(final byte[] profileKey, final CrawlProfile profile) {
         this.profilesActiveCrawls.put(profileKey, profile);
         this.profilesActiveCrawlsCache.put(profileKey, profile);
+        this.removePassive(profileKey);
     }
 
     public void putPassive(final byte[] profileKey, final CrawlProfile profile) {
         this.profilesPassiveCrawls.put(profileKey, profile);
+        this.removeActive(profileKey);
     }
 
     public RowHandleSet getURLHashes(final byte[] profileKey) {
@@ -585,6 +588,11 @@ public final class CrawlSwitchboard {
                     if (System.currentTimeMillis() > timeout) return new HashSet<String>(0); // give up; this is too large
                 }
                 if (deletionCandidate.size() == 0) return new HashSet<String>(0);
+            }
+            // look into the CrawlQueues.worker as well
+            Request[] requests = switchboard.crawlQueues.activeWorkerEntries();
+            for (Request request: requests) {
+                deletionCandidate.remove(request.profileHandle());
             }
         } catch (final Throwable e) {
             return new HashSet<String>(0);

@@ -62,7 +62,7 @@ public class serverSwitch
     public final File dataPath;
     public final File appPath;
     protected boolean firstInit;
-    protected ConcurrentLog log;
+    public ConcurrentLog log;
     protected int serverJobs;
     private ConcurrentMap<String, String> configProps;
     private final ConcurrentMap<String, String> configRemoved;

@@ -105,6 +105,7 @@ public class CrawlProfileEditor_p {
                 if (p != null) sb.crawler.putPassive(handle.getBytes(), p);
                 // delete all entries from the crawl queue that are deleted here
                 sb.crawler.removeActive(handle.getBytes());
+                sb.crawler.removePassive(handle.getBytes());
                 sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000);
             } catch (final SpaceExceededException e) {
                 ConcurrentLog.logException(e);

@@ -536,7 +536,7 @@ public final class Switchboard extends serverSwitch {
         }
 
         // create a crawler
-        this.crawler = new CrawlSwitchboard(networkName, this.log, this.queuesRoot);
+        this.crawler = new CrawlSwitchboard(networkName, this);
 
         // start yacy core
         this.log.config("Starting YaCy Protocol Core");
@@ -1330,7 +1330,7 @@ public final class Switchboard extends serverSwitch {
 
             // create a crawler
             this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
-            this.crawler = new CrawlSwitchboard(networkName, this.log, this.queuesRoot);
+            this.crawler = new CrawlSwitchboard(networkName, this);
 
             // init a DHT transmission dispatcher
             this.dhtDispatcher =
