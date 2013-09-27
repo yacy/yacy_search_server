@@ -700,7 +700,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                         link = link.substring(0, p).trim();
                         p = link.indexOf('<');
                         int q = link.lastIndexOf('>');
-                        if (p > 0 && q > 0) {
+                        if (p >= 0 && q > 0) {
                             link = link.substring(p + 1, q);
                             try {
                                 canonical = new DigestURL(link);
