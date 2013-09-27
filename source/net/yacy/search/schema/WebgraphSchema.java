@@ -52,6 +52,7 @@ public enum WebgraphSchema implements SchemaDeclaration {
     source_parameter_key_sxt(SolrType.string, true, true, true, false, false, "the keys from key-value pairs in the search part of the url (source)"),
     source_parameter_value_sxt(SolrType.string, true, true, true, false, false, "the values from key-value pairs in the search part of the url (source)"),
     source_clickdepth_i(SolrType.num_integer, true, true, false, false, false, "depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url (source)"),
+    source_cr_host_norm_i(SolrType.num_integer, true, true, false, false, false, "copy of the citation rank norm value from the source link"),
 
     source_host_s(SolrType.string, true, true, false, false, false, "host of the url (source)"),
     source_host_id_s(SolrType.string, true, true, false, false, false, "id of the host (source)"),
@@ -86,6 +87,7 @@ public enum WebgraphSchema implements SchemaDeclaration {
     target_parameter_key_sxt(SolrType.string, true, true, true, false, false, "the keys from key-value pairs in the search part of the url (target)"),
     target_parameter_value_sxt(SolrType.string, true, true, true, false, true, "the values from key-value pairs in the search part of the url (target)"),
     target_clickdepth_i(SolrType.num_integer, true, true, false, false, false, "depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url (target)"),
+    target_cr_host_norm_i(SolrType.num_integer, true, true, false, false, false, "copy of the citation rank norm value from the target link; this is only filled if the target host is identical to the source host"),
 
     target_host_s(SolrType.string, true, true, false, false, true, "host of the url (target)"),
     target_host_id_s(SolrType.string, true, true, false, false, false, "id of the host (target)"),

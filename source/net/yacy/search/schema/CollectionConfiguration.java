@@ -84,8 +84,8 @@ import net.yacy.search.query.QueryParams;
 import net.yacy.search.schema.WebgraphConfiguration.Subgraph;
 
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.SolrInputField;
 
 
 public class CollectionConfiguration extends SchemaConfiguration implements Serializable {
@@ -169,32 +169,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         omitFields.add(CollectionSchema.coordinate_p_1_coordinate.getSolrFieldName());
     }
     
-    /**
-     * Convert a SolrDocument to a SolrInputDocument.
-     * This is useful if a document from the search index shall be modified and indexed again.
-     * This shall be used as replacement of ClientUtils.toSolrInputDocument because we remove some fields
-     * which are created automatically during the indexing process.
-     * @param doc the solr document
-     * @return a solr input document
-     */
     public SolrInputDocument toSolrInputDocument(final SolrDocument doc) {
-        SolrInputDocument sid = new SolrInputDocument();
-        for (String name: doc.getFieldNames()) {
-            if (this.contains(name) && !omitFields.contains(name)) { // check each field if enabled in local Solr schema
-                sid.addField(name, doc.getFieldValue(name), 1.0f);
-            }
-        }
-        return sid;
+        return toSolrInputDocument(doc, omitFields);
     }
     
     public SolrDocument toSolrDocument(final SolrInputDocument doc) {
-        SolrDocument sd = new SolrDocument();
-        for (SolrInputField field: doc) {
-            if (this.contains(field.getName()) && !omitFields.contains(field.getName())) { // check each field if enabled in local Solr schema
-                sd.setField(field.getName(), field.getValue());
-            }
-        }
-        return sd;
+        return toSolrDocument(doc, omitFields);
     }
     
     /**
@@ -904,16 +884,18 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     public int postprocessing(final Segment segment, String harvestkey) {
         if (!this.contains(CollectionSchema.process_sxt)) return 0;
         if (!segment.connectedCitation()) return 0;
-        SolrConnector connector = segment.fulltext().getDefaultConnector();
-        connector.commit(true); // make sure that we have latest information that can be found
+        SolrConnector collectionConnector = segment.fulltext().getDefaultConnector();
+        SolrConnector webgraphConnector = segment.fulltext().getWebgraphConnector();
+        collectionConnector.commit(true); // make sure that we have latest information that can be found
         ReferenceReportCache rrCache = segment.getReferenceReportCache();
         Map<byte[], CRV> ranking = new TreeMap<byte[], CRV>(Base64Order.enhancedCoder);
+        ReversibleScoreMap<String> hostscore = null;
         try {
             // collect hosts from index which shall take part in citation computation
-            ReversibleScoreMap<String> hostscore = connector.getFacets(
+            hostscore = collectionConnector.getFacets(
                     (harvestkey == null ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
                     CollectionSchema.process_sxt.getSolrFieldName() + ":" + ProcessType.CITATION.toString(),
-                    10000, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
+                    10000000, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
             if (hostscore == null) hostscore = new ClusteredScoreMap<String>();
             // for each host, do a citation rank computation
             for (String host: hostscore.keyList(true)) {
@@ -931,14 +913,49 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 ranking.putAll(crn); // accumulate this here for usage in document update later
             }
         } catch (final IOException e2) {
+            hostscore = new ClusteredScoreMap<String>();
         }
         
-        // process all documents
-        BlockingQueue<SolrDocument> docs = connector.concurrentDocumentsByQuery(
+        // process all documents at the webgraph for the outgoing links of this document
+        SolrDocument doc;
+        if (webgraphConnector != null) {
+            for (String host: hostscore.keyList(true)) {
+                if (hostscore.get(host) <= 0) continue;
+                // select all webgraph edges and modify their cr value
+                BlockingQueue<SolrDocument> docs = webgraphConnector.concurrentDocumentsByQuery(
+                        WebgraphSchema.source_host_s.getSolrFieldName() + ":\"" + host + "\"",
+                        0, 10000000, 60000, 50);
+                try {
+                    while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+                        boolean changed = false;
+                        SolrInputDocument sid = segment.fulltext().getWebgraphConfiguration().toSolrInputDocument(doc, null);
+                        byte[] id = ASCII.getBytes((String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName()));
+                        CRV crv = ranking.get(id);
+                        if (crv != null) {
+                            sid.setField(WebgraphSchema.source_cr_host_norm_i.getSolrFieldName(), crv.crn);
+                            changed = true;
+                        }
+                        id = ASCII.getBytes((String) doc.getFieldValue(WebgraphSchema.target_id_s.getSolrFieldName()));
+                        crv = ranking.get(id);
+                        if (crv != null) {
+                            sid.setField(WebgraphSchema.target_cr_host_norm_i.getSolrFieldName(), crv.crn);
+                            changed = true;
+                        }
+                        if (changed) try {
+                            webgraphConnector.add(sid);
+                        } catch (SolrException e) {
+                        } catch (IOException e) {
+                       }
+                    }
+                } catch (final InterruptedException e) {}
+            }
+        }
+        
+        // process all documents in collection
+        BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQuery(
                 (harvestkey == null ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
                 CollectionSchema.process_sxt.getSolrFieldName() + ":[* TO *]",
                 0, 10000, 60000, 50);
-        SolrDocument doc;
         int proccount = 0, proccount_clickdepthchange = 0, proccount_referencechange = 0, proccount_citationchange = 0, proccount_uniquechange = 0;
         Map<String, Long> hostExtentCache = new HashMap<String, Long>(); // a mapping from the host id to the number of documents which contain this host-id
         Set<String> uniqueURLs = new HashSet<String>();
@@ -992,7 +1009,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     
                     // send back to index
                     //connector.deleteById(ASCII.String(id));
-                    connector.add(sid);
+                    collectionConnector.add(sid);
+                    
                     proccount++;
                 } catch (final Throwable e1) {
                 }

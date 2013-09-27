@@ -74,6 +74,10 @@ source_id_s
 ## depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url (source)
 #source_clickdepth_i
 
+## copy of the citation rank norm value from the source link
+source_cr_host_norm_i
+
+
 ## host of the url (source)
 #source_host_s
 
@@ -170,6 +174,10 @@ target_path_folders_sxt
 
 ## depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url (target)
 #target_clickdepth_i
+
+## copy of the citation rank norm value from the target link; this is only filled if the target host is identical to the source host
+target_cr_host_norm_i
+
 
 ## host of the url (target)
 #target_host_s
