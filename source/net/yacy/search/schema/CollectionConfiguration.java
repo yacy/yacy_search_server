@@ -691,7 +691,23 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             // canonical tag
             if (allAttr || contains(CollectionSchema.canonical_s)) {
-                final DigestURL canonical = html.getCanonical();
+                DigestURL canonical = html.getCanonical();
+                // if there is no canonical in the html then look into the http header:
+                if (canonical == null) {
+                    String link = responseHeader.get("Link", null);
+                    int p;
+                    if (link != null && ((p = link.indexOf("rel=\"canonical\"")) > 0)) {
+                        link = link.substring(0, p).trim();
+                        p = link.indexOf('<');
+                        int q = link.lastIndexOf('>');
+                        if (p > 0 && q > 0) {
+                            link = link.substring(p + 1, q);
+                            try {
+                                canonical = new DigestURL(link);
+                            } catch (MalformedURLException e) {}
+                        }
+                    }
+                }
                 if (canonical != null && !ASCII.String(canonical.hash()).equals(id)) {
                     containsCanonical = true;
                     inboundLinks.remove(canonical);
