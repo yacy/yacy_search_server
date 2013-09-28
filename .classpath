@@ -45,8 +45,8 @@
 	<classpathentry kind="lib" path="lib/wstx-asl-3.2.9.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/httpclient-4.2.5.jar"/>
-	<classpathentry kind="lib" path="lib/httpcore-4.2.4.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient-4.2.5.jar" sourcepath="/Users/admin/Downloads/httpcomponents-client-4.2.5/httpclient/src/main/java"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.2.4.jar" sourcepath="/Users/admin/Downloads/httpcomponents-core-4.2.5/httpcore/src/main/java"/>
 	<classpathentry kind="lib" path="lib/httpmime-4.2.5.jar"/>
 	<classpathentry kind="lib" path="lib/noggit-0.5.jar"/>
 	<classpathentry kind="lib" path="lib/metadata-extractor-2.6.2.jar"/>
