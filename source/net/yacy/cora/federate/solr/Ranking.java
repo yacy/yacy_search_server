@@ -24,6 +24,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.openjena.atlas.logging.Log;
+
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.search.schema.CollectionSchema;
 
@@ -75,16 +77,22 @@ public class Ranking {
      * @param boostDef the definition string
      */
     public void updateBoosts(String boostDef) {
-        // call i.e. with "sku^20.0,url_paths_sxt^20.0,title^15.0,h1_txt^11.0,h2_txt^10.0,author^8.0,description^5.0,keywords^2.0,text_t^1.0,fuzzy_signature_unique_b^100000.0"
+        // call i.e. with "sku^20.0,url_paths_sxt^20.0,title^15.0,h1_txt^11.0,h2_txt^10.0,author^8.0,description_txt^5.0,keywords^2.0,text_t^1.0,fuzzy_signature_unique_b^100000.0"
         if (boostDef == null || boostDef.length() == 0) return;
         String[] bf = CommonPattern.COMMA.split(boostDef);
         this.fieldBoosts.clear();
         for (String boost: bf) {
             int p = boost.indexOf('^');
             if (p < 0) continue;
-            CollectionSchema field = CollectionSchema.valueOf(boost.substring(0, p));
-            Float factor = Float.parseFloat(boost.substring(p + 1));
-            this.fieldBoosts.put(field, factor);
+            String boostkey = boost.substring(0, p);
+            try {
+                CollectionSchema field = CollectionSchema.valueOf(boostkey);
+                Float factor = Float.parseFloat(boost.substring(p + 1));
+                this.fieldBoosts.put(field, factor);
+            } catch (IllegalArgumentException e) {
+                // boostkey is unknown; ignore it but print warning
+                Log.warn("Ranking", "unknwon boost key '" + boostkey + "'");
+            }
         }
     }
 

@@ -394,7 +394,7 @@ public class Balancer {
     
     	        // at this point we must check if the crawlEntry has relevance because the crawl profile still exists
     	        // if not: return null. A calling method must handle the null value and try again
-    	        profileEntry = cs.getActive(UTF8.getBytes(crawlEntry.profileHandle()));
+    	        profileEntry = cs.get(UTF8.getBytes(crawlEntry.profileHandle()));
     	        if (profileEntry == null) {
     	        	ConcurrentLog.warn("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
     	        	continue;
@@ -481,7 +481,7 @@ public class Balancer {
                     rowEntry = this.urlFileIndex.get(urlhash, false);
                     if (rowEntry == null) continue; // may have been deleted there manwhile
                     Request crawlEntry = new Request(rowEntry);
-                    CrawlProfile profileEntry = cs.getActive(UTF8.getBytes(crawlEntry.profileHandle()));
+                    CrawlProfile profileEntry = cs.get(UTF8.getBytes(crawlEntry.profileHandle()));
                     if (profileEntry == null) {
                         ConcurrentLog.warn("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
                         continue;

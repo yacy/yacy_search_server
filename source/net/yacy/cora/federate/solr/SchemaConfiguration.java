@@ -33,6 +33,7 @@ import java.util.Set;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
@@ -76,6 +77,34 @@ public class SchemaConfiguration extends Configuration implements Serializable {
                 log.warn(ex);
             }
         }
+    }
+    
+    /**
+     * Convert a SolrDocument to a SolrInputDocument.
+     * This is useful if a document from the search index shall be modified and indexed again.
+     * This shall be used as replacement of ClientUtils.toSolrInputDocument because we remove some fields
+     * which are created automatically during the indexing process.
+     * @param doc the solr document
+     * @return a solr input document
+     */
+    public SolrInputDocument toSolrInputDocument(final SolrDocument doc, Set<String> omitFields) {
+        SolrInputDocument sid = new SolrInputDocument();
+        for (String name: doc.getFieldNames()) {
+            if (this.contains(name) && (omitFields == null || !omitFields.contains(name))) { // check each field if enabled in local Solr schema
+                sid.addField(name, doc.getFieldValue(name), 1.0f);
+            }
+        }
+        return sid;
+    }
+    
+    public SolrDocument toSolrDocument(final SolrInputDocument doc, Set<String> omitFields) {
+        SolrDocument sd = new SolrDocument();
+        for (SolrInputField field: doc) {
+            if (this.contains(field.getName()) && (omitFields == null || !omitFields.contains(field.getName()))) { // check each field if enabled in local Solr schema
+                sd.setField(field.getName(), field.getValue());
+            }
+        }
+        return sd;
     }
     
     public boolean postprocessing_doublecontent(Segment segment, Set<String> uniqueURLs, SolrInputDocument sid, DigestURL url) {

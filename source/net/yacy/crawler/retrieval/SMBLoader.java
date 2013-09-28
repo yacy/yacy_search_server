@@ -101,7 +101,7 @@ public class SMBLoader {
             ResponseHeader responseHeader = new ResponseHeader(200);
             responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
-            final CrawlProfile profile = this.sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
+            final CrawlProfile profile = this.sb.crawler.get(ASCII.getBytes(request.profileHandle()));
             Response response = new Response(
                     request,
                     requestHeader,
@@ -141,7 +141,7 @@ public class SMBLoader {
 
             // create response with metadata only
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/plain");
-            final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
+            final CrawlProfile profile = this.sb.crawler.get(request.profileHandle().getBytes());
             Response response = new Response(
                     request,
                     requestHeader,
@@ -158,7 +158,7 @@ public class SMBLoader {
         is.close();
 
         // create response with loaded content
-        final CrawlProfile profile = this.sb.crawler.getActive(request.profileHandle().getBytes());
+        final CrawlProfile profile = this.sb.crawler.get(request.profileHandle().getBytes());
         Response response = new Response(
                 request,
                 requestHeader,

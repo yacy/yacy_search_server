@@ -13,7 +13,7 @@
 	<classpathentry excluding="collection1/" kind="src" path="htroot/solr"/>
 	<classpathentry kind="src" path="htroot/gsa"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.3.jar"/>
 	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
 	<classpathentry kind="lib" path="lib/webcat-0.1-swf.jar"/>
 	<classpathentry kind="lib" path="lib/activation.jar"/>
@@ -45,9 +45,9 @@
 	<classpathentry kind="lib" path="lib/wstx-asl-3.2.9.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/httpclient-4.2.5.jar" sourcepath="/Users/admin/Downloads/httpcomponents-client-4.2.5/httpclient/src/main/java"/>
-	<classpathentry kind="lib" path="lib/httpcore-4.2.4.jar" sourcepath="/Users/admin/Downloads/httpcomponents-core-4.2.5/httpcore/src/main/java"/>
-	<classpathentry kind="lib" path="lib/httpmime-4.2.5.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient-4.3.jar"/>
+	<classpathentry kind="lib" path="lib/httpcore-4.3.jar"/>
+	<classpathentry kind="lib" path="lib/httpmime-4.3.jar"/>
 	<classpathentry kind="lib" path="lib/noggit-0.5.jar"/>
 	<classpathentry kind="lib" path="lib/metadata-extractor-2.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-analyzers-common-4.4.0.jar"/>
