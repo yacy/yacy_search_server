@@ -42,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
+import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.MultiMapSolrParams;
@@ -125,7 +126,7 @@ public class SolrServlet implements Filter {
             // add default search field if missing 
             String queryStr = hrequest.getQueryString();
             if (!queryStr.contains("&df=")) {
-                queryStr = queryStr + "&df=*";
+                queryStr = queryStr + "&df=" + CollectionSchema.text_t.getSolrFieldName();
             }
             MultiMapSolrParams mmsp = SolrRequestParsers.parseQueryString(queryStr);
             req = connector.request(mmsp);

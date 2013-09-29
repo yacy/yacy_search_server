@@ -103,7 +103,8 @@ import org.eclipse.jetty.util.resource.ResourceFactory;
  *
  *  dirAllowed        If true, directory listings are returned if no
  *                    welcome file is found. Else 403 Forbidden.
- *
+ *  
+ *  welcomeFile       name of the welcome file (default is "index.html", "welcome.html")
  *
  *  resourceBase      Set to replace the context resource base
  *
@@ -132,6 +133,7 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
     private boolean _etags = false;
     private Resource _resourceBase;
     private MimeTypes _mimeTypes;
+    private String[] _welcomes;    
     private String _relativeResourceBase;
     
     private File htLocalePath;
@@ -148,7 +150,12 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
         _servletContext = getServletContext();
 
         _mimeTypes = new MimeTypes(); 
-
+        String tmpstr = this.getServletContext().getInitParameter("welcomeFile");
+        if (tmpstr == null) { 
+            _welcomes = new String[]{"index.html", "welcome.html"}; // set a default welcome file name
+        } else {
+            _welcomes = new String[]{tmpstr,"index.html"};
+        }
         _acceptRanges = getInitBoolean("acceptRanges", _acceptRanges);
         _dirAllowed = getInitBoolean("dirAllowed", _dirAllowed);
         _pathInfoOnly = getInitBoolean("pathInfoOnly", _pathInfoOnly);
@@ -328,11 +335,16 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
                         response.setContentLength(0);
                         response.sendRedirect(response.encodeRedirectURL(buf.toString()));
                     }
-                } // else look for a welcome file
-                else {
-                    content = new HttpContent.ResourceAsHttpContent(resource, _mimeTypes.getMimeByExtension(resource.toString()), _etags);
-                    if (included.booleanValue() || passConditionalHeaders(request, response, resource, content)) {
-                        sendDirectory(request, response, resource, pathInContext);
+                } else { // look for a welcome file
+                    String welcomeFileName = getWelcomeFile (pathInContext);
+                    if (welcomeFileName != null) {
+                        RequestDispatcher rd = request.getRequestDispatcher(welcomeFileName);
+                        rd.forward(request, response);
+                    } else { // send directory listing
+                        content = new HttpContent.ResourceAsHttpContent(resource, _mimeTypes.getMimeByExtension(resource.toString()), _etags);
+                        if (included.booleanValue() || passConditionalHeaders(request, response, resource, content)) {
+                            sendDirectory(request, response, resource, pathInContext);
+                        }
                     }
                 }
             }
@@ -378,7 +390,28 @@ public class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
         resp.setHeader("Allow", "GET,HEAD,POST,OPTIONS");
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * Finds a matching welcome file for the supplied path. 
+     * The filename to look is set as servlet context init parameter 
+     * default is "index.html"
+     * @param path in context
+     * @return The path of the matching welcome file in context or null.
+     */
+    private String getWelcomeFile(String pathInContext) {
+        if (_welcomes == null) {
+            return null;
+        }
 
+        for (int i = 0; i < _welcomes.length; i++) {
+            String welcome_in_context = URIUtil.addPaths(pathInContext, _welcomes[i]);
+            Resource welcome = getResource(welcome_in_context);
+            if (welcome != null && welcome.exists()) {
+                return _welcomes[i];
+            }
+        }
+        return null;
+    } 
     /* ------------------------------------------------------------ */
     /* Check modification date headers.
      */

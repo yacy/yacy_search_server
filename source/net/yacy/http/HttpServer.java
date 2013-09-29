@@ -86,7 +86,7 @@ public class HttpServer {
         ServletHolder sholder = new ServletHolder(YaCyDefaultServlet.class);
         sholder.setInitParameter("resourceBase", "htroot");        
         htrootContext.addServlet(sholder,"/*");    
-        htrootContext.setWelcomeFiles(new String[]{"index.html"});
+        //htrootContext.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
         
         ContextHandlerCollection servletContext = new ContextHandlerCollection();                
         servletContext.setHandlers(new Handler[] { solrContext, htrootContext });        
@@ -94,8 +94,7 @@ public class HttpServer {
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[]
            {domainHandler, new ProxyCacheHandler(), new ProxyHandler(),
-            new RewriteHandler(),  servletContext,
-            resource_handler, new DefaultHandler()});
+            servletContext, resource_handler, new DefaultHandler()});
 
         YaCySecurityHandler securityHandler = new YaCySecurityHandler();
         securityHandler.setLoginService(new YaCyLoginService());
