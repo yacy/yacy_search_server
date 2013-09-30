@@ -27,10 +27,16 @@ package net.yacy.cora.protocol.http;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.impl.client.AbstractHttpClient;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.conn.routing.HttpRoute;
+import org.apache.http.conn.routing.HttpRoutePlanner;
+import org.apache.http.protocol.HttpContext;
 
 /**
  * settings for a remote proxy
@@ -71,12 +77,36 @@ public final class ProxySettings {
     	return new HttpHost(host, port);
     }
     
-    public static void setProxyCreds(AbstractHttpClient httpClient) {
-    	if (!use) return;
-    	httpClient.getCredentialsProvider().setCredentials(
-    			new AuthScope(host, port),
-    			new UsernamePasswordCredentials(user, password));
-    }
+    public static HttpRoutePlanner RoutePlanner = new HttpRoutePlanner() {
+
+		@Override
+		public HttpRoute determineRoute(HttpHost target, HttpRequest request, HttpContext context) throws HttpException {
+			if (use) {
+				final Protocol protocol = "https".equalsIgnoreCase(target.getSchemeName())? Protocol.HTTPS : Protocol.HTTP;
+				if (useForHost(target.getHostName(), protocol))
+					return new HttpRoute(target, null,  getProxyHost(), protocol == Protocol.HTTPS);
+			}
+			return new HttpRoute(target); // direct
+		}
+    };
+    
+    public static CredentialsProvider CredsProvider = new CredentialsProvider() {
+
+		@Override
+		public void clear() {
+		}
+
+		@Override
+		public Credentials getCredentials(AuthScope scope) {
+			if (host != null && host.equals(scope.getHost()) && port == scope.getPort())
+				return new UsernamePasswordCredentials(user, password);
+			return null;
+		}
+
+		@Override
+		public void setCredentials(AuthScope arg0, Credentials arg1) {
+		}
+    };
     
     /**
      * tell if a remote proxy will be used for the given host

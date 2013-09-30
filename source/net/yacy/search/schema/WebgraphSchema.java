@@ -36,6 +36,7 @@ public enum WebgraphSchema implements SchemaDeclaration {
     load_date_dt(SolrType.date, true, true, false, false, false, "time when resource was loaded"),
     collection_sxt(SolrType.string, true, true, true, false, false, "tags that are attached to crawls/index generation to separate the search result into user-defined subsets"),
     process_sxt(SolrType.string, true, true, true, false, false, "needed (post-)processing steps on this metadata set, used i.e. for clickdepth-computation."),
+    harvestkey_s(SolrType.string, true, true, false, false, false, "key from a harvest process (i.e. the crawl profile hash key) which is needed for near-realtime postprocessing. This shall be deleted as soon as postprocessing has been terminated."),
     
     // source information
     source_id_s(SolrType.string, true, true, false, false, false, "primary key of document, the URL hash (source)"),
@@ -51,6 +52,7 @@ public enum WebgraphSchema implements SchemaDeclaration {
     source_parameter_key_sxt(SolrType.string, true, true, true, false, false, "the keys from key-value pairs in the search part of the url (source)"),
     source_parameter_value_sxt(SolrType.string, true, true, true, false, false, "the values from key-value pairs in the search part of the url (source)"),
     source_clickdepth_i(SolrType.num_integer, true, true, false, false, false, "depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url (source)"),
+    source_cr_host_norm_i(SolrType.num_integer, true, true, false, false, false, "copy of the citation rank norm value from the source link"),
 
     source_host_s(SolrType.string, true, true, false, false, false, "host of the url (source)"),
     source_host_id_s(SolrType.string, true, true, false, false, false, "id of the host (source)"),
@@ -85,6 +87,7 @@ public enum WebgraphSchema implements SchemaDeclaration {
     target_parameter_key_sxt(SolrType.string, true, true, true, false, false, "the keys from key-value pairs in the search part of the url (target)"),
     target_parameter_value_sxt(SolrType.string, true, true, true, false, true, "the values from key-value pairs in the search part of the url (target)"),
     target_clickdepth_i(SolrType.num_integer, true, true, false, false, false, "depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url (target)"),
+    target_cr_host_norm_i(SolrType.num_integer, true, true, false, false, false, "copy of the citation rank norm value from the target link; this is only filled if the target host is identical to the source host"),
 
     target_host_s(SolrType.string, true, true, false, false, true, "host of the url (target)"),
     target_host_id_s(SolrType.string, true, true, false, false, false, "id of the host (target)"),
@@ -114,6 +117,23 @@ public enum WebgraphSchema implements SchemaDeclaration {
         this.omitNorms = omitNorms;
         this.searchable = searchable;
         this.comment = comment;
+        // verify our naming scheme
+        String name = this.name();
+        int p = name.indexOf('_');
+        if (p > 0) {
+            String ext = name.substring(p + 1);
+            assert !ext.equals("i") || (type == SolrType.num_integer && !multiValued) : name;
+            assert !ext.equals("l") || (type == SolrType.num_long && !multiValued) : name;
+            assert !ext.equals("b") || (type == SolrType.bool && !multiValued) : name;
+            assert !ext.equals("s") || (type == SolrType.string && !multiValued) : name;
+            assert !ext.equals("sxt") || (type == SolrType.string && multiValued) : name;
+            assert !ext.equals("dt") || (type == SolrType.date && !multiValued) : name;
+            assert !ext.equals("t") || (type == SolrType.text_general && !multiValued) : name;
+            assert !ext.equals("coordinate") || (type == SolrType.coordinate && !multiValued) : name;
+            assert !ext.equals("txt") || (type == SolrType.text_general && multiValued) : name;
+            assert !ext.equals("val") || (type == SolrType.num_integer && multiValued) : name;
+            assert !ext.equals("d") || (type == SolrType.num_double && !multiValued) : name;
+        }
         assert type.appropriateName(this) : "bad configuration: " + this.name();
     }
 

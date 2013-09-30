@@ -136,6 +136,7 @@ public final class SearchEvent {
     private Thread localsolrsearch;
     private int localsolroffset;
     private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences; // counter for referenced that had been sorted out for other reasons
+    public final ScoreMap<String> locationNavigator; // a counter for the appearance of location coordinates
     public final ScoreMap<String> hostNavigator; // a counter for the appearance of host names
     public final ScoreMap<String> authorNavigator; // a counter for the appearances of authors
     public final ScoreMap<String> namespaceNavigator; // a counter for name spaces
@@ -225,6 +226,7 @@ public final class SearchEvent {
         this.excludeintext_image = Switchboard.getSwitchboard().getConfigBool("search.excludeintext.image", true);
         // prepare configured search navigation
         final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "");
+        this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>() : null;
         this.authorNavigator = navcfg.contains("authors") ? new ConcurrentScoreMap<String>() : null;
         this.namespaceNavigator = navcfg.contains("namespace") ? new ConcurrentScoreMap<String>() : null;
         this.hostNavigator = navcfg.contains("hosts") ? new ConcurrentScoreMap<String>() : null;
@@ -741,6 +743,17 @@ public final class SearchEvent {
 
         // collect navigation information
         ReversibleScoreMap<String> fcts;
+        if (this.locationNavigator != null) {
+            fcts = facets.get(CollectionSchema.coordinate_p.getSolrFieldName());
+            if (fcts != null) {
+                for (String coordinate: fcts) {
+                    int hc = fcts.get(coordinate);
+                    if (hc == 0) continue;
+                    this.locationNavigator.inc(coordinate, hc);
+                }
+            }
+        }
+        
         if (this.hostNavigator != null) {
             fcts = facets.get(CollectionSchema.host_s.getSolrFieldName());
             if (fcts != null) {

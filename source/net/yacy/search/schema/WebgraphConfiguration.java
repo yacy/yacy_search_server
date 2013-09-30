@@ -117,7 +117,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             final Subgraph subgraph,
             final DigestURL source, final ResponseHeader responseHeader, Map<String, Pattern> collections, int clickdepth_source,
             final List<ImageEntry> images, final boolean inbound, final Collection<AnchorURL> links,
-            final IndexCell<CitationReference> citations) {
+            final IndexCell<CitationReference> citations, final String sourceName) {
         boolean allAttr = this.isEmpty();
         int target_order = 0;
         boolean generalNofollow = responseHeader.get("X-Robots-Tag", "").indexOf("nofollow") >= 0;
@@ -284,6 +284,9 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                 List<String> pr = new ArrayList<String>();
                 for (ProcessType t: processTypes) pr.add(t.name());
                 add(edge, WebgraphSchema.process_sxt, pr);
+                if (allAttr || contains(CollectionSchema.harvestkey_s)) {
+                    add(edge, CollectionSchema.harvestkey_s, sourceName);
+                }
             }
             
             // add the edge to the subgraph
@@ -291,7 +294,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         }
     }
     
-    public int postprocessing(Segment segment) {
+    public int postprocessing(final Segment segment, final String harvestkey) {
         if (!this.contains(WebgraphSchema.process_sxt)) return 0;
         if (!segment.connectedCitation()) return 0;
         if (!segment.fulltext().writeToWebgraph()) return 0;
@@ -299,7 +302,10 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         // that means we must search for those entries.
         connector.commit(true); // make sure that we have latest information that can be found
         //BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery("*:*", 0, 1000, 60000, 10);
-        BlockingQueue<SolrDocument> docs = connector.concurrentDocumentsByQuery(WebgraphSchema.process_sxt.getSolrFieldName() + ":[* TO *]", 0, 100000, 60000, 50);
+        BlockingQueue<SolrDocument> docs = connector.concurrentDocumentsByQuery(
+                (harvestkey == null ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
+                WebgraphSchema.process_sxt.getSolrFieldName() + ":[* TO *]",
+                0, 100000, 60000, 50);
         
         SolrDocument doc;
         String protocol, urlstub, id;
@@ -335,6 +341,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                         
                         // all processing steps checked, remove the processing tag
                         sid.removeField(WebgraphSchema.process_sxt.getSolrFieldName());
+                        sid.removeField(WebgraphSchema.harvestkey_s.getSolrFieldName());
                         
                         // send back to index
                         connector.add(sid);

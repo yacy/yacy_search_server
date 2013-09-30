@@ -59,6 +59,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     references_exthosts_i(SolrType.num_integer, true, true, false, false, false, "number of external hosts which provide http references"),
     clickdepth_i(SolrType.num_integer, true, true, false, false, false, "depth of web page according to number of clicks from the 'main' page, which is the page that appears if only the host is entered as url"),
     process_sxt(SolrType.string, true, true, true, false, false, "needed (post-)processing steps on this metadata set"),
+    harvestkey_s(SolrType.string, true, true, false, false, false, "key from a harvest process (i.e. the crawl profile hash key) which is needed for near-realtime postprocessing. This shall be deleted as soon as postprocessing has been terminated."),
     
     // optional but recommended, part of index distribution
     load_date_dt(SolrType.date, true, true, false, false, false, "time when resource was loaded"),
@@ -231,6 +232,23 @@ public enum CollectionSchema implements SchemaDeclaration {
         this.omitNorms = omitNorms;
         this.searchable = searchable;
         this.comment = comment;
+        // verify our naming scheme
+        String name = this.name();
+        int p = name.indexOf('_');
+        if (p > 0) {
+            String ext = name.substring(p + 1);
+            assert !ext.equals("i") || (type == SolrType.num_integer && !multiValued) : name;
+            assert !ext.equals("l") || (type == SolrType.num_long && !multiValued) : name;
+            assert !ext.equals("b") || (type == SolrType.bool && !multiValued) : name;
+            assert !ext.equals("s") || (type == SolrType.string && !multiValued) : name;
+            assert !ext.equals("sxt") || (type == SolrType.string && multiValued) : name;
+            assert !ext.equals("dt") || (type == SolrType.date && !multiValued) : name;
+            assert !ext.equals("t") || (type == SolrType.text_general && !multiValued) : name;
+            assert !ext.equals("coordinate") || (type == SolrType.coordinate && !multiValued) : name;
+            assert !ext.equals("txt") || (type == SolrType.text_general && multiValued) : name;
+            assert !ext.equals("val") || (type == SolrType.num_integer && multiValued) : name;
+            assert !ext.equals("d") || (type == SolrType.num_double && !multiValued) : name;
+        }
         assert type.appropriateName(this) : "bad configuration: " + this.name();
     }
     

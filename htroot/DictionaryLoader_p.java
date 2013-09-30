@@ -316,10 +316,18 @@ public class DictionaryLoader_p {
         }
 
         // check status again
+        boolean keepPlacesTagging = false;
         for (final LibraryProvider.Dictionary dictionary: LibraryProvider.Dictionary.values()) {
-            prop.put(dictionary.nickname + "Status", dictionary.file().exists() ? 1 : dictionary.fileDisabled().exists() ? 2 : 0);
+            int newstatus = dictionary.file().exists() ? 1 : dictionary.fileDisabled().exists() ? 2 : 0;
+            if (newstatus == 1) keepPlacesTagging = true;
+            prop.put(dictionary.nickname + "Status", newstatus);
         }
 
+        // if all locations are deleted or deactivated, remove also the vocabulary
+        if (!keepPlacesTagging) {
+            LibraryProvider.autotagging.removePlaces();
+        }
+        
         return prop; // return rewrite values for templates
     }
 }

@@ -42,8 +42,6 @@ import org.openjena.atlas.logging.Log;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
@@ -51,7 +49,6 @@ import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.Latency;
 import net.yacy.crawler.retrieval.Request;
@@ -294,37 +291,6 @@ public class Balancer {
     }
 
     /**
-     * Get the minimum sleep time for a given url. The result can also be negative to reflect the time since the last access
-     * The time can be as low as Integer.MIN_VALUE to show that there should not be any limitation at all.
-     * @param robots
-     * @param profileEntry
-     * @param crawlURL
-     * @return the sleep time in milliseconds; may be negative for no sleep time
-     */
-    private long getDomainSleepTime(final RobotsTxt robots, final CrawlProfile profileEntry, final DigestURL crawlURL) {
-        if (profileEntry == null) return 0;
-        long sleeptime = (
-            profileEntry.cacheStrategy() == CacheStrategy.CACHEONLY ||
-            (profileEntry.cacheStrategy() == CacheStrategy.IFEXIST && Cache.has(crawlURL.hash()))
-            ) ? Integer.MIN_VALUE : Latency.waitingRemaining(crawlURL, robots, profileEntry.getAgent()); // this uses the robots.txt database and may cause a loading of robots.txt from the server
-        return sleeptime;
-    }
-    
-    /**
-     * load a robots.txt to get the robots time.
-     * ATTENTION: this method causes that a robots.txt is loaded from the web which may cause a longer delay in execution.
-     * This shall therefore not be called in synchronized environments.
-     * @param robots
-     * @param profileEntry
-     * @param crawlURL
-     * @return
-     */
-    private long getRobotsTime(final RobotsTxt robots, final DigestURL crawlURL, ClientIdentification.Agent agent) {
-        long sleeptime = Latency.waitingRobots(crawlURL, robots, agent); // this uses the robots.txt database and may cause a loading of robots.txt from the server
-        return sleeptime < 0 ? 0 : sleeptime;
-    }
-
-    /**
      * get lists of crawl request entries for a specific host
      * @param host
      * @param maxcount
@@ -428,13 +394,13 @@ public class Balancer {
     
     	        // at this point we must check if the crawlEntry has relevance because the crawl profile still exists
     	        // if not: return null. A calling method must handle the null value and try again
-    	        profileEntry = cs.getActive(UTF8.getBytes(crawlEntry.profileHandle()));
+    	        profileEntry = cs.get(UTF8.getBytes(crawlEntry.profileHandle()));
     	        if (profileEntry == null) {
     	        	ConcurrentLog.warn("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
     	        	continue;
     	        }
     	        // depending on the caching policy we need sleep time to avoid DoS-like situations
-    	        sleeptime = getDomainSleepTime(robots, profileEntry, crawlEntry.url());
+    	        sleeptime = Latency.getDomainSleepTime(robots, profileEntry, crawlEntry.url());
     
     	        assert Base64Order.enhancedCoder.equal(nexthash, rowEntry.getPrimaryKeyBytes()) : "result = " + ASCII.String(nexthash) + ", rowEntry.getPrimaryKeyBytes() = " + ASCII.String(rowEntry.getPrimaryKeyBytes());
     	        assert Base64Order.enhancedCoder.equal(nexthash, crawlEntry.url().hash()) : "result = " + ASCII.String(nexthash) + ", crawlEntry.url().hash() = " + ASCII.String(crawlEntry.url().hash());
@@ -445,7 +411,7 @@ public class Balancer {
     	}
     	if (crawlEntry == null) return null;
     	ClientIdentification.Agent agent = profileEntry == null ? ClientIdentification.yacyInternetCrawlerAgent : profileEntry.getAgent();
-    	long robotsTime = getRobotsTime(robots, crawlEntry.url(), agent);
+    	long robotsTime = Latency.getRobotsTime(robots, crawlEntry.url(), agent);
         Latency.updateAfterSelection(crawlEntry.url(), profileEntry == null ? 0 : robotsTime);
         if (delay && sleeptime > 0) {
             // force a busy waiting here
@@ -515,7 +481,7 @@ public class Balancer {
                     rowEntry = this.urlFileIndex.get(urlhash, false);
                     if (rowEntry == null) continue; // may have been deleted there manwhile
                     Request crawlEntry = new Request(rowEntry);
-                    CrawlProfile profileEntry = cs.getActive(UTF8.getBytes(crawlEntry.profileHandle()));
+                    CrawlProfile profileEntry = cs.get(UTF8.getBytes(crawlEntry.profileHandle()));
                     if (profileEntry == null) {
                         ConcurrentLog.warn("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
                         continue;

@@ -79,8 +79,16 @@ public final class QueryParams {
         }
     }
 
-    private static final CollectionSchema[] defaultfacetfields = new CollectionSchema[]{
-        CollectionSchema.host_s, CollectionSchema.url_protocol_s, CollectionSchema.url_file_ext_s, CollectionSchema.author_sxt};
+    private static final Map<String, CollectionSchema> defaultfacetfields = new HashMap<String, CollectionSchema>();
+    static {
+        // the key shall match with configuration property search.navigation
+        defaultfacetfields.put("location", CollectionSchema.coordinate_p);
+        defaultfacetfields.put("hosts", CollectionSchema.host_s);
+        defaultfacetfields.put("protocol", CollectionSchema.url_protocol_s);
+        defaultfacetfields.put("filetype", CollectionSchema.url_file_ext_s);
+        defaultfacetfields.put("authors", CollectionSchema.author_sxt);
+        //missing: namespace
+    }
     
     private static final int defaultmaxfacets = 30;
     private static final String ampersand = "&amp;";
@@ -132,7 +140,8 @@ public final class QueryParams {
             final Bitfield constraint,
             final Segment indexSegment,
             final RankingProfile ranking,
-            final String userAgent) {
+            final String userAgent,
+            final String[] search_navigation) {
         this.queryGoal = new QueryGoal(query_original, query_words);
     	this.ranking = ranking;
     	this.modifier = new QueryModifier();
@@ -169,8 +178,9 @@ public final class QueryParams {
         this.facetfields = new LinkedHashSet<String>();
 
         this.solrSchema = indexSegment.fulltext().getDefaultConfiguration();
-        for (CollectionSchema f: defaultfacetfields) {
-            if (solrSchema.contains(f)) facetfields.add(f.getSolrFieldName());
+        for (String navkey: search_navigation) {
+            CollectionSchema f = defaultfacetfields.get(navkey);
+            if (f != null && solrSchema.contains(f)) facetfields.add(f.getSolrFieldName());
         }
         for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_SUFFIX);
         this.maxfacets = defaultmaxfacets;
@@ -205,7 +215,8 @@ public final class QueryParams {
         final boolean filterscannerfail,
         final double lat,
         final double lon,
-        final double radius
+        final double radius,
+        final String[] search_navigation
         ) {
         this.queryGoal = queryGoal;
         this.modifier = modifier;
@@ -269,8 +280,9 @@ public final class QueryParams {
         this.facetfields = new LinkedHashSet<String>();
         
         this.solrSchema = indexSegment.fulltext().getDefaultConfiguration();
-        for (CollectionSchema f: defaultfacetfields) {
-            if (solrSchema.contains(f)) facetfields.add(f.getSolrFieldName());
+        for (String navkey: search_navigation) {
+            CollectionSchema f = defaultfacetfields.get(navkey);
+            if (f != null && solrSchema.contains(f)) facetfields.add(f.getSolrFieldName());
         }
         for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_SUFFIX);
         this.maxfacets = defaultmaxfacets;

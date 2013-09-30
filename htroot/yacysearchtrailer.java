@@ -387,7 +387,8 @@ public class yacysearchtrailer {
 
         // category: location search
         // show only if there is a location database present and if there had been any search results
-        if (LibraryProvider.geoLoc.isEmpty() || theSearch.getResultCount() == 0) {
+        if ((LibraryProvider.geoLoc.isEmpty() || theSearch.getResultCount() == 0) &&
+            (theSearch.locationNavigator == null || theSearch.locationNavigator.isEmpty())) {
             prop.put("cat-location", 0);
         } else {
             prop.put("cat-location", 1);

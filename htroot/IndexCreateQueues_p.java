@@ -69,7 +69,10 @@ public class IndexCreateQueues_p {
                                 entry = sb.crawler.getActive(handle);
                                 final String name = entry.name();
                                 if (CrawlSwitchboard.DEFAULT_PROFILES.contains(name)) continue;
-                                if (compiledPattern.matcher(name).find()) sb.crawler.removeActive(entry.handle().getBytes());
+                                if (compiledPattern.matcher(name).find()) {
+                                    sb.crawler.removeActive(entry.handle().getBytes());
+                                    sb.crawler.removePassive(entry.handle().getBytes());
+                                }
                             }
                         } else {
                             // iterating through the list of URLs

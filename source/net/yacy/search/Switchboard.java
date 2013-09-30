@@ -536,7 +536,7 @@ public final class Switchboard extends serverSwitch {
         }
 
         // create a crawler
-        this.crawler = new CrawlSwitchboard(networkName, this.log, this.queuesRoot);
+        this.crawler = new CrawlSwitchboard(networkName, this);
 
         // start yacy core
         this.log.config("Starting YaCy Protocol Core");
@@ -1330,7 +1330,7 @@ public final class Switchboard extends serverSwitch {
 
             // create a crawler
             this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
-            this.crawler = new CrawlSwitchboard(networkName, this.log, this.queuesRoot);
+            this.crawler = new CrawlSwitchboard(networkName, this);
 
             // init a DHT transmission dispatcher
             this.dhtDispatcher =
@@ -2009,7 +2009,7 @@ public final class Switchboard extends serverSwitch {
             // clear caches
             if (WordCache.sizeCommonWords() > 1000) WordCache.clearCommonWords();
             Word.clearCache();
-            Domains.clear();
+            // Domains.clear();
             
             // clean up image stack
             ResultImages.clearQueues();
@@ -2130,9 +2130,24 @@ public final class Switchboard extends serverSwitch {
 
             // clean up profiles
             checkInterruption();
-            //cleanProfiles();
-            int cleanup =  this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) ? 0 : this.crawler.cleanFinishesProfiles(this.crawlQueues);
-            if (cleanup > 0) log.info("cleanup removed " + cleanup + " crawl profiles");
+            
+            if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
+                Set<String> deletionCandidates = this.crawler.getFinishesProfiles(this.crawlQueues);
+                int cleanup =  deletionCandidates.size();
+                if (cleanup > 0) {
+                    // run postprocessing on these profiles
+                    postprocessingRunning = true;
+                    int proccount = 0;
+                    for (String profileHash: deletionCandidates) {
+                        proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, profileHash);
+                        proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, profileHash);
+                    }
+                    postprocessingRunning = false;
+                    
+                    this.crawler.cleanProfiles(deletionCandidates);
+                    log.info("cleanup removed " + cleanup + " crawl profiles, post-processed " + proccount + " documents");
+                }
+            }
             
             // clean up news
             checkInterruption();
@@ -2268,11 +2283,14 @@ public final class Switchboard extends serverSwitch {
             // if no crawl is running and processing is activated:
             // execute the (post-) processing steps for all entries that have a process tag assigned
             if (this.crawlQueues.coreCrawlJobSize() == 0) {
-                if (this.crawlQueues.noticeURL.isEmpty()) this.crawlQueues.noticeURL.clear(); // flushes more caches 
+                if (this.crawlQueues.noticeURL.isEmpty()) {
+                	Domains.clear();
+                	this.crawlQueues.noticeURL.clear(); // flushes more caches 
+                }
                 postprocessingRunning = true;
                 int proccount = 0;
-                proccount += index.fulltext().getDefaultConfiguration().postprocessing(index);
-                proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index);
+                proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, null);
+                proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, null);
                 long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
                 long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
                 long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
@@ -2490,13 +2508,13 @@ public final class Switchboard extends serverSwitch {
         if (response.profile() != null) {
             ArrayList<Document> newDocs = new ArrayList<Document>();
             for (Document doc: documents) {
-                String rejectReason = this.crawlStacker.checkAcceptance(doc.dc_source(), response.profile(), 1 /*depth is irrelevant here, we just make clear its not the start url*/);
+                String rejectReason = this.crawlStacker.checkAcceptanceChangeable(doc.dc_source(), response.profile(), 1 /*depth is irrelevant here, we just make clear its not the start url*/);
                 if (rejectReason == null) {
                     newDocs.add(doc);
                 } else {
                     // we consider this as fail urls to have a tracking of the problem
                     if (rejectReason != null && !rejectReason.startsWith("double in")) {
-                        final CrawlProfile profile = this.crawler.getActive(UTF8.getBytes(response.profile().handle()));
+                        final CrawlProfile profile = this.crawler.get(UTF8.getBytes(response.profile().handle()));
                         this.crawlStacker.nextQueue.errorURL.push(response.url(), profile, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
                     }
                 }
@@ -2659,18 +2677,28 @@ public final class Switchboard extends serverSwitch {
         // the condenser may be null in case that an indexing is not wanted (there may be a no-indexing flag in the file)
         if ( in.condenser != null ) {
             for ( int i = 0; i < in.documents.length; i++ ) {
+                CrawlProfile profile = in.queueEntry.profile();
                 storeDocumentIndex(
                     in.queueEntry,
                     in.queueEntry.profile().collections(),
                     in.documents[i],
                     in.condenser[i],
                     null,
-                    "crawler/indexing queue");
+                    profile == null ? "crawler" : profile.handle());
             }
         }
         in.queueEntry.updateStatus(Response.QUEUE_STATE_FINISHED);
     }
 
+    /**
+     * 
+     * @param queueEntry
+     * @param collections
+     * @param document
+     * @param condenser
+     * @param searchEvent
+     * @param sourceName if this document was created by a crawl, then the sourceName contains the crawl hash
+     */
     private void storeDocumentIndex(
         final Response queueEntry,
         final Map<String, Pattern> collections,
@@ -2821,7 +2849,7 @@ public final class Switchboard extends serverSwitch {
 
     public void stackURLs(Set<DigestURL> rootURLs, final CrawlProfile profile, final Set<DigestURL> successurls, final Map<DigestURL,String> failurls) {
         if (rootURLs == null || rootURLs.size() == 0) return;
-        List<Thread> stackthreads = new ArrayList<Thread>(); // do this concurrently
+        final List<Thread> stackthreads = new ArrayList<Thread>(); // do this concurrently
         for (DigestURL url: rootURLs) {
             final DigestURL turl = url;
             Thread t = new Thread() {
@@ -2832,9 +2860,9 @@ public final class Switchboard extends serverSwitch {
             };
             t.start();
             stackthreads.add(t);
-            try {Thread.sleep(10);} catch (final InterruptedException e) {} // to prevent that this fires more than 100 connections pre second!
+            try {Thread.sleep(100);} catch (final InterruptedException e) {} // to prevent that this fires more than 10 connections pre second!
         }
-        long waitingtime = 1 + (30000 / rootURLs.size()); // at most wait only halve an minute to prevent that the crawl start runs into a time-out
+        final long waitingtime = 10 + (30000 / rootURLs.size()); // at most wait only halve an minute to prevent that the crawl start runs into a time-out
         for (Thread t: stackthreads) try {t.join(waitingtime);} catch (final InterruptedException e) {}
     }
     
@@ -2974,8 +3002,8 @@ public final class Switchboard extends serverSwitch {
                 continue;
             }
             final Request request = this.loader.request(e.getValue(), true, true);
-            final CrawlProfile profile = this.crawler.getActive(ASCII.getBytes(request.profileHandle()));
-            final String acceptedError = this.crawlStacker.checkAcceptance(e.getValue(), profile, 0);
+            final CrawlProfile profile = this.crawler.get(ASCII.getBytes(request.profileHandle()));
+            final String acceptedError = this.crawlStacker.checkAcceptanceChangeable(e.getValue(), profile, 0);
             if (acceptedError != null) {
                 this.log.warn("addToIndex: cannot load " + urlName + ": " + acceptedError);
                 continue;
@@ -3004,7 +3032,7 @@ public final class Switchboard extends serverSwitch {
                         final Document[] documents = response.parse();
                         if (documents != null) {
                             for (final Document document: documents) {
-                                final CrawlProfile profile = crawler.getActive(ASCII.getBytes(request.profileHandle()));
+                                final CrawlProfile profile = crawler.get(ASCII.getBytes(request.profileHandle()));
                                 if (document.indexingDenied() && (profile == null || profile.obeyHtmlRobotsNoindex())) {
                                     throw new Parser.Failure("indexing is denied", url);
                                 }
@@ -3047,8 +3075,9 @@ public final class Switchboard extends serverSwitch {
             if (existingids.contains(e.getKey())) continue; // double
             DigestURL url = e.getValue();
             final Request request = this.loader.request(url, true, true);
-            final CrawlProfile profile = this.crawler.getActive(ASCII.getBytes(request.profileHandle()));
-            final String acceptedError = this.crawlStacker.checkAcceptance(url, profile, 0);
+            final CrawlProfile profile = this.crawler.get(ASCII.getBytes(request.profileHandle()));
+            String acceptedError = this.crawlStacker.checkAcceptanceChangeable(url, profile, 0);
+            if (acceptedError == null) acceptedError = this.crawlStacker.checkAcceptanceInitially(url, profile);
             if (acceptedError != null) {
                 this.log.info("addToCrawler: cannot load " + url.toNormalform(true) + ": " + acceptedError);
                 return;

@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.crawler.robots.RobotsTxtEntry;
@@ -262,6 +263,37 @@ public class Latency {
         return s.toString();
     }
 
+    /**
+     * Get the minimum sleep time for a given url. The result can also be negative to reflect the time since the last access
+     * The time can be as low as Integer.MIN_VALUE to show that there should not be any limitation at all.
+     * @param robots
+     * @param profileEntry
+     * @param crawlURL
+     * @return the sleep time in milliseconds; may be negative for no sleep time
+     */
+    public static long getDomainSleepTime(final RobotsTxt robots, final CrawlProfile profileEntry, final DigestURL crawlURL) {
+        if (profileEntry == null) return 0;
+        long sleeptime = (
+            profileEntry.cacheStrategy() == CacheStrategy.CACHEONLY ||
+            (profileEntry.cacheStrategy() == CacheStrategy.IFEXIST && Cache.has(crawlURL.hash()))
+            ) ? Integer.MIN_VALUE : waitingRemaining(crawlURL, robots, profileEntry.getAgent()); // this uses the robots.txt database and may cause a loading of robots.txt from the server
+        return sleeptime;
+    }
+    
+    /**
+     * load a robots.txt to get the robots time.
+     * ATTENTION: this method causes that a robots.txt is loaded from the web which may cause a longer delay in execution.
+     * This shall therefore not be called in synchronized environments.
+     * @param robots
+     * @param profileEntry
+     * @param crawlURL
+     * @return
+     */
+    public static long getRobotsTime(final RobotsTxt robots, final DigestURL crawlURL, ClientIdentification.Agent agent) {
+        long sleeptime = waitingRobots(crawlURL, robots, agent); // this uses the robots.txt database and may cause a loading of robots.txt from the server
+        return sleeptime < 0 ? 0 : sleeptime;
+    }
+    
     public static final class Host {
         private AtomicLong timeacc;
         private AtomicLong lastacc;

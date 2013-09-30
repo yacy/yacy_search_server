@@ -110,7 +110,7 @@ public class AutotaggingLibrary {
     }
 
     public void addPlaces(Locations locations) {
-    	if (locations.isEmpty()) return; // otherwise we get a navigation that does nothing
+        if (locations.isEmpty()) return; // otherwise we get a navigation that does nothing
         Tagging voc = new Tagging("Locations", locations);
         try {
             voc.setObjectspace("http://dbpedia.org/resource/");
@@ -120,6 +120,10 @@ public class AutotaggingLibrary {
         for (String t: voc.tags()) {
             this.allTags.put(t, PRESENT);
         }
+    }
+
+    public void removePlaces() {
+        this.vocabularies.remove("Locations");
     }
 
     public int size() {
