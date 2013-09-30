@@ -62,9 +62,10 @@ public class YacyDomainHandler extends AbstractHandler implements Handler {
 			int posPort = hostPort.lastIndexOf(':');
 			String newHost = hostPort.substring(0, posPort);
 			int newPort = Integer.parseInt(hostPort.substring(posPort + 1));
-			
-        	RequestDispatcher dispatcher = request.getRequestDispatcher(path + target);
+
+        	RequestDispatcher dispatcher = request.getRequestDispatcher(path + target);         
         	dispatcher.forward(new DomainRequestWrapper(request, newHost, newPort), response);
+                baseRequest.setHandled(true);
 		}
 	}
 	
@@ -89,6 +90,12 @@ public class YacyDomainHandler extends AbstractHandler implements Handler {
 			return newServerPort;
 		}
 		
+                @Override
+                public StringBuffer getRequestURL() {
+                    StringBuffer buf = new StringBuffer(this.getScheme() +"://"+ newServerName + ":" + newServerPort + this.getPathInfo());
+                    return buf;
+                }
+                
 		@Override
 		public String getHeader(String name) {
 			if(name.equals("Host")) {

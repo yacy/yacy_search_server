@@ -36,10 +36,10 @@ import net.yacy.search.Switchboard;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -67,11 +67,13 @@ public class HttpServer {
         YacyDomainHandler domainHandler = new YacyDomainHandler();
         domainHandler.setAlternativeResolver(sb.peers);
 
+        /*  this is now handled by YaCyDefaultServlet
         ResourceHandler resource_handler = new ResourceHandler();
         resource_handler.setDirectoriesListed(true);
         resource_handler.setWelcomeFiles(new String[]{"index.html"});
         resource_handler.setResourceBase("htroot/");
-
+        */
+        
         //add SolrServlet
         ServletContextHandler solrContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
         solrContext.setContextPath("/solr");       
@@ -88,20 +90,35 @@ public class HttpServer {
         htrootContext.addServlet(sholder,"/*");    
         //htrootContext.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
         
+        // assemble the servlet handlers
         ContextHandlerCollection servletContext = new ContextHandlerCollection();                
         servletContext.setHandlers(new Handler[] { solrContext, htrootContext });        
 
+        // define list of YaCy specific general handlers
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[]
-           {domainHandler, new ProxyCacheHandler(), new ProxyHandler(),
-            servletContext, resource_handler, new DefaultHandler()});
+           {domainHandler, new ProxyCacheHandler(), new ProxyHandler()
+            /*, resource_handler, new DefaultHandler() */}); 
 
+        // context handler for dispatcher and security (hint: dispatcher requires a context)
+        ContextHandler context = new ContextHandler();
+        context.setContextPath("/");
+        context.setHandler(handlers);
+
+        // make YaCy handlers (in context) and servlet context handlers available (both contain root context "/")
+        // logic: 1. YaCy handlers are called if request not handled (e.g. proxy) then servlets handle it
+        ContextHandlerCollection allrequesthandlers = new ContextHandlerCollection();
+        allrequesthandlers.addHandler(context);
+        allrequesthandlers.addHandler(servletContext);
+        allrequesthandlers.addHandler(new DefaultHandler()); // if not handled by other handler 
+        
+        // wrap all handlers by security handler
         YaCySecurityHandler securityHandler = new YaCySecurityHandler();
         securityHandler.setLoginService(new YaCyLoginService());
         securityHandler.setRealmName("YaCy Admin Interface");
-        securityHandler.setHandler(new CrashProtectionHandler(handlers));
-
-        server.setHandler(securityHandler);
+        securityHandler.setHandler(new CrashProtectionHandler(allrequesthandlers));
+                    
+        server.setHandler(/*securityHandler*/allrequesthandlers);
     }
 
     /**
