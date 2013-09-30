@@ -118,7 +118,7 @@ public class HttpServer {
         securityHandler.setRealmName("YaCy Admin Interface");
         securityHandler.setHandler(new CrashProtectionHandler(allrequesthandlers));
                     
-        server.setHandler(/*securityHandler*/allrequesthandlers);
+        server.setHandler(securityHandler);
     }
 
     /**
