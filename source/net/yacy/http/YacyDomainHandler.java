@@ -41,80 +41,96 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import net.yacy.server.http.AlternativeDomainNames;
 
+/**
+ * handling of request to virtual ".yacy" domain determines public adress from
+ * seedlist and forwards modified/wrapped request to it
+ */
 public class YacyDomainHandler extends AbstractHandler implements Handler {
-	
-	private AlternativeDomainNames alternativeResolvers;
-	
-	public void setAlternativeResolver(AlternativeDomainNames resolver) {
-		this.alternativeResolvers = resolver;
-	}
 
-	@Override
-	public void handle(String target, Request baseRequest, HttpServletRequest request,
-			HttpServletResponse response) throws IOException, ServletException {
-		String host = request.getServerName();
-		String resolved = alternativeResolvers.resolve(host);
-		if(resolved != null) {
-			// split resolved into host, port and path
-			int posPath = resolved.indexOf('/');
-			String path = resolved.substring(posPath);
-			String hostPort = resolved.substring(0, posPath);
-			int posPort = hostPort.lastIndexOf(':');
-			String newHost = hostPort.substring(0, posPort);
-			int newPort = Integer.parseInt(hostPort.substring(posPort + 1));
+    private AlternativeDomainNames alternativeResolvers;
 
-        	RequestDispatcher dispatcher = request.getRequestDispatcher(path + target);         
-        	dispatcher.forward(new DomainRequestWrapper(request, newHost, newPort), response);
-                baseRequest.setHandled(true);
-		}
-	}
-	
-	private class DomainRequestWrapper extends HttpServletRequestWrapper {
-		
-		private String newServerName;
-		private int newServerPort;
+    public void setAlternativeResolver(AlternativeDomainNames resolver) {
+        this.alternativeResolvers = resolver;
+    }
 
-		public DomainRequestWrapper(HttpServletRequest request, String serverName, int serverPort) {
-			super(request);
-			this.newServerName = serverName;
-			this.newServerPort = serverPort;
-		}
-		
-		@Override
-		public String getServerName() {
-			return newServerName;
-		}
-		
-		@Override
-		public int getServerPort() {
-			return newServerPort;
-		}
-		
-                @Override
-                public StringBuffer getRequestURL() {
-                    StringBuffer buf = new StringBuffer(this.getScheme() +"://"+ newServerName + ":" + newServerPort + this.getPathInfo());
-                    return buf;
-                }
-                
-		@Override
-		public String getHeader(String name) {
-			if(name.equals("Host")) {
-				return newServerName + (newServerPort!=80 ? ":"+newServerPort : "");
-			}
-			return super.getHeader(name);
-		}
-		
-		@SuppressWarnings("unchecked")
-		@Override
-		public Enumeration<String> getHeaders(String name) {
-			if(name.equals("Host")) {
-				Vector<String> header = new Vector<String>();
-				header.add(newServerName + (newServerPort!=80 ? ":"+newServerPort : ""));
-				return header.elements();
-			}
-			return super.getHeaders(name);
-		}
-		
-	}
+    @Override
+    public void handle(String target, Request baseRequest, HttpServletRequest request,
+            HttpServletResponse response) throws IOException, ServletException {
+        String host = request.getServerName();
+        String resolved = alternativeResolvers.resolve(host);
+        if (resolved != null) {
+            // split resolved into host, port and path
+            String path;
+            String hostPort;
+            int posPath = resolved.indexOf('/');
+            if (posPath >= 0) {
+                path = resolved.substring(posPath);
+                hostPort = resolved.substring(0, posPath);
+            } else {
+                path = "";
+                hostPort = resolved;
+            }
+            int posPort = hostPort.lastIndexOf(':');
+            String newHost;
+            int newPort;
+            if (posPort >= 0) {
+                newHost = hostPort.substring(0, posPort);
+                newPort = Integer.parseInt(hostPort.substring(posPort + 1));
+            } else {
+                newHost = hostPort;
+                newPort = 80;
+            }
+            RequestDispatcher dispatcher = request.getRequestDispatcher(path + target);
+            dispatcher.forward(new DomainRequestWrapper(request, newHost, newPort), response);
+            baseRequest.setHandled(true);
+        }
+    }
+
+    private class DomainRequestWrapper extends HttpServletRequestWrapper {
+
+        private String newServerName;
+        private int newServerPort;
+
+        public DomainRequestWrapper(HttpServletRequest request, String serverName, int serverPort) {
+            super(request);
+            this.newServerName = serverName;
+            this.newServerPort = serverPort;
+        }
+
+        @Override
+        public String getServerName() {
+            return newServerName;
+        }
+
+        @Override
+        public int getServerPort() {
+            return newServerPort;
+        }
+
+        @Override
+        public StringBuffer getRequestURL() {
+            StringBuffer buf = new StringBuffer(this.getScheme() + "://" + newServerName + ":" + newServerPort + this.getPathInfo());
+            return buf;
+        }
+
+        @Override
+        public String getHeader(String name) {
+            if (name.equals("Host")) {
+                return newServerName + (newServerPort != 80 ? ":" + newServerPort : "");
+            }
+            return super.getHeader(name);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Enumeration<String> getHeaders(String name) {
+            if (name.equals("Host")) {
+                Vector<String> header = new Vector<String>();
+                header.add(newServerName + (newServerPort != 80 ? ":" + newServerPort : ""));
+                return header.elements();
+            }
+            return super.getHeaders(name);
+        }
+    }
 
 }

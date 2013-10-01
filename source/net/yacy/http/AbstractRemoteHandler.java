@@ -25,12 +25,14 @@
 package net.yacy.http;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.yacy.cora.protocol.Domains;
 
 import net.yacy.search.Switchboard;
 
@@ -44,33 +46,49 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
  */
 abstract public class AbstractRemoteHandler extends AbstractHandler implements Handler {
 	
-	protected Switchboard sb = null;
-	
-	private List<String> localVirtualHostNames;
-	
-	@Override
-	protected void doStart() {
-		sb = Switchboard.getSwitchboard();
+    protected Switchboard sb = null;
+    private List<String> localVirtualHostNames; // list for quick check for req to local peer
+    
+    @Override
+    protected void doStart() {
+        sb = Switchboard.getSwitchboard();
 
-		localVirtualHostNames = new LinkedList<String>();
-		localVirtualHostNames.add("localpeer");
-		localVirtualHostNames.add("localhost");
-	}
+        localVirtualHostNames = new LinkedList<String>();
+        localVirtualHostNames.add("localhost");
+        localVirtualHostNames.add(sb.getConfig("fileHost", "localpeer"));
+
+        // add some other known local host names
+        InetAddress localInetAddress = Domains.myPublicLocalIP();
+        if (localInetAddress != null) {
+            if (!localVirtualHostNames.contains(localInetAddress.getHostName())) {
+                localVirtualHostNames.add(localInetAddress.getHostName());
+            }
+
+            if (!localVirtualHostNames.contains(localInetAddress.getCanonicalHostName())) {
+                localVirtualHostNames.add(localInetAddress.getCanonicalHostName());
+            }
+        }
+        localVirtualHostNames.add(sb.peers.mySeed().getIP());
+    }
 	
-	abstract public void handleRemote(String target, Request baseRequest, HttpServletRequest request,
-			HttpServletResponse response) throws IOException, ServletException;
-	
-	@Override
-	public void handle(String target, Request baseRequest, HttpServletRequest request,
-			HttpServletResponse response) throws IOException, ServletException {
-		String host = request.getHeader("Host");
-		if(host == null) return; // no proxy request, continue processing by handlers
-		int hostSplitPos = host.indexOf(':');
-		String hostOnly =  hostSplitPos<0 ? host : host.substring(0, hostSplitPos);
-		
-		if(localVirtualHostNames.contains(hostOnly)) return; // no proxy request, continue processing by handlers
-		
-		handleRemote(target, baseRequest, request, response);
-	}
+    abstract public void handleRemote(String target, Request baseRequest, HttpServletRequest request,
+            HttpServletResponse response) throws IOException, ServletException;
+
+    @Override
+    public void handle(String target, Request baseRequest, HttpServletRequest request,
+            HttpServletResponse response) throws IOException, ServletException {
+        String host = request.getHeader("Host");
+        if (host == null) return; // no proxy request, continue processing by handlers
+        int hostSplitPos = host.indexOf(':');
+        String hostOnly = hostSplitPos < 0 ? host : host.substring(0, hostSplitPos);
+
+        if (localVirtualHostNames.contains(hostOnly)) return; // no proxy request (quick check), continue processing by handlers        
+        if (Domains.isLocal(hostOnly, null)) return; // no proxy, continue processing by handlers
+        if (hostOnly.startsWith(sb.peers.myIP())) { // remote access to my external IP, continue processing by handlers
+            localVirtualHostNames.add(sb.peers.myIP()); // not available on init, add it now for quickcheck
+            return;
+        }
+        handleRemote(target, baseRequest, request, response);
+    }
 
 }
