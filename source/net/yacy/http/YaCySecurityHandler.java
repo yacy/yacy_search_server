@@ -44,6 +44,7 @@ import org.eclipse.jetty.server.UserIdentity;
 /**
  * jetty security handler
  * demands authentication for pages with _p. inside
+ * and updates AccessTracker
  */
 public class YaCySecurityHandler extends SecurityHandler {
 
@@ -143,11 +144,15 @@ public class YaCySecurityHandler extends SecurityHandler {
         //final String adminAccountBase64MD5 = sb.getConfig(YaCyLegacyCredential.ADMIN_ACCOUNT_B64MD5, "");
 
         String refererHost;
+        // update AccessTracker
+        refererHost = request.getRemoteAddr();
+        sb.track(refererHost, pathInContext);
+        
         try {
             refererHost = new MultiProtocolURL(request.getHeader("Referer")).getHost();
         } catch (MalformedURLException e) {
             refererHost = null;
-        }        
+        }                          
         final boolean accessFromLocalhost = Domains.isLocalhost(request.getRemoteHost()) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
         // ! note : accessFromLocalhost compares localhost ip pattern ( ! currently also any intranet host is a local host)
         final boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
