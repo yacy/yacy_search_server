@@ -46,9 +46,9 @@ public class CrawlStartExpert_p {
         // ---------- Start point
         // crawl start URL
         if (post != null && post.containsKey("crawlingURL")) {
-            prop.put("starturl", post.get("crawlingURL"));
+            prop.put("starturl", post.get("crawlingURL", ""));
             // simple check for content since it may be empty
-            if (!post.get("crawlingURL").trim().isEmpty()) {
+            if (!prop.get("crawlingURL").trim().isEmpty()) {
                 prop.put("has_url", "1");
             }
         } else {
@@ -57,9 +57,9 @@ public class CrawlStartExpert_p {
         
         // sitemap URL
         if (post != null && post.containsKey("sitemapURL")) {
-            prop.put("sitemapURL", post.get("sitemapURL"));
+            prop.put("sitemapURL", post.get("sitemapURL", ""));
             // simple check for content since it may be empty
-            if (!post.get("sitemapURL").trim().isEmpty()) {
+            if (!prop.get("sitemapURL").trim().isEmpty()) {
                 prop.put("has_sitemapURL", "1");            
             }
         } else {
@@ -68,9 +68,9 @@ public class CrawlStartExpert_p {
         
         // crawling file
         if (post != null && post.containsKey("crawlingFile")) {
-            prop.put("crawlingFile", post.get("crawlingFile"));
+            prop.put("crawlingFile", post.get("crawlingFile", ""));
             // simple check for content since it may be empty
-            if (!post.get("crawlingFile").trim().isEmpty()) {
+            if (!prop.get("crawlingFile").trim().isEmpty()) {
                 prop.put("has_crawlingFile", "1");            
             }
         } else {
@@ -79,7 +79,7 @@ public class CrawlStartExpert_p {
 
         // Crawling mode
         if (post != null && post.containsKey("crawlingMode")) {
-            final String crawlingMode = post.get("crawlingMode");
+            final String crawlingMode = post.get("crawlingMode", "");
             boolean hasMode = false;
             if (crawlingMode.equalsIgnoreCase("sitelist")
                     && prop.getBoolean("has_url")) {
@@ -109,7 +109,7 @@ public class CrawlStartExpert_p {
 
         // Bookmark title (set by script)
         if (post != null && post.containsKey("bookmarkTitle")) {
-            prop.put("bookmarkTitle", post.get("bookmarkTitle"));
+            prop.put("bookmarkTitle", post.get("bookmarkTitle", ""));
         } else {
             prop.put("bookmarkTitle", "");
         }
@@ -143,7 +143,8 @@ public class CrawlStartExpert_p {
 
         // Unlimited crawl depth for URLs matching with
         if (post != null && post.containsKey("crawlingDepthExtension")) {
-            prop.put("crawlingDepthExtension", post.get("crawlingDepthExtension"));
+            prop.put("crawlingDepthExtension", 
+                    post.get("crawlingDepthExtension", ""));
         } else {
             prop.put("crawlingDepthExtension", CrawlProfile.MATCH_NEVER_STRING);
         }
@@ -185,7 +186,7 @@ public class CrawlStartExpert_p {
 
         // Load Filter on URLs (range)
         if (post != null && post.containsKey("range")) {
-            final String range = post.get("range");
+            final String range = post.get("range", "");
             if (range.equalsIgnoreCase("domain")) {
                 prop.put("range_domain", "1");
             } else if (range.equalsIgnoreCase("subpath")) {
@@ -199,21 +200,21 @@ public class CrawlStartExpert_p {
 
         // Load Filter on URLs: must match
         if (post != null && post.containsKey("mustmatch")) {
-            prop.put("mustmatch", post.get("mustmatch"));
+            prop.put("mustmatch", post.get("mustmatch", ""));
         } else {
             prop.put("mustmatch", CrawlProfile.MATCH_ALL_STRING);
         }
 
         // Load Filter on URLs: must-not-match
         if (post != null && post.containsKey("mustnotmatch")) {
-            prop.put("mustnotmatch", post.get("mustnotmatch"));
+            prop.put("mustnotmatch", post.get("mustnotmatch", ""));
         } else {
             prop.put("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
         }
 
         // Load Filter on IPs: must match
         if (post != null && post.containsKey("ipMustmatch")) {
-            prop.put("ipMustmatch", post.get("ipMustmatch"));
+            prop.put("ipMustmatch", post.get("ipMustmatch", ""));
         } else {
             prop.put("ipMustmatch", sb.getConfig("crawlingIPMustMatch",
                     CrawlProfile.MATCH_ALL_STRING));
@@ -221,7 +222,7 @@ public class CrawlStartExpert_p {
 
         // Load Filter on IPs: must-not-match
         if (post != null && post.containsKey("ipMustnotmatch")) {
-            prop.put("ipMustnotmatch", post.get("ipMustnotmatch"));
+            prop.put("ipMustnotmatch", post.get("ipMustnotmatch", ""));
         } else {
             prop.put("ipMustnotmatch", sb.getConfig("crawlingIPMustNotMatch",
                     CrawlProfile.MATCH_NEVER_STRING));
@@ -238,7 +239,7 @@ public class CrawlStartExpert_p {
 
         // Must-Match List for Country Codes
         if (post != null && post.containsKey("countryMustMatchList")) {
-            prop.put("countryMustMatch", post.get("countryMustMatchList"));
+            prop.put("countryMustMatch", post.get("countryMustMatchList", ""));
         } else {
             prop.put("countryMustMatch",
                     sb.getConfig("crawlingCountryMustMatch", ""));
@@ -248,21 +249,22 @@ public class CrawlStartExpert_p {
         // ---------- Document filter
         // Indexer filter on URLs: must match
         if (post != null && post.containsKey("indexmustmatch")) {
-            prop.put("indexmustmatch", post.get("indexmustmatch"));
+            prop.put("indexmustmatch", post.get("indexmustmatch", ""));
         } else {
             prop.put("indexmustmatch", CrawlProfile.MATCH_ALL_STRING);
         }
 
         // Indexer filter on URLs: must-no-match
         if (post != null && post.containsKey("indexmustnotmatch")) {
-            prop.put("indexmustnotmatch", post.get("indexmustnotmatch"));
+            prop.put("indexmustnotmatch", post.get("indexmustnotmatch", ""));
         } else {
             prop.put("indexmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
         }
 
         // Filter on Content of Document: must match
         if (post != null && post.containsKey("indexcontentmustmatch")) {
-            prop.put("indexcontentmustmatch", post.get("indexcontentmustmatch"));
+            prop.put("indexcontentmustmatch", 
+                    post.get("indexcontentmustmatch", ""));
         } else {
             prop.put("indexcontentmustmatch", CrawlProfile.MATCH_ALL_STRING);
         }
@@ -270,7 +272,7 @@ public class CrawlStartExpert_p {
         // Filter on Content of Document: must-not-match
         if (post != null && post.containsKey("indexcontentmustnotmatch")) {
             prop.put("indexcontentmustnotmatch",
-                    post.get("indexcontentmustnotmatch"));
+                    post.get("indexcontentmustnotmatch", ""));
         } else {
             prop.put("indexcontentmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
         }
@@ -297,7 +299,7 @@ public class CrawlStartExpert_p {
 
         // delete if older settings: number unit
         if (post != null && post.containsKey("deleteIfOlderUnit")) {
-            final String olderUnit = post.get("deleteIfOlderUnit");
+            final String olderUnit = post.get("deleteIfOlderUnit", "");
             if (olderUnit.equalsIgnoreCase("year")) {
                 prop.put("deleteIfOlderUnit_year", "1");
             } else if (olderUnit.equalsIgnoreCase("month")) {
@@ -313,7 +315,7 @@ public class CrawlStartExpert_p {
 
         // delete any document before the crawl is started?
         if (post != null && post.containsKey("deleteold")) {
-            final String deleteold = post.get("deletold");
+            final String deleteold = post.get("deletold", "");
             if (deleteold.equalsIgnoreCase("on")){
                 post.put("deleteold_on", "1");
             } else if (deleteold.equalsIgnoreCase("age")) {
@@ -347,7 +349,7 @@ public class CrawlStartExpert_p {
 
         // reload settings: number unit
         if (post != null && post.containsKey("reloadIfOlderUnit")) {
-            final String olderUnit = post.get("reloadIfOlderUnit");
+            final String olderUnit = post.get("reloadIfOlderUnit", "");
             if (olderUnit.equalsIgnoreCase("year")) {
                 prop.put("reloadIfOlderUnit_year", "1");
             } else if (olderUnit.equalsIgnoreCase("month")) {
@@ -362,7 +364,7 @@ public class CrawlStartExpert_p {
         }
 
         if (post != null && post.containsKey("recrawl")) {
-            final String recrawl = post.get("recrawl");
+            final String recrawl = post.get("recrawl", "");
             if (recrawl.equalsIgnoreCase("reload")) {
                 prop.put("recrawl_reload", "1");
             } else {
@@ -385,7 +387,7 @@ public class CrawlStartExpert_p {
         
         // Policy for usage of Web Cache
         if (post != null && post.containsKey("cachePolicy")) {
-            final String cachePolicy = post.get("chachePolicy");
+            final String cachePolicy = post.get("chachePolicy", "");
             if (cachePolicy.equalsIgnoreCase("nocache")) {
                 prop.put("cachePolicy_nocache", "1");
             } else if (cachePolicy.equalsIgnoreCase("ifexist")) {
@@ -446,7 +448,7 @@ public class CrawlStartExpert_p {
                     post.getBoolean("indexMedia") ? "1" : "0");
             prop.put("crawlOrderChecked",
                     post.getBoolean("crawlOrder") ? "1" : "0");
-            prop.put("intention", post.get("intention"));
+            prop.put("intention", post.get("intention", ""));
         }
 
         // Target collection
@@ -457,7 +459,7 @@ public class CrawlStartExpert_p {
         prop.put("collectionEnabled", collectionEnabled ? 1 : 0);
         if (collectionEnabled) {
             if (post != null && post.containsKey("collection")) {
-                prop.put("collection", post.get("collection"));
+                prop.put("collection", post.get("collection", ""));
             } else {
                 prop.put("collection", collectionEnabled ? "user" : "");
             }
