@@ -99,10 +99,22 @@ public class CrawlStartExpert_p {
                 // sitemap needs "crawlingFile" parameter, checked already
                 prop.put("crawlingMode_file", "1");
                 hasMode = true;
-            }
-            // default to URL mode
-            if (!hasMode) {
+            } else if (crawlingMode.equalsIgnoreCase("url")
+                    && prop.getBoolean("has_crawlingURL")) {
                 prop.put("crawlingMode_url", "1");
+                hasMode = true;
+            }
+            // try to guess mode
+            if (!hasMode) {
+                if (prop.getBoolean("has_crawlingURL")) {
+                    prop.put("crawlingMode_url", "1");
+                } else if (prop.getBoolean("has_sitemapURL")) {
+                    prop.put("crawlingMode_sitemap", "1");
+                } else if (prop.getBoolean("has_crawlingFile")) {
+                    prop.put("crawlingMode_file", "1");
+                } else {
+                    prop.put("crawlingMode_url", "1");
+                }
             }
         } else {
             // default to URL
