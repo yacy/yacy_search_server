@@ -76,6 +76,7 @@ import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.RowHandleMap;
 import net.yacy.kelondro.rwi.IndexCell;
+import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segment.ReferenceReport;
@@ -339,7 +340,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     public SolrVector yacy2solr(
             final Map<String, Pattern> collections, final ResponseHeader responseHeader,
             final Document document, final Condenser condenser, final DigestURL referrerURL, final String language,
-            final IndexCell<CitationReference> citations,
             final WebgraphConfiguration webgraph, final String sourceName) {
         // we use the SolrCell design as index schema
         SolrVector doc = new SolrVector();
@@ -353,7 +353,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         String us = digestURL.toNormalform(true);
 
         int clickdepth = 999;
-        if ((allAttr || contains(CollectionSchema.clickdepth_i)) && citations != null) {
+        if ((allAttr || contains(CollectionSchema.clickdepth_i))) {
             if (digestURL.probablyRootURL()) {
                 clickdepth = 0;
             } else {
@@ -818,7 +818,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // create a subgraph
         if (!containsCanonical) {
             // a document with canonical tag should not get a webgraph relation, because that belongs to the canonical document
-            webgraph.addEdges(subgraph, digestURL, responseHeader, collections, clickdepth, images, true, document.getAnchors(), citations, sourceName);
+            webgraph.addEdges(subgraph, digestURL, responseHeader, collections, clickdepth, images, true, document.getAnchors(), sourceName);
         }
             
         // list all links
@@ -897,8 +897,40 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     CollectionSchema.process_sxt.getSolrFieldName() + ":" + ProcessType.CITATION.toString(),
                     10000000, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
             if (hostscore == null) hostscore = new ClusteredScoreMap<String>();
-            // for each host, do a citation rank computation
+
             for (String host: hostscore.keyList(true)) {
+                // Patch the citation index for links with canonical tags.
+                // This shall fulfill the following requirement:
+                // If a document A links to B and B contains a 'canonical C', then the citation rank coputation shall consider that A links to C and B does not link to C.
+                // To do so, we first must collect all canonical links, find all references to them, get the anchor list of the documents and patch the citation reference of these links
+                BlockingQueue<SolrDocument> documents_with_canonical_tag = collectionConnector.concurrentDocumentsByQuery(
+                        CollectionSchema.host_s.getSolrFieldName() + ":" + host + " AND " + CollectionSchema.canonical_s.getSolrFieldName() + ":[* TO *]",
+                        0, 10000000, 60000L, 50,
+                        CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.canonical_s.getSolrFieldName());
+                SolrDocument doc_B;
+                try {
+                    while ((doc_B = documents_with_canonical_tag.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+                        // find all documents which link to the canonical doc
+                        DigestURL doc_C_url = new DigestURL((String) doc_B.getFieldValue(CollectionSchema.canonical_s.getSolrFieldName()));
+                        byte[] doc_B_id = ASCII.getBytes(((String) doc_B.getFieldValue(CollectionSchema.id.getSolrFieldName())));
+                        // we remove all references to B, because these become references to C
+                        ReferenceContainer<CitationReference> doc_A_ids = segment.urlCitation().remove(doc_B_id);
+                        if (doc_A_ids == null) {
+                            //System.out.println("*** document with canonical but no referrer: " + doc_B.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
+                            continue; // the document has a canonical tag but no referrer?
+                        }
+                        Iterator<CitationReference> doc_A_ids_iterator = doc_A_ids.entries();
+                        // for each of the referrer A of B, set A as a referrer of C
+                        while (doc_A_ids_iterator.hasNext()) {
+                            CitationReference doc_A_citation = doc_A_ids_iterator.next();
+                            segment.urlCitation().add(doc_C_url.hash(), doc_A_citation);
+                        }
+                    }
+                } catch (InterruptedException e) {
+                } catch (SpaceExceededException e) {
+                }
+                
+                // do the citation rank computation
                 if (hostscore.get(host) <= 0) continue;
                 // select all documents for each host
                 CRHost crh = new CRHost(segment, rrCache, host, 0.85d, 6);

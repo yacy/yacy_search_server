@@ -55,8 +55,6 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.data.citation.CitationReference;
-import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.search.index.Segment;
 
 public class WebgraphConfiguration extends SchemaConfiguration implements Serializable {
@@ -117,7 +115,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             final Subgraph subgraph,
             final DigestURL source, final ResponseHeader responseHeader, Map<String, Pattern> collections, int clickdepth_source,
             final List<ImageEntry> images, final boolean inbound, final Collection<AnchorURL> links,
-            final IndexCell<CitationReference> citations, final String sourceName) {
+            final String sourceName) {
         boolean allAttr = this.isEmpty();
         int target_order = 0;
         boolean generalNofollow = responseHeader.get("X-Robots-Tag", "").indexOf("nofollow") >= 0;
@@ -268,7 +266,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             }
 
             if (this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
-                if ((allAttr || contains(WebgraphSchema.target_clickdepth_i)) && citations != null) {
+                if ((allAttr || contains(WebgraphSchema.target_clickdepth_i))) {
                     if (target_url.probablyRootURL()) {
                         boolean lc = this.lazy; this.lazy = false;
                         add(edge, WebgraphSchema.target_clickdepth_i, 0);
