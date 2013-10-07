@@ -589,7 +589,7 @@ public class Response {
 
             // -if-modified-since in request
             // if the page is fresh at the very moment we can index it
-            final Date ifModifiedSince = this.requestHeader.ifModifiedSince();
+            final Date ifModifiedSince = this.ifModifiedSince();
             if ((ifModifiedSince != null) && (this.responseHeader.containsKey(HeaderFramework.LAST_MODIFIED))) {
                 // parse date
                 Date d = this.responseHeader.lastModified();

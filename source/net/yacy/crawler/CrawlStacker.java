@@ -48,8 +48,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.data.NoticedURL;
-import net.yacy.crawler.data.ResultURLs;
-import net.yacy.crawler.data.ResultURLs.EventOrigin;
 import net.yacy.crawler.retrieval.FTPLoader;
 import net.yacy.crawler.retrieval.HTTPLoader;
 import net.yacy.crawler.retrieval.Request;
