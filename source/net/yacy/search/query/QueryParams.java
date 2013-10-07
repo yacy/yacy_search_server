@@ -44,6 +44,7 @@ import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
@@ -157,7 +158,7 @@ public final class QueryParams {
         this.targetlang = "en";
         this.metatags = new ArrayList<Tagging.Metatag>(0);
         this.domType = Searchdom.LOCAL;
-        this.zonecode = DigestURL.TLD_any_zone_filter;
+        this.zonecode = MultiProtocolURL.TLD_any_zone_filter;
         this.constraint = constraint;
         this.allofconstraint = false;
         this.snippetCacheStrategy = null;
