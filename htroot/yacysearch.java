@@ -670,7 +670,7 @@ public class yacysearch {
                         && sb.peers.mySeed().getFlagAcceptRemoteIndex(),
                     false,
                     lat, lon, rad,
-                    sb.getConfig("search_navigation","").split(","));
+                    sb.getConfig("search.navigation","").split(","));
             EventTracker.delete(EventTracker.EClass.SEARCH);
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
                 theQuery.id(true),
