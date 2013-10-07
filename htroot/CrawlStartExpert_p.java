@@ -46,9 +46,10 @@ public class CrawlStartExpert_p {
         // ---------- Start point
         // crawl start URL
         if (post != null && post.containsKey("crawlingURL")) {
-            prop.put("starturl", post.get("crawlingURL", ""));
+            final String crawlingURL = post.get("crawlingURL", "");
+            prop.put("starturl", crawlingURL);
             // simple check for content since it may be empty
-            if (!prop.get("crawlingURL").trim().isEmpty()) {
+            if (!crawlingURL.trim().isEmpty()) {
                 prop.put("has_url", "1");
             }
         } else {
@@ -57,9 +58,10 @@ public class CrawlStartExpert_p {
         
         // sitemap URL
         if (post != null && post.containsKey("sitemapURL")) {
-            prop.put("sitemapURL", post.get("sitemapURL", ""));
+            final String sitemapURL = post.get("sitemapURL", "");
+            prop.put("sitemapURL", sitemapURL);
             // simple check for content since it may be empty
-            if (!prop.get("sitemapURL").trim().isEmpty()) {
+            if (!sitemapURL.trim().isEmpty()) {
                 prop.put("has_sitemapURL", "1");            
             }
         } else {
@@ -68,9 +70,10 @@ public class CrawlStartExpert_p {
         
         // crawling file
         if (post != null && post.containsKey("crawlingFile")) {
-            prop.put("crawlingFile", post.get("crawlingFile", ""));
+            final String crawlingFile = post.get("crawlingFile", "");
+            prop.put("crawlingFile", crawlingFile);
             // simple check for content since it may be empty
-            if (!prop.get("crawlingFile").trim().isEmpty()) {
+            if (!crawlingFile.trim().isEmpty()) {
                 prop.put("has_crawlingFile", "1");            
             }
         } else {
