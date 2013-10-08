@@ -62,11 +62,12 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.utils.PKCS12Tool;
 
-public final class serverCore extends AbstractBusyThread implements BusyThread {
+public final class serverCore extends AbstractBusyThread implements BusyThread, YaCyHttpServer {
 
     // special ASCII codes used for protocol handling
     /**
@@ -206,6 +207,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         init();
     }
 
+    @Override
     public boolean withSSL() {
         return this.sslSocketFactory != null && this.switchboard.getConfigBool("server.https", false);
     }
@@ -493,12 +495,24 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         //return (getJobCount() == 0);
     }
 
+    @Override
     public int getMaxSessionCount() {
         return this.maxBusySessions;
     }
 
+    @Override
     public void setMaxSessionCount(final int count) {
         this.maxBusySessions = count;
+    }
+
+    @Override
+    public void startupServer() throws Exception {
+        this.start();
+    }
+
+    @Override
+    public String getVersion() {
+        return "AnomicHTTPD (www.anomic.de)";
     }
 
     public final class Session extends Thread {
