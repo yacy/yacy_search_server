@@ -6,9 +6,132 @@
     <script type="text/javascript" src="/js/ajax.js"></script>
     <script type="text/javascript" src="/js/IndexCreate.js"></script>
     <script type="text/javascript">
-        function check(key){
-            document.getElementById(key).checked = 'checked';
+        //<![CDATA[
+        function setStates(cId) {
+            // order matters!
+            // crawl start points
+            if ($('#url').prop("checked")) {
+                $('#crawlingURL').enable();
+                $('#sitemapURL, #crawlingFile').disable();
+                if (cId === "url") { $('#crawlingURL').focus(); }
+            } else if ($('#sitemap').prop("checked")) {
+                $('#sitemapURL').enable();
+                $('#crawlingURL, #crawlingFile').disable();
+                if (cId === "sitemap") { $('#sitemapURL').focus(); }
+            } else if ($('#file').prop("checked")) {
+                $('#crawlingFile').enable();
+                $('#crawlingURL, #sitemapURL').disable();
+                if (cId === "file") { $('#crawlingFile').focus(); }
+            }
+
+            // Load Filters
+            if (cId !== "deleteoldon" && cId !== "deleteoldoff" &&
+                    cId !== "deleteoldage") {
+                if ($('#rangeDomain').prop("checked") ||
+                        $('#rangeSubpath').prop("checked")) {
+                    // restrict to sub-path / domain
+                    $('#mustmatch').disable();
+                    $('#deleteoldoff, #deleteoldage').uncheck();
+                    $('#deleteoldon').check();
+                } else if ($('#rangeWide').prop("checked")) {
+                    // use Filter
+                    $('#mustmatch').enable();
+                    $('#deleteoldon, #deleteoldage').uncheck();
+                    $('#deleteoldoff').check();
+                    if (cId === "rangeWide") { $('#mustmatch').focus(); }
+                }
+            }
+
+            // crawl start: From File
+            if ($("#sitelist").prop("checked")) {
+                $('#rangeDomain').check();
+            }
+
+            // Delete only old
+            if ($('#deleteoldage').prop("checked")) {
+                $('#deleteIfOlderNumber, #deleteIfOlderUnit').enable();
+            } else {
+                $('#deleteIfOlderNumber, #deleteIfOlderUnit').disable();
+            }
+
+            // Reload if old
+            if ($('#reloadoldage').prop("checked")) {
+                $('#reloadIfOlderNumber, #reloadIfOlderUnit').enable();
+            } else {
+                $('#reloadIfOlderNumber, #reloadIfOlderUnit').disable();
+            }
+
+            // Use Must-Match List for Country Codes?
+            if ($('#noCountryMustMatchSwitch').prop("checked")) {
+                $('#countryMustMatchList').disable();
+            } else {
+                $('#countryMustMatchList').enable();
+                if (cId === "countryMustMatchSwitch") {
+                    $('#countryMustMatchList').focus();
+                }
+            }
+
+            // Maximum pages per domain
+            if ($('#crawlingDomMaxCheck').prop("checked")) {
+                $('#crawlingDomMaxPages').enable();
+                if (cId === "crawlingDomMaxCheck") {
+                    $('#crawlingDomMaxPages').focus();
+                }
+            } else {
+                $('#crawlingDomMaxPages').disable();
+            }
+
+            // Remote crawl
+            if ($('#crawlOrder').prop("checked")) {
+                $('#intention').enable();
+                if (cId === "crawlOrder") { $('#intention').focus(); }
+            } else {
+                $('#intention').disable();
+            }
         }
+
+        $(document).ready(function() {
+            (function($) {
+                $.fn.disable = function() {
+                    return this.each(function() {
+                        $(this).prop('disabled', true);
+                    });
+                };
+            })(jQuery);
+
+            (function($) {
+                $.fn.enable = function() {
+                    return this.each(function() {
+                        $(this).prop('disabled', false);
+                    });
+                };
+            })(jQuery);
+
+            (function($) {
+                $.fn.check = function() {
+                    return this.each(function() {
+                        $(this).attr("checked", "checked");
+                    });
+                };
+            })(jQuery);
+
+            (function($) {
+                $.fn.uncheck = function() {
+                    return this.each(function() {
+                        $(this).removeAttr("checked");
+                    });
+                };
+            })(jQuery);
+
+            // add event handlers to all checkoxes & radio buttons
+            $(document).on('change', 'input:checkbox,input:radio', function() {
+                setStates($(this).attr("id"));
+            });
+
+            // set initial states
+            setStates();
+        });
+        //]]>
     </script>
     <style type="text/css">
     	.nobr {
@@ -51,7 +174,7 @@
             Other already visited URLs are sorted out as "double", if they are not allowed using the re-crawl option.
           </span></span>
               <input type="radio" align="top" name="crawlingMode" id="url" value="url" #(crawlingMode_url)#::checked="checked"#(/crawlingMode_url)# />
-              <textarea name="crawlingURL" id="crawlingURL" cols="64" rows="3" size="41" onkeypress="changed()" onfocus="check('url')" >#[starturl]#</textarea>
+              <textarea name="crawlingURL" id="crawlingURL" cols="64" rows="3" size="41" onkeypress="changed()">#[starturl]#</textarea>
                 &nbsp;
                 <span id="robotsOK"></span>
 	            <span id="title"><br/></span>
@@ -63,16 +186,16 @@
 	        </dd>
 	        <dt>From Link-List of URL</dt>
 	        <dd>
-	          <input type="radio" name="crawlingMode" id="sitelist" value="sitelist" #(has_url)#disabled="disabled"::#(/has_url)# #(crawlingMode_sitelist)#::checked="checked"#(/crawlingMode_sitelist)# onclick="document.getElementById('Crawler').rangeDomain.checked = true;"/><br />
+	          <input type="radio" name="crawlingMode" id="sitelist" value="sitelist" #(has_url)#disabled="disabled"::#(/has_url)# #(crawlingMode_sitelist)#::checked="checked"#(/crawlingMode_sitelist)#/><br />
               <div id="sitelistURLs"></div>
 	        </dd>
 	        <dt>From Sitemap</dt>
 	        <dd>
-	          <input type="radio" name="crawlingMode" id="sitemap" value="sitemap" #(crawlingMode_sitemap)#::checked="checked"#(/crawlingMode_sitemap)# #(has_sitemapURL)#disabled="disabled"::#(/has_sitemapURL)#/><input name="sitemapURL" type="text" size="71" maxlength="256" value="#[sitemapURL]#" readonly="readonly"/>
+	          <input type="radio" name="crawlingMode" id="sitemap" value="sitemap" #(crawlingMode_sitemap)#::checked="checked"#(/crawlingMode_sitemap)# #(has_sitemapURL)#disabled="disabled"::#(/has_sitemapURL)#/><input name="sitemapURL" id="sitemapURL" type="text" size="71" maxlength="256" value="#[sitemapURL]#"/>
 	        </dd>
 	        <dt>From File (enter a path<br/>within your local file system)</dt>
 	        <dd>
-	          <input type="radio" name="crawlingMode" id="file" value="file" onclick="document.getElementById('Crawler').rangeDomain.checked = true;" #(crawlingMode_file)#::checked="checked"#(/crawlingMode_file)#/><input type="text" name="crawlingFile" value="#[crawlingFile]#" size="71" maxlength="256" onfocus="check('file')"/>
+	          <input type="radio" name="crawlingMode" id="file" value="file" #(crawlingMode_file)#::checked="checked"#(/crawlingMode_file)#/><input type="text" name="crawlingFile" id="crawlingFile" value="#[crawlingFile]#" size="71" maxlength="256"/>
 	        </dd>
 	      </dl>
         </fieldset>
@@ -129,10 +252,10 @@
             </span></span>
             <table border="0">
             <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td></td></tr>
-			<tr><td colspan="2"><input type="radio" name="range" id="rangeDomain" value="domain" #(range_domain)#::checked="checked"#(/range_domain)# onclick="document.getElementById('mustmatch').disabled=true;document.getElementById('deleteoldon').disabled=false;document.getElementById('deleteoldage').disabled=false;document.getElementById('deleteoldon').checked=true;"/>Restrict to start domain(s)</td></tr>
-			<tr><td colspan="2"><input type="radio" name="range" id="rangeSubpath" value="subpath" #(range_subpath)#::checked="checked"#(/range_subpath)# onclick="document.getElementById('mustmatch').disabled=true;document.getElementById('deleteoldon').disabled=false;document.getElementById('deleteoldage').disabled=false;document.getElementById('deleteoldon').checked=true;" />Restrict to sub-path(s)</td></tr>
-			<tr><td><input type="radio" name="range" id="rangeWide" value="wide" #(range_wide)#::checked="checked"#(/range_wide)# onclick="document.getElementById('mustmatch').disabled=false;document.getElementById('deleteoldoff').checked=true;document.getElementById('deleteoldon').disabled=true;document.getElementById('deleteoldage').disabled=true;"/>Use filter</td>
-			<td valign="bottom"><input name="mustmatch" id="mustmatch" type="text" size="55" maxlength="100000" value="#[mustmatch]#" onclick="document.getElementById('deleteoldon').disabled=false;document.getElementById('deleteoldage').disabled=false" #(range_wide)#disabled="disabled"::#(/range_wide)#/></td></tr>
+			<tr><td colspan="2"><input type="radio" name="range" id="rangeDomain" value="domain" #(range_domain)#::checked="checked"#(/range_domain)#/>Restrict to start domain(s)</td></tr>
+			<tr><td colspan="2"><input type="radio" name="range" id="rangeSubpath" value="subpath" #(range_subpath)#::checked="checked"#(/range_subpath)#/>Restrict to sub-path(s)</td></tr>
+			<tr><td><input type="radio" name="range" id="rangeWide" value="wide" #(range_wide)#::checked="checked"#(/range_wide)#/>Use filter</td>
+			<td valign="bottom"><input name="mustmatch" id="mustmatch" type="text" size="55" maxlength="100000" value="#[mustmatch]#"/></td></tr>
             <tr><td><img src="/env/grafics/minus.gif"> must-not-match</td><td><input name="mustnotmatch" id="mustnotmatch" type="text" size="55" maxlength="100000" value="#[mustnotmatch]#" /></td></tr>
 			</table>
 	        </dd>
@@ -149,8 +272,8 @@
             Crawls can be restricted to specific countries. This uses the country code that can be computed from
             the IP of the server that hosts the page. The filter is not a regular expressions but a list of country codes, separated by comma.
             </span></span>
-			<input type="radio" name="countryMustMatchSwitch" id="countryMustMatchSwitch" value="false" #(countryMustMatchSwitchChecked)#::checked="checked"#(/countryMustMatchSwitchChecked)# />no country code restriction<br />
-			<input type="radio" name="countryMustMatchSwitch" id="countryMustMatchSwitch" value="true" #(countryMustMatchSwitchChecked)#checked="checked::"#(/countryMustMatchSwitchChecked)#/>Use filter&nbsp;&nbsp;
+			<input type="radio" name="countryMustMatchSwitch" id="noCountryMustMatchSwitch" value="false" #(countryMustMatchSwitchChecked)#::checked="checked"#(/countryMustMatchSwitchChecked)# />no country code restriction<br />
+			<input type="radio" name="countryMustMatchSwitch" id="countryMustMatchSwitch" value="true" #(countryMustMatchSwitchChecked)#checked="checked"::#(/countryMustMatchSwitchChecked)# />Use filter&nbsp;&nbsp;
 			<input name="countryMustMatchList" id="countryMustMatchList" type="text" size="60" maxlength="256" value="#[countryMustMatch]#" />
 		  </dd>
 	      </dl>
@@ -189,9 +312,9 @@
             to delete them because they simply do not exist any more. Use this in combination with re-crawl while this time should be longer.
             </span></span><input type="radio" name="deleteold" id="deleteoldoff" value="off" #(deleteold_off)#::checked="checked"#(/deleteold_off)#/>Do not delete any document before the crawl is started.</dd>
             <dt>Delete sub-path</dt>
-            <dd><input type="radio" name="deleteold" id="deleteoldon" value="on" #(deleteold_on)#::checked="checked"#(/deleteold_on)# #(range_wide)#::disabled="disabled"#(/range_wide)#/>For each host in the start url list, delete all documents (in the given subpath) from that host.</dd>
+            <dd><input type="radio" name="deleteold" id="deleteoldon" value="on" #(deleteold_on)#::checked="checked"#(/deleteold_on)#/>For each host in the start url list, delete all documents (in the given subpath) from that host.</dd>
 			<dt>Delete only old</dt>
-			<dd><input type="radio" name="deleteold" id="deleteoldage" value="age" #(deleteold_age)#::checked="checked"#(/deleteold_age)# #(range_wide)#::disabled="disabled"#(/range_wide)#/>Treat documents that are loaded
+			<dd><input type="radio" name="deleteold" id="deleteoldage" value="age" #(deleteold_age)#::checked="checked"#(/deleteold_age)#/>Treat documents that are loaded
 			<select name="deleteIfOlderNumber" id="deleteIfOlderNumber">
               <option value="1" #(deleteIfOlderNumber_1)#::selected="selected"#(/deleteIfOlderNumber_1)#>1</option>
               <option value="2" #(deleteIfOlderNumber_2)#::selected="selected"#(/deleteIfOlderNumber_2)#>2</option>
@@ -226,9 +349,9 @@
             A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,
             then the url is treated as double when you check the 'no doubles' option. A url may be loaded again when it has reached a specific age,
             to use that check the 're-load' option.
-            </span></span><input type="radio" name="recrawl" value="nodoubles" #(recrawl_nodoubles)#checked="checked"#(/recrawl_nodoubles)#/>Never load any page that is already known. Only the start-url may be loaded again.</dd>
+            </span></span><input type="radio" name="recrawl" id="reloadoldoff" value="nodoubles" #(recrawl_nodoubles)#checked="checked"#(/recrawl_nodoubles)#/>Never load any page that is already known. Only the start-url may be loaded again.</dd>
 			<dt>Re-load</dt>
-			<dd><input type="radio" name="recrawl" value="reload" #(recrawl_reload)#checked="checked"#(/recrawl_reload)#/>Treat documents that are loaded
+			<dd><input type="radio" name="recrawl" id="reloadoldage" value="reload" #(recrawl_reload)#checked="checked"#(/recrawl_reload)#/>Treat documents that are loaded
 			<select name="reloadIfOlderNumber" id="reloadIfOlderNumber">
               <option value="1" #(reloadIfOlderNumber_1)#::selected="selected"#(/reloadIfOlderNumber_1)#>1</option>
               <option value="2" #(reloadIfOlderNumber_2)#::selected="selected"#(/reloadIfOlderNumber_2)#>2</option>
@@ -269,7 +392,20 @@
           <dd>
             <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             The caching policy states when to use the cache during crawling:
-              <b>no&nbsp;cache</b>: never use the cache, all content from fresh internet source;
+              <b>no&nbsp;cache</b>: never use the cache, all content from
+	      </dl>
+        </fieldset>
+        <fieldset>
+          <legend><label>Document Cache</label></legend>
+          <dl><dt><label for="storeHTCache">Store to Web Cache</label></dt>
+          <dd>
+            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
+            This option is used by default for proxy prefetch, but is not needed for explicit crawling.
+            </span></span>
+            <input type="checkbox" name="storeHTCache" id="storeHTCache" #(storeHTCacheChecked)#::checked="checked"#(/storeHTCacheChecked)# />
+          </dd>
+
+          <dt><label for="mustmatch">Policy for usage of Web Cache</labfresh internet source;
               <b>if&nbsp;fresh</b>: use the cache if the cache exists and is fresh using the proxy-fresh rules;
               <b>if&nbsp;exist</b>: use the cache if the cache exist. Do no check freshness. Otherwise use online source;
               <b>cache&nbsp;only</b>: never go online, use all content from cache. If no cache exist, treat content as unavailable
