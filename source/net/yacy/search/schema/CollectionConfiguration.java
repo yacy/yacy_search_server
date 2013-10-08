@@ -824,8 +824,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         doc.webgraphDocuments.addAll(subgraph.edges);
         if (allAttr || contains(CollectionSchema.inboundlinks_protocol_sxt)) add(doc, CollectionSchema.inboundlinks_protocol_sxt, protocolList2indexedList(subgraph.urlProtocols[0]));
         if (allAttr || contains(CollectionSchema.inboundlinks_urlstub_sxt)) add(doc, CollectionSchema.inboundlinks_urlstub_sxt, subgraph.urlStubs[0]);
+        if (allAttr || contains(CollectionSchema.inboundlinks_anchortext_txt)) add(doc, CollectionSchema.inboundlinks_anchortext_txt, subgraph.urlAnchorTexts[0]);
         if (allAttr || contains(CollectionSchema.outboundlinks_protocol_sxt)) add(doc, CollectionSchema.outboundlinks_protocol_sxt, protocolList2indexedList(subgraph.urlProtocols[1]));
         if (allAttr || contains(CollectionSchema.outboundlinks_urlstub_sxt)) add(doc, CollectionSchema.outboundlinks_urlstub_sxt, subgraph.urlStubs[1]);
+        if (allAttr || contains(CollectionSchema.outboundlinks_anchortext_txt)) add(doc, CollectionSchema.outboundlinks_anchortext_txt, subgraph.urlAnchorTexts[1]);
         
         // charset
         if (allAttr || contains(CollectionSchema.charset_s)) add(doc, CollectionSchema.charset_s, document.getCharset());

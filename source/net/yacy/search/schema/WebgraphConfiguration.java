@@ -101,12 +101,13 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     }
     
     public static class Subgraph {
-        public final ArrayList<String>[] urlProtocols, urlStubs;
+        public final ArrayList<String>[] urlProtocols, urlStubs, urlAnchorTexts;
         public final ArrayList<SolrInputDocument> edges;
         @SuppressWarnings("unchecked")
         public Subgraph(int inboundSize, int outboundSize) {
             this.urlProtocols = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
             this.urlStubs = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
+            this.urlAnchorTexts = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
             this.edges = new ArrayList<SolrInputDocument>(inboundSize + outboundSize);
         }
     }
@@ -226,8 +227,9 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             final String target_url_string = target_url.toNormalform(false);
             int pr_target = target_url_string.indexOf("://",0);
             subgraph.urlProtocols[ioidx].add(target_url_string.substring(0, pr_target));
-            if (allAttr || contains(WebgraphSchema.target_protocol_s)) add(edge, WebgraphSchema.target_protocol_s, target_url_string.substring(0, pr_target));
             subgraph.urlStubs[ioidx].add(target_url_string.substring(pr_target + 3));
+            subgraph.urlAnchorTexts[ioidx].add(text);
+            if (allAttr || contains(WebgraphSchema.target_protocol_s)) add(edge, WebgraphSchema.target_protocol_s, target_url_string.substring(0, pr_target));
             if (allAttr || contains(WebgraphSchema.target_urlstub_s)) add(edge, WebgraphSchema.target_urlstub_s, target_url_string.substring(pr_target + 3));
             Map<String, String> target_searchpart = target_url.getSearchpartMap();
             if (target_searchpart == null) {
