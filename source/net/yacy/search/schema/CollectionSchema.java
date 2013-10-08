@@ -45,7 +45,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     exact_signature_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if exact_signature_l is unique at the time of document creation, used for double-check during search"),
     exact_signature_copycount_i(SolrType.num_integer, true, true, false, false, false, "counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)"),
     fuzzy_signature_l(SolrType.num_long, true, true, false, false, false, "64 bit of the Lookup3Signature from EnhancedTextProfileSignature of text_t"),
-    fuzzy_signature_text_t(SolrType.text_general, true, true, false, false, false, "intermediate data produced in EnhancedTextProfileSignature: a list of word frequencies"),
+    fuzzy_signature_text_t(SolrType.text_general, true, true, false, false, true, "intermediate data produced in EnhancedTextProfileSignature: a list of word frequencies"),
     fuzzy_signature_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if fuzzy_signature_l is unique at the time of document creation, used for double-check during search"),
     fuzzy_signature_copycount_i(SolrType.num_integer, true, true, false, false, false, "counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)"),
     size_i(SolrType.num_integer, true, true, false, false, false, "the size of the raw source"),// int size();
@@ -156,8 +156,8 @@ public enum CollectionSchema implements SchemaDeclaration {
     publisher_url_s(SolrType.string, true, true, false, false, false, "publisher url as defined in http://support.google.com/plus/answer/1713826?hl=de"),
     
     url_protocol_s(SolrType.string, true, true, false, false, false, "the protocol of the url"),
-    url_file_name_s(SolrType.string, true, true, false, false, false, "the file name (which is the string after the last '/' and before the query part from '?' on) without the file extension"),
-    url_file_ext_s(SolrType.string, true, true, false, false, false, "the file name extension"),
+    url_file_name_s(SolrType.string, true, true, false, false, true, "the file name (which is the string after the last '/' and before the query part from '?' on) without the file extension"),
+    url_file_ext_s(SolrType.string, true, true, false, false, true, "the file name extension"),
     url_paths_sxt(SolrType.string, true, true, true, false, true, "all path elements in the url hpath (see: http://www.ietf.org/rfc/rfc1738.txt) without the file name"),
     url_parameter_i(SolrType.num_integer, true, true, false, false, false, "number of key-value pairs in search part of the url"),
     url_parameter_key_sxt(SolrType.string, true, true, true, false, false, "the keys from key-value pairs in the search part of the url"),

@@ -120,6 +120,7 @@ public class RankingSolr_p {
                 prop.put("boosts_" + i + "_boost", boost.toString());
                 prop.put("boosts_" + i + "_notinindexwarning", (sb.index.fulltext().getDefaultConfiguration().contains(field.name())? "0" : "1") );
             }
+            prop.putHTML("boosts_" + i + "_comment", field.getComment());
             i++;
         }
         prop.put("boosts", i);
