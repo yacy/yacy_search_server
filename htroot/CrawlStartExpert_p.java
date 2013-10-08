@@ -345,21 +345,32 @@ public class CrawlStartExpert_p {
 
         // ---------- Double-Check Rules
         // reload settings: number value
+        prop.put("reloadIfOlderSelect", "1");
+        for (int i=0; i<13; i++) {
+            prop.put("reloadIfOlderSelect_list_"+i+"_name", Integer.toString(i));
+        }
+        prop.put("reloadIfOlderSelect_list_13_name", "14");
+        prop.put("reloadIfOlderSelect_list_14_name", "21");
+        prop.put("reloadIfOlderSelect_list_15_name", "28");
+        prop.put("reloadIfOlderSelect_list_16_name", "30");
+        prop.put("reloadIfOlderSelect_list", 16);
+
         if (post != null && post.containsKey("reloadIfOlderNumber")) {
-            final Integer olderNumber = post.getInt("reloadIfOlderNumber", -1);
-            if (olderNumber >0 && olderNumber <=12) {
-                prop.put("reloadIfOlderNumber" + olderNumber, "1");
-            } else {
+            Integer olderNumber = post.getInt("reloadIfOlderNumber", -1);
+            if (olderNumber <=0 || olderNumber >12) {
                 switch (olderNumber) {
-                    case 14: prop.put("reloadIfOlderNumber_14", "1"); break;
-                    case 21: prop.put("reloadIfOlderNumber_21", "1"); break;
-                    case 28: prop.put("reloadIfOlderNumber_28", "1"); break;
-                    case 30: prop.put("reloadIfOlderNumber_30", "1"); break;
-                    default: prop.put("reloadIfOlderNumber_14", "1"); break;
+                    case 14: 
+                    case 21: 
+                    case 28: 
+                    case 30: break;
+                    default: olderNumber = 14; break;
                 }
             }
+            prop.put("reloadIfOlderSelect_list_"+olderNumber+"_default",
+                        "selected=\"selected\"");
         } else {
-            prop.put("reloadIfOlderNumber_14", "1");
+            prop.put("reloadIfOlderSelect_list_14_default",
+                    "selected=\"selected\"");
         }
 
         // reload settings: number unit

@@ -352,23 +352,11 @@
             </span></span><input type="radio" name="recrawl" id="reloadoldoff" value="nodoubles" #(recrawl_nodoubles)#checked="checked"#(/recrawl_nodoubles)#/>Never load any page that is already known. Only the start-url may be loaded again.</dd>
 			<dt>Re-load</dt>
 			<dd><input type="radio" name="recrawl" id="reloadoldage" value="reload" #(recrawl_reload)#checked="checked"#(/recrawl_reload)#/>Treat documents that are loaded
-			<select name="reloadIfOlderNumber" id="reloadIfOlderNumber">
-              <option value="1" #(reloadIfOlderNumber_1)#::selected="selected"#(/reloadIfOlderNumber_1)#>1</option>
-              <option value="2" #(reloadIfOlderNumber_2)#::selected="selected"#(/reloadIfOlderNumber_2)#>2</option>
-              <option value="3" #(reloadIfOlderNumber_3)#::selected="selected"#(/reloadIfOlderNumber_3)#>3</option>
-              <option value="4" #(reloadIfOlderNumber_4)#::selected="selected"#(/reloadIfOlderNumber_4)#>4</option>
-              <option value="5" #(reloadIfOlderNumber_5)#::selected="selected"#(/reloadIfOlderNumber_5)#>5</option>
-              <option value="6" #(reloadIfOlderNumber_6)#::selected="selected"#(/reloadIfOlderNumber_6)#>6</option>
-              <option value="7" #(reloadIfOlderNumber_7)#::selected="selected"#(/reloadIfOlderNumber_7)#>7</option>
-              <option value="8" #(reloadIfOlderNumber_8)#::selected="selected"#(/reloadIfOlderNumber_8)#>8</option>
-              <option value="9" #(reloadIfOlderNumber_9)#::selected="selected"#(/reloadIfOlderNumber_9)#>9</option>
-              <option value="10" #(reloadIfOlderNumber_10)#::selected="selected"#(/reloadIfOlderNumber_10)#>10</option>
-              <option value="12" #(reloadIfOlderNumber_12)#::selected="selected"#(/reloadIfOlderNumber_12)#>12</option>
-              <option value="14" #(reloadIfOlderNumber_14)#::selected="selected"#(/reloadIfOlderNumber_14)#>14</option>
-              <option value="21" #(reloadIfOlderNumber_21)#::selected="selected"#(/reloadIfOlderNumber_21)#>21</option>
-              <option value="28" #(reloadIfOlderNumber_28)#::selected="selected"#(/reloadIfOlderNumber_28)#>28</option>
-              <option value="30" #(reloadIfOlderNumber_30)#::selected="selected"#(/reloadIfOlderNumber_30)#>30</option>
-			</select>
+                            <select name="reloadIfOlderNumber" id="reloadIfOlderNumber">
+                            #(reloadIfOlderSelect)#::
+                                   #{list}#<option value="#[name]#" #[default]#>#[name]#</option>#{/list}#
+                            #(/reloadIfOlderSelect)#
+                            </select>
             <select name="reloadIfOlderUnit" id="reloadIfOlderUnit">
               <option value="year" #(reloadIfOlderUnit_year)#::selected="selected"#(/reloadIfOlderUnit_year)#>years</option>
               <option value="month" #(reloadIfOlderUnit_month)#::selected="selected"#(/reloadIfOlderUnit_month)#>months</option>
