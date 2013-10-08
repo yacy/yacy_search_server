@@ -25,8 +25,8 @@
             }
 
             // Load Filters
-            if (cId !== "deleteoldon" && cId !== "deleteoldoff" &&
-                    cId !== "deleteoldage") {
+            if (cId === "rangeDomain" || cId === "rangeSubpath" ||
+                    cId === "rangeWide") {
                 if ($('#rangeDomain').prop("checked") ||
                         $('#rangeSubpath').prop("checked")) {
                     // restrict to sub-path / domain
@@ -110,7 +110,7 @@
             (function($) {
                 $.fn.check = function() {
                     return this.each(function() {
-                        $(this).attr("checked", "checked");
+                        $(this).attr("checked", "checked").prop("checked", true);
                     });
                 };
             })(jQuery);
@@ -118,7 +118,7 @@
             (function($) {
                 $.fn.uncheck = function() {
                     return this.each(function() {
-                        $(this).removeAttr("checked");
+                        $(this).removeAttr("checked").prop("checked", false);
                     });
                 };
             })(jQuery);
@@ -316,28 +316,15 @@
 			<dt>Delete only old</dt>
 			<dd><input type="radio" name="deleteold" id="deleteoldage" value="age" #(deleteold_age)#::checked="checked"#(/deleteold_age)#/>Treat documents that are loaded
 			<select name="deleteIfOlderNumber" id="deleteIfOlderNumber">
-              <option value="1" #(deleteIfOlderNumber_1)#::selected="selected"#(/deleteIfOlderNumber_1)#>1</option>
-              <option value="2" #(deleteIfOlderNumber_2)#::selected="selected"#(/deleteIfOlderNumber_2)#>2</option>
-              <option value="3" #(deleteIfOlderNumber_3)#::selected="selected"#(/deleteIfOlderNumber_3)#>3</option>
-              <option value="4" #(deleteIfOlderNumber_4)#::selected="selected"#(/deleteIfOlderNumber_4)#>4</option>
-              <option value="5" #(deleteIfOlderNumber_5)#::selected="selected"#(/deleteIfOlderNumber_5)#>5</option>
-              <option value="6" #(deleteIfOlderNumber_6)#::selected="selected"#(/deleteIfOlderNumber_6)#>6</option>
-              <option value="7" #(deleteIfOlderNumber_7)#::selected="selected"#(/deleteIfOlderNumber_7)#>7</option>
-              <option value="8" #(deleteIfOlderNumber_8)#::selected="selected"#(/deleteIfOlderNumber_8)#>8</option>
-              <option value="9" #(deleteIfOlderNumber_9)#::selected="selected"#(/deleteIfOlderNumber_9)#>9</option>
-              <option value="10" #(deleteIfOlderNumber_10)#::selected="selected"#(/deleteIfOlderNumber_10)#>10</option>
-              <option value="12" #(deleteIfOlderNumber_12)#::selected="selected"#(/deleteIfOlderNumber_12)#>12</option>
-              <option value="14" #(deleteIfOlderNumber_14)#::selected="selected"#(/deleteIfOlderNumber_14)#>14</option>
-              <option value="21" #(deleteIfOlderNumber_21)#::selected="selected"#(/deleteIfOlderNumber_21)#>21</option>
-              <option value="28" #(deleteIfOlderNumber_28)#::selected="selected"#(/deleteIfOlderNumber_28)#>28</option>
-              <option value="30" #(deleteIfOlderNumber_30)#::selected="selected"#(/deleteIfOlderNumber_30)#>30</option>
-			</select>
-            <select name="deleteIfOlderUnit" id="deleteIfOlderUnit">
-              <option value="year" #(deleteIfOlderUnit_year)#::selected="selected"#(/deleteIfOlderUnit_year)#>years</option>
-              <option value="month" #(deleteIfOlderUnit_month)#::selected="selected"#(/deleteIfOlderUnit_month)#>months</option>
-              <option value="day" #(deleteIfOlderUnit_day)#::selected="selected"#(/deleteIfOlderUnit_day)#>days</option>
-              <option value="hour" #(deleteIfOlderUnit_hour)#::selected="selected"#(/deleteIfOlderUnit_hour)#>hours</option>
-			</select> ago as stale and delete them before the crawl is started.
+                            #(deleteIfOlderSelect)#::
+                                   #{list}#<option value="#[name]#" #(default)#::selected="selected"#(/default)#>#[name]#</option>#{/list}#
+                            #(/deleteIfOlderSelect)#
+                        </select>
+                        <select name="deleteIfOlderUnit" id="deleteIfOlderUnit">
+                            #(deleteIfOlderUnitSelect)#::
+                                   #{list}#<option value="#[value]#" #(default)#::selected="selected"#(/default)#>#[name]#</option>#{/list}#
+                            #(/deleteIfOlderUnitSelect)#
+                            </select> ago as stale and delete them before the crawl is started.
 			</dd>
 	      </dl>
         </fieldset>
@@ -349,20 +336,19 @@
             A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,
             then the url is treated as double when you check the 'no doubles' option. A url may be loaded again when it has reached a specific age,
             to use that check the 're-load' option.
-            </span></span><input type="radio" name="recrawl" id="reloadoldoff" value="nodoubles" #(recrawl_nodoubles)#checked="checked"#(/recrawl_nodoubles)#/>Never load any page that is already known. Only the start-url may be loaded again.</dd>
+            </span></span><input type="radio" name="recrawl" id="reloadoldoff" value="nodoubles" #(recrawl_nodoubles)#::checked="checked"#(/recrawl_nodoubles)#/>Never load any page that is already known. Only the start-url may be loaded again.</dd>
 			<dt>Re-load</dt>
-			<dd><input type="radio" name="recrawl" id="reloadoldage" value="reload" #(recrawl_reload)#checked="checked"#(/recrawl_reload)#/>Treat documents that are loaded
+			<dd><input type="radio" name="recrawl" id="reloadoldage" value="reload" #(recrawl_reload)#::checked="checked"#(/recrawl_reload)#/>Treat documents that are loaded
                             <select name="reloadIfOlderNumber" id="reloadIfOlderNumber">
                             #(reloadIfOlderSelect)#::
-                                   #{list}#<option value="#[name]#" #[default]#>#[name]#</option>#{/list}#
+                                   #{list}#<option value="#[name]#" #(default)#::selected="selected"#(/default)#>#[name]#</option>#{/list}#
                             #(/reloadIfOlderSelect)#
                             </select>
-            <select name="reloadIfOlderUnit" id="reloadIfOlderUnit">
-              <option value="year" #(reloadIfOlderUnit_year)#::selected="selected"#(/reloadIfOlderUnit_year)#>years</option>
-              <option value="month" #(reloadIfOlderUnit_month)#::selected="selected"#(/reloadIfOlderUnit_month)#>months</option>
-              <option value="day" #(reloadIfOlderUnit_day)#::selected="selected"#(/reloadIfOlderUnit_day)#>days</option>
-              <option value="hour" #(reloadIfOlderUnit_hour)#::selected="selected"#(/reloadIfOlderUnit_hour)#>hours</option>
-			</select> ago as stale and load them again. If they are younger, they are ignored.
+                            <select name="reloadIfOlderUnit" id="reloadIfOlderUnit">
+                            #(reloadIfOlderUnitSelect)#::
+                                   #{list}#<option value="#[value]#" #(default)#::selected="selected"#(/default)#>#[name]#</option>#{/list}#
+                            #(/reloadIfOlderUnitSelect)#
+                            </select> ago as stale and load them again. If they are younger, they are ignored.
 			</dd>
 	      </dl>
         </fieldset>
@@ -380,20 +366,7 @@
           <dd>
             <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             The caching policy states when to use the cache during crawling:
-              <b>no&nbsp;cache</b>: never use the cache, all content from
-	      </dl>
-        </fieldset>
-        <fieldset>
-          <legend><label>Document Cache</label></legend>
-          <dl><dt><label for="storeHTCache">Store to Web Cache</label></dt>
-          <dd>
-            <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
-            This option is used by default for proxy prefetch, but is not needed for explicit crawling.
-            </span></span>
-            <input type="checkbox" name="storeHTCache" id="storeHTCache" #(storeHTCacheChecked)#::checked="checked"#(/storeHTCacheChecked)# />
-          </dd>
-
-          <dt><label for="mustmatch">Policy for usage of Web Cache</labfresh internet source;
+              <b>no&nbsp;cache</b>: never use the cache, all content from fresh internet source;
               <b>if&nbsp;fresh</b>: use the cache if the cache exists and is fresh using the proxy-fresh rules;
               <b>if&nbsp;exist</b>: use the cache if the cache exist. Do no check freshness. Otherwise use online source;
               <b>cache&nbsp;only</b>: never go online, use all content from cache. If no cache exist, treat content as unavailable

@@ -295,37 +295,66 @@ public class CrawlStartExpert_p {
 
         // ---------- Clean-Up before Crawl Start
         // delete if older settings: number value
+        prop.put("deleteIfOlderSelect", "1");
+        for (int i=0; i<13; i++) {
+            prop.put("deleteIfOlderSelect_list_"+i+"_name", Integer.toString(i));
+        }
+        prop.put("deleteIfOlderSelect_list_13_name", "14");
+        prop.put("deleteIfOlderSelect_list_14_name", "21");
+        prop.put("deleteIfOlderSelect_list_15_name", "28");
+        prop.put("deleteIfOlderSelect_list_16_name", "30");
+        prop.put("deleteIfOlderSelect_list", 17);
+
         if (post != null && post.containsKey("deleteIfOlderNumber")) {
             final Integer olderNumber = post.getInt("deleteIfOlderNumber", -1);
-            if (olderNumber >0 && olderNumber <=12) {
-                prop.put("deleteIfOlderNumber_" + olderNumber, "1");
+            if (olderNumber >0 && olderNumber <= 12) {
+                prop.put("deleteIfOlderSelect_list_" + olderNumber +
+                        "_default", "1");
             } else {
                 switch (olderNumber) {
-                    case 14: prop.put("deleteIfOlderNumber_14", "1"); break;
-                    case 21: prop.put("deleteIfOlderNumber_21", "1"); break;
-                    case 28: prop.put("deleteIfOlderNumber_28", "1"); break;
-                    case 30: prop.put("deleteIfOlderNumber_30", "1"); break;
-                    default: prop.put("deleteIfOlderNumber_14", "1"); break;
+                    case 21:
+                        prop.put("deleteIfOlderSelect_list_14_default", "1");
+                        break;
+                    case 28:
+                        prop.put("deleteIfOlderSelect_list_15_default", "1");
+                        break;
+                    case 30:
+                        prop.put("deleteIfOlderSelect_list_16_default", "1");
+                        break;
+                    default:
+                        prop.put("deleteIfOlderSelect_list_13_default", "1");
+                        break;
                 }
             }
         } else {
-            prop.put("deleteIfOlderNumber_14", "1");
+            prop.put("deleteIfOlderSelect_list_13_default", "1");
         }
 
         // delete if older settings: number unit
+        prop.put("deleteIfOlderUnitSelect", "1");
+        prop.put("deleteIfOlderUnitSelect_list_0_name", "years");
+        prop.put("deleteIfOlderUnitSelect_list_0_value", "year");
+        prop.put("deleteIfOlderUnitSelect_list_1_name", "months");
+        prop.put("deleteIfOlderUnitSelect_list_1_value", "month");
+        prop.put("deleteIfOlderUnitSelect_list_2_name", "days");
+        prop.put("deleteIfOlderUnitSelect_list_2_value", "day");
+        prop.put("deleteIfOlderUnitSelect_list_3_name", "hours");
+        prop.put("deleteIfOlderUnitSelect_list_3_value", "hour");
+        prop.put("deleteIfOlderUnitSelect_list", 4);
+
         if (post != null && post.containsKey("deleteIfOlderUnit")) {
             final String olderUnit = post.get("deleteIfOlderUnit", "");
             if (olderUnit.equalsIgnoreCase("year")) {
-                prop.put("deleteIfOlderUnit_year", "1");
+                prop.put("deleteIfOlderUnitSelect_list_0_default", "1");
             } else if (olderUnit.equalsIgnoreCase("month")) {
-                prop.put("deleteIfOlderUnit_month", "1");
+                prop.put("deleteIfOlderUnitSelect_list_1_default", "1");
             } else if (olderUnit.equalsIgnoreCase("hour")) {
-                prop.put("deleteIfOlderUnit_hour", "1");
+                prop.put("deleteIfOlderUnitSelect_list_3_default", "1");
             } else {
-                prop.put("deleteIfOlderUnit_day", "1");
+                prop.put("deleteIfOlderUnitSelect_list_2_default", "1");
             }
         } else {
-            prop.put("deleteIfOlderUnit_day", "1");
+            prop.put("deleteIfOlderUnitSelect_list_2_default", "1");
         }
 
         // delete any document before the crawl is started?
@@ -353,40 +382,58 @@ public class CrawlStartExpert_p {
         prop.put("reloadIfOlderSelect_list_14_name", "21");
         prop.put("reloadIfOlderSelect_list_15_name", "28");
         prop.put("reloadIfOlderSelect_list_16_name", "30");
-        prop.put("reloadIfOlderSelect_list", 16);
+        prop.put("reloadIfOlderSelect_list", 17);
 
         if (post != null && post.containsKey("reloadIfOlderNumber")) {
-            Integer olderNumber = post.getInt("reloadIfOlderNumber", -1);
-            if (olderNumber <=0 || olderNumber >12) {
+            final Integer olderNumber = post.getInt("reloadIfOlderNumber", -1);
+            if (olderNumber >0 && olderNumber <= 12) {
+                prop.put("reloadIfOlderSelect_list_" + olderNumber +
+                        "_default", "1");
+            } else {
                 switch (olderNumber) {
-                    case 14: 
-                    case 21: 
-                    case 28: 
-                    case 30: break;
-                    default: olderNumber = 14; break;
+                    case 21:
+                        prop.put("reloadIfOlderSelect_list_14_default", "1");
+                        break;
+                    case 28:
+                        prop.put("reloadIfOlderSelect_list_15_default", "1");
+                        break;
+                    case 30:
+                        prop.put("reloadIfOlderSelect_list_16_default", "1");
+                        break;
+                    default:
+                        prop.put("reloadIfOlderSelect_list_13_default", "1");
+                        break;
                 }
             }
-            prop.put("reloadIfOlderSelect_list_"+olderNumber+"_default",
-                        "selected=\"selected\"");
         } else {
-            prop.put("reloadIfOlderSelect_list_14_default",
-                    "selected=\"selected\"");
+            prop.put("reloadIfOlderSelect_list_13_default", "1");
         }
 
         // reload settings: number unit
+        prop.put("reloadIfOlderUnitSelect", "1");
+        prop.put("reloadIfOlderUnitSelect_list_0_name", "years");
+        prop.put("reloadIfOlderUnitSelect_list_0_value", "year");
+        prop.put("reloadIfOlderUnitSelect_list_1_name", "months");
+        prop.put("reloadIfOlderUnitSelect_list_1_value", "month");
+        prop.put("reloadIfOlderUnitSelect_list_2_name", "days");
+        prop.put("reloadIfOlderUnitSelect_list_2_value", "day");
+        prop.put("reloadIfOlderUnitSelect_list_3_name", "hours");
+        prop.put("reloadIfOlderUnitSelect_list_3_value", "hour");
+        prop.put("reloadIfOlderUnitSelect_list", 4);
+
         if (post != null && post.containsKey("reloadIfOlderUnit")) {
             final String olderUnit = post.get("reloadIfOlderUnit", "");
             if (olderUnit.equalsIgnoreCase("year")) {
-                prop.put("reloadIfOlderUnit_year", "1");
+                prop.put("reloadIfOlderUnitSelect_list_0_default", "1");
             } else if (olderUnit.equalsIgnoreCase("month")) {
-                prop.put("reloadIfOlderUnit_month", "1");
+                prop.put("reloadIfOlderUnitSelect_list_1_default", "1");
             } else if (olderUnit.equalsIgnoreCase("hour")) {
-                prop.put("reloadIfOlderUnit_hour", "1");
+                prop.put("reloadIfOlderUnitSelect_list_3_default", "1");
             } else {
-                prop.put("reloadIfOlderUnit_day", "1");
+                prop.put("reloadIfOlderUnitSelect_list_2_default", "1");
             }
         } else {
-            prop.put("reloadIfOlderUnit_day", "1");
+            prop.put("reloadIfOlderUnitSelect_list_2_default", "1");
         }
 
         if (post != null && post.containsKey("recrawl")) {
