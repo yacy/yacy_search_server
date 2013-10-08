@@ -2,10 +2,10 @@ package de.anomic.yacy;
 
 import java.net.MalformedURLException;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 import junit.framework.TestCase;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 
 public class yacyURLTest extends TestCase {
 
@@ -32,7 +32,7 @@ public class yacyURLTest extends TestCase {
 			// conversion result
 			String resolvedURL="";
                         try {
-                            resolvedURL = (new MultiProtocolURI(testhost + testStrings[i][0])).toString();
+                            resolvedURL = (new MultiProtocolURL(testhost + testStrings[i][0])).toString();
                         } catch (final MalformedURLException ex) {
                             fail ("malformed URL");
                         }
@@ -57,7 +57,7 @@ public class yacyURLTest extends TestCase {
 			String shouldBe = testStrings[i][1];
 			
 			// conversion result
-			String resolvedURL = (new DigestURI(testStrings[i][0])).toString();
+			String resolvedURL = (new DigestURL(testStrings[i][0])).toString();
 			
 			// test if equal
 			assertEquals(shouldBe,resolvedURL);

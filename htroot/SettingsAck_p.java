@@ -40,7 +40,7 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.http.HttpServer;
+import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.Network;
 import net.yacy.peers.Seed;
@@ -109,7 +109,7 @@ public class SettingsAck_p {
             prop.putHTML("info_port", port);
             if (!env.getConfig("port", port).equals(port)) {
                 // validation port
-                final HttpServer theServerCore =  env.getHttpServer();
+                final YaCyHttpServer theServerCore =  env.getHttpServer();
                 try {
                     final InetSocketAddress theNewAddress = theServerCore.generateSocketAddress(port);
                     final String hostName = Domains.getHostName(theNewAddress.getAddress());

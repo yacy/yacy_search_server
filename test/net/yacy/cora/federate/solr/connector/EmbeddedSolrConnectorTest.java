@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.EnumSet;
+import javax.servlet.DispatcherType;
 import net.yacy.cora.federate.solr.SolrServlet;
 import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.search.schema.CollectionSchema;
@@ -13,8 +15,9 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler.Context;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -122,14 +125,19 @@ public class EmbeddedSolrConnectorTest {
          this.server.setConnectors(new Connector[] { connector });
          this.server.setSessionIdManager(new HashSessionIdManager(new Random()));
          */
+        ServerConnector connector = new ServerConnector(server);
+        connector.setPort(port);
+
+        server.addConnector(connector);
         server.setStopAtShutdown(true);
-        Context root = new Context(server, context, Context.SESSIONS);
+        ServletContextHandler root = new ServletContextHandler(ServletContextHandler.SESSIONS); //new Context(server, context, Context.SESSIONS);
         root.addServlet(SolrServlet.Servlet404.class, "/*");
 
         // attach org.apache.solr.response.XMLWriter to search requests
         SolrServlet.initCore(c);
-        FilterHolder dispatchFilter = root.addFilter(SolrServlet.class, "*", Handler.REQUEST);
-
+        FilterHolder dispatchFilter = root.addFilter(SolrServlet.class, "*", EnumSet.of(DispatcherType.REQUEST));
+        //root.addFilter(new FilterHolder(SolrServlet.class), "/*", EnumSet.of(DispatcherType.REQUEST));
+        server.setHandler(root);
         if (!server.isRunning()) {
             try {
                 server.start();

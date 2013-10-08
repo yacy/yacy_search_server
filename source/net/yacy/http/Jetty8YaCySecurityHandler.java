@@ -30,13 +30,13 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.search.Switchboard;
-import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.http.HttpSchemes;
 import org.eclipse.jetty.security.RoleInfo;
 
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.UserDataConstraint;
-import org.eclipse.jetty.server.HttpChannel;
-import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.AbstractHttpConnection;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.UserIdentity;
@@ -46,51 +46,76 @@ import org.eclipse.jetty.server.UserIdentity;
  * demands authentication for pages with _p. inside
  * and updates AccessTracker
  */
-public class YaCySecurityHandler extends SecurityHandler {
+public class Jetty8YaCySecurityHandler extends SecurityHandler {
 
     @Override
-    protected boolean checkUserDataPermissions(String pathInContext, Request request, Response response, RoleInfo roleInfo) throws IOException   
+    protected boolean checkUserDataPermissions(String pathInContext, Request request, Response response, Object constraintInfo) throws IOException   
      // check the SecurityHandler code, denying here does not provide authentication
      // - identical with ConstraintSecurityHandler.checkUserDataPermissions implementation of Jetty source distribution
-    {
-        if (roleInfo == null) {
+    { 
+        if (constraintInfo == null)
             return true;
-        }
 
-        if (roleInfo.isForbidden()) {
+        RoleInfo roleInfo = (RoleInfo)constraintInfo;
+        if (roleInfo.isForbidden())
             return false;
-        }
+
 
         UserDataConstraint dataConstraint = roleInfo.getUserDataConstraint();
-        if (dataConstraint == null || dataConstraint == UserDataConstraint.None) {
+        if (dataConstraint == null || dataConstraint == UserDataConstraint.None)
+        {
             return true;
         }
+        AbstractHttpConnection connection = AbstractHttpConnection.getCurrentConnection();
+        Connector connector = connection.getConnector();
 
-        HttpConfiguration httpConfig = HttpChannel.getCurrentHttpChannel().getHttpConfiguration();
-
-        if (dataConstraint == UserDataConstraint.Confidential || dataConstraint == UserDataConstraint.Integral) {
-            if (request.isSecure()) {
+        if (dataConstraint == UserDataConstraint.Integral)
+        {
+            if (connector.isIntegral(request))
                 return true;
-            }
-
-            if (httpConfig.getSecurePort() > 0) {
-                String scheme = httpConfig.getSecureScheme();
-                int port = httpConfig.getSecurePort();
-                String url = ("https".equalsIgnoreCase(scheme) && port == 443)
-                        ? "https://" + request.getServerName() + request.getRequestURI()
-                        : scheme + "://" + request.getServerName() + ":" + port + request.getRequestURI();
-                if (request.getQueryString() != null) {
+            if (connector.getIntegralPort() > 0)
+            {
+                String scheme=connector.getIntegralScheme();
+                int port=connector.getIntegralPort();
+                String url = (HttpSchemes.HTTPS.equalsIgnoreCase(scheme) && port==443)
+                    ? "https://"+request.getServerName()+request.getRequestURI()
+                    : scheme + "://" + request.getServerName() + ":" + port + request.getRequestURI();
+                if (request.getQueryString() != null)
                     url += "?" + request.getQueryString();
-                }
                 response.setContentLength(0);
                 response.sendRedirect(url);
-            } else {
-                response.sendError(HttpStatus.FORBIDDEN_403, "!Secure");
             }
+            else
+                response.sendError(Response.SC_FORBIDDEN,"!Integral");
 
             request.setHandled(true);
             return false;
-        } else {
+        }
+        else if (dataConstraint == UserDataConstraint.Confidential)
+        {
+            if (connector.isConfidential(request))
+                return true;
+
+            if (connector.getConfidentialPort() > 0)
+            {
+                String scheme=connector.getConfidentialScheme();
+                int port=connector.getConfidentialPort();
+                String url = (HttpSchemes.HTTPS.equalsIgnoreCase(scheme) && port==443)
+                    ? "https://"+request.getServerName()+request.getRequestURI()
+                    : scheme + "://" + request.getServerName() + ":" + port + request.getRequestURI();                    
+                if (request.getQueryString() != null)
+                    url += "?" + request.getQueryString();
+                response.setContentLength(0);
+                response.sendRedirect(url);
+            }
+            else
+                response.sendError(Response.SC_FORBIDDEN,"!Confidential");
+
+            request.setHandled(true);
+            return false;
+        }
+        else
+        {
             throw new IllegalArgumentException("Invalid dataConstraint value: " + dataConstraint);
         }
     }        
@@ -171,4 +196,5 @@ public class YaCySecurityHandler extends SecurityHandler {
         }
         return null;
     }
+
 }

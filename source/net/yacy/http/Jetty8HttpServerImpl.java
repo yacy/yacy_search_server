@@ -1,5 +1,5 @@
 //
-//  HttpServer
+//  Jetty8HttpServerImpl
 //  Copyright 2011 by Florian Richter
 //  First released 13.04.2011 at http://yacy.net
 //  
@@ -35,30 +35,30 @@ import net.yacy.search.Switchboard;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 /**
- * class to embedded jetty http server into YaCy
+ * class to embedded Jetty 8 http server into YaCy
  */
-public class HttpServer {
+public class Jetty8HttpServerImpl implements YaCyHttpServer {
 
     private Server server;
 
     /**
      * @param port TCP Port to listen for http requests
      */
-    public HttpServer(int port) {
+    public Jetty8HttpServerImpl(int port) {
         Switchboard sb = Switchboard.getSwitchboard();
         
         server = new Server();
-        ServerConnector connector = new ServerConnector(server);
+        SelectChannelConnector connector = new SelectChannelConnector();
         connector.setPort(port);
         connector.setName("httpd:"+Integer.toString(port));
         //connector.setThreadPool(new QueuedThreadPool(20));
@@ -85,10 +85,11 @@ public class HttpServer {
         // configure root context
         ServletContextHandler htrootContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
         htrootContext.setContextPath("/");  
-        ServletHolder sholder = new ServletHolder(YaCyDefaultServlet.class);
-        sholder.setInitParameter("resourceBase", "htroot");        
+        ServletHolder sholder = new ServletHolder(Jetty8YaCyDefaultServlet.class);
+        sholder.setInitParameter("resourceBase", "htroot");
+        //sholder.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
+        sholder.setInitParameter("gzip","false");
         htrootContext.addServlet(sholder,"/*");    
-        //htrootContext.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
         
         // assemble the servlet handlers
         ContextHandlerCollection servletContext = new ContextHandlerCollection();                
@@ -113,7 +114,7 @@ public class HttpServer {
         allrequesthandlers.addHandler(new DefaultHandler()); // if not handled by other handler 
         
         // wrap all handlers by security handler
-        YaCySecurityHandler securityHandler = new YaCySecurityHandler();
+        Jetty8YaCySecurityHandler securityHandler = new Jetty8YaCySecurityHandler();
         securityHandler.setLoginService(new YaCyLoginService());
         securityHandler.setRealmName("YaCy Admin Interface");
         securityHandler.setHandler(new CrashProtectionHandler(allrequesthandlers));
@@ -124,26 +125,31 @@ public class HttpServer {
     /**
      * start http server
      */
-    public void start() throws Exception {
+    @Override
+    public void startupServer() throws Exception {
         server.start();
     }
 
     /**
      * stop http server and wait for it
      */
+    @Override
     public void stop() throws Exception {
         server.stop();
         server.join();
     }
 
+    @Override
     public void setMaxSessionCount(int maxBusy) {
         // TODO:
     }
 
+    @Override
     public boolean withSSL() {
         return false; // TODO:
     }
 
+    @Override
     public void reconnect(int milsec) {
         try {
             Thread.sleep(milsec);
@@ -161,16 +167,24 @@ public class HttpServer {
         }
     }
 
+    @Override
     public InetSocketAddress generateSocketAddress(String port) throws SocketException {
         return null; // TODO:
     }
 
+    @Override
     public int getMaxSessionCount() {
         return server.getThreadPool().getThreads();
     }
 
+    @Override
     public int getJobCount() {
         return getMaxSessionCount() - server.getThreadPool().getIdleThreads(); // TODO:
+    }
+
+    @Override
+    public String getVersion() {
+        return "Jetty " + server.getVersion();
     }
 
 }

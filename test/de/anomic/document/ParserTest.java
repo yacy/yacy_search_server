@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.AbstractParser;
 
 import net.yacy.document.Document;
@@ -19,7 +20,6 @@ import net.yacy.document.parser.docParser;
 import net.yacy.document.parser.odtParser;
 import net.yacy.document.parser.ooxmlParser;
 import net.yacy.document.parser.pdfParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.junit.Test;
 
@@ -38,7 +38,7 @@ public class ParserTest {
                         final String filename = "test/parsertest/" + testFile[0];
                         final File file = new File(filename);
                         final String mimetype = testFile[1];
-                        final DigestURI url = new DigestURI("http://localhost/"+filename);
+                        final AnchorURL url = new AnchorURL("http://localhost/"+filename);
 
                         AbstractParser p = new ooxmlParser();
                         final Document[] docs = p.parse(url, mimetype, null, new FileInputStream(file));
@@ -72,7 +72,7 @@ public class ParserTest {
                         final String filename = "test/parsertest/" + testFile[0];
                         final File file = new File(filename);
                         final String mimetype = testFile[1];
-                        final DigestURI url = new DigestURI("http://localhost/"+filename);
+                        final AnchorURL url = new AnchorURL("http://localhost/"+filename);
 
                         AbstractParser p = new odtParser();
                         final Document[] docs = p.parse(url, mimetype, null, new FileInputStream(file));
@@ -104,7 +104,7 @@ public class ParserTest {
                         final String filename = "test/parsertest/" + testFile[0];
                         final File file = new File(filename);
                         final String mimetype = testFile[1];
-                        final DigestURI url = new DigestURI("http://localhost/"+filename);
+                        final AnchorURL url = new AnchorURL("http://localhost/"+filename);
 
                         AbstractParser p = new pdfParser();
                         final Document[] docs = p.parse(url, mimetype, null, new FileInputStream(file));
@@ -136,7 +136,7 @@ public class ParserTest {
                         final String filename = "test/parsertest/" + testFile[0];
                         final File file = new File(filename);
                         final String mimetype = testFile[1];
-                        final DigestURI url = new DigestURI("http://localhost/"+filename);
+                        final AnchorURL url = new AnchorURL("http://localhost/"+filename);
 
                         AbstractParser p = new docParser();
                         final Document[] docs = p.parse(url, mimetype, null, new FileInputStream(file));

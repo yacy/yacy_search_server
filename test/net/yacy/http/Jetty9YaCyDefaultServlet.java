@@ -33,11 +33,13 @@ import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -70,18 +72,24 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import org.eclipse.jetty.http.HttpContent;
 import org.eclipse.jetty.http.HttpFields;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.MimeTypes;
+import org.eclipse.jetty.io.WriterOutputStream;
+import org.eclipse.jetty.server.HttpOutput;
+import org.eclipse.jetty.server.InclusiveByteRange;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.util.BufferUtil;
+import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.MultiPartOutputStream;
+import org.eclipse.jetty.util.QuotedStringTokenizer;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
 
 /**
- * YaCyDefaultServlet based on Jetty DefaultServlet.java 
+ * YaCyDefaultServlet base on Jetty DefaultServlet.java 
  * handles static files and the YaCy servlets.
- * 
- * This interface impements the YaCy specific and standard Servlet routines
- * which should not have a dependency on the implemented Jetty version.
- * The Jetty version specific code is moved to the Jetty8HttpServerImpl.java implementation
  */
 
 /**
@@ -97,6 +105,10 @@ import org.eclipse.jetty.util.resource.ResourceFactory;
  *                    welcome file is found. Else 403 Forbidden.
  *  
  *  welcomeFile       name of the welcome file (default is "index.html", "welcome.html")
+ *
+ *  gzip              If set to true, then static content will be served as
+ *                    gzip content encoded if a matching resource is
+ *                    found ending with ".gz"
  *
  *  resourceBase      Set to replace the context resource base
  *
@@ -115,78 +127,17 @@ import org.eclipse.jetty.util.resource.ResourceFactory;
  *
  * </PRE>
  */
-public abstract class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
+public class Jetty9YaCyDefaultServlet extends YaCyDefaultServlet implements ResourceFactory {
 
     private static final long serialVersionUID = 4900000000000001110L;
-    protected ServletContext _servletContext;
-    protected boolean _acceptRanges = true;
-    protected boolean _dirAllowed = true;
-    protected boolean _pathInfoOnly = false;
-    protected boolean _etags = false;
-    protected Resource _resourceBase;
-    protected MimeTypes _mimeTypes;
-    protected String[] _welcomes;    
-    protected String _relativeResourceBase;
-    
-    protected File _htLocalePath;
-    protected File _htDocsPath;    
-    protected static final serverClassLoader provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
-    protected ConcurrentHashMap<File, SoftReference<Method>> templateMethodCache = null;
+
+    private boolean _gzip=true;
 
     /* ------------------------------------------------------------ */
     @Override
     public void init() throws UnavailableException {
-        _htDocsPath = Switchboard.getSwitchboard().htDocsPath;
-        _htLocalePath = Switchboard.getSwitchboard().getDataPath("locale.translated_html", "DATA/LOCALE/htroot");
-        
-        _servletContext = getServletContext();
-
-        _mimeTypes = new MimeTypes(); 
-        String tmpstr = this.getServletContext().getInitParameter("welcomeFile");
-        if (tmpstr == null) { 
-            _welcomes = new String[]{"index.html", "welcome.html"}; // set a default welcome file name
-        } else {
-            _welcomes = new String[]{tmpstr,"index.html"};
-        }
-        _acceptRanges = getInitBoolean("acceptRanges", _acceptRanges);
-        _dirAllowed = getInitBoolean("dirAllowed", _dirAllowed);
-        _pathInfoOnly = getInitBoolean("pathInfoOnly", _pathInfoOnly);
-
-        _relativeResourceBase = getInitParameter("relativeResourceBase");
-
-        String rb = getInitParameter("resourceBase");
-        if (rb != null) {
-            if (_relativeResourceBase != null) {
-                throw new UnavailableException("resourceBase & relativeResourceBase");
-            }
-            try {
-                _resourceBase = Resource.newResource(rb);
-            } catch (Exception e) {
-                ConcurrentLog.logException(e);
-                throw new UnavailableException(e.toString());
-            }
-        }
-
-        _etags = getInitBoolean("etags", _etags);
-
-        if (ConcurrentLog.isFine("YaCyDefaultServlet")) {
-            ConcurrentLog.fine("YaCyDefaultServlet","resource base = " + _resourceBase);
-        }
-        templateMethodCache = new ConcurrentHashMap<File, SoftReference<Method>>();
-    }
-
-
-    /* ------------------------------------------------------------ */
-    protected boolean getInitBoolean(String name, boolean dft) {
-        String value = getInitParameter(name);
-        if (value == null || value.length() == 0) {
-            return dft;
-        }
-        return (value.startsWith("t")
-                || value.startsWith("T")
-                || value.startsWith("y")
-                || value.startsWith("Y")
-                || value.startsWith("1"));
+        super.init();
+        _gzip=getInitBoolean("gzip",_gzip);
     }
 
     /* ------------------------------------------------------------ */
@@ -258,14 +209,12 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
         Resource resource = null;
         HttpContent content = null;
         try {
-            String pathofClass = null;
-
             // Look for a class resource
             boolean hasClass = false;
             if (reqRanges == null && !endsWithSlash) {
                 final int p = pathInContext.lastIndexOf('.');
                 if (p >= 0) {
-                    pathofClass = pathInContext.substring(0, p) + ".class";
+                    String pathofClass = pathInContext.substring(0, p) + ".class";
                     resource = getResource(pathofClass);
                     // Does a class resource exist?
                     if (resource != null && resource.exists() && !resource.isDirectory()) {
@@ -273,9 +222,29 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
                     }
                 }
             }
-
+            // is gzip enabled?
+            String pathInContextGz=null;
+            boolean gzip=false;
+            if (!included.booleanValue() && _gzip && reqRanges==null && !endsWithSlash )
+            {
+                // Look for a gzip resource
+                pathInContextGz=pathInContext+".gz";                
+                resource=getResource(pathInContextGz);
+                // Does a gzip resource exist?
+                if (resource!=null && resource.exists() && !resource.isDirectory())
+                {
+                    // Tell caches that response may vary by accept-encoding
+                    response.addHeader(HttpHeader.VARY.asString(),HttpHeader.ACCEPT_ENCODING.asString());
+                    
+                    // Does the client accept gzip?
+                    String accept=request.getHeader(HttpHeader.ACCEPT_ENCODING.asString());
+                    if (accept!=null && accept.indexOf("gzip")>=0)
+                        gzip=true;
+                }
+            }
+            
             // find resource
-            resource = getResource(pathInContext);
+            if (!gzip) resource = getResource(pathInContext);
 
             if (ConcurrentLog.isFine("YaCyDefaultServlet")) {
                 ConcurrentLog.fine("YaCyDefaultServlet","uri=" + request.getRequestURI() + " resource=" + resource + (content != null ? " content" : ""));
@@ -305,6 +274,14 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
                         handleTemplate(pathInfo, request, response);
                     } else {
                         if (included.booleanValue() || passConditionalHeaders(request, response, resource, content)) {
+                            //sendData(request, response, included.booleanValue(), resource, content, reqRanges);
+                            if (gzip) {
+                                response.setHeader(HttpHeader.CONTENT_ENCODING.asString(), "gzip");
+                                String mt = _servletContext.getMimeType(pathInContext);
+                                if (mt != null) {
+                                    response.setContentType(mt);
+                                }
+                            }
                             sendData(request, response, included.booleanValue(), resource, content, reqRanges);
                         }
                     }
@@ -349,12 +326,13 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
             if (content != null) {
                 content.release();
             } else if (resource != null) {
-                resource.release();
+                resource.close();
             }
         }
     }
 
     /* ------------------------------------------------------------ */
+    @Override
     protected boolean hasDefinedRange(Enumeration<String> reqRanges) {
         return (reqRanges != null && reqRanges.hasMoreElements());
     }
@@ -367,50 +345,110 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
     }
 
     /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @see javax.servlet.http.HttpServlet#doTrace(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
-    @Override
-    protected void doTrace(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-    }
-
-    /* ------------------------------------------------------------ */
-    @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        resp.setHeader("Allow", "GET,HEAD,POST,OPTIONS");
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Finds a matching welcome file for the supplied path. 
-     * The filename to look is set as servlet context init parameter 
-     * default is "index.html"
-     * @param path in context
-     * @return The path of the matching welcome file in context or null.
-     */
-    protected String getWelcomeFile(String pathInContext) {
-        if (_welcomes == null) {
-            return null;
-        }
-
-        for (int i = 0; i < _welcomes.length; i++) {
-            String welcome_in_context = URIUtil.addPaths(pathInContext, _welcomes[i]);
-            Resource welcome = getResource(welcome_in_context);
-            if (welcome != null && welcome.exists()) {
-                return _welcomes[i];
-            }
-        }
-        return null;
-    } 
-    /* ------------------------------------------------------------ */
     /* Check modification date headers.
      */
-    abstract protected boolean passConditionalHeaders(HttpServletRequest request, HttpServletResponse response, Resource resource, HttpContent content)
-            throws IOException;
+    @Override
+    protected boolean passConditionalHeaders(HttpServletRequest request, HttpServletResponse response, Resource resource, HttpContent content)
+            throws IOException {
+        try {
+            if (!HttpMethod.HEAD.is(request.getMethod())) {
+                if (_etags) {
+                    String ifm = request.getHeader(HttpHeader.IF_MATCH.asString());
+                    if (ifm != null) {
+                        boolean match = false;
+                        if (content.getETag() != null) {
+                            QuotedStringTokenizer quoted = new QuotedStringTokenizer(ifm, ", ", false, true);
+                            while (!match && quoted.hasMoreTokens()) {
+                                String tag = quoted.nextToken();
+                                if (content.getETag().toString().equals(tag)) {
+                                    match = true;
+                                }
+                            }
+                        }
+
+                        if (!match) {
+                            response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+                            return false;
+                        }
+                    }
+
+                    String if_non_match_etag = request.getHeader(HttpHeader.IF_NONE_MATCH.asString());
+                    if (if_non_match_etag != null && content.getETag() != null) {
+                        // Look for GzipFiltered version of etag
+                        if (content.getETag().toString().equals(request.getAttribute("o.e.j.s.GzipFilter.ETag"))) {
+                            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                            response.setHeader(HeaderFramework.ETAG, if_non_match_etag);
+                            return false;
+                        }
+
+                        // Handle special case of exact match.
+                        if (content.getETag().toString().equals(if_non_match_etag)) {
+                            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                            response.setHeader(HeaderFramework.ETAG, content.getETag());
+                            return false;
+                        }
+
+                        // Handle list of tags
+                        QuotedStringTokenizer quoted = new QuotedStringTokenizer(if_non_match_etag, ", ", false, true);
+                        while (quoted.hasMoreTokens()) {
+                            String tag = quoted.nextToken();
+                            if (content.getETag().toString().equals(tag)) {
+                                response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                                response.setHeader(HeaderFramework.ETAG, content.getETag());
+                                return false;
+                            }
+                        }
+
+                        // If etag requires content to be served, then do not check if-modified-since
+                        return true;
+                    }
+                }
+
+                // Handle if modified since
+                String ifms = request.getHeader(HttpHeader.IF_MODIFIED_SINCE.asString());
+                if (ifms != null) {
+                    //Get jetty's Response impl
+                    String mdlm = content.getLastModified();
+                    if (mdlm != null && ifms.equals(mdlm)) {
+                        response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                        if (_etags) {
+                            response.setHeader(HeaderFramework.ETAG, content.getETag());
+                        }
+                        response.flushBuffer();
+                        return false;
+                    }
+
+                    long ifmsl = request.getDateHeader(HttpHeader.IF_MODIFIED_SINCE.asString());
+                    if (ifmsl != -1 && resource.lastModified() / 1000 <= ifmsl / 1000) {
+                        response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                        if (_etags) {
+                            response.setHeader(HeaderFramework.ETAG, content.getETag());
+                        }
+                        response.flushBuffer();
+                        return false;
+                    }
+                }
+
+                // Parse the if[un]modified dates and compare to resource
+                long date = request.getDateHeader(HttpHeader.IF_UNMODIFIED_SINCE.asString());
+                if (date != -1 && resource.lastModified() / 1000 > date / 1000) {
+                    response.sendError(HttpServletResponse.SC_PRECONDITION_FAILED);
+                    return false;
+                }
+
+            }
+        } catch (IllegalArgumentException iae) {
+            if (!response.isCommitted()) {
+                response.sendError(400, iae.getMessage());
+            }
+            throw iae;
+        }
+        return true;
+    }
+
 
     /* ------------------------------------------------------------------- */
+    @Override
     protected void sendDirectory(HttpServletRequest request,
             HttpServletResponse response,
             Resource resource,
@@ -438,132 +476,233 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
     }
 
     /* ------------------------------------------------------------ */
-    abstract protected void sendData(HttpServletRequest request,
+    @Override
+    protected void sendData(HttpServletRequest request,
             HttpServletResponse response,
             boolean include,
             Resource resource,
             HttpContent content,
             Enumeration<String> reqRanges)
-            throws IOException;
+            throws IOException {
+        final long content_length = (content == null) ? resource.length() : content.getContentLength();
 
-    /* ------------------------------------------------------------ */
-    abstract protected void writeHeaders(HttpServletResponse response, HttpContent content, long count);
-
-    /* ------------------------------------------------------------ */
-    protected void writeOptionHeaders(HttpFields fields) {
-        if (_acceptRanges) {
-            fields.put(HeaderFramework.ACCEPT_RANGES, "bytes");
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    protected void writeOptionHeaders(HttpServletResponse response) {
-        if (_acceptRanges) {
-            response.setHeader(HeaderFramework.ACCEPT_RANGES, "bytes");
-        }
-    }
-
-
-    protected Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        return rewriteMethod(targetClass).invoke(null, new Object[]{request, args, Switchboard.getSwitchboard()}); // add switchboard
-    }
-
-    protected RequestHeader generateLegacyRequestHeader(HttpServletRequest request, String target, String targetExt) {
-        RequestHeader legacyRequestHeader = new RequestHeader();
-        @SuppressWarnings("unchecked")
-        Enumeration<String> headers = request.getHeaderNames();
-        while (headers.hasMoreElements()) {
-            String headerName = headers.nextElement();
-            @SuppressWarnings("unchecked")
-            Enumeration<String> header = request.getHeaders(headerName);
-            while (header.hasMoreElements()) {
-                legacyRequestHeader.add(headerName, header.nextElement());
-            }
-        }
-
-        legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, request.getRemoteAddr());
-        legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target);
-        legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, targetExt);
-
-        return legacyRequestHeader;
-    }
-
-    /**
-     * Returns a path to the localized or default file according to the
-     * parameter localeSelection
-     *
-     * @param path relative from htroot
-     * @param localeSelection language of localized file; locale.language from
-     * switchboard is used if localeSelection.equals("")
-     */
-    public File getLocalizedFile(final String path, final String localeSelection) throws IOException {
-        if (!(localeSelection.equals("default"))) {
-            final File localePath = new File(_htLocalePath, localeSelection + '/' + path);
-            if (localePath.exists()) {
-                return localePath;  // avoid "NoSuchFile" troubles if the "localeSelection" is misspelled
-            }
-        }
-
-        File docsPath = new File(_htDocsPath, path);
-        if (docsPath.exists()) {
-            return docsPath;
-        }
-        return _resourceBase.addPath(path).getFile();
-    }
-
-    protected File rewriteClassFile(final File template) {
+        // Get the output stream (or writer)
+        OutputStream out = null;
+        boolean written;
         try {
-            String f = template.getCanonicalPath();
-            final int p = f.lastIndexOf('.');
-            if (p < 0) {
-                return null;
-            }
-            f = f.substring(0, p) + ".class";
-            final File cf = new File(f);
-            if (cf.exists()) {
-                return cf;
-            }
-            return null;
-        } catch (final IOException e) {
-            return null;
-        }
-    }
+            out = response.getOutputStream();
 
-    protected Method rewriteMethod(final File classFile) throws InvocationTargetException {
-        Method m = null;
-        // now make a class out of the stream
-        try {
-            final SoftReference<Method> ref = templateMethodCache.get(classFile);
-            if (ref != null) {
-                m = ref.get();
-                if (m == null) {
-                    templateMethodCache.remove(classFile);
+            // has a filter already written to the response?
+            written = out instanceof HttpOutput
+                    ? ((HttpOutput) out).isWritten()
+                    : true;
+        } catch (IllegalStateException e) {
+            out = new WriterOutputStream(response.getWriter());
+            written = true; // there may be data in writer buffer, so assume written
+        }
+
+        if (reqRanges == null || !reqRanges.hasMoreElements() || content_length < 0) {
+            //  if there were no ranges, send entire entity
+            if (include) {
+                resource.writeTo(out, 0, content_length);
+            } // else if we can't do a bypass write because of wrapping
+            else if (content == null || written || !(out instanceof HttpOutput)) {
+                // write normally
+                writeHeaders(response, content, written ? -1 : content_length);
+                ByteBuffer buffer = (content == null) ? null : content.getIndirectBuffer();
+                if (buffer != null) {
+                    BufferUtil.writeTo(buffer, out);
                 } else {
-                    return m;
+                    resource.writeTo(out, 0, content_length);
+                }
+            } // else do a bypass write
+            else {
+                // write the headers
+                if (response instanceof Response) {
+                    Response r = (Response) response;
+                    writeOptionHeaders(r.getHttpFields());
+                    r.setHeaders(content);
+                } else {
+                    writeHeaders(response, content, content_length);
+                }
+
+                // write the content asynchronously if supported
+                if (request.isAsyncSupported()) {
+                    final AsyncContext context = request.startAsync();
+
+                    ((HttpOutput) out).sendContent(content, new Callback() {
+                        @Override
+                        public void succeeded() {
+                            context.complete();
+                        }
+
+                        @Override
+                        public void failed(Throwable x) {
+                            ConcurrentLog.logException(x);
+                            context.complete();
+                        }
+                    });
+                } // otherwise write content blocking
+                else {
+                    ((HttpOutput) out).sendContent(content);
+                }
+            }
+        } else {
+            // Parse the satisfiable ranges
+            List<InclusiveByteRange> ranges = InclusiveByteRange.satisfiableRanges(reqRanges, content_length);
+
+            //  if there are no satisfiable ranges, send 416 response
+            if (ranges == null || ranges.size() == 0) {
+                writeHeaders(response, content, content_length);
+                response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+                response.setHeader(HeaderFramework.CONTENT_RANGE,
+                        InclusiveByteRange.to416HeaderRangeString(content_length));
+                resource.writeTo(out, 0, content_length);
+                return;
+            }
+
+            //  if there is only a single valid range (must be satisfiable
+            //  since were here now), send that range with a 216 response
+            if (ranges.size() == 1) {
+                InclusiveByteRange singleSatisfiableRange = ranges.get(0);
+                long singleLength = singleSatisfiableRange.getSize(content_length);
+                writeHeaders(response, content, singleLength);
+                response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+                response.setHeader(HeaderFramework.CONTENT_RANGE,
+                        singleSatisfiableRange.toHeaderRangeString(content_length));
+                resource.writeTo(out, singleSatisfiableRange.getFirst(content_length), singleLength);
+                return;
+            }
+
+            //  multiple non-overlapping valid ranges cause a multipart
+            //  216 response which does not require an overall
+            //  content-length header
+            //
+            writeHeaders(response, content, -1);
+            String mimetype = (content == null || content.getContentType() == null ? null : content.getContentType().toString());
+            if (mimetype == null) {
+                ConcurrentLog.warn("YaCyDefaultServlet", "Unknown mimetype for " + request.getRequestURI());
+            }
+            MultiPartOutputStream multi = new MultiPartOutputStream(out);
+            response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+
+            // If the request has a "Request-Range" header then we need to
+            // send an old style multipart/x-byteranges Content-Type. This
+            // keeps Netscape and acrobat happy. This is what Apache does.
+            String ctp;
+            if (request.getHeader(HttpHeader.REQUEST_RANGE.asString()) != null) {
+                ctp = "multipart/x-byteranges; boundary=";
+            } else {
+                ctp = "multipart/byteranges; boundary=";
+            }
+            response.setContentType(ctp + multi.getBoundary());
+
+            InputStream in = resource.getInputStream();
+            long pos = 0;
+
+            // calculate the content-length
+            int length = 0;
+            String[] header = new String[ranges.size()];
+            for (int i = 0; i < ranges.size(); i++) {
+                InclusiveByteRange ibr = ranges.get(i);
+                header[i] = ibr.toHeaderRangeString(content_length);
+                length +=
+                        ((i > 0) ? 2 : 0)
+                        + 2 + multi.getBoundary().length() + 2
+                        + (mimetype == null ? 0 : HeaderFramework.CONTENT_TYPE.length() + 2 + mimetype.length()) + 2
+                        + HeaderFramework.CONTENT_RANGE.length() + 2 + header[i].length() + 2
+                        + 2
+                        + (ibr.getLast(content_length) - ibr.getFirst(content_length)) + 1;
+            }
+            length += 2 + 2 + multi.getBoundary().length() + 2 + 2;
+            response.setContentLength(length);
+
+            for (int i = 0; i < ranges.size(); i++) {
+                InclusiveByteRange ibr = ranges.get(i);
+                multi.startPart(mimetype, new String[]{HeaderFramework.CONTENT_RANGE + ": " + header[i]});
+
+                long start = ibr.getFirst(content_length);
+                long size = ibr.getSize(content_length);
+                if (in != null) {
+                    // Handle non cached resource
+                    if (start < pos) {
+                        in.close();
+                        in = resource.getInputStream();
+                        pos = 0;
+                    }
+                    if (pos < start) {
+                        in.skip(start - pos);
+                        pos = start;
+                    }
+
+                    FileUtils.copy(in, multi, size);
+                    pos += size;
+                } else // Handle cached resource
+                {
+                    (resource).writeTo(multi, start, size);
+                }
+
+            }
+            if (in != null) {
+                in.close();
+            }
+            multi.close();
+        }        
+    }
+
+    /* ------------------------------------------------------------ */
+    @Override
+    protected void writeHeaders(HttpServletResponse response, HttpContent content, long count) {
+        if (content.getContentType() != null && response.getContentType() == null) {
+            response.setContentType(content.getContentType().toString());
+        }
+
+        if (response instanceof Response) {
+            Response r = (Response) response;
+            HttpFields fields = r.getHttpFields();
+
+            if (content.getLastModified() != null) {
+                fields.put(HeaderFramework.LAST_MODIFIED, content.getLastModified());
+            } else if (content.getResource() != null) {
+                long lml = content.getResource().lastModified();
+                if (lml != -1) {
+                    fields.putDateField(HeaderFramework.LAST_MODIFIED, lml);
                 }
             }
 
-            final Class<?> c = provider.loadClass(classFile);           
-            final Class<?>[] params = new Class[]{
-                RequestHeader.class,
-                serverObjects.class,
-                serverSwitch.class};
-            m = c.getMethod("respond", params);
+            if (count != -1) {
+                r.setLongContentLength(count);
+            }
 
-            // store the method into the cache
-            templateMethodCache.put(classFile, new SoftReference<Method>(m));
+            writeOptionHeaders(fields);
 
-        } catch (final ClassNotFoundException e) {
-            ConcurrentLog.severe("TemplateHandler", "class " + classFile + " is missing:" + e.getMessage());
-            throw new InvocationTargetException(e, "class " + classFile + " is missing:" + e.getMessage());
-        } catch (final NoSuchMethodException e) {
-            ConcurrentLog.severe("TemplateHandler", "method 'respond' not found in class " + classFile + ": " + e.getMessage());
-            throw new InvocationTargetException(e, "method 'respond' not found in class " + classFile + ": " + e.getMessage());
+            if (_etags) {
+                fields.put(HeaderFramework.ETAG, content.getETag());
+            }
+        } else {
+            long lml = content.getResource().lastModified();
+            if (lml >= 0) {
+                response.setDateHeader(HeaderFramework.LAST_MODIFIED, lml);
+            }
+
+            if (count != -1) {
+                if (count < Integer.MAX_VALUE) {
+                    response.setContentLength((int) count);
+                } else {
+                    response.setHeader(HeaderFramework.CONTENT_LENGTH, Long.toString(count));
+                }
+            }
+
+            writeOptionHeaders(response);
+
+            if (_etags) {
+                response.setHeader(HeaderFramework.ETAG, content.getETag().toString());
+            }
         }
-        return m;
     }
 
-    protected void handleTemplate(String target,  HttpServletRequest request,
+     @Override
+    public void handleTemplate(String target,  HttpServletRequest request,
             HttpServletResponse response) throws IOException, ServletException {
         Switchboard sb = Switchboard.getSwitchboard();
 
@@ -731,6 +870,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
     }
 	
     // parse SSI line and include resource
+    @Override
     protected void parseSSI(final net.yacy.cora.util.ByteBuffer in, final int off, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (in.startsWith("<!--#include virtual=\"".getBytes(), off)) {
             final int q = in.indexOf("\"".getBytes(), off + 22);
@@ -756,7 +896,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
      * @param request
      * @param args found fields/values are added to the map
      */
-    protected void parseMultipart(HttpServletRequest request, serverObjects args) {
+    public void parseMultipart(HttpServletRequest request, serverObjects args) {
         DiskFileItemFactory factory = new DiskFileItemFactory();
         // maximum size that will be stored in memory
         factory.setSizeThreshold(4096 * 16);

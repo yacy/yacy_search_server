@@ -4,8 +4,7 @@ import static org.junit.Assert.*;
 
 import java.net.MalformedURLException;
 import java.util.TreeSet;
-
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.id.MultiProtocolURL;
 
 import org.junit.Test;
 
@@ -23,10 +22,10 @@ public class MultiProtocolURITest {
 		TreeSet<String> idNames = new TreeSet<String>();
 		idNames.add("phpsessionid");
 
-		MultiProtocolURI.initSessionIDNames(idNames);
+		MultiProtocolURL.initSessionIDNames(idNames);
 
 		for (int i=0; i<testURIs.length; i++) {
-			MultiProtocolURI uri = new MultiProtocolURI(testURIs[i][0]);
+			MultiProtocolURL uri = new MultiProtocolURL(testURIs[i][0]);
     
    			assertEquals(uri.toNormalform(true, true), testURIs[i][1]);
 		}

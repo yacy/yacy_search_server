@@ -38,12 +38,11 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.Translator;
 import net.yacy.data.WorkTables;
-import net.yacy.http.HttpServer;
+import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.HTTPDFileHandler;
@@ -132,7 +131,7 @@ public class ConfigBasic {
         final boolean reconnect;
         if (!(env.getConfigLong("port", port) == port) || env.getConfigBool("server.https", false) != ssl) {
             // validate port
-            final HttpServer theServerCore =  env.getHttpServer();
+            final YaCyHttpServer theServerCore =  env.getHttpServer();
             env.setConfig("port", port);
             env.setConfig("server.https", ssl);
 

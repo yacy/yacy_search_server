@@ -22,8 +22,9 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package net.yacy;
+package net.yacy.http;
 
+import net.yacy.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -53,7 +54,6 @@ import net.yacy.data.Translator;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
 import net.yacy.http.YaCyHttpServer;
-import net.yacy.http.Jetty8HttpServerImpl;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
@@ -65,7 +65,11 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
 import com.google.common.io.Files;
+import net.yacy.http.Jetty9HttpServerImpl;
+import net.yacy.migration;
+
 import net.yacy.server.serverCore;
+
 
 
 /**
@@ -104,7 +108,7 @@ import net.yacy.server.serverCore;
 * </ul>
 */
 
-public final class yacy {
+public final class YacyMain {
 
     // static objects
     public static final String vString = yacyBuildProperties.getVersion();
@@ -332,7 +336,7 @@ public final class yacy {
             try {
 
             	// start jetty http server
-            	YaCyHttpServer httpServer = new Jetty8HttpServerImpl(port);
+            	YaCyHttpServer httpServer = new Jetty9HttpServerImpl(port);
             	httpServer.startupServer();
                 sb.setHttpServer(httpServer);
                 ConcurrentLog.info("STARTUP",httpServer.getVersion());
@@ -661,7 +665,6 @@ public final class yacy {
     	}
     }
 }
-
 /**
 * This class is a helper class whose instance is started, when the java virtual
 * machine shuts down. Signals the plasmaSwitchboard to shut down.
