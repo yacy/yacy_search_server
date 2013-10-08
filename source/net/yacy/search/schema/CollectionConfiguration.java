@@ -211,10 +211,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // path elements of link
         String filename = digestURL.getFileName();
         String extension = MultiProtocolURL.getFileExtension(filename);
+        String filenameStub = filename.toLowerCase().endsWith("." + extension) ? filename.substring(0, filename.length() - extension.length() - 1) : filename;
         if (allAttr || contains(CollectionSchema.url_chars_i)) add(doc, CollectionSchema.url_chars_i, us.length());
         if (allAttr || contains(CollectionSchema.url_protocol_s)) add(doc, CollectionSchema.url_protocol_s, digestURL.getProtocol());
         if (allAttr || contains(CollectionSchema.url_paths_sxt)) add(doc, CollectionSchema.url_paths_sxt, digestURL.getPaths());
-        if (allAttr || contains(CollectionSchema.url_file_name_s)) add(doc, CollectionSchema.url_file_name_s, filename.toLowerCase().endsWith("." + extension) ? filename.substring(0, filename.length() - extension.length() - 1) : filename);
+        if (allAttr || contains(CollectionSchema.url_file_name_s)) add(doc, CollectionSchema.url_file_name_s, filenameStub);
+        if (allAttr || contains(CollectionSchema.url_file_name_tokens_t)) add(doc, CollectionSchema.url_file_name_tokens_t, MultiProtocolURL.toTokens(filenameStub));
         if (allAttr || contains(CollectionSchema.url_file_ext_s)) add(doc, CollectionSchema.url_file_ext_s, extension);
         if (allAttr || contains(CollectionSchema.content_type)) add(doc, CollectionSchema.content_type, Response.doctype2mime(extension, doctype));
         

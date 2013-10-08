@@ -159,6 +159,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     
     url_protocol_s(SolrType.string, true, true, false, false, false, "the protocol of the url"),
     url_file_name_s(SolrType.string, true, true, false, false, true, "the file name (which is the string after the last '/' and before the query part from '?' on) without the file extension"),
+    url_file_name_tokens_t(SolrType.text_general, true, true, false, false, true, "tokens generated from url_file_name_s which can be used for better matching and result boosting"),
     url_file_ext_s(SolrType.string, true, true, false, false, true, "the file name extension"),
     url_paths_sxt(SolrType.string, true, true, true, false, true, "all path elements in the url hpath (see: http://www.ietf.org/rfc/rfc1738.txt) without the file name"),
     url_parameter_i(SolrType.num_integer, true, true, false, false, false, "number of key-value pairs in search part of the url"),
@@ -198,6 +199,9 @@ public enum CollectionSchema implements SchemaDeclaration {
     cr_host_count_i(SolrType.num_integer, true, true, false, false, false, "the number of documents within a single host"),
     cr_host_chance_d(SolrType.num_double, true, true, false, false, false, "the chance to click on this page when randomly clicking on links within on one host"),
     cr_host_norm_i(SolrType.num_integer, true, true, false, false, false, "normalization of chance: 0 for lower halve of cr_host_count_i urls, 1 for 1/2 of the remaining and so on. the maximum number is 10"),
+    
+    // custom rating; values to influence the ranking in combination with boost rules
+    rating_i(SolrType.num_integer, true, true, false, false, false, "custom rating; to be set with external rating information"),
     
     // special values; can only be used if '_val' type is defined in schema file; this is not standard
     bold_val(SolrType.num_integer, true, true, true, false, false, "number of occurrences of texts in bold_txt"),
