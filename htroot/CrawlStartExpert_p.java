@@ -112,7 +112,7 @@ public class CrawlStartExpert_p {
             }
             // try to guess mode
             if (!hasMode) {
-                if (prop.getBoolean("has_crawlingURL")) {
+                if (prop.getBoolean("has_url")) {
                     prop.put("crawlingMode_url", "1");
                 } else if (prop.getBoolean("has_sitemapURL")) {
                     prop.put("crawlingMode_sitemap", "1");
