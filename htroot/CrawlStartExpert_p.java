@@ -466,7 +466,7 @@ public class CrawlStartExpert_p {
         
         // Policy for usage of Web Cache
         if (post != null && post.containsKey("cachePolicy")) {
-            final String cachePolicy = post.get("chachePolicy", "");
+            final String cachePolicy = post.get("cachePolicy", "");
             if (cachePolicy.equalsIgnoreCase("nocache")) {
                 prop.put("cachePolicy_nocache", "1");
             } else if (cachePolicy.equalsIgnoreCase("ifexist")) {
