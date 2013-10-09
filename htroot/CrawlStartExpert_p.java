@@ -56,7 +56,7 @@ public class CrawlStartExpert_p {
             prop.put("starturl", crawlingURL);
             // simple check for content since it may be empty
             if (!crawlingURL.trim().isEmpty()) {
-                prop.put("has_url", "1");
+                prop.put("has_url", 1);
             }
         } else {
             prop.put("starturl", "");
@@ -68,7 +68,7 @@ public class CrawlStartExpert_p {
             prop.put("sitemapURL", sitemapURL);
             // simple check for content since it may be empty
             if (!sitemapURL.trim().isEmpty()) {
-                prop.put("has_sitemapURL", "1");            
+                prop.put("has_sitemapURL", 1);
             }
         } else {
             prop.put("sitemapURL", "");
@@ -80,7 +80,7 @@ public class CrawlStartExpert_p {
             prop.put("crawlingFile", crawlingFile);
             // simple check for content since it may be empty
             if (!crawlingFile.trim().isEmpty()) {
-                prop.put("has_crawlingFile", "1");            
+                prop.put("has_crawlingFile", 1);
             }
         } else {
             prop.put("crawlingFile", "");
@@ -93,38 +93,38 @@ public class CrawlStartExpert_p {
             if (crawlingMode.equalsIgnoreCase("sitelist")
                     && prop.getBoolean("has_url")) {
                 // sitelist needs "crawlingURL" parameter, checked already
-                prop.put("crawlingMode_sitelist", "1");
+                prop.put("crawlingMode_sitelist", 1);
                 hasMode = true;
             } else if (crawlingMode.equalsIgnoreCase("sitemap")
                     && prop.getBoolean("has_sitemapURL")) {
                 // sitemap needs "sitemapURL" parameter, checked already
-                prop.put("crawlingMode_sitemap", "1");
+                prop.put("crawlingMode_sitemap", 1);
                 hasMode = true;
             } else if (crawlingMode.equalsIgnoreCase("file")
                     && prop.getBoolean("has_crawlingFile")) {
                 // sitemap needs "crawlingFile" parameter, checked already
-                prop.put("crawlingMode_file", "1");
+                prop.put("crawlingMode_file", 1);
                 hasMode = true;
             } else if (crawlingMode.equalsIgnoreCase("url")
                     && prop.getBoolean("has_crawlingURL")) {
-                prop.put("crawlingMode_url", "1");
+                prop.put("crawlingMode_url", 1);
                 hasMode = true;
             }
             // try to guess mode
             if (!hasMode) {
                 if (prop.getBoolean("has_url")) {
-                    prop.put("crawlingMode_url", "1");
+                    prop.put("crawlingMode_url", 1);
                 } else if (prop.getBoolean("has_sitemapURL")) {
-                    prop.put("crawlingMode_sitemap", "1");
+                    prop.put("crawlingMode_sitemap", 1);
                 } else if (prop.getBoolean("has_crawlingFile")) {
-                    prop.put("crawlingMode_file", "1");
+                    prop.put("crawlingMode_file", 1);
                 } else {
-                    prop.put("crawlingMode_url", "1");
+                    prop.put("crawlingMode_url", 1);
                 }
             }
         } else {
             // default to URL
-            prop.put("crawlingMode_url", "1");
+            prop.put("crawlingMode_url", 1);
         }
 
 
@@ -156,10 +156,10 @@ public class CrawlStartExpert_p {
         // linked non-parseable documents?
         if (post == null) {
             prop.put("directDocByURLChecked",
-                    sb.getConfigBool("crawlingDirectDocByURL", true) ? "1" : "0");
+                    sb.getConfigBool("crawlingDirectDocByURL", true) ? 1 : 0);
         } else {
             prop.put("directDocByURLChecked",
-                    post.getBoolean("directDocByURL") ? "1" : "0");
+                    post.getBoolean("directDocByURL") ? 1 : 0);
         }
 
         // Unlimited crawl depth for URLs matching with
@@ -173,10 +173,10 @@ public class CrawlStartExpert_p {
         // Limit by maximum Pages per Domain?
         if (post == null) {
             prop.put("crawlingDomMaxCheck",
-                    (crawlingDomMaxPages == -1) ? "0" : "1");
+                    (crawlingDomMaxPages == -1) ? 0 : 1);
         } else {
             prop.put("crawlingDomMaxCheck",
-                    post.getBoolean("crawlingDomMaxCheck") ? "1" : "0");
+                    post.getBoolean("crawlingDomMaxCheck") ? 1 : 0);
         }
 
         // Maximum Pages per Domain
@@ -196,27 +196,27 @@ public class CrawlStartExpert_p {
         // Obey html-robots-noindex?
         if (post == null) {
             prop.put("crawlingQChecked",
-                    env.getConfigBool("crawlingQ", true) ? "1" : "0");
+                    env.getConfigBool("crawlingQ", true) ? 1 : 0);
             prop.put("obeyHtmlRobotsNoindexChecked",
-                    env.getConfigBool("obeyHtmlRobotsNoindex", true) ? "1" : "0");
+                    env.getConfigBool("obeyHtmlRobotsNoindex", true) ? 1 : 0);
         } else {
-            prop.put("crawlingQChecked", post.getBoolean("crawlingQ") ? "1" : "0");
+            prop.put("crawlingQChecked", post.getBoolean("crawlingQ") ? 1 : 0);
             prop.put("obeyHtmlRobotsNoindexChecked",
-                    post.getBoolean("obeyHtmlRobotsNoindex") ? "1" : "0");
+                    post.getBoolean("obeyHtmlRobotsNoindex") ? 1 : 0);
         }
 
         // Load Filter on URLs (range)
         if (post != null && post.containsKey("range")) {
             final String range = post.get("range", "");
             if (range.equalsIgnoreCase("domain")) {
-                prop.put("range_domain", "1");
+                prop.put("range_domain", 1);
             } else if (range.equalsIgnoreCase("subpath")) {
-                prop.put("range_subpath", "1");
+                prop.put("range_subpath", 1);
             } else if (range.equalsIgnoreCase("wide")) {
-                prop.put("range_wide", "1");
+                prop.put("range_wide", 1);
             }
         } else {
-            prop.put("range_wide", "1");
+            prop.put("range_wide", 1);
         }
 
         // Load Filter on URLs: must match
@@ -252,10 +252,10 @@ public class CrawlStartExpert_p {
         // Use Country Codes Match-List?
         if (post == null) {
             // use the default that was set in the original template
-            prop.put("countryMustMatchSwitchChecked", "0");
+            prop.put("countryMustMatchSwitchChecked", 0);
         } else {
             prop.put("countryMustMatchSwitchChecked",
-                    post.getBoolean("countryMustMatchSwitch") ? "1" : "0");
+                    post.getBoolean("countryMustMatchSwitch") ? 1 : 0);
         }
 
         // Must-Match List for Country Codes
@@ -301,7 +301,7 @@ public class CrawlStartExpert_p {
 
         // ---------- Clean-Up before Crawl Start
         // delete if older settings: number value
-        prop.put("deleteIfOlderSelect", "1");
+        prop.put("deleteIfOlderSelect", 1);
         for (int i=0; i<13; i++) {
             prop.put("deleteIfOlderSelect_list_"+i+"_name", Integer.toString(i));
         }
@@ -315,29 +315,29 @@ public class CrawlStartExpert_p {
             final Integer olderNumber = post.getInt("deleteIfOlderNumber", -1);
             if (olderNumber >0 && olderNumber <= 12) {
                 prop.put("deleteIfOlderSelect_list_" + olderNumber +
-                        "_default", "1");
+                        "_default", 1);
             } else {
                 switch (olderNumber) {
                     case 21:
-                        prop.put("deleteIfOlderSelect_list_14_default", "1");
+                        prop.put("deleteIfOlderSelect_list_14_default", 1);
                         break;
                     case 28:
-                        prop.put("deleteIfOlderSelect_list_15_default", "1");
+                        prop.put("deleteIfOlderSelect_list_15_default", 1);
                         break;
                     case 30:
-                        prop.put("deleteIfOlderSelect_list_16_default", "1");
+                        prop.put("deleteIfOlderSelect_list_16_default", 1);
                         break;
                     default:
-                        prop.put("deleteIfOlderSelect_list_13_default", "1");
+                        prop.put("deleteIfOlderSelect_list_13_default", 1);
                         break;
                 }
             }
         } else {
-            prop.put("deleteIfOlderSelect_list_13_default", "1");
+            prop.put("deleteIfOlderSelect_list_13_default", 1);
         }
 
         // delete if older settings: number unit
-        prop.put("deleteIfOlderUnitSelect", "1");
+        prop.put("deleteIfOlderUnitSelect", 1);
         prop.put("deleteIfOlderUnitSelect_list_0_name", "years");
         prop.put("deleteIfOlderUnitSelect_list_0_value", "year");
         prop.put("deleteIfOlderUnitSelect_list_1_name", "months");
@@ -351,36 +351,36 @@ public class CrawlStartExpert_p {
         if (post != null && post.containsKey("deleteIfOlderUnit")) {
             final String olderUnit = post.get("deleteIfOlderUnit", "");
             if (olderUnit.equalsIgnoreCase("year")) {
-                prop.put("deleteIfOlderUnitSelect_list_0_default", "1");
+                prop.put("deleteIfOlderUnitSelect_list_0_default", 1);
             } else if (olderUnit.equalsIgnoreCase("month")) {
-                prop.put("deleteIfOlderUnitSelect_list_1_default", "1");
+                prop.put("deleteIfOlderUnitSelect_list_1_default", 1);
             } else if (olderUnit.equalsIgnoreCase("hour")) {
-                prop.put("deleteIfOlderUnitSelect_list_3_default", "1");
+                prop.put("deleteIfOlderUnitSelect_list_3_default", 1);
             } else {
-                prop.put("deleteIfOlderUnitSelect_list_2_default", "1");
+                prop.put("deleteIfOlderUnitSelect_list_2_default", 1);
             }
         } else {
-            prop.put("deleteIfOlderUnitSelect_list_2_default", "1");
+            prop.put("deleteIfOlderUnitSelect_list_2_default", 1);
         }
 
         // delete any document before the crawl is started?
         if (post != null && post.containsKey("deleteold")) {
             final String deleteold = post.get("deleteold", "");
             if (deleteold.equalsIgnoreCase("on")){
-                prop.put("deleteold_on", "1");
+                prop.put("deleteold_on", 1);
             } else if (deleteold.equalsIgnoreCase("age")) {
-                prop.put("deleteold_age", "1");
+                prop.put("deleteold_age", 1);
             } else {
-                prop.put("deleteold_off", "1");
+                prop.put("deleteold_off", 1);
             }
         } else {
-            prop.put("deleteold_off", "1");
+            prop.put("deleteold_off", 1);
         }
 
 
         // ---------- Double-Check Rules
         // reload settings: number value
-        prop.put("reloadIfOlderSelect", "1");
+        prop.put("reloadIfOlderSelect", 1);
         for (int i=0; i<13; i++) {
             prop.put("reloadIfOlderSelect_list_"+i+"_name", Integer.toString(i));
         }
@@ -394,29 +394,29 @@ public class CrawlStartExpert_p {
             final Integer olderNumber = post.getInt("reloadIfOlderNumber", -1);
             if (olderNumber >0 && olderNumber <= 12) {
                 prop.put("reloadIfOlderSelect_list_" + olderNumber +
-                        "_default", "1");
+                        "_default", 1);
             } else {
                 switch (olderNumber) {
                     case 21:
-                        prop.put("reloadIfOlderSelect_list_14_default", "1");
+                        prop.put("reloadIfOlderSelect_list_14_default", 1);
                         break;
                     case 28:
-                        prop.put("reloadIfOlderSelect_list_15_default", "1");
+                        prop.put("reloadIfOlderSelect_list_15_default", 1);
                         break;
                     case 30:
-                        prop.put("reloadIfOlderSelect_list_16_default", "1");
+                        prop.put("reloadIfOlderSelect_list_16_default", 1);
                         break;
                     default:
-                        prop.put("reloadIfOlderSelect_list_13_default", "1");
+                        prop.put("reloadIfOlderSelect_list_13_default", 1);
                         break;
                 }
             }
         } else {
-            prop.put("reloadIfOlderSelect_list_13_default", "1");
+            prop.put("reloadIfOlderSelect_list_13_default", 1);
         }
 
         // reload settings: number unit
-        prop.put("reloadIfOlderUnitSelect", "1");
+        prop.put("reloadIfOlderUnitSelect", 1);
         prop.put("reloadIfOlderUnitSelect_list_0_name", "years");
         prop.put("reloadIfOlderUnitSelect_list_0_value", "year");
         prop.put("reloadIfOlderUnitSelect_list_1_name", "months");
@@ -430,27 +430,27 @@ public class CrawlStartExpert_p {
         if (post != null && post.containsKey("reloadIfOlderUnit")) {
             final String olderUnit = post.get("reloadIfOlderUnit", "");
             if (olderUnit.equalsIgnoreCase("year")) {
-                prop.put("reloadIfOlderUnitSelect_list_0_default", "1");
+                prop.put("reloadIfOlderUnitSelect_list_0_default", 1);
             } else if (olderUnit.equalsIgnoreCase("month")) {
-                prop.put("reloadIfOlderUnitSelect_list_1_default", "1");
+                prop.put("reloadIfOlderUnitSelect_list_1_default", 1);
             } else if (olderUnit.equalsIgnoreCase("hour")) {
-                prop.put("reloadIfOlderUnitSelect_list_3_default", "1");
+                prop.put("reloadIfOlderUnitSelect_list_3_default", 1);
             } else {
-                prop.put("reloadIfOlderUnitSelect_list_2_default", "1");
+                prop.put("reloadIfOlderUnitSelect_list_2_default", 1);
             }
         } else {
-            prop.put("reloadIfOlderUnitSelect_list_2_default", "1");
+            prop.put("reloadIfOlderUnitSelect_list_2_default", 1);
         }
 
         if (post != null && post.containsKey("recrawl")) {
             final String recrawl = post.get("recrawl", "");
             if (recrawl.equalsIgnoreCase("reload")) {
-                prop.put("recrawl_reload", "1");
+                prop.put("recrawl_reload", 1);
             } else {
-                prop.put("recrawl_nodoubles", "1");
+                prop.put("recrawl_nodoubles", 1);
             }
         } else {
-            prop.put("recrawl_nodoubles", "1");
+            prop.put("recrawl_nodoubles", 1);
         }
 
 
@@ -458,26 +458,26 @@ public class CrawlStartExpert_p {
         // Store to Web Cache?
         if (post == null) {
             prop.put("storeHTCacheChecked",
-                    env.getConfigBool("storeHTCache", true) ? "1" : "0");
+                    env.getConfigBool("storeHTCache", true) ? 1 : 0);
         } else {
             prop.put("storeHTCacheChecked",
-                    post.getBoolean("storeHTCache") ? "1" : "0");
+                    post.getBoolean("storeHTCache") ? 1 : 0);
         }
         
         // Policy for usage of Web Cache
         if (post != null && post.containsKey("cachePolicy")) {
             final String cachePolicy = post.get("cachePolicy", "");
             if (cachePolicy.equalsIgnoreCase("nocache")) {
-                prop.put("cachePolicy_nocache", "1");
+                prop.put("cachePolicy_nocache", 1);
             } else if (cachePolicy.equalsIgnoreCase("ifexist")) {
-                prop.put("cachePolicy_ifexist", "1");
+                prop.put("cachePolicy_ifexist", 1);
             } else if (cachePolicy.equalsIgnoreCase("cacheonly")) {
-                prop.put("cachePolicy_cacheonly", "1");
+                prop.put("cachePolicy_cacheonly", 1);
             } else {
-                prop.put("cachePolicy_iffresh", "1");
+                prop.put("cachePolicy_iffresh", 1);
             }
         } else {
-            prop.put("cachePolicy_iffresh", "1");
+            prop.put("cachePolicy_iffresh", 1);
         }
 
 
@@ -511,22 +511,22 @@ public class CrawlStartExpert_p {
         if (post == null) {
             // Local index text?
             prop.put("indexingTextChecked",
-                    env.getConfigBool("indexText", true) ? "1" : "0");
+                    env.getConfigBool("indexText", true) ? 1 : 0);
             // Local index media?
             prop.put("indexingMediaChecked",
-                    env.getConfigBool("indexMedia", true) ? "1" : "0");
+                    env.getConfigBool("indexMedia", true) ? 1 : 0);
             // Do Remote Indexing?
             prop.put("crawlOrderChecked",
-                    env.getConfigBool("crawlOrder", true) ? "1" : "0");
+                    env.getConfigBool("crawlOrder", true) ? 1 : 0);
             // Remote crawl intention
             prop.put("intention", "");
         } else {
             prop.put("indexingTextChecked",
-                    post.getBoolean("indexText") ? "1" : "0");
+                    post.getBoolean("indexText") ? 1 : 0);
             prop.put("indexingMediaChecked",
-                    post.getBoolean("indexMedia") ? "1" : "0");
+                    post.getBoolean("indexMedia") ? 1 : 0);
             prop.put("crawlOrderChecked",
-                    post.getBoolean("crawlOrder") ? "1" : "0");
+                    post.getBoolean("crawlOrder") ? 1 : 0);
             prop.put("intention", post.get("intention", ""));
         }
 
