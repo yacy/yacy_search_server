@@ -60,6 +60,7 @@ import net.yacy.cora.util.ConcurrentLog;
 import com.google.common.net.InetAddresses;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.google.common.util.concurrent.TimeLimiter;
+import com.google.common.util.concurrent.UncheckedTimeoutException;
 
 public class Domains {
     
@@ -776,7 +777,7 @@ public class Domains {
                         ip = null;
                     }
                 }
-                if (ip == null) {
+                if (ip == null) try {
                     ip = timeLimiter.callWithTimeout(new Callable<InetAddress>() {
                         @Override
                         public InetAddress call() throws Exception {
@@ -784,6 +785,10 @@ public class Domains {
                         }
                     }, 3000L, TimeUnit.MILLISECONDS, false);
                     //ip = TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
+                } catch (final UncheckedTimeoutException e) {
+                	// in case of a timeout - maybe cause of massive requests - do not fill NAME_CACHE_MISS
+                	LOOKUP_SYNC.remove(host);
+                    return null;
                 }
                 //.out.println("DNSLOOKUP-*LOOKUP* " + host + ", time = " + (System.currentTimeMillis() - t) + "ms");
             } catch (final Throwable e) {

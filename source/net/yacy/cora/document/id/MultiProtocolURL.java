@@ -836,7 +836,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      * resulting words are not ordered by appearance, but all
      * @return
      */
-    private static String toTokens(final String s) {
+    public static String toTokens(final String s) {
         // remove all non-character & non-number
         final StringBuilder sb = new StringBuilder(s.length());
         char c;
@@ -854,18 +854,18 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         // split the string into tokens and add all camel-case splitting
         final String[] u = CommonPattern.SPACE.split(t);
         final Set<String> token = new LinkedHashSet<String>();
-        for (final String r: u) {
-            token.addAll(parseCamelCase(r));
-        }
+        for (final String r: u) token.add(r);
+        for (final String r: u) token.addAll(parseCamelCase(r));
 
         // construct a String again
-        for (final String v: token) if (v.length() > 1) t += ' ' + v;
-        return t;
+        sb.setLength(0);
+        for (final String v: token) if (v.length() > 1) sb.append(v).append(' ');
+        return sb.length() == 0 ? "" : sb.substring(0, sb.length() - 1);
     }
 
     public static enum CharType { low, high, number; }
 
-    public static Set<String> parseCamelCase(String s) {
+    private static Set<String> parseCamelCase(String s) {
         final Set<String> token = new LinkedHashSet<String>();
         if (s.isEmpty()) return token;
         int p = 0;

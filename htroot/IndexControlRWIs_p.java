@@ -34,6 +34,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -627,7 +628,7 @@ public class IndexControlRWIs_p {
                 filter,
                 false,
                 null,
-                DigestURL.TLD_any_zone_filter,
+                MultiProtocolURL.TLD_any_zone_filter,
                 "", 
                 false,
                 sb.index,

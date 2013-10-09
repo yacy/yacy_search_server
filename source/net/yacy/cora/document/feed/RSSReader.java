@@ -185,7 +185,7 @@ public class RSSReader extends DefaultHandler {
             }
             this.item = new RSSMessage();
             this.parsingItem = true;
-        } else if (this.parsingItem && this.type == Type.atom && "link".equals(tag) && (atts.getValue("type") == null || atts.getValue("type").startsWith("text"))) {
+        } else if (this.parsingItem && this.type == Type.atom && "link".equals(tag) && (atts.getValue("type") == null || this.item.getLink().length() == 0 || atts.getValue("type").startsWith("text") || atts.getValue("type").equals("application/xhtml+xml"))) {
             final String url = atts.getValue("href");
             if (url != null && url.length() > 0) this.item.setValue(Token.link, url);
         } else if ("image".equals(tag) || (this.parsingItem && this.type == Type.atom && "link".equals(tag) && (atts.getValue("type") == null || atts.getValue("type").startsWith("image")))) {
