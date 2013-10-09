@@ -7,6 +7,10 @@
     <script type="text/javascript" src="/js/IndexCreate.js"></script>
     <script type="text/javascript">
         //<![CDATA[
+        /**
+         * Set the state of all elements based on other elements state.
+         * @param {String} cId id of the element that had changed it's state
+         */
         function setStates(cId) {
             // order matters!
             // crawl start points
@@ -90,38 +94,78 @@
             }
         }
 
+        /** 
+         * Disable element if value matches val.
+         * @param {String} id element id
+         * @param {String} val value to comapre to elements value */
+        function disableIf(id, val) {
+            var e = $('#'+id);
+            if (e.val() === val) {
+                e.disable();
+            }
+        }
+
         $(document).ready(function() {
             (function($) {
+                /** Disable a form element. */
                 $.fn.disable = function() {
                     return this.each(function() {
                         $(this).prop('disabled', true);
                     });
                 };
-            })(jQuery);
 
-            (function($) {
+                /** Enable a form element. */
                 $.fn.enable = function() {
                     return this.each(function() {
                         $(this).prop('disabled', false);
                     });
                 };
-            })(jQuery);
 
-            (function($) {
+                /** Set checked state for checkoxes/radio buttons. */
                 $.fn.check = function() {
                     return this.each(function() {
                         $(this).attr("checked", "checked").prop("checked", true);
                     });
                 };
-            })(jQuery);
 
-            (function($) {
+                /** Unset checked state for checkoxes/radio buttons. */
                 $.fn.uncheck = function() {
                     return this.each(function() {
                         $(this).removeAttr("checked").prop("checked", false);
                     });
                 };
             })(jQuery);
+
+            /**
+             * On form submission remove text fields with default values as they
+             * are set to those by yacy values by yacy, if missing.
+             * @param {eventObject} ev */
+            $('#Crawler').on('submit', function(ev){
+                var defaultMatchAll = "#[matchAllStr]#";
+                var defaultMatchNone = "#[matchNoneStr]#";
+
+                // remove empty textfields
+                disableIf('crawlingDepthExtension', '');
+                disableIf('intention', '');
+
+                // remove if MATCH_NEVER_STRING
+                disableIf('mustnotmatch', defaultMatchNone);
+                disableIf('ipMustnotmatch', defaultMatchNone);
+                disableIf('indexmustnotmatch', defaultMatchNone);
+                disableIf('indexcontentmustnotmatch', defaultMatchNone);
+
+                // remove if MATCH_ALL_STRING
+                disableIf('mustmatch', defaultMatchAll);
+                disableIf('ipMustmatch', defaultMatchAll);
+                disableIf('indexmustmatch', defaultMatchAll);
+                disableIf('indexcontentmustmatch', defaultMatchAll);
+
+                // remove default collection name
+                disableIf('collection', '#[defaultCollection]#');
+
+                console.log("POST: "+$(this).serialize());
+                return false;
+            });
 
             // add event handlers to all checkoxes & radio buttons
             $(document).on('change', 'input:checkbox,input:radio', function() {

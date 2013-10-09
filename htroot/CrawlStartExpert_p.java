@@ -42,6 +42,12 @@ public class CrawlStartExpert_p {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
+        final String defaultCollection = "user";
+
+        // javascript values
+        prop.put("matchAllStr", CrawlProfile.MATCH_ALL_STRING);
+        prop.put("matchNoneStr", CrawlProfile.MATCH_NEVER_STRING);
+        prop.put("defaultCollection", defaultCollection);
 
         // ---------- Start point
         // crawl start URL
@@ -534,7 +540,7 @@ public class CrawlStartExpert_p {
             if (post != null && post.containsKey("collection")) {
                 prop.put("collection", post.get("collection", ""));
             } else {
-                prop.put("collection", collectionEnabled ? "user" : "");
+                prop.put("collection", collectionEnabled ? defaultCollection : "");
             }
         }
 
