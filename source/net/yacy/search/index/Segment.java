@@ -424,6 +424,7 @@ public class Segment {
         try {
             return (int) this.fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.text_t.getSolrFieldName() + ":\"" + word + "\"");
         } catch (final Throwable e) {
+            ConcurrentLog.warn("Segment", "problem with word guess for word: " + word);
             ConcurrentLog.logException(e);
             return 0;
         }

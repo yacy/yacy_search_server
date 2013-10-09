@@ -44,18 +44,28 @@ public class DidYouMean {
         '\u00e8','\u00e9','\u00ea','\u00eb','\u00ec','\u00ed','\u00ee','\u00ef',
         '\u00f0','\u00f1','\u00f2','\u00f3','\u00f4','\u00f5','\u00f6',
         '\u00f8','\u00f9','\u00fa','\u00fb','\u00fc','\u00fd','\u00fe','\u00ff'};
-    private static final char[] ALPHABET_KANJI = new char[512];
+    private static final char[] ALPHABET_KANJI = new char[512]; // \u3400-\u34ff + \u4e00-\u4eff
+    private static final char[] ALPHABET_HIRAGANA = new char[96]; // \u3040-\u309F
+    private static final char[] ALPHABET_KATAKANA = new char[96]; // \u30A0-\u30FF
+    private static final char[] ALPHABET_CJK_UNIFIED_IDEOGRAPHS_Part1 = new char[5376]; // \u4E00-\u62FF
+    private static final char[] ALPHABET_CJK_UNIFIED_IDEOGRAPHS_Part2 = new char[5376]; // \u6300-\u77FF
+    private static final char[] ALPHABET_CJK_UNIFIED_IDEOGRAPHS_Part3 = new char[5376]; // \u7800-\u8CFF
+    private static final char[] ALPHABET_CJK_UNIFIED_IDEOGRAPHS_Part4 = new char[4864]; // \u8D00-\u9FFF
     static {
         // this is very experimental: a very small subset of Kanji
-        for (char a = '\u3400'; a <= '\u34ff'; a++) {
-            ALPHABET_KANJI[0xff & (a - '\u3400')] = a;
-        }
-        for (char a = '\u4e00'; a <= '\u4eff'; a++) {
-            ALPHABET_KANJI[0xff & (a - '\u4e00') + 256] = a;
-        }
+        for (char a = '\u3400'; a <= '\u34ff'; a++) ALPHABET_KANJI[0xff & (a - '\u3400')] = a;
+        for (char a = '\u4e00'; a <= '\u4eff'; a++) ALPHABET_KANJI[0xff & (a - '\u4e00') + 256] = a;
+        for (char a = '\u3040'; a <= '\u309F'; a++) ALPHABET_HIRAGANA[0xff & (a - '\u3040')] = a;
+        for (char a = '\u30A0'; a <= '\u30FF'; a++) ALPHABET_KATAKANA[0xff & (a - '\u30A0')] = a;
+        for (char a = '\u4E00'; a <= '\u62FF'; a++) ALPHABET_CJK_UNIFIED_IDEOGRAPHS_Part1[0xff & (a - '\u4E00')] = a;
+        for (char a = '\u6300'; a <= '\u77FF'; a++) ALPHABET_CJK_UNIFIED_IDEOGRAPHS_Part2[0xff & (a - '\u6300')] = a;
+        for (char a = '\u7800'; a <= '\u8CFF'; a++) ALPHABET_CJK_UNIFIED_IDEOGRAPHS_Part3[0xff & (a - '\u7800')] = a;
+        for (char a = '\u8D00'; a <= '\u9FFF'; a++) ALPHABET_CJK_UNIFIED_IDEOGRAPHS_Part4[0xff & (a - '\u8D00')] = a;
     }
 
-    private static final char[][] ALPHABETS = {ALPHABET_LATIN, ALPHABET_KANJI};
+    private static final char[][] ALPHABETS = {
+        ALPHABET_LATIN, ALPHABET_KANJI, ALPHABET_HIRAGANA, ALPHABET_KATAKANA,
+        ALPHABET_CJK_UNIFIED_IDEOGRAPHS_Part1, ALPHABET_CJK_UNIFIED_IDEOGRAPHS_Part2, ALPHABET_CJK_UNIFIED_IDEOGRAPHS_Part3, ALPHABET_CJK_UNIFIED_IDEOGRAPHS_Part4};
     private static final StringBuilder POISON_STRING = new StringBuilder("\n");
     public  static final int AVAILABLE_CPU = Runtime.getRuntime().availableProcessors();
     private static final wordLengthComparator WORD_LENGTH_COMPARATOR = new wordLengthComparator();
@@ -92,10 +102,15 @@ public class DidYouMean {
             alphatest: for (final char[] alpha: ALPHABETS) {
                 if (isAlphabet(alpha, testchar)) {
                     this.alphabet = new char[alpha.length];
-                    System.arraycopy(ALPHABET_LATIN, 0, this.alphabet, 0, alpha.length);
+                    System.arraycopy(alpha, 0, this.alphabet, 0, alpha.length);
                     alphafound = true;
                     break alphatest;
                 }
+            }
+            if (!alphafound && testchar < 'A') {
+                this.alphabet = new char[ALPHABET_LATIN.length];
+                System.arraycopy(ALPHABET_LATIN, 0, this.alphabet, 0, ALPHABET_LATIN.length);
+                alphafound = true;
             }
             if (!alphafound) {
                 // generate generic alphabet using simply a character block of 256 characters
