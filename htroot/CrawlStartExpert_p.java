@@ -365,13 +365,13 @@ public class CrawlStartExpert_p {
 
         // delete any document before the crawl is started?
         if (post != null && post.containsKey("deleteold")) {
-            final String deleteold = post.get("deletold", "");
+            final String deleteold = post.get("deleteold", "");
             if (deleteold.equalsIgnoreCase("on")){
-                post.put("deleteold_on", "1");
+                prop.put("deleteold_on", "1");
             } else if (deleteold.equalsIgnoreCase("age")) {
-                post.put("deleteold_age", "1");
+                prop.put("deleteold_age", "1");
             } else {
-                post.put("deleteold_off", "1");
+                prop.put("deleteold_off", "1");
             }
         } else {
             prop.put("deleteold_off", "1");

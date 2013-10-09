@@ -35,14 +35,20 @@
                         $('#rangeSubpath').isChecked()) {
                     // restrict to sub-path / domain
                     $('#mustmatch').disable();
-                    $('#deleteoldoff, #deleteoldage').uncheck();
-                    $('#deleteoldon').check();
+                    // skip these on initial load
+                    if (typeof cId !== 'undefined') {
+                        $('#deleteoldoff, #deleteoldage').uncheck();
+                        $('#deleteoldon').check();
+                    }
                 } else if ($('#rangeWide').isChecked()) {
                     // use Filter
                     $('#mustmatch').enable();
-                    $('#deleteoldon, #deleteoldage').uncheck();
-                    $('#deleteoldoff').check();
-                    if (cId === "rangeWide") { $('#mustmatch').focus(); }
+                    // skip these on initial load
+                    if (typeof cId !== 'undefined') {
+                        $('#deleteoldon, #deleteoldage').uncheck();
+                        $('#deleteoldoff').check();
+                        if (cId === "rangeWide") { $('#mustmatch').focus(); }
+                    }
                 }
             }
 
@@ -499,7 +505,7 @@
 	      </dl>
         </fieldset>
 
-          <dt><input type="submit" name=countryMustMatchSwitch"crawlingstart" value="Start New Crawl Job" class="submitready"/></dt><dd></dd>
+          <dt><input type="submit" name=countryMustdMatchSwitch"crawlingstart" value="Start New Crawl Job" class="submitready"/></dt><dd></dd>
         </dl>
       </fieldset>
     </form>
