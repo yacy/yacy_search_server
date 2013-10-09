@@ -3,11 +3,11 @@
     <type>org.netbeans.modules.ant.freeform</type>
     <configuration>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
-            <name>YaCy-clone</name>
+            <name>YaCy</name>
         </general-data>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/2">
             <!-- Do not use Project Properties customizer when editing this file manually. -->
-            <name>YaCy-clone</name>
+            <name>YaCy</name>
             <properties/>
             <folders>
                 <source-folder>
