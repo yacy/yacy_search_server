@@ -45,7 +45,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     exact_signature_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if exact_signature_l is unique at the time of document creation, used for double-check during search"),
     exact_signature_copycount_i(SolrType.num_integer, true, true, false, false, false, "counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)"),
     fuzzy_signature_l(SolrType.num_long, true, true, false, false, false, "64 bit of the Lookup3Signature from EnhancedTextProfileSignature of text_t"),
-    fuzzy_signature_text_t(SolrType.text_general, true, true, false, false, false, "intermediate data produced in EnhancedTextProfileSignature: a list of word frequencies"),
+    fuzzy_signature_text_t(SolrType.text_general, true, true, false, false, true, "intermediate data produced in EnhancedTextProfileSignature: a list of word frequencies"),
     fuzzy_signature_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if fuzzy_signature_l is unique at the time of document creation, used for double-check during search"),
     fuzzy_signature_copycount_i(SolrType.num_integer, true, true, false, false, false, "counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)"),
     size_i(SolrType.num_integer, true, true, false, false, false, "the size of the raw source"),// int size();
@@ -119,9 +119,11 @@ public enum CollectionSchema implements SchemaDeclaration {
     robots_i(SolrType.num_integer, true, true, false, false, false, "content of <meta name=\"robots\" content=#content#> tag and the \"X-Robots-Tag\" HTTP property"),
     metagenerator_t(SolrType.text_general, true, true, false, false, false, "content of <meta name=\"generator\" content=#content#> tag"),
     inboundlinks_protocol_sxt(SolrType.string, true, true, true, false, false, "internal links, only the protocol"),
-    inboundlinks_urlstub_sxt(SolrType.string, true, true, true, false, false, "internal links, the url only without the protocol"),
+    inboundlinks_urlstub_sxt(SolrType.string, true, true, true, false, true, "internal links, the url only without the protocol"),
+    inboundlinks_anchortext_txt(SolrType.text_general, true, true, true, false, true, "internal links, the visible anchor text"),
     outboundlinks_protocol_sxt(SolrType.string, true, true, true, false, false, "external links, only the protocol"),
-    outboundlinks_urlstub_sxt(SolrType.string, true, true, true, false, false, "external links, the url only without the protocol"),
+    outboundlinks_urlstub_sxt(SolrType.string, true, true, true, false, true, "external links, the url only without the protocol"),
+    outboundlinks_anchortext_txt(SolrType.text_general, true, true, true, false, true, "external links, the visible anchor text"),
     
     images_text_t(SolrType.text_general, true, true, false, false, true, "all text/words appearing in image alt texts or the tokenized url"),
     images_urlstub_sxt(SolrType.string, true, true, true, false, true, "all image links without the protocol and '://'"),
@@ -156,8 +158,9 @@ public enum CollectionSchema implements SchemaDeclaration {
     publisher_url_s(SolrType.string, true, true, false, false, false, "publisher url as defined in http://support.google.com/plus/answer/1713826?hl=de"),
     
     url_protocol_s(SolrType.string, true, true, false, false, false, "the protocol of the url"),
-    url_file_name_s(SolrType.string, true, true, false, false, false, "the file name (which is the string after the last '/' and before the query part from '?' on) without the file extension"),
-    url_file_ext_s(SolrType.string, true, true, false, false, false, "the file name extension"),
+    url_file_name_s(SolrType.string, true, true, false, false, true, "the file name (which is the string after the last '/' and before the query part from '?' on) without the file extension"),
+    url_file_name_tokens_t(SolrType.text_general, true, true, false, false, true, "tokens generated from url_file_name_s which can be used for better matching and result boosting"),
+    url_file_ext_s(SolrType.string, true, true, false, false, true, "the file name extension"),
     url_paths_sxt(SolrType.string, true, true, true, false, true, "all path elements in the url hpath (see: http://www.ietf.org/rfc/rfc1738.txt) without the file name"),
     url_parameter_i(SolrType.num_integer, true, true, false, false, false, "number of key-value pairs in search part of the url"),
     url_parameter_key_sxt(SolrType.string, true, true, true, false, false, "the keys from key-value pairs in the search part of the url"),
@@ -197,6 +200,9 @@ public enum CollectionSchema implements SchemaDeclaration {
     cr_host_chance_d(SolrType.num_double, true, true, false, false, false, "the chance to click on this page when randomly clicking on links within on one host"),
     cr_host_norm_i(SolrType.num_integer, true, true, false, false, false, "normalization of chance: 0 for lower halve of cr_host_count_i urls, 1 for 1/2 of the remaining and so on. the maximum number is 10"),
     
+    // custom rating; values to influence the ranking in combination with boost rules
+    rating_i(SolrType.num_integer, true, true, false, false, false, "custom rating; to be set with external rating information"),
+    
     // special values; can only be used if '_val' type is defined in schema file; this is not standard
     bold_val(SolrType.num_integer, true, true, true, false, false, "number of occurrences of texts in bold_txt"),
     italic_val(SolrType.num_integer, true, true, true, false, false, "number of occurrences of texts in italic_txt"),
@@ -214,7 +220,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     ext_title_txt(SolrType.text_general, true, true, true, false, false, "names matching title expressions"),
     ext_title_val(SolrType.num_integer, true, true, true, false, false, "number of matching title expressions");
 
-    public final static String CORE_NAME = "collection1";
+    public final static String CORE_NAME = "collection1"; // this was the default core name up to Solr 4.4.0. This default name was stored in CoreContainer.DEFAULT_DEFAULT_CORE_NAME but was removed in Solr 4.5.0
     
     public final static String VOCABULARY_PREFIX = "vocabulary_";
     public final static String VOCABULARY_SUFFIX = "_sxt";

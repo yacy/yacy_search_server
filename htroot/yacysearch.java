@@ -45,6 +45,7 @@ import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.opensearch.OpenSearchConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
@@ -658,7 +659,7 @@ public class yacysearch {
                     constraint,
                     true,
                     DigestURL.hosthashess(sb.getConfig("search.excludehosth", "")),
-                    DigestURL.TLD_any_zone_filter,
+                    MultiProtocolURL.TLD_any_zone_filter,
                     client,
                     authenticated,
                     indexSegment,
@@ -669,7 +670,7 @@ public class yacysearch {
                         && sb.peers.mySeed().getFlagAcceptRemoteIndex(),
                     false,
                     lat, lon, rad,
-                    sb.getConfig("search_navigation","").split(","));
+                    sb.getConfig("search.navigation","").split(","));
             EventTracker.delete(EventTracker.EClass.SEARCH);
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
                 theQuery.id(true),

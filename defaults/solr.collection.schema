@@ -242,11 +242,17 @@ inboundlinks_protocol_sxt
 ## internal links, the url only without the protocol
 inboundlinks_urlstub_sxt
 
+## internal links, the visible anchor text
+inboundlinks_anchortext_txt
+
 ## external links, only the protocol
 outboundlinks_protocol_sxt
 
 ## external links, the url only without the protocol
 outboundlinks_urlstub_sxt
+
+## external links, the visible anchor text
+outboundlinks_anchortext_txt
 
 ## all text/words appearing in image alt texts or the tokenized url
 images_text_t
@@ -353,6 +359,9 @@ url_protocol_s
 ## the file name (which is the string after the last '/' and before the query part from '?' on) without the file extension
 url_file_name_s
 
+## tokens generated from url_file_name_s which can be used for better matching and result boosting
+url_file_name_tokens_t
+
 ## the file name extension
 url_file_ext_s
 
@@ -435,7 +444,9 @@ cr_host_chance_d
 
 ## normalization of chance: 0 for lower halve of cr_host_count_i urls, 1 for 1/2 of the remaining and so on. the maximum number is 10
 cr_host_norm_i
-   
+
+## custom rating; to be set with external rating information
+rating_i
 
 ## names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias
 #ext_cms_txt

@@ -81,12 +81,11 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.lucene.util.Version;
-import org.apache.solr.core.CoreContainer;
 
 public final class Fulltext {
 
-    private static final String SOLR_PATH = "solr_44"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
-    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40"};
+    private static final String SOLR_PATH = "solr_45"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
+    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44"};
     
     // class objects
 	private final File                    segmentPath;
@@ -167,7 +166,6 @@ public final class Fulltext {
             File oldLocation = new File(this.segmentPath, oldVersion);
             if (oldLocation.exists()) oldLocation.renameTo(solrLocation);
         }
-        assert CoreContainer.DEFAULT_DEFAULT_CORE_NAME.equals(CollectionSchema.CORE_NAME); // check that solr and we use the same default core name
         
         EmbeddedInstance localCollectionInstance = new EmbeddedInstance(new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"), solrLocation, CollectionSchema.CORE_NAME, new String[]{CollectionSchema.CORE_NAME, WebgraphSchema.CORE_NAME});
         EmbeddedSolrConnector localCollectionConnector = new EmbeddedSolrConnector(localCollectionInstance);

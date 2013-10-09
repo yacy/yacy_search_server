@@ -26,7 +26,6 @@
 
 package net.yacy.search.query;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -132,60 +131,6 @@ public final class QueryParams {
     public int maxfacets;
     private SolrQuery cachedQuery;
     private CollectionConfiguration solrSchema;
-
-    public QueryParams(
-            final String query_original,
-            final String query_words,
-            final int itemsPerPage,
-            final Bitfield constraint,
-            final Segment indexSegment,
-            final RankingProfile ranking,
-            final String userAgent,
-            final String[] search_navigation) {
-        this.queryGoal = new QueryGoal(query_original, query_words);
-    	this.ranking = ranking;
-    	this.modifier = new QueryModifier();
-        this.maxDistance = Integer.MAX_VALUE;
-        this.urlMask = catchall_pattern;
-        this.urlMask_isCatchall = true;
-        this.tld = null;
-        this.inlink = null;
-        this.prefer = matchnothing_pattern;
-        this.contentdom = ContentDomain.ALL;
-        this.itemsPerPage = itemsPerPage;
-        this.offset = 0;
-        this.targetlang = "en";
-        this.metatags = new ArrayList<Tagging.Metatag>(0);
-        this.domType = Searchdom.LOCAL;
-        this.zonecode = DigestURL.TLD_any_zone_filter;
-        this.constraint = constraint;
-        this.allofconstraint = false;
-        this.snippetCacheStrategy = null;
-        this.clienthost = null;
-        this.siteexcludes = null;
-        this.remotepeer = null;
-        this.starttime = Long.valueOf(System.currentTimeMillis());
-        this.maxtime = 10000;
-        this.timeout = this.starttime + this.timeout;
-        this.indexSegment = indexSegment;
-        this.userAgent = userAgent;
-        this.transmitcount = 0;
-        this.filterfailurls = false;
-        this.filterscannerfail = false;
-        this.lat = 0.0d;
-        this.lon = 0.0d;
-        this.radius = 0.0d;
-        this.facetfields = new LinkedHashSet<String>();
-
-        this.solrSchema = indexSegment.fulltext().getDefaultConfiguration();
-        for (String navkey: search_navigation) {
-            CollectionSchema f = defaultfacetfields.get(navkey);
-            if (f != null && solrSchema.contains(f)) facetfields.add(f.getSolrFieldName());
-        }
-        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_SUFFIX);
-        this.maxfacets = defaultmaxfacets;
-        this.cachedQuery = null;
-    }
 
     public QueryParams(
         final QueryGoal queryGoal,
