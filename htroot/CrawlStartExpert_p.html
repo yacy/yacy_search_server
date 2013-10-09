@@ -321,8 +321,8 @@
             Crawls can be restricted to specific countries. This uses the country code that can be computed from
             the IP of the server that hosts the page. The filter is not a regular expressions but a list of country codes, separated by comma.
             </span></span>
-			<input type="radio" name="countryMustMatchSwitch" id="noCountryMustMatchSwitch" value="0" #(countryMustMatchSwitchChecked)#::checked="checked"#(/countryMustMatchSwitchChecked)# />no country code restriction<br />
-			<input type="radio" name="countryMustMatchSwitch" id="countryMustMatchSwitch" value="1" #(countryMustMatchSwitchChecked)#checked="checked"::#(/countryMustMatchSwitchChecked)# />Use filter&nbsp;&nbsp;
+			<input type="radio" name="countryMustMatchSwitch" id="noCountryMustMatchSwitch" value="0" #(countryMustMatchSwitchChecked)#checked="checked"::#(/countryMustMatchSwitchChecked)# />no country code restriction<br />
+			<input type="radio" name="countryMustMatchSwitch" id="countryMustMatchSwitch" value="1" #(countryMustMatchSwitchChecked)#::checked="checked"#(/countryMustMatchSwitchChecked)# />Use filter&nbsp;&nbsp;
 			<input name="countryMustMatchList" id="countryMustMatchList" type="text" size="60" maxlength="256" value="#[countryMustMatch]#" />
 		  </dd>
 	      </dl>
@@ -499,7 +499,7 @@
 	      </dl>
         </fieldset>
 
-          <dt><input type="submit" name="crawlingstart" value="Start New Crawl Job" class="submitready"/></dt><dd></dd>
+          <dt><input type="submit" name=countryMustMatchSwitch"crawlingstart" value="Start New Crawl Job" class="submitready"/></dt><dd></dd>
         </dl>
       </fieldset>
     </form>
