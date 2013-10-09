@@ -14,15 +14,15 @@
         function setStates(cId) {
             // order matters!
             // crawl start points
-            if ($('#url').prop("checked")) {
+            if ($('#url').isChecked()) {
                 $('#crawlingURL').enable();
                 $('#sitemapURL, #crawlingFile').disable();
                 if (cId === "url") { $('#crawlingURL').focus(); }
-            } else if ($('#sitemap').prop("checked")) {
+            } else if ($('#sitemap').isChecked()) {
                 $('#sitemapURL').enable();
                 $('#crawlingURL, #crawlingFile').disable();
                 if (cId === "sitemap") { $('#sitemapURL').focus(); }
-            } else if ($('#file').prop("checked")) {
+            } else if ($('#file').isChecked()) {
                 $('#crawlingFile').enable();
                 $('#crawlingURL, #sitemapURL').disable();
                 if (cId === "file") { $('#crawlingFile').focus(); }
@@ -30,14 +30,14 @@
 
             // Load Filters
             if (cId === "rangeDomain" || cId === "rangeSubpath" ||
-                    cId === "rangeWide") {
-                if ($('#rangeDomain').prop("checked") ||
-                        $('#rangeSubpath').prop("checked")) {
+                    cId === "rangeWide" || typeof cId === 'undefined') {
+                if ($('#rangeDomain').isChecked() ||
+                        $('#rangeSubpath').isChecked()) {
                     // restrict to sub-path / domain
                     $('#mustmatch').disable();
                     $('#deleteoldoff, #deleteoldage').uncheck();
                     $('#deleteoldon').check();
-                } else if ($('#rangeWide').prop("checked")) {
+                } else if ($('#rangeWide').isChecked()) {
                     // use Filter
                     $('#mustmatch').enable();
                     $('#deleteoldon, #deleteoldage').uncheck();
@@ -47,26 +47,26 @@
             }
 
             // crawl start: From File
-            if ($("#sitelist").prop("checked")) {
+            if ($("#sitelist").isChecked()) {
                 $('#rangeDomain').check();
             }
 
             // Delete only old
-            if ($('#deleteoldage').prop("checked")) {
+            if ($('#deleteoldage').isChecked()) {
                 $('#deleteIfOlderNumber, #deleteIfOlderUnit').enable();
             } else {
                 $('#deleteIfOlderNumber, #deleteIfOlderUnit').disable();
             }
 
             // Reload if old
-            if ($('#reloadoldage').prop("checked")) {
+            if ($('#reloadoldage').isChecked()) {
                 $('#reloadIfOlderNumber, #reloadIfOlderUnit').enable();
             } else {
                 $('#reloadIfOlderNumber, #reloadIfOlderUnit').disable();
             }
 
             // Use Must-Match List for Country Codes?
-            if ($('#noCountryMustMatchSwitch').prop("checked")) {
+            if ($('#noCountryMustMatchSwitch').isChecked()) {
                 $('#countryMustMatchList').disable();
             } else {
                 $('#countryMustMatchList').enable();
@@ -76,7 +76,7 @@
             }
 
             // Maximum pages per domain
-            if ($('#crawlingDomMaxCheck').prop("checked")) {
+            if ($('#crawlingDomMaxCheck').isChecked()) {
                 $('#crawlingDomMaxPages').enable();
                 if (cId === "crawlingDomMaxCheck") {
                     $('#crawlingDomMaxPages').focus();
@@ -86,7 +86,7 @@
             }
 
             // Remote crawl
-            if ($('#crawlOrder').prop("checked")) {
+            if ($('#crawlOrder').isChecked()) {
                 $('#intention').enable();
                 if (cId === "crawlOrder") { $('#intention').focus(); }
             } else {
@@ -119,6 +119,11 @@
                     return this.each(function() {
                         $(this).prop('disabled', false);
                     });
+                };
+
+                /** Check DOM & properties if element is checkeds. */
+                $.fn.isChecked = function() {
+                    return $(this).attr("checked") || $(this).prop("checked");
                 };
 
                 /** Set checked state for checkoxes/radio buttons. */
