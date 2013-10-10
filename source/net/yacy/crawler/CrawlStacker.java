@@ -133,7 +133,7 @@ public final class CrawlStacker {
         // this is the method that is called by the busy thread from outside
         if (entry == null) return null;
 
-        // record the link graph for this request
+        // record the link graph for this request; this can be overwritten, replaced and enhanced by an index writing process in Segment.storeDocument
         byte[] anchorhash = entry.url().hash();
         IndexCell<CitationReference> urlCitationIndex = this.indexSegment.urlCitation();
         if (urlCitationIndex != null && entry.referrerhash() != null) try {

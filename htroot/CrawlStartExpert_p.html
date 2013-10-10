@@ -6,9 +6,185 @@
     <script type="text/javascript" src="/js/ajax.js"></script>
     <script type="text/javascript" src="/js/IndexCreate.js"></script>
     <script type="text/javascript">
-        function check(key){
-            document.getElementById(key).checked = 'checked';
+        //<![CDATA[
+        /**
+         * Set the state of all elements based on other elements state.
+         * @param {String} cId id of the element that had changed it's state
+         */
+        function setStates(cId) {
+            // order matters!
+            // crawl start points
+            if ($('#url').isChecked()) {
+                $('#crawlingURL').enable();
+                $('#sitemapURL, #crawlingFile').disable();
+                if (cId === "url") { $('#crawlingURL').focus(); }
+            } else if ($('#sitemap').isChecked()) {
+                $('#sitemapURL').enable();
+                $('#crawlingURL, #crawlingFile').disable();
+                if (cId === "sitemap") { $('#sitemapURL').focus(); }
+            } else if ($('#file').isChecked()) {
+                $('#crawlingFile').enable();
+                $('#crawlingURL, #sitemapURL').disable();
+                if (cId === "file") { $('#crawlingFile').focus(); }
+            }
+
+            // Load Filters
+            if (cId === "rangeDomain" || cId === "rangeSubpath" ||
+                    cId === "rangeWide" || typeof cId === 'undefined') {
+                if ($('#rangeDomain').isChecked() ||
+                        $('#rangeSubpath').isChecked()) {
+                    // restrict to sub-path / domain
+                    $('#mustmatch').disable();
+                    // skip these on initial load
+                    if (typeof cId !== 'undefined') {
+                        $('#deleteoldoff, #deleteoldage').uncheck();
+                        $('#deleteoldon').check();
+                    }
+                } else if ($('#rangeWide').isChecked()) {
+                    // use Filter
+                    $('#mustmatch').enable();
+                    // skip these on initial load
+                    if (typeof cId !== 'undefined') {
+                        $('#deleteoldon, #deleteoldage').uncheck();
+                        $('#deleteoldoff').check();
+                        if (cId === "rangeWide") { $('#mustmatch').focus(); }
+                    }
+                }
+            }
+
+            // crawl start: From File
+            if ($("#sitelist").isChecked()) {
+                $('#rangeDomain').check();
+            }
+
+            // Delete only old
+            if ($('#deleteoldage').isChecked()) {
+                $('#deleteIfOlderNumber, #deleteIfOlderUnit').enable();
+            } else {
+                $('#deleteIfOlderNumber, #deleteIfOlderUnit').disable();
+            }
+
+            // Reload if old
+            if ($('#reloadoldage').isChecked()) {
+                $('#reloadIfOlderNumber, #reloadIfOlderUnit').enable();
+            } else {
+                $('#reloadIfOlderNumber, #reloadIfOlderUnit').disable();
+            }
+
+            // Use Must-Match List for Country Codes?
+            if ($('#noCountryMustMatchSwitch').isChecked()) {
+                $('#countryMustMatchList').disable();
+            } else {
+                $('#countryMustMatchList').enable();
+                if (cId === "countryMustMatchSwitch") {
+                    $('#countryMustMatchList').focus();
+                }
+            }
+
+            // Maximum pages per domain
+            if ($('#crawlingDomMaxCheck').isChecked()) {
+                $('#crawlingDomMaxPages').enable();
+                if (cId === "crawlingDomMaxCheck") {
+                    $('#crawlingDomMaxPages').focus();
+                }
+            } else {
+                $('#crawlingDomMaxPages').disable();
+            }
+
+            // Remote crawl
+            if ($('#crawlOrder').isChecked()) {
+                $('#intention').enable();
+                if (cId === "crawlOrder") { $('#intention').focus(); }
+            } else {
+                $('#intention').disable();
+            }
         }
+
+        /** 
+         * Disable element if value matches val.
+         * @param {String} id element id
+         * @param {String} val value to comapre to elements value */
+        function disableIf(id, val) {
+            var e = $('#'+id);
+            if (e.val() === val) {
+                e.disable();
+            }
+        }
+
+        $(document).ready(function() {
+            (function($) {
+                /** Disable a form element. */
+                $.fn.disable = function() {
+                    return this.each(function() {
+                        $(this).prop('disabled', true);
+                    });
+                };
+
+                /** Enable a form element. */
+                $.fn.enable = function() {
+                    return this.each(function() {
+                        $(this).prop('disabled', false);
+                    });
+                };
+
+                /** Check DOM & properties if element is checkeds. */
+                $.fn.isChecked = function() {
+                    return $(this).attr("checked") || $(this).prop("checked");
+                };
+
+                /** Set checked state for checkoxes/radio buttons. */
+                $.fn.check = function() {
+                    return this.each(function() {
+                        $(this).attr("checked", "checked").prop("checked", true);
+                    });
+                };
+
+                /** Unset checked state for checkoxes/radio buttons. */
+                $.fn.uncheck = function() {
+                    return this.each(function() {
+                        $(this).removeAttr("checked").prop("checked", false);
+                    });
+                };
+            })(jQuery);
+
+            /**
+             * On form submission remove text fields with default values as they
+             * are set to those by yacy values by yacy, if missing.
+             * @param {eventObject} ev */
+            $('#Crawler').on('submit', function(ev){
+                var defaultMatchAll = "#[matchAllStr]#";
+                var defaultMatchNone = "#[matchNoneStr]#";
+
+                // remove empty textfields
+                disableIf('crawlingDepthExtension', '');
+                disableIf('intention', '');
+
+                // remove if MATCH_NEVER_STRING
+                disableIf('mustnotmatch', defaultMatchNone);
+                disableIf('ipMustnotmatch', defaultMatchNone);
+                disableIf('indexmustnotmatch', defaultMatchNone);
+                disableIf('indexcontentmustnotmatch', defaultMatchNone);
+
+                // remove if MATCH_ALL_STRING
+                disableIf('mustmatch', defaultMatchAll);
+                disableIf('ipMustmatch', defaultMatchAll);
+                disableIf('indexmustmatch', defaultMatchAll);
+                disableIf('indexcontentmustmatch', defaultMatchAll);
+
+                // remove default collection name
+                disableIf('collection', '#[defaultCollection]#');
+            });
+
+            // add event handlers to all checkoxes & radio buttons
+            $(document).on('change', 'input:checkbox,input:radio', function() {
+                setStates($(this).attr("id"));
+            });
+
+            // set initial states
+            if ($('#crawlingURL').val() !== '') { changed(); }
+            setStates();
+        });
+        //]]>
     </script>
     <style type="text/css">
     	.nobr {
@@ -50,8 +226,8 @@
             Each of these URLs are the root for a crawl start, existing start URLs are always re-loaded.
             Other already visited URLs are sorted out as "double", if they are not allowed using the re-crawl option.
           </span></span>
-              <input type="radio" align="top" name="crawlingMode" id="url" value="url" checked="checked" />
-              <textarea name="crawlingURL" id="crawlingURL" cols="64" rows="3" size="41" onkeypress="changed()" onfocus="check('url')" >#[starturl]#</textarea>
+              <input type="radio" align="top" name="crawlingMode" id="url" value="url" #(crawlingMode_url)#::checked="checked"#(/crawlingMode_url)# />
+              <textarea name="crawlingURL" id="crawlingURL" cols="64" rows="3" size="41" onkeypress="changed()">#[starturl]#</textarea>
                 &nbsp;
                 <span id="robotsOK"></span>
 	            <span id="title"><br/></span>
@@ -59,20 +235,20 @@
 	        </dd>
 	        <dt></dt>
 	        <dd>
-	          <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="46" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/>
+	          <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="46" maxlength="256" value="#[bookmarkTitle]#" readonly="readonly" style="background:transparent; border:0px"/>
 	        </dd>
 	        <dt>From Link-List of URL</dt>
 	        <dd>
-	          <input type="radio" name="crawlingMode" id="sitelist" value="sitelist" disabled="disabled" onclick="document.getElementById('Crawler').rangeDomain.checked = true;"/><br />
+	          <input type="radio" name="crawlingMode" id="sitelist" value="sitelist" #(has_url)#disabled="disabled"::#(/has_url)# #(crawlingMode_sitelist)#::checked="checked"#(/crawlingMode_sitelist)#/><br />
               <div id="sitelistURLs"></div>
 	        </dd>
 	        <dt>From Sitemap</dt>
 	        <dd>
-	          <input type="radio" name="crawlingMode" id="sitemap" value="sitemap" disabled="disabled"/><input name="sitemapURL" type="text" size="71" maxlength="256" value="" readonly="readonly"/>
+	          <input type="radio" name="crawlingMode" id="sitemap" value="sitemap" #(crawlingMode_sitemap)#::checked="checked"#(/crawlingMode_sitemap)# #(has_sitemapURL)#disabled="disabled"::#(/has_sitemapURL)#/><input name="sitemapURL" id="sitemapURL" type="text" size="71" maxlength="256" value="#[sitemapURL]#"/>
 	        </dd>
 	        <dt>From File (enter a path<br/>within your local file system)</dt>
 	        <dd>
-	          <input type="radio" name="crawlingMode" id="file" value="file" onclick="document.getElementById('Crawler').rangeDomain.checked = true;"/><input type="text" name="crawlingFile" size="71" maxlength="256" onfocus="check('file')"/><!--<input type="file" name="crawlingFile" size="18" onfocus="check('file')"/>-->
+	          <input type="radio" name="crawlingMode" id="file" value="file" #(crawlingMode_file)#::checked="checked"#(/crawlingMode_file)#/><input type="text" name="crawlingFile" id="crawlingFile" value="#[crawlingFile]#" size="71" maxlength="256"/>
 	        </dd>
 	      </dl>
         </fieldset>
@@ -129,10 +305,10 @@
             </span></span>
             <table border="0">
             <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td></td></tr>
-			<tr><td colspan="2"><input type="radio" name="range" id="rangeDomain" value="domain" onclick="document.getElementById('mustmatch').disabled=true;document.getElementById('deleteoldon').disabled=false;document.getElementById('deleteoldage').disabled=false;document.getElementById('deleteoldon').checked=true;"/>Restrict to start domain(s)</td></tr>
-			<tr><td colspan="2"><input type="radio" name="range" id="rangeSubpath" value="subpath" onclick="document.getElementById('mustmatch').disabled=true;document.getElementById('deleteoldon').disabled=false;document.getElementById('deleteoldage').disabled=false;document.getElementById('deleteoldon').checked=true;" />Restrict to sub-path(s)</td></tr>
-			<tr><td><input type="radio" name="range" id="rangeWide" value="wide" checked="checked" onclick="document.getElementById('mustmatch').disabled=false;document.getElementById('deleteoldoff').checked=true;document.getElementById('deleteoldon').disabled=true;document.getElementById('deleteoldage').disabled=true;"/>Use filter</td>
-			<td valign="bottom"><input name="mustmatch" id="mustmatch" type="text" size="55" maxlength="100000" value="#[mustmatch]#" onclick="document.getElementById('deleteoldon').disabled=false;document.getElementById('deleteoldage').disabled=false"/></td></tr>
+			<tr><td colspan="2"><input type="radio" name="range" id="rangeDomain" value="domain" #(range_domain)#::checked="checked"#(/range_domain)#/>Restrict to start domain(s)</td></tr>
+			<tr><td colspan="2"><input type="radio" name="range" id="rangeSubpath" value="subpath" #(range_subpath)#::checked="checked"#(/range_subpath)#/>Restrict to sub-path(s)</td></tr>
+			<tr><td><input type="radio" name="range" id="rangeWide" value="wide" #(range_wide)#::checked="checked"#(/range_wide)#/>Use filter</td>
+			<td valign="bottom"><input name="mustmatch" id="mustmatch" type="text" size="55" maxlength="100000" value="#[mustmatch]#"/></td></tr>
             <tr><td><img src="/env/grafics/minus.gif"> must-not-match</td><td><input name="mustnotmatch" id="mustnotmatch" type="text" size="55" maxlength="100000" value="#[mustnotmatch]#" /></td></tr>
 			</table>
 	        </dd>
@@ -149,8 +325,8 @@
             Crawls can be restricted to specific countries. This uses the country code that can be computed from
             the IP of the server that hosts the page. The filter is not a regular expressions but a list of country codes, separated by comma.
             </span></span>
-			<input type="radio" name="countryMustMatchSwitch" id="countryMustMatchSwitch" value="false" checked="checked" />no country code restriction<br />
-			<input type="radio" name="countryMustMatchSwitch" id="countryMustMatchSwitch" value="true" />Use filter&nbsp;&nbsp;
+			<input type="radio" name="countryMustMatchSwitch" id="noCountryMustMatchSwitch" value="0" #(countryMustMatchSwitchChecked)#checked="checked"::#(/countryMustMatchSwitchChecked)# />no country code restriction<br />
+			<input type="radio" name="countryMustMatchSwitch" id="countryMustMatchSwitch" value="1" #(countryMustMatchSwitchChecked)#::checked="checked"#(/countryMustMatchSwitchChecked)# />Use filter&nbsp;&nbsp;
 			<input name="countryMustMatchList" id="countryMustMatchList" type="text" size="60" maxlength="256" value="#[countryMustMatch]#" />
 		  </dd>
 	      </dl>
@@ -187,25 +363,21 @@
             After a crawl was done in the past, document may become stale and eventually they are also deleted on the target host.
             To remove old files from the search index it is not sufficient to just consider them for re-load but it may be necessary
             to delete them because they simply do not exist any more. Use this in combination with re-crawl while this time should be longer.
-            </span></span><input type="radio" name="deleteold" id="deleteoldoff" value="off" checked="checked"/>Do not delete any document before the crawl is started.</dd>
+            </span></span><input type="radio" name="deleteold" id="deleteoldoff" value="off" #(deleteold_off)#::checked="checked"#(/deleteold_off)#/>Do not delete any document before the crawl is started.</dd>
             <dt>Delete sub-path</dt>
-            <dd><input type="radio" name="deleteold" id="deleteoldon" value="on" disabled="true"/>For each host in the start url list, delete all documents (in the given subpath) from that host.</dd>
+            <dd><input type="radio" name="deleteold" id="deleteoldon" value="on" #(deleteold_on)#::checked="checked"#(/deleteold_on)#/>For each host in the start url list, delete all documents (in the given subpath) from that host.</dd>
 			<dt>Delete only old</dt>
-			<dd><input type="radio" name="deleteold" id="deleteoldage" value="age" disabled="true"/>Treat documents that are loaded
+			<dd><input type="radio" name="deleteold" id="deleteoldage" value="age" #(deleteold_age)#::checked="checked"#(/deleteold_age)#/>Treat documents that are loaded
 			<select name="deleteIfOlderNumber" id="deleteIfOlderNumber">
-              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option><option value="9">9</option><option value="10">10</option>
-              <option value="12">12</option><option value="14" selected="selected">14</option><option value="21">21</option>
-              <option value="28">28</option><option value="30">30</option>
-			</select>
-			<select name="deleteIfOlderUnit" id="deleteIfOlderUnit">
-              <option value="year">years</option>
-              <option value="month">months</option>
-              <option value="day" selected="selected">days</option>
-              <option value="hour">hours</option>
-			</select> ago as stale and delete them before the crawl is started.
+                            #(deleteIfOlderSelect)#::
+                                   #{list}#<option value="#[name]#" #(default)#::selected="selected"#(/default)#>#[name]#</option>#{/list}#
+                            #(/deleteIfOlderSelect)#
+                        </select>
+                        <select name="deleteIfOlderUnit" id="deleteIfOlderUnit">
+                            #(deleteIfOlderUnitSelect)#::
+                                   #{list}#<option value="#[value]#" #(default)#::selected="selected"#(/default)#>#[name]#</option>#{/list}#
+                            #(/deleteIfOlderUnitSelect)#
+                            </select> ago as stale and delete them before the crawl is started.
 			</dd>
 	      </dl>
         </fieldset>
@@ -217,23 +389,19 @@
             A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,
             then the url is treated as double when you check the 'no doubles' option. A url may be loaded again when it has reached a specific age,
             to use that check the 're-load' option.
-            </span></span><input type="radio" name="recrawl" value="nodoubles" checked="checked"/>Never load any page that is already known. Only the start-url may be loaded again.</dd>
+            </span></span><input type="radio" name="recrawl" id="reloadoldoff" value="nodoubles" #(recrawl_nodoubles)#::checked="checked"#(/recrawl_nodoubles)#/>Never load any page that is already known. Only the start-url may be loaded again.</dd>
 			<dt>Re-load</dt>
-			<dd><input type="radio" name="recrawl" value="reload"/>Treat documents that are loaded
-			<select name="reloadIfOlderNumber" id="reloadIfOlderNumber">
-              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-              <option value="7" selected="selected">7</option>
-              <option value="8">8</option><option value="9">9</option><option value="10">10</option>
-              <option value="12">12</option><option value="14">14</option><option value="21">21</option>
-              <option value="28">28</option><option value="30">30</option>
-			</select>
-			<select name="reloadIfOlderUnit" id="reloadIfOlderUnit">
-              <option value="year">years</option>
-              <option value="month">months</option>
-              <option value="day" selected="selected">days</option>
-              <option value="hour">hours</option>
-			</select> ago as stale and load them again. If they are younger, they are ignored.
+			<dd><input type="radio" name="recrawl" id="reloadoldage" value="reload" #(recrawl_reload)#::checked="checked"#(/recrawl_reload)#/>Treat documents that are loaded
+                            <select name="reloadIfOlderNumber" id="reloadIfOlderNumber">
+                            #(reloadIfOlderSelect)#::
+                                   #{list}#<option value="#[name]#" #(default)#::selected="selected"#(/default)#>#[name]#</option>#{/list}#
+                            #(/reloadIfOlderSelect)#
+                            </select>
+                            <select name="reloadIfOlderUnit" id="reloadIfOlderUnit">
+                            #(reloadIfOlderUnitSelect)#::
+                                   #{list}#<option value="#[value]#" #(default)#::selected="selected"#(/default)#>#[name]#</option>#{/list}#
+                            #(/reloadIfOlderUnitSelect)#
+                            </select> ago as stale and load them again. If they are younger, they are ignored.
 			</dd>
 	      </dl>
         </fieldset>
@@ -256,10 +424,10 @@
               <b>if&nbsp;exist</b>: use the cache if the cache exist. Do no check freshness. Otherwise use online source;
               <b>cache&nbsp;only</b>: never go online, use all content from cache. If no cache exist, treat content as unavailable
               </span></span>
-			<input type="radio" name="cachePolicy" value="nocache" />no&nbsp;cache&nbsp;&nbsp;&nbsp;
-			<input type="radio" name="cachePolicy" value="iffresh" checked="checked" />if&nbsp;fresh&nbsp;&nbsp;&nbsp;
-			<input type="radio" name="cachePolicy" value="ifexist" />if&nbsp;exist&nbsp;&nbsp;&nbsp;
-			<input type="radio" name="cachePolicy" value="cacheonly" />cache&nbsp;only
+			<input type="radio" name="cachePolicy" value="nocache" #(cachePolicy_nocache)#::checked="checked"#(/cachePolicy_nocache)#/>no&nbsp;cache&nbsp;&nbsp;&nbsp;
+			<input type="radio" name="cachePolicy" value="iffresh" #(cachePolicy_iffresh)#::checked="checked"#(/cachePolicy_iffresh)# />if&nbsp;fresh&nbsp;&nbsp;&nbsp;
+			<input type="radio" name="cachePolicy" value="ifexist" #(cachePolicy_ifexist)#::checked="checked"#(/cachePolicy_ifexist)#/>if&nbsp;exist&nbsp;&nbsp;&nbsp;
+			<input type="radio" name="cachePolicy" value="cacheonly" #(cachePolicy_cacheonly)#::checked="checked"#(/cachePolicy_cacheonly)#/>cache&nbsp;only
 		  </dd>
 	      </dl>
         </fieldset>
@@ -290,7 +458,7 @@
           <dt>Do Local Indexing</dt>
           <dd>
             <span class="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
-            This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
+            This enables indexing of the webpages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
             Document Cache without indexing.
             </span></span>
             <label for="indexText">index text</label>:
@@ -315,7 +483,7 @@
                 </td>
                 <td>
                   <label for="intention">Describe your intention to start this global crawl (optional)</label>:<br />
-                  <input name="intention" id="intention" type="text" size="40" maxlength="100" value="" /><br />
+                  <input name="intention" id="intention" type="text" size="40" maxlength="100" value="#[intention]#" /><br />
                   This message will appear in the 'Other Peer Crawl Start' table of other peers.
                 </td>
               </tr>
@@ -335,7 +503,7 @@
 	      </dl>
         </fieldset>
 
-          <dt><input type="submit" name="crawlingstart" value="Start New Crawl Job" class="submitready"/></dt><dd></dd>
+          <dt><input type="hidden" name="crawlingstart" value="1"/><input type="submit" value="Start New Crawl Job" class="submitready"/></dt><dd></dd>
         </dl>
       </fieldset>
     </form>

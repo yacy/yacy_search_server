@@ -962,20 +962,20 @@ search.ranking.rwi.profile =
 # The field boostfunctionmode can be either 'add' or 'multiply' to describe the mode.
 # All boost methods > 0 must have names to be able to select this name with a query, with the syntax /name
 search.ranking.solr.collection.boostname.tmpa.0=Default Profile
-search.ranking.solr.collection.boostfields.tmpa.0=url_paths_sxt^1000.0,synonyms_sxt^1.0,title^10000.0,text_t^2.0,h1_txt^1000.0,h2_txt^100.0,host_organization_s^100000.0
-search.ranking.solr.collection.boostquery.tmpa.0=fuzzy_signature_unique_b:true^100000.0
-search.ranking.solr.collection.boostfunction.tmpb.0=scale(cr_host_norm_i,1,20)
+search.ranking.solr.collection.boostfields.tmpa.0=url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,host_s^6.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^3.0
+search.ranking.solr.collection.boostquery.tmpa.0=clickdepth_i:0^0.8 clickdepth_i:1^0.4
+search.ranking.solr.collection.boostfunction.tmpb.0=
 search.ranking.solr.collection.boostname.tmpa.1=Date Profile: sort by date in descending order for a '/data' usage
 search.ranking.solr.collection.boostfields.tmpa.1=text_t^1.0
-search.ranking.solr.collection.boostquery.tmpa.1=fuzzy_signature_unique_b:true^100000.0
+search.ranking.solr.collection.boostquery.tmpa.1=clickdepth_i:0^0.8 clickdepth_i:1^0.4
 search.ranking.solr.collection.boostfunction.tmpb.1=recip(rord(last_modified),1,1000,1000)
 search.ranking.solr.collection.boostname.tmpa.2=Intranet Profile: when a search is done on a singe domain only, i.e. if a site:-operator is used
-search.ranking.solr.collection.boostfields.tmpa.2=url_paths_sxt^1000.0,synonyms_sxt^1.0,title^10000.0,text_t^2.0,h1_txt^1000.0,h2_txt^100.0
-search.ranking.solr.collection.boostquery.tmpa.2=fuzzy_signature_unique_b:true^100000.0
-search.ranking.solr.collection.boostfunction.tmpb.2=scale(cr_host_norm_i,1,20)
+search.ranking.solr.collection.boostfields.tmpa.2=url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^3.0,h3_txt^2.0
+search.ranking.solr.collection.boostquery.tmpa.2=fuzzy_signature_unique_b:true^10.0
+search.ranking.solr.collection.boostfunction.tmpb.2=
 search.ranking.solr.collection.boostname.tmpa.3=_unused3
 search.ranking.solr.collection.boostfields.tmpa.3=text_t^1.0
-search.ranking.solr.collection.boostquery.tmpa.3=fuzzy_signature_unique_b:true^100000.0
+search.ranking.solr.collection.boostquery.tmpa.3=clickdepth_i:0^0.8 clickdepth_i:1^0.4
 search.ranking.solr.collection.boostfunction.tmpb.3=
 
 # the following values are used to identify duplicate content

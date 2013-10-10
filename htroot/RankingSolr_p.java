@@ -68,7 +68,7 @@ public class RankingSolr_p {
             }
         }
         if (post != null && post.containsKey("ResetBoosts")) {
-            String s = "url_paths_sxt^1000.0,synonyms_sxt^1.0,title^10000.0,text_t^2.0,h1_txt^1000.0,h2_txt^100.0,host_organization_s^100000.0";
+            String s = "url_paths_sxt^3.0,synonyms_sxt^0.5,title^5.0,text_t^1.0,host_s^6.0,h1_txt^5.0,url_file_name_tokens_t^4.0,h2_txt^3.0";
             sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFIELDS_ + profileNr, s);
             sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).updateBoosts(s);
         }
@@ -81,7 +81,7 @@ public class RankingSolr_p {
             }
         }
         if (post != null && post.containsKey("ResetBQ")) {
-            String bq = "fuzzy_signature_unique_b:true^100000.0";
+            String bq = "clickdepth_i:0^0.8 clickdepth_i:1^0.4";
             if (bq != null) {
                 sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTQUERY_ + profileNr, bq);
                 sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setBoostQuery(bq);
@@ -96,7 +96,7 @@ public class RankingSolr_p {
             }
         }
         if (post != null && post.containsKey("ResetBF")) {
-            String bf = "product(recip(rord(last_modified),1,1000,1000),div(product(log(product(references_external_i,references_exthosts_i)),div(references_internal_i,host_extent_i)),add(clickdepth_i,1)))";
+            String bf = "";
             if (bf != null) {
                 sb.setConfig(SwitchboardConstants.SEARCH_RANKING_SOLR_COLLECTION_BOOSTFUNCTION_ + profileNr, bf);
                 sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr).setBoostFunction(bf);
@@ -120,6 +120,7 @@ public class RankingSolr_p {
                 prop.put("boosts_" + i + "_boost", boost.toString());
                 prop.put("boosts_" + i + "_notinindexwarning", (sb.index.fulltext().getDefaultConfiguration().contains(field.name())? "0" : "1") );
             }
+            prop.putHTML("boosts_" + i + "_comment", field.getComment());
             i++;
         }
         prop.put("boosts", i);

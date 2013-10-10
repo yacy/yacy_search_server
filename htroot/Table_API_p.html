@@ -84,14 +84,14 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         </tr>
         #{list}#
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#" id="#[pk]#">
-          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
-          <td>#[type]#</td>
-          <td>#[comment]#</td>
-          <td>#[callcount]#</td>
-          <td>#[dateRecording]#</td>
-          <td>#[dateLastExec]#</td>
-          <td>#[dateNextExec]#</td>
-          <td>
+          <td valign="top" align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
+          <td valign="top">#[type]##(isCrawlerStart)#::<br/><br/><a href="#[url]#" title="clone"><img src="/env/grafics/doc.gif"><img src="/env/grafics/right.gif"><img src="/env/grafics/doc.gif"></a>#(/isCrawlerStart)#</td>
+          <td valign="top">#[comment]#</td>
+          <td valign="top">#[callcount]#</td>
+          <td valign="top">#[dateRecording]#</td>
+          <td valign="top">#[dateLastExec]#</td>
+          <td valign="top">#[dateNextExec]#</td>
+          <td valign="top">
           #(event)#
             <select name="event_select_#[pk]#" onchange='submitchange("#[pk]#")'>
               <option value="off" selected="selected">no event</option>
@@ -137,7 +137,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
             </table>          
           #(/event)#
           </td>
-          <td>
+          <td valign="top">
           #(scheduler)#
             <select name="repeat_select_#[pk]#" onchange='submitchange("#[pk]#")'#(disabled)#:: disabled="disabled"#(/disabled)#>
               <option value="off" selected="selected">no repetition</option>
@@ -161,7 +161,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
             </table>          
           #(/scheduler)#
           </td>
-          #(inline)#<td>#[url]#</td>::#(/inline)#
+          #(inline)#<td valign="top">#[url]#</td>::#(/inline)#
         </tr>
         #{/list}#
       </table>

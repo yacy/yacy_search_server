@@ -55,8 +55,6 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.data.citation.CitationReference;
-import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.search.index.Segment;
 
 public class WebgraphConfiguration extends SchemaConfiguration implements Serializable {
@@ -103,12 +101,13 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
     }
     
     public static class Subgraph {
-        public final ArrayList<String>[] urlProtocols, urlStubs;
+        public final ArrayList<String>[] urlProtocols, urlStubs, urlAnchorTexts;
         public final ArrayList<SolrInputDocument> edges;
         @SuppressWarnings("unchecked")
         public Subgraph(int inboundSize, int outboundSize) {
             this.urlProtocols = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
             this.urlStubs = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
+            this.urlAnchorTexts = new ArrayList[]{new ArrayList<String>(inboundSize), new ArrayList<String>(outboundSize)};
             this.edges = new ArrayList<SolrInputDocument>(inboundSize + outboundSize);
         }
     }
@@ -117,7 +116,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             final Subgraph subgraph,
             final DigestURL source, final ResponseHeader responseHeader, Map<String, Pattern> collections, int clickdepth_source,
             final List<ImageEntry> images, final boolean inbound, final Collection<AnchorURL> links,
-            final IndexCell<CitationReference> citations, final String sourceName) {
+            final String sourceName) {
         boolean allAttr = this.isEmpty();
         int target_order = 0;
         boolean generalNofollow = responseHeader.get("X-Robots-Tag", "").indexOf("nofollow") >= 0;
@@ -228,8 +227,9 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             final String target_url_string = target_url.toNormalform(false);
             int pr_target = target_url_string.indexOf("://",0);
             subgraph.urlProtocols[ioidx].add(target_url_string.substring(0, pr_target));
-            if (allAttr || contains(WebgraphSchema.target_protocol_s)) add(edge, WebgraphSchema.target_protocol_s, target_url_string.substring(0, pr_target));
             subgraph.urlStubs[ioidx].add(target_url_string.substring(pr_target + 3));
+            subgraph.urlAnchorTexts[ioidx].add(text);
+            if (allAttr || contains(WebgraphSchema.target_protocol_s)) add(edge, WebgraphSchema.target_protocol_s, target_url_string.substring(0, pr_target));
             if (allAttr || contains(WebgraphSchema.target_urlstub_s)) add(edge, WebgraphSchema.target_urlstub_s, target_url_string.substring(pr_target + 3));
             Map<String, String> target_searchpart = target_url.getSearchpartMap();
             if (target_searchpart == null) {
@@ -268,7 +268,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             }
 
             if (this.contains(WebgraphSchema.target_protocol_s) && this.contains(WebgraphSchema.target_urlstub_s) && this.contains(WebgraphSchema.target_id_s)) {
-                if ((allAttr || contains(WebgraphSchema.target_clickdepth_i)) && citations != null) {
+                if ((allAttr || contains(WebgraphSchema.target_clickdepth_i))) {
                     if (target_url.probablyRootURL()) {
                         boolean lc = this.lazy; this.lazy = false;
                         add(edge, WebgraphSchema.target_clickdepth_i, 0);

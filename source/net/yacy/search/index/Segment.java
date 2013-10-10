@@ -32,6 +32,7 @@ import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -43,6 +44,7 @@ import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
@@ -422,6 +424,7 @@ public class Segment {
         try {
             return (int) this.fulltext.getDefaultConnector().getCountByQuery(CollectionSchema.text_t.getSolrFieldName() + ":\"" + word + "\"");
         } catch (final Throwable e) {
+            ConcurrentLog.warn("Segment", "problem with word guess for word: " + word);
             ConcurrentLog.logException(e);
             return 0;
         }
@@ -619,7 +622,7 @@ public class Segment {
         char docType = Response.docType(document.dc_format());
         
         // CREATE SOLR DOCUMENT
-        final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(collections, responseHeader, document, condenser, referrerURL, language, urlCitationIndex, this.fulltext.getWebgraphConfiguration(), sourceName);
+        final CollectionConfiguration.SolrVector vector = this.fulltext.getDefaultConfiguration().yacy2solr(collections, responseHeader, document, condenser, referrerURL, language, this.fulltext.getWebgraphConfiguration(), sourceName);
         
         // ENRICH DOCUMENT WITH RANKING INFORMATION
         if (this.connectedCitation()) {
@@ -628,21 +631,45 @@ public class Segment {
         // STORE TO SOLR
         String error = null;
         this.putDocumentInQueue(vector);
-        if (this.fulltext.writeToWebgraph()) {
-            tryloop: for (int i = 0; i < 20; i++) {
-                try {
-                    error = null;
-                    this.fulltext.putEdges(vector.getWebgraphDocuments());
-                    break tryloop;
-                } catch (final IOException e ) {
-                    error = "failed to send " + urlNormalform + " to solr: " + e.getMessage();
-                    ConcurrentLog.warn("SOLR", error);
-                    if (i == 10) this.fulltext.commit(true);
-                    try {Thread.sleep(1000);} catch (final InterruptedException e1) {}
-                    continue tryloop;
+        List<SolrInputDocument> webgraph = vector.getWebgraphDocuments();
+        if (webgraph != null && webgraph.size() > 0) {
+            
+            // write the edges to the webgraph solr index
+            if (this.fulltext.writeToWebgraph()) {
+                tryloop: for (int i = 0; i < 20; i++) {
+                    try {
+                        error = null;
+                        this.fulltext.putEdges(webgraph);
+                        break tryloop;
+                    } catch (final IOException e ) {
+                        error = "failed to send " + urlNormalform + " to solr: " + e.getMessage();
+                        ConcurrentLog.warn("SOLR", error);
+                        if (i == 10) this.fulltext.commit(true);
+                        try {Thread.sleep(1000);} catch (final InterruptedException e1) {}
+                        continue tryloop;
+                    }
                 }
             }
+        
+            // write the edges to the citation reference index
+            if (this.connectedCitation()) try {
+                // normal links
+                for (SolrInputDocument edge: webgraph) {
+                    String referrerhash = (String) edge.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName());
+                    String anchorhash = (String) edge.getFieldValue(WebgraphSchema.target_id_s.getSolrFieldName());
+                    if (referrerhash != null && anchorhash != null) {
+                        urlCitationIndex.add(ASCII.getBytes(anchorhash), new CitationReference(ASCII.getBytes(referrerhash), loadDate.getTime()));
+                    }
+                }
+                // media links as well!
+                for (AnchorURL image: document.getImages().keySet()) urlCitationIndex.add(image.hash(), new CitationReference(url.hash(), loadDate.getTime()));
+                for (AnchorURL audio: document.getAudiolinks().keySet()) urlCitationIndex.add(audio.hash(), new CitationReference(url.hash(), loadDate.getTime()));
+                for (AnchorURL video: document.getVideolinks().keySet()) urlCitationIndex.add(video.hash(), new CitationReference(url.hash(), loadDate.getTime()));
+            } catch (Throwable e) {
+                ConcurrentLog.logException(e);
+            }
         }
+        
         if (error != null) {
             ConcurrentLog.severe("SOLR", error + ", PLEASE REPORT TO bugs.yacy.net");
             //Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, error);

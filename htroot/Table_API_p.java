@@ -287,6 +287,15 @@ public class Table_API_p {
                 prop.put("showtable_list_" + count + "_dateNextExec", date_next_exec == null ? "-" : DateFormat.getDateTimeInstance().format(date_next_exec));
                 prop.put("showtable_list_" + count + "_type", row.get(WorkTables.TABLE_API_COL_TYPE));
                 prop.put("showtable_list_" + count + "_comment", row.get(WorkTables.TABLE_API_COL_COMMENT));
+                // check type & action to link crawl start URLs back to CrawlStartExpert_p.html
+                if (prop.get("showtable_list_" + count + "_type", "").equals(WorkTables.TABLE_API_TYPE_CRAWLER)
+                        && prop.get("showtable_list_" + count + "_comment", "").startsWith("crawl start for")) {
+                    prop.put("showtable_list_" + count + "_isCrawlerStart", 1);
+                    final String editUrl = UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)).replace("Crawler_p", "CrawlStartExpert_p");
+                    prop.put("showtable_list_" + count + "_isCrawlerStart_url", editUrl);
+                } else {
+                    prop.put("showtable_list_" + count + "_isCrawlerStart", 0);
+                }
                 prop.putHTML("showtable_list_" + count + "_inline_url", "http://" + sb.myPublicIP() + ":" + sb.getConfig("port", "8090") + UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)));
                 prop.put("showtable_list_" + count + "_scheduler_inline", inline ? "true" : "false");
                 prop.put("showtable_list_" + count + "_scheduler_filter", typefilter.pattern());

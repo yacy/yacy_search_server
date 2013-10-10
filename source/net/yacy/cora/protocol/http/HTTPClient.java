@@ -51,8 +51,6 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 
 import org.apache.http.Header;
-import org.apache.http.HeaderElement;
-import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
@@ -79,10 +77,9 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.ByteArrayBuffer;
@@ -360,7 +357,6 @@ public class HTTPClient {
         } catch (IllegalArgumentException e) {
             throw new IOException(e.getMessage()); // can be caused  at java.net.URI.create()
         }
-        httpGet.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         return getContentBytes(httpGet, maxBytes);
     }
@@ -383,7 +379,6 @@ public class HTTPClient {
         } catch (IllegalArgumentException e) {
             throw new IOException(e.getMessage()); // can be caused  at java.net.URI.create()
         }
-        httpGet.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         this.currentRequest = httpGet;
         execute(httpGet);
@@ -399,7 +394,6 @@ public class HTTPClient {
     public HttpResponse HEADResponse(final String uri) throws IOException {
         final MultiProtocolURL url = new MultiProtocolURL(uri);
         final HttpHead httpHead = new HttpHead(url.toNormalform(true));
-        httpHead.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	execute(httpHead);
     	finish();
@@ -421,7 +415,6 @@ public class HTTPClient {
     	if (this.currentRequest != null) throw new IOException("Client is in use!");
         final MultiProtocolURL url = new MultiProtocolURL(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true));
-        httpPost.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         String host = url.getHost();
         if (host == null) host = Domains.LOCALHOST;
         setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
@@ -458,7 +451,6 @@ public class HTTPClient {
      */
     public byte[] POSTbytes(final MultiProtocolURL url, final String vhost, final Map<String, ContentBody> post, final boolean usegzip) throws IOException {
     	final HttpPost httpPost = new HttpPost(url.toNormalform(true));
-        httpPost.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
 
         setHost(vhost); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	if (vhost == null) setHost(Domains.LOCALHOST);
@@ -491,7 +483,6 @@ public class HTTPClient {
     public byte[] POSTbytes(final String uri, final InputStream instream, final long length) throws IOException {
         final MultiProtocolURL url = new MultiProtocolURL(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true));
-        httpPost.addHeader(new BasicHeader("Connection", "close")); // don't keep alive, prevent CLOSE_WAIT state
         String host = url.getHost();
         if (host == null) host = Domains.LOCALHOST;
         setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
@@ -536,6 +527,7 @@ public class HTTPClient {
                 ConnectionInfo.removeConnection(this.currentRequest.hashCode());
                 this.currentRequest.abort();
                 this.currentRequest = null;
+                this.httpResponse.close();
                 throw e;
             }
         }
@@ -563,6 +555,7 @@ public class HTTPClient {
                 ConnectionInfo.removeConnection(this.currentRequest.hashCode());
                 this.currentRequest.abort();
                 this.currentRequest = null;
+                this.httpResponse.close();
                 throw e;
             }
         }
@@ -577,10 +570,11 @@ public class HTTPClient {
     public void finish() throws IOException {
         if (this.httpResponse != null) {
                 final HttpEntity httpEntity = this.httpResponse.getEntity();
-        if (httpEntity != null && httpEntity.isStreaming()) {
-            // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
-            EntityUtils.consume(httpEntity);
-        }
+	        if (httpEntity != null && httpEntity.isStreaming()) {
+	            // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
+	            EntityUtils.consume(httpEntity);
+	        }
+	        this.httpResponse.close();
         }
         if (this.currentRequest != null) {
                 ConnectionInfo.removeConnection(this.currentRequest.hashCode());
@@ -607,6 +601,7 @@ public class HTTPClient {
                 httpUriRequest.abort();
                 throw e;
         } finally {
+        	if (this.httpResponse != null) this.httpResponse.close();
         	ConnectionInfo.removeConnection(httpUriRequest.hashCode());
         }
     }
@@ -639,6 +634,7 @@ public class HTTPClient {
         } catch (final IOException e) {
             ConnectionInfo.removeConnection(httpUriRequest.hashCode());
             httpUriRequest.abort();
+            if (this.httpResponse != null) this.httpResponse.close();
             throw new IOException("Client can't execute: "
             		+ (e.getCause() == null ? e.getMessage() : e.getCause().getMessage())
             		+ " duration=" + Long.toString(System.currentTimeMillis() - time));
@@ -681,6 +677,7 @@ public class HTTPClient {
     		httpUriRequest.setHeader(HTTP.TARGET_HOST, this.host);
         if (this.realm != null)
             httpUriRequest.setHeader("Authorization", "realm=" + this.realm);
+        httpUriRequest.setHeader("Connection", "close"); // don't keep alive, prevent CLOSE_WAIT state
     }
 
     private void storeConnectionInfo(final HttpUriRequest httpUriRequest) {
@@ -734,35 +731,25 @@ public class HTTPClient {
     /**
      * If the Keep-Alive header is not present in the response,
      * HttpClient assumes the connection can be kept alive indefinitely.
-     * Here we limit this to 5 seconds.
+     * Here we limit this to 5 seconds if unset and to a max of 25 seconds
      *
      * @param defaultHttpClient
      */
-    private static ConnectionKeepAliveStrategy customKeepAliveStrategy() {
-    	return new ConnectionKeepAliveStrategy() {
+	private static ConnectionKeepAliveStrategy customKeepAliveStrategy() {
+		return new DefaultConnectionKeepAliveStrategy() {
 			@Override
-            public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
-		        // Honor 'keep-alive' header
-				String param, value;
-				HeaderElement element;
-		        HeaderElementIterator it = new BasicHeaderElementIterator(
-		                response.headerIterator(HTTP.CONN_KEEP_ALIVE));
-		        while (it.hasNext()) {
-		            element = it.nextElement();
-		            param = element.getName();
-		            value = element.getValue();
-		            if (value != null && param.equalsIgnoreCase("timeout")) {
-		                try {
-		                    return Long.parseLong(value) * 1000;
-		                } catch(final NumberFormatException e) {
-		                }
-		            }
-		        }
-		        // Keep alive for 5 seconds only
-		        return 5 * 1000;
+			public long getKeepAliveDuration(HttpResponse response,
+					HttpContext context) {
+				long keepAlive = super.getKeepAliveDuration(response, context);
+				if (keepAlive < 1) {
+					// Keep connections alive 5 seconds if a keep-alive value
+					// has not be explicitly set by the server
+					keepAlive = 5000;
+				}
+				return Math.min(keepAlive, 25000);
 			}
-    	};
-    }
+		};
+	}
 
     /**
      * testing
