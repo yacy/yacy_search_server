@@ -1303,6 +1303,7 @@ public final class HTTPDProxyHandler {
                (sslSocket.isBound()) &&
                (!(sslSocket.isClosed())) &&
                (sslSocket.isConnected()) &&
+               (!sslSocket.isInputShutdown() && !sslSocket.isOutputShutdown()) &&
                ((cs.isAlive()) || (sc.isAlive()))) {
             // idle
             try {Thread.sleep(1000);} catch (final InterruptedException e) {} // wait a while
@@ -1314,6 +1315,7 @@ public final class HTTPDProxyHandler {
         cs.interrupt();
         sc.interrupt();
         // ...hope they have terminated...
+        if (sslSocket != null) sslSocket.close();
     }
 
     public static class Mediate extends Thread {
