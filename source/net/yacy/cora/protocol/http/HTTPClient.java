@@ -634,7 +634,7 @@ public class HTTPClient {
         } catch (final IOException e) {
             ConnectionInfo.removeConnection(httpUriRequest.hashCode());
             httpUriRequest.abort();
-            this.httpResponse.close();
+            if (this.httpResponse != null) this.httpResponse.close();
             throw new IOException("Client can't execute: "
             		+ (e.getCause() == null ? e.getMessage() : e.getCause().getMessage())
             		+ " duration=" + Long.toString(System.currentTimeMillis() - time));
