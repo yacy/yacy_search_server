@@ -246,9 +246,11 @@ function latestinfo() {
       var rsp = eval("(" + self.xmlHttpReq.responseText + ")");
       statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localResourceSize, rsp.remoteResourceSize, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase);
     }
-  }
+  };
   self.xmlHttpReq.send(null);
 }
+// TODO: resets statistic on navigating to next page in Jetty implementation
+/*
 window.setTimeout('latestinfo();',500);
 window.setTimeout('latestinfo();',1000);
 window.setTimeout('latestinfo();',1500);
@@ -259,6 +261,7 @@ window.setTimeout('latestinfo();',5000);
 window.setTimeout('latestinfo();',6000);
 window.setTimeout('latestinfo();',8000);
 window.setTimeout('latestinfo();',10000);
+*/
 </script>
 
 <!--#include virtual="/interaction_elements/Footer.html" -->

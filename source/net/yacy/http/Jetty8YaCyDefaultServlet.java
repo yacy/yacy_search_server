@@ -447,6 +447,7 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
     }
 
     /* ------------------------------------------------------------ */
+    @Override
     protected void sendData(HttpServletRequest request,
             HttpServletResponse response,
             boolean include,
