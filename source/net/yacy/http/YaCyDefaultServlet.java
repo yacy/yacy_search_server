@@ -98,6 +98,10 @@ import org.eclipse.jetty.util.resource.ResourceFactory;
  *  
  *  welcomeFile       name of the welcome file (default is "index.html", "welcome.html")
  *
+ *  gzip              If set to true, then static content will be served as
+ *                    gzip content encoded if a matching resource is
+ *                    found ending with ".gz"
+ * 
  *  resourceBase      Set to replace the context resource base
  *
  *  resourceCache     If set, this is a context attribute name, which the servlet
@@ -123,6 +127,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
     protected boolean _dirAllowed = true;
     protected boolean _pathInfoOnly = false;
     protected boolean _etags = false;
+    protected boolean _gzip = true;
     protected Resource _resourceBase;
     protected MimeTypes _mimeTypes;
     protected String[] _welcomes;    
@@ -168,7 +173,8 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
         }
 
         _etags = getInitBoolean("etags", _etags);
-
+        _gzip=getInitBoolean("gzip",_gzip);
+        
         if (ConcurrentLog.isFine("YaCyDefaultServlet")) {
             ConcurrentLog.fine("YaCyDefaultServlet","resource base = " + _resourceBase);
         }
@@ -331,7 +337,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
                     String welcomeFileName = getWelcomeFile (pathInContext);
                     if (welcomeFileName != null) {
                         RequestDispatcher rd = request.getRequestDispatcher(welcomeFileName);
-                        rd.forward(request, response);
+                        if (rd != null) rd.forward(request, response);
                     } else { // send directory listing
                         content = new HttpContent.ResourceAsHttpContent(resource, _mimeTypes.getMimeByExtension(resource.toString()), _etags);
                         if (included.booleanValue() || passConditionalHeaders(request, response, resource, content)) {
@@ -554,10 +560,10 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
             templateMethodCache.put(classFile, new SoftReference<Method>(m));
 
         } catch (final ClassNotFoundException e) {
-            ConcurrentLog.severe("TemplateHandler", "class " + classFile + " is missing:" + e.getMessage());
+            ConcurrentLog.severe("YaCyDefaultServlet", "class " + classFile + " is missing:" + e.getMessage());
             throw new InvocationTargetException(e, "class " + classFile + " is missing:" + e.getMessage());
         } catch (final NoSuchMethodException e) {
-            ConcurrentLog.severe("TemplateHandler", "method 'respond' not found in class " + classFile + ": " + e.getMessage());
+            ConcurrentLog.severe("YaCyDefaultServlet", "method 'respond' not found in class " + classFile + ": " + e.getMessage());
             throw new InvocationTargetException(e, "method 'respond' not found in class " + classFile + ": " + e.getMessage());
         }
         return m;
@@ -737,7 +743,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
             if (q > 0) {
                 final String path = in.toString(off + 22, q - off - 22);
                 try {
-                    RequestDispatcher dispatcher = request.getRequestDispatcher("/" + path);
+                    RequestDispatcher dispatcher = request.getRequestDispatcher(path);
                     dispatcher.include(request, response);
                     response.flushBuffer();
                 } catch (Exception e) {

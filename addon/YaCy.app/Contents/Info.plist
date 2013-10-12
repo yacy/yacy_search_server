@@ -37,13 +37,14 @@
 		<key>ClassPath</key>
 			<array>
 			<string>$JAVAROOT/htroot</string>
-                        <string>$JAVAROOT/lib/jetty-http-9.0.5.v20130815.jar</string>
-                        <string>$JAVAROOT/lib/jetty-io-9.0.5.v20130815.jar</string>
-                        <string>$JAVAROOT/lib/jetty-security-9.0.5.v20130815.jar</string>
-                        <string>$JAVAROOT/lib/jetty-server-9.0.5.v20130815.jar</string>
-                        <string>$JAVAROOT/lib/jetty-servlet-9.0.5.v20130815.jar</string>
-                        <string>$JAVAROOT/lib/jetty-servlets-9.0.5.v20130815.jar</string>
-                        <string>$JAVAROOT/lib/jetty-util-9.0.5.v20130815.jar</string>
+                        <string>$JAVAROOT/lib/jetty-continuation-8.1.13.v20130916.jar</string>
+                        <string>$JAVAROOT/lib/jetty-http-8.1.13.v20130916.jar</string>
+                        <string>$JAVAROOT/lib/jetty-io-8.1.13.v20130916.jar</string>
+                        <string>$JAVAROOT/lib/jetty-security-8.1.13.v20130916.jar</string>
+                        <string>$JAVAROOT/lib/jetty-server-8.1.13.v20130916.jar</string>
+                        <string>$JAVAROOT/lib/jetty-servlet-8.1.13.v20130916.jar</string>
+                        <string>$JAVAROOT/lib/jetty-servlets-8.1.13.v20130916.jar</string>
+                        <string>$JAVAROOT/lib/jetty-util-8.1.13.v20130916.jar</string>
                         <string>$JAVAROOT/lib/javax.servlet-3.0.0.v201112011016.jar</string>                    
 			<string>$JAVAROOT/lib/activation.jar</string>
 			<string>$JAVAROOT/lib/apache-mime4j-0.6.jar</string>

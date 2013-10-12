@@ -38,7 +38,7 @@ import java.util.Set;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.workflow.WorkflowThread;
+import net.yacy.http.YaCyHttpServer;
 import net.yacy.peers.PeerActions;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
@@ -56,8 +56,8 @@ public final class Connections_p {
 
         // server sessions
         // get the serverCore thread
-        //final WorkflowThread httpd = sb.getThread("10_httpd"); //not working with Jetty
-
+        final YaCyHttpServer httpd = sb.getHttpServer();
+        
         // determines if name lookup should be done or not
         final boolean doNameLookup;
         if (post != null) {
@@ -138,8 +138,8 @@ public final class Connections_p {
         }
         prop.put("list", idx);
 
-        prop.putNum("numMax", -1/* ((serverCore)httpd).getMaxSessionCount()*/); //TODO: get limit from Jetty
-        prop.putNum("numActiveRunning", numActiveRunning);
+        prop.putNum("numMax", httpd.getMaxSessionCount());
+        prop.putNum("numActiveRunning", httpd.getJobCount());
         prop.putNum("numActivePending", numActivePending);
 
         // client sessions

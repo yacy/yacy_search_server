@@ -27,7 +27,6 @@ import java.util.List;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -36,7 +35,6 @@ import net.yacy.kelondro.util.FileUtils;
 
 import org.eclipse.jetty.http.HttpContent;
 import org.eclipse.jetty.http.HttpFields;
-import org.eclipse.jetty.http.HttpHeaderValues;
 import org.eclipse.jetty.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpMethods;
 import org.eclipse.jetty.io.Buffer;
@@ -96,58 +94,11 @@ import org.eclipse.jetty.util.resource.ResourceFactory;
  *
  * </PRE>
  *
- *
- *
- *
  */
 public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements ResourceFactory {
 
     private static final long serialVersionUID = 4900000000000001110L;
     
-    private boolean _gzip = true;
-
-    /* ------------------------------------------------------------ */
-    @Override
-    public void init() throws UnavailableException {
-        super.init();
-
-        _gzip=getInitBoolean("gzip",_gzip);
-
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * get Resource to serve. Map a path to a resource. The default
-     * implementation calls HttpContext.getResource but derived servlets may
-     * provide their own mapping.
-     *
-     * @param pathInContext The path to find a resource for.
-     * @return The resource to serve.
-     */
-    @Override
-    public Resource getResource(String pathInContext) {
-        Resource r = null;
-        if (_relativeResourceBase != null) {
-            pathInContext = URIUtil.addPaths(_relativeResourceBase, pathInContext);
-        }
-
-        try {
-            if (_resourceBase != null) {
-                r = _resourceBase.addPath(pathInContext);
-            } else {
-                URL u = _servletContext.getResource(pathInContext);
-                r = Resource.newResource(u);
-            }
-
-            if (ConcurrentLog.isFine("YaCyDefaultServlet")) {
-                ConcurrentLog.fine("YaCyDefaultServlet","Resource " + pathInContext + "=" + r);
-            }
-        } catch (IOException e) {
-            // ConcurrentLog.logException(e);
-        }
-
-        return r;
-    }
 
     /* ------------------------------------------------------------ */
     @Override
@@ -195,11 +146,11 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
                 // Does a gzip resource exist?
                 if (resource != null && resource.exists() && !resource.isDirectory()) {
                     // Tell caches that response may vary by accept-encoding
-                    response.addHeader(HttpHeaders.VARY, HttpHeaders.ACCEPT_ENCODING);
+                    response.addHeader(HttpHeaders.VARY, HeaderFramework.ACCEPT_ENCODING);
 
                     // Does the client accept gzip?
-                    String accept = request.getHeader(HttpHeaders.ACCEPT_ENCODING);
-                    if (accept != null && accept.indexOf("gzip") >= 0) {
+                    String accept = request.getHeader(HeaderFramework.ACCEPT_ENCODING);
+                    if (accept != null && accept.indexOf(HeaderFramework.CONTENT_ENCODING_GZIP) >= 0) {
                         gzip = true;
                     }
                 }
@@ -251,7 +202,7 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
                     } else {
                         if (included.booleanValue() || passConditionalHeaders(request, response, resource, content)) {
                             if (gzip) {
-                                response.setHeader(HttpHeaders.CONTENT_ENCODING, "gzip");
+                                response.setHeader(HeaderFramework.CONTENT_ENCODING, HeaderFramework.CONTENT_ENCODING_GZIP);
                                 String mt = _servletContext.getMimeType(pathInContext);
                                 if (mt != null) {
                                     response.setContentType(mt);
@@ -316,12 +267,6 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
                 resource.release();
             }
         }
-    }
-
-    /* ------------------------------------------------------------ */
-    @Override
-    protected boolean hasDefinedRange(Enumeration<String> reqRanges) {
-        return (reqRanges != null && reqRanges.hasMoreElements());
     }
 
     /* ------------------------------------------------------------ */
@@ -669,24 +614,5 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
                 response.setHeader(HeaderFramework.ETAG, content.getETag().toString());
             }
         }
-    }
-
-    /* ------------------------------------------------------------ */
-    @Override
-    protected void writeOptionHeaders(HttpFields fields) {
-        if (_acceptRanges) {
-            fields.put(HttpHeaders.ACCEPT_RANGES_BUFFER, HttpHeaderValues.BYTES_BUFFER);
-        }
-
-    }
-
-    /* ------------------------------------------------------------ */
-    /*
-     * @see javax.servlet.Servlet#destroy()
-     */
-    @Override
-    public void destroy() {
-
-        super.destroy();
     }
 }
