@@ -34,8 +34,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.RequestDispatcher;
@@ -65,6 +67,7 @@ import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
 import net.yacy.visualization.RasterPlotter;
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
@@ -137,7 +140,10 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
     protected File _htDocsPath;    
     protected static final serverClassLoader provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
     protected ConcurrentHashMap<File, SoftReference<Method>> templateMethodCache = null;
-
+    // settings for multipart/form-data
+    protected static final File TMPDIR = new File(System.getProperty("java.io.tmpdir"));
+    protected static final int SIZE_FILE_THRESHOLD = 20 * 1024 * 1024;
+    protected static final FileItemFactory DISK_FILE_ITEM_FACTORY = new DiskFileItemFactory(SIZE_FILE_THRESHOLD, TMPDIR);
     /* ------------------------------------------------------------ */
     @Override
     public void init() throws UnavailableException {
@@ -762,15 +768,16 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
      * @param request
      * @param args found fields/values are added to the map
      */
-    protected void parseMultipart(HttpServletRequest request, serverObjects args) {
-        DiskFileItemFactory factory = new DiskFileItemFactory();
-        // maximum size that will be stored in memory
-        factory.setSizeThreshold(4096 * 16);
-        // Location to save data that is larger than maxMemSize.
-        // factory.setRepository(new File("."));
-        // Create a new file upload handler
-        ServletFileUpload upload = new ServletFileUpload(factory);
-        upload.setSizeMax(4096 * 16);
+    protected void parseMultipart(HttpServletRequest request, serverObjects args) throws IOException {
+
+        // reject too large uploads
+        if (request.getContentLength() > SIZE_FILE_THRESHOLD) throw new IOException("FileUploadException: uploaded file too large = " + request.getContentLength());
+
+        // check if we have enough memory
+        if (!MemoryControl.request(request.getContentLength() * 3, false)) {
+        	throw new IOException("not enough memory available for request. request.getContentLength() = " + request.getContentLength() + ", MemoryControl.available() = " + MemoryControl.available());
+        }        
+        ServletFileUpload upload = new ServletFileUpload(DISK_FILE_ITEM_FACTORY);
         try {
             // Parse the request to get form field items
             @SuppressWarnings("unchecked")
@@ -778,9 +785,16 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
             // Process the uploaded file items
             Iterator<FileItem> i = fileItems.iterator();
             while (i.hasNext()) {
-                FileItem fi = i.next();
-                if (fi.isFormField()) {
-                    args.put(fi.getFieldName(), fi.getString());
+                FileItem item = i.next();
+                if (item.isFormField()) {
+                    // simple text
+                    if (item.getContentType() == null || !item.getContentType().contains("charset")) {
+                        // old yacy clients use their local default charset, on most systems UTF-8 (I hope ;)
+                        args.add(item.getFieldName(), item.getString("UTF-8"));
+                    } else {
+                        // use default encoding (given as header or ISO-8859-1)
+                        args.add(item.getFieldName(), item.getString());
+                    }
                 }
             }
         } catch (Exception ex) {

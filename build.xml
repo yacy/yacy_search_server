@@ -652,7 +652,7 @@
       <!--<arg value="-Xrunhprof"/>-->
       <arg line="-start"/>
       <jvmarg line="-Xms180m"/>
-      <jvmarg line="-Xmx512m"/>
+      <jvmarg line="-Xmx600m"/>
       <!-- <arg line="-migratewords"/>-->
       <!-- <arg line="-start ${user.dir}"/>-->
     </java>
