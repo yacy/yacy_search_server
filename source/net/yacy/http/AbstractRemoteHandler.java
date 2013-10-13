@@ -68,7 +68,10 @@ abstract public class AbstractRemoteHandler extends AbstractHandler implements H
                 localVirtualHostNames.add(localInetAddress.getCanonicalHostName());
             }
         }
-        localVirtualHostNames.add(sb.peers.mySeed().getIP());
+        if (sb.peers != null) {
+            localVirtualHostNames.add(sb.peers.mySeed().getIP());
+            localVirtualHostNames.add(sb.peers.myAlternativeAddress()); // add the "peername.yacy" address
+        }
     }
 	
     abstract public void handleRemote(String target, Request baseRequest, HttpServletRequest request,

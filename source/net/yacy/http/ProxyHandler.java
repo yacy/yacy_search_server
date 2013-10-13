@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.HeaderFramework;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -49,6 +50,7 @@ import org.eclipse.jetty.server.Request;
 
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
+import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.server.http.MultiOutputStream;
 
 /**
@@ -89,7 +91,8 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 			HttpServletResponse response) throws IOException, ServletException {
 
 		RequestHeader proxyHeaders = convertHeaderFromJetty(request);
-		proxyHeaders.add(RequestHeader.VIA, "YaCy");
+                final String httpVer = (String) request.getHeader(HeaderFramework.CONNECTION_PROP_HTTP_VER);
+                setViaHeader (proxyHeaders, httpVer);
 		proxyHeaders.remove(RequestHeader.KEEP_ALIVE);
 		proxyHeaders.remove(RequestHeader.CONTENT_LENGTH);
 
@@ -235,6 +238,31 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
         // we handled this request, break out of handler chain
 		baseRequest.setHandled(true);
 	}
+        
+    private void setViaHeader(final HeaderFramework header, final String httpVer) {
+        if (!sb.getConfigBool("proxy.sendViaHeader", true)) return;
+        
+        final String myAddress = (sb.peers == null) ? null : sb.peers.myAlternativeAddress();
+        if (myAddress != null) {
 
+            // getting header set by other proxies in the chain
+            final StringBuilder viaValue = new StringBuilder(80);
+            if (header.containsKey(HeaderFramework.VIA)) {
+                viaValue.append(header.get(HeaderFramework.VIA));
+            }
+            if (viaValue.length() > 0) {
+                viaValue.append(", ");
+            }
+
+            // appending info about this peer
+            viaValue
+                    .append(httpVer).append(" ")
+                    .append(myAddress).append(" ")
+                    .append("(YaCy ").append(yacyBuildProperties.getVersion()).append(")");
+
+            // storing header back
+            header.put(HeaderFramework.VIA, viaValue.toString());
+        }
+    }
 
 }
