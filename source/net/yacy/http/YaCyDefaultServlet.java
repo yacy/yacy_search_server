@@ -34,11 +34,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.zip.GZIPInputStream;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -59,6 +58,7 @@ import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.server.http.HTTPDemon;
 import net.yacy.server.http.TemplateEngine;
 import net.yacy.server.serverClassLoader;
 import net.yacy.server.serverCore;
@@ -599,15 +599,21 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
             while (attNames.hasMoreElements()) {
                 String argName = attNames.nextElement();
                 args.put(argName, request.getAttribute(argName).toString());
-            }
-
+            }          
+            RequestHeader legacyRequestHeader = generateLegacyRequestHeader(request, target, targetExt);
             // add multipart-form fields to parameter
-            if (request.getContentType() != null && request.getContentType().startsWith("multipart/form-data")) {
-                parseMultipart(request, args);
+            if (ServletFileUpload.isMultipartContent(request)) {
+                //TODO:   added quickfix to support gzip encoded content
+                //        using existing HTTPDemon.parseMultipart()
+                final String bodyEncoding = request.getHeader(HeaderFramework.CONTENT_ENCODING);
+                InputStream body = request.getInputStream();
+                if (HeaderFramework.CONTENT_ENCODING_GZIP.equalsIgnoreCase(bodyEncoding) && !(body instanceof GZIPInputStream)) {
+                    HTTPDemon.parseMultipart(legacyRequestHeader, args, body);
+                } else {
+                    parseMultipart(request, args);
+                }
             }
             // eof modification to read attribute
-            RequestHeader legacyRequestHeader = generateLegacyRequestHeader(request, target, targetExt);
-
             Object tmp;
             try {
                 tmp = invokeServlet(targetClass, legacyRequestHeader, args);
@@ -776,12 +782,12 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
         // check if we have enough memory
         if (!MemoryControl.request(request.getContentLength() * 3, false)) {
         	throw new IOException("not enough memory available for request. request.getContentLength() = " + request.getContentLength() + ", MemoryControl.available() = " + MemoryControl.available());
-        }        
+        }                
         ServletFileUpload upload = new ServletFileUpload(DISK_FILE_ITEM_FACTORY);
         try {
             // Parse the request to get form field items
-            @SuppressWarnings("unchecked")
-            List<FileItem> fileItems = upload.parseRequest(request);
+            @SuppressWarnings("unchecked")             
+            List<FileItem> fileItems = upload.parseRequest(request);                 
             // Process the uploaded file items
             Iterator<FileItem> i = fileItems.iterator();
             while (i.hasNext()) {
@@ -801,4 +807,4 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
             ConcurrentLog.logException(ex);
         }
     }
-}
+ }
