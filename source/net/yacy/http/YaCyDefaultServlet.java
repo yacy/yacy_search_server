@@ -606,9 +606,8 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
                 //TODO:   added quickfix to support gzip encoded content
                 //        using existing HTTPDemon.parseMultipart()
                 final String bodyEncoding = request.getHeader(HeaderFramework.CONTENT_ENCODING);
-                InputStream body = request.getInputStream();
-                if (HeaderFramework.CONTENT_ENCODING_GZIP.equalsIgnoreCase(bodyEncoding) && !(body instanceof GZIPInputStream)) {
-                    HTTPDemon.parseMultipart(legacyRequestHeader, args, body);
+                if (HeaderFramework.CONTENT_ENCODING_GZIP.equalsIgnoreCase(bodyEncoding)) {
+                    HTTPDemon.parseMultipart(legacyRequestHeader, args, request.getInputStream());
                 } else {
                     parseMultipart(request, args);
                 }
