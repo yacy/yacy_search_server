@@ -37,7 +37,6 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.zip.GZIPInputStream;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -668,7 +667,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
                 return;
             }
 
-            servletProperties templatePatterns = null;
+            servletProperties templatePatterns;
             if (tmp == null) {
                 // if no args given, then tp will be an empty Hashtable object (not null)
                 templatePatterns = new servletProperties();
@@ -677,6 +676,23 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
             } else {
                 templatePatterns = new servletProperties((serverObjects) tmp);
             }
+            
+            // handle YaCy http commands
+            if (templatePatterns.containsKey(serverObjects.ACTION_LOCATION)) {
+                String location = templatePatterns.get(serverObjects.ACTION_LOCATION, "");
+
+                if (location.isEmpty()) {
+                    location = request.getPathInfo();
+                }
+                //TODO: handle equivalent of this from httpdfilehandler
+                // final ResponseHeader headers = getDefaultHeaders(request.getPathInfo());
+                // headers.setAdditionalHeaderProperties(templatePatterns.getOutgoingHeader().getAdditionalHeaderProperties()); //put the cookies into the new header TODO: can we put all headerlines, without trouble?
+                
+                response.setHeader(HeaderFramework.LOCATION, location);
+                response.setStatus(HttpServletResponse.SC_FOUND);
+                return;
+            }
+            
             // add the application version, the uptime and the client name to every rewrite table
             templatePatterns.put(servletProperties.PEER_STAT_VERSION, yacyBuildProperties.getVersion());
             templatePatterns.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() - serverCore.startupTime) / 1000) / 60); // uptime in minutes
@@ -732,7 +748,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
             p = buffer.indexOf("<!--#".getBytes(), off);
         }
         out.write(in, off, in.length - off);
-        out.flush();
+        //out.flush();
     }
 	
     // parse SSI line and include resource
@@ -744,7 +760,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
                 try {
                     RequestDispatcher dispatcher = request.getRequestDispatcher(path);
                     dispatcher.include(request, response);
-                    response.flushBuffer();
+                    //response.flushBuffer();
                 } catch (Exception e) {
                     ConcurrentLog.logException(e);
                     throw new ServletException();
