@@ -718,20 +718,8 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
         net.yacy.cora.util.ByteBuffer buffer = new net.yacy.cora.util.ByteBuffer(in);
         OutputStream out = response.getOutputStream();
 
-
-        // remove virtual host "currentyacypeer"
-        int off = 0; // starting offset
-        int x = buffer.indexOf("/currentyacypeer/".getBytes(), off);
-        while (x >= 0) {
-            for (int i = 0; i < 16; i++) {
-                in[x + i] = 32;
-            }
-            off = x + 16;
-            x = buffer.indexOf("/currentyacypeer/".getBytes(), off);
-        }
-
         // check and handle SSI (ServerSideIncludes)
-        off = 0;
+        int off = 0;
         int p = buffer.indexOf("<!--#".getBytes(), off);
         int q;
         while (p >= 0) {
