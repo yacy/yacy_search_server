@@ -242,7 +242,7 @@ public class sharedBlacklist_p {
                  * turn the ampersand into &amp; which renders the parameters
                  * useless (at least when using Opera 9.53, haven't tested other browsers)
                  */
-                prop.put("LOCATION","Blacklist_p.html?selectedListName=" + CharacterCoding.unicode2html(selectedBlacklistName, true) + "&selectList=select");
+                prop.put(serverObjects.ACTION_LOCATION,"Blacklist_p.html?selectedListName=" + CharacterCoding.unicode2html(selectedBlacklistName, true) + "&selectList=select");
                 return prop;
             }
 
