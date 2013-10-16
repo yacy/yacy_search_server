@@ -40,6 +40,7 @@ import java.util.regex.Pattern;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.openjena.atlas.logging.Log;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.AnchorURL;
@@ -314,11 +315,12 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
             while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                 // for each to-be-processed entry work on the process tag
                 Collection<Object> proctags = doc.getFieldValues(WebgraphSchema.process_sxt.getSolrFieldName());
-                for (Object tag: proctags) {
+
+                try {
+                    SolrInputDocument sid = this.toSolrInputDocument(doc);
                     
-                    try {
-                        SolrInputDocument sid = this.toSolrInputDocument(doc);
-                        
+                    for (Object tag: proctags) {
+                                             
                         // switch over tag types
                         ProcessType tagtype = ProcessType.valueOf((String) tag);
                         if (tagtype == ProcessType.CLICKDEPTH) {
@@ -337,18 +339,16 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                                 if (postprocessing_clickdepth(segment, doc, sid, url, WebgraphSchema.target_clickdepth_i)) proccount_clickdepthchange++;
                             }
                         }
-                        
-                        // all processing steps checked, remove the processing tag
-                        sid.removeField(WebgraphSchema.process_sxt.getSolrFieldName());
-                        if (this.contains(WebgraphSchema.harvestkey_s)) sid.removeField(WebgraphSchema.harvestkey_s.getSolrFieldName());
-                        
-                        // send back to index
-                        connector.deleteById((String) doc.getFieldValue(WebgraphSchema.id.getSolrFieldName())); 
-                        connector.add(sid);
-                        proccount++;
-                    } catch (final Throwable e1) {
                     }
+                    // all processing steps checked, remove the processing tag
+                    sid.removeField(WebgraphSchema.process_sxt.getSolrFieldName());
+                    if (this.contains(WebgraphSchema.harvestkey_s)) sid.removeField(WebgraphSchema.harvestkey_s.getSolrFieldName());
                     
+                    // send back to index
+                    connector.add(sid);
+                    proccount++;
+                } catch (Throwable e1) {
+                    Log.warn(WebgraphConfiguration.class, "postprocessing failed", e1);
                 }
             }
             ConcurrentLog.info("WebgraphConfiguration", "cleanup_processing: re-calculated " + proccount + " new documents, " + proccount_clickdepthchange + " clickdepth values changed.");
