@@ -230,8 +230,8 @@ public class Segment {
         final byte[] hosthash = new byte[6]; // the host of the url to be checked
         System.arraycopy(searchhash, 6, hosthash, 0, 6);
         
-        long timeout = System.currentTimeMillis() + 10000;
-        for (int maxdepth = 0; maxdepth < 10 && System.currentTimeMillis() < timeout; maxdepth++) {
+        long timeout = System.currentTimeMillis() + 1000;
+        mainloop: for (int maxdepth = 0; maxdepth < 6 && System.currentTimeMillis() < timeout; maxdepth++) {
             
             RowHandleSet checknext = new RowHandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 100);
             
@@ -247,11 +247,11 @@ public class Segment {
                     if (ref == null) continue nextloop;
                     byte[] u = ref.urlhash();
                     
-                    // check ignore
-                    if (ignore.has(u)) continue nextloop;
-                    
                     // check if this is from the same host
                     if (!ByteBuffer.equals(u, 6, hosthash, 0, 6)) continue nextloop;
+                    
+                    // check ignore
+                    if (ignore.has(u)) continue nextloop;
                     
                     // check if the url is a root url
                     if (rootCandidates.has(u)) {
@@ -262,10 +262,10 @@ public class Segment {
                     try {checknext.put(u);} catch (final SpaceExceededException e) {}
                     try {ignore.put(u);} catch (final SpaceExceededException e) {}
                 }
+                if (System.currentTimeMillis() > timeout) break mainloop;
             }
             leveldepth++;
             levelhashes = checknext;
-        
         }
         return 999;
     }

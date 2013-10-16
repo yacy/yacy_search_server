@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -2136,27 +2137,6 @@ public final class Switchboard extends serverSwitch {
                     ResultURLs.clearStack(origin);
                 }
             }
-
-            // clean up profiles
-            checkInterruption();
-            
-            if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
-                Set<String> deletionCandidates = this.crawler.getFinishesProfiles(this.crawlQueues);
-                int cleanup =  deletionCandidates.size();
-                if (cleanup > 0) {
-                    // run postprocessing on these profiles
-                    postprocessingRunning = true;
-                    int proccount = 0;
-                    for (String profileHash: deletionCandidates) {
-                        proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, profileHash);
-                        proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, profileHash);
-                    }
-                    postprocessingRunning = false;
-                    
-                    this.crawler.cleanProfiles(deletionCandidates);
-                    log.info("cleanup removed " + cleanup + " crawl profiles, post-processed " + proccount + " documents");
-                }
-            }
             
             // clean up news
             checkInterruption();
@@ -2289,37 +2269,67 @@ public final class Switchboard extends serverSwitch {
                 JenaTripleStore.saveAll();
             }
 
+            
+            // clean up profiles
+            checkInterruption();
+
             // if no crawl is running and processing is activated:
             // execute the (post-) processing steps for all entries that have a process tag assigned
-            if (this.crawlQueues.coreCrawlJobSize() == 0) {
-                if (this.crawlQueues.noticeURL.isEmpty()) {
-                	Domains.clear();
-                	this.crawlQueues.noticeURL.clear(); // flushes more caches 
-                }
-                postprocessingRunning = true;
+            if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
                 int proccount = 0;
-                proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, null);
-                proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, null);
-                long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
-                long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
-                long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
-                boolean optimizeRequired = deltaOptimize > 60000 * 60 * 3; // 3 hours
-                int opts = Math.max(1, (int) (index.fulltext().collectionSize() / 5000000));
-                
-                log.info("Solr auto-optimization: idleSearch=" + idleSearch + ", idleAdmin=" + idleAdmin + ", deltaOptimize=" + deltaOptimize + ", proccount=" + proccount);
-                if (idleAdmin > 600000) {
-                    // only run optimization if the admin is idle (10 minutes)
-                    if (proccount > 0) {
-                    	opts++; // have postprocessings will force optimazion with one more Segment which is small an quick
-                    	optimizeRequired = true;
+                if (index.fulltext().getDefaultConfiguration().contains(CollectionSchema.harvestkey_s.getSolrFieldName())) {
+                    Set<String> deletionCandidates = this.crawler.getFinishesProfiles(this.crawlQueues);
+                    int cleanup = deletionCandidates.size();
+                    if (cleanup > 0) {
+                        // run postprocessing on these profiles
+                        postprocessingRunning = true;
+                        for (String profileHash: deletionCandidates) {
+                            proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, profileHash);
+                            proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, profileHash);
+                        }
+                        
+                        this.crawler.cleanProfiles(deletionCandidates);
+                        log.info("cleanup removed " + cleanup + " crawl profiles, post-processed " + proccount + " documents");
                     }
-                    if (optimizeRequired) {
-                        if (idleSearch < 600000) opts++; // < 10 minutes idle time will cause a optimization with one more Segment which is small an quick
-                        log.info("Solr auto-optimization: running solr.optimize(" + opts + ")");
-                        index.fulltext().optimize(opts);
-                        this.optimizeLastRun = System.currentTimeMillis();
+                } else {
+                    if (this.crawler.allCrawlsFinished(this.crawlQueues)) {
+                        // run postprocessing on all profiles
+                        postprocessingRunning = true;
+                        proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, null);
+                        proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, null);
+                        
+                        this.crawler.cleanProfiles(this.crawler.getActiveProfiles());
+                        log.info("cleanup post-processed " + proccount + " documents");
                     }
                 }
+                if (this.crawler.allCrawlsFinished(this.crawlQueues)) {
+                    // flush caches
+                    Domains.clear();
+                    this.crawlQueues.noticeURL.clear();
+                    
+                    // do solr optimization
+                    long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
+                    long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
+                    long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
+                    boolean optimizeRequired = deltaOptimize > 60000 * 60 * 3; // 3 hours
+                    int opts = Math.max(1, (int) (index.fulltext().collectionSize() / 5000000));
+                    
+                    log.info("Solr auto-optimization: idleSearch=" + idleSearch + ", idleAdmin=" + idleAdmin + ", deltaOptimize=" + deltaOptimize + ", proccount=" + proccount);
+                    if (idleAdmin > 600000) {
+                        // only run optimization if the admin is idle (10 minutes)
+                        if (proccount > 0) {
+                            opts++; // have postprocessings will force optimazion with one more Segment which is small an quick
+                            optimizeRequired = true;
+                        }
+                        if (optimizeRequired) {
+                            if (idleSearch < 600000) opts++; // < 10 minutes idle time will cause a optimization with one more Segment which is small an quick
+                            log.info("Solr auto-optimization: running solr.optimize(" + opts + ")");
+                            index.fulltext().optimize(opts);
+                            this.optimizeLastRun = System.currentTimeMillis();
+                        }
+                    }
+                }
+                
                 postprocessingRunning = false;
             }
 

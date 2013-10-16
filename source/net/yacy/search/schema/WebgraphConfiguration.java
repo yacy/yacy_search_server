@@ -302,10 +302,9 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         // that means we must search for those entries.
         connector.commit(true); // make sure that we have latest information that can be found
         //BlockingQueue<SolrDocument> docs = index.fulltext().getSolr().concurrentQuery("*:*", 0, 1000, 60000, 10);
-        BlockingQueue<SolrDocument> docs = connector.concurrentDocumentsByQuery(
-                (harvestkey == null ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
-                WebgraphSchema.process_sxt.getSolrFieldName() + ":[* TO *]",
-                0, 100000, 60000, 50);
+        String query = (harvestkey == null || !this.contains(WebgraphSchema.harvestkey_s) ? "" : WebgraphSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
+                WebgraphSchema.process_sxt.getSolrFieldName() + ":[* TO *]";
+        BlockingQueue<SolrDocument> docs = connector.concurrentDocumentsByQuery(query, 0, 100000, 60000, 50);
         
         SolrDocument doc;
         String protocol, urlstub, id;
@@ -341,9 +340,10 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
                         
                         // all processing steps checked, remove the processing tag
                         sid.removeField(WebgraphSchema.process_sxt.getSolrFieldName());
-                        sid.removeField(WebgraphSchema.harvestkey_s.getSolrFieldName());
+                        if (this.contains(WebgraphSchema.harvestkey_s)) sid.removeField(WebgraphSchema.harvestkey_s.getSolrFieldName());
                         
                         // send back to index
+                        connector.deleteById((String) doc.getFieldValue(WebgraphSchema.id.getSolrFieldName())); 
                         connector.add(sid);
                         proccount++;
                     } catch (final Throwable e1) {

@@ -244,7 +244,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
     }
     
     public boolean contains(SchemaDeclaration field) {
-        return this.contains(field.name());
+        return this.contains(field.getSolrFieldName());
     }
 
     public void add(final SolrInputDocument doc, final SchemaDeclaration key, final String value) {
