@@ -49,6 +49,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -121,7 +122,7 @@ import org.eclipse.jetty.util.resource.ResourceFactory;
  *
  * </PRE>
  */
-public abstract class YaCyDefaultServlet extends HttpServlet implements ResourceFactory {
+public abstract class YaCyDefaultServlet extends HttpServlet  {
 
     private static final long serialVersionUID = 4900000000000001110L;
     protected ServletContext _servletContext;
@@ -209,7 +210,6 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
      * @param pathInContext The path to find a resource for.
      * @return The resource to serve.
      */
-    @Override
     public Resource getResource(String pathInContext) {
         Resource r = null;
         if (_relativeResourceBase != null) {
@@ -676,9 +676,15 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
             } else {
                 templatePatterns = new servletProperties((serverObjects) tmp);
             }
-            
+     
             // handle YaCy http commands
-            if (templatePatterns.containsKey(serverObjects.ACTION_LOCATION)) {
+            // handle action auth: check if the servlets requests authentication
+            if (templatePatterns.containsKey(serverObjects.ACTION_AUTHENTICATE)) {
+                if (!request.authenticate(response)) {
+                    return; 
+                }
+            //handle action forward
+            } else if (templatePatterns.containsKey(serverObjects.ACTION_LOCATION)) {
                 String location = templatePatterns.get(serverObjects.ACTION_LOCATION, "");
 
                 if (location.isEmpty()) {
@@ -687,7 +693,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet implements Resource
                 //TODO: handle equivalent of this from httpdfilehandler
                 // final ResponseHeader headers = getDefaultHeaders(request.getPathInfo());
                 // headers.setAdditionalHeaderProperties(templatePatterns.getOutgoingHeader().getAdditionalHeaderProperties()); //put the cookies into the new header TODO: can we put all headerlines, without trouble?
-                
+
                 response.setHeader(HeaderFramework.LOCATION, location);
                 response.setStatus(HttpServletResponse.SC_FOUND);
                 return;
