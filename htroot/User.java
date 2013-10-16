@@ -120,7 +120,7 @@ public class User{
                 prop.put("logged-in_identified-by", "1");
                 prop.putHTML("logged-in_username", username);
                 if(post.containsKey("returnto")){
-                    prop.put("LOCATION", post.get("returnto"));
+                    prop.put(serverObjects.ACTION_LOCATION, post.get("returnto"));
                 }
             }
         }
@@ -160,7 +160,7 @@ public class User{
             	prop.authenticationRequired();
             }
             if(post.containsKey("returnto")){
-                prop.put("LOCATION", post.get("returnto"));
+                prop.put(serverObjects.ACTION_LOCATION, post.get("returnto"));
             }
         }
         // return rewrite properties

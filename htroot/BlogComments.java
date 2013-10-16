@@ -129,7 +129,7 @@ public class BlogComments {
                 blogEntry.addComment(commentID);
                 sb.blogDB.writeBlogEntry(blogEntry);
                 sb.blogCommentDB.write(sb.blogCommentDB.newEntry(commentID, subject, author, ip, date, content));
-                prop.putHTML("LOCATION","BlogComments.html?page=" + pagename);
+                prop.putHTML(serverObjects.ACTION_LOCATION,"BlogComments.html?page=" + pagename);
 
                 MessageBoard.entry msgEntry = sb.messageDB.newEntry(
                         "blogComment",
@@ -179,7 +179,7 @@ public class BlogComments {
             // show blog-entry/entries
             prop.put("mode", "0"); //viewing
             if("blog_default".equals(pagename)) {
-                prop.put("LOCATION","Blog.html");
+                prop.put(serverObjects.ACTION_LOCATION,"Blog.html");
             } else {
                 //show 1 blog entry
                 prop.put("mode_pageid", page.getKey());
