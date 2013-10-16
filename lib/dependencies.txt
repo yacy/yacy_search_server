@@ -22,7 +22,7 @@ commons-io-2.1.jar
 commons-lang-2.6.jar
 geronimo-stax-api_1.0_spec-1.0.1.jar
 guava-r05.jar
-httpclient-4.3.jar
+httpclient-4.3.1.jar
 httpcore-4.3.jar
 jcl-over-slf4j-1.6.1.jar
 log4j-over-slf4j-1.6.1.jar

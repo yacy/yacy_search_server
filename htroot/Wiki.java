@@ -123,8 +123,8 @@ public class Wiki {
                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_WIKI_UPDATE, map);
             }
             page = newEntry;
-            prop.putHTML("LOCATION", "/Wiki.html?page=" + pagename);
-            prop.put("LOCATION", prop.get("LOCATION"));
+            prop.putHTML(serverObjects.ACTION_LOCATION, "/Wiki.html?page=" + pagename);
+            prop.put(serverObjects.ACTION_LOCATION, prop.get(serverObjects.ACTION_LOCATION));
         }
 
         if (post != null && post.containsKey("edit")) {

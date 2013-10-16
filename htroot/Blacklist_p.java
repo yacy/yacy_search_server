@@ -124,7 +124,7 @@ public class Blacklist_p {
 
                 blacklistToUse = post.get("newListName", "").trim();
                 if (blacklistToUse.isEmpty()) {
-                    prop.put("LOCATION","");
+                    prop.put(serverObjects.ACTION_LOCATION,"");
                     return prop;
                 }
 
@@ -171,7 +171,7 @@ public class Blacklist_p {
 
                 blacklistToUse = post.get("selectedListName");
                 if (blacklistToUse == null || blacklistToUse.isEmpty()) {
-                    prop.put("LOCATION","");
+                    prop.put(serverObjects.ACTION_LOCATION,"");
                     return prop;
                 }
 
@@ -199,7 +199,7 @@ public class Blacklist_p {
 
                 blacklistToUse = post.get("selectedListName", "").trim();
                 if (blacklistToUse == null || blacklistToUse.isEmpty()) {
-                    prop.put("LOCATION", "");
+                    prop.put(serverObjects.ACTION_LOCATION, "");
                     return prop;
                 }
 
@@ -222,7 +222,7 @@ public class Blacklist_p {
 
                 blacklistToUse = post.get("selectedListName", "").trim();
                 if (blacklistToUse == null || blacklistToUse.isEmpty()) {
-                    prop.put("LOCATION", "");
+                    prop.put(serverObjects.ACTION_LOCATION, "");
                     return prop;
                 }
 
@@ -246,7 +246,7 @@ public class Blacklist_p {
                     String temp = null;
                     for (final String selectedBlacklistEntry : selectedBlacklistEntries) {
                         if ((temp = deleteBlacklistEntry(blacklistToUse, selectedBlacklistEntry, header)) != null) {
-                            prop.put("LOCATION", temp);
+                            prop.put(serverObjects.ACTION_LOCATION, temp);
                             return prop;
                         }
                     }
@@ -269,7 +269,7 @@ public class Blacklist_p {
 
                 final String temp = addBlacklistEntry(blacklistToUse, blentry, header);
                 if (temp != null) {
-                    prop.put("LOCATION", temp);
+                    prop.put(serverObjects.ACTION_LOCATION, temp);
                     return prop;
                 }
 
@@ -295,12 +295,12 @@ public class Blacklist_p {
                     String temp;
                     for (final String selectedBlacklistEntry : selectedBlacklistEntries) {
                         if ((temp = addBlacklistEntry(targetBlacklist, selectedBlacklistEntry, header)) != null) {
-                            prop.put("LOCATION", temp);
+                            prop.put(serverObjects.ACTION_LOCATION, temp);
                             return prop;
                         }
 
                         if ((temp = deleteBlacklistEntry(blacklistToUse, selectedBlacklistEntry, header)) != null) {
-                            prop.put("LOCATION", temp);
+                            prop.put(serverObjects.ACTION_LOCATION, temp);
                             return prop;
 
                         }
@@ -326,7 +326,7 @@ public class Blacklist_p {
                     final String[] selectedBlacklistEntries = post.getAll("selectedBlacklistEntry.*");
 
                     if (selectedBlacklistEntries.length != editedBlacklistEntries.length) {
-                        prop.put("LOCATION", "");
+                        prop.put(serverObjects.ACTION_LOCATION, "");
                         return prop;
                     }
 
@@ -337,12 +337,12 @@ public class Blacklist_p {
                         if (!selectedBlacklistEntries[i].equals(editedBlacklistEntries[i])) {
 
                             if ((temp = deleteBlacklistEntry(blacklistToUse, selectedBlacklistEntries[i], header)) != null) {
-                                prop.put("LOCATION", temp);
+                                prop.put(serverObjects.ACTION_LOCATION, temp);
                                 return prop;
                             }
 
                             if ((temp = addBlacklistEntry(blacklistToUse, editedBlacklistEntries[i], header)) != null) {
-                                prop.put("LOCATION", temp);
+                                prop.put(serverObjects.ACTION_LOCATION, temp);
                                 return prop;
                             }
                         }

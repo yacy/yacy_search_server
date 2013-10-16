@@ -65,7 +65,7 @@ public final class Connections_p {
             if (post.containsKey("closeServerSession")) {
                 final String sessionName = post.get("closeServerSession", null);
                 sb.closeSessions(sessionName);
-                prop.put("LOCATION","");
+                prop.put(serverObjects.ACTION_LOCATION,"");
                 return prop;
             }
         } else {
