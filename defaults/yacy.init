@@ -8,7 +8,8 @@
 
 # ----------------------------------------------------------------------------
 # the HTTP service configurations
-
+# choices are jetty or anomic
+defaulthttpserver=jetty
 # port number where the server should bind to
 port = 8090
 

@@ -65,6 +65,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
 import com.google.common.io.Files;
+import net.yacy.server.http.HTTPDemon;
 import net.yacy.server.serverCore;
 
 
@@ -330,27 +331,29 @@ public final class yacy {
             // start main threads
             final int port = sb.getConfigInt("port", 8090);
             try {
-
-            	// start jetty http server
-            	YaCyHttpServer httpServer = new Jetty8HttpServerImpl(port);
-            	httpServer.startupServer();
-                sb.setHttpServer(httpServer);
-                ConcurrentLog.info("STARTUP",httpServer.getVersion());
-                //final HTTPDemon protocolHandler = new HTTPDemon(sb);
-                //final serverCore server = new serverCore(
-                //        timeout /*control socket timeout in milliseconds*/,
-                //        true /* block attacks (wrong protocol) */,
-                //        protocolHandler /*command class*/,
-                //        sb,
-                //        30000 /*command max length incl. GET args*/);
-                //server.setName("httpd:"+port);
-                //server.setPriority(Thread.MAX_PRIORITY);
-                //server.setObeyIntermission(false);
-                
+                // start http server
+            	YaCyHttpServer httpServer;
+                // default jetty (alternative "anomichttpd")
+                if (sb.getConfig("defaulthttpserver","jetty").equalsIgnoreCase("jetty")) {
+                    httpServer = new Jetty8HttpServerImpl(port);
+                } else {   
+                final HTTPDemon protocolHandler = new HTTPDemon(sb);
+                httpServer = new serverCore(
+                        timeout /*control socket timeout in milliseconds*/,
+                        true /* block attacks (wrong protocol) */,
+                        protocolHandler /*command class*/,
+                        sb,
+                        30000 /*command max length incl. GET args*/);
+                ((serverCore) httpServer).setName("httpd:"+port);
+                ((serverCore) httpServer).setPriority(Thread.MAX_PRIORITY);
+                ((serverCore) httpServer).setObeyIntermission(false);
                 // start the server
                 //sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);             
-                //server.start();
-
+                }
+                httpServer.startupServer();
+                sb.setHttpServer(httpServer);
+                ConcurrentLog.info("STARTUP",httpServer.getVersion());
+                
                 // open the browser window
                 final boolean browserPopUpTrigger = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
                 if (browserPopUpTrigger) try {
