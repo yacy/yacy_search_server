@@ -128,6 +128,9 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
      */
     @Override
     public void startupServer() throws Exception {
+        // option to finish running requests on shutdown
+        server.setGracefulShutdown(3000);
+        server.setStopAtShutdown(true);
         server.start();
     }
 
@@ -136,7 +139,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
      */
     @Override
     public void stop() throws Exception {
-        server.stop();
+        server.stop();  
         server.join();
     }
 

@@ -13,6 +13,14 @@
 	<classpathentry excluding="collection1/" kind="src" path="htroot/solr"/>
 	<classpathentry kind="src" path="htroot/gsa"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/jetty-continuation-8.1.13.v20130916.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-http-8.1.13.v20130916.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-io-8.1.13.v20130916.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-security-8.1.13.v20130916.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-server-8.1.13.v20130916.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlet-8.1.13.v20130916.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlets-8.1.13.v20130916.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-util-8.1.13.v20130916.jar"/>	
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.3.jar"/>
 	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
 	<classpathentry kind="lib" path="lib/webcat-0.1-swf.jar"/>
@@ -34,7 +42,7 @@
 	<classpathentry kind="lib" path="lib/commons-io-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-compress-1.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar"/>
-	<classpathentry kind="lib" path="lib/servlet-api-2.5-20081211.jar"/>
+	<classpathentry kind="lib" path="lib/javax.servlet-3.0.0.v201112011016.jar"/>
 	<classpathentry kind="lib" path="lib/jaudiotagger-2.0.4-20111207.115108-15.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.7.jar"/>
 	<classpathentry kind="lib" path="lib/spatial4j-0.3.jar"/>
