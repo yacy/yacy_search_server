@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -560,29 +561,33 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return System.currentTimeMillis() - (60000L * oldTimeMinutes);
     }
 
-    public static String siteFilter(final Collection<? extends MultiProtocolURL> uris) {
+    public static String siteFilter(final Collection<? extends MultiProtocolURL> urls) {
+        LinkedHashSet<String> filters = new LinkedHashSet<String>(); // first collect in a set to eliminate doubles
+        for (final MultiProtocolURL url: urls) filters.add(mustMatchFilterFullDomain(url));
         final StringBuilder filter = new StringBuilder();
-        for (final MultiProtocolURL uri: uris) filter.append('|').append(mustMatchFilterFullDomain(uri));
+        for (final String urlfilter: filters) filter.append('|').append(urlfilter);
         return filter.length() > 0 ? filter.substring(1) : CrawlProfile.MATCH_ALL_STRING;
     }
 
-    public static String mustMatchFilterFullDomain(final MultiProtocolURL uri) {
-        String host = uri.getHost();
-        if (host == null) return uri.getProtocol() + ".*";
+    public static String mustMatchFilterFullDomain(final MultiProtocolURL url) {
+        String host = url.getHost();
+        if (host == null) return url.getProtocol() + ".*";
         if (host.startsWith("www.")) host = host.substring(4);
-        String protocol = uri.getProtocol();
+        String protocol = url.getProtocol();
         if ("http".equals(protocol) || "https".equals(protocol)) protocol = "https?+";
         return new StringBuilder(host.length() + 20).append(protocol).append("://(www.)?").append(Pattern.quote(host)).append(".*").toString();
     }
 
-    public static String subpathFilter(final Collection<? extends MultiProtocolURL> uris) {
+    public static String subpathFilter(final Collection<? extends MultiProtocolURL> urls) {
+        LinkedHashSet<String> filters = new LinkedHashSet<String>(); // first collect in a set to eliminate doubles
+        for (final MultiProtocolURL url: urls) filters.add(mustMatchSubpath(url));
         final StringBuilder filter = new StringBuilder();
-        for (final MultiProtocolURL uri: uris) filter.append('|').append(mustMatchSubpath(uri));
+        for (final String urlfilter: filters) filter.append('|').append(urlfilter);
         return filter.length() > 0 ? filter.substring(1) : CrawlProfile.MATCH_ALL_STRING;
     }
 
-    public static String mustMatchSubpath(final MultiProtocolURL uri) {
-        String u = uri.toNormalform(true);
+    public static String mustMatchSubpath(final MultiProtocolURL url) {
+        String u = url.toNormalform(true);
         if (!u.endsWith("/")) {int p = u.lastIndexOf("/"); if (p > 0) u = u.substring(0, p + 1);}
         return new StringBuilder(u.length() + 5).append(Pattern.quote(u)).append(".*").toString();
     }
