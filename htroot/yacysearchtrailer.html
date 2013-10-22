@@ -1,7 +1,7 @@
 <div style="float:right;width:25%;">
 
 #(cat-location)#::
-<div style="float:right; margin-top:5px; width:220px;">
+<div style="float:right; margin-top:5px; width:230px;">
 <a href="yacysearch_location.html?query=#[queryenc]#">
 <img src="/env/grafics/earthsearch.png" width="215" height="159" alt="earthsearchlogo" /></a>
 <a href="yacysearch_location.html?query=#[queryenc]#">Show search results for "#[query]#" on map</a>
@@ -9,15 +9,25 @@
 #(/cat-location)#
 
 #(nav-topics)#::
-<div style="float: right; margin-top:5px; width: 220px; height: 80px">
-<div><ul id="sidebarTopics" style="padding-left: 0px;">#{element}#
-<li value="#[count]#"><a href="#[url]#">#[name]#</a></li>
-#{/element}#</ul></div>
+<div style="float: right; margin-top:5px; width: 230px; height: 72px">
+<div id="tagcloud" style="text-align:justify">#{element}#
+<a rel="#[count]#" href="#[url]#" style="text-decoration: none;">#[name]#</a>
+#{/element}#</div>
 </div>
+<script type="text/javascript" charset="utf-8">
+  $.fn.tagcloud.defaults = {
+    size: {start: 8, end: 16, unit: 'pt'},
+    color: {start: '#c08080', end: '#2200CC'}
+  };
+  $(document).ready(function(){
+    $("#tagcloud a").tagcloud();
+    return false;
+  })
+</script>
 #(/nav-topics)#
 
 #(nav-protocols)#::
-<div id="sidebarProtocols" style="float:right; margin-top:5px; width:220px;">
+<div id="sidebarProtocols" style="float:right; margin-top:5px; width:230px;">
 <h3 style="padding-left:25px;">Protocol Navigator</h3>
 <dl class="bplike" style="padding-left:5px;">#{element}#
 <dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
@@ -34,7 +44,7 @@ $(function() { $("#sidebarProtocols").accordion('activate', false); });
 #(/nav-protocols)#
 
 #(nav-filetypes)#::
-<div id="sidebarFiletypes" style="float:right; margin-top:5px; width:220px;">
+<div id="sidebarFiletypes" style="float:right; margin-top:5px; width:230px;">
 <h3 style="padding-left:25px;">Filetype Navigator</h3>
 <dl class="bplike" style="padding-left:5px;">#{element}#
 <dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
@@ -51,7 +61,7 @@ $(function() { $("#sidebarFiletypes").accordion('activate', false); });
 #(/nav-filetypes)#
 
 #(nav-domains)#::
-<div id="sidebarDomains" style="float:right; margin-top:5px; width:220px;">
+<div id="sidebarDomains" style="float:right; margin-top:5px; width:230px;">
 <h3 style="padding-left:25px;">Domain Navigator</h3>
 <dl class="bplike" style="padding-left:5px;">#{element}#
 <dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
@@ -68,7 +78,7 @@ $(function() { $("#sidebarDomains").accordion('activate', false); });
 #(/nav-domains)#
 
 #(nav-namespace)#::
-<div id="sidebarNameSpace" style="float:right; margin-top:5px; width:220px;">
+<div id="sidebarNameSpace" style="float:right; margin-top:5px; width:230px;">
 <h3 style="padding-left:25px;">Name Space Navigator</h3>
 <dl class="bplike" style="padding-left:5px;">#{element}#
 <dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
@@ -85,7 +95,7 @@ $(function() { $("#sidebarNameSpace").accordion('activate', false); });
 #(/nav-namespace)#
 
 #(nav-authors)#::
-<div id="sidebarAuthors" style="float:right; margin-top:5px; width:220px;">
+<div id="sidebarAuthors" style="float:right; margin-top:5px; width:230px;">
 <h3 style="padding-left:25px;">Author Navigator</h3>
 <dl class="bplike" style="padding-left:5px;">#{element}#
 <dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
@@ -102,7 +112,7 @@ $(function() { $("#sidebarAuthors").accordion('activate', false); });
 #(/nav-authors)#
 
 #{nav-vocabulary}#
-<div id="sidebar#[navname]#" style="float:right; margin-top:5px; width:220px;">
+<div id="sidebar#[navname]#" style="float:right; margin-top:5px; width:230px;">
 <h3 style="padding-left:25px;">#[navname]# Navigator</h3>
 <dl class="bplike" style="padding-left:5px;">#{element}#
 <dt><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/></dt>
@@ -112,7 +122,7 @@ $(function() { $("#sidebarAuthors").accordion('activate', false); });
 #{/nav-vocabulary}#
 
 #(nav-about)#::
-<div id="sidebarAbout" style="float: right; margin-top:5px; width: 220px;">
+<div id="sidebarAbout" style="float: right; margin-top:5px; width: 230px;">
 <h3 style="padding-left:25px;">#[headline]#</h3>
 <div style="margin:0px; padding:0px;">
 #[body]#
