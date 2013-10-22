@@ -245,7 +245,7 @@ public class Table_API_p {
             boolean dark = true;
             boolean scheduledactions = false;
             int c = 0;
-            String type, comment;
+            String type, comment, url;
             // first prepare a list
             while (mapIterator.hasNext()) {
                 r = mapIterator.next();
@@ -257,7 +257,8 @@ public class Table_API_p {
                     continue;
                 }
                 comment = UTF8.String(r.get(WorkTables.TABLE_API_COL_COMMENT));
-                if (!query.matcher(comment).matches()) {
+                url = UTF8.String(r.get(WorkTables.TABLE_API_COL_URL));
+                if (!(query.matcher(comment).matches() || query.matcher(url).matches())) {
                     continue;
                 }
                 if (c >= startRecord) {
