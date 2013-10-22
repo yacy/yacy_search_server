@@ -799,7 +799,7 @@ search.verify.delete = true
 # images may be treated either as documents that are shown in search results or as objects
 # that are only visible in special search environments, like image search
 search.excludeintext.image = true
-crawler.load.image = true;
+crawler.load.image = true
 
 # remote search details
 remotesearch.maxcount = 10

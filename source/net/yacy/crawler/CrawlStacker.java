@@ -60,6 +60,7 @@ import net.yacy.peers.SeedDB;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.FilterEngine;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.search.schema.CollectionConfiguration;
 
@@ -335,13 +336,20 @@ public final class CrawlStacker {
 
         // check availability of parser and maxfilesize
         String warning = null;
-        boolean loadImages = Switchboard.getSwitchboard().getConfigBool("crawler.load.image", true);
+        boolean loadImages = Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.CRAWLER_LOAD_IMAGE, true);
+        if (!loadImages && Switchboard.getSwitchboard().getConfig(SwitchboardConstants.CRAWLER_LOAD_IMAGE, "").equals("true;")) {
+            // dammit semicolon
+            // TODO: remove this shit later
+            Switchboard.getSwitchboard().setConfig(SwitchboardConstants.CRAWLER_LOAD_IMAGE, true);
+            loadImages = true;
+        }
+        ContentDomain contentDomain = entry.url().getContentDomainFromExt();
         if ((maxFileSize >= 0 && entry.size() > maxFileSize) ||
-            entry.url().getContentDomain() == ContentDomain.APP  ||
-            (!loadImages && entry.url().getContentDomain() == ContentDomain.IMAGE) ||
-            entry.url().getContentDomain() == ContentDomain.AUDIO  ||
-            entry.url().getContentDomain() == ContentDomain.VIDEO ||
-            entry.url().getContentDomain() == ContentDomain.CTRL) {
+            contentDomain == ContentDomain.APP  ||
+            (!loadImages && contentDomain == ContentDomain.IMAGE) ||
+            contentDomain == ContentDomain.AUDIO  ||
+            contentDomain == ContentDomain.VIDEO ||
+            contentDomain == ContentDomain.CTRL) {
             warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry, profile, this.robots);
             //if (warning != null && this.log.isFine()) this.log.logFine("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
             return null;

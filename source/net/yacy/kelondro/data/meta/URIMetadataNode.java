@@ -38,7 +38,6 @@ import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
@@ -91,6 +90,20 @@ public class URIMetadataNode {
         this(doc);
         this.word = searchedWord;
         this.ranking = ranking;
+    }
+
+    /**
+     * Get the content domain of a document. This tries to get the content domain from the mime type
+     * and if this fails it uses alternatively the content domain from the file extension.
+     * @return the content domain which classifies the content type
+     */
+    public ContentDomain getContentDomain() {
+        if (this.doc == null) return this.url.getContentDomainFromExt();
+        String mime = mime();
+        if (mime == null) return this.url.getContentDomainFromExt();
+        ContentDomain contentDomain = Classification.getContentDomainFromMime(mime);
+        if (contentDomain != ContentDomain.ALL) return contentDomain;
+        return this.url.getContentDomainFromExt();
     }
     
     public SolrDocument getDocument() {
@@ -183,6 +196,11 @@ public class URIMetadataNode {
         return Response.docType(a.get(0));
     }
 
+    public String mime() {
+        ArrayList<String> mime = getStringList(CollectionSchema.content_type);
+        return mime == null || mime.size() == 0 ? null : mime.get(0);
+    }
+
     public byte[] language() {
         String language = getString(CollectionSchema.language_s);
         if (language == null || language.length() == 0) return ASCII.getBytes("en");
@@ -203,7 +221,7 @@ public class URIMetadataNode {
         if (flags == null) {
             this.flags = new Bitfield();
             if (dc_subject() != null && dc_subject().indexOf("indexof") >= 0) this.flags.set(Condenser.flag_cat_indexof, true);
-            ContentDomain cd = Classification.getContentDomain(MultiProtocolURL.getFileExtension(this.url().getFileName()));
+            ContentDomain cd = getContentDomain();
             if (lon() != 0.0d || lat() != 0.0d) this.flags.set(Condenser.flag_cat_haslocation, true);
             if (cd == ContentDomain.IMAGE || limage() > 0) this.flags.set(Condenser.flag_cat_hasimage, true);
             if (cd == ContentDomain.AUDIO || laudio() > 0) this.flags.set(Condenser.flag_cat_hasaudio, true);

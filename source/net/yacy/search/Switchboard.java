@@ -2553,7 +2553,7 @@ public final class Switchboard extends serverSwitch {
            ) {
             // get the hyperlinks
             final Map<DigestURL, String> hl = Document.getHyperlinks(documents);
-            boolean loadImages = getConfigBool("crawler.load.image", true);
+            boolean loadImages = getConfigBool(SwitchboardConstants.CRAWLER_LOAD_IMAGE, true);
             if (loadImages) hl.putAll(Document.getImagelinks(documents));
             
             // add all media links also to the crawl stack. They will be re-sorted to the NOLOAD queue and indexed afterwards as pure links
