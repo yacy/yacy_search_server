@@ -3632,12 +3632,12 @@ public final class Switchboard extends serverSwitch {
             }
             c++;
             if ( seedListFileURL.startsWith("http://") || seedListFileURL.startsWith("https://") ) {
-                loadSeedListConcurrently(this.peers, seedListFileURL, scc, (int) getConfigLong("bootstrapLoadTimeout", 20000));
+                loadSeedListConcurrently(this.peers, seedListFileURL, scc, (int) getConfigLong("bootstrapLoadTimeout", 20000), c > 0);
             }
         }
     }
 
-    private static void loadSeedListConcurrently(final SeedDB peers, final String seedListFileURL, final AtomicInteger scc, final int timeout) {
+    private static void loadSeedListConcurrently(final SeedDB peers, final String seedListFileURL, final AtomicInteger scc, final int timeout, final boolean checkAge) {
         // uses the superseed to initialize the database with known seeds
 
         Thread seedLoader = new Thread() {
@@ -3656,52 +3656,48 @@ public final class Switchboard extends serverSwitch {
                     client.HEADResponse(url.toString());
                     int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
                     ResponseHeader header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
-                    //final long loadtime = System.currentTimeMillis() - start;
-                    /*if (header == null) {
-                        if (loadtime > getConfigLong("bootstrapLoadTimeout", 6000)) {
-                            yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available, time-out after " + loadtime + " milliseconds");
-                        } else {
-                            yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available, no content");
+                    if (checkAge) {
+                        if ( header.lastModified() == null ) {
+                            Network.log.warn("BOOTSTRAP: seed-list URL "
+                                + seedListFileURL
+                                + " not usable, last-modified is missing");
+                            return;
+                        } else if ( (header.age() > 86400000) && (scc.get() > 0) ) {
+                            Network.log.info("BOOTSTRAP: seed-list URL "
+                                + seedListFileURL
+                                + " too old ("
+                                + (header.age() / 86400000)
+                                + " days)");
+                            return;
                         }
-                    } else*/if ( header.lastModified() == null ) {
-                        Network.log.warn("BOOTSTRAP: seed-list URL "
-                            + seedListFileURL
-                            + " not usable, last-modified is missing");
-                    } else if ( (header.age() > 86400000) && (scc.get() > 0) ) {
-                        Network.log.info("BOOTSTRAP: seed-list URL "
-                            + seedListFileURL
-                            + " too old ("
-                            + (header.age() / 86400000)
-                            + " days)");
-                    } else {
-                        scc.incrementAndGet();
-                        final byte[] content = client.GETbytes(url);
-                        Iterator<String> enu = FileUtils.strings(content);
-                        int lc = 0;
-                        while ( enu.hasNext() ) {
-                            try {
-                                Seed ys = Seed.genRemoteSeed(enu.next(), false, null);
-                                if ( (ys != null)
-                                    && (!peers.mySeedIsDefined() || !peers.mySeed().hash.equals(ys.hash)) ) {
-                                    final long lastseen = Math.abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);
-                                    if ( lastseen < 60 ) {
-                                        if ( peers.peerActions.connectPeer(ys, false) ) {
-                                            lc++;
-                                        }
+                    }
+                    scc.incrementAndGet();
+                    final byte[] content = client.GETbytes(url);
+                    Iterator<String> enu = FileUtils.strings(content);
+                    int lc = 0;
+                    while ( enu.hasNext() ) {
+                        try {
+                            Seed ys = Seed.genRemoteSeed(enu.next(), false, null);
+                            if ( (ys != null)
+                                && (!peers.mySeedIsDefined() || !peers.mySeed().hash.equals(ys.hash)) ) {
+                                final long lastseen = Math.abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);
+                                if ( lastseen < 60 ) {
+                                    if ( peers.peerActions.connectPeer(ys, false) ) {
+                                        lc++;
                                     }
                                 }
-                            } catch (final IOException e ) {
-                                Network.log.info("BOOTSTRAP: bad seed from " + seedListFileURL + ": " + e.getMessage());
                             }
+                        } catch (final IOException e ) {
+                            Network.log.info("BOOTSTRAP: bad seed from " + seedListFileURL + ": " + e.getMessage());
                         }
-                        Network.log.info("BOOTSTRAP: "
-                            + lc
-                            + " seeds from seed-list URL "
-                            + seedListFileURL
-                            + ", AGE="
-                            + (header.age() / 3600000)
-                            + "h");
                     }
+                    Network.log.info("BOOTSTRAP: "
+                        + lc
+                        + " seeds from seed-list URL "
+                        + seedListFileURL
+                        + ", AGE="
+                        + (header.age() / 3600000)
+                        + "h");
 
                 } catch (final IOException e ) {
                     // this is when wget fails, commonly because of timeout
