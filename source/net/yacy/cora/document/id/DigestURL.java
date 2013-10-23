@@ -47,6 +47,8 @@ import net.yacy.cora.util.ConcurrentLog;
  */
 public class DigestURL extends MultiProtocolURL implements Serializable {
 
+    public static final DigestURL POISON = new DigestURL(); // poison pill for concurrent link generators
+    
     private static final long serialVersionUID = -1173233022912141885L;
 
     // class variables
@@ -100,6 +102,13 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         return h;
     }
 
+    /**
+     * DigestURI to generate a poison pill
+     */
+    private DigestURL() {
+        super();
+        this.hash = null;
+    }
 
     /**
      * DigestURI from File
