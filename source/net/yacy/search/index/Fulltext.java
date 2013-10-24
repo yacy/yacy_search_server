@@ -440,23 +440,15 @@ public final class Fulltext {
      * @param freshdate either NULL or a date in the past which is the limit for deletion. Only documents older than this date are deleted
      * @throws IOException
      */
-    public void deleteDomainHashpart(final String hosthash, Date freshdate) {
-        // first collect all url hashes that belong to the domain
-        assert hosthash.length() == 6;
-        final String collection1Query = CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + hosthash + "\"" +
-                ((freshdate != null && freshdate.before(new Date())) ?
-                        (" AND " + CollectionSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") :
-                        ""
-                );
-        final String webgraphQuery = WebgraphSchema.source_host_id_s.getSolrFieldName() + ":\"" + hosthash + "\"" +
-                ((freshdate != null && freshdate.before(new Date())) ?
-                        (" AND " + WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") :
-                        ""
-                );
-
+    public void deleteStaleDomainHashes(final Set<String> hosthashes, Date freshdate) {
         // delete in solr
-        try {Fulltext.this.getDefaultConnector().deleteByQuery(collection1Query);} catch (final IOException e) {}
-        if (this.writeWebgraph) try {Fulltext.this.getWebgraphConnector().deleteByQuery(webgraphQuery);} catch (final IOException e) {}
+        Date now = new Date();
+        deleteDomainWithConstraint(this.getDefaultConnector(), CollectionSchema.host_id_s.getSolrFieldName(), hosthashes,
+                (freshdate == null || freshdate.after(now)) ? null :
+                (CollectionSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
+        if (this.writeWebgraph) deleteDomainWithConstraint(this.getWebgraphConnector(), WebgraphSchema.source_host_id_s.getSolrFieldName(), hosthashes,
+                (freshdate == null || freshdate.after(now)) ? null :
+                (WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
 
         // delete in old metadata structure
         if (Fulltext.this.urlIndexFile != null) {
@@ -467,7 +459,7 @@ public final class Fulltext {
                 String hash;
                 while (i != null && i.hasNext()) {
                     hash = ASCII.String(i.next());
-                    if (hosthash.equals(hash.substring(6))) l.add(hash);
+                    if (hosthashes.contains(hash.substring(6))) l.add(hash);
                 }
                 
                 // then delete the urls using this list
@@ -481,32 +473,20 @@ public final class Fulltext {
             HostStat hs;
             while (hsi.hasNext()) {
                 hs = hsi.next();
-                if (hs.hosthash.equals(hosthash)) {
-                    hsi.remove();
-                    break;
-                }
+                if (hosthashes.contains(hs.hosthash)) hsi.remove();
             }
         }
     }
 
-    public void deleteDomainHostname(final String hostname, Date freshdate) {
-        // first collect all url hashes that belong to the domain
-        final String collectionQuery =
-                CollectionSchema.host_s.getSolrFieldName() + ":\"" + hostname + "\"" +
-                ((freshdate != null && freshdate.before(new Date())) ?
-                        (" AND " + CollectionSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") :
-                        ""
-                );
-        final String webgraphQuery =
-        WebgraphSchema.source_host_s.getSolrFieldName() + ":\"" + hostname + "\"" +
-        ((freshdate != null && freshdate.before(new Date())) ?
-                (" AND " + WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]") :
-                ""
-        );
-        
-        // delete in solr
-        try {Fulltext.this.getDefaultConnector().deleteByQuery(collectionQuery);} catch (final IOException e) {}
-        if (this.writeWebgraph) try {Fulltext.this.getWebgraphConnector().deleteByQuery(webgraphQuery);} catch (final IOException e) {}
+    public void deleteStaleDomainNames(final Set<String> hostnames, Date freshdate) {
+
+        Date now = new Date();
+        deleteDomainWithConstraint(this.getDefaultConnector(), CollectionSchema.host_s.getSolrFieldName(), hostnames,
+                (freshdate == null || freshdate.after(now)) ? null :
+                (CollectionSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
+        if (this.writeWebgraph) deleteDomainWithConstraint(this.getWebgraphConnector(), WebgraphSchema.source_host_s.getSolrFieldName(), hostnames,
+                (freshdate == null || freshdate.after(now)) ? null :
+                (WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
         
         // finally remove the line with statistics
         if (Fulltext.this.statsDump != null) {
@@ -514,10 +494,37 @@ public final class Fulltext {
             HostStat hs;
             while (hsi.hasNext()) {
                 hs = hsi.next();
-                if (hs.hostname.equals(hostname)) {
-                    hsi.remove();
-                    break;
+                if (hostnames.contains(hs.hostname)) hsi.remove();
+            }
+        }
+    }
+    
+    /**
+     * delete all documents within a domain that are registered as error document
+     * @param hosthashes
+     */
+    public void deleteDomainErrors(final Set<String> hosthashes) {
+        deleteDomainWithConstraint(this.getDefaultConnector(), CollectionSchema.host_id_s.getSolrFieldName(), hosthashes, CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
+    }
+    
+    private static void deleteDomainWithConstraint(SolrConnector connector, String fieldname, final Set<String> hosthashes, String constraintQuery) {
+        if (hosthashes == null || hosthashes.size() == 0) return;
+        int subsetscount = 1 + (hosthashes.size() / 255); // if the list is too large, we get a "too many boolean clauses" exception
+        int c = 0;
+        @SuppressWarnings("unchecked")
+        List<String>[] subsets = new ArrayList[subsetscount];
+        for (int i = 0; i < subsetscount; i++) subsets[i] = new ArrayList<String>();
+        for (String hosthash: hosthashes) subsets[c++ % subsetscount].add(hosthash);
+        for (List<String> subset: subsets) {
+            try {
+                StringBuilder query = new StringBuilder();
+                for (String hosthash: subset) {
+                    if (query.length() > 0) query.append(" OR ");
+                    //query.append(CollectionSchema.host_id_s.getSolrFieldName()).append(":\"").append(hosthash).append(":\"");
+                    query.append("({!raw f=").append(fieldname).append('}').append(hosthash).append(")");
                 }
+                if (constraintQuery == null) connector.deleteByQuery(query.toString()); else connector.deleteByQuery("(" + query.toString() + ") AND " + constraintQuery);
+            } catch (final IOException e) {
             }
         }
     }

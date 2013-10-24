@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -2925,7 +2926,9 @@ public final class Switchboard extends serverSwitch {
         
         // remove the document from the error-db
         byte[] hosthash = new byte[6]; System.arraycopy(urlhash, 6, hosthash, 0, 6);
-        this.crawlQueues.errorURL.removeHost(hosthash);
+        Set<String> hosthashes = new HashSet<String>();
+        hosthashes.add(ASCII.String(hosthash));
+        this.crawlQueues.errorURL.removeHosts(hosthashes);
         this.index.fulltext().remove(urlhash);
 
         // get a scraper to get the title

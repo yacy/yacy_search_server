@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
@@ -37,7 +38,6 @@ import org.apache.solr.common.SolrInputDocument;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.FailCategory;
-import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.search.index.Fulltext;
@@ -81,18 +81,15 @@ public class ErrorCache {
         this.fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
     }
 
-    public void removeHost(final byte[] hosthash) {
-        if (hosthash == null) return;
-        try {
-            this.fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.host_id_s.getSolrFieldName() + ":\"" + ASCII.String(hosthash) + "\" AND " + CollectionSchema.failreason_s.getSolrFieldName() + ":[* TO *]");
-            synchronized (this.stack) {
+    public void removeHosts(final Set<String> hosthashes) {
+        if (hosthashes == null || hosthashes.size() == 0) return;
+        this.fulltext.deleteDomainErrors(hosthashes);
+        synchronized (this.stack) {
             Iterator<String> i = ErrorCache.this.stack.keySet().iterator();
-                while (i.hasNext()) {
-                    String b = i.next();
-                    if (NaturalOrder.naturalOrder.equal(hosthash, 0, ASCII.getBytes(b), 6, 6)) i.remove();
-                }
+            while (i.hasNext()) {
+                String b = i.next();
+                if (hosthashes.contains(b)) i.remove();
             }
-        } catch (final IOException e) {
         }
     }
 

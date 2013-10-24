@@ -312,9 +312,9 @@ public class Crawler_p {
                     if (fullDomain) {
                         siteFilter = CrawlProfile.siteFilter(rootURLs);
                         if (deleteold) {
-                            for (DigestURL u: rootURLs) {
-                                sb.index.fulltext().deleteDomainHashpart(u.hosthash(), deleteageDate);
-                            }
+                            Set<String> hosthashes = new HashSet<String>();
+                            for (DigestURL u: rootURLs) hosthashes.add(u.hosthash());
+                            sb.index.fulltext().deleteStaleDomainHashes(hosthashes, deleteageDate);
                         }
                     } else if (subPath) {
                         siteFilter = CrawlProfile.subpathFilter(rootURLs);
@@ -387,10 +387,12 @@ public class Crawler_p {
                 try {sb.crawlQueues.noticeURL.removeByProfileHandle(profile.handle(), 10000);} catch (final SpaceExceededException e1) {}
                 
                 // delete all error urls for that domain
+                Set<String> hosthashes = new HashSet<String>();
                 for (DigestURL u: rootURLs) {
                     sb.index.fulltext().remove(u.hash());
-                    sb.crawlQueues.errorURL.removeHost(ASCII.getBytes(u.hosthash()));
+                    hosthashes.add(u.hosthash());
                 }
+                sb.crawlQueues.errorURL.removeHosts(hosthashes);
                 sb.index.fulltext().commit(true);
                 
                 // start the crawl

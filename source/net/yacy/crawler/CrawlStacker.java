@@ -28,8 +28,10 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -175,6 +177,17 @@ public final class CrawlStacker {
     }
 
     private void enqueueEntries(final byte[] initiator, final String profileHandle, final List<AnchorURL> hyperlinks, final boolean replace) {
+        if (replace) {
+            // delete old entries, if exists to force a re-load of the url (thats wanted here)
+            Set<String> hosthashes = new HashSet<String>();
+            for (final AnchorURL url: hyperlinks) {
+                if (url == null) continue;
+                final byte[] urlhash = url.hash();
+                byte[] hosthash = new byte[6]; System.arraycopy(urlhash, 6, hosthash, 0, 6);
+                hosthashes.add(ASCII.String(hosthash));
+            }
+            this.nextQueue.errorURL.removeHosts(hosthashes);
+        }
         for (final AnchorURL url: hyperlinks) {
             if (url == null) continue;
 
@@ -182,8 +195,6 @@ public final class CrawlStacker {
             final byte[] urlhash = url.hash();
             if (replace) {
                 this.indexSegment.fulltext().remove(urlhash);
-                byte[] hosthash = new byte[6]; System.arraycopy(urlhash, 6, hosthash, 0, 6);
-                this.nextQueue.errorURL.removeHost(hosthash);
                 String u = url.toNormalform(true);
                 if (u.endsWith("/")) {
                     u = u + "index.html";

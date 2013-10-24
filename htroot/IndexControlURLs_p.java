@@ -28,9 +28,11 @@
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
@@ -294,7 +296,9 @@ public class IndexControlURLs_p {
 
         if (post.containsKey("deletedomain")) {
             final String domain = post.get("domain");
-            segment.fulltext().deleteDomainHostname(domain, null);
+            Set<String> hostnames = new HashSet<String>();
+            hostnames.add(domain);
+            segment.fulltext().deleteStaleDomainNames(hostnames, null);
             // trigger the loading of the table
             post.put("statistics", "");
         }
