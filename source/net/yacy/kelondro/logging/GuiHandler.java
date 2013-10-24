@@ -42,78 +42,46 @@ import net.yacy.kelondro.util.MemoryControl;
 
 public class GuiHandler extends Handler {
 
-    private final static int DEFAULT_SIZE = 200; // don't make this too big, it eats up a lot of memory!
+    private final static int DEFAULT_SIZE = 1000; // don't make this too big, it eats up a lot of memory!
     private static int size = DEFAULT_SIZE;
-    private static LogRecord buffer[];
+    private static String buffer[];
     private static int start, count;
 
     public GuiHandler() {
         super();
-        configure();
-        init();
-    }
-
-    /**
-     * Get any configuration properties set
-     */
-    private void configure() {
         final LogManager manager = LogManager.getLogManager();
         final String className = getClass().getName();
-
         final String level = manager.getProperty(className + ".level");
         setLevel((level == null) ? Level.INFO : Level.parse(level));
-
-        final String filter = manager.getProperty(className + ".filter");
-        setFilter(makeFilter(filter));
-
-        final String formatter = manager.getProperty(className + ".formatter");
-        setFormatter(makeFormatter(formatter));
-
-        final String sizeString = manager.getProperty(className + ".size");
-        GuiHandler.size = parseSize(sizeString);
-    }
-
-    private static int parseSize(final String sizeString) {
-        int newSize = DEFAULT_SIZE;
+        setFilter(makeFilter(manager.getProperty(className + ".filter")));
+        setFormatter(makeFormatter(manager.getProperty(className + ".formatter")));
         try {
-            newSize = Integer.parseInt(sizeString);
+            GuiHandler.size = Integer.parseInt(manager.getProperty(className + ".size"));
         } catch (final NumberFormatException e) {
-            newSize = DEFAULT_SIZE;
+            GuiHandler.size = DEFAULT_SIZE;
         }
-        return newSize;
+        GuiHandler.buffer = new String[GuiHandler.size];
+        GuiHandler.start = 0;
+        GuiHandler.count = 0;
     }
 
     private static Filter makeFilter(final String name) {
         if (name == null) return null;
-
-        Filter f = null;
         try {
-            final Class<?> c = Class.forName(name);
-            f = (Filter)c.newInstance();
+            return (Filter) Class.forName(name).newInstance();
         } catch (final Exception e) {
             System.err.println("Unable to load filter: " + name);
         }
-        return f;
+        return null;
     }
 
     private static Formatter makeFormatter(final String name) {
         if (name == null) return null;
-
-        Formatter f = null;
         try {
-            final Class<?> c = Class.forName(name);
-            f = (Formatter)c.newInstance();
+            return (Formatter) Class.forName(name).newInstance();
         } catch (final Exception e) {
-            f = new SimpleFormatter();
+            return new SimpleFormatter();
         }
-        return f;
-    }
-
-    // Initialize.  Size is a count of LogRecords.
-    private void init() {
-        GuiHandler.buffer = new LogRecord[GuiHandler.size];
-        GuiHandler.start = 0;
-        GuiHandler.count = 0;
     }
 
     public final int getSize() {
@@ -123,10 +91,8 @@ public class GuiHandler extends Handler {
     @Override
     public final void publish(final LogRecord record) {
         if (!isLoggable(record)) return;
-
-        // write it to the buffer
-        final int ix = (GuiHandler.start+GuiHandler.count)%GuiHandler.buffer.length;
-        GuiHandler.buffer[ix] = record;
+        final int ix = (GuiHandler.start + GuiHandler.count) % GuiHandler.buffer.length;
+        GuiHandler.buffer[ix] = getFormatter().format(record);
         if (GuiHandler.count < GuiHandler.buffer.length) {
             GuiHandler.count++;
         } else {
@@ -136,72 +102,19 @@ public class GuiHandler extends Handler {
         if (MemoryControl.shortStatus()) clear();
     }
 
-    public final synchronized LogRecord[] getLogArray() {
-    	return this.getLogArray(null);
-    }
-
-
-    public final synchronized LogRecord[] getLogArray(final Long sequenceNumberStart) {
-        final List<LogRecord> tempBuffer = new ArrayList<LogRecord>(GuiHandler.count);
-
-        for (int i = 0; i < GuiHandler.count; i++) {
-            final int ix = (GuiHandler.start+i)%GuiHandler.buffer.length;
-            final LogRecord record = GuiHandler.buffer[ix];
-            if ((sequenceNumberStart == null) || (record.getSequenceNumber() >= sequenceNumberStart.longValue())) {
-            	tempBuffer.add(record);
-            }
-        }
-
-        return tempBuffer.toArray(new LogRecord[tempBuffer.size()]);
-    }
-
-    public final synchronized String getLog(final boolean reversed, int lineCount) {
-
-        if ((lineCount > GuiHandler.count)||(lineCount < 0)) lineCount = GuiHandler.count;
-
-        final StringBuilder logMessages = new StringBuilder(GuiHandler.count*40);
-        final Formatter logFormatter = getFormatter();
-
-        try {
-            final int theStart = (reversed)?GuiHandler.start+GuiHandler.count-1:GuiHandler.start;
-            LogRecord record=null;
-            for (int i = 0; i < lineCount; i++) {
-                final int ix = (reversed) ?
-                    Math.abs((theStart-i)%GuiHandler.buffer.length) :
-                    (theStart+i)%GuiHandler.buffer.length;
-                record = GuiHandler.buffer[ix];
-                logMessages.append(logFormatter.format(record));
-            }
-            return logMessages.toString();
-        } catch (final Exception ex) {
-            // We don't want to throw an exception here, but we
-            // report the exception to any registered ErrorManager.
-            reportError(null, ex, ErrorManager.FORMAT_FAILURE);
-            return "Error while formatting the logging message";
-        }
-    }
-
     public final synchronized String[] getLogLines(final boolean reversed, int lineCount) {
-
-        if ((lineCount > GuiHandler.count)||(lineCount < 0)) lineCount = GuiHandler.count;
-
+        if (lineCount > GuiHandler.count || lineCount < 0) lineCount = GuiHandler.count;
         final List<String> logMessages = new ArrayList<String>(GuiHandler.count);
-        final Formatter logFormatter = getFormatter();
-
         try {
-            final int theStart = (reversed) ? GuiHandler.start+GuiHandler.count-1 : GuiHandler.start+GuiHandler.count-lineCount;
-            LogRecord record=null;
+            final int theStart = (reversed) ? GuiHandler.start + GuiHandler.count - 1 : GuiHandler.start + GuiHandler.count - lineCount;
+            String record = null;
             for (int i = 0; i < lineCount; i++) {
-                final int ix = (reversed) ?
-                    Math.abs((theStart-i)%GuiHandler.buffer.length) :
-                    (theStart + i) % GuiHandler.buffer.length;
+                final int ix = (reversed) ? Math.abs((theStart - i) % GuiHandler.buffer.length) : (theStart + i) % GuiHandler.buffer.length;
                 record = GuiHandler.buffer[ix];
-                logMessages.add(logFormatter.format(record));
+                logMessages.add(record);
             }
             return logMessages.toArray(new String[logMessages.size()]);
         } catch (final Exception ex) {
-            // We don't want to throw an exception here, but we
-            // report the exception to any registered ErrorManager.
             reportError(null, ex, ErrorManager.FORMAT_FAILURE);
             return new String[]{"Error while formatting the logging message"};
         }
@@ -219,7 +132,6 @@ public class GuiHandler extends Handler {
 
     @Override
     public synchronized void close() throws SecurityException {
-        // Nothing implement here
     }
 
 }
