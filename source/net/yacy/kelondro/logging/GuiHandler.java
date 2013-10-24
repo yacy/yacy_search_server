@@ -40,7 +40,7 @@ import java.util.logging.SimpleFormatter;
 
 public class GuiHandler extends Handler {
 
-    private final static int DEFAULT_SIZE = 10000;
+    private final static int DEFAULT_SIZE = 200; // don't make this too big, it eats up a lot of memory!
     private int size = DEFAULT_SIZE;
     private LogRecord buffer[];
     private int start, count;
