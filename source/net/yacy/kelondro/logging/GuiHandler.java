@@ -38,13 +38,14 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
+import net.yacy.kelondro.util.MemoryControl;
+
 public class GuiHandler extends Handler {
 
     private final static int DEFAULT_SIZE = 200; // don't make this too big, it eats up a lot of memory!
-    private int size = DEFAULT_SIZE;
-    private LogRecord buffer[];
-    private int start, count;
-
+    private static int size = DEFAULT_SIZE;
+    private static LogRecord buffer[];
+    private static int start, count;
 
     public GuiHandler() {
         super();
@@ -69,7 +70,7 @@ public class GuiHandler extends Handler {
         setFormatter(makeFormatter(formatter));
 
         final String sizeString = manager.getProperty(className + ".size");
-        this.size = parseSize(sizeString);
+        GuiHandler.size = parseSize(sizeString);
     }
 
     private static int parseSize(final String sizeString) {
@@ -110,13 +111,13 @@ public class GuiHandler extends Handler {
 
     // Initialize.  Size is a count of LogRecords.
     private void init() {
-        this.buffer = new LogRecord[this.size];
-        this.start = 0;
-        this.count = 0;
+        GuiHandler.buffer = new LogRecord[GuiHandler.size];
+        GuiHandler.start = 0;
+        GuiHandler.count = 0;
     }
 
     public final int getSize() {
-    	return this.size;
+    	return GuiHandler.size;
     }
 
     @Override
@@ -124,14 +125,15 @@ public class GuiHandler extends Handler {
         if (!isLoggable(record)) return;
 
         // write it to the buffer
-        final int ix = (this.start+this.count)%this.buffer.length;
-        this.buffer[ix] = record;
-        if (this.count < this.buffer.length) {
-            this.count++;
+        final int ix = (GuiHandler.start+GuiHandler.count)%GuiHandler.buffer.length;
+        GuiHandler.buffer[ix] = record;
+        if (GuiHandler.count < GuiHandler.buffer.length) {
+            GuiHandler.count++;
         } else {
-            this.start++;
+            GuiHandler.start++;
         }
         flush();
+        if (MemoryControl.shortStatus()) clear();
     }
 
     public final synchronized LogRecord[] getLogArray() {
@@ -140,11 +142,11 @@ public class GuiHandler extends Handler {
 
 
     public final synchronized LogRecord[] getLogArray(final Long sequenceNumberStart) {
-        final List<LogRecord> tempBuffer = new ArrayList<LogRecord>(this.count);
+        final List<LogRecord> tempBuffer = new ArrayList<LogRecord>(GuiHandler.count);
 
-        for (int i = 0; i < this.count; i++) {
-            final int ix = (this.start+i)%this.buffer.length;
-            final LogRecord record = this.buffer[ix];
+        for (int i = 0; i < GuiHandler.count; i++) {
+            final int ix = (GuiHandler.start+i)%GuiHandler.buffer.length;
+            final LogRecord record = GuiHandler.buffer[ix];
             if ((sequenceNumberStart == null) || (record.getSequenceNumber() >= sequenceNumberStart.longValue())) {
             	tempBuffer.add(record);
             }
@@ -155,19 +157,19 @@ public class GuiHandler extends Handler {
 
     public final synchronized String getLog(final boolean reversed, int lineCount) {
 
-        if ((lineCount > this.count)||(lineCount < 0)) lineCount = this.count;
+        if ((lineCount > GuiHandler.count)||(lineCount < 0)) lineCount = GuiHandler.count;
 
-        final StringBuilder logMessages = new StringBuilder(this.count*40);
+        final StringBuilder logMessages = new StringBuilder(GuiHandler.count*40);
         final Formatter logFormatter = getFormatter();
 
         try {
-            final int theStart = (reversed)?this.start+this.count-1:this.start;
+            final int theStart = (reversed)?GuiHandler.start+GuiHandler.count-1:GuiHandler.start;
             LogRecord record=null;
             for (int i = 0; i < lineCount; i++) {
                 final int ix = (reversed) ?
-                    Math.abs((theStart-i)%this.buffer.length) :
-                    (theStart+i)%this.buffer.length;
-                record = this.buffer[ix];
+                    Math.abs((theStart-i)%GuiHandler.buffer.length) :
+                    (theStart+i)%GuiHandler.buffer.length;
+                record = GuiHandler.buffer[ix];
                 logMessages.append(logFormatter.format(record));
             }
             return logMessages.toString();
@@ -181,19 +183,19 @@ public class GuiHandler extends Handler {
 
     public final synchronized String[] getLogLines(final boolean reversed, int lineCount) {
 
-        if ((lineCount > this.count)||(lineCount < 0)) lineCount = this.count;
+        if ((lineCount > GuiHandler.count)||(lineCount < 0)) lineCount = GuiHandler.count;
 
-        final List<String> logMessages = new ArrayList<String>(this.count);
+        final List<String> logMessages = new ArrayList<String>(GuiHandler.count);
         final Formatter logFormatter = getFormatter();
 
         try {
-            final int theStart = (reversed) ? this.start+this.count-1 : this.start+this.count-lineCount;
+            final int theStart = (reversed) ? GuiHandler.start+GuiHandler.count-1 : GuiHandler.start+GuiHandler.count-lineCount;
             LogRecord record=null;
             for (int i = 0; i < lineCount; i++) {
                 final int ix = (reversed) ?
-                    Math.abs((theStart-i)%this.buffer.length) :
-                    (theStart + i) % this.buffer.length;
-                record = this.buffer[ix];
+                    Math.abs((theStart-i)%GuiHandler.buffer.length) :
+                    (theStart + i) % GuiHandler.buffer.length;
+                record = GuiHandler.buffer[ix];
                 logMessages.add(logFormatter.format(record));
             }
             return logMessages.toArray(new String[logMessages.size()]);
@@ -207,7 +209,12 @@ public class GuiHandler extends Handler {
 
     @Override
     public void flush() {
-
+    }
+    
+    public static void clear() {
+        for (int i = 0; i < GuiHandler.buffer.length; i++) GuiHandler.buffer[i] = null;
+        GuiHandler.start = 0;
+        GuiHandler.count = 0;
     }
 
     @Override

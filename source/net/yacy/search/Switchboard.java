@@ -160,6 +160,7 @@ import net.yacy.gui.Tray;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.logging.GuiHandler;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -2033,6 +2034,7 @@ public final class Switchboard extends serverSwitch {
                 this.index.clearCache();
                 SearchEventCache.cleanupEvents(false);
                 this.trail.clear();
+                GuiHandler.clear();
             }
 
             // set a random password if no password is configured
