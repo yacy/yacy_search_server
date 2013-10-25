@@ -22,27 +22,34 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.Cache;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.ImageParser;
+import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
 
 public class CacheResource_p {
 
-    public static Object respond(final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
+    public static Object respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        Switchboard sb = (Switchboard) env;
         final servletProperties prop = new servletProperties();
         prop.put("resource", new byte[0]);
 
         if (post == null) return prop;
 
+        boolean load = post.getBoolean("load");
         final String u = post.get("url", "");
         DigestURL url;
         try {
@@ -53,7 +60,18 @@ public class CacheResource_p {
         }
 
         byte[] resource = Cache.getContent(url.hash());
-        if (resource == null) return prop;
+        ResponseHeader responseHeader = null;
+        if (resource == null) {
+            if (load) {
+                try {
+                    final Response response = sb.loader.load(sb.loader.request(url, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, ClientIdentification.yacyInternetCrawlerAgent);
+                    responseHeader = response.getResponseHeader();
+                    resource = response.getContent();
+                } catch (IOException e) {
+                    return prop;
+                }
+            } else return prop;
+        }
 
         // check request type
         if (header.get("EXT", "html").equals("png")) {
@@ -61,7 +79,7 @@ public class CacheResource_p {
             return ImageParser.parse(u, resource);
         }
         // get response header and set mime type
-        ResponseHeader responseHeader = Cache.getResponseHeader(url.hash());
+        if (responseHeader == null) responseHeader = Cache.getResponseHeader(url.hash());
         String resMime = responseHeader == null ? null : responseHeader.mime();
         if (resMime != null) {
             final ResponseHeader outgoingHeader = new ResponseHeader(200);
