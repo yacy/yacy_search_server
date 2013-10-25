@@ -285,6 +285,7 @@ public final class Condenser {
 	        }
         } finally {
         	wordenum.close();
+        	wordenum = null;
         }
     }
 
@@ -345,7 +346,7 @@ public final class Condenser {
         if (LibraryProvider.autotagging.isEmpty()) doAutotagging = false;
 
         // read source
-        final WordTokenizer wordenum = new WordTokenizer(new SentenceReader(text), meaningLib);
+        WordTokenizer wordenum = new WordTokenizer(new SentenceReader(text), meaningLib);
         try {
 	        while (wordenum.hasMoreElements()) {
 	            word = wordenum.nextElement().toString().toLowerCase(Locale.ENGLISH);
@@ -420,6 +421,7 @@ public final class Condenser {
 	        }
         } finally {
         	wordenum.close();
+        	wordenum = null;
         }
 
         if (pseudostemming) {

@@ -191,14 +191,17 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 // we did not find everything in the metadata, look further into the document itself.
 
                 // first acquire the sentences:
-                final String solrText = row.getText();
+                String solrText = row.getText();
                 if (solrText != null) {
                     // compute sentences from solr query
-                    final SentenceReader sr = new SentenceReader(solrText, pre);
+                    SentenceReader sr = new SentenceReader(solrText, pre);
                     sentences = new ArrayList<StringBuilder>();
                     while (sr.hasNext()) {
                         sentences.add(sr.next());
                     }
+                    sr.close();
+                    sr = null;
+                    solrText = null;
                 } else if (net.yacy.crawler.data.Cache.has(url.hash())) {
                     // get the sentences from the cache
                     final Request request = loader == null ? null : loader.request(url, true, reindexing);
@@ -213,6 +216,8 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                         try {
                             document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
                             sentences = document.getSentences(pre);
+                            response = null;
+                            document = null;
                         } catch (final Parser.Failure e) {
                         }
                     }
@@ -254,6 +259,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 init(url.hash(), textline.length() > 0 ? textline : this.line, false, ResultClass.SOURCE_METADATA, null);
                 return;
             }
+            sentences = null; // we don't need this here any more
 
             // try to load the resource from the cache
             Response response = null;
@@ -311,6 +317,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 init(url.hash(), null, false, ResultClass.ERROR_NO_MATCH, "snippet extractor failed:" + e.getMessage());
                 return;
             }
+            sentences = null;
         } //encapsulate potential expensive sentences END
 
         // compute snippet from media - attention document closed above!

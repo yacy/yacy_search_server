@@ -53,25 +53,12 @@ public class SentenceReader implements Iterator<StringBuilder>, Iterable<StringB
     }
 
     private StringBuilder nextElement0() {
-        final StringBuilder s = readSentence();
-		//System.out.println(" SENTENCE='" + s + "'"); // DEBUG
-		if (s == null) return null;
-		return s;
-    }
-
-    private StringBuilder readSentence() {
         final StringBuilder s = new StringBuilder(80);
         int nextChar;
         char c, lc = ' '; // starting with ' ' as last character prevents that the result string starts with a ' '
 
         // find sentence end
-        while (true) {
-        	if (this.pos >= this.text.length()) break;
-            nextChar = this.text.charAt(this.pos++);
-            //System.out.print((char) nextChar); // DEBUG
-            if (nextChar < 0) {
-                break;
-            }
+        while (this.pos < this.text.length() && (nextChar = this.text.charAt(this.pos++)) > 0) {
             c = (char) nextChar;
             if (this.pre && (nextChar == 10 || nextChar == 13)) break;
             if (c < ' ') c = ' ';

@@ -39,7 +39,7 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
  // this enumeration removes all words that contain either wrong characters or are too short
 
     private StringBuilder buffer = null;
-    private final unsievedWordsEnum e;
+    private unsievedWordsEnum e;
     private final WordCache meaningLib;
 
     public WordTokenizer(final SentenceReader sr, final WordCache meaningLib) {
@@ -82,13 +82,15 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
 
     public synchronized void close() {
     	this.e.close();
+    	this.e = null;
+    	this.buffer = null;
     }
 
     private static class unsievedWordsEnum implements Enumeration<StringBuilder> {
         // returns an enumeration of StringBuilder Objects
         private StringBuilder buffer = null;
-        private final SentenceReader sr;
-        private final List<StringBuilder> s;
+        private SentenceReader sr;
+        private List<StringBuilder> s;
         private int sIndex;
 
         public unsievedWordsEnum(final SentenceReader sr0) {
@@ -152,7 +154,11 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
         }
 
         public synchronized void close() {
+            this.sIndex = 0;
+            this.s.clear();
+            this.s = null;
         	this.sr.close();
+        	this.sr = null;
         }
     }
 
@@ -181,7 +187,7 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
      */
     public static SortedMap<byte[], Integer> hashSentence(final String sentence, final WordCache meaningLib, int maxlength) {
         final SortedMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
-        final WordTokenizer words = new WordTokenizer(new SentenceReader(sentence), meaningLib);
+        WordTokenizer words = new WordTokenizer(new SentenceReader(sentence), meaningLib);
         try {
 	        int pos = 0;
 	        StringBuilder word;
@@ -202,6 +208,7 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
 	        return map;
         } finally {
         	words.close();
+        	words = null;
         }
     }
 }
