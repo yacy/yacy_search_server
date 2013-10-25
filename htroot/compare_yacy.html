@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>YaCy '#[clientname]#': Websearch Comparison</title>
-    <link rel="search" type="application/opensearchdescription+xml" title="Compare Yacy on '#[clientname]#'" href="opensearchdescription.xml?compare_yacy=true" /> 
+    <link rel="search" type="application/opensearchdescription+xml" title="Compare Yacy on '#[clientname]#'" href="opensearchdescription.xml?compare_yacy=true&amp;left=#[search_left]#&amp;right=#[search_right]#" /> 
     #%env/templates/metas.template%#
   </head>
 <body>
@@ -16,7 +16,7 @@
     <fieldset>
         <legend>Websearch Comparison</legend>
         <form action="" method="get" accept-charset="UTF-8">
-            <p><input type="text" class="searchinput" name="query" value="#[search_query]#" size="20" /><input type="submit" value="Compare" />
+            <p><input type="text" class="searchinput" name="query" value="#[search_query]#" size="40" onFocus="this.select()"/><input type="submit" value="Compare" />
                Left Search Engine
                    <select name="left">
                    #{searchengines}#

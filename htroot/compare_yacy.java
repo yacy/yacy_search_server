@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import net.yacy.cora.protocol.RequestHeader;
@@ -35,20 +35,15 @@ import net.yacy.server.servletProperties;
 
 public class compare_yacy {
 
-    private static final String defaultsearchL = "YaCy";
-    private static final String defaultsearchR = "metager.de";
-    private static final String[] order = {defaultsearchL, "YaCy (local)", "bing.com",
-        /*"google.de",*/ defaultsearchR,
-        "metager2.de (web)", "metager2.de (international)",
-        "yahoo.com", "romso.de", "search.live.com", "Wikipedia English", "Wikipedia Deutsch",
-        "Sciencenet", "dbpedia", "wolfram alpha", "OAIster@OCLC", "oai.yacy.net"};
-    private static final Map<String, String> searchengines = new HashMap<String, String>();
+    public static final String defaultsearchL = "YaCy";
+    public static final String defaultsearchR = "startpage.com";
+    private static final Map<String, String> searchengines = new LinkedHashMap<String, String>();
     static {
         searchengines.put(defaultsearchL, "yacysearch.html?display=2&resource=global&query=");
         searchengines.put("YaCy (local)", "yacysearch.html?display=2&resource=local&query=");
+        //searchengines.put("google.com", "https://www.google.com/#q=");
+        searchengines.put("startpage.com", "https://startpage.com/do/search?cat=web&query=");
         searchengines.put("bing.com", "http://www.bing.com/search?q=");
-        // searchengines.put("google.de", "http://www.google.de/#fp=1&q=");
-        // searchengines.put("google.com", "http://www.google.com/#fp=1&q=");
         searchengines.put("metager.de", "http://www.metager.de/meta/cgi-bin/meta.ger1?eingabe=");
         searchengines.put("metager2.de (web)", "http://www.metager2.de/search.php?ses=web&q=");
         searchengines.put("metager2.de (international)", "http://www.metager2.de/search.php?ses=international&q=");
@@ -87,13 +82,13 @@ public class compare_yacy {
             }
         }
 
-        prop.put("searchengines", order.length);
-        String name;
-        for (int i = 0; i < order.length; i++) {
-            name = order[i];
+        prop.put("searchengines", searchengines.size());
+        int i = 0;
+        for (String name: searchengines.keySet()) {
             prop.putHTML("searchengines_" + i + "_searchengine", name);
             prop.put("searchengines_" + i + "_leftengine", name.equals(default_left) ? 1 : 0);
             prop.put("searchengines_" + i + "_rightengine", name.equals(default_right) ? 1 : 0);
+            i++;
         }
 
         prop.putHTML("search_left", searchengines.get(default_left));
