@@ -1607,12 +1607,17 @@ public final class HTTPDFileHandler {
 				    m.appendReplacement(result, newurl);
 
 				} else if (url.startsWith("http")) {
-					// absoulte url of form href="http://domain.com/path"
-					if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("domainlist")) {
-						if (sb.crawlStacker.urlInAcceptedDomain(new DigestURL(url)) != null) {
-							continue;
-						}
-					}
+                                    // absoulte url of form href="http://domain.com/path"
+                                    if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("domainlist")) {
+                                        try {
+                                            if (sb.crawlStacker.urlInAcceptedDomain(new DigestURL(url)) != null) {
+                                                continue;
+                                            }
+                                        } catch (final MalformedURLException e) {
+                                            theLogger.fine("malformed url for url-rewirte " + url.toString());
+                                            continue;
+                                        }
+                                    }
 
 					String newurl = init + "/proxy.html?url=" + url;
 					newurl = newurl.replaceAll("\\$","\\\\\\$");
