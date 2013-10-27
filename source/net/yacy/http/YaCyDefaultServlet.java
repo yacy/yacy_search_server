@@ -49,7 +49,6 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -76,7 +75,6 @@ import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
-import org.eclipse.jetty.util.resource.ResourceFactory;
 
 /**
  * YaCyDefaultServlet based on Jetty DefaultServlet.java 
@@ -480,17 +478,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
     }
 
     protected RequestHeader generateLegacyRequestHeader(HttpServletRequest request, String target, String targetExt) {
-        RequestHeader legacyRequestHeader = new RequestHeader();
-        @SuppressWarnings("unchecked")
-        Enumeration<String> headers = request.getHeaderNames();
-        while (headers.hasMoreElements()) {
-            String headerName = headers.nextElement();
-            @SuppressWarnings("unchecked")
-            Enumeration<String> header = request.getHeaders(headerName);
-            while (header.hasMoreElements()) {
-                legacyRequestHeader.add(headerName, header.nextElement());
-            }
-        }
+        RequestHeader legacyRequestHeader = ProxyHandler.convertHeaderFromJetty(request);
 
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, request.getRemoteAddr());
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target);

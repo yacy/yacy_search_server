@@ -161,6 +161,7 @@
     <path id="project.class.path">
         <pathelement location="${build}" />
         <pathelement location="${htroot}" />
+        <pathelement location="${lib}/jetty-client-8.1.13.v20130916.jar" />
         <pathelement location="${lib}/jetty-continuation-8.1.13.v20130916.jar" />
   	<pathelement location="${lib}/jetty-http-8.1.13.v20130916.jar" />
 	<pathelement location="${lib}/jetty-io-8.1.13.v20130916.jar" />
@@ -169,7 +170,7 @@
 	<pathelement location="${lib}/jetty-servlet-8.1.13.v20130916.jar" />
 	<pathelement location="${lib}/jetty-servlets-8.1.13.v20130916.jar" />
         <pathelement location="${lib}/jetty-util-8.1.13.v20130916.jar" />    
-          
+
         <pathelement location="${lib}/javax.servlet-3.0.0.v201112011016.jar" />
     	<pathelement location="${lib}/activation.jar" />
         <pathelement location="${lib}/apache-mime4j-0.6.jar" />

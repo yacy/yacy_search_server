@@ -63,7 +63,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         connector.setName("httpd:"+Integer.toString(port));
         //connector.setThreadPool(new QueuedThreadPool(20));
         server.addConnector(connector);
-      
+    	
         YacyDomainHandler domainHandler = new YacyDomainHandler();
         domainHandler.setAlternativeResolver(sb.peers);
 
@@ -90,6 +90,9 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         //sholder.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
         sholder.setInitParameter("gzip","false");
         htrootContext.addServlet(sholder,"/*");    
+        
+        ServletHolder proxyholder= new ServletHolder(YaCyProxyServlet.class);
+        htrootContext.addServlet(proxyholder,"/proxy.html");
         
         // assemble the servlet handlers
         ContextHandlerCollection servletContext = new ContextHandlerCollection();                
