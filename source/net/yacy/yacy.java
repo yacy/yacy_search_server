@@ -67,6 +67,9 @@ import net.yacy.server.serverCore;
 import net.yacy.server.http.HTTPDemon;
 
 import com.google.common.io.Files;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.crawler.retrieval.Response;
 
 
 /**
