@@ -63,10 +63,10 @@ import net.yacy.peers.operation.yacyRelease;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.server.serverCore;
+import net.yacy.server.http.HTTPDemon;
 
 import com.google.common.io.Files;
-import net.yacy.server.http.HTTPDemon;
-import net.yacy.server.serverCore;
 
 
 /**
@@ -265,12 +265,26 @@ public final class yacy {
             mkdirIfNeseccary(htDocsPath);
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
+            // copy the donate iframe (better to copy this once here instead of doing this in an actual iframe in the search result)
+            final File wwwEnvPath = new File(htDocsPath, "env");
+            mkdirIfNeseccary(wwwEnvPath);
+            final String iframesource = sb.getConfig("donation.iframesource", "");
+            final String iframetarget = sb.getConfig("donation.iframetarget", "");
+            final File iframefile = new File(htDocsPath, iframetarget);
+            if (!iframefile.exists()) new Thread() {
+                public void run() {
+                    final ClientIdentification.Agent agent = ClientIdentification.getAgent(ClientIdentification.yacyInternetCrawlerAgentName);
+                    Response response;
+                    try {
+                        response = sb.loader == null ? null : sb.loader.load(sb.loader.request(new DigestURL(iframesource), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
+                        if (response != null) FileUtils.copy(response.getContent(), iframefile);
+                    } catch (Throwable e) {}
+                }
+            }.start();
+            
             // create default notifier picture
-            //TODO: Use templates instead of copying images ...
-            if (!((new File(htDocsPath, "notifier.gif")).exists())) try {
-                Files.copy(new File(htRootPath, "env/grafics/empty.gif"),
-                                     new File(htDocsPath, "notifier.gif"));
-            } catch (final IOException e) {}
+            File notifierFile = new File(htDocsPath, "notifier.gif");
+            if (!notifierFile.exists()) try {Files.copy(new File(htRootPath, "env/grafics/empty.gif"), notifierFile);} catch (final IOException e) {}
 
             final File htdocsReadme = new File(htDocsPath, "readme.txt");
             if (!(htdocsReadme.exists())) try {FileUtils.copy((
@@ -291,7 +305,6 @@ public final class yacy {
 
             final File wwwDefaultPath = new File(htDocsPath, "www");
             mkdirIfNeseccary(wwwDefaultPath);
-
 
             final File shareDefaultPath = new File(htDocsPath, "share");
             mkdirIfNeseccary(shareDefaultPath);
