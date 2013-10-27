@@ -24,7 +24,9 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.util.AbstractMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 
 import net.yacy.cora.document.analysis.Classification;
@@ -46,7 +48,7 @@ import net.yacy.server.serverSwitch;
 
 public class yacysearchtrailer {
 
-    private static final int MAX_TOPWORDS = 12;
+    private static final int MAX_TOPWORDS = 16;
     private static final int MAXLIMIT_NAV_LOW = 5;
     private static final int MAXLIMIT_NAV_HIGH = 20;
 
@@ -209,26 +211,29 @@ public class yacysearchtrailer {
             prop.put("nav-topics", "1");
             navigatorIterator = topicNavigator.keys(false);
             int i = 0;
-            String queryStringForUrl;
+            String queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
+            // first sort the list to a form where the greatest element is in the middle
+            LinkedList<Map.Entry<String, Integer>> cloud = new LinkedList<Map.Entry<String, Integer>>();
             while (i < MAX_TOPWORDS && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = topicNavigator.get(name);
-                if (count == 0) {
-                    break;
-                }
-                queryStringForUrl = theSearch.query.getQueryGoal().getOriginalQueryString(true);
-                if (queryStringForUrl == null) {
-                    break;
-                }
-                if (name != null) {
-                    prop.put("nav-topics_element_" + i + "_on", 1);
-                    prop.put(fileType, "nav-topics_element_" + i + "_modifier", name);
-                    prop.put(fileType, "nav-topics_element_" + i + "_name", name);
-                    prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl + "+" + name).toString());
-                    prop.put("nav-topics_element_" + i + "_count", count);
-                    prop.put("nav-topics_element_" + i + "_nl", 1);
-                    i++;
-                }
+                if (count == 0) break;
+                if (name == null) continue;
+                Map.Entry<String, Integer> entry = new AbstractMap.SimpleEntry<String, Integer>(name, (count + MAX_TOPWORDS - i) / 2);
+                if (cloud.size() % 2 == 0) cloud.addFirst(entry); else cloud.addLast(entry); // alternating add entry to first or last position.
+                i++;
+            }
+            i= 0;
+            for (Map.Entry<String, Integer> entry: cloud) {
+                name = entry.getKey();
+                count = entry.getValue();
+                prop.put("nav-topics_element_" + i + "_on", 1);
+                prop.put(fileType, "nav-topics_element_" + i + "_modifier", name);
+                prop.put(fileType, "nav-topics_element_" + i + "_name", name);
+                prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType.name().toLowerCase(), 0, theSearch.query, queryStringForUrl + "+" + name).toString());
+                prop.put("nav-topics_element_" + i + "_count", count);
+                prop.put("nav-topics_element_" + i + "_nl", 1);
+                i++;
             }
             prop.put("nav-topics_element", i);
             i--;

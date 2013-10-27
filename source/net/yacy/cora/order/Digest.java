@@ -28,14 +28,15 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.document.encoding.UTF8;
@@ -48,7 +49,7 @@ import net.yacy.cora.util.Memory;
 
 public class Digest {
 
-	public static BlockingQueue<MessageDigest> digestPool = new LinkedBlockingDeque<MessageDigest>();
+	public static Queue<MessageDigest> digestPool = new ConcurrentLinkedQueue<MessageDigest>();
 
     private static final int md5CacheSize = Math.max(1000, Math.min(1000000, (int) (Memory.available() / 50000L)));
     private static ARC<String, byte[]> md5Cache = null;
@@ -138,11 +139,8 @@ public class Digest {
         digest.update(keyBytes);
         final byte[] result = digest.digest();
         digest.reset(); // to be prepared for next
-        try {
-            digestPool.put(digest);
-            //System.out.println("Digest Pool size = " + digestPool.size());
-        } catch (final  InterruptedException e ) {
-        }
+        digestPool.add(digest);
+        //System.out.println("Digest Pool size = " + digestPool.size());
 
         // update the cache
         md5Cache.insertIfAbsent(key, result); // prevent expensive MD5 computation and encoding

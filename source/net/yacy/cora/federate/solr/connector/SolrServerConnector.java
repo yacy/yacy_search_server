@@ -295,7 +295,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         // get all fields contained in index
         final LukeRequest lukeRequest = new LukeRequest();
         lukeRequest.setResponseParser(new XMLResponseParser());
-        lukeRequest.setNumTerms(1);
+        lukeRequest.setNumTerms(0);
         lukeRequest.setShowSchema(showSchema);
         /*
         final SolrRequest lukeRequest = new SolrRequest(METHOD.GET, "/admin/luke") {

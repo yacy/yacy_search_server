@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -237,6 +238,10 @@ public class Tables implements Iterable<String> {
 
     @Override
     public Iterator<String> iterator() {
+        return getTablenames().iterator();
+    }
+    
+    public Set<String> getTablenames() {
         // we did a lazy initialization, but here we must discover all actually existing tables
         String tablename;
         File file;
@@ -256,7 +261,7 @@ public class Tables implements Iterable<String> {
             }
         }
         // now the list of tables is enriched, return an iterator
-        return this.tables.keySet().iterator();
+        return this.tables.keySet();
     }
 
     public void close(final String tablename) {
@@ -268,6 +273,11 @@ public class Tables implements Iterable<String> {
     public synchronized void close() {
         for (final BEncodedHeap heap: this.tables.values()) heap.close();
         this.tables.clear();
+    }
+    
+    public void clear() {
+        Set<String> tablenames = this.getTablenames();
+        for (String tablename: tablenames) this.clear(tablename);
     }
 
     public void clear(final String tablename) {

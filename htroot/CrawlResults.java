@@ -27,9 +27,11 @@
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -124,7 +126,9 @@ public class CrawlResults {
             if (post.containsKey("deletedomain")) {
                 final String domain = post.get("domain", null);
                 if (domain != null) {
-                    sb.index.fulltext().deleteDomainHostname(domain, null);
+                    Set<String> hostnames = new HashSet<String>();
+                    hostnames.add(domain);
+                    sb.index.fulltext().deleteStaleDomainNames(hostnames, null);
                     ResultURLs.deleteDomain(tabletype, domain);
                 }
             }

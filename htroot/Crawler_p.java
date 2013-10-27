@@ -170,7 +170,8 @@ public class Crawler_p {
                     if (t > 0) deleteageDate = new Date(t);
                 }
                 final boolean deleteold = (deleteage && deleteageDate != null) || (restrictedcrawl && post.getBoolean("deleteold"));
-                
+
+                final String sitemapURLStr = post.get("sitemapURL","");
                 String crawlingStart0 = post.get("crawlingURL","").trim(); // the crawljob start url
                 String[] rootURLs0 = crawlingStart0.indexOf('\n') > 0 || crawlingStart0.indexOf('\r') > 0 ? crawlingStart0.split("[\\r\\n]+") : crawlingStart0.split(Pattern.quote("|"));
                 Set<DigestURL> rootURLs = new HashSet<DigestURL>();
@@ -199,7 +200,7 @@ public class Crawler_p {
                     if (p >= 8) crawlName = crawlName.substring(0, p);
                 }
                 if (crawlName.endsWith(",")) crawlName = crawlName.substring(0, crawlName.length() - 1);
-
+                if (crawlName.length() == 0 && sitemapURLStr.length() > 0) crawlName = "sitemap loader for " + sitemapURLStr;
                 
                 // set the crawl filter
                 String ipMustMatch = post.get("ipMustmatch", CrawlProfile.MATCH_ALL_STRING);
@@ -311,9 +312,9 @@ public class Crawler_p {
                     if (fullDomain) {
                         siteFilter = CrawlProfile.siteFilter(rootURLs);
                         if (deleteold) {
-                            for (DigestURL u: rootURLs) {
-                                sb.index.fulltext().deleteDomainHashpart(u.hosthash(), deleteageDate);
-                            }
+                            Set<String> hosthashes = new HashSet<String>();
+                            for (DigestURL u: rootURLs) hosthashes.add(u.hosthash());
+                            sb.index.fulltext().deleteStaleDomainHashes(hosthashes, deleteageDate);
                         }
                     } else if (subPath) {
                         siteFilter = CrawlProfile.subpathFilter(rootURLs);
@@ -386,10 +387,12 @@ public class Crawler_p {
                 try {sb.crawlQueues.noticeURL.removeByProfileHandle(profile.handle(), 10000);} catch (final SpaceExceededException e1) {}
                 
                 // delete all error urls for that domain
+                Set<String> hosthashes = new HashSet<String>();
                 for (DigestURL u: rootURLs) {
                     sb.index.fulltext().remove(u.hash());
-                    sb.crawlQueues.errorURL.removeHost(ASCII.getBytes(u.hosthash()));
+                    hosthashes.add(u.hosthash());
                 }
+                sb.crawlQueues.errorURL.removeHosts(hosthashes);
                 sb.index.fulltext().commit(true);
                 
                 // start the crawl
@@ -442,7 +445,6 @@ public class Crawler_p {
                         if (successurls.size() > 0) sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                     }
                 } else if ("sitemap".equals(crawlingMode)) {
-                    final String sitemapURLStr = post.get("sitemapURL","");
                     try {
                         final DigestURL sitemapURL = new DigestURL(sitemapURLStr);
                         sb.crawler.putActive(handle, profile);

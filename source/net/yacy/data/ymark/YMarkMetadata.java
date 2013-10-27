@@ -99,7 +99,8 @@ public class YMarkMetadata {
 		if(this.document == null) {
 			Response response = null;
 			response = loader.load(loader.request(this.uri, true, false), CacheStrategy.IFEXIST, Integer.MAX_VALUE, null, agent);
-			this.document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
+			Document[] docs = response.parse();
+			this.document = Document.mergeDocuments(response.url(), response.getMimeType(), docs);
 		}
 		return this.document;
 	}

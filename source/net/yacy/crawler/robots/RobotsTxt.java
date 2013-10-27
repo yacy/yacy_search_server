@@ -29,10 +29,13 @@ package net.yacy.crawler.robots;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.id.DigestURL;
@@ -47,6 +50,7 @@ import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.repository.LoaderDispatcher;
+import net.yacy.repository.Blacklist.BlacklistType;
 
 public class RobotsTxt {
 
@@ -327,4 +331,52 @@ public class RobotsTxt {
         return sb.toString();
     }
 
+    public static class CheckEntry {
+        public final DigestURL digestURL;
+        public final RobotsTxtEntry robotsTxtEntry;
+        public final Response response;
+        public final String error;
+        public CheckEntry(DigestURL digestURL, RobotsTxtEntry robotsTxtEntry, Response response, String error) {
+            this.digestURL = digestURL;
+            this.robotsTxtEntry = robotsTxtEntry;
+            this.response = response;
+            this.error = error;
+        }
+    }
+    
+    public Collection<CheckEntry> massCrawlCheck(final Collection<DigestURL> rootURLs, final ClientIdentification.Agent userAgent, final int concurrency) {
+        // put the rootURLs into a blocking queue as input for concurrent computation
+        final BlockingQueue<DigestURL> in = new LinkedBlockingQueue<DigestURL>();
+        try {
+            for (DigestURL u: rootURLs) in.put(u);
+            for (int i = 0; i < concurrency; i++) in.put(DigestURL.POISON);
+        } catch (InterruptedException e) {}
+        final BlockingQueue<CheckEntry> out = new LinkedBlockingQueue<CheckEntry>();
+        final Thread[] threads = new Thread[concurrency];
+        for (int i = 0; i < concurrency; i++) {
+            threads[i] = new Thread() {
+                public void run() {
+                    DigestURL u;
+                    try {
+                        while ((u = in.take()) != DigestURL.POISON) {
+                            // try to load the robots
+                            RobotsTxtEntry robotsEntry = getEntry(u, userAgent);
+                            boolean robotsAllowed = robotsEntry == null ? true : !robotsEntry.isDisallowed(u);
+                            if (robotsAllowed) try {
+                                Request request = loader.request(u, true, false);
+                                Response response = loader.load(request, CacheStrategy.NOCACHE, BlacklistType.CRAWLER, userAgent);
+                                out.put(new CheckEntry(u, robotsEntry, response, null));
+                            } catch (final IOException e) {
+                                out.put(new CheckEntry(u, robotsEntry, null, "error response: " + e.getMessage()));
+                            }
+                        }
+                    } catch (InterruptedException e) {}
+                }
+            };
+            threads[i].start();
+        }
+        // wait for termiation
+        try {for (Thread t: threads) t.join();} catch (InterruptedException e1) {}
+        return out;
+    }
 }

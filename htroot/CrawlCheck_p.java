@@ -18,21 +18,17 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.crawler.retrieval.Request;
-import net.yacy.crawler.retrieval.Response;
-import net.yacy.crawler.robots.RobotsTxtEntry;
-import net.yacy.repository.Blacklist.BlacklistType;
+import net.yacy.crawler.robots.RobotsTxt.CheckEntry;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -49,7 +45,7 @@ public class CrawlCheck_p {
         if (post.containsKey("crawlcheck")) {
             
             // get the list of rootURls for this crawl start
-            Set<DigestURL> rootURLs = new HashSet<DigestURL>();
+            Set<DigestURL> rootURLs = new LinkedHashSet<DigestURL>();
             String crawlingStart0 = post.get("crawlingURLs","").trim();
             String[] rootURLs0 = crawlingStart0.indexOf('\n') > 0 || crawlingStart0.indexOf('\r') > 0 ? crawlingStart0.split("[\\r\\n]+") : crawlingStart0.split(Pattern.quote("|"));
             for (String crawlingStart: rootURLs0) {
@@ -72,46 +68,46 @@ public class CrawlCheck_p {
                 prop.put("table", 0);
             } else {
                 prop.put("table", 1);
-                ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+                
+                // mass check
+                final ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+                final int concurrency = Math.min(rootURLs.size(), 20);
+                Collection<CheckEntry> out = sb.robots.massCrawlCheck(rootURLs, agent, concurrency);
+                // evaluate the result from the concurrent computation
                 
                 // make a string that is used to fill the starturls field again
                 // and analyze the urls to make the table rows
                 StringBuilder s = new StringBuilder(300);
                 int row = 0;
-                for (DigestURL u: rootURLs) {
-                    s.append(u.toNormalform(true)).append('\n');
-                    prop.put("table_list_" + row + "_url", u.toNormalform(true));
+                for (CheckEntry entry: out) {
+                    String u = entry.digestURL.toNormalform(true);
+                    s.append(u).append('\n');
+                    prop.put("table_list_" + row + "_url", u);
 
                     // try to load the robots
-                    RobotsTxtEntry robotsEntry;
                     boolean robotsAllowed = true;
-                    robotsEntry = sb.robots.getEntry(u, agent);
-                    if (robotsEntry == null) {
+                    if (entry.robotsTxtEntry == null) {
                         prop.put("table_list_" + row + "_robots", "no robots");
                         prop.put("table_list_" + row + "_crawldelay", agent.minimumDelta + " ms");
                         prop.put("table_list_" + row + "_sitemap", "");
                     } else {
-                        robotsAllowed = !robotsEntry.isDisallowed(u);
+                        robotsAllowed = !entry.robotsTxtEntry.isDisallowed(entry.digestURL);
                         prop.put("table_list_" + row + "_robots", "robots exist: " + (robotsAllowed ? "crawl allowed" : "url disallowed"));
-                        prop.put("table_list_" + row + "_crawldelay", Math.max(agent.minimumDelta, robotsEntry.getCrawlDelayMillis()) + " ms");
-                        prop.put("table_list_" + row + "_sitemap", robotsEntry.getSitemap() == null ? "-" : robotsEntry.getSitemap().toNormalform(true));
+                        prop.put("table_list_" + row + "_crawldelay", Math.max(agent.minimumDelta, entry.robotsTxtEntry.getCrawlDelayMillis()) + " ms");
+                        prop.put("table_list_" + row + "_sitemap", entry.robotsTxtEntry.getSitemap() == null ? "-" : entry.robotsTxtEntry.getSitemap().toNormalform(true));
                     }
                     
                     // try to load the url
-                    if (robotsAllowed) try {
-                        Request request = sb.loader.request(u, true, false);
-                        final Response response = sb.loader.load(request, CacheStrategy.NOCACHE, BlacklistType.CRAWLER, agent);
-                        if (response == null) {
-                            prop.put("table_list_" + row + "_access", "no response");
+                    if (robotsAllowed) {
+                        if (entry.response == null) {
+                            prop.put("table_list_" + row + "_access", entry.error == null ? "no response" : entry.error);
                         } else {
-                            if (response.getResponseHeader().getStatusCode() == 200) {
-                                prop.put("table_list_" + row + "_access", "200 ok, last-modified = " + response.lastModified());
+                            if (entry.response.getResponseHeader().getStatusCode() == 200) {
+                                prop.put("table_list_" + row + "_access", "200 ok, last-modified = " + entry.response.lastModified());
                             } else {
-                                prop.put("table_list_" + row + "_access", response.getResponseHeader().getStatusCode() + " - load failed");
+                                prop.put("table_list_" + row + "_access", entry.response.getResponseHeader().getStatusCode() + " - load failed");
                             }
                         }
-                    } catch (final IOException e) {
-                        prop.put("table_list_" + row + "_access", "error response: " + e.getMessage());
                     } else {
                         prop.put("table_list_" + row + "_access", "not loaded - prevented by robots.txt");
                     }

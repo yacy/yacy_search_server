@@ -555,19 +555,25 @@ public final class CrawlSwitchboard {
         return hasDoneSomething;
     }
 
+    public Set<String> getActiveProfiles() {
+        // find all profiles that are candidates for deletion
+        Set<String> profileKeys = new HashSet<String>();
+        for (final byte[] handle: this.getActive()) {
+            CrawlProfile entry;
+            entry = new CrawlProfile(this.getActive(handle));
+            if (!CrawlSwitchboard.DEFAULT_PROFILES.contains(entry.name())) {
+                profileKeys.add(ASCII.String(handle));
+            }
+        }
+        return profileKeys;
+    }
+    
     public Set<String> getFinishesProfiles(CrawlQueues crawlQueues) {
         // clear the counter cache
         this.profilesActiveCrawlsCounter.clear();        
         
         // find all profiles that are candidates for deletion
-        Set<String> deletionCandidate = new HashSet<String>();
-        for (final byte[] handle: this.getActive()) {
-            CrawlProfile entry;
-            entry = new CrawlProfile(this.getActive(handle));
-            if (!CrawlSwitchboard.DEFAULT_PROFILES.contains(entry.name())) {
-                deletionCandidate.add(ASCII.String(handle));
-            }
-        }
+        Set<String> deletionCandidate = getActiveProfiles();
         if (deletionCandidate.size() == 0) return new HashSet<String>(0);
         
         // iterate through all the queues and see if one of these handles appear there
@@ -600,6 +606,13 @@ public final class CrawlSwitchboard {
             return new HashSet<String>(0);
         }
         return deletionCandidate;
+    }
+    
+    public boolean allCrawlsFinished(CrawlQueues crawlQueues) {
+        if (!crawlQueues.noticeURL.isEmpty()) return false;
+        // look into the CrawlQueues.worker as well
+        if (switchboard.crawlQueues.activeWorkerEntries().length > 0) return false;
+        return true;
     }
     
     public void cleanProfiles(Set<String> deletionCandidate) {

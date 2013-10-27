@@ -50,7 +50,7 @@ public class ViewLog_p {
         String[] log = new String[0];
         boolean reversed = true;
         boolean json = false;
-        int maxlines = 10000, lines = 1000;
+        int maxlines = 200, lines = 200;
         /* Usually a regex like this would make no sense, ".*" would be
          * sufficient, but ".*.*" makes it a little bit more convenient
          * for the user to input regexes like ".*FOO.*" in the HTML

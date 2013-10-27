@@ -95,84 +95,85 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 		buffer.append(document.dc_title().toLowerCase());
 		for (String s:document.dc_description()) buffer.append(s.toLowerCase());
 		buffer.append(document.dc_subject(' ').toLowerCase());
-		final WordTokenizer tokens = new WordTokenizer(new SentenceReader(buffer.toString()), LibraryProvider.dymLib);
-		try {
-			int score = 0;
+		int score = 0;
 
-			// get phrases
-			final TreeMap<String, YMarkTag> phrases = getPhrases(document, 2);
-			phrases.putAll(getPhrases(document, 3));
-			final Iterator<String> iter = phrases.keySet().iterator();
-			while(iter.hasNext()) {
+		// get phrases
+		final TreeMap<String, YMarkTag> phrases = getPhrases(document, 2);
+		phrases.putAll(getPhrases(document, 3));
+		final Iterator<String> iter = phrases.keySet().iterator();
+		while(iter.hasNext()) {
+			score = 10;
+			final String phrase = iter.next();
+			if(phrases.get(phrase).size() > 3 && phrases.get(phrase).size() < 10) {
+				score = phrases.get(phrase).size() * phrase.split(" ").length * 20;
+			}
+			if(isDigitSpace(phrase)) {
 				score = 10;
-				final String phrase = iter.next();
-				if(phrases.get(phrase).size() > 3 && phrases.get(phrase).size() < 10) {
-					score = phrases.get(phrase).size() * phrase.split(" ").length * 20;
-				}
-				if(isDigitSpace(phrase)) {
-					score = 10;
-				}
-				if(phrases.get(phrase).size() > 2 && buffer.indexOf(phrase) > 1) {
-					score = score * 10;
-				}
-				if (tags.containsKey(phrase)) {
-					score = score * 20;
-				}
-				topwords.add(new YMarkTag(phrase, score));
-				pwords.append(phrase);
-				pwords.append(' ');
 			}
-
-			// loop through potential tag and rank them
-			while(tokens.hasMoreElements()) {
-				score = 0;
-				token = tokens.nextElement();
-
-				// check if the token appears in the text
-				if (words.containsKey(token.toString())) {
-					final Word word = words.get(token.toString());
-					// token appears in text and matches an existing bookmark tag
-					if (tags.containsKey(token.toString())) {
-						score = word.occurrences() * tags.get(token.toString()).size() * 200;
-					}
-					// token appears in text and has more than 3 characters
-					else if (token.length()>3) {
-						score = word.occurrences() * 100;
-					}
-					// if token is already part of a phrase, reduce score
-					if(pwords.toString().indexOf(token.toString())>1) {
-						score = score / 3;
-					}
-					topwords.add(new YMarkTag(token.toString(), score));
-				}
+			if(phrases.get(phrase).size() > 2 && buffer.indexOf(phrase) > 1) {
+				score = score * 10;
 			}
-			score = 0;
-			buffer.setLength(0);
-			for(final YMarkTag tag : topwords) {
-				if(score < max) {
-					if(tag.size() > 100) {
-						buffer.append(tag.name());
-						buffer.append(YMarkUtil.TAGS_SEPARATOR);
-						score++;
-					}
-				} else {
-					break;
-				}
+			if (tags.containsKey(phrase)) {
+				score = score * 20;
 			}
-			final String clean =  YMarkUtil.cleanTagsString(buffer.toString());
-			if(clean.equals(YMarkEntry.BOOKMARK.TAGS.deflt())) {
-				return MultiProtocolURL.getFileExtension(document.dc_source().getFileName());
-			}
-			return clean;
-		} finally {
-			tokens.close();
+			topwords.add(new YMarkTag(phrase, score));
+			pwords.append(phrase);
+			pwords.append(' ');
 		}
+
+		// loop through potential tag and rank them
+        WordTokenizer tokens = new WordTokenizer(new SentenceReader(buffer.toString()), LibraryProvider.dymLib);
+        try {
+    		while (tokens.hasMoreElements()) {
+    			score = 0;
+    			token = tokens.nextElement();
+    
+    			// check if the token appears in the text
+    			if (words.containsKey(token.toString())) {
+    				final Word word = words.get(token.toString());
+    				// token appears in text and matches an existing bookmark tag
+    				if (tags.containsKey(token.toString())) {
+    					score = word.occurrences() * tags.get(token.toString()).size() * 200;
+    				}
+    				// token appears in text and has more than 3 characters
+    				else if (token.length()>3) {
+    					score = word.occurrences() * 100;
+    				}
+    				// if token is already part of a phrase, reduce score
+    				if(pwords.toString().indexOf(token.toString())>1) {
+    					score = score / 3;
+    				}
+    				topwords.add(new YMarkTag(token.toString(), score));
+    			}
+    		}
+        } finally {
+            tokens.close();
+            tokens = null;
+        }
+		score = 0;
+		buffer.setLength(0);
+		for(final YMarkTag tag : topwords) {
+			if(score < max) {
+				if(tag.size() > 100) {
+					buffer.append(tag.name());
+					buffer.append(YMarkUtil.TAGS_SEPARATOR);
+					score++;
+				}
+			} else {
+				break;
+			}
+		}
+		final String clean =  YMarkUtil.cleanTagsString(buffer.toString());
+		if(clean.equals(YMarkEntry.BOOKMARK.TAGS.deflt())) {
+			return MultiProtocolURL.getFileExtension(document.dc_source().getFileName());
+		}
+		return clean;
 	}
 
 	private static TreeMap<String, YMarkTag> getPhrases(final Document document, final int size) {
 		final TreeMap<String, YMarkTag> phrases = new TreeMap<String, YMarkTag>();
 		final StringBuilder phrase = new StringBuilder(128);
-		final WordTokenizer tokens = new WordTokenizer(new SentenceReader(document.getTextString()), LibraryProvider.dymLib);
+		WordTokenizer tokens = new WordTokenizer(new SentenceReader(document.getTextString()), LibraryProvider.dymLib);
 		try {
 			StringBuilder token;
 			int count = 0;
@@ -206,6 +207,7 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			return phrases;
 		} finally {
 			tokens.close();
+			tokens = null;
 		}
 	}
 

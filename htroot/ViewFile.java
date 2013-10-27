@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import net.yacy.cora.document.encoding.ASCII;
@@ -290,17 +289,21 @@ public class ViewFile {
                     // Search word highlighting
                     for (final StringBuilder s: sentences) {
                         sentence = s.toString();
-                        Enumeration<StringBuilder> tokens = null;
-                        tokens = new WordTokenizer(new SentenceReader(sentence), LibraryProvider.dymLib);
-                        while (tokens.hasMoreElements()) {
-                            token = tokens.nextElement();
-                            if (token.length() > 0) {
-                                prop.put("viewMode_words_" + i + "_nr", i + 1);
-                                prop.put("viewMode_words_" + i + "_word", token.toString());
-                                prop.put("viewMode_words_" + i + "_dark", dark ? "1" : "0");
-                                dark = !dark;
-                                i++;
+                        WordTokenizer tokens = new WordTokenizer(new SentenceReader(sentence), LibraryProvider.dymLib);
+                        try {
+                            while (tokens.hasMoreElements()) {
+                                token = tokens.nextElement();
+                                if (token.length() > 0) {
+                                    prop.put("viewMode_words_" + i + "_nr", i + 1);
+                                    prop.put("viewMode_words_" + i + "_word", token.toString());
+                                    prop.put("viewMode_words_" + i + "_dark", dark ? "1" : "0");
+                                    dark = !dark;
+                                    i++;
+                                }
                             }
+                        } finally {
+                            tokens.close();
+                            tokens = null;
                         }
                     }
                 }

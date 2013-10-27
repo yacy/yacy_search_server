@@ -27,6 +27,7 @@ import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.cora.federate.solr.instance.SolrInstance;
 import net.yacy.cora.util.ConcurrentLog;
 
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrException;
@@ -41,6 +42,8 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.util.RefCounted;
 
 public class EmbeddedSolrConnector extends SolrServerConnector implements SolrConnector {
 
@@ -90,6 +93,21 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         try {this.core.close();} catch (final Throwable e) {ConcurrentLog.logException(e);}
     }
 
+    @Override
+    public long getSize() {
+        RefCounted<SolrIndexSearcher> refCountedIndexSearcher = this.core.getSearcher();
+        SolrIndexSearcher searcher = refCountedIndexSearcher.get();
+        DirectoryReader reader = searcher.getIndexReader();
+        long numDocs = reader.numDocs();
+        refCountedIndexSearcher.decref();
+        return numDocs;
+    }
+
+    /**
+     * get a new query request. MUST be closed after usage using close()
+     * @param params
+     * @return
+     */
     public SolrQueryRequest request(final SolrParams params) {
         SolrQueryRequest req = null;
         req = new SolrQueryRequestBase(this.core, params){};

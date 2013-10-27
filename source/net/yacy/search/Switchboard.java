@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -159,6 +160,7 @@ import net.yacy.gui.Tray;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.logging.GuiHandler;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -2032,6 +2034,7 @@ public final class Switchboard extends serverSwitch {
                 this.index.clearCache();
                 SearchEventCache.cleanupEvents(false);
                 this.trail.clear();
+                GuiHandler.clear();
             }
 
             // set a random password if no password is configured
@@ -2134,27 +2137,6 @@ public final class Switchboard extends serverSwitch {
                             + origin.getCode());
                     }
                     ResultURLs.clearStack(origin);
-                }
-            }
-
-            // clean up profiles
-            checkInterruption();
-            
-            if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
-                Set<String> deletionCandidates = this.crawler.getFinishesProfiles(this.crawlQueues);
-                int cleanup =  deletionCandidates.size();
-                if (cleanup > 0) {
-                    // run postprocessing on these profiles
-                    postprocessingRunning = true;
-                    int proccount = 0;
-                    for (String profileHash: deletionCandidates) {
-                        proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, profileHash);
-                        proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, profileHash);
-                    }
-                    postprocessingRunning = false;
-                    
-                    this.crawler.cleanProfiles(deletionCandidates);
-                    log.info("cleanup removed " + cleanup + " crawl profiles, post-processed " + proccount + " documents");
                 }
             }
             
@@ -2289,37 +2271,68 @@ public final class Switchboard extends serverSwitch {
                 JenaTripleStore.saveAll();
             }
 
+            
+            // clean up profiles
+            checkInterruption();
+
             // if no crawl is running and processing is activated:
             // execute the (post-) processing steps for all entries that have a process tag assigned
-            if (this.crawlQueues.coreCrawlJobSize() == 0) {
-                if (this.crawlQueues.noticeURL.isEmpty()) {
-                	Domains.clear();
-                	this.crawlQueues.noticeURL.clear(); // flushes more caches 
-                }
-                postprocessingRunning = true;
+            if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
                 int proccount = 0;
-                proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, null);
-                proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, null);
-                long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
-                long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
-                long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
-                boolean optimizeRequired = deltaOptimize > 60000 * 60 * 3; // 3 hours
-                int opts = Math.max(1, (int) (index.fulltext().collectionSize() / 5000000));
-                
-                log.info("Solr auto-optimization: idleSearch=" + idleSearch + ", idleAdmin=" + idleAdmin + ", deltaOptimize=" + deltaOptimize + ", proccount=" + proccount);
-                if (idleAdmin > 600000) {
-                    // only run optimization if the admin is idle (10 minutes)
-                    if (proccount > 0) {
-                    	opts++; // have postprocessings will force optimazion with one more Segment which is small an quick
-                    	optimizeRequired = true;
+                if (index.fulltext().getDefaultConfiguration().contains(CollectionSchema.harvestkey_s.getSolrFieldName())) {
+                    Set<String> deletionCandidates = this.crawler.getFinishesProfiles(this.crawlQueues);
+                    int cleanup = deletionCandidates.size();
+                    if (cleanup > 0) {
+                        // run postprocessing on these profiles
+                        postprocessingRunning = true;
+                        for (String profileHash: deletionCandidates) {
+                            proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, profileHash);
+                            proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, profileHash);
+                        }
+                        
+                        this.crawler.cleanProfiles(deletionCandidates);
+                        log.info("cleanup removed " + cleanup + " crawl profiles, post-processed " + proccount + " documents");
                     }
-                    if (optimizeRequired) {
-                        if (idleSearch < 600000) opts++; // < 10 minutes idle time will cause a optimization with one more Segment which is small an quick
-                        log.info("Solr auto-optimization: running solr.optimize(" + opts + ")");
-                        index.fulltext().optimize(opts);
-                        this.optimizeLastRun = System.currentTimeMillis();
+                } else {
+                    if (this.crawler.allCrawlsFinished(this.crawlQueues)) {
+                        // run postprocessing on all profiles
+                        postprocessingRunning = true;
+                        proccount += index.fulltext().getDefaultConfiguration().postprocessing(index, null);
+                        proccount += index.fulltext().getWebgraphConfiguration().postprocessing(index, null);
+                        
+                        this.crawler.cleanProfiles(this.crawler.getActiveProfiles());
+                        log.info("cleanup post-processed " + proccount + " documents");
                     }
                 }
+                if (this.crawler.allCrawlsFinished(this.crawlQueues)) {
+                    postprocessingRunning = true;
+                    // flush caches
+                    Domains.clear();
+                    this.crawlQueues.noticeURL.clear();
+                    
+                    // do solr optimization
+                    long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
+                    long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
+                    long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
+                    boolean optimizeRequired = deltaOptimize > 60000 * 60 * 3; // 3 hours
+                    int opts = Math.max(1, (int) (index.fulltext().collectionSize() / 5000000));
+                    
+                    log.info("Solr auto-optimization: idleSearch=" + idleSearch + ", idleAdmin=" + idleAdmin + ", deltaOptimize=" + deltaOptimize + ", proccount=" + proccount);
+                    if (idleAdmin > 600000) {
+                        // only run optimization if the admin is idle (10 minutes)
+                        if (proccount > 0) {
+                            opts++; // have postprocessings will force optimazion with one more Segment which is small an quick
+                            optimizeRequired = true;
+                        }
+                        if (optimizeRequired) {
+                            if (idleSearch < 600000) opts++; // < 10 minutes idle time will cause a optimization with one more Segment which is small an quick
+                            log.info("Solr auto-optimization: running solr.optimize(" + opts + ")");
+                            index.fulltext().optimize(opts);
+                            this.optimizeLastRun = System.currentTimeMillis();
+                        }
+                    }
+                }
+                
                 postprocessingRunning = false;
             }
 
@@ -2543,7 +2556,7 @@ public final class Switchboard extends serverSwitch {
            ) {
             // get the hyperlinks
             final Map<DigestURL, String> hl = Document.getHyperlinks(documents);
-            boolean loadImages = getConfigBool("crawler.load.image", true);
+            boolean loadImages = getConfigBool(SwitchboardConstants.CRAWLER_LOAD_IMAGE, true);
             if (loadImages) hl.putAll(Document.getImagelinks(documents));
             
             // add all media links also to the crawl stack. They will be re-sorted to the NOLOAD queue and indexed afterwards as pure links
@@ -2915,7 +2928,9 @@ public final class Switchboard extends serverSwitch {
         
         // remove the document from the error-db
         byte[] hosthash = new byte[6]; System.arraycopy(urlhash, 6, hosthash, 0, 6);
-        this.crawlQueues.errorURL.removeHost(hosthash);
+        Set<String> hosthashes = new HashSet<String>();
+        hosthashes.add(ASCII.String(hosthash));
+        this.crawlQueues.errorURL.removeHosts(hosthashes);
         this.index.fulltext().remove(urlhash);
 
         // get a scraper to get the title
@@ -3622,12 +3637,12 @@ public final class Switchboard extends serverSwitch {
             }
             c++;
             if ( seedListFileURL.startsWith("http://") || seedListFileURL.startsWith("https://") ) {
-                loadSeedListConcurrently(this.peers, seedListFileURL, scc, (int) getConfigLong("bootstrapLoadTimeout", 20000));
+                loadSeedListConcurrently(this.peers, seedListFileURL, scc, (int) getConfigLong("bootstrapLoadTimeout", 20000), c > 0);
             }
         }
     }
 
-    private static void loadSeedListConcurrently(final SeedDB peers, final String seedListFileURL, final AtomicInteger scc, final int timeout) {
+    private static void loadSeedListConcurrently(final SeedDB peers, final String seedListFileURL, final AtomicInteger scc, final int timeout, final boolean checkAge) {
         // uses the superseed to initialize the database with known seeds
 
         Thread seedLoader = new Thread() {
@@ -3646,52 +3661,48 @@ public final class Switchboard extends serverSwitch {
                     client.HEADResponse(url.toString());
                     int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
                     ResponseHeader header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
-                    //final long loadtime = System.currentTimeMillis() - start;
-                    /*if (header == null) {
-                        if (loadtime > getConfigLong("bootstrapLoadTimeout", 6000)) {
-                            yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available, time-out after " + loadtime + " milliseconds");
-                        } else {
-                            yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available, no content");
+                    if (checkAge) {
+                        if ( header.lastModified() == null ) {
+                            Network.log.warn("BOOTSTRAP: seed-list URL "
+                                + seedListFileURL
+                                + " not usable, last-modified is missing");
+                            return;
+                        } else if ( (header.age() > 86400000) && (scc.get() > 0) ) {
+                            Network.log.info("BOOTSTRAP: seed-list URL "
+                                + seedListFileURL
+                                + " too old ("
+                                + (header.age() / 86400000)
+                                + " days)");
+                            return;
                         }
-                    } else*/if ( header.lastModified() == null ) {
-                        Network.log.warn("BOOTSTRAP: seed-list URL "
-                            + seedListFileURL
-                            + " not usable, last-modified is missing");
-                    } else if ( (header.age() > 86400000) && (scc.get() > 0) ) {
-                        Network.log.info("BOOTSTRAP: seed-list URL "
-                            + seedListFileURL
-                            + " too old ("
-                            + (header.age() / 86400000)
-                            + " days)");
-                    } else {
-                        scc.incrementAndGet();
-                        final byte[] content = client.GETbytes(url);
-                        Iterator<String> enu = FileUtils.strings(content);
-                        int lc = 0;
-                        while ( enu.hasNext() ) {
-                            try {
-                                Seed ys = Seed.genRemoteSeed(enu.next(), false, null);
-                                if ( (ys != null)
-                                    && (!peers.mySeedIsDefined() || !peers.mySeed().hash.equals(ys.hash)) ) {
-                                    final long lastseen = Math.abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);
-                                    if ( lastseen < 60 ) {
-                                        if ( peers.peerActions.connectPeer(ys, false) ) {
-                                            lc++;
-                                        }
+                    }
+                    scc.incrementAndGet();
+                    final byte[] content = client.GETbytes(url);
+                    Iterator<String> enu = FileUtils.strings(content);
+                    int lc = 0;
+                    while ( enu.hasNext() ) {
+                        try {
+                            Seed ys = Seed.genRemoteSeed(enu.next(), false, null);
+                            if ( (ys != null)
+                                && (!peers.mySeedIsDefined() || !peers.mySeed().hash.equals(ys.hash)) ) {
+                                final long lastseen = Math.abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);
+                                if ( lastseen < 60 ) {
+                                    if ( peers.peerActions.connectPeer(ys, false) ) {
+                                        lc++;
                                     }
                                 }
-                            } catch (final IOException e ) {
-                                Network.log.info("BOOTSTRAP: bad seed from " + seedListFileURL + ": " + e.getMessage());
                             }
+                        } catch (final IOException e ) {
+                            Network.log.info("BOOTSTRAP: bad seed from " + seedListFileURL + ": " + e.getMessage());
                         }
-                        Network.log.info("BOOTSTRAP: "
-                            + lc
-                            + " seeds from seed-list URL "
-                            + seedListFileURL
-                            + ", AGE="
-                            + (header.age() / 3600000)
-                            + "h");
                     }
+                    Network.log.info("BOOTSTRAP: "
+                        + lc
+                        + " seeds from seed-list URL "
+                        + seedListFileURL
+                        + ", AGE="
+                        + (header.age() / 3600000)
+                        + "h");
 
                 } catch (final IOException e ) {
                     // this is when wget fails, commonly because of timeout

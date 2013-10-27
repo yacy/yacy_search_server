@@ -895,10 +895,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         ReversibleScoreMap<String> hostscore = null;
         try {
             // collect hosts from index which shall take part in citation computation
-            hostscore = collectionConnector.getFacets(
-                    (harvestkey == null ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
-                    CollectionSchema.process_sxt.getSolrFieldName() + ":" + ProcessType.CITATION.toString(),
-                    10000000, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
+            String query = (harvestkey == null || !segment.fulltext().getDefaultConfiguration().contains(CollectionSchema.harvestkey_s) ? "" : CollectionSchema.harvestkey_s.getSolrFieldName() + ":\"" + harvestkey + "\" AND ") +
+                    CollectionSchema.process_sxt.getSolrFieldName() + ":" + ProcessType.CITATION.toString();
+            hostscore = collectionConnector.getFacets(query, 10000000, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
             if (hostscore == null) hostscore = new ClusteredScoreMap<String>();
 
             for (String host: hostscore.keyList(true)) {
@@ -906,9 +905,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 // This shall fulfill the following requirement:
                 // If a document A links to B and B contains a 'canonical C', then the citation rank coputation shall consider that A links to C and B does not link to C.
                 // To do so, we first must collect all canonical links, find all references to them, get the anchor list of the documents and patch the citation reference of these links
-                BlockingQueue<SolrDocument> documents_with_canonical_tag = collectionConnector.concurrentDocumentsByQuery(
-                        CollectionSchema.host_s.getSolrFieldName() + ":" + host + " AND " + CollectionSchema.canonical_s.getSolrFieldName() + ":[* TO *]",
-                        0, 10000000, 60000L, 50,
+                String patchquery = CollectionSchema.host_s.getSolrFieldName() + ":" + host + " AND " + CollectionSchema.canonical_s.getSolrFieldName() + ":[* TO *]";
+                BlockingQueue<SolrDocument> documents_with_canonical_tag = collectionConnector.concurrentDocumentsByQuery(patchquery, 0, 10000000, 60000L, 50,
                         CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.canonical_s.getSolrFieldName());
                 SolrDocument doc_B;
                 try {

@@ -269,9 +269,15 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     public final boolean isFile()  { return this.protocol.equals("file"); }
     public final boolean isSMB()   { return this.protocol.equals("smb"); }
 
-    public final ContentDomain getContentDomain() {
+    /**
+     * Get the content domain of a document according to the extension.
+     * This can produce wrong results because the extension is a weak hint for the content domain.
+     * If possible, use the mime type, call Classification.getContentDomainFromMime()
+     * @return the content domain which classifies the content type
+     */
+    public final ContentDomain getContentDomainFromExt() {
         if (this.contentDomain == null) {
-            this.contentDomain = Classification.getContentDomain(getFileExtension(this.getFileName()));
+            this.contentDomain = Classification.getContentDomainFromExt(getFileExtension(this.getFileName()));
         }
         return this.contentDomain;
     }

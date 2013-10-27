@@ -54,9 +54,15 @@
 
             // crawl start: From File
             if ($("#sitelist").isChecked()) {
-                $('#rangeDomain').check();
+                document.getElementById('rangeDomainDescription').innerHTML ='Restrict to the domains in the link-list';
+                document.getElementById('rangeSubpathDescription').innerHTML ='Restrict to the subpaths in the link-list';
+                
+                if ($("#rangeWide").isChecked()) {
+                    // we allow also #rangeSubpath
+                    $('#rangeDomain').check();
+                }
             }
-
+            
             // Delete only old
             if ($('#deleteoldage').isChecked()) {
                 $('#deleteIfOlderNumber, #deleteIfOlderUnit').enable();
@@ -305,17 +311,17 @@
             </span></span>
             <table border="0">
             <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td></td></tr>
-			<tr><td colspan="2"><input type="radio" name="range" id="rangeDomain" value="domain" #(range_domain)#::checked="checked"#(/range_domain)#/>Restrict to start domain(s)</td></tr>
-			<tr><td colspan="2"><input type="radio" name="range" id="rangeSubpath" value="subpath" #(range_subpath)#::checked="checked"#(/range_subpath)#/>Restrict to sub-path(s)</td></tr>
+			<tr><td colspan="2"><input type="radio" name="range" id="rangeDomain" value="domain" #(range_domain)#::checked="checked"#(/range_domain)#/><div id="rangeDomainDescription" style="display:inline">Restrict to start domain(s)</div></td></tr>
+			<tr><td colspan="2"><input type="radio" name="range" id="rangeSubpath" value="subpath" #(range_subpath)#::checked="checked"#(/range_subpath)#/><div id="rangeSubpathDescription" style="display:inline">Restrict to sub-path(s)</div></td></tr>
 			<tr><td><input type="radio" name="range" id="rangeWide" value="wide" #(range_wide)#::checked="checked"#(/range_wide)#/>Use filter</td>
-			<td valign="bottom"><input name="mustmatch" id="mustmatch" type="text" size="55" maxlength="100000" value="#[mustmatch]#"/></td></tr>
+			<td valign="bottom"><input name="mustmatch" id="mustmatch" type="text" size="55" maxlength="100000" value="#[mustmatch]#" onblur="if (this.value=='') this.value='.*';"/></td><td>(must not be empty)</td></tr>
             <tr><td><img src="/env/grafics/minus.gif"> must-not-match</td><td><input name="mustnotmatch" id="mustnotmatch" type="text" size="55" maxlength="100000" value="#[mustnotmatch]#" /></td></tr>
 			</table>
 	        </dd>
 	        <dt>Load Filter on IPs</dt>
 	        <dd>
             <table border="0">
-            <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td><input name="ipMustmatch" id="ipMustmatch" type="text" size="55" maxlength="100000" value="#[ipMustmatch]#" /></td></tr>
+            <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td><input name="ipMustmatch" id="ipMustmatch" type="text" size="55" maxlength="100000" value="#[ipMustmatch]#" onblur="if (this.value=='') this.value='.*';"/></td><td>(must not be empty)</td></tr>
 		    <tr><td><img src="/env/grafics/minus.gif"> must-not-match</td><td><input name="ipMustnotmatch" id="ipMustnotmatch" type="text" size="55" maxlength="100000" value="#[ipMustnotmatch]#" /></td></tr>
 			</table>
 	        </dd>
@@ -342,14 +348,14 @@
             that <b>must not match</b> with the URLs to allow that the content of the url is indexed.
             </span></span>
             <table border="0">
-		    <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td><input name="indexmustmatch" id="indexmustmatch" type="text" size="55" maxlength="100000" value="#[indexmustmatch]#" /></td></tr>
+		    <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td><input name="indexmustmatch" id="indexmustmatch" type="text" size="55" maxlength="100000" value="#[indexmustmatch]#" onblur="if (this.value=='') this.value='.*';"/></td><td>(must not be empty)</td></tr>
 		    <tr><td><img src="/env/grafics/minus.gif"> must-not-match</td><td><input name="indexmustnotmatch" id="indexmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexmustnotmatch]#" /></td></tr>
 			</table>
 	        </dd>
 	        <dt>Filter on Content of Document<br/>(all visible text, including camel-case-tokenized url and title)</dt>
 	        <dd>
             <table border="0">
-		    <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td><input name="indexcontentmustmatch" id="indexcontentmustmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustmatch]#" /></td></tr>
+		    <tr><td width="110"><img src="/env/grafics/plus.gif"> must-match</td><td><input name="indexcontentmustmatch" id="indexcontentmustmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustmatch]#" onblur="if (this.value=='') this.value='.*';"/></td><td>(must not be empty)</td></tr>
 		    <tr><td><img src="/env/grafics/minus.gif"> must-not-match</td><td><input name="indexcontentmustnotmatch" id="indexcontentmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustnotmatch]#" /></td></tr>
 			</table>
 	        </dd>

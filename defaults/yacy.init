@@ -800,7 +800,7 @@ search.verify.delete = true
 # images may be treated either as documents that are shown in search results or as objects
 # that are only visible in special search environments, like image search
 search.excludeintext.image = true
-crawler.load.image = true;
+crawler.load.image = true
 
 # remote search details
 remotesearch.maxcount = 10
@@ -1013,7 +1013,7 @@ routing.deleteOldSeeds.time = 30
 
 # options to remember the default search engines when using the search compare features
 compare_yacy.left = YaCy
-compare_yacy.right = metager.de
+compare_yacy.right = startpage.com
 
 # minimum free disk space for crawling (MiB)
 disk.free = 3000
@@ -1046,7 +1046,10 @@ content.phpbb3.dumpfile =
 # search engine teaser: an about box in search results
 # this is only shown, if the about.body is filled
 about.headline=Please support YaCy!
-about.body=<iframe src="http://yacy.net/include/donate.html" width="100%" height="90" border="0" frameborder="0" scrolling="no" hspace="0" vspace="0" name="donate"></iframe><br/><div style="padding:8px;">If you run a YaCy server, feel free to replace our donation plea with your own support message, use the <a href="/ConfigPortal.html">Portal Configuration</a> servlet.</div>
+about.body=<iframe src="/env/donate.html" width="100%" height="90" border="0" frameborder="0" scrolling="no" hspace="0" vspace="0" name="donate"></iframe><br/><div style="padding:8px;">If you run a YaCy server, feel free to replace our donation plea with your own support message, use the <a href="/ConfigPortal.html">Portal Configuration</a> servlet.</div>
+
+donation.iframesource=http://yacy.net/include/donate.html
+donation.iframetarget=env/donate.html
 
 # search heuristics
 heuristic.site = false
@@ -1093,7 +1096,7 @@ federated.service.solr.indexing.url = http://127.0.0.1:8983/solr
 federated.service.solr.indexing.sharding = MODULO_HOST_MD5
 # the lazy attribute causes that fields containing "" or 0 are not added and not written
 federated.service.solr.indexing.lazy = true
-federated.service.solr.indexing.timeout = 10000
+federated.service.solr.indexing.timeout = 6000
 
 # temporary definition of backend services to use.
 # After the migration a rwi+solr combination is used, the solr contains the content of the previously used metadata-db.

@@ -149,13 +149,32 @@ public class Classification {
         return textExtSet.contains(ext) || mediaExtSet.contains(ext) || ctrlExtSet.contains(ext);
     }
 
-    public static ContentDomain getContentDomain(final String ext) {
+    /**
+     * Get the content domain of a document according to the file extension.
+     * This can produce wrong results because the extension is a weak hint for the content domain.
+     * If possible, use the mime type, call Classification.getContentDomainFromMime()
+     * @return the content domain which classifies the content type
+     */
+    public static ContentDomain getContentDomainFromExt(final String ext) {
         if (isTextExtension(ext)) return ContentDomain.TEXT;
         if (isImageExtension(ext)) return ContentDomain.IMAGE;
         if (isAudioExtension(ext)) return ContentDomain.AUDIO;
         if (isVideoExtension(ext)) return ContentDomain.VIDEO;
         if (isApplicationExtension(ext)) return ContentDomain.APP;
         if (isControlExtension(ext)) return ContentDomain.CTRL;
+        return ContentDomain.ALL;
+    }
+
+    /**
+     * Get the content domain of a document according to the mime type.
+     * @return the content domain which classifies the content type
+     */
+    public static ContentDomain getContentDomainFromMime(final String mime) {
+        if (mime.startsWith("text/")) return ContentDomain.TEXT;
+        if (mime.startsWith("image/")) return ContentDomain.IMAGE;
+        if (mime.startsWith("audio/")) return ContentDomain.AUDIO;
+        if (mime.startsWith("video/")) return ContentDomain.VIDEO;
+        if (mime.startsWith("application/")) return ContentDomain.APP;
         return ContentDomain.ALL;
     }
 

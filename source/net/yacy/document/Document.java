@@ -50,6 +50,7 @@ import java.util.TreeSet;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
@@ -145,6 +146,17 @@ public class Document {
         this.date = date == null ? new Date() : date;
     }
 
+    /**
+     * Get the content domain of a document. This tries to get the content domain from the mime type
+     * and if this fails it uses alternatively the content domain from the file extension.
+     * @return the content domain which classifies the content type
+     */
+    public ContentDomain getContentDomain() {
+        ContentDomain contentDomain = Classification.getContentDomainFromMime(this.mimeType);
+        if (contentDomain != ContentDomain.ALL) return contentDomain;
+        return this.dc_source().getContentDomainFromExt();
+    }
+    
     public Object getParserObject() {
         return this.parserObject;
     }
@@ -480,7 +492,7 @@ dc_rights
             this.applinks   = new LinkedHashMap<AnchorURL, String>();
             this.emaillinks = new LinkedHashMap<String, String>();
             final Map<AnchorURL, ImageEntry> collectedImages = new HashMap<AnchorURL, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
-            for (final Map.Entry<AnchorURL, ImageEntry> entry: collectedImages.entrySet()) {
+            for (final Map.Entry<AnchorURL, ImageEntry> entry: this.images.entrySet()) {
                 if (entry.getKey().getHost().equals(thishost)) this.inboundlinks.put(entry.getKey(), "image"); else this.outboundlinks.put(entry.getKey(), "image");
             }
             for (final AnchorURL url: this.anchors) {

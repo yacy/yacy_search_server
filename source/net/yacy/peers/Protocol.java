@@ -902,10 +902,12 @@ public final class Protocol {
             Map<String, String> resultMap = null;
             String key = "";
             final ContentBody keyBody = parts.get("key");
-            if ( keyBody != null ) {
-                final ByteArrayOutputStream baos = new ByteArrayOutputStream(20);
+            if (keyBody != null) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(20);
                 keyBody.writeTo(baos);
-                key = baos.toString();
+                key = UTF8.String(baos.toByteArray());
+                baos.close();
+                baos = null;
             }
             
             String filter = event.query.urlMask.pattern().toString();
@@ -1037,67 +1039,70 @@ public final class Protocol {
         RemoteInstance instance = null;
         SolrConnector solrConnector = null;        
         SolrDocumentList docList = null;
-        QueryResponse rsp = null;
-        if (localsearch) {
-            // search the local index
-            try {
-                rsp = event.getQuery().getSegment().fulltext().getDefaultConnector().getResponseByParams(solrQuery);
-                docList = rsp.getResults();
-            } catch (final Throwable e) {
-                Network.log.info("SEARCH failed (solr), localpeer (" + e.getMessage() + ")", e);
-                return -1;
-            }
-        } else {
-            try {
-                String address = target == event.peers.mySeed() ? "localhost:" + target.getPort() : target.getPublicAddress();
-                final int solrtimeout = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 10000);
-                instance = new RemoteInstance("http://" + address, null, "solr", solrtimeout); // this is a 'patch configuration' which considers 'solr' as default collection
-                solrConnector = new RemoteSolrConnector(instance, "solr");
-                rsp = solrConnector.getResponseByParams(solrQuery);
-                docList = rsp.getResults();
-                solrConnector.close();
-                instance.close();
-                // no need to close this here because that sends a commit to remote solr which is not wanted here
-            } catch (final Throwable e) {
-                Network.log.info("SEARCH failed (solr), remote Peer: " +target.getName() + "/" + target.getPublicAddress() + " (" + e.getMessage() + ")");
-                return -1;
-            }
-        }
-        
-        // evaluate facets
         Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>(event.query.facetfields.size());
-        for (String field: event.query.facetfields) {
-            FacetField facet = rsp.getFacetField(field);
-            ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
-            List<Count> values = facet == null ? null : facet.getValues();
-            if (values == null) continue;
-            for (Count ff: values) {
-                int c = (int) ff.getCount();
-                if (c == 0) continue;
-                result.set(ff.getName(), c);
-            }
-            if (result.size() > 0) facets.put(field, result);
-        }
-        
-        // evaluate snippets
-        Map<String, Map<String, List<String>>> rawsnippets = rsp.getHighlighting(); // a map from the urlhash to a map with key=field and value = list of snippets
         Map<String, String> snippets = new HashMap<String, String>(); // this will be a list of urlhash-snippet entries
-        if (rawsnippets != null) {
-            nextsnippet: for (Map.Entry<String, Map<String, List<String>>> re: rawsnippets.entrySet()) {
-                Map<String, List<String>> rs = re.getValue();
-                for (CollectionSchema field: snippetFields) {
-                    if (rs.containsKey(field.getSolrFieldName())) {
-                        List<String> s = rs.get(field.getSolrFieldName());
-                        if (s.size() > 0) {
-                            snippets.put(re.getKey(), s.get(0));
-                            continue nextsnippet;
+        {// encapsulate expensive solr QueryResponse object
+            QueryResponse rsp = null;
+            if (localsearch) {
+                // search the local index
+                try {
+                    rsp = event.getQuery().getSegment().fulltext().getDefaultConnector().getResponseByParams(solrQuery);
+                    docList = rsp.getResults();
+                } catch (final Throwable e) {
+                    Network.log.info("SEARCH failed (solr), localpeer (" + e.getMessage() + ")", e);
+                    return -1;
+                }
+            } else {
+                try {
+                    String address = target == event.peers.mySeed() ? "localhost:" + target.getPort() : target.getPublicAddress();
+                    final int solrtimeout = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 6000);
+                    instance = new RemoteInstance("http://" + address, null, "solr", solrtimeout); // this is a 'patch configuration' which considers 'solr' as default collection
+                    solrConnector = new RemoteSolrConnector(instance, "solr");
+                    rsp = solrConnector.getResponseByParams(solrQuery);
+                    docList = rsp.getResults();
+                    solrConnector.close();
+                    instance.close();
+                    // no need to close this here because that sends a commit to remote solr which is not wanted here
+                } catch (final Throwable e) {
+                    Network.log.info("SEARCH failed (solr), remote Peer: " +target.getName() + "/" + target.getPublicAddress() + " (" + e.getMessage() + ")");
+                    return -1;
+                }
+            }
+            
+            // evaluate facets
+            for (String field: event.query.facetfields) {
+                FacetField facet = rsp.getFacetField(field);
+                ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+                List<Count> values = facet == null ? null : facet.getValues();
+                if (values == null) continue;
+                for (Count ff: values) {
+                    int c = (int) ff.getCount();
+                    if (c == 0) continue;
+                    result.set(ff.getName(), c);
+                }
+                if (result.size() > 0) facets.put(field, result);
+            }
+            
+            // evaluate snippets
+            Map<String, Map<String, List<String>>> rawsnippets = rsp.getHighlighting(); // a map from the urlhash to a map with key=field and value = list of snippets
+            if (rawsnippets != null) {
+                nextsnippet: for (Map.Entry<String, Map<String, List<String>>> re: rawsnippets.entrySet()) {
+                    Map<String, List<String>> rs = re.getValue();
+                    for (CollectionSchema field: snippetFields) {
+                        if (rs.containsKey(field.getSolrFieldName())) {
+                            List<String> s = rs.get(field.getSolrFieldName());
+                            if (s.size() > 0) {
+                                snippets.put(re.getKey(), s.get(0));
+                                continue nextsnippet;
+                            }
                         }
                     }
+                    // no snippet found :( --we don't assign a value here by default; that can be done as an evaluation outside this method
                 }
-                // no snippet found :( --we don't assign a value here by default; that can be done as an evaluation outside this method
             }
+            rsp = null;
         }
-
+        
         // evaluate result
         List<URIMetadataNode> container = new ArrayList<URIMetadataNode>();
 		if (docList == null || docList.size() == 0) {
@@ -1164,24 +1169,25 @@ public final class Protocol {
             // add the url entry to the word indexes
             container.add(urlEntry);
         }
+        final int dls = docList.size();
+        final int numFound = (int) docList.getNumFound();
+        docList.clear();
+        docList = null;
         if (localsearch) {
-            event.addNodes(container, facets, snippets, true, "localpeer", (int) docList.getNumFound());
+            event.addNodes(container, facets, snippets, true, "localpeer", numFound);
             event.addFinalize();
             event.addExpectedRemoteReferences(-count);
-            Network.log.info("local search (solr): localpeer sent " + container.size() + "/" + docList.getNumFound() + " references");
+            Network.log.info("local search (solr): localpeer sent " + container.size() + "/" + numFound + " references");
         } else {
             for (SolrInputDocument doc: docs) {
                 event.query.getSegment().putDocumentInQueue(doc);
             }
             docs.clear(); docs = null;
-            event.addNodes(container, facets, snippets, false, target.getName() + "/" + target.hash, (int) docList.getNumFound());
+            event.addNodes(container, facets, snippets, false, target.getName() + "/" + target.hash, numFound);
             event.addFinalize();
             event.addExpectedRemoteReferences(-count);
-            Network.log.info("remote search (solr): peer " + target.getName() + " sent " + (container.size() == 0 ? 0 : container.size()) + "/" + docList.getNumFound() + " references");
+            Network.log.info("remote search (solr): peer " + target.getName() + " sent " + (container.size() == 0 ? 0 : container.size()) + "/" + numFound + " references");
         }
-        final int dls = docList.size();
-        docList.clear();
-        docList = null;
         if (solrConnector != null) solrConnector.close();
         if (instance != null) instance.close();
         return dls;

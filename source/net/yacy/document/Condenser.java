@@ -102,10 +102,11 @@ public final class Condenser {
         this.RESULT_FLAGS = new Bitfield(4);
 
         // construct flag set for document
-        if (document.dc_source().getContentDomain() == ContentDomain.IMAGE || !document.getImages().isEmpty())     this.RESULT_FLAGS.set(flag_cat_hasimage, true);
-        if (document.dc_source().getContentDomain() == ContentDomain.AUDIO || !document.getAudiolinks().isEmpty()) this.RESULT_FLAGS.set(flag_cat_hasaudio, true);
-        if (document.dc_source().getContentDomain() == ContentDomain.VIDEO || !document.getVideolinks().isEmpty()) this.RESULT_FLAGS.set(flag_cat_hasvideo, true);
-        if (document.dc_source().getContentDomain() == ContentDomain.APP   || !document.getApplinks().isEmpty())   this.RESULT_FLAGS.set(flag_cat_hasapp,   true);
+        ContentDomain contentDomain = document.getContentDomain();
+        if (contentDomain == ContentDomain.IMAGE || !document.getImages().isEmpty())     this.RESULT_FLAGS.set(flag_cat_hasimage, true);
+        if (contentDomain == ContentDomain.AUDIO || !document.getAudiolinks().isEmpty()) this.RESULT_FLAGS.set(flag_cat_hasaudio, true);
+        if (contentDomain == ContentDomain.VIDEO || !document.getVideolinks().isEmpty()) this.RESULT_FLAGS.set(flag_cat_hasvideo, true);
+        if (contentDomain == ContentDomain.APP   || !document.getApplinks().isEmpty())   this.RESULT_FLAGS.set(flag_cat_hasapp,   true);
         if (document.lat() != 0.0 && document.lon() != 0.0) this.RESULT_FLAGS.set(flag_cat_haslocation, true);
 
         this.languageIdentificator = new Identificator();
@@ -284,6 +285,7 @@ public final class Condenser {
 	        }
         } finally {
         	wordenum.close();
+        	wordenum = null;
         }
     }
 
@@ -344,7 +346,7 @@ public final class Condenser {
         if (LibraryProvider.autotagging.isEmpty()) doAutotagging = false;
 
         // read source
-        final WordTokenizer wordenum = new WordTokenizer(new SentenceReader(text), meaningLib);
+        WordTokenizer wordenum = new WordTokenizer(new SentenceReader(text), meaningLib);
         try {
 	        while (wordenum.hasMoreElements()) {
 	            word = wordenum.nextElement().toString().toLowerCase(Locale.ENGLISH);
@@ -419,6 +421,7 @@ public final class Condenser {
 	        }
         } finally {
         	wordenum.close();
+        	wordenum = null;
         }
 
         if (pseudostemming) {
