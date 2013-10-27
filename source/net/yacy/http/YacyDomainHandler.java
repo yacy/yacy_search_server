@@ -35,11 +35,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
+import net.yacy.cora.protocol.Domains;
+import net.yacy.server.http.AlternativeDomainNames;
+
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import net.yacy.server.http.AlternativeDomainNames;
 
 /**
  * handling of request to virtual ".yacy" domain determines public adress from
@@ -80,6 +82,8 @@ public class YacyDomainHandler extends AbstractHandler implements Handler {
                 newHost = hostPort;
                 newPort = 80;
             }
+            if (newHost.equals(alternativeResolvers.myIP())) return;  
+            if (Domains.isLocal(newHost, null)) return;
             RequestDispatcher dispatcher = request.getRequestDispatcher(path + target);
             dispatcher.forward(new DomainRequestWrapper(request, newHost, newPort), response);
             baseRequest.setHandled(true);
@@ -88,8 +92,8 @@ public class YacyDomainHandler extends AbstractHandler implements Handler {
 
     private class DomainRequestWrapper extends HttpServletRequestWrapper {
 
-        private String newServerName;
-        private int newServerPort;
+        final private String newServerName;
+        final private int newServerPort;
 
         public DomainRequestWrapper(HttpServletRequest request, String serverName, int serverPort) {
             super(request);

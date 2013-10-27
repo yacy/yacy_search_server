@@ -100,9 +100,8 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
 
         // define list of YaCy specific general handlers
         HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[]
-           //TODO: domainHandler causes a closed response.outputstream if resolved to local address     
-           {/*domainHandler,*/ new ProxyCacheHandler(), new ProxyHandler()
+        handlers.setHandlers(new Handler[] 
+           {domainHandler, new ProxyCacheHandler(), new ProxyHandler()
             /*, resource_handler, new DefaultHandler() */}); 
 
         // context handler for dispatcher and security (hint: dispatcher requires a context)
