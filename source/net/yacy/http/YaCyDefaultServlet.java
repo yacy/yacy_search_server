@@ -179,8 +179,8 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
         _etags = getInitBoolean("etags", _etags);
         _gzip=getInitBoolean("gzip",_gzip);
         
-        if (ConcurrentLog.isFine("YaCyDefaultServlet")) {
-            ConcurrentLog.fine("YaCyDefaultServlet","resource base = " + _resourceBase);
+        if (ConcurrentLog.isFine("FILEHANDLER")) {
+            ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: resource base = " + _resourceBase);
         }
         templateMethodCache = new ConcurrentHashMap<File, SoftReference<Method>>();
     }
@@ -222,8 +222,8 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
                 r = Resource.newResource(u);
             }
 
-            if (ConcurrentLog.isFine("YaCyDefaultServlet")) {
-                ConcurrentLog.fine("YaCyDefaultServlet","Resource " + pathInContext + "=" + r);
+            if (ConcurrentLog.isFine("FILEHANDLER")) {
+                ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: Resource " + pathInContext + "=" + r);
             }
         } catch (IOException e) {
             // ConcurrentLog.logException(e);
@@ -286,8 +286,8 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
             // find resource
             resource = getResource(pathInContext);
 
-            if (ConcurrentLog.isFine("YaCyDefaultServlet")) {
-                ConcurrentLog.fine("YaCyDefaultServlet","uri=" + request.getRequestURI() + " resource=" + resource + (content != null ? " content" : ""));
+            if (ConcurrentLog.isFine("FILEHANDLER")) {
+                ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: uri=" + request.getRequestURI() + " resource=" + resource + (content != null ? " content" : ""));
             }
 
             // Handle resource
@@ -553,10 +553,10 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
             templateMethodCache.put(classFile, new SoftReference<Method>(m));
 
         } catch (final ClassNotFoundException e) {
-            ConcurrentLog.severe("YaCyDefaultServlet", "class " + classFile + " is missing:" + e.getMessage());
+            ConcurrentLog.severe("FILEHANDLER","YaCyDefaultServlet: class " + classFile + " is missing:" + e.getMessage());
             throw new InvocationTargetException(e, "class " + classFile + " is missing:" + e.getMessage());
         } catch (final NoSuchMethodException e) {
-            ConcurrentLog.severe("YaCyDefaultServlet", "method 'respond' not found in class " + classFile + ": " + e.getMessage());
+            ConcurrentLog.severe("FILEHANDLER","YaCyDefaultServlet: method 'respond' not found in class " + classFile + ": " + e.getMessage());
             throw new InvocationTargetException(e, "method 'respond' not found in class " + classFile + ": " + e.getMessage());
         }
         return m;

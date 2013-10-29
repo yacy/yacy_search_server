@@ -82,8 +82,8 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
  */
 public class TemplateHandler extends AbstractHandler implements Handler {
 
-    private String htLocalePath = "DATA/LOCALE/htroot";
-    private String htDefaultPath = "htroot";
+    private final String htLocalePath = "DATA/LOCALE/htroot";
+    private final String htDefaultPath = "htroot";
     private String htDocsPath = "DATA/HTDOCS";
     
     private static final serverClassLoader provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
@@ -156,10 +156,10 @@ public class TemplateHandler extends AbstractHandler implements Handler {
             templateMethodCache.put(classFile, new SoftReference<Method>(m));
             
         } catch (final ClassNotFoundException e) {
-            ConcurrentLog.severe("TemplateHandler", "class " + classFile + " is missing:" + e.getMessage());
+            ConcurrentLog.severe("HTTPDFileHandler", "class " + classFile + " is missing:" + e.getMessage());
             throw new InvocationTargetException(e, "class " + classFile + " is missing:" + e.getMessage());
         } catch (final NoSuchMethodException e) {
-            ConcurrentLog.severe("TemplateHandler", "method 'respond' not found in class " + classFile + ": " + e.getMessage());
+            ConcurrentLog.severe("HTTPDFileHandler", "method 'respond' not found in class " + classFile + ": " + e.getMessage());
             throw new InvocationTargetException(e, "method 'respond' not found in class " + classFile + ": " + e.getMessage());
         }
         return m;

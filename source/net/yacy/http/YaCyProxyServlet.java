@@ -219,7 +219,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
                                         continue;
                                     }
                                 } catch (final MalformedURLException e) {
-                                    ConcurrentLog.fine("ProxyServlet", "malformed url for url-rewirte " + url);
+                                    ConcurrentLog.fine("PROXY","ProxyServlet: malformed url for url-rewirte " + url);
                                     continue;
                                 }
                             }
@@ -237,7 +237,7 @@ public class YaCyProxyServlet extends ProxyServlet implements Servlet {
                                     continue;
                                 }
                                 } catch (MalformedURLException ex) {
-                                    ConcurrentLog.fine("ProxyServlet", "malformed url for url-rewirte " + complete_url);
+                                    ConcurrentLog.fine("PROXY","ProxyServlet: malformed url for url-rewirte " + complete_url);
                                     continue;
                                 }
                             }
