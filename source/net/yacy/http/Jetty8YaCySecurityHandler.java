@@ -181,7 +181,11 @@ public class Jetty8YaCySecurityHandler extends SecurityHandler {
         final boolean accessFromLocalhost = Domains.isLocalhost(request.getRemoteHost()) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
         // ! note : accessFromLocalhost compares localhost ip pattern ( ! currently also any intranet host is a local host)
         final boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
-        final boolean protectedPage = pathInContext.indexOf("_p.") > 0;
+        boolean protectedPage = (pathInContext.indexOf("_p.") > 0);
+        // check "/gsa" and "/solr" if not publicSearchpage
+        if (!protectedPage && !sb.getConfigBool("publicSearchpage", true)) { 
+            protectedPage = pathInContext.startsWith("/solr/") || pathInContext.startsWith("/gsa/");                        
+        }
         //final boolean accountEmpty = adminAccountBase64MD5.length() == 0;
         //final boolean yacyBot = request.getHeader("User-Agent").startsWith("yacybot");
      

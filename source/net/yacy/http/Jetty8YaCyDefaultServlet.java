@@ -46,7 +46,6 @@ import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.WriterOutputStream;
 import org.eclipse.jetty.server.AbstractHttpConnection;
 import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Dispatcher;
 import org.eclipse.jetty.server.HttpOutput;
 import org.eclipse.jetty.server.InclusiveByteRange;
 import org.eclipse.jetty.server.Response;
@@ -112,10 +111,10 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
         String servletPath = null;
         String pathInfo = null;
         Enumeration<String> reqRanges = null;
-        Boolean included = request.getAttribute(Dispatcher.INCLUDE_REQUEST_URI) != null;
+        Boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null; 
         if (included != null && included.booleanValue()) {
-            servletPath = (String) request.getAttribute(Dispatcher.INCLUDE_SERVLET_PATH);
-            pathInfo = (String) request.getAttribute(Dispatcher.INCLUDE_PATH_INFO);
+            servletPath = (String) request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
+            pathInfo = (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
             if (servletPath == null) {
                 servletPath = request.getServletPath();
                 pathInfo = request.getPathInfo();

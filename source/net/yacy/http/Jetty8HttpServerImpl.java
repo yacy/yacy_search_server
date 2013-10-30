@@ -91,9 +91,14 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
         sholder.setInitParameter("gzip","false");
         htrootContext.addServlet(sholder,"/*");    
         
+        // add proxy?url= servlet
         ServletHolder proxyholder= new ServletHolder(YaCyProxyServlet.class);
         htrootContext.addServlet(proxyholder,"/proxy.html");
         
+        // add GSA servlet
+        ServletHolder gsaholder = new ServletHolder (GSAsearchServlet.class);
+        htrootContext.addServlet(gsaholder,"/gsa/search");
+
         // assemble the servlet handlers
         ContextHandlerCollection servletContext = new ContextHandlerCollection();                
         servletContext.setHandlers(new Handler[] { solrContext, htrootContext });        
