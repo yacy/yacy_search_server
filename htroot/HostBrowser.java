@@ -399,7 +399,7 @@ public class HostBrowser {
                     } else {
                         // this is a folder
                         prop.put("files_list_" + c + "_type", 1);
-                        prop.put("files_list_" + c + "_type_url", entry.getKey());
+                        prop.putHTML("files_list_" + c + "_type_url", entry.getKey());
                         int linked = ((int[]) entry.getValue())[0];
                         int stored = ((int[]) entry.getValue())[1];
                         int crawler = ((int[]) entry.getValue())[2];
