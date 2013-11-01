@@ -139,7 +139,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @return one result or null if no result exists
      * @throws IOException
      */
-    public Object getFieldById(final String key, final String field) throws IOException;
+    public String getFieldById(final String key, final String field) throws IOException;
     
     /**
      * get a document from solr by given key for the id-field

@@ -70,7 +70,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         catchSuccessQuery.setRows(0);
         catchSuccessQuery.setStart(0);
     }
-    private final static int pagesize = 100;
+    protected final static int pagesize = 100;
     
     @Override
     public boolean existsByQuery(final String query) throws IOException {
@@ -83,10 +83,10 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     }
     
     @Override
-    public Object getFieldById(final String key, final String field) throws IOException {
+    public String getFieldById(final String key, final String field) throws IOException {
         SolrDocument doc = getDocumentById(key, field);
         if (doc == null) return null;
-        return doc.getFieldValue(field);
+        return doc.getFieldValue(field).toString();
     }
     
     /**
@@ -329,11 +329,11 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     }
     
     @Override
-    public SolrDocument getDocumentById(final String key, final String ... fields) throws IOException {
+    public SolrDocument getDocumentById(final String id, final String ... fields) throws IOException {
         final SolrQuery query = new SolrQuery();
-        assert key.length() == 12;
+        assert id.length() == 12;
         // construct query
-        query.setQuery("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + key);
+        query.setQuery("{!raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id);
         query.clearSorts();
         query.setRows(1);
         query.setStart(0);

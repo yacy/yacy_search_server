@@ -399,7 +399,7 @@ public class HostBrowser {
                     } else {
                         // this is a folder
                         prop.put("files_list_" + c + "_type", 1);
-                        prop.put("files_list_" + c + "_type_url", entry.getKey());
+                        prop.putHTML("files_list_" + c + "_type_url", entry.getKey());
                         int linked = ((int[]) entry.getValue())[0];
                         int stored = ((int[]) entry.getValue())[1];
                         int crawler = ((int[]) entry.getValue())[2];
@@ -441,7 +441,9 @@ public class HostBrowser {
                                     // maybe this is only in the errorURL
                                     prop.put("files_list_" + c + "_type_stored_error", process == HarvestProcess.ERRORS ? sb.crawlQueues.errorURL.get(ASCII.String(uri.hash())).getFailReason() : "unknown error");
                                 } else {
-                                    prop.put("files_list_" + c + "_type_stored_error", failType == FailType.excl ? "excluded from indexing" : "load fail");
+                                    String ids = ASCII.String(uri.hash());
+                                    InfoCacheEntry ice = infoCache.get(ids);
+                                    prop.put("files_list_" + c + "_type_stored_error", failType == FailType.excl ? "excluded from indexing" : "load fail; " + ice.toString());
                                 }
                             }
                             if (loadRight) {
