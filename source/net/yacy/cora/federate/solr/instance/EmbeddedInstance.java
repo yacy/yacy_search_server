@@ -166,6 +166,10 @@ public class EmbeddedInstance implements SolrInstance {
         return this.containerPath;
     }
     
+    public CoreContainer getCoreContainer() {
+        return this.coreContainer;
+    }
+    
     @Override
     public String getDefaultCoreName() {
         return this.defaultCoreName;

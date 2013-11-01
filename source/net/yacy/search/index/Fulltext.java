@@ -310,7 +310,9 @@ public final class Fulltext {
         if (urlHash == null) return null;
         Date x;
         try {
-            x = (Date) this.getDefaultConnector().getFieldById(urlHash, CollectionSchema.load_date_dt.getSolrFieldName());
+            String d = this.getDefaultConnector().getFieldById(urlHash, CollectionSchema.load_date_dt.getSolrFieldName());
+            if (d == null) return null;
+            x = new Date(Long.parseLong(d));
         } catch (final IOException e) {
             return null;
         }
@@ -322,7 +324,7 @@ public final class Fulltext {
         
         String x;
         try {
-            x = (String) this.getDefaultConnector().getFieldById(ASCII.String(urlHash), CollectionSchema.sku.getSolrFieldName());
+            x = this.getDefaultConnector().getFieldById(ASCII.String(urlHash), CollectionSchema.sku.getSolrFieldName());
         } catch (final IOException e) {
             return null;
         }
@@ -642,7 +644,7 @@ public final class Fulltext {
 
     public String failReason(final String urlHash) throws IOException {
         if (urlHash == null) return null;
-        String reason = (String) this.getDefaultConnector().getFieldById(urlHash, CollectionSchema.failreason_s.getSolrFieldName());
+        String reason = this.getDefaultConnector().getFieldById(urlHash, CollectionSchema.failreason_s.getSolrFieldName());
         if (reason == null) return null;
         return reason.length() == 0 ? null : reason;
     }

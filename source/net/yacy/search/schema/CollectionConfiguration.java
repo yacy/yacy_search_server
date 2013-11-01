@@ -1092,7 +1092,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             this.crt = new TreeMap<byte[], double[]>(Base64Order.enhancedCoder);
             try {
                 // select all documents for each host
-                BlockingQueue<String> ids = connector.concurrentIDsByQuery(CollectionSchema.host_s.getSolrFieldName() + ":\"" + host + "\"", 0, 1000000, 600000);
+                BlockingQueue<String> ids = connector.concurrentIDsByQuery("{!raw f=" + CollectionSchema.host_s.getSolrFieldName() + "}" + host, 0, 1000000, 600000);
                 String id;
                 while ((id = ids.take()) != AbstractSolrConnector.POISON_ID) {
                     this.crt.put(ASCII.getBytes(id), new double[]{0.0d,0.0d}); //{old value, new value}
