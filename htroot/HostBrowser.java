@@ -441,7 +441,9 @@ public class HostBrowser {
                                     // maybe this is only in the errorURL
                                     prop.put("files_list_" + c + "_type_stored_error", process == HarvestProcess.ERRORS ? sb.crawlQueues.errorURL.get(ASCII.String(uri.hash())).getFailReason() : "unknown error");
                                 } else {
-                                    prop.put("files_list_" + c + "_type_stored_error", failType == FailType.excl ? "excluded from indexing" : "load fail");
+                                    String ids = ASCII.String(uri.hash());
+                                    InfoCacheEntry ice = infoCache.get(ids);
+                                    prop.put("files_list_" + c + "_type_stored_error", failType == FailType.excl ? "excluded from indexing" : "load fail; " + ice.toString());
                                 }
                             }
                             if (loadRight) {

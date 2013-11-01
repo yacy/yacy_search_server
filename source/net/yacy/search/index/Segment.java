@@ -327,7 +327,8 @@ public class Segment {
             this.externalHosts = new RowHandleSet(6, Base64Order.enhancedCoder, 0);
             this.internalIDs = new RowHandleSet(12, Base64Order.enhancedCoder, 0);
             this.externalIDs = new RowHandleSet(12, Base64Order.enhancedCoder, 0);
-            if (Segment.this.fulltext.writeToWebgraph()) {
+            boolean useWebgraph = Segment.this.fulltext.writeToWebgraph();
+            if (useWebgraph) {
                 // reqd the references from the webgraph
                 SolrConnector webgraph = Segment.this.fulltext.getWebgraphConnector();
                 webgraph.commit(true);
@@ -354,7 +355,8 @@ public class Segment {
                 } catch (final InterruptedException e) {
                     ConcurrentLog.logException(e);
                 }
-            } else if (connectedCitation()) {
+            }
+            if ((!useWebgraph || (internalIDs.size() == 0 && externalIDs.size() == 0)) && connectedCitation()) {
                 // read the references from the citation index
                 ReferenceContainer<CitationReference> references;
                 references = urlCitation().get(id, null);
