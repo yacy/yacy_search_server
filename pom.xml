@@ -4,7 +4,7 @@
 
     <groupId>net.yacy</groupId>
     <artifactId>yacycore</artifactId>
-    <version>1.64</version>
+    <version>1.65</version>
     <packaging>jar</packaging>
     <description>YaCy - a Peer to Peer Web Search Engine</description>
     <name>YaCy</name>
@@ -34,7 +34,16 @@
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
         <!-- the Solr version used in dependency section for all related dependencies -->
-        <solr.version>4.5.0</solr.version>        
+        <solr.version>4.5.0</solr.version> 
+        
+        <!-- properties used for filtering yacyBuildProperties.java -->       
+        <REPL_DATE>${DSTAMP}</REPL_DATE>
+        <REPL_RELEASE>yacy_v${project.version}_${DSTAMP}_${releaseNr}.tar.gz</REPL_RELEASE>
+        <REPL_VERSION>${project.version}</REPL_VERSION>
+        <REPL_REVISION_NR>${releaseNr}</REPL_REVISION_NR>
+        <REPL_YACY_ROOT_DIR>.</REPL_YACY_ROOT_DIR>
+        <REPL_PKGMANAGER>false</REPL_PKGMANAGER>
+        <REPL_RESTARTCMD>/etc/init.d/yacy restart</REPL_RESTARTCMD>
     </properties>
 
     <build>
@@ -58,6 +67,17 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
+                    <excludes>
+                        <!-- special exclude for compatibility with ant build script
+                        note: the ant build uses a tricky source filtering to filter yacyBuildProperties.java
+                        for the Maven build the original source for filtering has been copied to
+                            libbuild/java-templates 
+                        and for maven the files in libbuild/java-templates are used for filtering to produce generated-sources.
+                        For the ant build script the yacyBuildProperties.java must be at it's origianl location,
+                        thus it is excluded here to prevent Maven compile error "duplicate source"
+                        -->
+                        <exclude>**/net/yacy/peers/operation/yacyBuildProperties.java</exclude>
+                    </excludes>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>          
                 </configuration>
@@ -75,9 +95,9 @@
                             <addClasspath>true</addClasspath>
                         </manifest>
                         <manifestEntries>
-                            <Implementation-Build>${project.version}-${buildNumber}</Implementation-Build>
+                            <Implementation-Build>${project.version}-${releaseNr}</Implementation-Build>
                         </manifestEntries>
-                    </archive>
+                    </archive>                    
                 </configuration>
             </plugin>
 
@@ -88,7 +108,7 @@
                     <descriptors>
                         <descriptor>assembly.xml</descriptor>
                     </descriptors>
-                    <finalName>yacy_v${project.version}_${buildNumber}</finalName>
+                    <finalName>yacy_v${project.version}_${DSTAMP}_${releaseNr}</finalName>
                     <outputDirectory>RELEASE</outputDirectory>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
@@ -142,71 +162,59 @@
                     </excludes>
                 </configuration>
             </plugin>
-
+            
+            <!-- custom plugin to add YaCy release number from local Git clone 
+            sets property <releaseNr>9nnn</releasNr> <DSTAMP>yyyyMMdd</DSTAMP> 
+            ! run sub project in libbuild to install the plugin ! -->
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>1.2</version>
+                <groupId>net.yacy</groupId>
+                <artifactId>maven-plugin-gitrevisionnumber</artifactId>
+                <version>1.0</version>
                 <executions>
                     <execution>
-                        <id>1</id>
-                        <!-- phase must be after phase initialize, as used property releaseNr only available after initialize -->
-                        <phase>generate-sources</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>create</goal>
                         </goals>
+                        <!-- optional parameter to set/change the propertyName 
+                        <configuration> 
+                            <branchPropertyName>branch</branchPropertyName>
+                            <buildNumberPropertyName>releasNr</buildNumberPropertyName> 
+                            <commitDatePropertyName>DSTAMP</commitDatePropertyName> 
+                        </configuration> 
+                        -->
                     </execution>
                 </executions>
-                <configuration>
-                    <doCheck>false</doCheck>
-                    <doUpdate>false</doUpdate>
-                    <shortRevisionLength>5</shortRevisionLength>
-                    <revisionOnScmFailure>9000</revisionOnScmFailure>
-                    <!-- creates a string e.g. 20130131-1fd45 -->
-                    <format>{0,date,yyyyMMdd}_{1}</format>
-                    <items>
-                        <item>timestamp</item>                        
-                        <item>${releaseNr}</item> <!-- custom releaseNr read as property from child project GitRevTask -->
-                        <item>scmVersion</item> <!-- Git short version - from remote archive  CURRENTLY NOT USED -->
-                    </items>
-                </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>templating-maven-plugin</artifactId>
+                <version>1.0-alpha-3</version>
+                <executions>
+                      <execution>
+                        <id>filter-src</id>
+                        <goals>
+                            <goal>filter-sources</goal>
+                        </goals>
+                        <configuration>               
+                 
+                            <sourceDirectory>${basedir}/libbuild/java-templates</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                  
+                        </configuration>
+                    </execution> 
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.6</version>
-                <executions>
+                <executions>               
                     <execution>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>build-classpath</goal>
                         </goals>
-                        <configuration>
-                            <!--attach>true</attach-->
-                            <outputFilterFile>true</outputFilterFile>
-                            <outputFile>${project.build.directory}/classpath.properties</outputFile>
-                            <!--fileSeparator>\\\\</fileSeparator-->
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0-alpha-2</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>read-project-properties</goal>
-                        </goals>
-                        <configuration>
-                            <files>
-                                <file>libbuild/gitbuildnumber.properties</file>
-                            </files>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

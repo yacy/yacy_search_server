@@ -73,9 +73,22 @@
     
     <dependencySets>
         <dependencySet>
-            <unpack>false</unpack>
+            <!-- adds the main yacycore.jar to the lib directory of zip package with defined name (yacycore.jar) 
+            hint: the standard Maven output name (yacycore-version.jar) can not be used as the std. startup script uses a classpath lib\yacycore.jar -->
+            <useProjectArtifact>true</useProjectArtifact>
+            <includes>
+                <include>net.yacy:yacycore</include>
+            </includes>
             <scope>runtime</scope>
             <outputDirectory>lib</outputDirectory>
+            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>            
+        </dependencySet>
+        
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <scope>runtime</scope>
+            <outputDirectory>lib</outputDirectory>        
         </dependencySet>        
     </dependencySets>
 
