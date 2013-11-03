@@ -169,7 +169,7 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
                 final int p = pathInContext.lastIndexOf('.');
                 if (p >= 0) {
                     String pathofClass = pathInContext.substring(0, p) + ".class";
-                    Resource classresource = getResource(pathofClass);
+                    Resource classresource = _resourceBase.addPath(pathofClass);
                     // Does a class resource exist?
                     if (classresource != null && classresource.exists() && !classresource.isDirectory()) {
                         hasClass = true;

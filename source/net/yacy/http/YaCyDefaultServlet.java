@@ -233,137 +233,6 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
     }
 
     /* ------------------------------------------------------------ */
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String servletPath = null;
-        String pathInfo = null;
-        Enumeration<String> reqRanges = null;
-        Boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
-        if (included != null && included.booleanValue()) {
-            servletPath = (String) request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
-            pathInfo = (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
-            if (servletPath == null) {
-                servletPath = request.getServletPath();
-                pathInfo = request.getPathInfo();
-            }
-        } else {
-            included = Boolean.FALSE;
-            servletPath = _pathInfoOnly ? "/" : request.getServletPath();
-            pathInfo = request.getPathInfo();
-
-            // Is this a Range request?
-            reqRanges = request.getHeaders(HeaderFramework.RANGE);
-            if (!hasDefinedRange(reqRanges)) {
-                reqRanges = null;
-            }
-        }
-        
-        if (pathInfo.startsWith("/currentyacypeer/")) pathInfo = pathInfo.substring(16);
-        String pathInContext = URIUtil.addPaths(servletPath, pathInfo);
-        boolean endsWithSlash = (pathInfo == null ? request.getServletPath() : pathInfo).endsWith(URIUtil.SLASH);
-
-        // Find the resource and content
-        Resource resource = null;
-        HttpContent content = null;
-        try {
-            String pathofClass = null;
-
-            // Look for a class resource
-            boolean hasClass = false;
-            if (reqRanges == null && !endsWithSlash) {
-                final int p = pathInContext.lastIndexOf('.');
-                if (p >= 0) {
-                    pathofClass = pathInContext.substring(0, p) + ".class";
-                    resource = getResource(pathofClass);
-                    // Does a class resource exist?
-                    if (resource != null && resource.exists() && !resource.isDirectory()) {
-                        hasClass = true;
-                    }
-                }
-            }
-
-            // find resource
-            resource = getResource(pathInContext);
-
-            if (ConcurrentLog.isFine("FILEHANDLER")) {
-                ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: uri=" + request.getRequestURI() + " resource=" + resource + (content != null ? " content" : ""));
-            }
-
-            // Handle resource
-            if (!hasClass && (resource == null || !resource.exists())) {
-                if (included) {
-                    throw new FileNotFoundException("!" + pathInContext);
-                }
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            } else if (!resource.isDirectory()) {
-                if (endsWithSlash && pathInContext.length() > 1) {
-                    String q = request.getQueryString();
-                    pathInContext = pathInContext.substring(0, pathInContext.length() - 1);
-                    if (q != null && q.length() != 0) {
-                        pathInContext += "?" + q;
-                    }
-                    response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths(_servletContext.getContextPath(), pathInContext)));
-                } else {
-                    // ensure we have content
-                    if (content == null) {
-                        content = new HttpContent.ResourceAsHttpContent(resource, _mimeTypes.getMimeByExtension(resource.toString()), response.getBufferSize(), _etags);
-                    }
-
-                    if (hasClass) { // this is a YaCy servlet, handle the template
-                        handleTemplate(pathInfo, request, response);
-                    } else {
-                        if (included.booleanValue() || passConditionalHeaders(request, response, resource, content)) {
-                            sendData(request, response, included.booleanValue(), resource, content, reqRanges);
-                        }
-                    }
-                }
-            } else {
-                if (!endsWithSlash || (pathInContext.length() == 1 && request.getAttribute("org.eclipse.jetty.server.nullPathInfo") != null)) {
-                    StringBuffer buf = request.getRequestURL();
-                    synchronized (buf) {
-                        int param = buf.lastIndexOf(";");
-                        if (param < 0) {
-                            buf.append('/');
-                        } else {
-                            buf.insert(param, '/');
-                        }
-                        String q = request.getQueryString();
-                        if (q != null && q.length() != 0) {
-                            buf.append('?');
-                            buf.append(q);
-                        }
-                        response.setContentLength(0);
-                        response.sendRedirect(response.encodeRedirectURL(buf.toString()));
-                    }
-                } else { // look for a welcome file
-                    String welcomeFileName = getWelcomeFile (pathInContext);
-                    if (welcomeFileName != null) {
-                        RequestDispatcher rd = request.getRequestDispatcher(welcomeFileName);
-                        if (rd != null) rd.forward(request, response);
-                    } else { // send directory listing
-                        content = new HttpContent.ResourceAsHttpContent(resource, _mimeTypes.getMimeByExtension(resource.toString()), _etags);
-                        if (included.booleanValue() || passConditionalHeaders(request, response, resource, content)) {
-                            sendDirectory(request, response, resource, pathInContext);
-                        }
-                    }
-                }
-            }
-        } catch (IllegalArgumentException e) {
-            ConcurrentLog.logException(e);
-            if (!response.isCommitted()) {
-                response.sendError(500, e.getMessage());
-            }
-        } finally {
-            if (content != null) {
-                content.release();
-            } else if (resource != null) {
-                resource.release();
-            }
-        }
-    }
-
-    /* ------------------------------------------------------------ */
     protected boolean hasDefinedRange(Enumeration<String> reqRanges) {
         return (reqRanges != null && reqRanges.hasMoreElements());
     }
@@ -396,19 +265,18 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
      * Finds a matching welcome file for the supplied path. 
      * The filename to look is set as servlet context init parameter 
      * default is "index.html"
-     * @param path in context
+     * @param pathInContext path in context
      * @return The path of the matching welcome file in context or null.
      */
     protected String getWelcomeFile(String pathInContext) {
         if (_welcomes == null) {
             return null;
         }
-
-        for (int i = 0; i < _welcomes.length; i++) {
-            String welcome_in_context = URIUtil.addPaths(pathInContext, _welcomes[i]);
+        for (String _welcome : _welcomes) {
+            String welcome_in_context = URIUtil.addPaths(pathInContext, _welcome);
             Resource welcome = getResource(welcome_in_context);
             if (welcome != null && welcome.exists()) {
-                return _welcomes[i];
+                return _welcome;
             }
         }
         return null;
@@ -429,8 +297,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-
-        byte[] data = null;
+         
         String base = URIUtil.addPaths(request.getRequestURI(), URIUtil.SLASH);
 
         String dir = resource.getListHTML(base, pathInContext.length() > 1);
@@ -440,7 +307,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
             return;
         }
 
-        data = dir.getBytes("UTF-8");
+        byte[] data = dir.getBytes("UTF-8");
         response.setContentType("text/html; charset=UTF-8");
         response.setContentLength(data.length);
         response.getOutputStream().write(data);
@@ -701,7 +568,7 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
             if (targetFile.exists() && targetFile.isFile() && targetFile.canRead()) {
                 String mimeType = Classification.ext2mime(targetExt, "text/html");
 
-                InputStream fis = null;
+                InputStream fis;
                 long fileSize = targetFile.length();
 
                 if (fileSize <= Math.min(4 * 1024 * 1204, MemoryControl.available() / 100)) {
