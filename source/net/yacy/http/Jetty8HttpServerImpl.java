@@ -32,6 +32,7 @@ import net.yacy.cora.federate.solr.SolrServlet;
 import net.yacy.cora.federate.solr.SolrServlet.Servlet404;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
+import org.eclipse.jetty.server.Connector;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -49,7 +50,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
  */
 public class Jetty8HttpServerImpl implements YaCyHttpServer {
 
-    private Server server;
+    private final Server server;
 
     /**
      * @param port TCP Port to listen for http requests
@@ -159,23 +160,47 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
     public boolean withSSL() {
         return false; // TODO:
     }
-
+  
+    /**
+     * reconnect with new port settings (after waiting milsec) - routine returns
+     * immediately
+     *
+     * @param milsec wait time
+     */
     @Override
-    public void reconnect(int milsec) {
-        try {
-            Thread.sleep(milsec);
-        } catch (final InterruptedException e) {
-            ConcurrentLog.logException(e);
-        } catch (final Exception e) {
-            ConcurrentLog.logException(e);
-        }
-        try {
-            server.stop();
-            server.join();
-            server.start();
-        } catch (Exception ex) {
-            ConcurrentLog.logException(ex);
-        }
+    public void reconnect(final int milsec) {
+
+        new Thread() {
+
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(milsec);
+                } catch (final InterruptedException e) {
+                    ConcurrentLog.logException(e);
+                } catch (final Exception e) {
+                    ConcurrentLog.logException(e);
+                }
+                try { // reconnect with new settings (instead to stop/start server, just manipulate connectors
+                    final Connector[] cons = server.getConnectors();
+                    final int port = Switchboard.getSwitchboard().getConfigInt("port", 8090);
+                    for (Connector con : cons) {
+                        if (con.getName().startsWith("httpd") && con.getPort() != port) {
+                            con.close();
+                            con.stop();
+                            if (!con.isStopped()) {
+                                ConcurrentLog.warn("SERVER", "Reconnect: Jetty Connector failed to stop");
+                            }
+                            con.setPort(port);
+                            con.start();
+                            ConcurrentLog.fine("SERVER", "set new port for Jetty connector " + con.getName());
+                        }
+                    }
+                } catch (Exception ex) {
+                    ConcurrentLog.logException(ex);
+                }
+            }
+        }.start();
     }
 
     @Override
@@ -195,7 +220,7 @@ public class Jetty8HttpServerImpl implements YaCyHttpServer {
 
     @Override
     public String getVersion() {
-        return "Jetty " + server.getVersion();
+        return "Jetty " + Server.getVersion();
     }
 
 }
