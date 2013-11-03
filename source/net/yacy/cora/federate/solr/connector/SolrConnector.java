@@ -106,7 +106,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @return a collection of a subset of the ids which exist in the index
      * @throws IOException
      */
-    public Set<String> existsByIds(Collection<String> ids) throws IOException;
+    public Set<String> existsByIds(Set<String> ids) throws IOException;
     
     /**
      * check if a given document exists in solr

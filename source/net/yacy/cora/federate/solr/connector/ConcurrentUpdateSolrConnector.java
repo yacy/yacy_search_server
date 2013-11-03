@@ -326,10 +326,10 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
     }
 
     @Override
-    public Set<String> existsByIds(Collection<String> ids) throws IOException {
+    public Set<String> existsByIds(Set<String> ids) throws IOException {
         HashSet<String> e = new HashSet<String>();
         if (ids == null || ids.size() == 0) return e;
-        Collection<String> idsC = new HashSet<String>();
+        Set<String> idsC = new HashSet<String>();
         for (String id: ids) {
             if (this.idCache.has(ASCII.getBytes(id))) {cacheSuccessSign(); e.add(id); continue;}
             if (existIdFromDeleteQueue(id)) {cacheSuccessSign(); continue;}

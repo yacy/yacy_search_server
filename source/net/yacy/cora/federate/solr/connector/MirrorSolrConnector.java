@@ -347,7 +347,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     @Override
-    public Set<String> existsByIds(Collection<String> ids) throws IOException {
+    public Set<String> existsByIds(Set<String> ids) throws IOException {
         if (this.solr0 != null && this.solr1 == null) return this.solr0.existsByIds(ids);
         if (this.solr0 == null && this.solr1 != null) return this.solr1.existsByIds(ids);
         Set<String> s = new HashSet<String>();

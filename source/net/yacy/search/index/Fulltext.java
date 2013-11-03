@@ -620,7 +620,7 @@ public final class Fulltext {
     public Set<String> exists(Collection<String> ids) {
         HashSet<String> e = new HashSet<String>();
         if (ids == null || ids.size() == 0) return e;
-        Collection<String> idsC = new HashSet<String>();
+        Set<String> idsC = new HashSet<String>();
         idsC.addAll(ids);
         if (this.urlIndexFile != null) {
             Iterator<String> idsi = idsC.iterator();

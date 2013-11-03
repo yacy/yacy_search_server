@@ -22,7 +22,6 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -224,9 +223,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
     
     @Override
-    public Set<String> existsByIds(Collection<String> ids) {
+    public Set<String> existsByIds(Set<String> ids) {
         if (ids == null || ids.size() == 0) return new HashSet<String>();
-        if (ids.size() == 1 && ids instanceof Set) return existsById(ids.iterator().next()) ? (Set<String>) ids : new HashSet<String>();
+        if (ids.size() == 1) return existsById(ids.iterator().next()) ? ids : new HashSet<String>();
         StringBuilder sb = new StringBuilder(); // construct something like "({!raw f=id}Ij7B63g-gSHA) OR ({!raw f=id}PBcGI3g-gSHA)"
         for (String id: ids) {
             sb.append("({!raw f=").append(CollectionSchema.id.getSolrFieldName()).append('}').append(id).append(") OR ");
