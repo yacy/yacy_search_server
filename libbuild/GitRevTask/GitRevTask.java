@@ -115,7 +115,7 @@ public class GitRevTask extends org.apache.tools.ant.Task {
         } else {
             gitRevTask.setRepoPath(args[0]);
         }
-        gitRevTask.setBranchprop("brnach");
+        gitRevTask.setBranchprop("branch");
         gitRevTask.setRevprop("baseRevisionNr");
         gitRevTask.setDateprop("DSTAMP");
 

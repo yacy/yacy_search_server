@@ -89,32 +89,35 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         NamedList<Object> paramsList = request.getOriginalParams().toNamedList();
         paramsList.remove("wt");
         String xmlquery = dqp.matcher("/solr/select?" + SolrParams.toSolrParams(paramsList).toString()).replaceAll("%22");
-        writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
-        writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see this page as XML.</div>\n");
-        
+
         DocList response = ((ResultContext) values.get("response")).docs;
         final int sz = response.size();
         if (sz > 0) {
             SolrIndexSearcher searcher = request.getSearcher();
             DocIterator iterator = response.iterator();
             IndexSchema schema = request.getSchema();
+
+            int id = iterator.nextDoc();
+            Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
+            LinkedHashMap<String, String> tdoc = translateDoc(schema, doc);
             
+            String title = tdoc.get(CollectionSchema.title.getSolrFieldName());
             if (sz == 1) {
-                int id = iterator.nextDoc();
-                Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
-                LinkedHashMap<String, String> tdoc = translateDoc(schema, doc);
-                String title = tdoc.get(CollectionSchema.title.getSolrFieldName());
                 writer.write("<title>" + title + "</title>\n</head><body>\n");
-                writeDoc(writer, tdoc, title);
             } else {
                 writer.write("<title>Document List</title>\n</head><body>\n");
-                for (int i = 0; i < sz; i++) {
-                    int id = iterator.nextDoc();
-                    Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
-                    LinkedHashMap<String, String> tdoc = translateDoc(schema, doc);
-                    String title = tdoc.get(CollectionSchema.title.getSolrFieldName());
-                    writeDoc(writer, tdoc, title);
-                }
+            }
+            writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
+            writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see this page as XML.</span></div>\n");
+
+            writeDoc(writer, tdoc, title);
+
+            while (iterator.hasNext()) {
+                id = iterator.nextDoc();
+                doc = searcher.doc(id, DEFAULT_FIELD_LIST);
+                tdoc = translateDoc(schema, doc);
+                title = tdoc.get(CollectionSchema.title.getSolrFieldName());
+                writeDoc(writer, tdoc, title);
             }
         } else {
             writer.write("<title>No Document Found</title>\n</head><body>\n");
