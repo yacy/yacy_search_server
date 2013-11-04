@@ -57,6 +57,7 @@ import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.document.parser.html.CharacterCoding;
 
 /**
  * MultiProtocolURI provides a URL object for multiple protocols like http, https, ftp, smb and file
@@ -66,7 +67,6 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     public static final MultiProtocolURL POISON = new MultiProtocolURL(); // poison pill for concurrent link generators
 
-    private static final Pattern ampPattern = Pattern.compile(Pattern.quote("&amp;"));
     private static final long serialVersionUID = -1173233022912141884L;
     private static final long SMB_TIMEOUT = 5000;
 
@@ -636,7 +636,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         } else {
             this.searchpart = this.path.substring(r + 1);
             // strip &amp;
-            Matcher matcher = ampPattern.matcher(this.searchpart);
+            Matcher matcher = CharacterCoding.ampPattern.matcher(this.searchpart);
             while (matcher.find()) {
                 this.searchpart = matcher.replaceAll("&");
                 matcher.reset(this.searchpart);
