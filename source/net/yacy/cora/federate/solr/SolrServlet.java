@@ -27,7 +27,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URL;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.Filter;
@@ -39,22 +39,24 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import net.yacy.cora.document.encoding.UTF8;
+
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
+import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
+import net.yacy.cora.federate.solr.responsewriter.GrepHTMLResponseWriter;
+import net.yacy.cora.federate.solr.responsewriter.HTMLResponseWriter;
+import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
+import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.response.XMLResponseWriter;
-import org.apache.solr.search.DocIterator;
-import org.apache.solr.search.DocList;
-import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.servlet.cache.HttpCacheHeaderUtil;
 import org.apache.solr.servlet.cache.Method;
@@ -63,10 +65,10 @@ import org.apache.solr.util.FastWriter;
 
 public class SolrServlet implements Filter {
 
-    private static final QueryResponseWriter responseWriter = new XMLResponseWriter();
     private static EmbeddedSolrConnector connector;
-
-    public SolrServlet() {
+    private final Map<String, QueryResponseWriter> RESPONSE_WRITER = new HashMap<String, QueryResponseWriter>();
+    
+    public SolrServlet() { 
     }
 
     public static void initCore(EmbeddedSolrConnector c) {
@@ -75,6 +77,19 @@ public class SolrServlet implements Filter {
 
     @Override
     public void init(FilterConfig config) throws ServletException {
+
+        OpensearchResponseWriter opensearchResponseWriter = new OpensearchResponseWriter();
+
+        // xml and xslt reponseWriter included in SorlCore.DEFAULT_RESPONSE_WRITERS 
+        // DEFAULT_RESPONSE_WRITERS is allways checke, here only additional response writers
+        RESPONSE_WRITER.put("exml", new EnhancedXMLResponseWriter());
+        RESPONSE_WRITER.put("html", new HTMLResponseWriter());
+        RESPONSE_WRITER.put("grephtml", new GrepHTMLResponseWriter());
+        RESPONSE_WRITER.put("rss", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
+        RESPONSE_WRITER.put("opensearch", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
+        RESPONSE_WRITER.put("yjson", new YJsonResponseWriter()); //try http://localhost:8090/solr/select?wt=json&q=olympia&hl=true&hl.fl=text_t,h1,h2
+        // GSA response implemented in separate servlet
+        // RESPONSE_WRITER.put("gsa", new GSAResponseWriter());
     }
 
     @Override
@@ -129,6 +144,15 @@ public class SolrServlet implements Filter {
                 queryStr = queryStr + "&df=" + CollectionSchema.text_t.getSolrFieldName();
             }
             MultiMapSolrParams mmsp = SolrRequestParsers.parseQueryString(queryStr);
+            String wt = mmsp.get(CommonParams.WT, "xml"); // maybe use /solr/select?q=*:*&start=0&rows=10&wt=exml            
+            QueryResponseWriter responseWriter = RESPONSE_WRITER.get(wt);
+            if (responseWriter == null) {
+                responseWriter = SolrCore.DEFAULT_RESPONSE_WRITERS.get(wt);
+                if (responseWriter == null) {
+                    hresponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Solr responsewriter not found for " + wt);               
+                    return;
+                 }
+            }            
             req = connector.request(mmsp);
 
             SolrQueryResponse rsp = connector.query(req);
@@ -152,36 +176,11 @@ public class SolrServlet implements Filter {
             }
 
             // write response body
-            Writer out = new FastWriter(new OutputStreamWriter(response.getOutputStream(), UTF8.charset));
-
-            //debug
-            @SuppressWarnings("unchecked")
-            Iterator<Map.Entry<String, Object>> ie = rsp.getValues().iterator();
-            Map.Entry<String, Object> e;
-            while (ie.hasNext()) {
-                e = ie.next();
-                System.out.println("Field: " + e.getKey() + ", value: " + e.getValue().getClass().getName());
-                //Field: responseHeader, value: org.apache.solr.common.util.SimpleOrderedMap
-                //Field: response, value: org.apache.solr.search.DocSlice
-                if (e.getValue() instanceof DocList) {
-                    DocList ids = (DocList) e.getValue();
-                    SolrIndexSearcher searcher = req.getSearcher();
-                    DocIterator iterator = ids.iterator();
-                    int sz = ids.size();
-                    for (int i = 0; i < sz; i++) {
-                        int id = iterator.nextDoc();
-                        searcher.doc(id);
-                    }
-                }
-            }
-
+            Writer out = new FastWriter(new OutputStreamWriter(response.getOutputStream(),UTF8.charset));
             responseWriter.write(out, req, rsp);
             out.flush();
-            return;
-
         } catch (final Throwable ex) {
             sendError(hresponse, ex);
-            return;
         } finally {
             if (req != null) {
                 req.close();
@@ -221,7 +220,7 @@ public class SolrServlet implements Filter {
         private static final long serialVersionUID=-4497069674942245148L;
         @Override
         public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
-            res.sendError(404, "Can not find: " + req.getRequestURI());
+            res.sendError(HttpServletResponse.SC_NOT_FOUND, "Can not find: " + req.getRequestURI());
         }
     }
 

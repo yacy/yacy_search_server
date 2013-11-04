@@ -68,7 +68,7 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
 
     @Override
     public String getContentType(final SolrQueryRequest request, final SolrQueryResponse response) {
-        return CONTENT_TYPE_XML_UTF8;
+        return "text/html";
     }
 
     @Override
@@ -116,7 +116,7 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
             String h1 = "Document Grep for query \"" + query + "\" and grep phrase \"" + grep + "\"";
             writer.write("<title>" + h1 + "</title>\n</head><body>\n<h1>" + h1 + "</h1>\n");
             writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
-            writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see an example call to the search rss API.</span>\n");
+            writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see an example call to the search rss API.</span></div>\n");
             for (int i = 0; i < sz; i++) {
                 int id = iterator.nextDoc();
                 Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
