@@ -25,7 +25,6 @@
 package net.yacy.peers;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -164,7 +163,7 @@ public class Transmission {
             final ReferenceContainer<WordReference> c = (remaining >= container.size()) ? container : trimContainer(container, remaining);
             // iterate through the entries in the container and check if the reference is in the repository
             final List<byte[]> notFoundx = new ArrayList<byte[]>();
-            Collection<String> testids = new HashSet<String>();
+            Set<String> testids = new HashSet<String>();
             Iterator<WordReference>  i = c.entries();
             while (i.hasNext()) {
                 final WordReference e = i.next();

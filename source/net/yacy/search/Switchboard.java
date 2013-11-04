@@ -1585,7 +1585,7 @@ public final class Switchboard extends serverSwitch {
      * @param ids a collection of url hashes
      * @return a map from the hash id to: if it exists, the name of the database, otherwise null
      */
-    public Map<String, HarvestProcess> urlExists(final Collection<String> ids) {
+    public Map<String, HarvestProcess> urlExists(final Set<String> ids) {
         Set<String> e = this.index.exists(ids);
         Map<String, HarvestProcess> m = new HashMap<String, HarvestProcess>();
         for (String id: ids) {
@@ -2905,7 +2905,7 @@ public final class Switchboard extends serverSwitch {
         // stacking may fail because of double occurrences of that url. Therefore
         // we must wait here until the url has actually disappeared
         int t = 100;
-        Collection<String> ids = new ArrayList<String>(1); ids.add(ASCII.String(urlhash));
+        Set<String> ids = new HashSet<String>(1); ids.add(ASCII.String(urlhash));
         while (t-- > 0 && this.index.exists(ids).size() > 0) {
             try {Thread.sleep(100);} catch (final InterruptedException e) {}
             ConcurrentLog.fine("Switchboard", "STACKURL: waiting for deletion, t=" + t);

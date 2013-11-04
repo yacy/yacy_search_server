@@ -29,7 +29,6 @@ package net.yacy.search.index;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -443,7 +442,7 @@ public class Segment {
      * @param ids
      * @return a set of ids which exist in the database
      */
-    public Set<String> exists(final Collection<String> ids) {
+    public Set<String> exists(final Set<String> ids) {
         return this.fulltext.exists(ids);
     }
 

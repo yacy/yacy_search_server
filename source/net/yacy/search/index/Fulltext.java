@@ -617,9 +617,10 @@ public final class Fulltext {
      * @param ids
      * @return a set of ids which exist in the database
      */
-    public Set<String> exists(Collection<String> ids) {
+    public Set<String> exists(Set<String> ids) {
         HashSet<String> e = new HashSet<String>();
         if (ids == null || ids.size() == 0) return e;
+        if (ids.size() == 1) return exists(ids.iterator().next()) ? ids : e;
         Set<String> idsC = new HashSet<String>();
         idsC.addAll(ids);
         if (this.urlIndexFile != null) {
