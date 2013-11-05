@@ -47,7 +47,10 @@ import net.yacy.cora.federate.solr.responsewriter.GrepHTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.HTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.search.query.AccessTracker;
 import net.yacy.search.schema.CollectionSchema;
+import org.apache.solr.common.SolrDocumentList;
 
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
@@ -56,6 +59,7 @@ import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.QueryResponseWriter;
+import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.servlet.cache.HttpCacheHeaderUtil;
@@ -107,7 +111,6 @@ public class SolrServlet implements Filter {
 
         HttpServletRequest hrequest = (HttpServletRequest) request;
         HttpServletResponse hresponse = (HttpServletResponse) response;
-        SolrQueryRequest req = null;
 
         // check if this servlet was called correctly
         String pathInfo = hrequest.getPathInfo();
@@ -130,63 +133,69 @@ public class SolrServlet implements Filter {
             throw new ServletException("Unsupported method: " + hrequest.getMethod());
         }
 
-        try {
-            SolrCore core = connector.getCore();
-            if (core == null) {
-                throw new UnsupportedOperationException("core not initialized");
-            }
-
-            // prepare request to solr
-            hrequest.setAttribute("org.apache.solr.CoreContainer", core);
-            // add default search field if missing 
-            String queryStr = hrequest.getQueryString();
-            if (!queryStr.contains("&df=")) {
-                queryStr = queryStr + "&df=" + CollectionSchema.text_t.getSolrFieldName();
-            }
-            MultiMapSolrParams mmsp = SolrRequestParsers.parseQueryString(queryStr);
-            String wt = mmsp.get(CommonParams.WT, "xml"); // maybe use /solr/select?q=*:*&start=0&rows=10&wt=exml            
-            QueryResponseWriter responseWriter = RESPONSE_WRITER.get(wt);
-            if (responseWriter == null) {
-                responseWriter = SolrCore.DEFAULT_RESPONSE_WRITERS.get(wt);
-                if (responseWriter == null) {
-                    hresponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Solr responsewriter not found for " + wt);               
-                    return;
-                 }
-            }            
-            req = connector.request(mmsp);
-
-            SolrQueryResponse rsp = connector.query(req);
-
-            // prepare response
-            hresponse.setHeader("Cache-Control", "no-cache");
-            HttpCacheHeaderUtil.checkHttpCachingVeto(rsp, hresponse, reqMethod);
-
-            // check error
-            if (rsp.getException() != null) {
-                sendError(hresponse, rsp.getException());
-                return;
-            }
-
-            // write response header
-            final String contentType = responseWriter.getContentType(req, rsp);
-            if (null != contentType) response.setContentType(contentType);
-
-            if (Method.HEAD == reqMethod) {
-                return;
-            }
-
-            // write response body
-            Writer out = new FastWriter(new OutputStreamWriter(response.getOutputStream(),UTF8.charset));
-            responseWriter.write(out, req, rsp);
-            out.flush();
-        } catch (final Throwable ex) {
-            sendError(hresponse, ex);
-        } finally {
-            if (req != null) {
-                req.close();
-            }
-            SolrRequestInfo.clearRequestInfo();
+        SolrCore core = connector.getCore();
+        if (core == null) {
+            hresponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "core not initialized");
+            return;
         }
+     
+        // prepare request to solr
+        hrequest.setAttribute("org.apache.solr.CoreContainer", core);
+        // add default search field if missing (required by edismax)
+        String queryStr = hrequest.getQueryString();
+        if (!queryStr.contains("&df=")) {
+            queryStr = queryStr + "&df=" + CollectionSchema.text_t.getSolrFieldName();
+        }
+        MultiMapSolrParams mmsp = SolrRequestParsers.parseQueryString(queryStr);
+        String wt = mmsp.get(CommonParams.WT, "xml"); // maybe use /solr/select?q=*:*&start=0&rows=10&wt=exml            
+        QueryResponseWriter responseWriter = RESPONSE_WRITER.get(wt); // check local response writer
+        if (responseWriter == null) {
+            // check default response writer
+            responseWriter = SolrCore.DEFAULT_RESPONSE_WRITERS.get(wt);
+            if (responseWriter == null) {
+                hresponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Solr responsewriter not found for " + wt);
+                return;
+            }
+        }           
+        SolrQueryRequest req = connector.request(mmsp);
+        SolrQueryResponse rsp = connector.query(req);
+
+        // prepare response
+        hresponse.setHeader("Cache-Control", "no-cache");
+        HttpCacheHeaderUtil.checkHttpCachingVeto(rsp, hresponse, reqMethod);
+
+        // check error
+        if (rsp.getException() != null) {
+            sendError(hresponse, rsp.getException());
+            return;
+        }
+
+        // write response header
+        final String contentType = responseWriter.getContentType(req, rsp);
+        if (null != contentType) response.setContentType(contentType);
+
+        if (Method.HEAD == reqMethod) {
+            return;
+        }
+
+        // write response body
+        Writer out = new FastWriter(new OutputStreamWriter(response.getOutputStream(), UTF8.charset));
+        responseWriter.write(out, req, rsp);
+        out.flush();
+
+        // log result
+        Object rv = rsp.getValues().get("response");
+        int matches = 0;
+        if (rv != null && rv instanceof ResultContext) {
+            matches = ((ResultContext) rv).docs.matches();
+        } else if (rv != null && rv instanceof SolrDocumentList) {
+            matches = (int) ((SolrDocumentList) rv).getNumFound();
+        }
+        AccessTracker.addToDump(mmsp.get("q"), Integer.toString(matches));
+        ConcurrentLog.info("SOLR Query", "results: " + matches + ", for query:" + req.getParamString());
+        req.close();
+
+        SolrRequestInfo.clearRequestInfo();               
     }
 
     private static void sendError(HttpServletResponse hresponse, Throwable ex) throws IOException {
