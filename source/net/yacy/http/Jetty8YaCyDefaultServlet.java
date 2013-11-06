@@ -111,8 +111,8 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
         String servletPath = null;
         String pathInfo = null;
         Enumeration<String> reqRanges = null;
-        Boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null; 
-        if (included != null && included.booleanValue()) {
+        boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null; 
+        if (included) {
             servletPath = (String) request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
             pathInfo = (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
             if (servletPath == null) {
@@ -120,7 +120,6 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
                 pathInfo = request.getPathInfo();
             }
         } else {
-            included = Boolean.FALSE;
             servletPath = _pathInfoOnly ? "/" : request.getServletPath();
             pathInfo = request.getPathInfo();
 
@@ -142,7 +141,7 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
             // is gzip enabled?
             String pathInContextGz = null;
             boolean gzip = false;
-            if (!included.booleanValue() && _gzip && reqRanges == null && !endsWithSlash) {
+            if (!included && _gzip && reqRanges == null && !endsWithSlash) {
                 // Look for a gzip resource
                 pathInContextGz = pathInContext + ".gz";
                 resource = getResource(pathInContextGz);
@@ -204,7 +203,7 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
                     if (hasClass) { // this is a YaCy servlet, handle the template
                         handleTemplate(pathInfo, request, response);
                     } else {
-                        if (included.booleanValue() || passConditionalHeaders(request, response, resource, content)) {
+                        if (included || passConditionalHeaders(request, response, resource, content)) {
                             if (gzip) {
                                 response.setHeader(HeaderFramework.CONTENT_ENCODING, HeaderFramework.CONTENT_ENCODING_GZIP);
                                 String mt = _servletContext.getMimeType(pathInContext);
@@ -212,7 +211,7 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
                                     response.setContentType(mt);
                                 }
                             }
-                            sendData(request, response, included.booleanValue(), resource, content, reqRanges);
+                            sendData(request, response, included, resource, content, reqRanges);
                         }
                     }
                 }
@@ -240,21 +239,19 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
                 else if (null != (welcome = getWelcomeFile(pathInContext))) {
                     ConcurrentLog.fine("FILEHANDLER","welcome={}" + welcome);
 
-
                     // Forward to the index
                     RequestDispatcher dispatcher = request.getRequestDispatcher(welcome);
                     if (dispatcher != null) {
-                        if (included.booleanValue()) {
+                        if (included) {
                             dispatcher.include(request, response);
                         } else {
                             request.setAttribute("org.eclipse.jetty.server.welcome", welcome);
                             dispatcher.forward(request, response);
                         }
                     }
-
                 } else {
                     content = new HttpContent.ResourceAsHttpContent(resource, _mimeTypes.getMimeByExtension(resource.toString()), _etags);
-                    if (included.booleanValue() || passConditionalHeaders(request, response, resource, content)) {
+                    if (included || passConditionalHeaders(request, response, resource, content)) {
                         sendDirectory(request, response, resource, pathInContext);
                     }
                 }
@@ -565,58 +562,6 @@ public class Jetty8YaCyDefaultServlet extends YaCyDefaultServlet implements Reso
                 in.close();
             }
             multi.close();
-        }
-        return;
-    }
-
-    /* ------------------------------------------------------------ */
-    @Override
-    protected void writeHeaders(HttpServletResponse response, HttpContent content, long count) {
-        if (content.getContentType() != null && response.getContentType() == null) {
-            response.setContentType(content.getContentType().toString());
-        }
-
-        if (response instanceof Response) {
-            Response r = (Response) response;
-            HttpFields fields = r.getHttpFields();
-
-            if (content.getLastModified() != null) {
-                fields.put(HttpHeaders.LAST_MODIFIED_BUFFER, content.getLastModified());
-            } else if (content.getResource() != null) {
-                long lml = content.getResource().lastModified();
-                if (lml != -1) {
-                    fields.putDateField(HttpHeaders.LAST_MODIFIED_BUFFER, lml);
-                }
-            }
-
-            if (count != -1) {
-                r.setLongContentLength(count);
-            }
-
-            writeOptionHeaders(fields);
-
-            if (_etags) {
-                fields.put(HttpHeaders.ETAG_BUFFER, content.getETag());
-            }
-        } else {
-            long lml = content.getResource().lastModified();
-            if (lml >= 0) {
-                response.setDateHeader(HeaderFramework.LAST_MODIFIED, lml);
-            }
-
-            if (count != -1) {
-                if (count < Integer.MAX_VALUE) {
-                    response.setContentLength((int) count);
-                } else {
-                    response.setHeader(HeaderFramework.CONTENT_LENGTH, Long.toString(count));
-                }
-            }
-
-            writeOptionHeaders(response);
-
-            if (_etags) {
-                response.setHeader(HeaderFramework.ETAG, content.getETag().toString());
-            }
         }
     }
 }

@@ -25,7 +25,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -323,7 +322,30 @@ public abstract class YaCyDefaultServlet extends HttpServlet  {
             throws IOException;
 
     /* ------------------------------------------------------------ */
-    abstract protected void writeHeaders(HttpServletResponse response, HttpContent content, long count);
+    protected void writeHeaders(HttpServletResponse response, HttpContent content, long count) {
+        if (content.getContentType() != null && response.getContentType() == null) {
+            response.setContentType(content.getContentType().toString());
+        }
+
+        long lml = content.getResource().lastModified();
+        if (lml >= 0) {
+            response.setDateHeader(HeaderFramework.LAST_MODIFIED, lml);
+        }
+
+        if (count != -1) {
+            if (count < Integer.MAX_VALUE) {
+                response.setContentLength((int) count);
+            } else {
+                response.setHeader(HeaderFramework.CONTENT_LENGTH, Long.toString(count));
+            }
+        }
+
+        writeOptionHeaders(response);
+
+        if (_etags) {
+            response.setHeader(HeaderFramework.ETAG, content.getETag().toString());
+        }
+    }
 
     /* ------------------------------------------------------------ */
     protected void writeOptionHeaders(HttpFields fields) {
