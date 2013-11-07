@@ -60,7 +60,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
 
     @Override
     public String getContentType(final SolrQueryRequest request, final SolrQueryResponse response) {
-        return "text/html";
+        return CONTENT_TYPE_XML_UTF8;
     }
 
     @Override
@@ -122,7 +122,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         } else {
             writer.write("<title>No Document Found</title>\n</head><body>\n");
         }
-       
+        
         writer.write("</body></html>\n");
     }
 
