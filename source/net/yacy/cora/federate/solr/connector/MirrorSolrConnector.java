@@ -53,6 +53,12 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         this.solr0 = solr0;
         this.solr1 = solr1;
     }
+
+    @Override
+    public void clearCaches() {
+        if (this.solr0 != null) this.solr0.clearCaches();
+        if (this.solr1 != null) this.solr1.clearCaches();
+    }
     
     public boolean isConnected0() {
         return this.solr0 != null;

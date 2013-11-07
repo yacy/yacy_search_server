@@ -61,7 +61,7 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
         this.missCache = new ConcurrentARC<String, Object>(missCacheMax, partitions);
     }
 
-    public void clearCache() {
+    public void clearCaches() {
         this.hitCache.clear();
         this.missCache.clear();
         this.documentCache.clear();
@@ -70,9 +70,9 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
 
     @Override
     public synchronized void close() {
+        this.clearCaches();
         if (this.solr != null) this.solr.close();
         this.solr = null;
-        this.clearCache();
     }
 
     /**
@@ -81,7 +81,7 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
      */
     @Override
     public void clear() throws IOException {
-        this.clearCache();
+        this.clearCaches();
         if (this.solr != null) this.solr.clear();
     }
 
@@ -119,7 +119,7 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
 
     @Override
     public void deleteByQuery(final String querystring) throws IOException {
-        this.clearCache();
+        this.clearCaches();
         this.solr.deleteByQuery(querystring);
     }
 
@@ -261,7 +261,7 @@ public class CachedSolrConnector extends AbstractSolrConnector implements SolrCo
     }
     
     private void addToCache(SolrDocumentList list, boolean doccache) {
-        if (MemoryControl.shortStatus()) clearCache();
+        if (MemoryControl.shortStatus()) clearCaches();
         for (final SolrDocument solrdoc: list) {
             addToCache(solrdoc, doccache);
         }

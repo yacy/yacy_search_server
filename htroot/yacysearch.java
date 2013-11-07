@@ -360,7 +360,7 @@ public class yacysearch {
 
             // check available memory and clean up if necessary
             if ( !MemoryControl.request(8000000L, false) ) {
-                indexSegment.clearCache();
+                indexSegment.clearCaches();
                 SearchEventCache.cleanupEvents(false);
             }
 

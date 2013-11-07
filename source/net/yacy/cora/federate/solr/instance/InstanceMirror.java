@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.federate.solr.connector.CachedSolrConnector;
 import net.yacy.cora.federate.solr.connector.ConcurrentUpdateSolrConnector;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.connector.MirrorSolrConnector;
@@ -161,9 +160,9 @@ public class InstanceMirror {
         return msc;
     }
     
-    public void clearCache() {
+    public void clearCaches() {
         for (SolrConnector csc: this.connectorCache.values()) {
-            if (csc instanceof CachedSolrConnector) ((CachedSolrConnector) csc).clearCache();
+            csc.clearCaches();
         }
         for (EmbeddedSolrConnector ssc: this.embeddedCache.values()) ssc.commit(true);
     }

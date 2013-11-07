@@ -2031,7 +2031,7 @@ public final class Switchboard extends serverSwitch {
 
             // clear caches if necessary
             if ( !MemoryControl.request(128000000L, false) ) {
-                this.index.clearCache();
+                this.index.clearCaches();
                 SearchEventCache.cleanupEvents(false);
                 this.trail.clear();
                 GuiHandler.clear();

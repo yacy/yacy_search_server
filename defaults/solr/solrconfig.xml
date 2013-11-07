@@ -461,19 +461,21 @@
          and old cache.
          -->
         <filterCache class="solr.FastLRUCache"
-        size="512"
-        initialSize="512"
-        autowarmCount="0"/>
+        size="64"
+        initialSize="64"
+        autowarmCount="4"
+        cleanupThread="true"/>
         
         <!-- Query Result Cache
          
          Caches results of searches - ordered lists of document ids
          (DocList) based on a query, a sort, and the range of documents requested.
          -->
-        <queryResultCache class="solr.LRUCache"
-        size="512"
-        initialSize="512"
-        autowarmCount="0"/>
+        <queryResultCache class="solr.FastLRUCache"
+        size="64"
+        initialSize="64"
+        autowarmCount="4"
+        cleanupThread="true"/>
         
         <!-- Document Cache
          
@@ -481,10 +483,11 @@
          document).  Since Lucene internal document ids are transient,
          this cache will not be autowarmed.
          -->
-        <documentCache class="solr.LRUCache"
-        size="512"
-        initialSize="512"
-        autowarmCount="0"/>
+        <documentCache class="solr.FastLRUCache"
+        size="64"
+        initialSize="64"
+        autowarmCount="4"
+        cleanupThread="true"/>
         
         <!-- Field Value Cache
          
@@ -494,9 +497,10 @@
          -->
         <!--
          <fieldValueCache class="solr.FastLRUCache"
-         size="512"
+         size="64"
          autowarmCount="128"
-         showItems="32" />
+         showItems="32"
+         cleanupThread="true"/>
          -->
         
         <!-- Custom Cache
@@ -510,11 +514,12 @@
          -->
         <!--
          <cache name="myUserCache"
-         class="solr.LRUCache"
-         size="4096"
-         initialSize="1024"
-         autowarmCount="1024"
+         class="solr.FastLRUCache"
+         size="64"
+         initialSize="64"
+         autowarmCount="64"
          regenerator="com.mycompany.MyRegenerator"
+         cleanupThread="true"
          />
          -->
         

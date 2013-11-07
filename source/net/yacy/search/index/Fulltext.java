@@ -225,10 +225,10 @@ public final class Fulltext {
         }
     }
 
-    public void clearCache() {
+    public void clearCaches() {
         if (this.urlIndexFile != null && this.urlIndexFile instanceof Cache) ((Cache) this.urlIndexFile).clearCache();
         if (this.statsDump != null) this.statsDump.clear();
-        this.solrInstances.clearCache();
+        this.solrInstances.clearCaches();
         this.statsDump = null;
     }
 
@@ -250,7 +250,7 @@ public final class Fulltext {
                 for (String name: instance.getCoreNames()) new EmbeddedSolrConnector(instance, name).clear();
             }
             this.commit(false);
-            this.solrInstances.clearCache();
+            this.solrInstances.clearCaches();
         }
     }
 
@@ -260,7 +260,7 @@ public final class Fulltext {
             if (instance != null) {
                 for (String name: instance.getCoreNames()) new RemoteSolrConnector(instance, name).clear();
             }
-            this.solrInstances.clearCache();
+            this.solrInstances.clearCaches();
         }
     }
 
@@ -400,7 +400,7 @@ public final class Fulltext {
             throw new IOException(e.getMessage(), e);
         }
         this.statsDump = null;
-        if (MemoryControl.shortStatus()) clearCache();
+        if (MemoryControl.shortStatus()) clearCaches();
     }
 
     public void putEdges(final Collection<SolrInputDocument> edges) throws IOException {
@@ -412,7 +412,7 @@ public final class Fulltext {
             throw new IOException(e.getMessage(), e);
         }
         this.statsDump = null;
-        if (MemoryControl.shortStatus()) clearCache();
+        if (MemoryControl.shortStatus()) clearCaches();
     }
 
     /**
@@ -432,7 +432,7 @@ public final class Fulltext {
             throw new IOException(e.getMessage(), e);
         }
         this.statsDump = null;
-        if (MemoryControl.shortStatus()) clearCache();
+        if (MemoryControl.shortStatus()) clearCaches();
     }
 
     /**
