@@ -22,7 +22,6 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -35,6 +34,7 @@ import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.search.Query;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -48,10 +48,14 @@ import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.component.SearchHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequestBase;
+import org.apache.solr.request.UnInvertedField;
 import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
+import org.apache.solr.search.DocSet;
+import org.apache.solr.search.QueryResultKey;
+import org.apache.solr.search.SolrCache;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.util.RefCounted;
 
@@ -89,6 +93,22 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         super.init(this.instance.getServer(coreName));
     }
 
+    public void clearCaches() {
+        SolrConfig solrConfig = this.core.getSolrConfig();
+        @SuppressWarnings("unchecked")
+        SolrCache<String, UnInvertedField> fieldValueCache = solrConfig.fieldValueCacheConfig == null ? null : solrConfig.fieldValueCacheConfig.newInstance();
+        if (fieldValueCache != null) fieldValueCache.clear();
+        @SuppressWarnings("unchecked")
+        SolrCache<Query, DocSet> filterCache= solrConfig.filterCacheConfig == null ? null : solrConfig.filterCacheConfig.newInstance();
+        if (filterCache != null) filterCache.clear();
+        @SuppressWarnings("unchecked")
+        SolrCache<QueryResultKey, DocList> queryResultCache = solrConfig.queryResultCacheConfig == null ? null : solrConfig.queryResultCacheConfig.newInstance();
+        if (queryResultCache != null) queryResultCache.clear();
+        @SuppressWarnings("unchecked")
+        SolrCache<Integer, Document> documentCache = solrConfig.documentCacheConfig == null ? null : solrConfig.documentCacheConfig.newInstance();
+        if (documentCache != null) documentCache.clear();
+    }
+    
     public SolrInstance getInstance() {
         return this.instance;
     }
@@ -224,9 +244,9 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
     
     @Override
-    public Set<String> existsByIds(Collection<String> ids) {
+    public Set<String> existsByIds(Set<String> ids) {
         if (ids == null || ids.size() == 0) return new HashSet<String>();
-        if (ids.size() == 1 && ids instanceof Set) return existsById(ids.iterator().next()) ? (Set<String>) ids : new HashSet<String>();
+        if (ids.size() == 1) return existsById(ids.iterator().next()) ? ids : new HashSet<String>();
         StringBuilder sb = new StringBuilder(); // construct something like "({!raw f=id}Ij7B63g-gSHA) OR ({!raw f=id}PBcGI3g-gSHA)"
         for (String id: ids) {
             sb.append("({!raw f=").append(CollectionSchema.id.getSolrFieldName()).append('}').append(id).append(") OR ");

@@ -553,7 +553,6 @@ public class HostBrowser {
                     }
                 } catch (final IOException e) {
                 }
-                
             }
             this.references_external = (rc_external == null || rc_external.intValue() <= 0) ? 0 : rc_external.intValue();
             this.references_exthosts = (rc_exthosts == null || rc_exthosts.intValue() <= 0) ? 0 : rc_exthosts.intValue();
@@ -562,7 +561,7 @@ public class HostBrowser {
             StringBuilder sbi = new StringBuilder();
             int c = 0;
             for (String s: references_internal_urls) {
-                sbi.append("<a href='").append("/HostBrowser.html?path=" + s).append("' target='_blank'><img src='env/grafics/i16.gif' alt='info' title='" + s + "' width='12' height='12'/></a>");
+                sbi.append("<a href='").append(s).append("' target='_blank'><img src='env/grafics/i16.gif' alt='info' title='" + s + "' width='12' height='12'/></a>");
                 c++;
                 if (c % 80 == 0) sbi.append("<br/>");
             }
@@ -570,7 +569,7 @@ public class HostBrowser {
             StringBuilder sbe = new StringBuilder();
             c = 0;
             for (String s: references_external_urls) {
-                sbe.append("<a href='").append("/HostBrowser.html?path=" + s).append("' target='_blank'><img src='env/grafics/i16.gif' alt='info' title='" + s + "' width='12' height='12'/></a>");
+                sbe.append("<a href='").append(s).append("' target='_blank'><img src='env/grafics/i16.gif' alt='info' title='" + s + "' width='12' height='12'/></a>");
                 c++;
                 if (c % 80 == 0) sbe.append("<br/>");
             }

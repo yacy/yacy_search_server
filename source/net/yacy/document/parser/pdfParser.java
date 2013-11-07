@@ -32,27 +32,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.Date;
 
-import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.exceptions.CryptographyException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.BadSecurityHandlerException;
 import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
-import org.apache.pdfbox.pdmodel.font.PDCIDFont;
-import org.apache.pdfbox.pdmodel.font.PDCIDFontType0Font;
-import org.apache.pdfbox.pdmodel.font.PDCIDFontType2Font;
-import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDMMType1Font;
-import org.apache.pdfbox.pdmodel.font.PDSimpleFont;
-import org.apache.pdfbox.pdmodel.font.PDTrueTypeFont;
-import org.apache.pdfbox.pdmodel.font.PDType0Font;
-import org.apache.pdfbox.pdmodel.font.PDType1AfmPfbFont;
-import org.apache.pdfbox.pdmodel.font.PDType1CFont;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.font.PDType3Font;
 import org.apache.pdfbox.util.PDFTextStripper;
 
 import net.yacy.cora.document.id.AnchorURL;
@@ -222,25 +210,54 @@ public class pdfParser extends AbstractParser implements Parser {
                 false,
                 docDate)};
     }
-
-    @SuppressWarnings("static-access")
+    
     public static void clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes() {
         // thank you very much, PDFParser hackers, this font cache will occupy >80MB RAM for a single pdf and then stays forever
         // AND I DO NOT EVEN NEED A FONT HERE TO PARSE THE TEXT!
         // Don't be so ignorant, just google once "PDFParser OutOfMemoryError" to feel the pain.
-        PDFont.clearResources();
-        COSName.clearResources();
-        PDType1Font.clearResources();
-        PDTrueTypeFont.clearResources();
-        PDType0Font.clearResources();
-        PDType1AfmPfbFont.clearResources();
-        PDType3Font.clearResources();
-        PDType1CFont.clearResources();
-        PDCIDFont.clearResources();
-        PDCIDFontType0Font.clearResources();
-        PDCIDFontType2Font.clearResources();
-        PDMMType1Font.clearResources();
-        PDSimpleFont.clearResources();
+        ResourceCleaner cl = new ResourceCleaner();
+        cl.clearClassResources("org.apache.pdfbox.cos.COSName");
+        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDFont");
+        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDType1Font");
+        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDTrueTypeFont");
+        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDType0Font");
+        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDType1AfmPfbFont");
+        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDType3Font");
+        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDType1CFont");
+        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDCIDFont");
+        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDCIDFontType0Font");
+        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDCIDFontType2Font");
+        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDMMType1Font");
+        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDSimpleFont");
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static class ResourceCleaner {
+        Method findLoadedClass;
+        private ClassLoader sys;
+        public ResourceCleaner() {
+            try {
+                this.findLoadedClass = ClassLoader.class.getDeclaredMethod("findLoadedClass", new Class[] { String.class });
+                this.findLoadedClass.setAccessible(true);
+                this.sys = ClassLoader.getSystemClassLoader();
+            } catch (Throwable e) {
+                e.printStackTrace();
+                this.findLoadedClass = null;
+                this.sys = null;
+            }
+        }
+        public void clearClassResources(String name) {
+            if (this.findLoadedClass == null) return;
+            try {
+                Object pdfparserpainclass = this.findLoadedClass.invoke(this.sys, name);
+                if (pdfparserpainclass != null) {
+                    Method clearResources = ((Class) pdfparserpainclass).getDeclaredMethod("clearResources", new Class[] {});
+                    if (clearResources != null) clearResources.invoke(null);
+                }
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
     }
     
     /**

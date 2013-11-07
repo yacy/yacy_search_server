@@ -225,10 +225,10 @@ public final class Fulltext {
         }
     }
 
-    public void clearCache() {
+    public void clearCaches() {
         if (this.urlIndexFile != null && this.urlIndexFile instanceof Cache) ((Cache) this.urlIndexFile).clearCache();
         if (this.statsDump != null) this.statsDump.clear();
-        this.solrInstances.clearCache();
+        this.solrInstances.clearCaches();
         this.statsDump = null;
     }
 
@@ -250,7 +250,7 @@ public final class Fulltext {
                 for (String name: instance.getCoreNames()) new EmbeddedSolrConnector(instance, name).clear();
             }
             this.commit(false);
-            this.solrInstances.clearCache();
+            this.solrInstances.clearCaches();
         }
     }
 
@@ -260,7 +260,7 @@ public final class Fulltext {
             if (instance != null) {
                 for (String name: instance.getCoreNames()) new RemoteSolrConnector(instance, name).clear();
             }
-            this.solrInstances.clearCache();
+            this.solrInstances.clearCaches();
         }
     }
 
@@ -400,7 +400,7 @@ public final class Fulltext {
             throw new IOException(e.getMessage(), e);
         }
         this.statsDump = null;
-        if (MemoryControl.shortStatus()) clearCache();
+        if (MemoryControl.shortStatus()) clearCaches();
     }
 
     public void putEdges(final Collection<SolrInputDocument> edges) throws IOException {
@@ -412,7 +412,7 @@ public final class Fulltext {
             throw new IOException(e.getMessage(), e);
         }
         this.statsDump = null;
-        if (MemoryControl.shortStatus()) clearCache();
+        if (MemoryControl.shortStatus()) clearCaches();
     }
 
     /**
@@ -432,7 +432,7 @@ public final class Fulltext {
             throw new IOException(e.getMessage(), e);
         }
         this.statsDump = null;
-        if (MemoryControl.shortStatus()) clearCache();
+        if (MemoryControl.shortStatus()) clearCaches();
     }
 
     /**
@@ -617,10 +617,11 @@ public final class Fulltext {
      * @param ids
      * @return a set of ids which exist in the database
      */
-    public Set<String> exists(Collection<String> ids) {
+    public Set<String> exists(Set<String> ids) {
         HashSet<String> e = new HashSet<String>();
         if (ids == null || ids.size() == 0) return e;
-        Collection<String> idsC = new HashSet<String>();
+        if (ids.size() == 1) return exists(ids.iterator().next()) ? ids : e;
+        Set<String> idsC = new HashSet<String>();
         idsC.addAll(ids);
         if (this.urlIndexFile != null) {
             Iterator<String> idsi = idsC.iterator();
@@ -751,12 +752,12 @@ public final class Fulltext {
     }
     
     // export methods
-    public Export export(final File f, final String filter, final int format, final boolean dom) {
+    public Export export(final File f, final String filter, final String query, final int format, final boolean dom) {
         if ((this.exportthread != null) && (this.exportthread.isAlive())) {
             ConcurrentLog.warn("LURL-EXPORT", "cannot start another export thread, already one running");
             return this.exportthread;
         }
-        this.exportthread = new Export(f, filter, format, dom);
+        this.exportthread = new Export(f, filter, query, format, dom);
         this.exportthread.start();
         return this.exportthread;
     }
@@ -769,14 +770,15 @@ public final class Fulltext {
         private final File f;
         private final Pattern pattern;
         private int count;
-        private String failure;
+        private String failure, query;
         private final int format;
         private final boolean dom;
 
-        private Export(final File f, final String filter, final int format, boolean dom) {
+        private Export(final File f, final String filter, final String query, final int format, boolean dom) {
             // format: 0=text, 1=html, 2=rss/xml
             this.f = f;
             this.pattern = filter == null ? null : Pattern.compile(filter);
+            this.query = query == null? "*:*" : query;
             this.count = 0;
             this.failure = null;
             this.format = format;
@@ -805,7 +807,7 @@ public final class Fulltext {
                 
                
                 if (this.dom) {
-                    Map<String, ReversibleScoreMap<String>> scores = Fulltext.this.getDefaultConnector().getFacets(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", 100000000, CollectionSchema.host_s.getSolrFieldName());
+                    Map<String, ReversibleScoreMap<String>> scores = Fulltext.this.getDefaultConnector().getFacets(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", 100000000, CollectionSchema.host_s.getSolrFieldName());
                     ReversibleScoreMap<String> stats = scores.get(CollectionSchema.host_s.getSolrFieldName());
                     for (final String host: stats) {
                         if (this.pattern != null && !this.pattern.matcher(host).matches()) continue;
@@ -814,21 +816,19 @@ public final class Fulltext {
                         this.count++;
                     }
                 } else {
-                    BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", 0, 100000000, 10 * 60 * 60 * 1000, 100,
+                    BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", 0, 100000000, 10 * 60 * 60 * 1000, 100,
                             CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.title.getSolrFieldName(),
                             CollectionSchema.author.getSolrFieldName(), CollectionSchema.description_txt.getSolrFieldName(), CollectionSchema.size_i.getSolrFieldName(), CollectionSchema.last_modified.getSolrFieldName());
                     SolrDocument doc;
-                    ArrayList<?> title;
-                    String url, author, hash;
-                    String[] descriptions;
+                    String url, hash, title, author, description;
                     Integer size;
                     Date date;
                     while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                        hash = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-                        url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
-                        title = (ArrayList<?>) doc.getFieldValue(CollectionSchema.title.getSolrFieldName());
-                        author = (String) doc.getFieldValue(CollectionSchema.author.getSolrFieldName());
-                        descriptions = (String[]) doc.getFieldValue(CollectionSchema.description_txt.getSolrFieldName());
+                        hash = getStringFrom(doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+                        url = getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
+                        title = getStringFrom(doc.getFieldValue(CollectionSchema.title.getSolrFieldName()));
+                        author = getStringFrom(doc.getFieldValue(CollectionSchema.author.getSolrFieldName()));
+                        description = getStringFrom(doc.getFieldValue(CollectionSchema.description_txt.getSolrFieldName()));
                         size = (Integer) doc.getFieldValue(CollectionSchema.size_i.getSolrFieldName());
                         date = (Date) doc.getFieldValue(CollectionSchema.last_modified.getSolrFieldName());
                         if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
@@ -836,16 +836,14 @@ public final class Fulltext {
                             pw.println(url);
                         }
                         if (this.format == 1) {
-                            if (title != null) pw.println("<a href=\"" + MultiProtocolURL.escape(url) + "\">" + CharacterCoding.unicode2xml((String) title.iterator().next(), true) + "</a>");
+                            if (title != null) pw.println("<a href=\"" + MultiProtocolURL.escape(url) + "\">" + CharacterCoding.unicode2xml(title, true) + "</a>");
                         }
                         if (this.format == 2) {
                             pw.println("<item>");
-                            if (title != null) pw.println("<title>" + CharacterCoding.unicode2xml((String) title.iterator().next(), true) + "</title>");
+                            if (title != null) pw.println("<title>" + CharacterCoding.unicode2xml(title, true) + "</title>");
                             pw.println("<link>" + MultiProtocolURL.escape(url) + "</link>");
                             if (author != null && !author.isEmpty()) pw.println("<author>" + CharacterCoding.unicode2xml(author, true) + "</author>");
-                            if (descriptions != null && descriptions.length > 0) {
-                                for (String d: descriptions) pw.println("<description>" + CharacterCoding.unicode2xml(d, true) + "</description>");
-                            }
+                            if (description != null && !description.isEmpty()) pw.println("<description>" + CharacterCoding.unicode2xml(description, true) + "</description>");
                             if (date != null) pw.println("<pubDate>" + HeaderFramework.formatRFC1123(date) + "</pubDate>");
                             if (size != null) pw.println("<yacy:size>" + size.intValue() + "</yacy:size>");
                             pw.println("<guid isPermaLink=\"false\">" + hash + "</guid>");
@@ -882,6 +880,13 @@ public final class Fulltext {
 
         public int count() {
             return this.count;
+        }
+        
+        @SuppressWarnings("unchecked")
+		private String getStringFrom(final Object o) {
+        	if (o == null) return "";
+        	if (o instanceof ArrayList) return ((ArrayList<String>) o).get(0);
+        	return (String) o;
         }
 
     }

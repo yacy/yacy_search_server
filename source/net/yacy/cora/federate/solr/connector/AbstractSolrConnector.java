@@ -21,7 +21,6 @@
 package net.yacy.cora.federate.solr.connector;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -235,7 +234,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
      * @return a collection of a subset of the ids which exist in the index
      * @throws IOException
      */
-    public Set<String> existsByIds(Collection<String> ids) throws IOException {
+    public Set<String> existsByIds(Set<String> ids) throws IOException {
         if (ids == null || ids.size() == 0) return new HashSet<String>();
         // construct raw query
         final SolrQuery params = new SolrQuery();

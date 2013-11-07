@@ -261,7 +261,8 @@ public class IndexControlURLs_p {
             final File f = new File(s);
             f.getParentFile().mkdirs();
             final String filter = post.get("exportfilter", ".*");
-            final Fulltext.Export running = segment.fulltext().export(f, filter, format, dom);
+            final String query = post.get("exportquery", "*:*");
+            final Fulltext.Export running = segment.fulltext().export(f, filter, query, format, dom);
 
             prop.put("lurlexport_exportfile", s);
             prop.put("lurlexport_urlcount", running.count());

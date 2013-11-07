@@ -64,7 +64,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     public SolrServer getServer() {
         return this.server;
     }
-
+    
     @Override
     public void commit(final boolean softCommit) {
         synchronized (this.server) {

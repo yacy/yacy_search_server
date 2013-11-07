@@ -37,12 +37,12 @@ public class CrashProtectionHandler extends HandlerWrapper implements Handler, H
 	}
 	
 	private void writeResponse(HttpServletRequest request, HttpServletResponse response, Exception exc) throws IOException {
-		PrintWriter out = response.getWriter();
-		out.println("Ops!");
-		out.println();
-		out.println("Message: " + exc.getMessage());
-		exc.printStackTrace(out);
-		response.setContentType("text/plain");
-        response.setStatus(500);
+            PrintWriter out = response.getWriter();
+            out.println("Ops!");
+            out.println();
+            out.println("Message: " + exc.getMessage());
+            exc.printStackTrace(out);
+            response.setContentType("text/plain");
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
 }

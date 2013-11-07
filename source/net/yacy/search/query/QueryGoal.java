@@ -242,7 +242,8 @@ public class QueryGoal {
         // add filter to prevent that results come from failed urls
         q.append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200").append(" AND (");
         q.append(CollectionSchema.images_urlstub_sxt.getSolrFieldName()).append(":[* TO *] OR ");
-        q.append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":(jpg OR png OR gif))");
+        q.append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":(jpg OR png OR gif) OR");
+        q.append(CollectionSchema.content_type.getSolrFieldName()).append(":(image/*))");
         
         // parse special requests
         if (isCatchall()) return q;

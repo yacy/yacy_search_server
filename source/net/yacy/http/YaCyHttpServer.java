@@ -17,13 +17,13 @@ import java.net.SocketException;
  */
 public interface YaCyHttpServer {
     
-    abstract public void startupServer() throws Exception;
-    abstract public void stop() throws Exception;
-    abstract public void setMaxSessionCount(int cnt);
-    abstract public InetSocketAddress generateSocketAddress(String port) throws SocketException;
-    abstract public int getMaxSessionCount();
-    abstract public int getJobCount();
-    abstract public boolean withSSL();
-    abstract public void reconnect(int milsec);
-    abstract public String getVersion();
+    abstract void startupServer() throws Exception;
+    abstract void stop() throws Exception;
+    abstract void setMaxSessionCount(int cnt);
+    abstract InetSocketAddress generateSocketAddress(String port) throws SocketException;
+    abstract int getMaxSessionCount();
+    abstract int getJobCount();
+    abstract boolean withSSL();
+    abstract void reconnect(int milsec);
+    abstract String getVersion();
 }

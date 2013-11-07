@@ -55,6 +55,7 @@ import net.yacy.crawler.retrieval.HTTPLoader;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.SMBLoader;
 import net.yacy.crawler.robots.RobotsTxt;
+import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
@@ -347,17 +348,10 @@ public final class CrawlStacker {
 
         // check availability of parser and maxfilesize
         String warning = null;
-        boolean loadImages = Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.CRAWLER_LOAD_IMAGE, true);
-        if (!loadImages && Switchboard.getSwitchboard().getConfig(SwitchboardConstants.CRAWLER_LOAD_IMAGE, "").equals("true;")) {
-            // dammit semicolon
-            // TODO: remove this shit later
-            Switchboard.getSwitchboard().setConfig(SwitchboardConstants.CRAWLER_LOAD_IMAGE, true);
-            loadImages = true;
-        }
         ContentDomain contentDomain = entry.url().getContentDomainFromExt();
         if ((maxFileSize >= 0 && entry.size() > maxFileSize) ||
             contentDomain == ContentDomain.APP  ||
-            (!loadImages && contentDomain == ContentDomain.IMAGE) ||
+            (contentDomain == ContentDomain.IMAGE && TextParser.supportsExtension(entry.url()) != null) ||
             contentDomain == ContentDomain.AUDIO  ||
             contentDomain == ContentDomain.VIDEO ||
             contentDomain == ContentDomain.CTRL) {

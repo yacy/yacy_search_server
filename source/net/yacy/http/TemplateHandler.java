@@ -97,11 +97,6 @@ public class TemplateHandler extends AbstractHandler implements Handler {
         htDocsPath = Switchboard.getSwitchboard().htDocsPath.getPath();
     }
 
-    @Override
-    protected void doStop() throws Exception {
-        super.doStop();
-    }
-
     /** Returns a path to the localized or default file according to the parameter localeSelection
      * @param path relative from htroot
      * @param localeSelection language of localized file; locale.language from switchboard is used if localeSelection.equals("") */

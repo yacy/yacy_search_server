@@ -91,7 +91,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 			HttpServletResponse response) throws IOException, ServletException {
 
 		RequestHeader proxyHeaders = convertHeaderFromJetty(request);
-                final String httpVer = (String) request.getHeader(HeaderFramework.CONNECTION_PROP_HTTP_VER);
+                final String httpVer = request.getHeader(HeaderFramework.CONNECTION_PROP_HTTP_VER);
                 setViaHeader (proxyHeaders, httpVer);
 		proxyHeaders.remove(RequestHeader.KEEP_ALIVE);
 		proxyHeaders.remove(RequestHeader.CONTENT_LENGTH);

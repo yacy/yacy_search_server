@@ -182,6 +182,14 @@ public final class Cache {
     public static long getActualCacheSize() {
         return fileDBunbuffered.length();
     }
+    
+    /**
+     * get the current actual cache size
+     * @return
+     */
+    public static long getActualCacheDocCount() {
+        return fileDBunbuffered.size();
+    }
 
     /**
      * close the databases

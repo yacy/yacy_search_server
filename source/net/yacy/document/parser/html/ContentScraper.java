@@ -204,11 +204,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     @Override
-    public void scrapeText(final char[] newtext, final String insideTag) {
+    public void scrapeText(final char[] newtext0, final String insideTag) {
         // System.out.println("SCRAPE: " + UTF8.String(newtext));
         if (insideTag != null && ("script".equals(insideTag) || "style".equals(insideTag))) return;
         int p, pl, q, s = 0;
-
+        char[] newtext = CharacterCoding.html2unicode(new String(newtext0)).toCharArray();
+        
         // match evaluation pattern
         this.evaluationScores.match(Element.text, newtext);
 
@@ -466,7 +467,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     public void scrapeTag1(final String tagname, final Properties tagopts, char[] text) {
         // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + UTF8.String(text));
         if (tagname.equalsIgnoreCase("a") && text.length < 2048) {
-            final String href = tagopts.getProperty("href", EMPTY_STRING);
+            String href = tagopts.getProperty("href", EMPTY_STRING);
+            href = CharacterCoding.html2unicode(href);
             AnchorURL url;
             if ((href.length() > 0) && ((url = absolutePath(href)) != null)) {
                 final String ext = MultiProtocolURL.getFileExtension(url.getFileName());

@@ -36,7 +36,12 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
 
 public interface SolrConnector extends Iterable<String> /* Iterable of document IDs */ {
-
+   
+    /**
+     * clear all caches: inside solr and ouside solr within the implementations of this interface
+     */
+    public void clearCaches();
+    
     /**
      * get the size of the index
      * @return number of results if solr is queries with a catch-all pattern
@@ -106,7 +111,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @return a collection of a subset of the ids which exist in the index
      * @throws IOException
      */
-    public Set<String> existsByIds(Collection<String> ids) throws IOException;
+    public Set<String> existsByIds(Set<String> ids) throws IOException;
     
     /**
      * check if a given document exists in solr
