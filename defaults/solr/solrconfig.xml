@@ -463,7 +463,7 @@
         <filterCache class="solr.FastLRUCache"
         size="64"
         initialSize="64"
-        autowarmCount="4"
+        autowarmCount="0"
         cleanupThread="true"/>
         
         <!-- Query Result Cache
@@ -474,7 +474,7 @@
         <queryResultCache class="solr.FastLRUCache"
         size="64"
         initialSize="64"
-        autowarmCount="4"
+        autowarmCount="0"
         cleanupThread="true"/>
         
         <!-- Document Cache
@@ -486,7 +486,7 @@
         <documentCache class="solr.FastLRUCache"
         size="64"
         initialSize="64"
-        autowarmCount="4"
+        autowarmCount="0"
         cleanupThread="true"/>
         
         <!-- Field Value Cache
@@ -495,13 +495,11 @@
          by document id.  The fieldValueCache is created by default
          even if not configured here.
          -->
-        <!--
          <fieldValueCache class="solr.FastLRUCache"
          size="64"
-         autowarmCount="128"
+         autowarmCount="0"
          showItems="32"
          cleanupThread="true"/>
-         -->
         
         <!-- Custom Cache
          
@@ -517,7 +515,7 @@
          class="solr.FastLRUCache"
          size="64"
          initialSize="64"
-         autowarmCount="64"
+         autowarmCount="0"
          regenerator="com.mycompany.MyRegenerator"
          cleanupThread="true"
          />
