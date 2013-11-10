@@ -49,6 +49,7 @@ import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionSchema;
 import org.apache.solr.common.SolrDocumentList;
 
@@ -141,12 +142,7 @@ public class SolrServlet implements Filter {
      
         // prepare request to solr
         hrequest.setAttribute("org.apache.solr.CoreContainer", core);
-        // add default search field if missing (required by edismax)
-        String queryStr = hrequest.getQueryString();
-        if (!queryStr.contains("&df=")) {
-            queryStr = queryStr + "&df=" + CollectionSchema.text_t.getSolrFieldName();
-        }
-        MultiMapSolrParams mmsp = SolrRequestParsers.parseQueryString(queryStr);
+        MultiMapSolrParams mmsp = SolrRequestParsers.parseQueryString(hrequest.getQueryString()); 
         String wt = mmsp.get(CommonParams.WT, "xml"); // maybe use /solr/select?q=*:*&start=0&rows=10&wt=exml            
         QueryResponseWriter responseWriter = RESPONSE_WRITER.get(wt); // check local response writer
         if (responseWriter == null) {
@@ -156,7 +152,20 @@ public class SolrServlet implements Filter {
                 hresponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Solr responsewriter not found for " + wt);
                 return;
             }
-        }           
+        }        
+        Map<String,String[]> map = mmsp.getMap(); // get modifiable parameter map
+        // add default search field if missing (required by edismax)
+        if (!map.containsKey(CommonParams.DF)) map.put (CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
+        // if this is a call to YaCys special search formats, enhance the query with field assignments
+        if ((responseWriter instanceof YJsonResponseWriter || responseWriter instanceof OpensearchResponseWriter) && "true".equals(mmsp.get("hl", "true"))) {
+            // add options for snippet generation
+            if (!map.containsKey("hl.q")) map.put("hl.q",new String[]{mmsp.get("q")});
+            if (!map.containsKey("hl.fl")) map.put("hl.fl",new String[]{CollectionSchema.h1_txt.getSolrFieldName() + "," + CollectionSchema.h2_txt.getSolrFieldName() + "," + CollectionSchema.text_t.getSolrFieldName()});
+            if (!map.containsKey("hl.alternateField")) map.put("hl.alternateField",new String[]{CollectionSchema.description_txt.getSolrFieldName()});
+            if (!map.containsKey("hl.simple.pre")) map.put("hl.simple.pre",new String[]{"<b>"});
+            if (!map.containsKey("hl.simple.post")) map.put("hl.simple.post",new String[]{"</b>"});
+            if (!map.containsKey("hl.fragsize")) map.put("hl.fragsize",new String[]{Integer.toString(SearchEvent.SNIPPET_MAX_LENGTH)});
+        }
         SolrQueryRequest req = connector.request(mmsp);
         SolrQueryResponse rsp = connector.query(req);
 
