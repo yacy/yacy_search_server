@@ -47,6 +47,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.analysis.Classification;
@@ -66,7 +68,7 @@ import net.yacy.kelondro.util.FileUtils;
 
 public class Document {
 
-    private final DigestURL source;             // the source url
+    private DigestURL source;             // the source url
     private final String mimeType;              // mimeType as taken from http header
     private final String charset;               // the charset of the document
     private final List<String> keywords;        // most resources provide a keyword field
@@ -319,6 +321,24 @@ dc_rights
 
     public DigestURL dc_source() {
         return this.source;
+    }
+
+    /**
+     * rewrite the dc_source; this can be used for normalization purpose
+     * @param pattern
+     * @param replacement
+     */
+    public void rewrite_dc_source(Pattern pattern, String replacement) {
+        String u = this.source.toNormalform(false);
+        Matcher m = pattern.matcher(u);
+        if (m.matches()) {
+            u = m.replaceAll(replacement);
+            try {
+                DigestURL du = new DigestURL(u);
+                this.source = du;
+            } catch (MalformedURLException e) {
+            }
+        }
     }
 
     /**

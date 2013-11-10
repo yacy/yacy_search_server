@@ -2477,6 +2477,7 @@ public final class Switchboard extends serverSwitch {
 
     private Document[] parseDocument(final Response response) throws InterruptedException {
         Document[] documents = null;
+        //final Pattern rewritePattern = Pattern.compile(";jsessionid.*");
         final EventOrigin processCase = response.processCase(this.peers.mySeed().hash);
 
         if ( this.log.isFine() ) {
@@ -2530,6 +2531,7 @@ public final class Switchboard extends serverSwitch {
         if (response.profile() != null) {
             ArrayList<Document> newDocs = new ArrayList<Document>();
             for (Document doc: documents) {
+                //doc.rewrite_dc_source(rewritePattern, "");
                 String rejectReason = this.crawlStacker.checkAcceptanceChangeable(doc.dc_source(), response.profile(), 1 /*depth is irrelevant here, we just make clear its not the start url*/);
                 if (rejectReason == null) {
                     newDocs.add(doc);
@@ -2559,7 +2561,6 @@ public final class Switchboard extends serverSwitch {
             for (Map.Entry<DigestURL, String> entry: Document.getImagelinks(documents).entrySet()) {
                 if (TextParser.supportsExtension(entry.getKey()) == null) hl.put(entry.getKey(), entry.getValue());
             }
-            
             
             // add all media links also to the crawl stack. They will be re-sorted to the NOLOAD queue and indexed afterwards as pure links
             if (response.profile().directDocByURL()) {
@@ -2593,6 +2594,8 @@ public final class Switchboard extends serverSwitch {
                     log.info("REWRITE of url = \"" + u + "\" to \"" + u0 + "\"");
                     u = u0;
                 }
+                //Matcher m = rewritePattern.matcher(u);
+                //if (m.matches()) u = m.replaceAll("");
                 
                 // enqueue the hyperlink into the pre-notice-url db
                 try {
