@@ -48,7 +48,7 @@
 
     <build>
         <sourceDirectory>source</sourceDirectory>
-        <!-- testSourceDirectory>test</testSourceDirectory -->
+        <testSourceDirectory>test</testSourceDirectory>
         <finalName>yacycore</finalName>
 
         <plugins>
@@ -561,6 +561,12 @@
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-core</artifactId>
             <version>${solr.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-log4j12</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
