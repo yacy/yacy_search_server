@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.EnumSet;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.DispatcherType;
 import net.yacy.cora.federate.solr.SolrServlet;
 import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
@@ -14,8 +17,10 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.bio.SocketConnector;
+import org.eclipse.jetty.server.session.HashSessionIdManager;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.junit.After;
@@ -116,27 +121,23 @@ public class EmbeddedSolrConnectorTest {
      * from org.apache.solr.client.solrj.embedded.JettySolrRunner
      */
     public static Server startServer(String context, int port, EmbeddedSolrConnector c) {
-        //this.context = context;
-        Server server = new Server(port);
-        /*
-         SocketConnector connector = new SocketConnector();
-         connector.setPort(port);
-         connector.setReuseAddress(true);
-         this.server.setConnectors(new Connector[] { connector });
-         this.server.setSessionIdManager(new HashSessionIdManager(new Random()));
-         */
-        ServerConnector connector = new ServerConnector(server);
-        connector.setPort(port);
-
-        server.addConnector(connector);
+        Server server = new Server(port);    
         server.setStopAtShutdown(true);
+        
+        SocketConnector connector = new SocketConnector();
+        connector.setPort(port);
+        connector.setReuseAddress(true);
+        server.setConnectors(new Connector[] { connector });
+        server.setSessionIdManager(new HashSessionIdManager(new Random()));
+        server.setStopAtShutdown(true);
+        
         ServletContextHandler root = new ServletContextHandler(ServletContextHandler.SESSIONS); //new Context(server, context, Context.SESSIONS);
+        root.setContextPath(context);
         root.addServlet(SolrServlet.Servlet404.class, "/*");
 
         // attach org.apache.solr.response.XMLWriter to search requests
         SolrServlet.initCore(c);
-        FilterHolder dispatchFilter = root.addFilter(SolrServlet.class, "*", EnumSet.of(DispatcherType.REQUEST));
-        //root.addFilter(new FilterHolder(SolrServlet.class), "/*", EnumSet.of(DispatcherType.REQUEST));
+        root.addFilter(new FilterHolder(SolrServlet.class), "/*", EnumSet.of(DispatcherType.REQUEST));
         server.setHandler(root);
         if (!server.isRunning()) {
             try {
@@ -162,7 +163,7 @@ public class EmbeddedSolrConnectorTest {
             doc.addField(CollectionSchema.host_s.name(), "yacy.net");
             doc.addField(CollectionSchema.text_t.name(), "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
             solr.add(doc);
-
+            solr.commit(true);
             // start a server
             startServer("/solr", 8091, solr); // try http://localhost:8091/solr/select?q=*:*
 
@@ -180,11 +181,7 @@ public class EmbeddedSolrConnectorTest {
 
 
             // try http://127.0.0.1:8091/solr/select?q=ping
-            try {
-                Thread.sleep(1000 * 1000);
-            } catch (final InterruptedException e) {
-            }
-            solr.close();
+            solr.close();            
         } catch (final IOException e) {
             e.printStackTrace();
         }
